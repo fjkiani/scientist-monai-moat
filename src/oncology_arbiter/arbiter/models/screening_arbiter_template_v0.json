@@ -1,0 +1,66 @@
+{
+  "model_name": "screening_arbiter_template_v0",
+  "model_type": "L2_regularized_logistic_regression",
+  "lambda": 0.5,
+  "n_training": 0,
+  "n_positive": 0,
+  "n_negative": 0,
+  "positive_class": "recall_for_diagnostic_workup",
+  "intercept": -2.0,
+  "coefficients": {
+    "birads_BI_RADS_0": 1.5,
+    "birads_BI_RADS_1": -3.0,
+    "birads_BI_RADS_2": -2.5,
+    "birads_BI_RADS_3": 1.0,
+    "birads_BI_RADS_4": 3.5,
+    "birads_BI_RADS_5": 4.5,
+    "density_A_almost_entirely_fatty": -0.5,
+    "density_B_scattered_fibroglandular": -0.2,
+    "density_C_heterogeneously_dense": 0.4,
+    "density_D_extremely_dense": 0.8,
+    "prior_biopsy_history": 0.6,
+    "family_history_first_degree": 0.5,
+    "brca_status_known_pathogenic": 1.2,
+    "age_norm": 0.15,
+    "years_since_last_mammo_norm": 0.3
+  },
+  "feature_encodings": {
+    "birads": {
+      "ONE_HOT": [
+        "BI_RADS_0",
+        "BI_RADS_1",
+        "BI_RADS_2",
+        "BI_RADS_3",
+        "BI_RADS_4",
+        "BI_RADS_5"
+      ],
+      "REFERENCE": "BI_RADS_6"
+    },
+    "density": {
+      "ONE_HOT": [
+        "A_almost_entirely_fatty",
+        "B_scattered_fibroglandular",
+        "C_heterogeneously_dense",
+        "D_extremely_dense"
+      ],
+      "REFERENCE": "UNKNOWN"
+    },
+    "prior_biopsy_history": {"true": 1.0, "false": 0.0, "unknown": 0.5},
+    "family_history_first_degree": {"true": 1.0, "false": 0.0, "unknown": 0.5},
+    "brca_status_known_pathogenic": {"true": 1.0, "false": 0.0, "unknown": 0.5},
+    "age_norm": "raw_age_years / 100.0",
+    "years_since_last_mammo_norm": "raw_years / 5.0"
+  },
+  "recommendations": {
+    "LOW":  "ROUTINE_1YR_FOLLOWUP",
+    "MID":  "SHORT_INTERVAL_6MO_FOLLOWUP",
+    "HIGH": "RECALL_FOR_DIAGNOSTIC_WORKUP"
+  },
+  "performance": {
+    "cv_auroc_mean": null,
+    "cv_auroc_std": null,
+    "brier_score": null,
+    "AUROC_CAVEAT": "TEMPLATE — coefficients illustrative, not fit on real mammography outcomes. n_training=0. Do not report AUROC; there is nothing to average over. Prospective AUROC will be established only after Phase 3 EMBED / CBIS-DDSM training runs land with an independent test split. This artefact locks the schema and honesty gates; it does not encode a validated model."
+  },
+  "disclaimer": "RESEARCH USE ONLY — not validated for clinical decision-making. Not FDA-cleared. Not CE-marked."
+}

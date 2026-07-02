@@ -31,6 +31,8 @@ from oncology_arbiter import AUROC_CAVEAT, RUO_DISCLAIMER, __version__
 from .audit import log_event, new_request_id
 from .schemas import (
     ApiEnvelope,
+    ArbiterScore,
+    ArtifactCategory,
     BiopsyReceptorPanel,
     BiopsyRequest,
     BiopsyResponse,
@@ -39,6 +41,8 @@ from .schemas import (
     FullCaseResponse,
     HealthResponse,
     HonestyGateReport,
+    ModelCardsIndex,
+    ModelCardSummary,
     ModelState,
     Provenance,
     ScreeningRequest,
@@ -80,6 +84,43 @@ def _decode_bytes_arg(bytes_b64: str | None) -> bytes | None:
         raise HTTPException(400, f"invalid base64 dicom_bytes: {e}")
 
 
+def _score_arbiter(name: str, features: dict[str, Any]) -> ArbiterScore:
+    """Load the named L2 arbiter and score `features`.
+
+    Wraps :func:`oncology_arbiter.arbiter.load_arbiter` and marshals the
+    :class:`ArbiterResult` into the wire-level :class:`ArbiterScore` pydantic.
+    """
+    from oncology_arbiter.arbiter import load_arbiter
+    arb = load_arbiter(name)
+    r = arb.score(features)
+    return ArbiterScore(
+        model_name=arb.model_name,
+        p_positive=r.p_positive,
+        logit=r.logit,
+        risk_bucket=r.risk_bucket,  # type: ignore[arg-type]
+        recommendation=r.recommendation,
+        term_contributions=r.term_contributions,
+        driving_feature=r.driving_feature,
+        driving_feature_contribution=r.driving_feature_contribution,
+        positive_class=arb.positive_class,
+        n_training=arb.n_training,
+        model_state=r.metadata["model_state"],  # type: ignore[arg-type]
+        caveat=r.caveat,
+    )
+
+
+# --------------------------------------------------------------------------- #
+# Artifact paths — mirrors progression_arbiter/router.py stream_artifact
+
+_PROJECT_ROOT = Path(__file__).resolve().parents[3]
+_ARTIFACT_ROOTS: dict[ArtifactCategory, Path] = {
+    ArtifactCategory.docs: _PROJECT_ROOT / "docs" / "model_cards",
+    ArtifactCategory.reports: _PROJECT_ROOT / "artifacts" / "reports",
+    ArtifactCategory.data: _PROJECT_ROOT / "artifacts" / "data",
+    ArtifactCategory.models: _PROJECT_ROOT / "src" / "oncology_arbiter" / "arbiter" / "models",
+}
+
+
 # --------------------------------------------------------------------------- #
 # App factory
 
@@ -103,13 +144,19 @@ def create_app() -> FastAPI:
                 "POST /v1/biopsy/analyze",
                 "POST /v1/therapy/reason",
                 "POST /v1/case/full",
-                "GET /health",
+                "GET  /v1/model-cards",
+                "GET  /v1/artifacts/{category}/{filename}",
+                "GET  /health",
             ],
             models_loaded={
                 "monai_screening": ModelState.PLACEHOLDER,
                 "medsiglip_biopsy": ModelState.PLACEHOLDER,
                 "txgemma_therapy": ModelState.PLACEHOLDER,
                 "co_scientist": ModelState.PLACEHOLDER,
+                # The L3 arbiter templates ARE loaded (they're JSON on disk),
+                # but they carry n_training=0 → treated as placeholder at the
+                # health-check level per the PLAN.md honesty rules.
+                "l3_arbiter": ModelState.PLACEHOLDER,
             },
         )
 
@@ -159,6 +206,23 @@ def create_app() -> FastAPI:
         finally:
             Path(tmp_path).unlink(missing_ok=True)
 
+        # Score the L3 screening arbiter with a MINIMAL feature vector.
+        # We have no BI-RADS from a real reader in Phase 1 — the classifier
+        # isn't wired — so we deliberately submit the empty feature dict,
+        # which by design falls through to intercept-only (i.e. base rate).
+        # This proves the arbiter path is live end-to-end without pretending
+        # to have information we don't. Phase 2 replaces the empty dict with
+        # features extracted from L4a detector output.
+        arbiter_block: ArbiterScore | None = None
+        try:
+            arbiter_block = _score_arbiter("screening", features={})
+        except Exception as e:
+            log_event(request_id, "/v1/screening/analyze",
+                      model_state="unavailable",
+                      patient_id_hash=req.patient_id_hash,
+                      extra={"arbiter_error": str(e)[:200]})
+            arbiter_block = None
+
         response = ScreeningResponse(
             **_envelope(request_id),
             laterality=result.metadata.laterality.value,
@@ -167,6 +231,7 @@ def create_app() -> FastAPI:
             breast_mask_coverage=float(result.breast_mask.mean()),
             findings=[],
             overall_score=None,   # placeholder — no classifier wired yet
+            arbiter_score=arbiter_block,
         )
         log_event(request_id, "/v1/screening/analyze",
                   model_state="placeholder",
@@ -192,12 +257,18 @@ def create_app() -> FastAPI:
                   patient_id_hash=req.patient_id_hash,
                   extra={"has_wsi": bool(req.wsi_url or req.wsi_bytes_b64),
                          "has_report": bool(req.report_text)})
+        arbiter_block: ArbiterScore | None = None
+        try:
+            arbiter_block = _score_arbiter("biopsy", features={})
+        except Exception:
+            arbiter_block = None
         return BiopsyResponse(
             **_envelope(request_id),
             subtype_prediction=None,
             receptor_panel=BiopsyReceptorPanel(),
             grade=None,
             confidence=None,
+            arbiter_score=arbiter_block,
         )
 
     # ----------------------------------------------------------------------- #
@@ -210,10 +281,98 @@ def create_app() -> FastAPI:
                   model_state="placeholder",
                   patient_id_hash=None,
                   extra={"has_biopsy_input": req.biopsy_output is not None})
+        arbiter_block: ArbiterScore | None = None
+        try:
+            arbiter_block = _score_arbiter("therapy", features={})
+        except Exception:
+            arbiter_block = None
         return TherapyResponse(
             **_envelope(request_id),
             recommended_options=[],
             not_recommended=[],
+            arbiter_score=arbiter_block,
+        )
+
+    # ----------------------------------------------------------------------- #
+    # /v1/model-cards — index every model card shipped with the API
+
+    @app.get("/v1/model-cards", response_model=ModelCardsIndex)
+    def list_model_cards() -> ModelCardsIndex:
+        """PLAN.md §5.6: `Public model card + errata page` — served as JSON
+        index so a client can enumerate what cards exist without a directory
+        listing. Raw markdown is served by `/v1/artifacts/docs/{filename}`.
+        """
+        cards_dir = _ARTIFACT_ROOTS[ArtifactCategory.docs]
+        cards: list[ModelCardSummary] = []
+        if cards_dir.is_dir():
+            for path in sorted(cards_dir.glob("*.md")):
+                text = path.read_text(encoding="utf-8", errors="replace")
+                first_h1 = ""
+                for line in text.splitlines():
+                    line = line.strip()
+                    if line.startswith("# "):
+                        first_h1 = line[2:].strip()
+                        break
+                # A card is properly disclaimed if it either quotes the
+                # RUO phrase verbatim OR references the RUO_DISCLAIMER
+                # constant so a reader knows where the phrase lives. Both
+                # patterns exist in this repo — accept either.
+                ruo_ok = ("RESEARCH USE ONLY" in text) or ("RUO_DISCLAIMER" in text)
+                cards.append(ModelCardSummary(
+                    slug=path.stem,
+                    title=first_h1 or path.stem,
+                    n_bytes=len(text.encode("utf-8")),
+                    honesty_markers={
+                        "auroc_caveat_present": "AUROC" in text,
+                        "ruo_disclaimer_present": ruo_ok,
+                        "not_fda_cleared_note": "FDA" in text,
+                    },
+                ))
+        return ModelCardsIndex(
+            disclaimer=RUO_DISCLAIMER,
+            caveat=AUROC_CAVEAT,
+            cards=cards,
+        )
+
+    # ----------------------------------------------------------------------- #
+    # /v1/artifacts/{category}/{filename} — path-traversal-safe streamer.
+    # Mirrors org.backend/capabilities/progression_arbiter/router.py verbatim
+    # for the security model: category-whitelisted + relative_to() containment.
+
+    @app.get("/v1/artifacts/{category}/{filename}")
+    def stream_artifact(category: str, filename: str):
+        try:
+            cat = ArtifactCategory(category)
+        except ValueError:
+            raise HTTPException(400, f"invalid category: {category}")
+        category_dir = _ARTIFACT_ROOTS[cat].resolve()
+        # Reject empty / suspicious filenames early
+        if not filename or filename in {".", ".."} or "\x00" in filename:
+            raise HTTPException(400, "invalid filename")
+        candidate = (category_dir / filename).resolve()
+        try:
+            candidate.relative_to(category_dir)
+        except ValueError:
+            raise HTTPException(403, "directory traversal forbidden")
+        if not candidate.exists() or not candidate.is_file():
+            raise HTTPException(404, f"artifact not found: {filename}")
+        # Guess a sensible media type
+        media_type = "text/markdown" if candidate.suffix == ".md" else (
+            "application/json" if candidate.suffix == ".json" else (
+                "application/sql" if candidate.suffix == ".sql" else "text/plain"
+            )
+        )
+        return JSONResponse(
+            status_code=200,
+            content={
+                "category": category,
+                "filename": filename,
+                "media_type": media_type,
+                "n_bytes": candidate.stat().st_size,
+                "content": candidate.read_text(encoding="utf-8", errors="replace"),
+                "disclaimer": RUO_DISCLAIMER,
+                "caveat": AUROC_CAVEAT,
+            },
         )
 
     # ----------------------------------------------------------------------- #
