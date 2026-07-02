@@ -1,0 +1,62 @@
+{
+  "Calc-Test_P_00038_LEFT_CC": {
+    "Modality": "MG",
+    "BodyPartExamined": "Left Breast",
+    "ImageLaterality": "",
+    "ViewPosition": "",
+    "PatientOrientation": "CC",
+    "Manufacturer": "",
+    "Rows": 4616,
+    "Columns": 3016,
+    "BitsStored": 16,
+    "PhotometricInterpretation": "MONOCHROME2"
+  },
+  "Calc-Test_P_00038_RIGHT_CC": {
+    "Modality": "MG",
+    "BodyPartExamined": "Right Breast",
+    "ImageLaterality": "",
+    "ViewPosition": "",
+    "PatientOrientation": "CC",
+    "Manufacturer": "",
+    "Rows": 4688,
+    "Columns": 2744,
+    "BitsStored": 16,
+    "PhotometricInterpretation": "MONOCHROME2"
+  },
+  "Calc-Test_P_00038_LEFT_MLO": {
+    "Modality": "MG",
+    "BodyPartExamined": "Left Breast",
+    "ImageLaterality": "",
+    "ViewPosition": "",
+    "PatientOrientation": "MLO",
+    "Manufacturer": "",
+    "Rows": 4728,
+    "Columns": 3064,
+    "BitsStored": 16,
+    "PhotometricInterpretation": "MONOCHROME2"
+  },
+  "Calc-Test_P_00038_RIGHT_MLO": {
+    "Modality": "MG",
+    "BodyPartExamined": "Right Breast",
+    "ImageLaterality": "",
+    "ViewPosition": "",
+    "PatientOrientation": "MLO",
+    "Manufacturer": "",
+    "Rows": 4720,
+    "Columns": 2928,
+    "BitsStored": 16,
+    "PhotometricInterpretation": "MONOCHROME2"
+  },
+  "Mass-Test_P_00016_LEFT_CC": {
+    "Modality": "MG",
+    "BodyPartExamined": "BREAST",
+    "ImageLaterality": "",
+    "ViewPosition": "",
+    "PatientOrientation": "CC",
+    "Manufacturer": "",
+    "Rows": 4006,
+    "Columns": 1846,
+    "BitsStored": 16,
+    "PhotometricInterpretation": "MONOCHROME2"
+  }
+}

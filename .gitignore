@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Editor / OS
+.DS_Store
+*.swp
+.vscode/
+.idea/
+
+# Runtime artifacts
+artifacts/audit/
+artifacts/logs/
+*.log
+
+# Large fixtures — CBIS-DDSM DICOMs (~120 MB, 5 files) + HF cache
+# Kept out of git; regenerated on demand via tests/fixtures/download_cbis_ddsm_fixtures.py
+# Metadata JSON and README are small and versioned.
+tests/fixtures/cbis_ddsm/*.dcm
+tests/fixtures/cbis_ddsm/**/*.dcm
+tests/fixtures/cbis_ddsm/**/*.metadata
+tests/fixtures/cbis_ddsm/.cache/
+tests/fixtures/cbis_ddsm/img/
+tests/fixtures/cbis_ddsm/cbis-ddsm-r-dataset.csv
+
+# Any dataset CSVs pulled from HF mirrors
+tests/fixtures/**/cbis-ddsm-r-dataset.csv
