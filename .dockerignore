@@ -1,0 +1,71 @@
+# Keep the docker build context lean. Anything not needed to install the
+# python package + run the API server is excluded.
+#
+# Rules:
+#   * Never send secrets, virtualenvs, node_modules, or test artifacts.
+#   * Do include src/, pyproject.toml, README.md — those are what
+#     `pip install .` needs.
+#   * Do include src/oncology_arbiter/api/static/dist/ so the /ui/ SPA
+#     works out of the box (it's a committed artifact, small).
+
+# ─── Version control ──────────────────────────────────────────────────────── #
+.git/
+.gitignore
+.gitattributes
+
+# ─── Python build & runtime artefacts ─────────────────────────────────────── #
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.env
+.envrc
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.coverage
+htmlcov/
+pip-wheel-metadata/
+
+# ─── Frontend build inputs (we ship the already-built dist/) ──────────────── #
+frontend/node_modules/
+frontend/dist/
+frontend/test-results/
+frontend/playwright-report/
+frontend/.playwright/
+frontend/tsconfig.tsbuildinfo
+
+# ─── Tests & docs sources not needed at runtime ───────────────────────────── #
+tests/
+tests/**
+scripts/
+notebooks/
+examples/
+
+# ─── Editor / OS junk ─────────────────────────────────────────────────────── #
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# ─── Local secret files (defense in depth — should never exist in-repo) ──── #
+.env.local
+.env.*.local
+*.pem
+*.key
+secrets/
+
+# ─── Docker itself ────────────────────────────────────────────────────────── #
+Dockerfile
+Dockerfile.*
+docker-compose.yml
+docker-compose.*.yml
+.dockerignore
