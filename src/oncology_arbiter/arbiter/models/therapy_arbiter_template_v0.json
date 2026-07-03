@@ -1,0 +1,66 @@
+{
+  "model_name": "therapy_arbiter_template_v0",
+  "model_type": "L2_regularized_logistic_regression",
+  "lambda": 0.5,
+  "n_training": 0,
+  "n_positive": 0,
+  "n_negative": 0,
+  "positive_class": "escalate_to_neoadjuvant_chemotherapy",
+  "intercept": -1.8,
+  "coefficients": {
+    "histology_invasive_ductal": 0.8,
+    "histology_invasive_lobular": 0.4,
+    "histology_ductal_carcinoma_in_situ": -1.6,
+    "histology_lobular_carcinoma_in_situ": -2.4,
+    "grade_1": -1.2,
+    "grade_2": 0.3,
+    "grade_3": 1.5,
+    "er_status_positive": -0.9,
+    "pr_status_positive": -0.6,
+    "her2_status_positive": 1.3,
+    "ki67_norm": 0.9,
+    "tumor_size_norm": 1.4,
+    "node_status_positive": 2.1,
+    "brca_status_known_pathogenic": 0.8,
+    "age_at_diagnosis_norm": -0.5
+  },
+  "feature_encodings": {
+    "histology": {
+      "ONE_HOT": [
+        "invasive_ductal",
+        "invasive_lobular",
+        "ductal_carcinoma_in_situ",
+        "lobular_carcinoma_in_situ"
+      ],
+      "REFERENCE": "OTHER_OR_UNCLEAR"
+    },
+    "grade": {
+      "ONE_HOT": [
+        "1",
+        "2",
+        "3"
+      ],
+      "REFERENCE": "UNKNOWN"
+    },
+    "er_status_positive": {"true": 1.0, "false": 0.0, "unknown": 0.5},
+    "pr_status_positive": {"true": 1.0, "false": 0.0, "unknown": 0.5},
+    "her2_status_positive": {"true": 1.0, "false": 0.0, "unknown": 0.5},
+    "node_status_positive": {"true": 1.0, "false": 0.0, "unknown": 0.5},
+    "brca_status_known_pathogenic": {"true": 1.0, "false": 0.0, "unknown": 0.5},
+    "ki67_norm": "ki67_pct / 100.0",
+    "tumor_size_norm": "size_mm / 50.0",
+    "age_at_diagnosis_norm": "age_years / 100.0"
+  },
+  "recommendations": {
+    "LOW":  "SURGERY_FIRST",
+    "MID":  "MULTIDISCIPLINARY_REVIEW",
+    "HIGH": "ESCALATE_TO_NEOADJUVANT_CHEMOTHERAPY"
+  },
+  "performance": {
+    "cv_auroc_mean": null,
+    "cv_auroc_std": null,
+    "brier_score": null,
+    "AUROC_CAVEAT": "TEMPLATE — coefficients illustrative, not fit on real therapy-selection outcomes. n_training=0. Do not report AUROC; there is nothing to average over. Prospective AUROC will be established only after Phase 3 training runs with tumour-registry outcomes and an independent test split. This artefact locks the schema and honesty gates; it does not encode a validated model."
+  },
+  "disclaimer": "RESEARCH USE ONLY — not validated for clinical decision-making. Not FDA-cleared. Not CE-marked."
+}

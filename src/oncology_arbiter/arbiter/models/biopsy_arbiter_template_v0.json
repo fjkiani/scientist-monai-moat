@@ -1,0 +1,55 @@
+{
+  "model_name": "biopsy_arbiter_template_v0",
+  "model_type": "L2_regularized_logistic_regression",
+  "lambda": 0.5,
+  "n_training": 0,
+  "n_positive": 0,
+  "n_negative": 0,
+  "positive_class": "proceed_to_core_needle_biopsy",
+  "intercept": -1.5,
+  "coefficients": {
+    "lesion_type_calcification_pleomorphic": 2.8,
+    "lesion_type_calcification_amorphous": 1.4,
+    "lesion_type_mass_spiculated": 3.2,
+    "lesion_type_mass_circumscribed": -0.5,
+    "lesion_type_architectural_distortion": 2.4,
+    "size_norm": 0.9,
+    "growth_delta_norm": 1.6,
+    "prior_biopsy_benign_at_site": -1.2,
+    "family_history_first_degree": 0.4,
+    "brca_status_known_pathogenic": 1.1,
+    "us_correlate_hypoechoic_mass": 1.3,
+    "us_correlate_simple_cyst": -2.2
+  },
+  "feature_encodings": {
+    "lesion_type": {
+      "ONE_HOT": [
+        "calcification_pleomorphic",
+        "calcification_amorphous",
+        "mass_spiculated",
+        "mass_circumscribed",
+        "architectural_distortion"
+      ],
+      "REFERENCE": "OTHER_OR_UNCLEAR"
+    },
+    "size_norm": "size_mm / 30.0",
+    "growth_delta_norm": "delta_mm_per_6mo / 5.0",
+    "prior_biopsy_benign_at_site": {"true": 1.0, "false": 0.0, "unknown": 0.5},
+    "family_history_first_degree": {"true": 1.0, "false": 0.0, "unknown": 0.5},
+    "brca_status_known_pathogenic": {"true": 1.0, "false": 0.0, "unknown": 0.5},
+    "us_correlate_hypoechoic_mass": {"true": 1.0, "false": 0.0, "unknown": 0.5},
+    "us_correlate_simple_cyst": {"true": 1.0, "false": 0.0, "unknown": 0.5}
+  },
+  "recommendations": {
+    "LOW":  "SHORT_INTERVAL_6MO_FOLLOWUP",
+    "MID":  "ADDITIONAL_IMAGING_WORKUP",
+    "HIGH": "PROCEED_TO_CORE_NEEDLE_BIOPSY"
+  },
+  "performance": {
+    "cv_auroc_mean": null,
+    "cv_auroc_std": null,
+    "brier_score": null,
+    "AUROC_CAVEAT": "TEMPLATE — coefficients illustrative, not fit on real biopsy outcomes. n_training=0. Do not report AUROC; there is nothing to average over. Prospective AUROC will be established only after Phase 3 EMBED / CBIS-DDSM biopsy-outcome training runs land with an independent test split. This artefact locks the schema and honesty gates; it does not encode a validated model."
+  },
+  "disclaimer": "RESEARCH USE ONLY — not validated for clinical decision-making. Not FDA-cleared. Not CE-marked."
+}

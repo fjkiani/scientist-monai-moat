@@ -44,6 +44,35 @@ class HonestyGateReport(BaseModel):
     evidence_dropped: int = Field(..., ge=0)
 
 
+class ArbiterScore(BaseModel):
+    """L3 calibrated logistic arbiter output, matching progression_arbiter shape.
+
+    Every stage endpoint (screening/biopsy/therapy) attaches one of these blocks
+    when the L2 logistic arbiter runs. The `term_contributions` dict is required
+    to be a linear decomposition of the logit so downstream 'why did the model
+    say that?' UI can attribute the prediction to individual features.
+
+    PLAN.md §4a: 'Every response body carries: stage_output, arbiter_score,
+    term_contributions, driving_feature, evidence[]'.
+    """
+    model_config = ConfigDict(str_strip_whitespace=True)
+    model_name: str = Field(..., description="e.g. screening_arbiter_template_v0")
+    p_positive: float = Field(..., ge=0.0, le=1.0)
+    logit: float
+    risk_bucket: Literal["LOW", "MID", "HIGH"]
+    recommendation: str
+    term_contributions: dict[str, float]
+    driving_feature: str
+    driving_feature_contribution: float
+    positive_class: str
+    n_training: int = Field(..., ge=0)
+    model_state: Literal["template", "frozen"] = Field(
+        default="template",
+        description="'template' when n_training==0 (illustrative), 'frozen' after Phase 3 fit.",
+    )
+    caveat: str = Field(..., description="AUROC caveat from the frozen JSON")
+
+
 class Provenance(BaseModel):
     """Where did this response come from?"""
     model_config = ConfigDict(str_strip_whitespace=True)
@@ -110,6 +139,10 @@ class ScreeningResponse(ApiEnvelope):
         default=None, ge=0.0, le=1.0,
         description="Overall malignancy suspicion score; None if model not wired.",
     )
+    arbiter_score: ArbiterScore | None = Field(
+        default=None,
+        description="L3 screening arbiter output (recall vs. routine follow-up).",
+    )
 
 
 # --------------------------------------------------------------------------- #
@@ -142,6 +175,10 @@ class BiopsyResponse(ApiEnvelope):
     receptor_panel: BiopsyReceptorPanel = Field(default_factory=BiopsyReceptorPanel)
     grade: int | None = Field(default=None, ge=1, le=3, description="Nottingham grade 1-3")
     confidence: float | None = Field(default=None, ge=0.0, le=1.0)
+    arbiter_score: ArbiterScore | None = Field(
+        default=None,
+        description="L3 biopsy arbiter output (proceed to core-needle biopsy vs. follow-up).",
+    )
 
 
 # --------------------------------------------------------------------------- #
@@ -175,6 +212,39 @@ class TherapyOption(BaseModel):
 class TherapyResponse(ApiEnvelope):
     recommended_options: list[TherapyOption] = Field(default_factory=list)
     not_recommended: list[TherapyOption] = Field(default_factory=list)
+    arbiter_score: ArbiterScore | None = Field(
+        default=None,
+        description="L3 therapy arbiter output (escalate to neoadjuvant chemo vs. surgery-first).",
+    )
+
+
+# --------------------------------------------------------------------------- #
+# /v1/model-cards, /v1/artifacts
+
+
+class ModelCardSummary(BaseModel):
+    """Summary of a single model card served by /v1/model-cards."""
+    slug: str = Field(..., description="Stem of the .md file, e.g. 'medsiglip_448'")
+    title: str = Field(..., description="First H1 heading of the card")
+    n_bytes: int = Field(..., ge=0)
+    honesty_markers: dict[str, bool] = Field(
+        ...,
+        description="Which honesty markers this card contains (auroc_caveat, ruo_disclaimer, ...)",
+    )
+
+
+class ModelCardsIndex(BaseModel):
+    """/v1/model-cards response — index of every model card shipped with the API."""
+    disclaimer: str
+    caveat: str
+    cards: list[ModelCardSummary]
+
+
+class ArtifactCategory(str, Enum):
+    docs = "docs"
+    reports = "reports"
+    data = "data"
+    models = "models"
 
 
 # --------------------------------------------------------------------------- #
