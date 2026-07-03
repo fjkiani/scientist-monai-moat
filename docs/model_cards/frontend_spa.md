@@ -1,6 +1,6 @@
 # Frontend SPA (React + Vite)
 
-**Research Use Only. Not for diagnostic use.**
+**RESEARCH USE ONLY** — not for diagnostic use. See `RUO_DISCLAIMER` in `oncology_arbiter/__init__.py`.
 
 The oncology-arbiter frontend is a single-page React application served
 optionally by the FastAPI backend under `/ui/`. It calls only the documented

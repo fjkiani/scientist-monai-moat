@@ -75,7 +75,10 @@ def test_model_cards_index_flags_honesty_markers(client: TestClient) -> None:
         # Proxy cards should NOT quote an AUROC — that would be fabricating
         # medical validity of a general-domain model. The siglip proxy card
         # explicitly says 'Do not report proxy zero-shot AUCs on mammography'.
-        if "siglip_base" in slug:
+        # The frontend_spa card documents a UI rendering layer, not a medical
+        # model — attaching an AUROC caveat there would dilute the phrase's
+        # meaning for actual clinical model cards.
+        if "siglip_base" in slug or "frontend_spa" in slug:
             continue
         # All medical model cards must carry an AUROC caveat.
         assert markers["auroc_caveat_present"] is True, (
