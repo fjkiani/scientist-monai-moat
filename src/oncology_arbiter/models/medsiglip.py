@@ -327,6 +327,82 @@ class MedSigLip:
             gate_report=self._gate_report,
         )
 
+    def embed_image(
+        self,
+        image_bytes: bytes | None = None,
+        image_url: str | None = None,
+        preprocessed_image: np.ndarray | None = None,
+    ) -> np.ndarray:
+        """Return the vision-tower embedding (pooled) for a single image.
+
+        Exactly one of ``image_bytes`` / ``image_url`` / ``preprocessed_image``
+        must be provided. Used by L4b (biopsy probe) which needs the raw
+        image embedding rather than a zero-shot text-image comparison.
+
+        Returns a 1-D float32 numpy array of length equal to the model's
+        pooled projection dimension (768 for medsiglip-448).
+
+        Raises
+        ------
+        GatedAccessError
+            If HAI-DEF preflight fails (same contract as ``run()``).
+        ValueError
+            If zero or multiple image inputs are provided.
+        """
+        import torch  # type: ignore
+
+        provided = sum(
+            1 for x in (image_bytes, image_url, preprocessed_image) if x is not None
+        )
+        if provided != 1:
+            raise ValueError(
+                "embed_image requires exactly one of image_bytes / image_url / "
+                f"preprocessed_image (got {provided})"
+            )
+
+        # Preflight + weight download BEFORE any image I/O — same policy as run().
+        self._load()
+
+        # Resolve input to a PIL image
+        if preprocessed_image is not None:
+            pil = _to_pil_from_float01(np.asarray(preprocessed_image))
+        elif image_bytes is not None:
+            from io import BytesIO
+            from PIL import Image  # type: ignore
+            pil = Image.open(BytesIO(image_bytes)).convert("RGB")
+        else:  # image_url
+            import urllib.request as _ur
+            from io import BytesIO
+            from PIL import Image  # type: ignore
+            with _ur.urlopen(image_url, timeout=15) as resp:  # type: ignore[arg-type]
+                pil = Image.open(BytesIO(resp.read())).convert("RGB")
+
+        inputs = self._processor(images=pil, return_tensors="pt")
+        try:
+            inputs = {k: v.to(self.device) for k, v in inputs.items()}
+        except Exception:
+            pass
+
+        with torch.no_grad():
+            # SigLIP-family models expose get_image_features() on the base
+            # SiglipModel and its subclasses.
+            if hasattr(self._model, "get_image_features"):
+                feats = self._model.get_image_features(**inputs)
+            else:
+                # Fallback: run the full model and pull pooled_output from the
+                # vision-tower branch.
+                outputs = self._model.vision_model(**inputs)  # type: ignore[attr-defined]
+                feats = getattr(outputs, "pooler_output", None)
+                if feats is None:
+                    feats = outputs.last_hidden_state.mean(dim=1)
+
+        emb = feats.squeeze(0).cpu().float().numpy()
+        if emb.ndim != 1:
+            raise RuntimeError(
+                f"embed_image expected 1-D pooled embedding, got shape {emb.shape}"
+            )
+        return emb
+
 
 __all__ = [
     "MEDSIGLIP_REPO",

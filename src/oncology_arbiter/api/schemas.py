@@ -27,8 +27,11 @@ class ModelState(str, Enum):
     GATED = "gated"                   # HAI-DEF access denied (401/403)
     PROXY_SIGLIP = "proxy_siglip"     # ungated general-domain SigLIP fallback (NOT MedSigLIP output)
     LOADED_MEDSIGLIP = "loaded_medsiglip"  # HAI-DEF MedSigLIP-448 inference (medical but off-label for mammography)
+    LOADED_BIOPSY_PROBE = "loaded_biopsy_probe"  # L4b MedSigLIP embed + synthetic linear probe (RUO, off-label)
     LOADED_MONAI_DETECTOR = "loaded_monai_detector"  # L4a MONAI detector with trained weights (unreachable until weights ship)
     PROXY_MONAI_HEURISTIC = "proxy_monai_heuristic"  # L4a MONAI mask-gradient heuristic when weights unavailable
+    PROXY_RULES_LITE = "proxy_rules_lite"  # L4c NCCN-lite rules fallback when TxGemma gated
+    LOADED_TXGEMMA = "loaded_txgemma"  # L4c HAI-DEF TxGemma inference (never reachable under current token)
 
 
 class EvidenceRecord(BaseModel):
