@@ -26,6 +26,7 @@ class ModelState(str, Enum):
     CACHED = "cached"                 # result served from cache
     GATED = "gated"                   # HAI-DEF access denied (401/403)
     PROXY_SIGLIP = "proxy_siglip"     # ungated general-domain SigLIP fallback (NOT MedSigLIP output)
+    LOADED_MEDSIGLIP = "loaded_medsiglip"  # HAI-DEF MedSigLIP-448 inference (medical but off-label for mammography)
 
 
 class EvidenceRecord(BaseModel):
