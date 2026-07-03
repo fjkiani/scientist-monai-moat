@@ -93,6 +93,14 @@ class ApiEnvelope(BaseModel):
     provenance: Provenance
     honesty_gate: HonestyGateReport
     evidence: list[EvidenceRecord] = Field(default_factory=list)
+    warnings: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Non-fatal honesty warnings for this response — e.g. "
+            "`medsiglip_gated:<level>:<reason>`, out-of-distribution warnings, "
+            "or proxy_siglip fallback notes. Callers MUST surface these."
+        ),
+    )
 
 
 # --------------------------------------------------------------------------- #

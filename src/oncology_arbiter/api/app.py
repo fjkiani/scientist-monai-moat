@@ -110,6 +110,87 @@ def _score_arbiter(name: str, features: dict[str, Any]) -> ArbiterScore:
 
 
 # --------------------------------------------------------------------------- #
+# MedSigLIP / SigLIP proxy singletons + runners
+#
+# Precedence rules (Phase 2 wiring, 2026-07-02):
+#   1. If ONCOLOGY_ARBITER_ENABLE_MEDSIGLIP=1, try MedSigLIP first.
+#      - Preflight HAI-DEF gate → on ALLOWED, run and return the honest
+#        MedSigLipResult carrying ModelState.LOADED_MEDSIGLIP.
+#      - On GatedAccessError → NEVER silently fall back; the endpoint
+#        decides based on ONCOLOGY_ARBITER_ENABLE_SIGLIP_PROXY.
+#   2. If ONCOLOGY_ARBITER_ENABLE_SIGLIP_PROXY=1 (opt-in, NOT default),
+#      run the proxy and return a warned proxy_siglip response.
+#   3. Otherwise, return the placeholder envelope (overall_score=None).
+
+
+import os
+
+_MEDSIGLIP_SINGLETON: Any = None
+_SIGLIP_PROXY_SINGLETON: Any = None
+
+
+def _is_env_true(name: str) -> bool:
+    val = os.environ.get(name, "")
+    return val.strip().lower() in ("1", "true", "yes", "on")
+
+
+def _get_medsiglip() -> Any:
+    """Lazy-construct the MedSigLIP client. Reuses one instance per process."""
+    global _MEDSIGLIP_SINGLETON
+    if _MEDSIGLIP_SINGLETON is None:
+        from oncology_arbiter.models.medsiglip import MedSigLip
+        _MEDSIGLIP_SINGLETON = MedSigLip()
+    return _MEDSIGLIP_SINGLETON
+
+
+def _get_siglip_proxy() -> Any:
+    """Lazy-construct the SigLIP proxy client."""
+    global _SIGLIP_PROXY_SINGLETON
+    if _SIGLIP_PROXY_SINGLETON is None:
+        from oncology_arbiter.models.siglip_baseline import SiglipBaseline
+        _SIGLIP_PROXY_SINGLETON = SiglipBaseline()
+    return _SIGLIP_PROXY_SINGLETON
+
+
+def _run_medsiglip_on_preprocessed(preprocess_result: Any) -> Any:
+    """Run MedSigLIP on an already-preprocessed mammogram.
+
+    Uses the client's ``preprocess_fn`` injection point to bypass a second
+    DICOM read — we already have the float32 [0,1] array from the
+    endpoint's ``preprocess_mammogram`` call.
+
+    Raises ``GatedAccessError`` on HAI-DEF gate denial. Callers MUST NOT
+    catch this and silently fall back; the endpoint decides fallback
+    policy explicitly via env flag.
+    """
+    ms = _get_medsiglip()
+    # Feed the already-computed preprocess result back in via the injectable
+    # hook so the client's PIL conversion path runs but no second DICOM I/O happens.
+    class _AlreadyPreprocessed:
+        image = preprocess_result.image
+
+    def _inject(_path: str) -> Any:
+        return _AlreadyPreprocessed()
+
+    ms._preprocess_fn = _inject
+    return ms.run("(preprocessed)")
+
+
+def _run_siglip_proxy_on_preprocessed(preprocess_result: Any) -> Any:
+    """Run the SigLIP proxy on an already-preprocessed mammogram."""
+    proxy = _get_siglip_proxy()
+
+    class _AlreadyPreprocessed:
+        image = preprocess_result.image
+
+    def _inject(_path: str) -> Any:
+        return _AlreadyPreprocessed()
+
+    proxy._preprocess_fn = _inject
+    return proxy.run("(preprocessed)")
+
+
+# --------------------------------------------------------------------------- #
 # Artifact paths — mirrors progression_arbiter/router.py stream_artifact
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[3]
@@ -206,13 +287,105 @@ def create_app() -> FastAPI:
         finally:
             Path(tmp_path).unlink(missing_ok=True)
 
+        # Run the vision backbone according to Phase-2 precedence rules.
+        # Default posture is placeholder — the model states below only
+        # activate when the operator explicitly turned them on via env.
+        backend_result: Any = None
+        backend_state: ModelState = ModelState.PLACEHOLDER
+        backend_name: str | None = None
+        backend_warnings: list[str] = []
+        gate_report_dict: dict[str, Any] | None = None
+
+        if _is_env_true("ONCOLOGY_ARBITER_ENABLE_MEDSIGLIP"):
+            try:
+                backend_result = _run_medsiglip_on_preprocessed(result)
+                backend_state = ModelState.LOADED_MEDSIGLIP
+                backend_name = backend_result.model_repo
+                backend_warnings = list(backend_result.warnings)
+                if backend_result.gate_report is not None:
+                    gr = backend_result.gate_report
+                    gate_report_dict = {
+                        "repo_id": gr.repo_id,
+                        "access_level": gr.access_level.value,
+                        "status_code": gr.status_code,
+                        "reason": gr.reason,
+                        "has_token": gr.has_token,
+                    }
+            except Exception as e:
+                # HAI-DEF gate denial or model load failure. Import lazily
+                # so the module-level `import` doesn't force transformers.
+                from oncology_arbiter.models.hai_def import GatedAccessError
+                if isinstance(e, GatedAccessError):
+                    backend_state = ModelState.GATED
+                    backend_name = e.repo_id
+                    backend_warnings = [
+                        f"medsiglip_gated:{e.access_level.value}:{e.reason}"
+                    ]
+                    gate_report_dict = {
+                        "repo_id": e.repo_id,
+                        "access_level": e.access_level.value,
+                        "status_code": e.status_code,
+                        "reason": e.reason,
+                    }
+                else:
+                    backend_state = ModelState.UNAVAILABLE
+                    backend_warnings = [f"medsiglip_load_error:{type(e).__name__}: {e}"]
+                    log_event(request_id, "/v1/screening/analyze",
+                              model_state="unavailable",
+                              patient_id_hash=req.patient_id_hash,
+                              extra={"medsiglip_error": str(e)[:200]})
+
+        # Proxy fallback is OPT-IN and only activates if MedSigLIP either
+        # was disabled OR the request landed as GATED and the operator has
+        # explicitly enabled the proxy. This is the code path that used to
+        # silently fire and mis-label proxy scores as MedSigLIP — locked
+        # behind an env flag now.
+        if (
+            backend_result is None
+            and backend_state in (ModelState.PLACEHOLDER, ModelState.GATED)
+            and _is_env_true("ONCOLOGY_ARBITER_ENABLE_SIGLIP_PROXY")
+        ):
+            try:
+                proxy_result = _run_siglip_proxy_on_preprocessed(result)
+                # If MedSigLIP was gated, keep the gate report + warning
+                # alongside the proxy warning so the response is honest
+                # about WHY we fell back.
+                prior_warnings = list(backend_warnings)
+                backend_result = proxy_result
+                backend_state = ModelState.PROXY_SIGLIP
+                backend_name = proxy_result.model_repo
+                backend_warnings = prior_warnings + list(proxy_result.warnings)
+            except Exception as e:
+                backend_state = ModelState.UNAVAILABLE
+                backend_warnings.append(f"proxy_siglip_load_error:{type(e).__name__}: {e}")
+                log_event(request_id, "/v1/screening/analyze",
+                          model_state="unavailable",
+                          patient_id_hash=req.patient_id_hash,
+                          extra={"proxy_error": str(e)[:200]})
+
+        # Extract overall_score + findings from whichever backend ran.
+        overall_score: float | None = None
+        findings_list: list[dict[str, Any]] = []
+        if backend_result is not None:
+            # SigLIP-family convention: probs[0] is the "malignant" label
+            # and probs[1] is the "without" label (see
+            # oncology_arbiter.models.siglip_baseline.DEFAULT_ZERO_SHOT_LABELS).
+            probs = list(backend_result.probs)
+            labels = list(backend_result.labels)
+            if len(probs) >= 1:
+                overall_score = float(probs[0])
+            for lbl, p in zip(labels, probs):
+                findings_list.append({
+                    "label": lbl,
+                    "score": float(p),
+                    "location_bbox_normalized": None,
+                })
+
         # Score the L3 screening arbiter with a MINIMAL feature vector.
-        # We have no BI-RADS from a real reader in Phase 1 — the classifier
-        # isn't wired — so we deliberately submit the empty feature dict,
-        # which by design falls through to intercept-only (i.e. base rate).
-        # This proves the arbiter path is live end-to-end without pretending
-        # to have information we don't. Phase 2 replaces the empty dict with
-        # features extracted from L4a detector output.
+        # Phase 2: still no BI-RADS from a real reader — the classifier
+        # isn't wired — so we deliberately submit the empty feature dict.
+        # That falls through to intercept-only (base rate). Phase 3 will
+        # feed features extracted from the L4a detector output.
         arbiter_block: ArbiterScore | None = None
         try:
             arbiter_block = _score_arbiter("screening", features={})
@@ -223,24 +396,39 @@ def create_app() -> FastAPI:
                       extra={"arbiter_error": str(e)[:200]})
             arbiter_block = None
 
+        env = _envelope(request_id, model_state=backend_state, model_name=backend_name)
+        # Attach the gate report (if any) onto the provenance dict via a
+        # side-channel — Provenance itself doesn't have a gate_report field
+        # (schema-level addition is a v2 change), so we append it to the
+        # audit log and to the response `warnings` chain.
+        if gate_report_dict is not None:
+            log_event(request_id, "/v1/screening/analyze",
+                      model_state=backend_state.value,
+                      patient_id_hash=req.patient_id_hash,
+                      extra={"gate_report": gate_report_dict})
+
         response = ScreeningResponse(
-            **_envelope(request_id),
+            **env,
             laterality=result.metadata.laterality.value,
             view=result.metadata.view.value,
             orientation_flipped=result.metadata.orientation_flipped,
             breast_mask_coverage=float(result.breast_mask.mean()),
-            findings=[],
-            overall_score=None,   # placeholder — no classifier wired yet
+            findings=[dict(f) for f in findings_list],
+            overall_score=overall_score,
             arbiter_score=arbiter_block,
+            warnings=backend_warnings,
         )
         log_event(request_id, "/v1/screening/analyze",
-                  model_state="placeholder",
+                  model_state=backend_state.value,
                   patient_id_hash=req.patient_id_hash,
                   extra={
                       "shape": [result.image.shape[0], result.image.shape[1]],
                       "laterality": result.metadata.laterality.value,
                       "view": result.metadata.view.value,
                       "mask_coverage": float(result.breast_mask.mean()),
+                      "backend": backend_state.value,
+                      "overall_score": overall_score,
+                      "n_warnings": len(backend_warnings),
                   })
         return response
 
