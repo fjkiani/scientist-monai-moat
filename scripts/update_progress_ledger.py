@@ -184,7 +184,10 @@ SUBSYSTEMS = [
         "current_backend": "in-house (numpy/scikit-image)",
         "hai_def_gate_state": None,
         "wired_files": [
-            "src/oncology_arbiter/data/preprocess.py",
+            "src/oncology_arbiter/mammography/reader.py",
+            "src/oncology_arbiter/mammography/segmentation.py",
+            "src/oncology_arbiter/mammography/laterality.py",
+            "src/oncology_arbiter/mammography/pipeline.py",
         ],
         "evidence": [
             "tests/unit/test_pectoral_removal_synthetic.py",
@@ -205,10 +208,10 @@ SUBSYSTEMS = [
         "current_backend": "urllib + custom parsers",
         "hai_def_gate_state": None,
         "wired_files": [
-            "src/oncology_arbiter/evidence/pubmed.py",
-            "src/oncology_arbiter/evidence/arxiv.py",
-            "src/oncology_arbiter/evidence/europe_pmc.py",
-            "src/oncology_arbiter/evidence/web_fetch.py",
+            "src/oncology_arbiter/tools/pubmed_search.py",
+            "src/oncology_arbiter/tools/arxiv_search.py",
+            "src/oncology_arbiter/tools/europe_pmc_search.py",
+            "src/oncology_arbiter/tools/web_fetch.py",
         ],
         "evidence": [
             "tests/integration/test_pubmed_live.py",
@@ -528,10 +531,10 @@ SUBSYSTEMS = [
         "layer": "infra",
         "role": "Container image for the FastAPI app.",
         "status": "NOT_WIRED",
-        "not_wired_reason": "Dockerfile parseable in the repo but never built in this sandbox (no daemon). First real build happens in CI on push.",
-        "current_backend": "Dockerfile only",
+        "not_wired_reason": "Dockerfile not yet written. Wave 3 step 2.3 lands a multi-stage Dockerfile + .dockerignore; first real docker build happens in CI on push (no docker daemon in this sandbox).",
+        "current_backend": None,
         "hai_def_gate_state": None,
-        "wired_files": ["Dockerfile"],
+        "wired_files": [],
         "evidence": [],
     },
 ]

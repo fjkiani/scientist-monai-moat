@@ -100,6 +100,27 @@ def test_every_live_entry_has_working_evidence(ledger: dict) -> None:
             )
 
 
+def test_every_wired_files_path_exists_on_disk(ledger: dict) -> None:
+    """Subsystem wired_files must point at real files on disk (not aspirational paths).
+
+    Regression guard against the honesty bug where L2-evidence-fetchers cited
+    ``src/oncology_arbiter/evidence/*`` but the code actually lives in ``tools/``.
+    Applies to BOTH LIVE and NOT_WIRED subsystems: if a wired_files entry doesn't
+    exist, the ledger is lying about where the code lives.
+    """
+    for e in ledger["subsystems"]:
+        wf = e.get("wired_files") or []
+        for path in wf:
+            file_part = path.split("::", 1)[0]
+            if file_part.startswith("/"):
+                candidate = Path(file_part)
+            else:
+                candidate = REPO_ROOT / file_part
+            assert candidate.exists(), (
+                f"{e['id']} wired_files path missing on disk: {path}"
+            )
+
+
 def test_every_not_wired_entry_has_reason(ledger: dict) -> None:
     for e in _iter_status_entries(ledger):
         if e.get("status") != "NOT_WIRED":
