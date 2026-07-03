@@ -79,6 +79,36 @@ class ArbiterScore(BaseModel):
     caveat: str = Field(..., description="AUROC caveat from the frozen JSON")
 
 
+class GateReport(BaseModel):
+    """Structured preflight result for a gated repo (HAI-DEF or similar).
+
+    Populated on `Provenance.gate_report` whenever the endpoint attempted a
+    live gated-model call. Absent (`None`) when no gated preflight was run
+    (e.g. placeholder-only responses, or when the endpoint is fully served
+    from a proxy / heuristic path that never touched the gated repo).
+
+    Field semantics match `oncology_arbiter.models.hai_def.GateReport`. This
+    schema does NOT mirror the runtime dataclass field-for-field to avoid
+    accidental drift — instead, the API-layer factory in `app.py` converts
+    the dataclass into this pydantic block. That way, changes to internal
+    fields (e.g. adding retry_after) can happen without a public schema bump.
+    """
+    model_config = ConfigDict(str_strip_whitespace=True)
+    repo_id: str = Field(..., description="Gated repo id preflighted, e.g. 'google/medsiglip-448'")
+    access_level: Literal["allowed", "forbidden", "unauthenticated", "unknown"] = Field(
+        ..., description="AccessLevel returned by check_hai_def_access(): allowed / forbidden / unauthenticated / unknown",
+    )
+    status_code: int | None = Field(
+        default=None,
+        description="Underlying HTTP status from HF hub, if the preflight completed. None on transport failure.",
+    )
+    reason: str = Field(
+        ..., description="Human-readable one-line reason, e.g. 'accept terms at huggingface.co/google/medsiglip-448'",
+    )
+    has_token: bool = Field(..., description="True if an HF token was discovered (env or ~/.cache/huggingface/token)")
+    allowed: bool = Field(..., description="Convenience: access_level == 'allowed'")
+
+
 class Provenance(BaseModel):
     """Where did this response come from?"""
     model_config = ConfigDict(str_strip_whitespace=True)
@@ -89,6 +119,15 @@ class Provenance(BaseModel):
     )
     model_version: str | None = None
     request_id: str = Field(..., description="Trace id for correlation with the audit ledger")
+    gate_report: GateReport | None = Field(
+        default=None,
+        description=(
+            "Structured HAI-DEF preflight result for the gated model that this endpoint "
+            "attempted. None when no gated preflight was performed (placeholder / pure "
+            "proxy path). Carries repo_id, access_level, status_code, reason, has_token. "
+            "Consumers should surface `access_level` alongside `model_state=GATED`."
+        ),
+    )
 
 
 class ApiEnvelope(BaseModel):
