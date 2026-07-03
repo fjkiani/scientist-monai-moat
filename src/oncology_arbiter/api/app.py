@@ -423,6 +423,41 @@ def create_app() -> FastAPI:
                     "location_bbox_normalized": None,
                 })
 
+        # ── L4a MONAI detector (mask-gradient heuristic) ──
+        # Opt-in via ONCOLOGY_ARBITER_ENABLE_MONAI_DETECTOR=1. When on, we
+        # run the detector on the real preprocessed image + breast mask
+        # from the mammography pipeline. Findings are added with
+        # ``location_bbox_normalized`` set and a ``monai_heuristic:...``
+        # score prefix so downstream UI can distinguish them from SigLIP-
+        # family classification findings. NEVER silently upgrades the
+        # response's model_state to LOADED_MONAI_DETECTOR unless real
+        # trained weights load, which under Phase 3 they do not.
+        if _is_env_true("ONCOLOGY_ARBITER_ENABLE_MONAI_DETECTOR"):
+            try:
+                from oncology_arbiter.models.monai_detector import (
+                    MONAI_DETECTOR_WARNING,
+                    MonaiDetector,
+                )
+                det_result = MonaiDetector().detect(
+                    result.image.astype("float32"),
+                    result.breast_mask,
+                )
+                for box in det_result.boxes:
+                    findings_list.append({
+                        "label": f"monai_heuristic:{box.label}",
+                        "score": float(box.score),
+                        "location_bbox_normalized": [box.x0, box.y0, box.x1, box.y1],
+                    })
+                if MONAI_DETECTOR_WARNING not in backend_warnings:
+                    backend_warnings.append(MONAI_DETECTOR_WARNING)
+                if backend_state == ModelState.PLACEHOLDER:
+                    backend_state = ModelState.PROXY_MONAI_HEURISTIC
+                    backend_name = det_result.model_name
+            except Exception as e:  # noqa: BLE001 — surface, never hide
+                backend_warnings.append(
+                    f"monai_detector_error:{type(e).__name__}:{e}"
+                )
+
         # Score the L3 screening arbiter with a MINIMAL feature vector.
         # Phase 2: still no BI-RADS from a real reader — the classifier
         # isn't wired — so we deliberately submit the empty feature dict.
