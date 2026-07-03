@@ -96,13 +96,14 @@ USER_STORIES = [
         "endpoints": ["/v1/biopsy/analyze"],
         "status": "NOT_WIRED",
         "not_wired_reason": (
-            "Endpoint returns HTTP 200 with placeholder output. The L4b "
+            "Endpoint returns HTTP 200 with placeholder findings. The L4b "
             "biopsy model (MedSigLIP-448 for histopathology or a dedicated "
-            "biopsy classifier) is not connected to the endpoint yet."
+            "biopsy classifier) is not connected. Only the L3 biopsy arbiter "
+            "template runs (on empty features), which is a separate LIVE "
+            "subsystem — see L3-biopsy-arbiter."
         ),
         "evidence": [
             "src/oncology_arbiter/api/app.py",
-            "tests/unit/test_api_arbiter_wiring.py::test_biopsy_endpoint_returns_arbiter_score",
         ],
     },
     {
@@ -113,14 +114,14 @@ USER_STORIES = [
         "endpoints": ["/v1/therapy/reason"],
         "status": "NOT_WIRED",
         "not_wired_reason": (
-            "Endpoint returns HTTP 200 with placeholder output. The L4c "
-            "therapy reasoner (TxGemma-9B) is not connected. The L2 "
-            "evidence retrieval layer (PubMed / arXiv / Europe PMC) is "
-            "also not wired into this endpoint."
+            "Endpoint returns HTTP 200 with placeholder findings. The L4c "
+            "therapy reasoner (TxGemma-9B) is not connected. The L2 evidence "
+            "retrieval layer (PubMed / arXiv / Europe PMC) is also not "
+            "wired into this endpoint. Only the L3 therapy arbiter template "
+            "runs — see L3-therapy-arbiter."
         ),
         "evidence": [
             "src/oncology_arbiter/api/app.py",
-            "tests/unit/test_api_arbiter_wiring.py::test_therapy_endpoint_returns_arbiter_score",
         ],
     },
     {
