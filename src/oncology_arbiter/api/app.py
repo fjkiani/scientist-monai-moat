@@ -515,6 +515,8 @@ def create_app() -> FastAPI:
         subtype_prediction: str | None = None
         confidence: float | None = None
         warnings: list[str] = []
+        # Runtime dataclass (from hai_def), converted to schema at envelope time.
+        runtime_gate_report = None  # type: ignore[assignment]
 
         if _is_env_true("ONCOLOGY_ARBITER_ENABLE_BIOPSY_MEDSIGLIP"):
             if not (req.wsi_url or req.wsi_bytes_b64):
@@ -526,7 +528,11 @@ def create_app() -> FastAPI:
                     from oncology_arbiter.models.biopsy_medsiglip_probe import (
                         BiopsyMedSigLipProbe,
                     )
-                    from oncology_arbiter.models.hai_def import GatedAccessError
+                    from oncology_arbiter.models.hai_def import (
+                        GatedAccessError,
+                        GateReport as RuntimeGateReport,
+                        _discover_hf_token,
+                    )
 
                     probe = BiopsyMedSigLipProbe()
                     image_bytes = _decode_bytes_arg(req.wsi_bytes_b64)
@@ -540,11 +546,21 @@ def create_app() -> FastAPI:
                     model_state = ModelState.LOADED_BIOPSY_PROBE
                     model_name = "google/medsiglip-448+biopsy_probe_v0"
                     warnings.extend(result.warnings)
+                    # If the probe surfaced a runtime GateReport (allowed
+                    # preflight), thread it through.
+                    runtime_gate_report = getattr(result, "gate_report", None)
                 except GatedAccessError as gate_err:
                     model_state = ModelState.GATED
                     model_name = gate_err.repo_id
                     warnings.append(
                         f"biopsy_medsiglip_gated:{gate_err.access_level.value}:{gate_err.reason}"
+                    )
+                    runtime_gate_report = RuntimeGateReport(
+                        repo_id=gate_err.repo_id,
+                        access_level=gate_err.access_level,
+                        status_code=gate_err.status_code,
+                        reason=gate_err.reason,
+                        has_token=_discover_hf_token() is not None,
                     )
                 except Exception as e:  # noqa: BLE001 — surface, never hide
                     warnings.append(f"biopsy_medsiglip_error:{type(e).__name__}:{e}")
@@ -563,7 +579,13 @@ def create_app() -> FastAPI:
         except Exception:
             arbiter_block = None
 
-        env = _envelope(request_id, model_state=model_state, model_name=model_name)
+        schema_gate_report = _to_schema_gate_report(runtime_gate_report)
+        env = _envelope(
+            request_id,
+            model_state=model_state,
+            model_name=model_name,
+            gate_report=schema_gate_report,
+        )
         env["warnings"] = warnings
         return BiopsyResponse(
             **env,
@@ -600,6 +622,7 @@ def create_app() -> FastAPI:
         recommended: list[TherapyOption] = []
         not_recommended: list[TherapyOption] = []
         warnings: list[str] = []
+        runtime_gate_report = None  # populated by TxGemma preflight
 
         # Extract features for rules engine from biopsy_output + patient_context
         biopsy = req.biopsy_output
@@ -623,7 +646,11 @@ def create_app() -> FastAPI:
             txgemma_tried = True
             try:
                 from oncology_arbiter.models.txgemma_client import TxGemmaClient
-                from oncology_arbiter.models.hai_def import GatedAccessError
+                from oncology_arbiter.models.hai_def import (
+                    GatedAccessError,
+                    GateReport as RuntimeGateReport,
+                    _discover_hf_token,
+                )
 
                 tx = TxGemmaClient()
                 tx_result = tx.recommend_therapy(
@@ -641,9 +668,17 @@ def create_app() -> FastAPI:
                 warnings.extend(tx_result.warnings)
                 model_state = ModelState.LOADED_TXGEMMA
                 model_name = tx.repo_id
+                runtime_gate_report = getattr(tx_result, "gate_report", None)
             except GatedAccessError as gate_err:
                 warnings.append(
                     f"txgemma_gated:{gate_err.access_level.value}:{gate_err.reason}"
+                )
+                runtime_gate_report = RuntimeGateReport(
+                    repo_id=gate_err.repo_id,
+                    access_level=gate_err.access_level,
+                    status_code=gate_err.status_code,
+                    reason=gate_err.reason,
+                    has_token=_discover_hf_token() is not None,
                 )
 
         # ── (2) NCCN-lite rules fallback ──
@@ -709,7 +744,13 @@ def create_app() -> FastAPI:
         except Exception:
             arbiter_block = None
 
-        env = _envelope(request_id, model_state=model_state, model_name=model_name)
+        schema_gate_report = _to_schema_gate_report(runtime_gate_report)
+        env = _envelope(
+            request_id,
+            model_state=model_state,
+            model_name=model_name,
+            gate_report=schema_gate_report,
+        )
         env["warnings"] = warnings
         return TherapyResponse(
             **env,
