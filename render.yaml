@@ -1,0 +1,57 @@
+# Render.com blueprint for the oncology-arbiter tumor board API.
+#
+# Free-tier deployment posture (2026-07):
+#   - 512 MB RAM, 0.1 CPU, spins down after 15 min idle, ~1 min cold start.
+#   - No persistent disk; ephemeral filesystem.
+#   - Docker language: Render's BuildKit builds ./Dockerfile then runs the
+#     resulting image behind their proxy on port 8080 (via HEALTHCHECK).
+#
+# Backend enablement flags are intentionally lightweight:
+#   - MONAI heuristic and MedSigLIP would OOM the 512 MB dyno the moment a
+#     real DICOM lands (MONAI ~500 MB, MedSigLIP ~2 GB with torch loaded).
+#     They stay OFF by default; endpoints return placeholder envelopes
+#     with model_state="placeholder" + honest warnings.
+#   - Therapy rules-lite (~20 MB, pure Python) IS enabled — fits free tier
+#     and demonstrates the real NCCN-lite recommendation surface.
+#   - Co-Scientist (L5) IS enabled — it operates over stage envelopes, no
+#     ML runtime; free tier can handle it.
+#   - Frontend (SPA) IS enabled — bundle is ~170 KB static assets, mounted
+#     under /ui/. Served from FastAPI's StaticFiles.
+#
+# No secrets in this file. HUGGINGFACE token is deliberately absent —
+# gated preflights will return 401, and the gate_report envelope will
+# populate with has_token=false, which itself proves the honesty gate
+# works in production.
+services:
+  - type: web
+    name: oncology-arbiter
+    runtime: docker
+    plan: free
+    region: oregon
+    branch: main
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      # Serve the SPA at /ui/ (bundle shipped at
+      # src/oncology_arbiter/api/static/dist/ via worker-3-frontend).
+      - key: ONCOLOGY_ARBITER_SERVE_FRONTEND
+        value: "1"
+      # Enable the deterministic NCCN-lite therapy rules engine as the
+      # therapy backend on free tier (TxGemma is gated + too large).
+      - key: ONCOLOGY_ARBITER_ENABLE_THERAPY_RULES_PROXY
+        value: "1"
+      # Enable the L5 Co-Scientist 4-phase ranker on /v1/case/full.
+      # Operates over envelopes, no ML runtime — fits 512 MB.
+      - key: ONCOLOGY_ARBITER_ENABLE_CO_SCIENTIST
+        value: "1"
+      # DELIBERATELY NOT SET (would OOM the free tier dyno):
+      #   ONCOLOGY_ARBITER_ENABLE_MEDSIGLIP
+      #   ONCOLOGY_ARBITER_ENABLE_MONAI_DETECTOR
+      #   ONCOLOGY_ARBITER_ENABLE_BIOPSY_MEDSIGLIP
+      #   ONCOLOGY_ARBITER_ENABLE_THERAPY_TXGEMMA
+      # These backends are exercised locally on worker-1/32GB via the
+      # generated capability proofs. Free tier ships the honest lightweight
+      # surface — gated / placeholder / rules-lite — which itself demonstrates
+      # the model_state contract to any client.
+    autoDeploy: true
