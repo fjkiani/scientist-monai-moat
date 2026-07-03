@@ -162,6 +162,14 @@ def _run_medsiglip_on_preprocessed(preprocess_result: Any) -> Any:
     Raises ``GatedAccessError`` on HAI-DEF gate denial. Callers MUST NOT
     catch this and silently fall back; the endpoint decides fallback
     policy explicitly via env flag.
+
+    Phase 2 limitation (2026-07-03): this helper mutates
+    ``ms._preprocess_fn`` on the singleton for the duration of the call.
+    That is safe under FastAPI's default single-threaded async request
+    handling but is NOT safe under a threadpool. Phase 3 will either
+    (a) construct a fresh MedSigLip per request (weights stay cached at
+    class level so no re-download) or (b) thread the preprocess through
+    the ``.run()`` signature directly.
     """
     ms = _get_medsiglip()
     # Feed the already-computed preprocess result back in via the injectable
@@ -177,7 +185,12 @@ def _run_medsiglip_on_preprocessed(preprocess_result: Any) -> Any:
 
 
 def _run_siglip_proxy_on_preprocessed(preprocess_result: Any) -> Any:
-    """Run the SigLIP proxy on an already-preprocessed mammogram."""
+    """Run the SigLIP proxy on an already-preprocessed mammogram.
+
+    Same Phase 2 caveat as :func:`_run_medsiglip_on_preprocessed` — the
+    proxy singleton's ``_preprocess_fn`` is mutated for the call. Safe
+    under single-thread async; not safe under a threadpool. Phase 3 fix.
+    """
     proxy = _get_siglip_proxy()
 
     class _AlreadyPreprocessed:
