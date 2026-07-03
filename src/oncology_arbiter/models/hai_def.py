@@ -151,7 +151,10 @@ def _discover_hf_token() -> str | None:
 def _classify_http_status(status_code: int | None) -> tuple[AccessLevel, str]:
     """Map an HTTP status from the HF hub to (AccessLevel, reason).
 
-    * 200 → ALLOWED
+    * 200 → ALLOWED (config.json readable — token accepted, HAI-DEF terms OK)
+    * 301/302/303/307/308 → ALLOWED (HF redirects an *authorized* /resolve/
+      request onto its CloudFront CDN — probing with allow_redirects=False
+      makes that redirect observable, and it means auth passed)
     * 401 → UNAUTHENTICATED (no token or invalid token)
     * 403 → FORBIDDEN (token OK but HAI-DEF terms not accepted)
     * 404 → UNKNOWN (repo not found — treat as configuration bug)
@@ -159,6 +162,11 @@ def _classify_http_status(status_code: int | None) -> tuple[AccessLevel, str]:
     """
     if status_code == 200:
         return AccessLevel.ALLOWED, "preflight succeeded"
+    if status_code in (301, 302, 303, 307, 308):
+        return (
+            AccessLevel.ALLOWED,
+            f"preflight redirected (HTTP {status_code}) to CDN — token accepted",
+        )
     if status_code == 401:
         return (
             AccessLevel.UNAUTHENTICATED,
@@ -175,6 +183,22 @@ def _classify_http_status(status_code: int | None) -> tuple[AccessLevel, str]:
     return AccessLevel.UNKNOWN, f"unexpected status HTTP {status_code}"
 
 
+def _hai_def_probe_url(repo_id: str) -> str:
+    """Build the correct HF endpoint for HAI-DEF gate detection.
+
+    We probe ``/{repo_id}/resolve/main/config.json`` — a file inside the
+    gated repo — instead of ``/api/models/{repo_id}`` because the metadata
+    endpoint returns 200 for gated repos even without a token (only the
+    file-serve endpoint actually enforces the gate). Learned the hard way
+    on 2026-07-02: silent proxy fallback happened because /api/models
+    returned 200/allowed for all three gated repos without a token.
+
+    See test_check_probes_resolve_endpoint_not_api_metadata for the
+    regression guard.
+    """
+    return f"https://huggingface.co/{repo_id}/resolve/main/config.json"
+
+
 # --------------------------------------------------------------------------- #
 # Public API
 
@@ -187,9 +211,19 @@ def check_hai_def_access(
 ) -> GateReport:
     """Preflight-check whether `repo_id` can be pulled from HuggingFace.
 
-    Uses HEAD `https://huggingface.co/api/models/<repo_id>` so we do NOT
+    Uses HEAD `https://huggingface.co/<repo_id>/resolve/main/config.json`
+    (the file-serve endpoint, which respects the HAI-DEF gate) so we do NOT
     trigger a weight download (which would be several GB for MedSigLIP or
     tens of GB for MedGemma 27B).
+
+    Historical note (fixed 2026-07-02): an earlier version probed
+    ``/api/models/<repo_id>``. That endpoint returns 200 for gated repos
+    even without a token, causing this function to falsely report ALLOWED
+    for unauthenticated requests and letting the caller silently fall back
+    to the SigLIP proxy while claiming to have HAI-DEF permission. The
+    file-serve endpoint returns 401 with X-Error-Code=GatedRepo for
+    unauthenticated requests, 200 for authenticated-and-approved requests,
+    or 30x (redirect to CDN) which we also treat as ALLOWED.
 
     Parameters
     ----------
@@ -212,11 +246,11 @@ def check_hai_def_access(
 
     Notes
     -----
-    HuggingFace's public API historically returns 401 for unauthenticated
+    HuggingFace's file-serve endpoint returns 401 for unauthenticated
     requests to gated repos and 403 for authenticated-but-unlicensed
-    requests. See https://huggingface.co/docs/hub/api and the /api/models
-    surface — behaviour is model-registry-specific and this classifier is
-    deliberately conservative (unknown status → AccessLevel.UNKNOWN).
+    requests. See https://huggingface.co/docs/hub — behaviour is
+    file-serve-specific and this classifier is deliberately conservative
+    (unknown status → AccessLevel.UNKNOWN).
     """
     if not repo_id or not isinstance(repo_id, str):
         raise ValueError("repo_id must be a non-empty string")
@@ -226,7 +260,7 @@ def check_hai_def_access(
     if token:
         headers["Authorization"] = f"Bearer {token}"
 
-    url = f"https://huggingface.co/api/models/{repo_id}"
+    url = _hai_def_probe_url(repo_id)
 
     # Lazy-import requests so the honesty of this module (no accidental
     # network calls at import time) is preserved and so tests using a
@@ -245,7 +279,10 @@ def check_hai_def_access(
         session = requests
 
     try:
-        resp = session.head(url, headers=headers, timeout=timeout_s, allow_redirects=True)
+        # allow_redirects=False so a 30x (redirect to CDN after auth check)
+        # stays observable and is classified as ALLOWED rather than followed
+        # through to some 200 that hides the auth outcome.
+        resp = session.head(url, headers=headers, timeout=timeout_s, allow_redirects=False)
     except Exception as exc:  # network flake, DNS, timeout etc.
         return GateReport(
             repo_id=repo_id,

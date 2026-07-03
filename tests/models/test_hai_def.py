@@ -58,6 +58,13 @@ def test_ungated_proxy_is_not_in_gated_list() -> None:
     "status,expected_level",
     [
         (200, AccessLevel.ALLOWED),
+        # 30x redirects observed when auth passes and HF redirects to CloudFront CDN.
+        # allow_redirects=False in the probe makes them observable as ALLOWED.
+        (301, AccessLevel.ALLOWED),
+        (302, AccessLevel.ALLOWED),
+        (303, AccessLevel.ALLOWED),
+        (307, AccessLevel.ALLOWED),
+        (308, AccessLevel.ALLOWED),
         (401, AccessLevel.UNAUTHENTICATED),
         (403, AccessLevel.FORBIDDEN),
         (404, AccessLevel.UNKNOWN),
@@ -81,6 +88,19 @@ def test_403_reason_mentions_terms() -> None:
     r = reason.lower()
     assert "terms" in r or "hai-def" in r
     assert "access" in r or "accept" in r
+
+
+def test_302_reason_mentions_redirect_or_cdn() -> None:
+    """When HF returns 30x, the reason string must record the redirect fact
+    so downstream logs (audit trail) can tell 'ALLOWED via 302 CDN redirect'
+    apart from 'ALLOWED via 200 direct'. This matters because a 30x means
+    the request would have hit CDN — which for a large HAI-DEF weight file
+    would then require signed CloudFront credentials that our test probe
+    doesn't consume.
+    """
+    _, reason = _classify_http_status(302)
+    r = reason.lower()
+    assert "redirect" in r or "cdn" in r or "302" in r
 
 
 # --------------------------------------------------------------------------- #
@@ -171,17 +191,55 @@ def test_check_returns_forbidden_on_403_with_token(monkeypatch) -> None:
     assert rep.has_token is True
 
 
-def test_check_hits_correct_hf_api_url(monkeypatch) -> None:
+def test_check_probes_resolve_endpoint_not_api_metadata(monkeypatch) -> None:
+    """REGRESSION GUARD (2026-07-02).
+
+    The gate MUST probe the file-serve endpoint (/{repo_id}/resolve/main/config.json)
+    which enforces HAI-DEF, NOT the metadata endpoint (/api/models/{repo_id})
+    which returns 200 for gated repos even without a token. An earlier
+    implementation used /api/models/ and silently reported UNAUTHENTICATED
+    requests as ALLOWED, causing a silent proxy fallback in the screening
+    endpoint.
+
+    This test locks in:
+    * URL contains /resolve/main/config.json
+    * URL does NOT contain /api/models/
+    * allow_redirects is False (30x means CDN redirect after successful auth;
+      we want to observe that outcome, not follow through to hidden CDN 200)
+    """
     monkeypatch.setenv("HF_TOKEN", "hf_dummy")
     monkeypatch.setattr("os.path.isfile", lambda p: False)
     sess = _StubSession(200)
     check_hai_def_access("google/medgemma-1.5-4b-it", session=sess)
     assert sess.calls, "session was not invoked"
     url, headers, timeout, follow = sess.calls[0]
-    assert url == "https://huggingface.co/api/models/google/medgemma-1.5-4b-it"
+    assert "/resolve/main/config.json" in url, (
+        f"gate must probe file-serve endpoint (which respects HAI-DEF), got {url!r}"
+    )
+    assert "/api/models/" not in url, (
+        f"gate must NOT probe /api/models/ (returns 200 for gated repos w/o token), "
+        f"got {url!r}"
+    )
+    assert "google/medgemma-1.5-4b-it" in url
     assert headers.get("Authorization") == "Bearer hf_dummy"
     assert isinstance(timeout, (int, float)) and timeout > 0
-    assert follow is True
+    assert follow is False, (
+        "allow_redirects must be False so 30x (CDN redirect after auth) "
+        "stays observable and classifies as ALLOWED, not silently followed"
+    )
+
+
+def test_check_returns_allowed_on_302_redirect(monkeypatch) -> None:
+    """A 302 to CDN means auth passed. Verify it maps to ALLOWED and the
+    reason records the redirect (so audit logs can tell 302 from 200)."""
+    monkeypatch.setenv("HF_TOKEN", "hf_dummy")
+    monkeypatch.setattr("os.path.isfile", lambda p: False)
+    sess = _StubSession(302)
+    rep = check_hai_def_access("google/medsiglip-448", session=sess)
+    assert rep.access_level is AccessLevel.ALLOWED
+    assert rep.status_code == 302
+    r = rep.reason.lower()
+    assert "redirect" in r or "cdn" in r or "302" in r
 
 
 def test_check_omits_auth_header_when_no_token(monkeypatch) -> None:
