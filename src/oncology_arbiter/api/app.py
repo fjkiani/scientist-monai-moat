@@ -635,19 +635,59 @@ def create_app() -> FastAPI:
         therapy = therapy_reason(
             TherapyRequest(biopsy_output=biopsy, patient_context=req.therapy_context)
         )
+        # L5 Co-Scientist 4-phase loop (opt-in). When enabled, runs
+        # generate → reflect → rank (Elo) → evolve → rank over the stage
+        # envelopes and returns the ranked hypotheses on
+        # `elo_ranked_hypotheses`. Honesty gate: only URLs found in the
+        # combined evidence[] of the stage responses count as "seen"; any
+        # hypothesis carrying an unseen URL is stripped of that URL by
+        # `reflect_hypotheses` before it can win Elo points.
+        elo_ranked: list[dict[str, Any]] = []
+        cs_warnings: list[str] = []
+        if _is_env_true("ONCOLOGY_ARBITER_ENABLE_CO_SCIENTIST"):
+            from oncology_arbiter.orchestrator.co_scientist import run_co_scientist
+            seen_urls: set[str] = set()
+            for env_dict in (
+                screening.model_dump() if screening is not None else None,
+                biopsy.model_dump() if biopsy is not None else None,
+                therapy.model_dump() if therapy is not None else None,
+            ):
+                if env_dict is None:
+                    continue
+                for e in env_dict.get("evidence") or []:
+                    if isinstance(e, dict) and "url" in e:
+                        seen_urls.add(e["url"])
+                # Therapy option evidence lives one level deeper
+                for opt in env_dict.get("recommended_options") or []:
+                    for e in (opt or {}).get("evidence") or []:
+                        if isinstance(e, dict) and "url" in e:
+                            seen_urls.add(e["url"])
+            try:
+                cs_out = run_co_scientist(
+                    screening=(screening.model_dump() if screening is not None else None),
+                    biopsy=(biopsy.model_dump() if biopsy is not None else None),
+                    therapy=(therapy.model_dump() if therapy is not None else None),
+                    seen_urls=seen_urls,
+                )
+                elo_ranked = cs_out["hypotheses"]
+                cs_warnings = cs_out["warnings"]
+            except Exception as e:
+                cs_warnings = [f"co_scientist_error:{type(e).__name__}:{e}"]
+
         log_event(request_id, "/v1/case/full",
                   model_state="placeholder",
                   patient_id_hash=None,
                   extra={
                       "has_screening": screening is not None,
                       "has_biopsy": biopsy is not None,
+                      "elo_n_hypotheses": len(elo_ranked),
                   })
         return FullCaseResponse(
             **_envelope(request_id),
             screening=screening,
             biopsy=biopsy,
             therapy=therapy,
-            elo_ranked_hypotheses=[],  # placeholder — Co-Scientist Elo in Phase 3
+            elo_ranked_hypotheses=elo_ranked,
         )
 
     return app
