@@ -31,3 +31,7 @@ tests/fixtures/cbis_ddsm/cbis-ddsm-r-dataset.csv
 
 # Any dataset CSVs pulled from HF mirrors
 tests/fixtures/**/cbis-ddsm-r-dataset.csv
+
+# Frontend
+frontend/node_modules/
+frontend/dist/

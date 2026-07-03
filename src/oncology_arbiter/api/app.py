@@ -608,4 +608,21 @@ def create_app() -> FastAPI:
             elo_ranked_hypotheses=[],  # placeholder — Co-Scientist Elo in Phase 3
         )
 
+    # ----------------------------------------------------------------------- #
+    # /ui — optional static frontend mount
+    #
+    # Serving the SPA is opt-in via ONCOLOGY_ARBITER_SERVE_FRONTEND=1 so the
+    # backend can boot in Docker/CI without a Node build. When enabled, the
+    # frontend bundle lives at src/oncology_arbiter/api/static/dist/ and is
+    # produced by `npm --prefix frontend run build`. Base path is /ui/ so it
+    # never collides with /v1/* API routes.
+    if _is_env_true("ONCOLOGY_ARBITER_SERVE_FRONTEND"):
+        from fastapi.staticfiles import StaticFiles
+
+        static_root = Path(__file__).parent / "static" / "dist"
+        if static_root.is_dir() and (static_root / "index.html").is_file():
+            # `html=True` makes StaticFiles fall through to index.html for any
+            # sub-path (SPA routing). It still 404s on missing static assets.
+            app.mount("/ui", StaticFiles(directory=str(static_root), html=True), name="ui")
+
     return app
