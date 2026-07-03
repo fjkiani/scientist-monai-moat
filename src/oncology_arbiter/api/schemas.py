@@ -24,6 +24,8 @@ class ModelState(str, Enum):
     LOADING = "loading"               # model warming up
     UNAVAILABLE = "unavailable"       # model failed to load; error path
     CACHED = "cached"                 # result served from cache
+    GATED = "gated"                   # HAI-DEF access denied (401/403)
+    PROXY_SIGLIP = "proxy_siglip"     # ungated general-domain SigLIP fallback (NOT MedSigLIP output)
 
 
 class EvidenceRecord(BaseModel):
