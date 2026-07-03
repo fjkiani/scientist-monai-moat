@@ -74,7 +74,13 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     # installed copy under /opt/oa is only there for its dependency set.
     PYTHONPATH="/app/src:/opt/oa/lib/python3.11/site-packages" \
     # Serve the built frontend by default when the image is deployed.
-    ONCOLOGY_ARBITER_SERVE_FRONTEND=1
+    ONCOLOGY_ARBITER_SERVE_FRONTEND=1 \
+    # Audit ledger lives outside /app so the non-root arbiter user can
+    # write it without needing to chown a subtree at container start. On
+    # Render free tier the disk is ephemeral either way, so /tmp is fine
+    # for the ledger; sites that want durable audit should mount a
+    # persistent volume and override this env var.
+    ONCOLOGY_ARBITER_AUDIT_DIR=/tmp/oa-audit
 
 # curl only needed for the HEALTHCHECK; everything else came from builder.
 RUN apt-get update && apt-get install --no-install-recommends -y \

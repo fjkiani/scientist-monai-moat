@@ -299,3 +299,37 @@ def test_pythonpath_prefers_app_src():
             f"PYTHONPATH must start with /app/src (got {parts[0]!r}). "
             f"Full value: {value!r}"
         )
+
+
+def test_audit_dir_points_to_writable_path():
+    """
+    audit.py default AUDIT_DIR is `$CWD/artifacts/audit`. Inside the
+    container CWD is /app/ (root-owned) and the process runs as non-root
+    arbiter (uid 10001), so mkdir fails and /v1/case/full 500s the moment
+    it tries to log_event(). The Dockerfile must set
+    ONCOLOGY_ARBITER_AUDIT_DIR to a path the non-root user CAN write —
+    /tmp is the safe default on ephemeral tiers. Learned live at
+    dep-d944aasv5n6c73bsdaqg: PermissionError: [Errno 13] '/app/artifacts'.
+    """
+    text = _dockerfile_text()
+    pattern = re.compile(
+        r"^\s*ONCOLOGY_ARBITER_AUDIT_DIR\s*=\s*(?P<path>/[^\s\\]+)",
+        re.MULTILINE,
+    )
+    m = pattern.search(text)
+    assert m, (
+        "Dockerfile must set ONCOLOGY_ARBITER_AUDIT_DIR to a writable "
+        "location, otherwise /v1/case/full and other endpoints that "
+        "call audit.log_event() will 500 as non-root uid 10001."
+    )
+    path = m.group("path")
+    # /app is root-owned, /opt/oa is baked read-only — reject those.
+    assert not path.startswith("/app"), (
+        f"AUDIT_DIR {path!r} is under /app/ which is root-owned; "
+        "non-root arbiter user cannot mkdir there. Use /tmp or a "
+        "persistent-volume mount point."
+    )
+    assert not path.startswith("/opt/oa"), (
+        f"AUDIT_DIR {path!r} is under /opt/oa which ships the immutable "
+        "dep set; do not write user data there."
+    )
