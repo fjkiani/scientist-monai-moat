@@ -39,6 +39,7 @@ from .schemas import (
     EvidenceRecord,
     FullCaseRequest,
     FullCaseResponse,
+    GateReport as SchemaGateReport,
     HealthResponse,
     HonestyGateReport,
     ModelCardsIndex,
@@ -57,9 +58,36 @@ from .schemas import (
 # Helpers
 
 
+def _to_schema_gate_report(runtime_gr: Any) -> SchemaGateReport | None:
+    """Convert the runtime hai_def.GateReport dataclass into the pydantic
+    schema GateReport, or None if the input is None.
+
+    We do NOT rely on pydantic's model_validate over the dataclass because
+    the runtime access_level is an Enum (`AccessLevel`) — we serialize its
+    `.value` string so the schema's Literal validator accepts it, and so
+    JSON output matches the wire contract.
+    """
+    if runtime_gr is None:
+        return None
+    return SchemaGateReport(
+        repo_id=runtime_gr.repo_id,
+        access_level=runtime_gr.access_level.value,
+        status_code=runtime_gr.status_code,
+        reason=runtime_gr.reason,
+        has_token=runtime_gr.has_token,
+        allowed=bool(runtime_gr.allowed),
+    )
+
+
 def _envelope(request_id: str, model_state: ModelState = ModelState.PLACEHOLDER,
-              model_name: str | None = None) -> dict[str, Any]:
-    """Common envelope fields that must appear on every response body."""
+              model_name: str | None = None,
+              gate_report: SchemaGateReport | None = None) -> dict[str, Any]:
+    """Common envelope fields that must appear on every response body.
+
+    `gate_report` is populated on `provenance.gate_report` when the endpoint
+    ran a HAI-DEF preflight (either successfully or hit a gate). Callers on
+    placeholder / pure-proxy paths pass None and it stays None on the wire.
+    """
     return {
         "disclaimer": RUO_DISCLAIMER,
         "caveat": AUROC_CAVEAT,
@@ -67,6 +95,7 @@ def _envelope(request_id: str, model_state: ModelState = ModelState.PLACEHOLDER,
             model_state=model_state,
             model_name=model_name,
             request_id=request_id,
+            gate_report=gate_report,
         ),
         "honesty_gate": HonestyGateReport(
             seen_urls_count=0, evidence_kept=0, evidence_dropped=0,
@@ -307,7 +336,9 @@ def create_app() -> FastAPI:
         backend_state: ModelState = ModelState.PLACEHOLDER
         backend_name: str | None = None
         backend_warnings: list[str] = []
-        gate_report_dict: dict[str, Any] | None = None
+        # runtime_gate_report is the hai_def.GateReport dataclass; converted
+        # to schema.GateReport for the wire at envelope time.
+        runtime_gate_report: Any = None
 
         if _is_env_true("ONCOLOGY_ARBITER_ENABLE_MEDSIGLIP"):
             try:
@@ -316,30 +347,28 @@ def create_app() -> FastAPI:
                 backend_name = backend_result.model_repo
                 backend_warnings = list(backend_result.warnings)
                 if backend_result.gate_report is not None:
-                    gr = backend_result.gate_report
-                    gate_report_dict = {
-                        "repo_id": gr.repo_id,
-                        "access_level": gr.access_level.value,
-                        "status_code": gr.status_code,
-                        "reason": gr.reason,
-                        "has_token": gr.has_token,
-                    }
+                    runtime_gate_report = backend_result.gate_report
             except Exception as e:
                 # HAI-DEF gate denial or model load failure. Import lazily
                 # so the module-level `import` doesn't force transformers.
-                from oncology_arbiter.models.hai_def import GatedAccessError
+                from oncology_arbiter.models.hai_def import GatedAccessError, GateReport as _RGR
                 if isinstance(e, GatedAccessError):
                     backend_state = ModelState.GATED
                     backend_name = e.repo_id
                     backend_warnings = [
                         f"medsiglip_gated:{e.access_level.value}:{e.reason}"
                     ]
-                    gate_report_dict = {
-                        "repo_id": e.repo_id,
-                        "access_level": e.access_level.value,
-                        "status_code": e.status_code,
-                        "reason": e.reason,
-                    }
+                    # Build a runtime GateReport from the exception. has_token
+                    # is not carried on the exception, so we discover it once
+                    # here — the same source of truth used by check_hai_def_access.
+                    from oncology_arbiter.models.hai_def import _discover_hf_token
+                    runtime_gate_report = _RGR(
+                        repo_id=e.repo_id,
+                        access_level=e.access_level,
+                        status_code=e.status_code,
+                        reason=e.reason,
+                        has_token=_discover_hf_token() is not None,
+                    )
                 else:
                     backend_state = ModelState.UNAVAILABLE
                     backend_warnings = [f"medsiglip_load_error:{type(e).__name__}: {e}"]
@@ -444,16 +473,29 @@ def create_app() -> FastAPI:
                       extra={"arbiter_error": str(e)[:200]})
             arbiter_block = None
 
-        env = _envelope(request_id, model_state=backend_state, model_name=backend_name)
-        # Attach the gate report (if any) onto the provenance dict via a
-        # side-channel — Provenance itself doesn't have a gate_report field
-        # (schema-level addition is a v2 change), so we append it to the
-        # audit log and to the response `warnings` chain.
-        if gate_report_dict is not None:
+        # Attach the structured gate_report onto Provenance. When populated,
+        # `provenance.gate_report` carries repo_id + access_level +
+        # status_code + reason + has_token — enough for a downstream UI or
+        # audit log to explain WHY the endpoint returned GATED / LOADED /
+        # UNAVAILABLE without having to string-parse the warnings.
+        schema_gate_report = _to_schema_gate_report(runtime_gate_report)
+        env = _envelope(
+            request_id,
+            model_state=backend_state,
+            model_name=backend_name,
+            gate_report=schema_gate_report,
+        )
+        if runtime_gate_report is not None:
             log_event(request_id, "/v1/screening/analyze",
                       model_state=backend_state.value,
                       patient_id_hash=req.patient_id_hash,
-                      extra={"gate_report": gate_report_dict})
+                      extra={"gate_report": {
+                          "repo_id": runtime_gate_report.repo_id,
+                          "access_level": runtime_gate_report.access_level.value,
+                          "status_code": runtime_gate_report.status_code,
+                          "reason": runtime_gate_report.reason,
+                          "has_token": runtime_gate_report.has_token,
+                      }})
 
         response = ScreeningResponse(
             **env,
