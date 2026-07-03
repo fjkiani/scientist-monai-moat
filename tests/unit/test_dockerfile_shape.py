@@ -241,3 +241,61 @@ def test_healthcheck_endpoint_exists_in_app():
         f"/health must exist in the FastAPI app for the Dockerfile HEALTHCHECK "
         f"to be meaningful. Existing paths: {sorted(paths)[:10]}..."
     )
+
+
+# --------------------------------------------------------------------------- #
+# Path-resolution contract (added after live-deploy gap: /v1/model-cards
+# returned [] and /ui/ was 404 because the arbiter package was imported
+# from /opt/oa/lib/python3.11/site-packages/ where parents[3] jumps
+# outside the repo tree, so docs/ and static/dist/ were unreachable).
+
+def test_runtime_ships_source_tree_to_app_src():
+    """
+    Runtime stage must COPY src/ to /app/src. Combined with
+    PYTHONPATH=/app/src:..., this makes
+    Path(__file__).resolve().parents[3] resolve to /app inside the container,
+    so _PROJECT_ROOT / 'docs' / 'model_cards' finds real files.
+    """
+    text = _dockerfile_text()
+    pattern = re.compile(
+        r"^COPY\s+(?:--chown=[^\s]+\s+)?src\s+/app/src\b",
+        re.MULTILINE,
+    )
+    assert pattern.search(text), (
+        "Dockerfile must COPY src/ to /app/src (needed so parents[3] from "
+        "api/app.py resolves to /app inside the container)"
+    )
+
+
+def test_runtime_ships_docs_to_app_docs():
+    """
+    Runtime stage must COPY docs/ to /app/docs so /v1/model-cards and
+    /v1/artifacts/docs/* have data to return.
+    """
+    text = _dockerfile_text()
+    pattern = re.compile(
+        r"^COPY\s+(?:--chown=[^\s]+\s+)?docs\s+/app/docs\b",
+        re.MULTILINE,
+    )
+    assert pattern.search(text), (
+        "Dockerfile must COPY docs/ to /app/docs — /v1/model-cards is empty "
+        "otherwise because _PROJECT_ROOT / 'docs' / 'model_cards' misses."
+    )
+
+
+def test_pythonpath_prefers_app_src():
+    """
+    PYTHONPATH must place /app/src FIRST. Otherwise `import oncology_arbiter`
+    resolves from the pip-installed copy under /opt/oa/lib/... and
+    parents[3] jumps outside the repo tree — breaking /v1/model-cards + /ui.
+    """
+    text = _dockerfile_text()
+    matches = re.findall(r"""PYTHONPATH\s*=\s*"?([^"\n]+)"?""", text)
+    assert matches, "Dockerfile must set PYTHONPATH"
+    for value in matches:
+        parts = [p.strip() for p in value.split(":") if p.strip()]
+        assert parts, f"PYTHONPATH is empty: {value!r}"
+        assert parts[0] == "/app/src", (
+            f"PYTHONPATH must start with /app/src (got {parts[0]!r}). "
+            f"Full value: {value!r}"
+        )
