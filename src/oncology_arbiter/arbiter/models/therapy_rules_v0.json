@@ -1,0 +1,68 @@
+{
+  "model_id": "nccn-lite-v0",
+  "version": "0.0.1",
+  "source_document": "NCCN Guidelines Version 2.2025 — Invasive Breast Cancer / DCIS",
+  "source_document_url": "https://www.nccn.org/professionals/physician_gls/pdf/breast.pdf",
+  "authoring_date": "2026-07-03",
+  "type": "deterministic_rules_lookup",
+  "n_training": null,
+  "n_training_synthetic": null,
+  "trained_on_real_patient_data": false,
+  "rule_branches": [
+    {
+      "branch_id": "dcis",
+      "trigger": "subtype == 'DCIS'",
+      "nccn_section": "DCIS-1 / DCIS-2 / DCIS-3",
+      "recommended": [
+        "Lumpectomy + whole-breast radiation (surgery+radiation)",
+        "Endocrine therapy (tamoxifen, 5y) if ER+"
+      ],
+      "not_recommended": ["Systemic chemotherapy"]
+    },
+    {
+      "branch_id": "metastatic",
+      "trigger": "stage contains 'M1'",
+      "nccn_section": "BINV-Q / BINV-R / BINV-P",
+      "recommended": [
+        "Biomarker-directed systemic therapy",
+        "Palliative care consultation",
+        "Trastuzumab + pertuzumab + taxane (if HER2+)",
+        "CDK4/6 inhibitor + AI (if HR+/HER2-)"
+      ]
+    },
+    {
+      "branch_id": "her2_positive",
+      "trigger": "receptor_status.HER2 == true && stage not M1",
+      "nccn_section": "BINV-J / BINV-K / BINV-L",
+      "recommended": [
+        "Trastuzumab (± pertuzumab)",
+        "Neoadjuvant TCHP (taxane + carboplatin + trastuzumab + pertuzumab)",
+        "Endocrine therapy if HR+ (sequenced after chemotherapy)"
+      ]
+    },
+    {
+      "branch_id": "triple_negative",
+      "trigger": "ER=false && PR=false && HER2=false && stage not M1",
+      "nccn_section": "BINV-M / BINV-J",
+      "recommended": [
+        "Neoadjuvant chemotherapy (AC-T ± pembrolizumab)",
+        "Consider platinum-based chemotherapy"
+      ],
+      "not_recommended": ["Endocrine therapy"]
+    },
+    {
+      "branch_id": "hr_positive_her2_negative",
+      "trigger": "(ER || PR) && HER2=false && stage not M1",
+      "nccn_section": "BINV-J / BINV-N",
+      "recommended": [
+        "Aromatase inhibitor (letrozole/anastrozole, 5y) if postmenopausal",
+        "Tamoxifen (5-10y) if premenopausal",
+        "Consider adjuvant chemotherapy per Oncotype DX / MammaPrint if grade≥3 or ≥T2"
+      ]
+    }
+  ],
+  "honesty": {
+    "note": "This is a LITE rules engine, not a full NCCN parser. It does NOT reason about individual comorbidities, drug interactions, prior therapy history, tumor board consensus, or trial enrollment. It MUST NOT be used for treatment decisions. Real clinical use requires a certified breast oncologist and a full guideline consultation. RESEARCH USE ONLY.",
+    "warning_key": "therapy_rules_proxy_warning"
+  }
+}

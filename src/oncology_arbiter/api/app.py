@@ -450,25 +450,85 @@ def create_app() -> FastAPI:
 
     @app.post("/v1/biopsy/analyze", response_model=BiopsyResponse)
     def biopsy_analyze(req: BiopsyRequest) -> BiopsyResponse:
+        """L4b: MedSigLIP-448 embed → synthetic 3-class linear probe.
+
+        Opt-in via ``ONCOLOGY_ARBITER_ENABLE_BIOPSY_MEDSIGLIP=1``.
+
+        Contract:
+        * NO WSI parser (no OpenSlide) — treats ``wsi_bytes_b64`` / ``wsi_url``
+          as an image the MedSigLIP vision encoder can consume. This is a
+          research proxy for a real WSI patcher.
+        * Preflight HAI-DEF gate first; on FORBIDDEN/UNAUTHENTICATED emits
+          ``ModelState.GATED`` with a ``biopsy_medsiglip_gated:<level>``
+          warning — NEVER silently fabricates a subtype.
+        * Weights are synthetic (n_training=48 synthetic=True) → the
+          response's ``warnings`` list surfaces this on every call.
+        """
         request_id = new_request_id()
         if not req.wsi_url and not req.wsi_bytes_b64 and not req.report_text:
             raise HTTPException(400, "must provide wsi_url, wsi_bytes_b64, or report_text")
+
+        model_state = ModelState.PLACEHOLDER
+        model_name: str | None = None
+        subtype_prediction: str | None = None
+        confidence: float | None = None
+        warnings: list[str] = []
+
+        if _is_env_true("ONCOLOGY_ARBITER_ENABLE_BIOPSY_MEDSIGLIP"):
+            if not (req.wsi_url or req.wsi_bytes_b64):
+                warnings.append(
+                    "biopsy_medsiglip_skipped:report_text_only:no_image_provided"
+                )
+            else:
+                try:
+                    from oncology_arbiter.models.biopsy_medsiglip_probe import (
+                        BiopsyMedSigLipProbe,
+                    )
+                    from oncology_arbiter.models.hai_def import GatedAccessError
+
+                    probe = BiopsyMedSigLipProbe()
+                    image_bytes = _decode_bytes_arg(req.wsi_bytes_b64)
+                    image_url = str(req.wsi_url) if req.wsi_url else None
+                    result = probe.run(
+                        image_bytes=image_bytes,
+                        image_url=image_url,
+                    )
+                    subtype_prediction = result.subtype
+                    confidence = float(result.subtype_probs[result.subtype])
+                    model_state = ModelState.LOADED_BIOPSY_PROBE
+                    model_name = "google/medsiglip-448+biopsy_probe_v0"
+                    warnings.extend(result.warnings)
+                except GatedAccessError as gate_err:
+                    model_state = ModelState.GATED
+                    model_name = gate_err.repo_id
+                    warnings.append(
+                        f"biopsy_medsiglip_gated:{gate_err.access_level.value}:{gate_err.reason}"
+                    )
+                except Exception as e:  # noqa: BLE001 — surface, never hide
+                    warnings.append(f"biopsy_medsiglip_error:{type(e).__name__}:{e}")
+
         log_event(request_id, "/v1/biopsy/analyze",
-                  model_state="placeholder",
+                  model_state=model_state.value,
                   patient_id_hash=req.patient_id_hash,
                   extra={"has_wsi": bool(req.wsi_url or req.wsi_bytes_b64),
-                         "has_report": bool(req.report_text)})
+                         "has_report": bool(req.report_text),
+                         "subtype": subtype_prediction,
+                         "n_warnings": len(warnings)})
+
         arbiter_block: ArbiterScore | None = None
         try:
             arbiter_block = _score_arbiter("biopsy", features={})
         except Exception:
             arbiter_block = None
+
+        env = _envelope(request_id, model_state=model_state, model_name=model_name)
+        env["warnings"] = warnings
         return BiopsyResponse(
-            **_envelope(request_id),
-            subtype_prediction=None,
+            **env,
+            subtype_prediction=subtype_prediction,
             receptor_panel=BiopsyReceptorPanel(),
             grade=None,
-            confidence=None,
+            confidence=confidence,
             arbiter_score=arbiter_block,
         )
 
@@ -477,20 +537,142 @@ def create_app() -> FastAPI:
 
     @app.post("/v1/therapy/reason", response_model=TherapyResponse)
     def therapy_reason(req: TherapyRequest) -> TherapyResponse:
+        """L4c: TxGemma-preferred, NCCN-lite rules fallback.
+
+        Precedence (matches screening's MedSigLIP → SigLIP proxy pattern):
+
+        1. If ``ONCOLOGY_ARBITER_ENABLE_THERAPY_TXGEMMA=1``: try TxGemma.
+           * On ALLOWED preflight (never reached under current token):
+             ``ModelState.LOADED_TXGEMMA``.
+           * On FORBIDDEN/UNAUTHENTICATED: emit ``txgemma_gated:<level>``
+             warning and FALL THROUGH to (2) only if the rules-lite proxy
+             is enabled.
+        2. If ``ONCOLOGY_ARBITER_ENABLE_THERAPY_RULES_PROXY=1``: run
+           deterministic NCCN-lite rules. ``ModelState.PROXY_RULES_LITE``.
+        3. Otherwise: placeholder (recommended_options=[]).
+        """
         request_id = new_request_id()
+
+        model_state = ModelState.PLACEHOLDER
+        model_name: str | None = None
+        recommended: list[TherapyOption] = []
+        not_recommended: list[TherapyOption] = []
+        warnings: list[str] = []
+
+        # Extract features for rules engine from biopsy_output + patient_context
+        biopsy = req.biopsy_output
+        subtype: str | None = biopsy.subtype_prediction if biopsy else None
+        er = bool(biopsy.receptor_panel.er_positive) if biopsy else False
+        pr = bool(biopsy.receptor_panel.pr_positive) if biopsy else False
+        her2_status = biopsy.receptor_panel.her2_status if biopsy else None
+        her2 = her2_status == "positive"
+        grade = biopsy.grade if biopsy and biopsy.grade else 2
+        # Stage isn't in BiopsyResponse today; use a conservative default and
+        # let the frontend pass stage via patient_context.genomic_markers.
+        pc = req.patient_context
+        stage = str(pc.genomic_markers.get("stage", "T1N0M0")) if pc.genomic_markers else "T1N0M0"
+        menopausal_map = {"pre": "premenopausal", "post": "postmenopausal",
+                          "peri": "premenopausal", "unknown": None, None: None}
+        menopausal_status = menopausal_map.get(pc.menopausal_status)
+
+        # ── (1) TxGemma path ──
+        txgemma_tried = False
+        if _is_env_true("ONCOLOGY_ARBITER_ENABLE_THERAPY_TXGEMMA"):
+            txgemma_tried = True
+            try:
+                from oncology_arbiter.models.txgemma_client import TxGemmaClient
+                from oncology_arbiter.models.hai_def import GatedAccessError
+
+                tx = TxGemmaClient()
+                tx_result = tx.recommend_therapy(
+                    receptor_status={"ER": er, "PR": pr, "HER2": her2},
+                    grade=grade,
+                    stage=stage,
+                    age=pc.age,
+                    menopausal_status=menopausal_status,
+                    subtype=subtype,
+                )
+                recommended = [
+                    TherapyOption(regimen=r, line_of_therapy=1, rationale="TxGemma")
+                    for r in tx_result.recommendations
+                ]
+                warnings.extend(tx_result.warnings)
+                model_state = ModelState.LOADED_TXGEMMA
+                model_name = tx.repo_id
+            except GatedAccessError as gate_err:
+                warnings.append(
+                    f"txgemma_gated:{gate_err.access_level.value}:{gate_err.reason}"
+                )
+
+        # ── (2) NCCN-lite rules fallback ──
+        if model_state == ModelState.PLACEHOLDER and _is_env_true(
+            "ONCOLOGY_ARBITER_ENABLE_THERAPY_RULES_PROXY"
+        ):
+            try:
+                from oncology_arbiter.models.therapy_rules_lite import (
+                    apply_nccn_lite_rules,
+                )
+                rules_result = apply_nccn_lite_rules(
+                    receptor_status={"ER": er, "PR": pr, "HER2": her2},
+                    grade=grade,
+                    stage=stage,
+                    age=pc.age,
+                    menopausal_status=menopausal_status,
+                    subtype=subtype,
+                )
+                recommended = [
+                    TherapyOption(
+                        regimen=o.name,
+                        line_of_therapy=1,
+                        rationale=o.rationale,
+                        evidence=[EvidenceRecord(
+                            url=o.citation_url,
+                            quoted_text=f"NCCN {o.nccn_section}",
+                            source="nccn-guidelines",
+                        )],
+                    )
+                    for o in rules_result.recommended_options
+                ]
+                not_recommended = [
+                    TherapyOption(
+                        regimen=o.name,
+                        line_of_therapy=1,
+                        rationale=o.rationale,
+                        evidence=[EvidenceRecord(
+                            url=o.citation_url,
+                            quoted_text=f"NCCN {o.nccn_section}",
+                            source="nccn-guidelines",
+                        )],
+                    )
+                    for o in rules_result.not_recommended
+                ]
+                warnings.extend(rules_result.warnings)
+                model_state = ModelState.PROXY_RULES_LITE
+                model_name = "nccn-lite-v0"
+            except Exception as e:  # noqa: BLE001
+                warnings.append(f"therapy_rules_lite_error:{type(e).__name__}:{e}")
+
         log_event(request_id, "/v1/therapy/reason",
-                  model_state="placeholder",
+                  model_state=model_state.value,
                   patient_id_hash=None,
-                  extra={"has_biopsy_input": req.biopsy_output is not None})
+                  extra={"has_biopsy_input": biopsy is not None,
+                         "txgemma_tried": txgemma_tried,
+                         "n_recommended": len(recommended),
+                         "n_not_recommended": len(not_recommended),
+                         "n_warnings": len(warnings)})
+
         arbiter_block: ArbiterScore | None = None
         try:
             arbiter_block = _score_arbiter("therapy", features={})
         except Exception:
             arbiter_block = None
+
+        env = _envelope(request_id, model_state=model_state, model_name=model_name)
+        env["warnings"] = warnings
         return TherapyResponse(
-            **_envelope(request_id),
-            recommended_options=[],
-            not_recommended=[],
+            **env,
+            recommended_options=recommended,
+            not_recommended=not_recommended,
             arbiter_score=arbiter_block,
         )
 
