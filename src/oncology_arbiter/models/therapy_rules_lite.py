@@ -24,10 +24,12 @@ RESEARCH USE ONLY — see :data:`oncology_arbiter.RUO_DISCLAIMER`.
 """
 from __future__ import annotations
 
+import hashlib
 import json
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, Optional
+from typing import Any, Dict, Iterable, List, Mapping, Optional
 
 from oncology_arbiter import AUROC_CAVEAT, RUO_DISCLAIMER
 
@@ -80,6 +82,10 @@ class TherapyRulesResult:
     warnings: List[str] = field(default_factory=list)
     caveat: str = AUROC_CAVEAT
     disclaimer: str = RUO_DISCLAIMER
+    # NEW in v0.2: pin the exact rules file the engine served from.
+    rules_sha256: Optional[str] = None
+    rules_model_id: Optional[str] = None
+    branch_id: Optional[str] = None
 
 
 # --------------------------------------------------------------------------- #
@@ -87,18 +93,151 @@ class TherapyRulesResult:
 # --------------------------------------------------------------------------- #
 
 
+# --- ruleset load + fingerprint ---------------------------------------- #
+
+_EXPECTED_RULES_MODEL_ID = "nccn-lite-v0"
+_EXPECTED_RULES_URL = "https://www.nccn.org/professionals/physician_gls/pdf/breast.pdf"
+_REQUIRED_BRANCH_FIELDS = ("branch_id", "nccn_section", "recommended")
+_COVERED_BRANCH_IDS = frozenset(
+    {"dcis", "metastatic", "her2_positive", "triple_negative", "hr_positive_her2_negative"}
+)
+_STAGE_RE = re.compile(r"^(T[0-4][a-c]?N[0-3][a-c]?M[01])$|.*M1.*")
+
+
+class RulesetIntegrityError(RuntimeError):
+    """Raised when the on-disk rules file drifts from what the code encodes."""
+
+
 def _load_rules(path: Path = _RULES_PATH) -> dict:
+    """Read + validate the NCCN-lite rules JSON.
+
+    Guardrails (fail loudly, never silently):
+      * File must exist.
+      * `model_id` must match ``nccn-lite-v0``.
+      * `source_document_url` must be the pinned NCCN URL.
+      * Every rule branch must have `branch_id`, `nccn_section`, non-empty `recommended`.
+      * Every `branch_id` in the JSON must be in `_COVERED_BRANCH_IDS`.
+    """
     if not path.exists():
         raise FileNotFoundError(
             f"NCCN-lite rules file not found at {path} — did the "
             "arbiter/models/therapy_rules_v0.json ship?"
         )
-    return json.loads(path.read_text())
+    raw = path.read_text()
+    data = json.loads(raw)
+    if data.get("model_id") != _EXPECTED_RULES_MODEL_ID:
+        raise RulesetIntegrityError(
+            f"model_id in {path.name} = {data.get('model_id')!r}, "
+            f"expected {_EXPECTED_RULES_MODEL_ID!r}"
+        )
+    if data.get("source_document_url") != _EXPECTED_RULES_URL:
+        raise RulesetIntegrityError(
+            f"source_document_url in {path.name} = "
+            f"{data.get('source_document_url')!r}, expected {_EXPECTED_RULES_URL!r}"
+        )
+    branches = data.get("rule_branches") or []
+    if not isinstance(branches, list) or not branches:
+        raise RulesetIntegrityError(
+            f"rule_branches missing or empty in {path.name}"
+        )
+    seen_ids: set = set()
+    for i, b in enumerate(branches):
+        for k in _REQUIRED_BRANCH_FIELDS:
+            if k not in b:
+                raise RulesetIntegrityError(
+                    f"branch #{i} in {path.name} missing required field {k!r}"
+                )
+        if not b["recommended"]:
+            raise RulesetIntegrityError(
+                f"branch {b['branch_id']!r} has empty recommended list"
+            )
+        if b["branch_id"] in seen_ids:
+            raise RulesetIntegrityError(
+                f"duplicate branch_id {b['branch_id']!r} in {path.name}"
+            )
+        seen_ids.add(b["branch_id"])
+    unknown = seen_ids - _COVERED_BRANCH_IDS
+    if unknown:
+        raise RulesetIntegrityError(
+            f"branch_ids in {path.name} that the code does not cover: "
+            f"{sorted(unknown)}. Update _COVERED_BRANCH_IDS + wire the code."
+        )
+    return data
+
+
+def rules_sha256_hex(path: Path = _RULES_PATH) -> str:
+    """Return the SHA-256 hex digest of the on-disk rules file."""
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+# Cached at import so every recommendation carries the SAME fingerprint.
+try:
+    _CACHED_RULES = _load_rules()
+    _CACHED_SHA256 = rules_sha256_hex()
+except Exception as _e:  # pragma: no cover - surfaced by tests
+    _CACHED_RULES = None  # type: ignore[assignment]
+    _CACHED_SHA256 = None  # type: ignore[assignment]
+    _CACHED_LOAD_ERROR: Optional[BaseException] = _e
+else:
+    _CACHED_LOAD_ERROR = None
 
 
 # --------------------------------------------------------------------------- #
 # Public API
 # --------------------------------------------------------------------------- #
+
+
+class InvalidInputError(ValueError):
+    """Raised when strict=True input validation rejects a call."""
+
+
+def _validate_receptor_status(rs: Mapping[str, bool]) -> None:
+    if not isinstance(rs, Mapping):
+        raise InvalidInputError(
+            f"receptor_status must be a mapping, got {type(rs).__name__}"
+        )
+    for k in ("ER", "PR", "HER2"):
+        if k not in rs:
+            raise InvalidInputError(
+                f"receptor_status missing required key {k!r}; got keys={sorted(rs.keys())}"
+            )
+        if not isinstance(rs[k], bool):
+            raise InvalidInputError(
+                f"receptor_status[{k!r}] must be bool, got {type(rs[k]).__name__}"
+            )
+
+
+def _validate_grade(grade: int) -> None:
+    if not isinstance(grade, int) or isinstance(grade, bool):
+        raise InvalidInputError(
+            f"grade must be int in [1, 3], got {grade!r} (type {type(grade).__name__})"
+        )
+    if grade < 1 or grade > 3:
+        raise InvalidInputError(
+            f"grade must be in [1, 3], got {grade}"
+        )
+
+
+def _validate_stage(stage: str) -> None:
+    if not isinstance(stage, str) or not stage:
+        raise InvalidInputError(
+            f"stage must be non-empty str, got {stage!r}"
+        )
+    if not _STAGE_RE.match(stage):
+        raise InvalidInputError(
+            f"stage {stage!r} does not match TNM pattern or contain M1. "
+            "Expected e.g. 'T1N0M0', 'T2N1M0', 'M1'."
+        )
+
+
+def _validate_menopausal_status(status: Optional[str]) -> None:
+    if status is None:
+        return
+    if status not in {"premenopausal", "postmenopausal", "unknown"}:
+        raise InvalidInputError(
+            f"menopausal_status must be one of "
+            f"{{'premenopausal','postmenopausal','unknown', None}}, got {status!r}"
+        )
 
 
 def apply_nccn_lite_rules(
@@ -108,6 +247,7 @@ def apply_nccn_lite_rules(
     age: int | None = None,
     menopausal_status: str | None = None,
     subtype: str | None = None,
+    strict: bool = False,
 ) -> TherapyRulesResult:
     """Return a deterministic NCCN-lite recommendation.
 
@@ -126,6 +266,15 @@ def apply_nccn_lite_rules(
     subtype
         Biopsy L4b output (e.g. "IDC", "DCIS"). If DCIS, we skip systemic.
     """
+    if _CACHED_LOAD_ERROR is not None:
+        raise _CACHED_LOAD_ERROR  # type: ignore[misc]
+
+    if strict:
+        _validate_receptor_status(receptor_status)
+        _validate_grade(grade)
+        _validate_stage(stage)
+        _validate_menopausal_status(menopausal_status)
+
     input_features = {
         "receptor_status": dict(receptor_status),
         "grade": int(grade),
@@ -143,6 +292,21 @@ def apply_nccn_lite_rules(
     recommended: List[TherapyOption] = []
     not_recommended: List[TherapyOption] = []
     warnings: List[str] = [THERAPY_RULES_PROXY_WARNING]
+
+    def _mk(branch_id: str,
+            recommended: List[TherapyOption],
+            not_recommended: List[TherapyOption],
+            warnings: List[str]) -> TherapyRulesResult:
+        return TherapyRulesResult(
+            recommended_options=recommended,
+            not_recommended=not_recommended,
+            input_features=input_features,
+            warnings=warnings,
+            rules_sha256=_CACHED_SHA256,
+            rules_model_id=(_CACHED_RULES or {}).get("model_id"),
+            branch_id=branch_id,
+        )
+
 
     # ── DCIS branch ────────────────────────────────────────────────────
     if subtype == "DCIS":
@@ -168,12 +332,7 @@ def apply_nccn_lite_rules(
             rationale="DCIS is a non-invasive lesion — no systemic chemotherapy indicated (NCCN DCIS-1)",
             nccn_section="DCIS-1",
         ))
-        return TherapyRulesResult(
-            recommended_options=recommended,
-            not_recommended=not_recommended,
-            input_features=input_features,
-            warnings=warnings,
-        )
+        return _mk("dcis", recommended, not_recommended, warnings)
 
     # ── Metastatic branch ─────────────────────────────────────────────
     if stage.startswith("M1") or "M1" in stage:
@@ -207,12 +366,7 @@ def apply_nccn_lite_rules(
                 rationale="HR+/HER2- metastatic first-line: CDK4/6 inhibitor + aromatase inhibitor (NCCN BINV-P)",
                 nccn_section="BINV-P",
             ))
-        return TherapyRulesResult(
-            recommended_options=recommended,
-            not_recommended=not_recommended,
-            input_features=input_features,
-            warnings=warnings,
-        )
+        return _mk("metastatic", recommended, not_recommended, warnings)
 
     # ── HER2-positive branch ──────────────────────────────────────────
     if her2:
@@ -238,12 +392,7 @@ def apply_nccn_lite_rules(
                 rationale="HR+/HER2+: sequence endocrine therapy after chemotherapy (NCCN BINV-L)",
                 nccn_section="BINV-L",
             ))
-        return TherapyRulesResult(
-            recommended_options=recommended,
-            not_recommended=not_recommended,
-            input_features=input_features,
-            warnings=warnings,
-        )
+        return _mk("her2_positive", recommended, not_recommended, warnings)
 
     # ── Triple-negative branch ────────────────────────────────────────
     if not hormone_receptor_positive and not her2:
@@ -268,16 +417,36 @@ def apply_nccn_lite_rules(
             rationale="TNBC is ER-/PR-: endocrine therapy not indicated (NCCN BINV-J)",
             nccn_section="BINV-J",
         ))
-        return TherapyRulesResult(
-            recommended_options=recommended,
-            not_recommended=not_recommended,
-            input_features=input_features,
-            warnings=warnings,
-        )
+        return _mk("triple_negative", recommended, not_recommended, warnings)
 
     # ── HR+/HER2- branch (default) ────────────────────────────────────
     # Endocrine therapy first-line, +/- chemotherapy by risk.
     if hormone_receptor_positive and not her2:
+        if menopausal_status == "unknown":
+            warnings.append(
+                "menopausal_status=unknown: cannot pick AI vs tamoxifen "
+                "deterministically. Emitting tamoxifen as the safer default "
+                "AND flagging that menopause status must be evaluated before "
+                "any therapy is offered."
+            )
+            recommended.append(TherapyOption(
+                name="Tamoxifen (5-10 years)",
+                category="endocrine",
+                citation_url=NCCN_URL,
+                rationale="HR+/HER2- with unknown menopause status: tamoxifen "
+                          "is the safer default across peri/post/pre states "
+                          "(NCCN BINV-J)",
+                nccn_section="BINV-J",
+            ))
+            recommended.append(TherapyOption(
+                name="Menopause status evaluation (LH/FSH panel)",
+                category="workup",
+                citation_url=NCCN_URL,
+                rationale="Menopause status is required to choose between AI "
+                          "and tamoxifen (NCCN BINV-J)",
+                nccn_section="BINV-J",
+            ))
+            return _mk("hr_positive_her2_negative", recommended, not_recommended, warnings)
         if menopausal_status == "postmenopausal":
             recommended.append(TherapyOption(
                 name="Aromatase inhibitor (letrozole/anastrozole, 5 years)",
@@ -302,24 +471,14 @@ def apply_nccn_lite_rules(
                 rationale="HR+/HER2- high-risk (grade 3 or ≥T2): consider genomic assay + chemo (NCCN BINV-N)",
                 nccn_section="BINV-N",
             ))
-        return TherapyRulesResult(
-            recommended_options=recommended,
-            not_recommended=not_recommended,
-            input_features=input_features,
-            warnings=warnings,
-        )
+        return _mk("hr_positive_her2_negative", recommended, not_recommended, warnings)
 
     # ── Fallthrough (should not reach): return empty with warning ────
     warnings.append(
         "therapy_rules_lite: input did not match any encoded branch; "
         "returning empty recommendations. Falling back to full NCCN consultation required."
     )
-    return TherapyRulesResult(
-        recommended_options=recommended,
-        not_recommended=not_recommended,
-        input_features=input_features,
-        warnings=warnings,
-    )
+    return _mk("fallthrough", recommended, not_recommended, warnings)
 
 
 __all__ = [
