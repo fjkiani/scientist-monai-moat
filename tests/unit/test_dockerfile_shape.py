@@ -333,3 +333,51 @@ def test_audit_dir_points_to_writable_path():
         f"AUDIT_DIR {path!r} is under /opt/oa which ships the immutable "
         "dep set; do not write user data there."
     )
+
+
+def test_saas_dependencies_in_pyproject():
+    """v0.2 SaaS hardening MUST bring in slowapi + prometheus-fastapi-instrumentator."""
+    pyproject = REPO_ROOT / "pyproject.toml"
+    content = pyproject.read_text()
+    assert "slowapi" in content, (
+        "pyproject.toml must declare slowapi so the rate-limit middleware "
+        "is available in the runtime image."
+    )
+    assert "prometheus-fastapi-instrumentator" in content, (
+        "pyproject.toml must declare prometheus-fastapi-instrumentator so "
+        "the /metrics endpoint is available in the runtime image."
+    )
+
+
+def test_saas_modules_ship_in_source_tree():
+    """The auth/ and observability/ packages must exist alongside api/."""
+    assert (REPO_ROOT / "src/oncology_arbiter/auth/__init__.py").is_file()
+    assert (REPO_ROOT / "src/oncology_arbiter/auth/api_key.py").is_file()
+    assert (REPO_ROOT / "src/oncology_arbiter/auth/middleware.py").is_file()
+    assert (REPO_ROOT / "src/oncology_arbiter/observability/__init__.py").is_file()
+    assert (REPO_ROOT / "src/oncology_arbiter/observability/request_id.py").is_file()
+    assert (REPO_ROOT / "src/oncology_arbiter/observability/logging_config.py").is_file()
+
+
+def test_auth_db_path_writable():
+    """Dockerfile ENV must point AUTH_DB_PATH at a writable location."""
+    content = (REPO_ROOT / "Dockerfile").read_text()
+    m = re.search(r"^\s*ONCOLOGY_ARBITER_AUTH_DB_PATH\s*=\s*(?P<path>/[^\s\\]+)", content, re.MULTILINE)
+    assert m, "Dockerfile must declare ONCOLOGY_ARBITER_AUTH_DB_PATH so tenants.sqlite has a writable home"
+    path = m.group("path")
+    assert not path.startswith("/app"), f"AUTH_DB_PATH {path!r} lands in root-owned /app; use /tmp or a volume"
+    assert not path.startswith("/opt/oa"), f"AUTH_DB_PATH {path!r} lands in the immutable dep dir /opt/oa"
+
+
+def test_auth_mode_default_is_off():
+    """Free-tier image must ship auth OFF so the /health probes work without a key.
+
+    Sites that want SaaS auth flip this to `on` via the platform's env-var
+    UI; that must NEVER be baked into the image."""
+    content = (REPO_ROOT / "Dockerfile").read_text()
+    m = re.search(r"^\s*ONCOLOGY_ARBITER_AUTH_MODE\s*=\s*(?P<mode>[a-z]+)", content, re.MULTILINE)
+    assert m, "Dockerfile must set ONCOLOGY_ARBITER_AUTH_MODE explicitly"
+    assert m.group("mode").lower() == "off", (
+        f"Image must ship with AUTH_MODE=off; got {m.group('mode')!r}. "
+        "Enable per-deployment via platform env var, not the Dockerfile."
+    )

@@ -188,9 +188,12 @@ def test_screening_writes_audit_log(client, audit_tmp):
     assert r.status_code == 200
     request_id = r.json()["provenance"]["request_id"]
 
-    # Ledger file should contain the request id
+    # Ledger file should contain the request id.
+    # As of v0.2 the audit ledger is partitioned per-tenant:
+    #   <AUDIT_DIR>/<tenant_id>/audit-YYYY-MM-DD.jsonl
+    # With auth off (default in tests) tenant_id is "_anon".
     import glob
-    logs = glob.glob(str(Path(audit_tmp) / "audit-*.jsonl"))
+    logs = glob.glob(str(Path(audit_tmp) / "*" / "audit-*.jsonl"))
     assert logs, "no audit log written"
     found = False
     for lp in logs:

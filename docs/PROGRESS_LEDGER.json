@@ -1,7 +1,7 @@
 {
   "$schema_version": "1.0.0",
-  "generated_at": "2026-07-03T20:13:10+00:00",
-  "git_sha": "5878cf424f182f99d1b26b7d7146e462924c0ba6",
+  "generated_at": "2026-07-04T10:29:02.958449+00:00",
+  "git_sha": "6a6427137d5ac941ccae5b2e8d9b08f703332f90",
   "project": {
     "name": "oncology-arbiter",
     "one_line_goal": "Open-architecture breast oncology reasoning platform spanning screening \u2192 biopsy \u2192 therapy, with calibrated per-stage arbiters, cited evidence, and honest performance disclosure.",
@@ -704,5 +704,23 @@
     "Hand-drafted math with caveat in a model card counts as LIVE (per user decision 2026-07-02) \u2014 the illustrative caveat lives in the model card and in `warnings`, not in the ledger tier.",
     "Stubs, placeholders, silent-failure fallbacks, and scaffolded-but-unconnected features are NOT_WIRED with an explicit `not_wired_reason`. They may still ship.",
     "Live-smoke numbers cited in this ledger (e.g. overall_score=7.976839697221294e-06) are bit-verified against the transcript.jsonl record before landing."
+  ],
+  "milestones": [
+    {
+      "id": "M-SAAS-HARDENING-v0.2",
+      "date": "2026-07-04",
+      "commit_planned_sha": "TBD",
+      "summary": "SaaS hardening landed on worker-1-hardening: API-key auth (SQLite tenants), CORS, slowapi rate-limit, /metrics (prometheus), X-Request-Id middleware, JSON structured logging, per-tenant audit ledger partitioning, and a `python -m oncology_arbiter.auth.cli` tenant CLI.",
+      "artifacts": [
+        "src/oncology_arbiter/auth/{api_key.py, middleware.py, cli.py}",
+        "src/oncology_arbiter/observability/{request_id.py, logging_config.py}",
+        "src/oncology_arbiter/api/app.py (middleware wired, 6 handlers Depends(require_api_key))",
+        "src/oncology_arbiter/api/audit.py (<AUDIT_DIR>/<tenant_id>/audit-YYYY-MM-DD.jsonl)",
+        "Dockerfile ENV: AUTH_DB_PATH, AUTH_MODE=off (image default)",
+        "tests/unit/test_saas_hardening.py (16 tests)",
+        "tests/unit/test_dockerfile_shape.py (26 tests, +4 SaaS shape)"
+      ],
+      "tests_state": "516 passed, 0 failed (was 323 at session start; +2 Dockerfile + 1 CLI + 15 core + transitive unlocks)"
+    }
   ]
 }

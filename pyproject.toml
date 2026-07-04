@@ -36,6 +36,9 @@ dependencies = [
   "pypdf>=4.3",              # PDF text extraction in web_fetch
   # science-skills SKILL.md frontmatter parsing
   "pyyaml>=6",
+  # SaaS observability + rate limiting
+  "slowapi>=0.1.9",
+  "prometheus-fastapi-instrumentator>=7.0",
 ]
 
 [project.optional-dependencies]

@@ -23,12 +23,18 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 
 from oncology_arbiter import AUROC_CAVEAT, RUO_DISCLAIMER, __version__
 
 from .audit import log_event, new_request_id
+from ..auth import APIKey, require_api_key
+from ..observability import (
+    RequestIdMiddleware,
+    configure_logging,
+    get_logger,
+)
 from .schemas import (
     ApiEnvelope,
     ArbiterScore,
@@ -255,6 +261,71 @@ def create_app() -> FastAPI:
         description=RUO_DISCLAIMER + "\n\n" + AUROC_CAVEAT,
     )
 
+    # ------------------------------------------------------------------- #
+    # SaaS middleware wiring
+    #
+    # Starlette applies the OUTERMOST middleware first on the inbound side;
+    # so we add them in reverse of "who should run first". We want the
+    # request-id middleware to run FIRST (so every downstream error carries
+    # a request id on its response header), which means it must be the LAST
+    # one added.
+
+    configure_logging(os.environ.get("ONCOLOGY_ARBITER_LOG_LEVEL", "INFO"))
+    _logger = get_logger()
+
+    # 1) Prometheus /metrics
+    try:
+        from prometheus_fastapi_instrumentator import Instrumentator
+
+        Instrumentator(
+            excluded_handlers=["/metrics"],
+            should_group_status_codes=False,
+        ).instrument(app).expose(app, endpoint="/metrics", include_in_schema=False)
+    except Exception as exc:  # pragma: no cover
+        _logger.warning("prometheus instrumentator disabled: %s", exc)
+
+    # 2) Rate limit
+    try:
+        from slowapi import Limiter
+        from slowapi.errors import RateLimitExceeded
+        from slowapi.middleware import SlowAPIMiddleware
+        from slowapi.util import get_remote_address
+
+        limiter = Limiter(
+            key_func=get_remote_address,
+            default_limits=[os.environ.get("ONCOLOGY_ARBITER_RATE_LIMIT", "60/minute")],
+        )
+        app.state.limiter = limiter
+        app.add_middleware(SlowAPIMiddleware)
+
+        @app.exception_handler(RateLimitExceeded)
+        def _rate_limit_handler(request, exc):  # type: ignore[no-untyped-def]
+            return JSONResponse(
+                status_code=429,
+                content={"detail": "rate limit exceeded", "limit": str(exc.detail)},
+                headers={"Retry-After": "60"},
+            )
+    except Exception as exc:  # pragma: no cover
+        _logger.warning("slowapi rate limiter disabled: %s", exc)
+
+    # 3) CORS
+    from fastapi.middleware.cors import CORSMiddleware
+
+    _allowed = os.environ.get("ONCOLOGY_ARBITER_ALLOWED_ORIGINS", "*")
+    _origins = [o.strip() for o in _allowed.split(",") if o.strip()]
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=_origins,
+        allow_credentials=False,
+        allow_methods=["GET", "POST", "OPTIONS"],
+        allow_headers=["Content-Type", "X-API-Key", "X-Request-Id"],
+        expose_headers=["X-Request-Id"],
+    )
+
+    # 4) Request-id (last add = first inbound)
+    app.add_middleware(RequestIdMiddleware)
+
+
     @app.get("/health", response_model=HealthResponse)
     def health() -> HealthResponse:
         return HealthResponse(
@@ -287,7 +358,10 @@ def create_app() -> FastAPI:
     # /v1/screening/analyze — REAL preprocessing, placeholder classifier
 
     @app.post("/v1/screening/analyze", response_model=ScreeningResponse)
-    def screening_analyze(req: ScreeningRequest) -> ScreeningResponse:
+    def screening_analyze(
+        req: ScreeningRequest,
+        tenant: APIKey = Depends(require_api_key),
+    ) -> ScreeningResponse:
         request_id = new_request_id()
 
         if not req.dicom_url and not req.dicom_bytes_b64:
@@ -302,7 +376,9 @@ def create_app() -> FastAPI:
             log_event(request_id, "/v1/screening/analyze",
                       model_state="placeholder",
                       patient_id_hash=req.patient_id_hash,
-                      extra={"reason": "url_ingestion_not_wired"})
+                      extra={"reason": "url_ingestion_not_wired"},
+                          tenant_id=tenant.tenant_id,
+                      )
             raise HTTPException(
                 501, "dicom_url ingestion not yet wired (Phase 2). "
                 "Send dicom_bytes_b64 for now.",
@@ -324,7 +400,9 @@ def create_app() -> FastAPI:
             log_event(request_id, "/v1/screening/analyze",
                       model_state="unavailable",
                       patient_id_hash=req.patient_id_hash,
-                      extra={"error": str(e)[:200]})
+                      extra={"error": str(e)[:200]},
+                          tenant_id=tenant.tenant_id,
+                      )
             raise HTTPException(422, f"preprocessing failed: {e}")
         finally:
             Path(tmp_path).unlink(missing_ok=True)
@@ -375,7 +453,9 @@ def create_app() -> FastAPI:
                     log_event(request_id, "/v1/screening/analyze",
                               model_state="unavailable",
                               patient_id_hash=req.patient_id_hash,
-                              extra={"medsiglip_error": str(e)[:200]})
+                              extra={"medsiglip_error": str(e)[:200]},
+                                  tenant_id=tenant.tenant_id,
+                              )
 
         # Proxy fallback is OPT-IN and only activates if MedSigLIP either
         # was disabled OR the request landed as GATED and the operator has
@@ -403,7 +483,9 @@ def create_app() -> FastAPI:
                 log_event(request_id, "/v1/screening/analyze",
                           model_state="unavailable",
                           patient_id_hash=req.patient_id_hash,
-                          extra={"proxy_error": str(e)[:200]})
+                          extra={"proxy_error": str(e)[:200]},
+                              tenant_id=tenant.tenant_id,
+                          )
 
         # Extract overall_score + findings from whichever backend ran.
         overall_score: float | None = None
@@ -470,7 +552,9 @@ def create_app() -> FastAPI:
             log_event(request_id, "/v1/screening/analyze",
                       model_state="unavailable",
                       patient_id_hash=req.patient_id_hash,
-                      extra={"arbiter_error": str(e)[:200]})
+                      extra={"arbiter_error": str(e)[:200]},
+                          tenant_id=tenant.tenant_id,
+                      )
             arbiter_block = None
 
         # Attach the structured gate_report onto Provenance. When populated,
@@ -495,7 +579,9 @@ def create_app() -> FastAPI:
                           "status_code": runtime_gate_report.status_code,
                           "reason": runtime_gate_report.reason,
                           "has_token": runtime_gate_report.has_token,
-                      }})
+                      }},
+                          tenant_id=tenant.tenant_id,
+                      )
 
         response = ScreeningResponse(
             **env,
@@ -519,14 +605,19 @@ def create_app() -> FastAPI:
                       "backend": backend_state.value,
                       "overall_score": overall_score,
                       "n_warnings": len(backend_warnings),
-                  })
+                  },
+                      tenant_id=tenant.tenant_id,
+                  )
         return response
 
     # ----------------------------------------------------------------------- #
     # /v1/biopsy/analyze — placeholder
 
     @app.post("/v1/biopsy/analyze", response_model=BiopsyResponse)
-    def biopsy_analyze(req: BiopsyRequest) -> BiopsyResponse:
+    def biopsy_analyze(
+        req: BiopsyRequest,
+        tenant: APIKey = Depends(require_api_key),
+    ) -> BiopsyResponse:
         """L4b: MedSigLIP-448 embed → synthetic 3-class linear probe.
 
         Opt-in via ``ONCOLOGY_ARBITER_ENABLE_BIOPSY_MEDSIGLIP=1``.
@@ -606,7 +697,9 @@ def create_app() -> FastAPI:
                   extra={"has_wsi": bool(req.wsi_url or req.wsi_bytes_b64),
                          "has_report": bool(req.report_text),
                          "subtype": subtype_prediction,
-                         "n_warnings": len(warnings)})
+                         "n_warnings": len(warnings)},
+                             tenant_id=tenant.tenant_id,
+                         )
 
         arbiter_block: ArbiterScore | None = None
         try:
@@ -635,7 +728,10 @@ def create_app() -> FastAPI:
     # /v1/therapy/reason — placeholder
 
     @app.post("/v1/therapy/reason", response_model=TherapyResponse)
-    def therapy_reason(req: TherapyRequest) -> TherapyResponse:
+    def therapy_reason(
+        req: TherapyRequest,
+        tenant: APIKey = Depends(require_api_key),
+    ) -> TherapyResponse:
         """L4c: TxGemma-preferred, NCCN-lite rules fallback.
 
         Precedence (matches screening's MedSigLIP → SigLIP proxy pattern):
@@ -771,7 +867,9 @@ def create_app() -> FastAPI:
                          "txgemma_tried": txgemma_tried,
                          "n_recommended": len(recommended),
                          "n_not_recommended": len(not_recommended),
-                         "n_warnings": len(warnings)})
+                         "n_warnings": len(warnings)},
+                             tenant_id=tenant.tenant_id,
+                         )
 
         arbiter_block: ArbiterScore | None = None
         try:
@@ -798,7 +896,9 @@ def create_app() -> FastAPI:
     # /v1/model-cards — index every model card shipped with the API
 
     @app.get("/v1/model-cards", response_model=ModelCardsIndex)
-    def list_model_cards() -> ModelCardsIndex:
+    def list_model_cards(
+        tenant: APIKey = Depends(require_api_key),
+    ) -> ModelCardsIndex:
         """PLAN.md §5.6: `Public model card + errata page` — served as JSON
         index so a client can enumerate what cards exist without a directory
         listing. Raw markdown is served by `/v1/artifacts/docs/{filename}`.
@@ -841,7 +941,11 @@ def create_app() -> FastAPI:
     # for the security model: category-whitelisted + relative_to() containment.
 
     @app.get("/v1/artifacts/{category}/{filename}")
-    def stream_artifact(category: str, filename: str):
+    def stream_artifact(
+        category: str,
+        filename: str,
+        tenant: APIKey = Depends(require_api_key),
+    ):
         try:
             cat = ArtifactCategory(category)
         except ValueError:
@@ -880,18 +984,22 @@ def create_app() -> FastAPI:
     # /v1/case/full — placeholder that chains sub-endpoints
 
     @app.post("/v1/case/full", response_model=FullCaseResponse)
-    def case_full(req: FullCaseRequest) -> FullCaseResponse:
+    def case_full(
+        req: FullCaseRequest,
+        tenant: APIKey = Depends(require_api_key),
+    ) -> FullCaseResponse:
         request_id = new_request_id()
         screening: ScreeningResponse | None = None
         biopsy: BiopsyResponse | None = None
         therapy: TherapyResponse | None = None
         # If sub-inputs are provided, run them through the placeholder subroutes.
         if req.screening_input:
-            screening = screening_analyze(req.screening_input)
+            screening = screening_analyze(req.screening_input, tenant=tenant)
         if req.biopsy_input:
-            biopsy = biopsy_analyze(req.biopsy_input)
+            biopsy = biopsy_analyze(req.biopsy_input, tenant=tenant)
         therapy = therapy_reason(
-            TherapyRequest(biopsy_output=biopsy, patient_context=req.therapy_context)
+            TherapyRequest(biopsy_output=biopsy, patient_context=req.therapy_context),
+            tenant=tenant,
         )
         # L5 Co-Scientist 4-phase loop (opt-in). When enabled, runs
         # generate → reflect → rank (Elo) → evolve → rank over the stage
@@ -939,7 +1047,9 @@ def create_app() -> FastAPI:
                       "has_screening": screening is not None,
                       "has_biopsy": biopsy is not None,
                       "elo_n_hypotheses": len(elo_ranked),
-                  })
+                  },
+                      tenant_id=tenant.tenant_id,
+                  )
         return FullCaseResponse(
             **_envelope(request_id),
             screening=screening,
