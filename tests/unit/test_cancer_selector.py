@@ -55,6 +55,7 @@ class TestHealthCancers:
                 "gated", "proxy_siglip", "loaded_medsiglip",
                 "loaded_biopsy_probe", "loaded_monai_detector",
                 "proxy_monai_heuristic", "proxy_rules_lite", "loaded_txgemma",
+                "proxy_lung_heuristic",
             }, f"{cancer}.state is not a recognized ModelState value"
             assert "endpoints" in cap, f"{cancer} missing endpoints"
             assert "case/full" in cap["endpoints"], (
@@ -62,12 +63,17 @@ class TestHealthCancers:
                 "surface the SPA cancer selector needs to render a working panel"
             )
 
-    def test_nsclc_flagged_as_placeholder(self, client):
+    def test_nsclc_flagged_at_least_as_proxy(self, client):
         j = client.get("/health").json()
-        assert j["cancers"]["nsclc"]["state"] == "placeholder"
+        # v0.2: the LIDC-IDRI + NCCN-lite pipeline is wired. /health may
+        # advertise it as proxy (rules + heuristic) or placeholder in older
+        # builds; both are acceptable, but never "loaded".
+        assert j["cancers"]["nsclc"]["state"] in {
+            "placeholder", "proxy_lung_heuristic"
+        }
         assert "notes" in j["cancers"]["nsclc"], (
-            "nsclc should carry an operator-visible 'notes' string until the "
-            "LIDC-IDRI pipeline lands"
+            "nsclc should carry an operator-visible 'notes' string that "
+            "describes what the current NSCLC track actually does"
         )
 
 
