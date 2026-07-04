@@ -42,6 +42,10 @@ from .schemas import (
     BiopsyReceptorPanel,
     BiopsyRequest,
     BiopsyResponse,
+    NsclcCTInput,
+    NsclcResponse,
+    NsclcCandidate,
+    NsclcTherapyOption,
     EvidenceRecord,
     FullCaseRequest,
     FullCaseResponse,
@@ -354,10 +358,16 @@ def create_app() -> FastAPI:
                     "endpoints": ["screening", "biopsy", "therapy", "case/full"],
                 },
                 "nsclc": {
-                    "state": ModelState.PLACEHOLDER.value,
-                    "case_full": False,
+                    "state": ModelState.PROXY_LUNG_HEURISTIC.value,
+                    "case_full": True,
                     "endpoints": ["case/full"],
-                    "notes": "Shape-only placeholder; LIDC-IDRI pipeline lands from worker-2.",
+                    "notes": (
+                        "LIDC-IDRI CT + HU-threshold heuristic + NCCN-lite rules. "
+                        "Real pipeline requires nsclc_ct_input.series_dir and "
+                        "ONCOLOGY_ARBITER_ALLOW_SERIES_DIR=1 on the server; "
+                        "otherwise the same endpoint returns a shape-only "
+                        "placeholder response with a warning."
+                    ),
                 },
             },
             models_loaded={
@@ -369,8 +379,8 @@ def create_app() -> FastAPI:
                 # but they carry n_training=0 → treated as placeholder at the
                 # health-check level per the PLAN.md honesty rules.
                 "l3_arbiter": ModelState.PLACEHOLDER,
-                # NSCLC track: still placeholder end-to-end.
-                "nsclc_pipeline": ModelState.PLACEHOLDER,
+                # NSCLC track: real heuristic + rules-lite, gated by env.
+                "nsclc_pipeline": ModelState.PROXY_LUNG_HEURISTIC,
             },
         )
 
@@ -1033,31 +1043,180 @@ def create_app() -> FastAPI:
 
         request_id = new_request_id()
 
-        # ------- NSCLC placeholder branch -------------------------------- #
-        # Shape-only: mirrors the FullCaseResponse envelope so the SPA can
-        # already render its NSCLC panel. Every sub-stage is None; the
-        # honesty gate is empty; provenance carries an nsclc-specific
-        # model_name so downstream consumers can tell where the shape came
-        # from. The real LIDC-IDRI pipeline lands from worker-2 and
-        # replaces this branch with the same call graph as breast.
+        # ------- NSCLC branch --------------------------------------------- #
+        # Two paths:
+        #   (1) placeholder / shape-only    (no series_dir OR feature-gate off)
+        #   (2) real lung heuristic + NCCN-lite rules
+        #       (nsclc_ct_input.series_dir set AND
+        #        ONCOLOGY_ARBITER_ALLOW_SERIES_DIR=1)
+        # The env gate prevents client-controlled filesystem paths from
+        # being trusted in shared / public deployments; local dev flips
+        # the gate on.
         if cancer_norm == "nsclc":
-            env = _envelope(request_id, model_name="nsclc_placeholder_v0")
+            ct_in = req.nsclc_ct_input
+            allow_series_dir = _is_env_true("ONCOLOGY_ARBITER_ALLOW_SERIES_DIR")
+
+            # ----- (1) shape-only placeholder --------------------------- #
+            if ct_in is None or not allow_series_dir:
+                env = _envelope(request_id, model_name="nsclc_placeholder_v0")
+                warnings = [
+                    "cancer=nsclc: placeholder shape only. Set "
+                    "nsclc_ct_input.series_dir AND "
+                    "ONCOLOGY_ARBITER_ALLOW_SERIES_DIR=1 for the real "
+                    "LIDC-IDRI CT pipeline + NCCN-NSCLC-lite rules.",
+                ]
+                if ct_in is not None and not allow_series_dir:
+                    warnings.append(
+                        "nsclc_ct_input was provided but "
+                        "ONCOLOGY_ARBITER_ALLOW_SERIES_DIR is not truthy on "
+                        "the server; ignoring series_dir for safety."
+                    )
+                log_event(request_id, "/v1/case/full",
+                          model_state="placeholder",
+                          patient_id_hash=None,
+                          extra={"cancer": "nsclc", "has_screening": False,
+                                 "has_biopsy": False, "elo_n_hypotheses": 0},
+                          tenant_id=tenant.tenant_id,
+                          )
+                return FullCaseResponse(
+                    **env,
+                    warnings=warnings,
+                    screening=None,
+                    biopsy=None,
+                    therapy=None,
+                    nsclc=NsclcResponse(
+                        model_state=ModelState.PLACEHOLDER,
+                        model_name="nsclc_placeholder_v0",
+                        warnings=warnings,
+                    ),
+                    elo_ranked_hypotheses=[],
+                )
+
+            # ----- (2) real pipeline ------------------------------------ #
+            import time
+            from oncology_arbiter.lung import (
+                read_ct_series,
+                run_lung_heuristic,
+                score_nsclc,
+                NsclcArbiterFeatures,
+            )
+            from oncology_arbiter.models.nccn_nsclc_rules import (
+                score_nsclc_therapy,
+                NSCLC_RULES_PROXY_WARNING,
+            )
+
+            series_dir = str(ct_in.series_dir)
+            t0 = time.perf_counter()
+            try:
+                ct = read_ct_series(series_dir)
+            except FileNotFoundError as exc:
+                raise HTTPException(400, f"series_dir not found: {exc}") from exc
+            except Exception as exc:
+                raise HTTPException(400, f"failed to read CT series: {exc}") from exc
+            t1 = time.perf_counter()
+            spacing_mm = (
+                float(ct.slice_thickness_mm),
+                float(ct.pixel_spacing_mm[0]),
+                float(ct.pixel_spacing_mm[1]),
+            )
+            heur = run_lung_heuristic(
+                ct.volume, spacing_mm=spacing_mm, top_n=int(ct_in.top_n)
+            )
+            t2 = time.perf_counter()
+            arb_feats = NsclcArbiterFeatures.from_lung_output(heur)
+            arb = score_nsclc(arb_feats)
+            therapy = score_nsclc_therapy(
+                risk_bucket=arb.risk_bucket,
+                driving_feature=arb.driving_feature,
+                max_diameter_mm=heur.max_diameter_mm,
+            )
+
+            model_name = "nsclc_lung_heuristic_v0+nccn_nsclc_lite_v0"
+            env = _envelope(
+                request_id,
+                model_state=ModelState.PROXY_LUNG_HEURISTIC,
+                model_name=model_name,
+            )
+            warnings = [
+                "cancer=nsclc: PROXY pipeline. Classical HU thresholding + "
+                "connected components (not a trained detector). Diameter "
+                "buckets follow Fleischner-lite anchors; therapy is "
+                "rules-only.",
+                NSCLC_RULES_PROXY_WARNING,
+            ]
             log_event(request_id, "/v1/case/full",
-                      model_state="placeholder",
+                      model_state="proxy",
                       patient_id_hash=None,
-                      extra={"cancer": "nsclc", "has_screening": False, "has_biopsy": False,
-                             "elo_n_hypotheses": 0},
+                      extra={
+                          "cancer": "nsclc",
+                          "series_dir": series_dir,
+                          "n_slices": int(ct.volume.shape[0]),
+                          "n_candidates_kept": heur.n_candidates_kept,
+                          "max_diameter_mm": float(heur.max_diameter_mm),
+                          "risk_bucket": arb.risk_bucket,
+                          "has_screening": False,
+                          "has_biopsy": False,
+                          "elo_n_hypotheses": 0,
+                      },
                       tenant_id=tenant.tenant_id,
                       )
             return FullCaseResponse(
                 **env,
-                warnings=[
-                    "cancer=nsclc: placeholder shape only. LIDC-IDRI CT "
-                    "pipeline + NCCN-NSCLC rules land from worker-2.",
-                ],
+                warnings=warnings,
                 screening=None,
                 biopsy=None,
                 therapy=None,
+                nsclc=NsclcResponse(
+                    model_state=ModelState.PROXY_LUNG_HEURISTIC,
+                    model_name=model_name,
+                    warnings=warnings,
+                    lung_voxel_fraction=float(heur.lung_voxel_fraction),
+                    n_candidates_total=int(heur.n_candidates_total),
+                    n_candidates_kept=int(heur.n_candidates_kept),
+                    max_diameter_mm=float(heur.max_diameter_mm),
+                    candidates=[
+                        NsclcCandidate(
+                            label=int(c.label),
+                            voxel_count=int(c.voxel_count),
+                            diameter_mm=float(c.diameter_mm),
+                            mean_hu=float(c.mean_hu),
+                            centroid_zyx_vox=(
+                                float(c.centroid_zyx_vox[0]),
+                                float(c.centroid_zyx_vox[1]),
+                                float(c.centroid_zyx_vox[2]),
+                            ),
+                        )
+                        for c in heur.candidates
+                    ],
+                    risk_score=float(arb.prob),
+                    risk_bucket=str(arb.risk_bucket),
+                    driving_feature=str(arb.driving_feature),
+                    logit=float(arb.logit),
+                    therapy_recommended=[
+                        NsclcTherapyOption(
+                            name=o.name,
+                            category=o.category,
+                            citation_url=o.citation_url,
+                            rationale=o.rationale,
+                            nccn_section=o.nccn_section,
+                        )
+                        for o in therapy.recommended_options
+                    ],
+                    therapy_not_recommended=[
+                        NsclcTherapyOption(
+                            name=o.name,
+                            category=o.category,
+                            citation_url=o.citation_url,
+                            rationale=o.rationale,
+                            nccn_section=o.nccn_section,
+                        )
+                        for o in therapy.not_recommended
+                    ],
+                    series_dir=series_dir,
+                    n_slices=int(ct.volume.shape[0]),
+                    read_seconds=float(t1 - t0),
+                    heuristic_seconds=float(t2 - t1),
+                ),
                 elo_ranked_hypotheses=[],
             )
 

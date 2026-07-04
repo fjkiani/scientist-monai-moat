@@ -68,9 +68,16 @@ def test_health_lists_all_endpoints(client):
     for path in ["POST /v1/screening/analyze", "POST /v1/biopsy/analyze",
                  "POST /v1/therapy/reason", "POST /v1/case/full"]:
         assert path in body["endpoints"], f"missing {path}"
-    # Every model_state is 'placeholder' pre-Phase-2
+    # v0.2: NSCLC ships a proxy heuristic; everything else is still placeholder.
     for m, state in body["models_loaded"].items():
-        assert state == "placeholder", f"{m} claims non-placeholder state pre-Phase-2"
+        if m == "nsclc_pipeline":
+            assert state in ("placeholder", "proxy_lung_heuristic"), (
+                f"{m} unexpected state {state}"
+            )
+        else:
+            assert state == "placeholder", (
+                f"{m} claims non-placeholder state pre-Phase-2"
+            )
 
 
 # --------------------------------------------------------------------------- #

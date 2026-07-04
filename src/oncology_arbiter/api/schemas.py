@@ -30,6 +30,7 @@ class ModelState(str, Enum):
     LOADED_BIOPSY_PROBE = "loaded_biopsy_probe"  # L4b MedSigLIP embed + synthetic linear probe (RUO, off-label)
     LOADED_MONAI_DETECTOR = "loaded_monai_detector"  # L4a MONAI detector with trained weights (unreachable until weights ship)
     PROXY_MONAI_HEURISTIC = "proxy_monai_heuristic"  # L4a MONAI mask-gradient heuristic when weights unavailable
+    PROXY_LUNG_HEURISTIC = "proxy_lung_heuristic"  # NSCLC HU-threshold + CC blobs (LIDC-IDRI) — not a trained detector
     PROXY_RULES_LITE = "proxy_rules_lite"  # L4c NCCN-lite rules fallback when TxGemma gated
     LOADED_TXGEMMA = "loaded_txgemma"  # L4c HAI-DEF TxGemma inference (never reachable under current token)
 
@@ -304,16 +305,89 @@ class ArtifactCategory(str, Enum):
 # /v1/case/full
 
 
+# --------------------------------------------------------------------------- #
+# NSCLC-specific inputs / outputs
+#
+# `NsclcCTInput.series_dir` points at a LIDC-IDRI CT series directory on the
+# server (e.g. `/workspace/lidc_cohort/lidc_idri/LIDC-IDRI-0001/<StudyUID>/CT_<SeriesUID>`).
+# Real pipeline execution is gated behind the `ONCOLOGY_ARBITER_ALLOW_SERIES_DIR=1`
+# env var so untrusted deployments never trust a client-controlled filesystem
+# path. When gated off, the branch falls back to shape-only placeholder.
+
+
+class NsclcCTInput(BaseModel):
+    """Point at a CT series on disk for the real lung heuristic + NCCN rules.
+
+    Only honored when `ONCOLOGY_ARBITER_ALLOW_SERIES_DIR=1` is set on the server;
+    otherwise ignored to avoid client-controlled path traversal in shared
+    deployments.
+    """
+    model_config = ConfigDict(extra="forbid")
+    series_dir: str = Field(..., description="Absolute path to a CT_<SeriesUID> directory")
+    patient_id: str | None = Field(default=None, description="LIDC patient id if known")
+    top_n: int = Field(default=10, ge=1, le=100, description="Max candidate blobs to summarize")
+
+
+class NsclcCandidate(BaseModel):
+    """One nodule-candidate blob surfaced by the lung heuristic."""
+    label: int
+    voxel_count: int
+    diameter_mm: float
+    mean_hu: float
+    centroid_zyx_vox: tuple[float, float, float]
+
+
+class NsclcTherapyOption(BaseModel):
+    """One NCCN-lite therapy card returned by the proxy rules."""
+    name: str
+    category: str
+    citation_url: str
+    rationale: str
+    nccn_section: str
+
+
+class NsclcResponse(BaseModel):
+    """Envelope for the real LIDC-IDRI + NCCN-lite path (or its placeholder)."""
+    model_config = ConfigDict(extra="forbid")
+    model_state: ModelState
+    model_name: str
+    warnings: list[str] = Field(default_factory=list)
+    # Lung heuristic block
+    lung_voxel_fraction: float | None = None
+    n_candidates_total: int | None = None
+    n_candidates_kept: int | None = None
+    max_diameter_mm: float | None = None
+    candidates: list[NsclcCandidate] = Field(default_factory=list)
+    # Arbiter block
+    risk_score: float | None = None
+    risk_bucket: str | None = None
+    driving_feature: str | None = None
+    logit: float | None = None
+    # Therapy block
+    therapy_recommended: list[NsclcTherapyOption] = Field(default_factory=list)
+    therapy_not_recommended: list[NsclcTherapyOption] = Field(default_factory=list)
+    # Provenance
+    series_dir: str | None = None
+    n_slices: int | None = None
+    read_seconds: float | None = None
+    heuristic_seconds: float | None = None
+
+
 class FullCaseRequest(BaseModel):
     screening_input: ScreeningRequest | None = None
     biopsy_input: BiopsyRequest | None = None
     therapy_context: TherapyPatientContext = Field(default_factory=TherapyPatientContext)
+    # NSCLC track: point at a CT series on disk (LIDC-IDRI layout). Real
+    # pipeline is only invoked when ONCOLOGY_ARBITER_ALLOW_SERIES_DIR=1 is
+    # set on the server; otherwise the request falls back to shape-only.
+    nsclc_ct_input: "NsclcCTInput | None" = None
 
 
 class FullCaseResponse(ApiEnvelope):
     screening: ScreeningResponse | None = None
     biopsy: BiopsyResponse | None = None
     therapy: TherapyResponse | None = None
+    nsclc: "NsclcResponse | None" = None
     elo_ranked_hypotheses: list[dict[str, Any]] = Field(
         default_factory=list,
         description="Co-Scientist Elo tournament output over all stage hypotheses.",
