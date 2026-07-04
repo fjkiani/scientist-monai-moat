@@ -2,6 +2,7 @@ import { useState } from "react";
 import { runCaseFull, type FullCaseResponse } from "../api";
 import { EnvelopeCard } from "../components/Envelope";
 import { BboxOverlay } from "../components/BboxOverlay";
+import { getCancer } from "../settings";
 
 /**
  * Runs the end-to-end tumor-board loop by chaining screening → biopsy →
@@ -49,7 +50,11 @@ export function CaseViewTab() {
         }
         if (reportText.trim()) body.biopsy_input.report_text = reportText.trim();
       }
-      const r = await runCaseFull(body);
+      // Case view is breast-specific today (all sub-inputs are mammo + WSI +
+      // free-text report). The cancer selector still governs which query
+      // param goes on the wire — an operator who switched to nsclc gets
+      // routed to <NsclcTab/> by App.tsx before they hit this button.
+      const r = await runCaseFull(getCancer(), body);
       setResult(r);
     } catch (e) { setErr(String(e)); } finally { setBusy(false); }
   }

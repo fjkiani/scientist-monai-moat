@@ -23,7 +23,7 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.responses import JSONResponse
 
 from oncology_arbiter import AUROC_CAVEAT, RUO_DISCLAIMER, __version__
@@ -328,6 +328,11 @@ def create_app() -> FastAPI:
 
     @app.get("/health", response_model=HealthResponse)
     def health() -> HealthResponse:
+        # `cancers` mirrors the surface `/v1/case/full?cancer=…` accepts.
+        # `breast` is the flagship path (real preprocessing, arbiter, etc.);
+        # `nsclc` is the LIDC-IDRI expansion track that worker-2 is wiring —
+        # the endpoint currently returns a shape-only placeholder so the SPA
+        # can already render a working NSCLC panel end-to-end.
         return HealthResponse(
             status="ok",
             version=__version__,
@@ -342,6 +347,19 @@ def create_app() -> FastAPI:
                 "GET  /v1/artifacts/{category}/{filename}",
                 "GET  /health",
             ],
+            cancers={
+                "breast": {
+                    "state": ModelState.PLACEHOLDER.value,
+                    "case_full": True,
+                    "endpoints": ["screening", "biopsy", "therapy", "case/full"],
+                },
+                "nsclc": {
+                    "state": ModelState.PLACEHOLDER.value,
+                    "case_full": False,
+                    "endpoints": ["case/full"],
+                    "notes": "Shape-only placeholder; LIDC-IDRI pipeline lands from worker-2.",
+                },
+            },
             models_loaded={
                 "monai_screening": ModelState.PLACEHOLDER,
                 "medsiglip_biopsy": ModelState.PLACEHOLDER,
@@ -351,6 +369,8 @@ def create_app() -> FastAPI:
                 # but they carry n_training=0 → treated as placeholder at the
                 # health-check level per the PLAN.md honesty rules.
                 "l3_arbiter": ModelState.PLACEHOLDER,
+                # NSCLC track: still placeholder end-to-end.
+                "nsclc_pipeline": ModelState.PLACEHOLDER,
             },
         )
 
@@ -983,12 +1003,65 @@ def create_app() -> FastAPI:
     # ----------------------------------------------------------------------- #
     # /v1/case/full — placeholder that chains sub-endpoints
 
+    # Cancer tracks the endpoint knows how to route. The SPA reads
+    # /health.cancers to know which selectors to enable. Any value NOT in
+    # this set is rejected with 400 (never silently coerced to breast) so
+    # the honesty caveat never masquerades as covering another cancer.
+    _SUPPORTED_CANCERS = {"breast", "nsclc"}
+
     @app.post("/v1/case/full", response_model=FullCaseResponse)
     def case_full(
         req: FullCaseRequest,
+        cancer: str = Query(
+            default="breast",
+            description="Cancer track: 'breast' (full pipeline) or 'nsclc' "
+                        "(shape-only placeholder; LIDC-IDRI pipeline lands "
+                        "from worker-2).",
+        ),
         tenant: APIKey = Depends(require_api_key),
     ) -> FullCaseResponse:
+        cancer_norm = cancer.lower().strip()
+        if cancer_norm not in _SUPPORTED_CANCERS:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    f"Unsupported cancer={cancer!r}. "
+                    f"Supported: {sorted(_SUPPORTED_CANCERS)}. "
+                    f"See /health.cancers for the wired-up set."
+                ),
+            )
+
         request_id = new_request_id()
+
+        # ------- NSCLC placeholder branch -------------------------------- #
+        # Shape-only: mirrors the FullCaseResponse envelope so the SPA can
+        # already render its NSCLC panel. Every sub-stage is None; the
+        # honesty gate is empty; provenance carries an nsclc-specific
+        # model_name so downstream consumers can tell where the shape came
+        # from. The real LIDC-IDRI pipeline lands from worker-2 and
+        # replaces this branch with the same call graph as breast.
+        if cancer_norm == "nsclc":
+            env = _envelope(request_id, model_name="nsclc_placeholder_v0")
+            log_event(request_id, "/v1/case/full",
+                      model_state="placeholder",
+                      patient_id_hash=None,
+                      extra={"cancer": "nsclc", "has_screening": False, "has_biopsy": False,
+                             "elo_n_hypotheses": 0},
+                      tenant_id=tenant.tenant_id,
+                      )
+            return FullCaseResponse(
+                **env,
+                warnings=[
+                    "cancer=nsclc: placeholder shape only. LIDC-IDRI CT "
+                    "pipeline + NCCN-NSCLC rules land from worker-2.",
+                ],
+                screening=None,
+                biopsy=None,
+                therapy=None,
+                elo_ranked_hypotheses=[],
+            )
+
+        # ------- Breast branch (existing behaviour) ----------------------- #
         screening: ScreeningResponse | None = None
         biopsy: BiopsyResponse | None = None
         therapy: TherapyResponse | None = None
@@ -1044,6 +1117,7 @@ def create_app() -> FastAPI:
                   model_state="placeholder",
                   patient_id_hash=None,
                   extra={
+                      "cancer": "breast",
                       "has_screening": screening is not None,
                       "has_biopsy": biopsy is not None,
                       "elo_n_hypotheses": len(elo_ranked),

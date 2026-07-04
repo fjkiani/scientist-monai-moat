@@ -1,21 +1,61 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ScreeningTab } from "./tabs/ScreeningTab";
 import { BiopsyTab } from "./tabs/BiopsyTab";
 import { TherapyTab } from "./tabs/TherapyTab";
 import { CaseViewTab } from "./tabs/CaseViewTab";
-import { getHealth, listModelCards, type HealthResponse, type ModelCardsIndex } from "./api";
+import { NsclcTab } from "./tabs/NsclcTab";
+import {
+  getHealth, listModelCards, installApiHooks,
+  type HealthResponseWithCancers, type ModelCardsIndex,
+} from "./api";
+import {
+  getApiKey, getCancer, setCancer as persistCancer, setLastRequestId,
+  type CancerId,
+} from "./settings";
+import { SettingsDrawer } from "./components/SettingsDrawer";
 
-type Tab = "screening" | "biopsy" | "therapy" | "case" | "cards";
+type Tab = "screening" | "biopsy" | "therapy" | "case" | "cards" | "nsclc";
 
 export function App() {
   const [tab, setTab] = useState<Tab>("screening");
-  const [health, setHealth] = useState<HealthResponse | null>(null);
+  const [health, setHealth] = useState<HealthResponseWithCancers | null>(null);
   const [cards, setCards] = useState<ModelCardsIndex | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [cancer, setCancerState] = useState<CancerId>(getCancer());
+  const [lastRequestId, setLastRequestIdState] = useState<string>("");
+
+  // Wire the api.ts hooks once on mount. `apiKey` is read live from
+  // localStorage so the operator can rotate keys mid-session without a
+  // reload. `on401` opens the drawer.
+  useEffect(() => {
+    installApiHooks({
+      apiKey: () => getApiKey(),
+      onRequestId: (rid) => {
+        setLastRequestIdState(rid);
+        setLastRequestId(rid);
+      },
+      on401: () => {
+        setDrawerOpen(true);
+      },
+    });
+  }, []);
 
   useEffect(() => {
     getHealth().then(setHealth).catch(() => setHealth(null));
     listModelCards().then(setCards).catch(() => setCards(null));
   }, []);
+
+  const cancerCaps = useMemo(() => health?.cancers ?? {}, [health]);
+
+  // If the operator switches cancer to a non-breast, jump their view to
+  // that cancer's tab immediately. Keeps the two selectors (drawer +
+  // header pill) in sync.
+  function handleCancerChange(c: CancerId) {
+    setCancerState(c);
+    persistCancer(c);
+    if (c === "nsclc") setTab("nsclc");
+    if (c === "breast" && tab === "nsclc") setTab("case");
+  }
 
   return (
     <div style={{ maxWidth: 1200, margin: "0 auto", padding: "1.5rem" }}>
@@ -24,7 +64,7 @@ export function App() {
           <div>
             <h1 style={{ margin: 0 }}>Oncology Arbiter</h1>
             <div style={{ color: "var(--fg-muted)", fontSize: "0.8rem" }}>
-              Breast cancer decision-support · Research Use Only (not for diagnosis)
+              Multi-cancer decision-support · Research Use Only (not for diagnosis)
               {health && <span> · v{health.version} · {health.status}</span>}
             </div>
           </div>
@@ -33,22 +73,35 @@ export function App() {
             <button className={tab === "biopsy" ? "active" : ""} onClick={() => setTab("biopsy")}>Biopsy</button>
             <button className={tab === "therapy" ? "active" : ""} onClick={() => setTab("therapy")}>Therapy</button>
             <button className={tab === "case" ? "active" : ""} onClick={() => setTab("case")}>Case view</button>
+            <button className={tab === "nsclc" ? "active" : ""} onClick={() => setTab("nsclc")}>NSCLC</button>
             <button className={tab === "cards" ? "active" : ""} onClick={() => setTab("cards")}>Model cards</button>
+            <button
+              onClick={() => setDrawerOpen(true)}
+              title="API key, cancer selector, last request id"
+              aria-label="Open settings"
+            >
+              ⚙︎ Settings
+            </button>
           </nav>
         </div>
-        {health && Object.keys(health.models_loaded || {}).length > 0 && (
-          <div style={{ marginTop: "0.5rem" }}>
-            {Object.entries(health.models_loaded).map(([k, v]) => (
-              <span key={k} className={`pill ${v}`}>{k}: {v}</span>
-            ))}
-          </div>
-        )}
+        <div style={{ marginTop: "0.5rem", display: "flex", flexWrap: "wrap", gap: "0.5rem", alignItems: "center" }}>
+          <span className="pill" style={{ fontWeight: 600 }}>cancer: {cancer}</span>
+          {lastRequestId && (
+            <span className="pill" style={{ fontFamily: "Menlo, monospace", fontSize: "0.7rem" }}>
+              req: {lastRequestId}
+            </span>
+          )}
+          {health && Object.entries(health.models_loaded || {}).map(([k, v]) => (
+            <span key={k} className={`pill ${v}`}>{k}: {v}</span>
+          ))}
+        </div>
       </header>
 
       {tab === "screening" && <ScreeningTab />}
       {tab === "biopsy" && <BiopsyTab />}
       {tab === "therapy" && <TherapyTab />}
       {tab === "case" && <CaseViewTab />}
+      {tab === "nsclc" && <NsclcTab />}
       {tab === "cards" && (
         <div className="card">
           <h2>Model cards</h2>
@@ -93,6 +146,14 @@ export function App() {
         Research use only. Not a diagnostic device. See model cards for provenance,
         weights loading state, and known failure modes.
       </footer>
+
+      <SettingsDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        onCancerChange={handleCancerChange}
+        cancers={cancerCaps as Record<string, { state: string; case_full: boolean }>}
+        lastRequestId={lastRequestId}
+      />
     </div>
   );
 }

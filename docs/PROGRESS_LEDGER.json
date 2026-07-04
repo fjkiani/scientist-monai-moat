@@ -1,7 +1,7 @@
 {
   "$schema_version": "1.0.0",
-  "generated_at": "2026-07-04T10:29:02.958449+00:00",
-  "git_sha": "6a6427137d5ac941ccae5b2e8d9b08f703332f90",
+  "generated_at": "2026-07-04T10:40:33.523332+00:00",
+  "git_sha": "f7c8b61c9138d6e03b3da1ed093fdce89b989cab",
   "project": {
     "name": "oncology-arbiter",
     "one_line_goal": "Open-architecture breast oncology reasoning platform spanning screening \u2192 biopsy \u2192 therapy, with calibrated per-stage arbiters, cited evidence, and honest performance disclosure.",
@@ -707,20 +707,21 @@
   ],
   "milestones": [
     {
-      "id": "M-SAAS-HARDENING-v0.2",
+      "id": "M-UI-CANCER-SELECTOR-v0.2",
       "date": "2026-07-04",
       "commit_planned_sha": "TBD",
-      "summary": "SaaS hardening landed on worker-1-hardening: API-key auth (SQLite tenants), CORS, slowapi rate-limit, /metrics (prometheus), X-Request-Id middleware, JSON structured logging, per-tenant audit ledger partitioning, and a `python -m oncology_arbiter.auth.cli` tenant CLI.",
+      "summary": "Multi-cancer selector landed on worker-3-ui: SettingsDrawer (API-key + cancer picker + last X-Request-Id), NsclcTab (shape-only placeholder), api.ts injects X-API-Key + captures X-Request-Id + opens drawer on 401, backend /health.cancers announces wired tracks, /v1/case/full accepts ?cancer=(breast|nsclc), invalid cancer \u2192 400.",
       "artifacts": [
-        "src/oncology_arbiter/auth/{api_key.py, middleware.py, cli.py}",
-        "src/oncology_arbiter/observability/{request_id.py, logging_config.py}",
-        "src/oncology_arbiter/api/app.py (middleware wired, 6 handlers Depends(require_api_key))",
-        "src/oncology_arbiter/api/audit.py (<AUDIT_DIR>/<tenant_id>/audit-YYYY-MM-DD.jsonl)",
-        "Dockerfile ENV: AUTH_DB_PATH, AUTH_MODE=off (image default)",
-        "tests/unit/test_saas_hardening.py (16 tests)",
-        "tests/unit/test_dockerfile_shape.py (26 tests, +4 SaaS shape)"
+        "frontend/src/settings.ts",
+        "frontend/src/components/SettingsDrawer.tsx",
+        "frontend/src/tabs/NsclcTab.tsx",
+        "frontend/src/App.tsx (settings drawer + NSCLC tab + cancer pill)",
+        "frontend/src/api.ts (installApiHooks, X-API-Key inject, X-Request-Id capture, Auth401Error)",
+        "src/oncology_arbiter/api/schemas.py (+HealthResponse.cancers)",
+        "src/oncology_arbiter/api/app.py (?cancer= param, /health.cancers map)",
+        "tests/unit/test_cancer_selector.py (9 tests)"
       ],
-      "tests_state": "516 passed, 0 failed (was 323 at session start; +2 Dockerfile + 1 CLI + 15 core + transitive unlocks)"
+      "tests_state": "worker-3 pytest: 439 passed, 86 skipped (CBIS-DDSM fixtures live on worker-1). worker-1 must be re-run post-merge."
     }
   ]
 }

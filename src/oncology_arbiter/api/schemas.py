@@ -331,3 +331,12 @@ class HealthResponse(BaseModel):
     caveat: str
     endpoints: list[str]
     models_loaded: dict[str, ModelState]
+    # cancers advertises which cancer tracks the current build exposes via
+    # `/v1/case/full?cancer=<name>`. Each entry MUST include `state`
+    # (mirror of ModelState) and `endpoints` (list of sub-routes wired for
+    # that cancer). The SPA reads this to decide which cancer-selector
+    # options to enable and which panels to render.
+    # Untyped dict so we can bolt on extra metadata (e.g. `case_full: bool`)
+    # per cancer without a schema migration; the SPA only reads the keys it
+    # knows.
+    cancers: dict[str, dict] = {}

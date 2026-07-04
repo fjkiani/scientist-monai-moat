@@ -103,21 +103,72 @@ export interface HealthResponse {
   models_loaded: Record<string, ModelState>;
 }
 
+// Cancer selector — mirrors backend /v1/case/full?cancer=…
+export type CancerId = "breast" | "nsclc";
+
 // ── HTTP helpers ─────────────────────────────────────────────────────────
 const API_BASE = "";
+
+/** Auth401Error is thrown on 401 so the UI can open the API-key drawer. */
+export class Auth401Error extends Error {
+  status = 401 as const;
+  constructor(public detail: string) { super(`401: ${detail}`); }
+}
+
+/** Client-side hooks the SPA installs at boot: injects X-API-Key from
+ *  localStorage, captures X-Request-Id from responses, and calls a
+ *  `on401` callback so the drawer can pop.
+ *  Kept as module-level bindings (not a context) so `post/get` can stay
+ *  simple; App.tsx wires it via `installApiHooks()` on mount. */
+let _apiKeyProvider: () => string = () => "";
+let _requestIdSink: (rid: string) => void = () => { /* no-op */ };
+let _on401: (detail: string) => void = () => { /* no-op */ };
+
+export function installApiHooks(opts: {
+  apiKey: () => string;
+  onRequestId: (rid: string) => void;
+  on401: (detail: string) => void;
+}): void {
+  _apiKeyProvider = opts.apiKey;
+  _requestIdSink = opts.onRequestId;
+  _on401 = opts.on401;
+}
+
+function _headers(extra: HeadersInit = {}): HeadersInit {
+  const h: Record<string, string> = { ...(extra as Record<string, string>) };
+  const k = _apiKeyProvider();
+  if (k) h["X-API-Key"] = k;
+  return h;
+}
+
+function _captureRequestId(resp: Response): void {
+  const rid = resp.headers.get("X-Request-Id");
+  if (rid) _requestIdSink(rid);
+}
+
+async function _handleUnauthorized(resp: Response): Promise<never> {
+  let detail = resp.statusText;
+  try { const j = await resp.json(); if (j?.detail) detail = String(j.detail); } catch { /* ignore */ }
+  _on401(detail);
+  throw new Auth401Error(detail);
+}
 
 async function post<T>(path: string, body: unknown): Promise<T> {
   const resp = await fetch(`${API_BASE}${path}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: _headers({ "Content-Type": "application/json" }),
     body: JSON.stringify(body),
   });
+  _captureRequestId(resp);
+  if (resp.status === 401) return _handleUnauthorized(resp);
   if (!resp.ok) throw new Error(`${resp.status} ${resp.statusText}: ${await resp.text()}`);
   return (await resp.json()) as T;
 }
 
 async function get<T>(path: string): Promise<T> {
-  const resp = await fetch(`${API_BASE}${path}`);
+  const resp = await fetch(`${API_BASE}${path}`, { headers: _headers() });
+  _captureRequestId(resp);
+  if (resp.status === 401) return _handleUnauthorized(resp);
   if (!resp.ok) throw new Error(`${resp.status} ${resp.statusText}: ${await resp.text()}`);
   return (await resp.json()) as T;
 }
@@ -132,7 +183,18 @@ export function reasonTherapy(payload: unknown) {
   return post<TherapyResponse>("/v1/therapy/reason", payload);
 }
 export function getHealth() {
-  return get<HealthResponse>("/health");
+  return get<HealthResponseWithCancers>("/health");
+}
+
+export interface CancerCapability {
+  state: string;                 // ModelState value, but comes over as string
+  case_full: boolean;
+  endpoints: string[];
+  notes?: string;
+}
+
+export interface HealthResponseWithCancers extends HealthResponse {
+  cancers?: Record<string, CancerCapability>;
 }
 
 // ── /v1/case/full ────────────────────────────────────────────────────────
@@ -144,8 +206,11 @@ export interface FullCaseResponse extends Envelope {
   elo_ranked_hypotheses: Array<Record<string, unknown>>;
 }
 
-export function runCaseFull(payload: unknown) {
-  return post<FullCaseResponse>("/v1/case/full", payload);
+/** `cancer` is a REQUIRED first argument (never defaulted silently); the
+ *  wire always carries `?cancer=…` so the audit log ties every response
+ *  to the cancer the operator meant to run. */
+export function runCaseFull(cancer: CancerId, payload: unknown) {
+  return post<FullCaseResponse>(`/v1/case/full?cancer=${encodeURIComponent(cancer)}`, payload);
 }
 
 // ── /v1/model-cards ──────────────────────────────────────────────────────
