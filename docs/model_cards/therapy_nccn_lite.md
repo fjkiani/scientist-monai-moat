@@ -162,3 +162,40 @@ TherapyRulesResult(
 | Baseline branch tests (`test_therapy_rules_lite.py`) | 8 |
 | Hardening tests (`test_therapy_rules_lite_hardening.py`) | 22 |
 | Full repo regression | 495 passed, 86 skipped, 0 failed |
+
+## v0.2 wire contract (`/v1/therapy/reason`)
+
+### Response envelope additions
+
+`TherapyResponse` now carries three optional fields that are populated **only
+when the rules-lite branch actually ran** (`model_state == "proxy_rules_lite"`).
+When the placeholder or TxGemma path serves the response, they are `null`.
+
+| Field | Type | Meaning |
+|-------|------|---------|
+| `rules_sha256` | `string \| null` | SHA-256 of `therapy_rules_v0.json` that the engine served from. |
+| `rules_model_id` | `string \| null` | `model_id` field inside the rules JSON (e.g. `"nccn-lite-v0"`). |
+| `branch_id` | `string \| null` | Which NCCN-lite branch the input landed in: `dcis`, `metastatic`, `her2_positive`, `triple_negative`, `hr_positive_her2_negative`, or `fallthrough`. |
+
+### Request opt-in: `strict`
+
+`TherapyRequest` now accepts an optional `strict: boolean` (default `false`).
+When `true` and the rules-lite branch fires, receptor_status / grade / stage /
+menopausal_status are validated. On drift the endpoint returns **HTTP 400**:
+
+```json
+{
+  "detail": "therapy_rules_lite_invalid_input: stage 'stage-two' does not match TNM pattern or contain M1. Expected e.g. 'T1N0M0', 'T2N1M0', 'M1'."
+}
+```
+
+The default `strict=false` preserves the existing lenient wire contract.
+
+### Test coverage snapshot (v0.2, worker-4, post-API-surfacing)
+
+| Suite | Count |
+|-------|-------|
+| Baseline branch tests (`test_therapy_rules_lite.py`) | 8 |
+| Engine hardening tests (`test_therapy_rules_lite_hardening.py`) | 22 |
+| API-level fingerprint + strict tests (`test_therapy_api_rules_fingerprint.py`) | 5 |
+| Full repo regression | 500 passed, 86 skipped, 0 failed |

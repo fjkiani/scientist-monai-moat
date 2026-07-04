@@ -253,6 +253,16 @@ class TherapyRequest(BaseModel):
         description="If provided, we skip re-running biopsy analysis and use this directly.",
     )
     patient_context: TherapyPatientContext = Field(default_factory=TherapyPatientContext)
+    # v0.2: opt in to strict input validation in the rules-lite branch.
+    # When true and the rules-lite fallback fires, receptor_status / grade /
+    # stage / menopausal_status are validated and 400 is returned on drift.
+    # Default false to preserve the existing wire contract.
+    strict: bool = Field(
+        default=False,
+        description="If true, rules-lite branch runs strict input validation "
+                    "and returns HTTP 400 on receptor_status / grade / stage / "
+                    "menopausal_status drift. Default false (permissive).",
+    )
 
 
 class TherapyOption(BaseModel):
@@ -269,6 +279,26 @@ class TherapyResponse(ApiEnvelope):
     arbiter_score: ArbiterScore | None = Field(
         default=None,
         description="L3 therapy arbiter output (escalate to neoadjuvant chemo vs. surgery-first).",
+    )
+    # v0.2: rules-lite fallback pins the on-disk ruleset via SHA-256 so
+    # auditors comparing two runs can detect silent guideline drift.
+    # Populated ONLY when model_state == PROXY_RULES_LITE; None otherwise.
+    rules_sha256: str | None = Field(
+        default=None,
+        description="SHA-256 of therapy_rules_v0.json used to serve this call. "
+                    "None when model_state != proxy_rules_lite.",
+    )
+    rules_model_id: str | None = Field(
+        default=None,
+        description="model_id inside the rules JSON (e.g. 'nccn-lite-v0'). "
+                    "None when model_state != proxy_rules_lite.",
+    )
+    branch_id: str | None = Field(
+        default=None,
+        description="Which NCCN-lite branch the input landed in "
+                    "(dcis | metastatic | her2_positive | triple_negative | "
+                    "hr_positive_her2_negative | fallthrough). "
+                    "None when model_state != proxy_rules_lite.",
     )
 
 
