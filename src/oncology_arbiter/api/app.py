@@ -857,6 +857,7 @@ def create_app() -> FastAPI:
                     age=pc.age,
                     menopausal_status=menopausal_status,
                     subtype=subtype,
+                    strict=bool(req.strict),
                 )
                 recommended = [
                     TherapyOption(
@@ -888,6 +889,16 @@ def create_app() -> FastAPI:
                 model_state = ModelState.PROXY_RULES_LITE
                 model_name = "nccn-lite-v0"
             except Exception as e:  # noqa: BLE001
+                # strict=True input drift → HTTP 400 (surfaces validation
+                # errors instead of hiding them in the warnings list).
+                from oncology_arbiter.models.therapy_rules_lite import (
+                    InvalidInputError as _InvalidInputError,
+                )
+                if isinstance(e, _InvalidInputError):
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"therapy_rules_lite_invalid_input: {e}",
+                    ) from e
                 warnings.append(f"therapy_rules_lite_error:{type(e).__name__}:{e}")
 
         log_event(request_id, "/v1/therapy/reason",
@@ -915,11 +926,25 @@ def create_app() -> FastAPI:
             gate_report=schema_gate_report,
         )
         env["warnings"] = warnings
+        # v0.2: only surface the ruleset fingerprint when the rules-lite
+        # branch actually ran (model_state == PROXY_RULES_LITE). If TxGemma
+        # was reachable, or we fell through to placeholder, these stay None.
+        _rules_sha: str | None = None
+        _rules_model_id: str | None = None
+        _rules_branch_id: str | None = None
+        if model_state == ModelState.PROXY_RULES_LITE and "rules_result" in locals():
+            _rules_sha = getattr(rules_result, "rules_sha256", None)
+            _rules_model_id = getattr(rules_result, "rules_model_id", None)
+            _rules_branch_id = getattr(rules_result, "branch_id", None)
+
         return TherapyResponse(
             **env,
             recommended_options=recommended,
             not_recommended=not_recommended,
             arbiter_score=arbiter_block,
+            rules_sha256=_rules_sha,
+            rules_model_id=_rules_model_id,
+            branch_id=_rules_branch_id,
         )
 
     # ----------------------------------------------------------------------- #
