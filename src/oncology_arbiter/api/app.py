@@ -289,14 +289,24 @@ def create_app() -> FastAPI:
         _logger.warning("prometheus instrumentator disabled: %s", exc)
 
     # 2) Rate limit
+    #
+    # The default slowapi key_func reads request.client.host, which behind
+    # Render + Cloudflare is the internal proxy IP — every real caller then
+    # shares the same handful of buckets and the bucket for any single caller
+    # never fills. Use `make_key_func()` from ..api.rate_limit, which reads
+    # CF-Connecting-IP (Cloudflare-signed) first, then X-Forwarded-For (first
+    # hop), then falls back to request.client.host. The header path is
+    # opt-in via ONCOLOGY_ARBITER_TRUST_FORWARDED_FOR=1 (production Render).
+    # See src/oncology_arbiter/api/rate_limit.py for the full trust rationale.
     try:
         from slowapi import Limiter
         from slowapi.errors import RateLimitExceeded
         from slowapi.middleware import SlowAPIMiddleware
-        from slowapi.util import get_remote_address
+
+        from .rate_limit import make_key_func
 
         limiter = Limiter(
-            key_func=get_remote_address,
+            key_func=make_key_func(),
             default_limits=[os.environ.get("ONCOLOGY_ARBITER_RATE_LIMIT", "60/minute")],
         )
         app.state.limiter = limiter
