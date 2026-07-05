@@ -841,6 +841,35 @@ MILESTONES = [
             "tests/unit/test_dockerfile_shape.py (inverted assertion)",
         ],
     },
+    {
+        "id": "M-RATE-LIMIT-KEYFUNC-v0.2",
+        "date": "2026-07-05",
+        "commit_planned_sha": "TBD",
+        "summary": (
+            "First v0.2 enforcement smoke revealed the SlowAPI rate limit "
+            "was effectively inert: 180 rapid requests (80 keyless + 100 "
+            "keyed, ~10 rps sustained) all returned 200/401 with no 429, "
+            "even though default_limits=60/minute was configured. Root "
+            "cause: the default key_func=get_remote_address reads "
+            "request.client.host, which behind Render + Cloudflare is the "
+            "internal proxy IP — every real caller shared one bucket that "
+            "never filled. Fix: new module api/rate_limit.py exposes "
+            "make_key_func() that reads CF-Connecting-IP (Cloudflare-signed) "
+            "first, then X-Forwarded-For first hop, then falls back to "
+            "request.client.host. The header path is opt-in via "
+            "ONCOLOGY_ARBITER_TRUST_FORWARDED_FOR=1 so it is safe to run in "
+            "topologies without a trusted proxy (naively trusting XFF would "
+            "let callers rotate their apparent IP to defeat the bucket). "
+            "35 new unit tests exercise the header precedence, trust gate, "
+            "and end-to-end 429 firing via a Starlette+slowapi TestClient."
+        ),
+        "artifacts": [
+            "src/oncology_arbiter/api/rate_limit.py (new module)",
+            "src/oncology_arbiter/api/app.py (uses make_key_func())",
+            "tests/unit/test_rate_limit_keyfunc.py (35 tests)",
+            "Render env var: ONCOLOGY_ARBITER_TRUST_FORWARDED_FOR=1",
+        ],
+    },
 ]
 
 
