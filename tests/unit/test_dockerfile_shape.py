@@ -369,15 +369,24 @@ def test_auth_db_path_writable():
     assert not path.startswith("/opt/oa"), f"AUTH_DB_PATH {path!r} lands in the immutable dep dir /opt/oa"
 
 
-def test_auth_mode_default_is_off():
-    """Free-tier image must ship auth OFF so the /health probes work without a key.
+def test_auth_mode_not_baked_into_image():
+    """Production image must NOT bake ONCOLOGY_ARBITER_AUTH_MODE.
 
-    Sites that want SaaS auth flip this to `on` via the platform's env-var
-    UI; that must NEVER be baked into the image."""
+    /health and /metrics are unguarded, so shipping the image with the
+    in-code default (`on`, see auth/middleware.py::_auth_off) is safe.
+    Baking `AUTH_MODE=off` into the Dockerfile ENV was empirically found
+    (2026-07-05 rollout) to WIN over Render service env vars on this
+    Docker orchestrator — a container flipped to `on` by the platform
+    was still serving as `off` because the Dockerfile ENV shadowed the
+    platform value. Never bake this key again; let deploy operators set
+    it via the platform env-var UI (which also feeds the bootstrap
+    hook — see auth/bootstrap.py).
+    """
     content = (REPO_ROOT / "Dockerfile").read_text()
-    m = re.search(r"^\s*ONCOLOGY_ARBITER_AUTH_MODE\s*=\s*(?P<mode>[a-z]+)", content, re.MULTILINE)
-    assert m, "Dockerfile must set ONCOLOGY_ARBITER_AUTH_MODE explicitly"
-    assert m.group("mode").lower() == "off", (
-        f"Image must ship with AUTH_MODE=off; got {m.group('mode')!r}. "
-        "Enable per-deployment via platform env var, not the Dockerfile."
+    m = re.search(r"^\s*ONCOLOGY_ARBITER_AUTH_MODE\s*=", content, re.MULTILINE)
+    assert m is None, (
+        "Dockerfile must NOT set ONCOLOGY_ARBITER_AUTH_MODE. "
+        "In-code default is `on` and Docker ENV shadows the platform env "
+        "var on Render — baking the key defeats the platform-level flip. "
+        "Delete the ENV line and let deploy operators flip via platform UI."
     )

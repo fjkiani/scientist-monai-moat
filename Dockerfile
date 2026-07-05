@@ -82,11 +82,14 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     # persistent volume and override this env var.
     ONCOLOGY_ARBITER_AUDIT_DIR=/tmp/oa-audit \
     # Auth DB (tenant/api-key SQLite) lives in the same writable location.
-    ONCOLOGY_ARBITER_AUTH_DB_PATH=/tmp/oa-audit/tenants.sqlite \
-    # Auth is OFF by default on this image so the free-tier free-for-all
-    # remains reachable. Flip to `on` (via Render env var) once a tenant
-    # is provisioned via `python -m oncology_arbiter.auth.cli issue …`.
-    ONCOLOGY_ARBITER_AUTH_MODE=off
+    ONCOLOGY_ARBITER_AUTH_DB_PATH=/tmp/oa-audit/tenants.sqlite
+
+# NOTE: ONCOLOGY_ARBITER_AUTH_MODE is intentionally NOT set here.
+# In-code default is `on` (see auth/middleware.py::_auth_off) — safer
+# for a production image. Local dev / CI test runs opt out with
+# `ONCOLOGY_ARBITER_AUTH_MODE=off` in tests/conftest.py or the shell.
+# Deploy operators flip on via a Render service env var; the same
+# env var also feeds the auth bootstrap hook (see auth/bootstrap.py).
 
 # curl only needed for the HEALTHCHECK; everything else came from builder.
 RUN apt-get update && apt-get install --no-install-recommends -y \

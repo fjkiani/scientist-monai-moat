@@ -815,6 +815,32 @@ MILESTONES = [
             "pyproject.toml (version -> 0.2.0-alpha)",
         ],
     },
+    {
+        "id": "M-AUTH-DOCKERFILE-UNBAKE-v0.2",
+        "date": "2026-07-05",
+        "commit_planned_sha": "TBD",
+        "summary": (
+            "Empirical finding on Render Docker orchestrator: a Dockerfile "
+            "ENV ONCOLOGY_ARBITER_AUTH_MODE=off directive WINS over the "
+            "service-level env-var setting ONCOLOGY_ARBITER_AUTH_MODE=on. "
+            "First flip-and-verify smoke on commit 038b47f showed identical "
+            "responses (200, byte-identical) for keyless, correct-key, and "
+            "garbage-key requests on /v1/model-cards, /v1/therapy/reason, "
+            "and /v1/biopsy/analyze even though the Render env-var UI and "
+            "GET /v1/services/{id}/env-vars both confirmed AUTH_MODE=on. "
+            "Fix: remove the ENV directive from the Dockerfile entirely; "
+            "in-code default in auth/middleware.py::_auth_off is already "
+            "'on', which is the safer production stance. Inverted the "
+            "test_dockerfile_shape assertion so the invariant now forbids "
+            "baking AUTH_MODE (guards against regression). tests/conftest.py "
+            "still sets AUTH_MODE=off for local/CI so keyless test suite "
+            "remains deterministic."
+        ),
+        "artifacts": [
+            "Dockerfile (removed ENV ONCOLOGY_ARBITER_AUTH_MODE=off)",
+            "tests/unit/test_dockerfile_shape.py (inverted assertion)",
+        ],
+    },
 ]
 
 
