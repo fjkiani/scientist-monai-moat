@@ -29,7 +29,7 @@ from fastapi.responses import JSONResponse
 from oncology_arbiter import AUROC_CAVEAT, RUO_DISCLAIMER, __version__
 
 from .audit import log_event, new_request_id
-from ..auth import APIKey, require_api_key
+from ..auth import APIKey, bootstrap_from_env, require_api_key
 from ..observability import (
     RequestIdMiddleware,
     configure_logging,
@@ -328,6 +328,34 @@ def create_app() -> FastAPI:
 
     # 4) Request-id (last add = first inbound)
     app.add_middleware(RequestIdMiddleware)
+
+    # 5) One-shot auth bootstrap from env
+    #
+    # On a fresh container the SQLite tenants table is empty. Flipping
+    # AUTH_MODE=on without a seeded tenant locks out every caller and there
+    # is no shell into the free-tier Render container to mint a key by hand.
+    # `bootstrap_from_env` reads a PRE-HASHED key from env (SHA256 hex only;
+    # the raw key never touches deploy env) and injects one row IFF the
+    # table is empty. On a second start the table has a row and this is a
+    # no-op. See src/oncology_arbiter/auth/bootstrap.py for the contract.
+    try:
+        _bootstrap_result = bootstrap_from_env()
+        if _bootstrap_result.get("fired"):
+            _logger.info(
+                "auth_bootstrap fired: tenant_id=%s key_prefix=%s",
+                _bootstrap_result.get("tenant_id"),
+                _bootstrap_result.get("key_prefix"),
+            )
+        elif _bootstrap_result.get("reason") not in (
+            "bootstrap_env_incomplete",
+            "tenants_table_not_empty",
+        ):
+            # Only log if it's a real config bug (e.g. malformed hash), not
+            # the two silent-no-op paths that fire on every non-configured
+            # local dev start.
+            _logger.warning("auth_bootstrap skipped: %s", _bootstrap_result)
+    except Exception as _boot_exc:  # pragma: no cover
+        _logger.warning("auth_bootstrap raised: %s", _boot_exc)
 
 
     @app.get("/health", response_model=HealthResponse)

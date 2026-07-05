@@ -18,12 +18,14 @@ from .api_key import (
     make_key,
     verify_api_key,
 )
+from .bootstrap import bootstrap_from_env
 from .middleware import ApiKeyDep, require_api_key
 
 __all__ = [
     "APIKey",
     "APIKeyDB",
     "ApiKeyDep",
+    "bootstrap_from_env",
     "hash_key",
     "make_key",
     "require_api_key",

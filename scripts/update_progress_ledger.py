@@ -708,6 +708,116 @@ SPRINTS = [
 ]
 
 
+# --------------------------------------------------------------------------- #
+# Milestones — coarser than sprints, per-user-visible-shipment.
+#
+# A milestone is a shippable slice with a name the user can call by hand:
+# "the NSCLC track went live", "the therapy API now surfaces the rules
+# fingerprint". Sprints track internal cadence; milestones track what the
+# operator can point at from outside. Both live in this file so the ledger
+# regeneration is a single source of truth (per honesty_notes rule #1).
+# --------------------------------------------------------------------------- #
+MILESTONES = [
+    {
+        "id": "M-UI-CANCER-SELECTOR-v0.2",
+        "date": "2026-07-04",
+        "commit_planned_sha": "TBD",
+        "summary": (
+            "Multi-cancer selector landed on worker-3-ui: SettingsDrawer "
+            "(API-key + cancer picker + last X-Request-Id), NsclcTab "
+            "(shape-only placeholder), api.ts injects X-API-Key + captures "
+            "X-Request-Id + opens drawer on 401, backend /health.cancers "
+            "announces wired tracks, /v1/case/full accepts "
+            "?cancer=(breast|nsclc), invalid cancer -> 400."
+        ),
+        "artifacts": [
+            "frontend/src/settings.ts",
+            "frontend/src/components/SettingsDrawer.tsx",
+            "frontend/src/tabs/NsclcTab.tsx",
+            "frontend/src/App.tsx",
+            "src/oncology_arbiter/api/app.py (/health.cancers, /v1/case/full?cancer=)",
+        ],
+    },
+    {
+        "id": "M-NSCLC-LUNG-HEURISTIC-v0.2",
+        "date": "2026-07-04",
+        "commit_planned_sha": "TBD",
+        "summary": (
+            "worker-2 landed the NSCLC track: LIDC-IDRI CT + HU-threshold "
+            "heuristic + NCCN-lite rules for lung cancer, gated behind "
+            "ONCOLOGY_ARBITER_ALLOW_SERIES_DIR=1 with a shape-only "
+            "placeholder response and honest warning when the gate is off."
+        ),
+        "artifacts": [
+            "src/oncology_arbiter/models/nsclc_pipeline.py",
+            "src/oncology_arbiter/models/nsclc_rules_lite.py",
+            "docs/model_cards/nsclc_lung_heuristic_v0.md",
+        ],
+    },
+    {
+        "id": "M-NCCN-RULES-HARDENING-v0.2",
+        "date": "2026-07-04",
+        "commit_planned_sha": "431e22c",
+        "summary": (
+            "worker-4 hardened the NCCN-lite therapy rules engine: SHA-256 "
+            "fingerprint pinned to nccn-lite-v0 rules snapshot, "
+            "RulesetIntegrityError on schema drift, InvalidInputError on "
+            "malformed stage/receptor input, menopausal-unknown branch that "
+            "recommends tamoxifen + LH/FSH workup instead of silently "
+            "picking AI. 22 hardening tests + 8 baseline all pass."
+        ),
+        "artifacts": [
+            "src/oncology_arbiter/models/therapy_rules_lite.py",
+            "tests/unit/test_therapy_rules_lite_hardening.py",
+            "docs/model_cards/therapy_nccn_lite.md (v0.2 hardening section)",
+        ],
+    },
+    {
+        "id": "M-THERAPY-API-FINGERPRINT-v0.2",
+        "date": "2026-07-04",
+        "commit_planned_sha": "2850610",
+        "summary": (
+            "/v1/therapy/reason surfaces rules_sha256 + rules_model_id + "
+            "branch_id when the response comes from the rules-lite path. "
+            "TherapyRequest gained strict: bool = False; strict=true + "
+            "malformed stage -> HTTP 400 with therapy_rules_lite_invalid_input "
+            "detail. 5 new API-level tests pass."
+        ),
+        "artifacts": [
+            "src/oncology_arbiter/api/schemas.py",
+            "src/oncology_arbiter/api/app.py",
+            "tests/unit/test_therapy_api_rules_fingerprint.py",
+            "docs/model_cards/therapy_nccn_lite.md (v0.2 wire contract section)",
+        ],
+    },
+    {
+        "id": "M-AUTH-BOOTSTRAP-v0.2",
+        "date": "2026-07-05",
+        "commit_planned_sha": "TBD",
+        "summary": (
+            "One-shot bootstrap for the SQLite tenants table so Render can "
+            "flip ONCOLOGY_ARBITER_AUTH_MODE=on without shelling into the "
+            "container. Reads pre-hashed key from env (SHA256 hex only; raw "
+            "key never touches deploy env), injects one tenant row iff the "
+            "table is empty, is a no-op on replay. Wired into create_app() "
+            "startup. Also added tests/conftest.py so keyless local/CI tests "
+            "are not at the mercy of ambient AUTH_MODE. 20 new bootstrap "
+            "tests + repo-wide 532 passed / 86 skipped / 0 failed on a "
+            "clean worker (up from 500 that was silently env-dependent)."
+        ),
+        "artifacts": [
+            "src/oncology_arbiter/auth/bootstrap.py",
+            "src/oncology_arbiter/auth/__init__.py",
+            "src/oncology_arbiter/api/app.py",
+            "tests/conftest.py",
+            "tests/unit/test_auth_bootstrap.py",
+            "src/oncology_arbiter/__init__.py (__version__ -> 0.2.0-alpha)",
+            "pyproject.toml (version -> 0.2.0-alpha)",
+        ],
+    },
+]
+
+
 DEFERRED_DECISIONS = [
     {
         "id": "ADR-0001",
@@ -847,6 +957,7 @@ def build_ledger() -> dict:
         "user_stories": USER_STORIES,
         "subsystems": SUBSYSTEMS,
         "sprints": SPRINTS,
+        "milestones": MILESTONES,
         "deferred_decisions": DEFERRED_DECISIONS,
         "external_gates": EXTERNAL_GATES,
         "honesty_notes": HONESTY_NOTES,
