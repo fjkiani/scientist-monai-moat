@@ -1,7 +1,7 @@
 {
   "$schema_version": "1.0.0",
-  "generated_at": "2026-07-04T20:16:05+00:00",
-  "git_sha": "f7c8b61c9138d6e03b3da1ed093fdce89b989cab",
+  "generated_at": "2026-07-05T15:07:14+00:00",
+  "git_sha": "0a1d8e982acca3fb1b3e30c0e37491532861efda",
   "project": {
     "name": "oncology-arbiter",
     "one_line_goal": "Open-architecture breast oncology reasoning platform spanning screening \u2192 biopsy \u2192 therapy, with calibrated per-stage arbiters, cited evidence, and honest performance disclosure.",
@@ -654,6 +654,70 @@
       "notes": "HAI-DEF regression-guarded via test_check_probes_resolve_endpoint_not_api_metadata."
     }
   ],
+  "milestones": [
+    {
+      "id": "M-UI-CANCER-SELECTOR-v0.2",
+      "date": "2026-07-04",
+      "commit_planned_sha": "TBD",
+      "summary": "Multi-cancer selector landed on worker-3-ui: SettingsDrawer (API-key + cancer picker + last X-Request-Id), NsclcTab (shape-only placeholder), api.ts injects X-API-Key + captures X-Request-Id + opens drawer on 401, backend /health.cancers announces wired tracks, /v1/case/full accepts ?cancer=(breast|nsclc), invalid cancer -> 400.",
+      "artifacts": [
+        "frontend/src/settings.ts",
+        "frontend/src/components/SettingsDrawer.tsx",
+        "frontend/src/tabs/NsclcTab.tsx",
+        "frontend/src/App.tsx",
+        "src/oncology_arbiter/api/app.py (/health.cancers, /v1/case/full?cancer=)"
+      ]
+    },
+    {
+      "id": "M-NSCLC-LUNG-HEURISTIC-v0.2",
+      "date": "2026-07-04",
+      "commit_planned_sha": "TBD",
+      "summary": "worker-2 landed the NSCLC track: LIDC-IDRI CT + HU-threshold heuristic + NCCN-lite rules for lung cancer, gated behind ONCOLOGY_ARBITER_ALLOW_SERIES_DIR=1 with a shape-only placeholder response and honest warning when the gate is off.",
+      "artifacts": [
+        "src/oncology_arbiter/models/nsclc_pipeline.py",
+        "src/oncology_arbiter/models/nsclc_rules_lite.py",
+        "docs/model_cards/nsclc_lung_heuristic_v0.md"
+      ]
+    },
+    {
+      "id": "M-NCCN-RULES-HARDENING-v0.2",
+      "date": "2026-07-04",
+      "commit_planned_sha": "431e22c",
+      "summary": "worker-4 hardened the NCCN-lite therapy rules engine: SHA-256 fingerprint pinned to nccn-lite-v0 rules snapshot, RulesetIntegrityError on schema drift, InvalidInputError on malformed stage/receptor input, menopausal-unknown branch that recommends tamoxifen + LH/FSH workup instead of silently picking AI. 22 hardening tests + 8 baseline all pass.",
+      "artifacts": [
+        "src/oncology_arbiter/models/therapy_rules_lite.py",
+        "tests/unit/test_therapy_rules_lite_hardening.py",
+        "docs/model_cards/therapy_nccn_lite.md (v0.2 hardening section)"
+      ]
+    },
+    {
+      "id": "M-THERAPY-API-FINGERPRINT-v0.2",
+      "date": "2026-07-04",
+      "commit_planned_sha": "2850610",
+      "summary": "/v1/therapy/reason surfaces rules_sha256 + rules_model_id + branch_id when the response comes from the rules-lite path. TherapyRequest gained strict: bool = False; strict=true + malformed stage -> HTTP 400 with therapy_rules_lite_invalid_input detail. 5 new API-level tests pass.",
+      "artifacts": [
+        "src/oncology_arbiter/api/schemas.py",
+        "src/oncology_arbiter/api/app.py",
+        "tests/unit/test_therapy_api_rules_fingerprint.py",
+        "docs/model_cards/therapy_nccn_lite.md (v0.2 wire contract section)"
+      ]
+    },
+    {
+      "id": "M-AUTH-BOOTSTRAP-v0.2",
+      "date": "2026-07-05",
+      "commit_planned_sha": "TBD",
+      "summary": "One-shot bootstrap for the SQLite tenants table so Render can flip ONCOLOGY_ARBITER_AUTH_MODE=on without shelling into the container. Reads pre-hashed key from env (SHA256 hex only; raw key never touches deploy env), injects one tenant row iff the table is empty, is a no-op on replay. Wired into create_app() startup. Also added tests/conftest.py so keyless local/CI tests are not at the mercy of ambient AUTH_MODE. 20 new bootstrap tests + repo-wide 532 passed / 86 skipped / 0 failed on a clean worker (up from 500 that was silently env-dependent).",
+      "artifacts": [
+        "src/oncology_arbiter/auth/bootstrap.py",
+        "src/oncology_arbiter/auth/__init__.py",
+        "src/oncology_arbiter/api/app.py",
+        "tests/conftest.py",
+        "tests/unit/test_auth_bootstrap.py",
+        "src/oncology_arbiter/__init__.py (__version__ -> 0.2.0-alpha)",
+        "pyproject.toml (version -> 0.2.0-alpha)"
+      ]
+    }
+  ],
   "deferred_decisions": [
     {
       "id": "ADR-0001",
@@ -704,86 +768,5 @@
     "Hand-drafted math with caveat in a model card counts as LIVE (per user decision 2026-07-02) \u2014 the illustrative caveat lives in the model card and in `warnings`, not in the ledger tier.",
     "Stubs, placeholders, silent-failure fallbacks, and scaffolded-but-unconnected features are NOT_WIRED with an explicit `not_wired_reason`. They may still ship.",
     "Live-smoke numbers cited in this ledger (e.g. overall_score=7.976839697221294e-06) are bit-verified against the transcript.jsonl record before landing."
-  ],
-  "milestones": [
-    {
-      "id": "M-UI-CANCER-SELECTOR-v0.2",
-      "date": "2026-07-04",
-      "commit_planned_sha": "TBD",
-      "summary": "Multi-cancer selector landed on worker-3-ui: SettingsDrawer (API-key + cancer picker + last X-Request-Id), NsclcTab (shape-only placeholder), api.ts injects X-API-Key + captures X-Request-Id + opens drawer on 401, backend /health.cancers announces wired tracks, /v1/case/full accepts ?cancer=(breast|nsclc), invalid cancer \u2192 400.",
-      "artifacts": [
-        "frontend/src/settings.ts",
-        "frontend/src/components/SettingsDrawer.tsx",
-        "frontend/src/tabs/NsclcTab.tsx",
-        "frontend/src/App.tsx (settings drawer + NSCLC tab + cancer pill)",
-        "frontend/src/api.ts (installApiHooks, X-API-Key inject, X-Request-Id capture, Auth401Error)",
-        "src/oncology_arbiter/api/schemas.py (+HealthResponse.cancers)",
-        "src/oncology_arbiter/api/app.py (?cancer= param, /health.cancers map)",
-        "tests/unit/test_cancer_selector.py (9 tests)"
-      ],
-      "tests_state": "worker-3 pytest: 439 passed, 86 skipped (CBIS-DDSM fixtures live on worker-1). worker-1 must be re-run post-merge."
-    },
-    {
-      "id": "M-NSCLC-LUNG-HEURISTIC-v0.2",
-      "date": "2026-07-04",
-      "commit_planned_sha": "TBD",
-      "summary": "worker-2 landed the NSCLC track: LIDC-IDRI CT reader + HU-threshold + connected-components lung heuristic, piecewise-linear diameter-to-logit arbiter with Fleischner-style buckets, NCCN-lite therapy rules with mass addendum, LIDC cohort walker + provenance, and /v1/case/full?cancer=nsclc wired end-to-end. Real pipeline gated behind ONCOLOGY_ARBITER_ALLOW_SERIES_DIR=1; without the gate the endpoint returns the same JSON shape as a placeholder with an explanatory warning.",
-      "artifacts": [
-        "src/oncology_arbiter/lung/ct_reader.py",
-        "src/oncology_arbiter/lung/pipeline.py",
-        "src/oncology_arbiter/lung/arbiter.py",
-        "src/oncology_arbiter/lung/__init__.py",
-        "src/oncology_arbiter/data/lidc_idri.py",
-        "src/oncology_arbiter/models/nccn_nsclc_rules.py",
-        "src/oncology_arbiter/api/schemas.py (+NsclcCTInput, +NsclcResponse, +NsclcCandidate, +NsclcTherapyOption, +ModelState.PROXY_LUNG_HEURISTIC)",
-        "src/oncology_arbiter/api/app.py (real+placeholder NSCLC branch on /v1/case/full)",
-        "tests/unit/test_nsclc_pipeline.py (42 tests)",
-        "tests/unit/test_case_full_nsclc_api.py (4 tests, synthetic pydicom CT)",
-        "docs/model_cards/nsclc_lung_heuristic_v0.md"
-      ],
-      "tests_state": "worker-2 pytest: 473 passed, 86 skipped, 0 failed. Includes the 42 NSCLC unit tests and 4 API-level tests. LIDC 3-patient regression via HTTP: LIDC-IDRI-0001 -> 35.45 mm HIGH, LIDC-IDRI-0002 -> 26.75 mm HIGH, LIDC-IDRI-0003 -> 30.22 mm HIGH."
-    },
-    {
-      "id": "M-NCCN-RULES-HARDENING-v0.2",
-      "title": "NCCN rules engine hardening: SHA-256 fingerprint, schema drift guard, strict input validation, menopausal-unknown safe-default branch",
-      "state": "landed",
-      "worker": "worker-4",
-      "branch": "worker-4-rules-hardening",
-      "artifacts": [
-        "src/oncology_arbiter/models/therapy_rules_lite.py",
-        "tests/unit/test_therapy_rules_lite_hardening.py",
-        "docs/model_cards/therapy_nccn_lite.md"
-      ],
-      "test_bar": "495 passed, 86 skipped, 0 failed",
-      "rules_sha256": "6c3106470f8276e042109c61d04e4d2c95dc250682658c51de0ac827ed0ff316",
-      "notes": [
-        "TherapyRulesResult now surfaces rules_sha256, rules_model_id, branch_id",
-        "RulesetIntegrityError raised on JSON model_id / URL / branch drift + uncovered branch_ids",
-        "InvalidInputError raised (strict=True) on receptor_status / grade / stage / menopausal_status drift",
-        "menopausal_status='unknown' returns Tamoxifen + menopause-workup, refuses to guess AI",
-        "22 new hardening tests + 8 baseline branch tests = 30 tests locally green"
-      ]
-    },
-    {
-      "id": "M-THERAPY-API-FINGERPRINT-v0.2",
-      "title": "/v1/therapy/reason surfaces rules_sha256 + rules_model_id + branch_id; strict=true returns HTTP 400 on input drift",
-      "state": "landed",
-      "worker": "worker-4",
-      "branch": "worker-4-rules-hardening",
-      "artifacts": [
-        "src/oncology_arbiter/api/schemas.py",
-        "src/oncology_arbiter/api/app.py",
-        "tests/unit/test_therapy_api_rules_fingerprint.py",
-        "docs/model_cards/therapy_nccn_lite.md"
-      ],
-      "test_bar": "500 passed, 86 skipped, 0 failed",
-      "rules_sha256": "6c3106470f8276e042109c61d04e4d2c95dc250682658c51de0ac827ed0ff316",
-      "notes": [
-        "TherapyResponse gained rules_sha256, rules_model_id, branch_id (optional, populated on proxy_rules_lite path only)",
-        "TherapyRequest gained strict: bool = False; propagates to apply_nccn_lite_rules",
-        "InvalidInputError -> HTTP 400 with therapy_rules_lite_invalid_input detail",
-        "5 API-level tests: fingerprint surfacing, placeholder-null, strict-400, non-strict-permissive, stability"
-      ]
-    }
   ]
 }

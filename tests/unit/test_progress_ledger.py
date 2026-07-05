@@ -57,6 +57,7 @@ def test_ledger_top_level_keys_present(ledger: dict) -> None:
         "user_stories",
         "subsystems",
         "sprints",
+        "milestones",
         "deferred_decisions",
         "external_gates",
         "honesty_notes",
@@ -68,7 +69,20 @@ def test_ledger_has_at_least_one_of_every_category(ledger: dict) -> None:
     assert ledger["user_stories"], "user_stories is empty"
     assert ledger["subsystems"], "subsystems is empty"
     assert ledger["sprints"], "sprints is empty"
+    assert ledger["milestones"], "milestones is empty"
     assert ledger["external_gates"], "external_gates is empty"
+
+
+def test_ledger_milestones_have_required_fields(ledger: dict) -> None:
+    """Every milestone must carry the minimum descriptive fields."""
+    for m in ledger["milestones"]:
+        for key in ("id", "date", "summary", "artifacts"):
+            assert key in m, f"milestone {m.get('id', '?')} missing {key}"
+        assert m["id"], f"empty id in {m}"
+        assert m["summary"], f"empty summary in {m['id']}"
+        assert isinstance(m["artifacts"], list) and m["artifacts"], (
+            f"milestone {m['id']} has empty artifacts list"
+        )
 
 
 # --------------------------------------------------------------------------- #

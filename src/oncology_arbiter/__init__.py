@@ -10,7 +10,7 @@ Not FDA-cleared. Not CE-marked. Not intended for clinical use.
 """
 from __future__ import annotations
 
-__version__ = "0.1.0-alpha"
+__version__ = "0.2.0-alpha"
 
 RUO_DISCLAIMER = (
     "RESEARCH USE ONLY — not validated for clinical decision-making. "
