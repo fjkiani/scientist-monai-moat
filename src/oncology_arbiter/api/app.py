@@ -307,7 +307,7 @@ def create_app() -> FastAPI:
 
         limiter = Limiter(
             key_func=make_key_func(),
-            default_limits=[os.environ.get("ONCOLOGY_ARBITER_RATE_LIMIT", "60/minute")],
+            default_limits=[os.environ.get("ONCOLOGY_ARBITER_RATE_LIMIT", "30/minute")],
         )
         app.state.limiter = limiter
         app.add_middleware(SlowAPIMiddleware)

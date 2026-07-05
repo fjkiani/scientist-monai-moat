@@ -870,6 +870,29 @@ MILESTONES = [
             "Render env var: ONCOLOGY_ARBITER_TRUST_FORWARDED_FOR=1",
         ],
     },
+    {
+        "id": "M-RATE-LIMIT-DEFAULT-BUMP-v0.2",
+        "date": "2026-07-05",
+        "commit_planned_sha": "TBD",
+        "summary": (
+            "After the proxy-aware key_func landed and started counting "
+            "distinct callers correctly, live hammering at the previous "
+            "60/minute default still did not surface a 429 within a "
+            "single-tester burst budget: 150 concurrent + 100 sequential "
+            "requests all returned 200. Lowering the Render env override "
+            "to ONCOLOGY_ARBITER_RATE_LIMIT=30/minute produced the "
+            "expected behaviour (429 fires at request #31 with "
+            "retry-after: 60, saved to proofs/v0.2-rate-limit/summary.json). "
+            "This commit aligns the in-code default with the observed-"
+            "working policy so the service is not silently permissive if "
+            "the env override is ever removed. Env var still overrides."
+        ),
+        "artifacts": [
+            "src/oncology_arbiter/api/app.py (default_limits 60/minute -> 30/minute)",
+            "src/oncology_arbiter/api/rate_limit.py (docstring example)",
+            "/mnt/results/proofs/v0.2-rate-limit/summary.json",
+        ],
+    },
 ]
 
 

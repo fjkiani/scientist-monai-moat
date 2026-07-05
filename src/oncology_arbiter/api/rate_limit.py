@@ -47,7 +47,7 @@ Passed directly to ``slowapi.Limiter(key_func=...)`` in
 
     from oncology_arbiter.api.rate_limit import make_key_func
     key_func = make_key_func()
-    limiter = Limiter(key_func=key_func, default_limits=["60/minute"])
+    limiter = Limiter(key_func=key_func, default_limits=["30/minute"])
 """
 from __future__ import annotations
 
