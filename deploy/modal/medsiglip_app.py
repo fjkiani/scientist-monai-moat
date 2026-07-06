@@ -151,6 +151,17 @@ class MedSigLipModal:
         pil = Image.fromarray(arr8, mode="L").convert("RGB")
         return pil
 
+    def _pixels_bytes_to_pil(self, img_bytes: bytes):
+        """Decode PNG/JPEG bytes → PIL RGB. Used for already-processed images
+        (e.g., the CBIS-DDSM_1024 PNG cohort) so callers do not need to
+        re-encode as DICOM."""
+        from PIL import Image
+
+        pil = Image.open(io.BytesIO(img_bytes))
+        # SigLIP wants 3-channel RGB. Grayscale mammograms become RGB by
+        # channel replication (same as the DICOM path).
+        return pil.convert("RGB")
+
     # ─── Core embed logic ────────────────────────────────────────────
     def _embed_pils(self, pils: List[Any]) -> List[List[float]]:
         import torch
@@ -190,20 +201,34 @@ class MedSigLipModal:
     # overhead (~33%) is negligible against total per-call latency.
     @modal.fastapi_endpoint(method="POST", label="medsiglip-embed")
     def embed(self, payload: Dict[str, Any]) -> Dict[str, Any]:
-        """POST JSON: `{"dicom_b64": "..."}`."""
+        """POST JSON: `{"dicom_b64": "..."}` OR `{"pixels_b64": "..."}`.
+
+        ``dicom_b64`` decodes as a DICOM (Modality LUT + windowing).
+        ``pixels_b64`` decodes as a PNG/JPEG (RGB conversion only).
+        """
         t0 = time.time()
-        dicom_b64 = payload.get("dicom_b64", "")
-        if not isinstance(dicom_b64, str) or not dicom_b64:
-            return {"error": "dicom_b64 must be non-empty string"}
+        dicom_b64 = payload.get("dicom_b64")
+        pixels_b64 = payload.get("pixels_b64")
+        if dicom_b64 and pixels_b64:
+            return {"error": "supply only one of dicom_b64 or pixels_b64"}
+        if not dicom_b64 and not pixels_b64:
+            return {"error": "dicom_b64 or pixels_b64 required"}
         try:
-            dcm_bytes = base64.b64decode(dicom_b64)
-            pil = self._dicom_bytes_to_pil(dcm_bytes)
+            if dicom_b64:
+                raw = base64.b64decode(dicom_b64)
+                pil = self._dicom_bytes_to_pil(raw)
+                input_format = "dicom"
+            else:
+                raw = base64.b64decode(pixels_b64)
+                pil = self._pixels_bytes_to_pil(raw)
+                input_format = "pixels"
             embedding = self._embed_pils([pil])[0]
         except Exception as e:  # pragma: no cover - runtime shape only
             return {"error": f"{type(e).__name__}: {e}"}
         return {
             "embedding": embedding,
             "dim": len(embedding),
+            "input_format": input_format,
             "seconds": round(time.time() - t0, 3),
             "app_version": APP_VERSION,
         }
@@ -211,15 +236,27 @@ class MedSigLipModal:
     # ─── /embed_batch  (JSON body: base64 list) ─────────────────────
     @modal.fastapi_endpoint(method="POST", label="medsiglip-embed-batch")
     def embed_batch(self, payload: Dict[str, Any]) -> Dict[str, Any]:
-        """POST JSON: `{"dicoms_b64": ["...", "..."]}`. Max 32 per call."""
+        """POST JSON: `{"dicoms_b64": ["...", "..."]}`. Max 32 per call.
+
+        For PNG/JPEG inputs (already-processed pixel arrays), use
+        ``pixels_b64`` instead — this is honest about the format expected
+        and lets Track V embed the CBIS-DDSM_1024 PNG cohort directly.
+        """
         t0 = time.time()
-        b64s = payload.get("dicoms_b64", [])
+        dicom_b64s = payload.get("dicoms_b64")
+        pixel_b64s = payload.get("pixels_b64")
+        if dicom_b64s and pixel_b64s:
+            return {"error": "supply only one of dicoms_b64 or pixels_b64"}
+        b64s = dicom_b64s or pixel_b64s or []
         if not isinstance(b64s, list) or not b64s:
-            return {"error": "dicoms_b64 must be non-empty list"}
+            return {"error": "dicoms_b64 or pixels_b64 must be non-empty list"}
         if len(b64s) > 32:
             return {"error": "max batch size is 32"}
         try:
-            pils = [self._dicom_bytes_to_pil(base64.b64decode(b)) for b in b64s]
+            if dicom_b64s is not None:
+                pils = [self._dicom_bytes_to_pil(base64.b64decode(b)) for b in b64s]
+            else:
+                pils = [self._pixels_bytes_to_pil(base64.b64decode(b)) for b in b64s]
             embeddings = self._embed_pils(pils)
         except Exception as e:
             return {"error": f"{type(e).__name__}: {e}"}
@@ -227,30 +264,40 @@ class MedSigLipModal:
             "embeddings": embeddings,
             "n": len(embeddings),
             "dim": len(embeddings[0]) if embeddings else 0,
+            "input_format": "dicom" if dicom_b64s is not None else "pixels",
             "seconds": round(time.time() - t0, 3),
             "app_version": APP_VERSION,
         }
 
-    # ─── /zero_shot  (JSON body: dicom_b64 + prompts) ────────────────
+    # ─── /zero_shot  (JSON body: dicom_b64 OR pixels_b64 + prompts) ──
     @modal.fastapi_endpoint(method="POST", label="medsiglip-zero-shot")
     def zero_shot(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         """POST JSON:
-        `{"dicom_b64": "...", "prompts": ["breast mass", "no mass", ...]}`.
+        ``{"dicom_b64": "...", "prompts": [...]}`` OR
+        ``{"pixels_b64": "...", "prompts": [...]}``.
         Returns sigmoid probabilities per prompt (SigLIP semantics).
         """
         import torch
 
         t0 = time.time()
-        dicom_b64 = payload.get("dicom_b64", "")
+        dicom_b64 = payload.get("dicom_b64")
+        pixels_b64 = payload.get("pixels_b64")
         prompts: List[str] = payload.get("prompts", [])
-        if not dicom_b64:
-            return {"error": "dicom_b64 empty"}
+        if dicom_b64 and pixels_b64:
+            return {"error": "supply only one of dicom_b64 or pixels_b64"}
+        if not dicom_b64 and not pixels_b64:
+            return {"error": "dicom_b64 or pixels_b64 required"}
         if not isinstance(prompts, list) or not prompts:
             return {"error": "prompts must be non-empty list"}
         if len(prompts) > 32:
             return {"error": "max 32 prompts"}
         try:
-            pil = self._dicom_bytes_to_pil(base64.b64decode(dicom_b64))
+            if dicom_b64:
+                pil = self._dicom_bytes_to_pil(base64.b64decode(dicom_b64))
+                input_format = "dicom"
+            else:
+                pil = self._pixels_bytes_to_pil(base64.b64decode(pixels_b64))
+                input_format = "pixels"
         except Exception as e:
             return {"error": f"decode: {type(e).__name__}: {e}"}
 
@@ -273,6 +320,7 @@ class MedSigLipModal:
             "prompts": prompts,
             "probs": probs,
             "top": prompts[int(max(range(len(probs)), key=lambda i: probs[i]))],
+            "input_format": input_format,
             "seconds": round(time.time() - t0, 3),
             "app_version": APP_VERSION,
         }

@@ -235,11 +235,21 @@ def _compute_models_loaded() -> dict[str, ModelState]:
 
 
 def _get_medsiglip() -> Any:
-    """Lazy-construct the MedSigLIP client. Reuses one instance per process."""
+    """Lazy-construct the MedSigLIP client. Reuses one instance per process.
+
+    Backend is chosen by ``MEDSIGLIP_BACKEND``:
+      * ``modal`` → :class:`MedSigLipModalClient` (remote A10G, no local
+        weight download, PNG/DICOM in-band via base64)
+      * anything else (default ``local``) → local :class:`MedSigLip`
+
+    The factory delegates so the choice can flip without touching this
+    endpoint's contract; both backends produce the same
+    :class:`MedSigLipResult` shape.
+    """
     global _MEDSIGLIP_SINGLETON
     if _MEDSIGLIP_SINGLETON is None:
-        from oncology_arbiter.models.medsiglip import MedSigLip
-        _MEDSIGLIP_SINGLETON = MedSigLip()
+        from oncology_arbiter.models.medsiglip_modal_client import get_medsiglip_client
+        _MEDSIGLIP_SINGLETON = get_medsiglip_client()
     return _MEDSIGLIP_SINGLETON
 
 
@@ -252,18 +262,30 @@ def _get_siglip_proxy() -> Any:
     return _SIGLIP_PROXY_SINGLETON
 
 
-def _run_medsiglip_on_preprocessed(preprocess_result: Any) -> Any:
+def _run_medsiglip_on_preprocessed(
+    preprocess_result: Any,
+    *,
+    dicom_bytes: bytes | None = None,
+) -> Any:
     """Run MedSigLIP on an already-preprocessed mammogram.
 
-    Uses the client's ``preprocess_fn`` injection point to bypass a second
-    DICOM read — we already have the float32 [0,1] array from the
-    endpoint's ``preprocess_mammogram`` call.
+    Two paths depending on backend:
+
+    * **Local backend** (:class:`oncology_arbiter.models.medsiglip.MedSigLip`):
+      uses ``_preprocess_fn`` injection so the client's PIL conversion runs
+      but no second DICOM I/O happens.
+    * **Modal backend** (:class:`MedSigLipModalClient`): Modal does its own
+      DICOM preprocess remotely — we need the raw DICOM bytes. We write
+      them to a temp file and call ``.run(path)``. If ``dicom_bytes`` is
+      not supplied, the fallback re-encodes the already-preprocessed
+      float32 image to an 8-bit PNG so Modal's ``pixels_b64`` branch can
+      handle it (loses some fidelity but preserves the honest path).
 
     Raises ``GatedAccessError`` on HAI-DEF gate denial. Callers MUST NOT
     catch this and silently fall back; the endpoint decides fallback
     policy explicitly via env flag.
 
-    Phase 2 limitation (2026-07-03): this helper mutates
+    Phase 2 limitation (2026-07-03): the local branch mutates
     ``ms._preprocess_fn`` on the singleton for the duration of the call.
     That is safe under FastAPI's default single-threaded async request
     handling but is NOT safe under a threadpool. Phase 3 will either
@@ -272,8 +294,38 @@ def _run_medsiglip_on_preprocessed(preprocess_result: Any) -> Any:
     the ``.run()`` signature directly.
     """
     ms = _get_medsiglip()
-    # Feed the already-computed preprocess result back in via the injectable
-    # hook so the client's PIL conversion path runs but no second DICOM I/O happens.
+    # Late import avoids circulars and keeps modal client optional at load time.
+    from oncology_arbiter.models.medsiglip_modal_client import MedSigLipModalClient
+
+    if isinstance(ms, MedSigLipModalClient):
+        if dicom_bytes is not None:
+            with tempfile.NamedTemporaryFile(suffix=".dcm", delete=False) as tf:
+                tf.write(dicom_bytes)
+                tmp_path = tf.name
+            try:
+                return ms.run(tmp_path)
+            finally:
+                Path(tmp_path).unlink(missing_ok=True)
+        # No raw bytes: re-encode the already-normalised float32 image as
+        # a temp PNG so Modal's pixels_b64 branch can consume it.
+        import io as _io
+        import numpy as _np
+        from PIL import Image as _Image
+
+        arr = _np.asarray(preprocess_result.image)
+        if arr.dtype != _np.uint8:
+            arr = _np.clip(arr * 255.0, 0, 255).astype(_np.uint8)
+        buf = _io.BytesIO()
+        _Image.fromarray(arr, mode="L").save(buf, format="PNG")
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tf:
+            tf.write(buf.getvalue())
+            tmp_path = tf.name
+        try:
+            return ms.run(tmp_path)
+        finally:
+            Path(tmp_path).unlink(missing_ok=True)
+
+    # Local backend path (unchanged): inject the preprocessed image.
     class _AlreadyPreprocessed:
         image = preprocess_result.image
 
@@ -577,7 +629,11 @@ def create_app() -> FastAPI:
 
         if _is_env_true("ONCOLOGY_ARBITER_ENABLE_MEDSIGLIP"):
             try:
-                backend_result = _run_medsiglip_on_preprocessed(result)
+                # Pass raw bytes so the Modal backend can preprocess remotely;
+                # local backend ignores this and uses ``preprocess_result``.
+                backend_result = _run_medsiglip_on_preprocessed(
+                    result, dicom_bytes=raw_bytes,
+                )
                 backend_state = ModelState.LOADED_MEDSIGLIP
                 backend_name = backend_result.model_repo
                 backend_warnings = list(backend_result.warnings)
