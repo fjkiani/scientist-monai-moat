@@ -103,8 +103,47 @@ main {
 
 .pill.placeholder { background: var(--panel); color: var(--fg-muted); }
 .pill.loaded, .pill.loaded_medsiglip, .pill.loaded_biopsy_probe, .pill.loaded_txgemma, .pill.loaded_monai_detector { background: var(--accent-2); color: white; }
-.pill.proxy_siglip, .pill.proxy_rules_lite, .pill.proxy_monai_heuristic { background: var(--warn); color: black; }
+.pill.proxy_siglip, .pill.proxy_rules_lite, .pill.proxy_monai_heuristic, .pill.proxy_lung_heuristic, .pill.proxy_regex_v0, .pill.proxy_co_scientist { background: var(--warn); color: black; }
+.pill.template { background: #e0e7ff; color: #1e3a8a; }
 .pill.gated, .pill.unavailable { background: var(--danger); color: black; }
+
+/* v0.2.2: HonestyPills — clickable, focus ring, popover */
+button.pill {
+  cursor: pointer;
+  font-family: "Menlo", monospace;
+  border: 1px solid var(--border);
+}
+button.pill:hover, button.pill:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.honesty-popover {
+  position: absolute;
+  z-index: 40;
+  max-width: 22rem;
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.75rem 0.9rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+.honesty-popover h4 {
+  margin: 0 0 0.35rem;
+  font-size: 0.85rem;
+  font-family: "Menlo", monospace;
+}
+.honesty-popover .badge {
+  display: inline-block;
+  padding: 0.05rem 0.35rem;
+  border-radius: 3px;
+  font-family: "Menlo", monospace;
+  font-size: 0.7rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+}
 
 .warning {
   background: #fff7ed;

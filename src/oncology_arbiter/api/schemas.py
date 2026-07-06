@@ -33,6 +33,9 @@ class ModelState(str, Enum):
     PROXY_LUNG_HEURISTIC = "proxy_lung_heuristic"  # NSCLC HU-threshold + CC blobs (LIDC-IDRI) — not a trained detector
     PROXY_RULES_LITE = "proxy_rules_lite"  # L4c NCCN-lite rules fallback when TxGemma gated
     LOADED_TXGEMMA = "loaded_txgemma"  # L4c HAI-DEF TxGemma inference (never reachable under current token)
+    TEMPLATE = "template"             # L3 arbiter JSON templates loaded from disk (n_training=0)
+    PROXY_REGEX_V0 = "proxy_regex_v0" # v0.2.1 pathology-report regex parser (stateless code, always available)
+    PROXY_CO_SCIENTIST = "proxy_co_scientist"  # L5 orchestrator: literature-derived Elo tournament (deterministic scoring)
 
 
 class EvidenceRecord(BaseModel):
@@ -479,3 +482,40 @@ class HealthResponse(BaseModel):
     # per cancer without a schema migration; the SPA only reads the keys it
     # knows.
     cancers: dict[str, dict] = {}
+
+
+# --------------------------------------------------------------------------- #
+# /v1/demo/case (v0.2.2)
+
+
+class DemoCaseResponse(BaseModel):
+    """Fully-formed sample case returned by ``GET /v1/demo/case``.
+
+    The DICOM is a public CBIS-DDSM training image (CC-BY-NC 4.0); the
+    pathology text and patient context are synthetic. See the endpoint
+    docstring in ``app.py`` for the full source citation and license.
+    """
+    model_config = ConfigDict(extra="forbid")
+
+    dicom_bytes_b64: str = Field(
+        ..., description="Base64-encoded DICOM ready to POST to /v1/screening/analyze."
+    )
+    dicom_source: str = Field(
+        ..., description="Human-readable citation for the DICOM."
+    )
+    dicom_sha256: str = Field(
+        ..., description="SHA-256 of the DICOM bytes (before base64 encoding)."
+    )
+    dicom_size_bytes: int = Field(
+        ..., ge=0, description="Raw DICOM size before base64 encoding."
+    )
+    report_text: str = Field(
+        ..., description="Canned luminal-A pathology report matching the frontend example."
+    )
+    patient_context: dict[str, Any] = Field(
+        default_factory=dict, description="Patient context to send to /v1/therapy/reason."
+    )
+    warnings: list[str] = Field(
+        default_factory=list,
+        description="Honesty caveats — 'not a real patient', 'RUO', 'synthetic report', etc.",
+    )

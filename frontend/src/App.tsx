@@ -13,11 +13,16 @@ import {
   type CancerId,
 } from "./settings";
 import { SettingsDrawer } from "./components/SettingsDrawer";
+import { HonestyPills } from "./components/HonestyPills";
 
 type Tab = "screening" | "biopsy" | "therapy" | "case" | "cards" | "nsclc";
 
 export function App() {
-  const [tab, setTab] = useState<Tab>("screening");
+  // v0.2.2: Case View is the primary landing tab — it bundles the whole
+  // workflow (screening → biopsy → therapy → co-scientist) into one form,
+  // which is where a first-time user should start. Individual tabs stay
+  // available for narrower single-endpoint testing.
+  const [tab, setTab] = useState<Tab>("case");
   const [health, setHealth] = useState<HealthResponseWithCancers | null>(null);
   const [cards, setCards] = useState<ModelCardsIndex | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -91,9 +96,9 @@ export function App() {
               req: {lastRequestId}
             </span>
           )}
-          {health && Object.entries(health.models_loaded || {}).map(([k, v]) => (
-            <span key={k} className={`pill ${v}`}>{k}: {v}</span>
-          ))}
+          {health && (
+            <HonestyPills models={health.models_loaded || {}} />
+          )}
         </div>
       </header>
 

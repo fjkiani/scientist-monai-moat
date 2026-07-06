@@ -20,6 +20,7 @@ from __future__ import annotations
 import base64
 import io
 import tempfile
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
 
@@ -42,6 +43,7 @@ from .schemas import (
     BiopsyReceptorPanel,
     BiopsyRequest,
     BiopsyResponse,
+    DemoCaseResponse,
     NsclcCTInput,
     NsclcResponse,
     NsclcCandidate,
@@ -173,6 +175,65 @@ def _is_env_true(name: str) -> bool:
     return val.strip().lower() in ("1", "true", "yes", "on")
 
 
+def _compute_models_loaded() -> dict[str, ModelState]:
+    """Compute each model slot's live state from env vars at request time.
+
+    v0.2.2: replaces the previous static hardcode. Each slot's precedence
+    mirrors the endpoint's own precedence — see the /v1/{screening,biopsy,
+    therapy,case/full} handlers. Slots that run stateless code (regex
+    parser, l3 arbiter JSON templates) always report their "running" state.
+
+    Never raises. Never touches disk or network.
+    """
+    # Screening: MedSigLIP > SigLIP proxy > MONAI heuristic > placeholder.
+    if _is_env_true("ONCOLOGY_ARBITER_ENABLE_MEDSIGLIP"):
+        screening = ModelState.LOADED_MEDSIGLIP
+    elif _is_env_true("ONCOLOGY_ARBITER_ENABLE_SIGLIP_PROXY"):
+        screening = ModelState.PROXY_SIGLIP
+    elif _is_env_true("ONCOLOGY_ARBITER_ENABLE_MONAI_DETECTOR"):
+        screening = ModelState.PROXY_MONAI_HEURISTIC
+    else:
+        screening = ModelState.PLACEHOLDER
+
+    # Biopsy classifier: MedSigLIP probe only. Regex parser is a separate slot.
+    biopsy = (
+        ModelState.LOADED_BIOPSY_PROBE
+        if _is_env_true("ONCOLOGY_ARBITER_ENABLE_BIOPSY_MEDSIGLIP")
+        else ModelState.PLACEHOLDER
+    )
+
+    # Therapy: TxGemma > rules-lite > placeholder.
+    if _is_env_true("ONCOLOGY_ARBITER_ENABLE_THERAPY_TXGEMMA"):
+        therapy = ModelState.LOADED_TXGEMMA
+    elif _is_env_true("ONCOLOGY_ARBITER_ENABLE_THERAPY_RULES_PROXY"):
+        therapy = ModelState.PROXY_RULES_LITE
+    else:
+        therapy = ModelState.PLACEHOLDER
+
+    co_sci = (
+        ModelState.PROXY_CO_SCIENTIST
+        if _is_env_true("ONCOLOGY_ARBITER_ENABLE_CO_SCIENTIST")
+        else ModelState.PLACEHOLDER
+    )
+
+    return {
+        "monai_screening": screening,
+        "medsiglip_biopsy": biopsy,
+        # v0.2.1 regex parser: stateless code, always available. This is
+        # honest — the parser is what actually populates receptor_panel
+        # today, not the medsiglip probe.
+        "biopsy_report_parser": ModelState.PROXY_REGEX_V0,
+        "txgemma_therapy": therapy,
+        "co_scientist": co_sci,
+        # L3 arbiter templates are JSON on disk with n_training=0. They're
+        # "loaded" as templates; the per-response arbiter_score.model_state
+        # Literal ("template" | "frozen") carries the same honesty note.
+        "l3_arbiter": ModelState.TEMPLATE,
+        # NSCLC track: real heuristic + rules-lite. Unchanged from v0.2.1.
+        "nsclc_pipeline": ModelState.PROXY_LUNG_HEURISTIC,
+    }
+
+
 def _get_medsiglip() -> Any:
     """Lazy-construct the MedSigLIP client. Reuses one instance per process."""
     global _MEDSIGLIP_SINGLETON
@@ -258,11 +319,49 @@ _ARTIFACT_ROOTS: dict[ArtifactCategory, Path] = {
 # App factory
 
 
+@asynccontextmanager
+async def _lifespan(app: FastAPI):
+    """FastAPI lifespan handler.
+
+    v0.2.2: eagerly fetch the demo DICOM at startup so the first user request
+    to /v1/demo/case doesn't block on a ~14 MB HuggingFace download. If the
+    fetch fails (offline dev, HF outage, CI without network), we swallow the
+    error — the endpoint will retry at request time and either succeed or
+    return a 503 with a useful message.
+
+    Skip pre-warm entirely when the env flag ONCOLOGY_ARBITER_SKIP_DEMO_PREWARM
+    is truthy. Unit tests set this so they don't hammer /tmp on every
+    create_app() call.
+    """
+    if not _is_env_true("ONCOLOGY_ARBITER_SKIP_DEMO_PREWARM"):
+        try:
+            from .demo_fixtures import prewarm_demo_case
+
+            path = prewarm_demo_case()
+            if path is not None:
+                get_logger().info(
+                    "demo case pre-warmed at %s (%d bytes)",
+                    path, path.stat().st_size,
+                )
+            else:
+                get_logger().info(
+                    "demo case pre-warm skipped (no local fixture, HF unreachable)"
+                )
+        except Exception as exc:
+            # Never block startup for a demo fetch. prewarm_demo_case()
+            # itself already swallows; this is belt-and-suspenders in case
+            # someone refactors it to re-raise.
+            get_logger().warning("demo pre-warm crashed: %s", exc)
+    yield
+    # No shutdown work today.
+
+
 def create_app() -> FastAPI:
     app = FastAPI(
         title="oncology-arbiter",
         version=__version__,
         description=RUO_DISCLAIMER + "\n\n" + AUROC_CAVEAT,
+        lifespan=_lifespan,
     )
 
     # ------------------------------------------------------------------- #
@@ -385,6 +484,7 @@ def create_app() -> FastAPI:
                 "POST /v1/biopsy/analyze",
                 "POST /v1/therapy/reason",
                 "POST /v1/case/full",
+                "GET  /v1/demo/case",
                 "GET  /v1/model-cards",
                 "GET  /v1/artifacts/{category}/{filename}",
                 "GET  /health",
@@ -408,18 +508,7 @@ def create_app() -> FastAPI:
                     ),
                 },
             },
-            models_loaded={
-                "monai_screening": ModelState.PLACEHOLDER,
-                "medsiglip_biopsy": ModelState.PLACEHOLDER,
-                "txgemma_therapy": ModelState.PLACEHOLDER,
-                "co_scientist": ModelState.PLACEHOLDER,
-                # The L3 arbiter templates ARE loaded (they're JSON on disk),
-                # but they carry n_training=0 → treated as placeholder at the
-                # health-check level per the PLAN.md honesty rules.
-                "l3_arbiter": ModelState.PLACEHOLDER,
-                # NSCLC track: real heuristic + rules-lite, gated by env.
-                "nsclc_pipeline": ModelState.PROXY_LUNG_HEURISTIC,
-            },
+            models_loaded=_compute_models_loaded(),
         )
 
     # ----------------------------------------------------------------------- #
@@ -1124,6 +1213,54 @@ def create_app() -> FastAPI:
                 "disclaimer": RUO_DISCLAIMER,
                 "caveat": AUROC_CAVEAT,
             },
+        )
+
+    # ----------------------------------------------------------------------- #
+    # /v1/demo/case — server-hosted sample case for first-time users
+    #
+    # v0.2.2: previously the SPA shipped a small canned pathology string but
+    # had no bundled DICOM, forcing users to hunt for one before they could
+    # exercise the pipeline. The demo endpoint returns a fully-formed case
+    # (real DICOM + pathology text + patient context) so a first-time user
+    # can click "Load demo case" and see the full workflow run.
+    #
+    # DICOM provenance: CBIS-DDSM (helloerikaaa/cbis-ddsm-r on HuggingFace,
+    # CC-BY-NC 4.0). Mass-Test_P_00016_LEFT_CC.dcm is the smallest of the
+    # 5 fixtures we already ship (~14 MB). No auth needed to fetch.
+    # Pathology text: synthetic luminal-A case (matches the frontend
+    # LUMINAL_A_EXAMPLE constant). Not a real patient.
+
+    @app.get(
+        "/v1/demo/case",
+        response_model=DemoCaseResponse,
+        summary="Return a fully-formed sample case for demoing the pipeline.",
+    )
+    def demo_case(
+        tenant: APIKey = Depends(require_api_key),
+    ) -> DemoCaseResponse:
+        from .demo_fixtures import DemoFixtureUnavailable, build_demo_case
+
+        try:
+            case = build_demo_case()
+        except DemoFixtureUnavailable as e:
+            raise HTTPException(
+                status_code=503,
+                detail=(
+                    f"Demo case unavailable: {e}. "
+                    "The server could not fetch the CBIS-DDSM fixture "
+                    "(helloerikaaa/cbis-ddsm-r on HuggingFace). "
+                    "This is transient — please retry in a moment."
+                ),
+            ) from e
+
+        return DemoCaseResponse(
+            dicom_bytes_b64=case.dicom_bytes_b64,
+            dicom_source=case.dicom_source,
+            dicom_sha256=case.dicom_sha256,
+            dicom_size_bytes=case.dicom_size_bytes,
+            report_text=case.report_text,
+            patient_context=case.patient_context,
+            warnings=case.warnings,
         )
 
     # ----------------------------------------------------------------------- #

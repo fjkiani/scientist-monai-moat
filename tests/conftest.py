@@ -31,3 +31,9 @@ def pytest_configure(config):
     enforced path (``AUTH_MODE=on`` from the shell) is left alone.
     """
     os.environ.setdefault("ONCOLOGY_ARBITER_AUTH_MODE", "off")
+
+    # v0.2.2: the /v1/demo/case pre-warm tries to fetch a ~14 MB DICOM from
+    # HuggingFace at every `create_app()`. Skipping it in tests keeps the
+    # suite fast and network-free by default. Tests that WANT to exercise
+    # the pre-warm path can un-set this via monkeypatch.
+    os.environ.setdefault("ONCOLOGY_ARBITER_SKIP_DEMO_PREWARM", "1")

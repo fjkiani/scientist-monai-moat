@@ -68,16 +68,27 @@ def test_health_lists_all_endpoints(client):
     for path in ["POST /v1/screening/analyze", "POST /v1/biopsy/analyze",
                  "POST /v1/therapy/reason", "POST /v1/case/full"]:
         assert path in body["endpoints"], f"missing {path}"
-    # v0.2: NSCLC ships a proxy heuristic; everything else is still placeholder.
+    # v0.2.2: models_loaded is env-driven at request time. Every slot must
+    # report a value from a small allow-list; the specific state depends on
+    # what the current test env has toggled on.
+    allowed_states = {
+        "monai_screening": {
+            "placeholder", "loaded_medsiglip", "proxy_siglip",
+            "proxy_monai_heuristic",
+        },
+        "medsiglip_biopsy": {"placeholder", "loaded_biopsy_probe"},
+        "biopsy_report_parser": {"proxy_regex_v0"},  # stateless code, always on
+        "txgemma_therapy": {"placeholder", "loaded_txgemma", "proxy_rules_lite"},
+        "co_scientist": {"placeholder", "proxy_co_scientist"},
+        "l3_arbiter": {"template"},                  # templates always loaded
+        "nsclc_pipeline": {"placeholder", "proxy_lung_heuristic"},
+    }
+    assert set(body["models_loaded"].keys()) == set(allowed_states.keys())
     for m, state in body["models_loaded"].items():
-        if m == "nsclc_pipeline":
-            assert state in ("placeholder", "proxy_lung_heuristic"), (
-                f"{m} unexpected state {state}"
-            )
-        else:
-            assert state == "placeholder", (
-                f"{m} claims non-placeholder state pre-Phase-2"
-            )
+        assert state in allowed_states[m], (
+            f"{m} reports unexpected state {state!r}; "
+            f"allowed: {sorted(allowed_states[m])}"
+        )
 
 
 # --------------------------------------------------------------------------- #

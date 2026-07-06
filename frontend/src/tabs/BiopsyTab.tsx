@@ -2,6 +2,7 @@ import { useState } from "react";
 import { analyzeBiopsy, reasonTherapy, type BiopsyResponse, type TherapyResponse } from "../api";
 import { EnvelopeCard } from "../components/Envelope";
 import { ReceptorPanelForm, type ConfirmedPanel } from "../components/ReceptorPanelForm";
+import { bytesToBase64Chunked } from "../lib/b64";
 
 // Canned luminal-A demo report shipped for the tumor-board dry-run.
 // Expected parser output: ER matched (True), PR matched (True),
@@ -32,7 +33,7 @@ export function BiopsyTab() {
       const payload: Record<string, unknown> = {};
       if (file) {
         const bytes = new Uint8Array(await file.arrayBuffer());
-        payload.wsi_bytes_b64 = btoa(String.fromCharCode(...bytes));
+        payload.wsi_bytes_b64 = bytesToBase64Chunked(bytes);
       }
       if (reportText.trim()) payload.report_text = reportText.trim();
       const r = await analyzeBiopsy(payload);

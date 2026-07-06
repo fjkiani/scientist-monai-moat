@@ -6,7 +6,12 @@ export type ModelState =
   | "placeholder" | "loaded" | "loading" | "unavailable" | "cached"
   | "gated" | "proxy_siglip" | "loaded_medsiglip"
   | "loaded_biopsy_probe" | "loaded_monai_detector"
-  | "proxy_monai_heuristic" | "proxy_rules_lite" | "loaded_txgemma";
+  | "proxy_monai_heuristic" | "proxy_rules_lite" | "loaded_txgemma"
+  // v0.2.2: honest state names surfaced in /health.
+  | "proxy_lung_heuristic"        // NSCLC HU-threshold + connected-components
+  | "template"                    // L3 arbiter JSON templates (n_training=0)
+  | "proxy_regex_v0"              // pathology-report regex parser (stateless)
+  | "proxy_co_scientist";         // Co-Scientist Elo tournament (deterministic)
 
 export interface Provenance {
   model_state: ModelState;
@@ -205,6 +210,28 @@ export function reasonTherapy(payload: unknown) {
 }
 export function getHealth() {
   return get<HealthResponseWithCancers>("/health");
+}
+
+// v0.2.2: /v1/demo/case
+export interface DemoCaseResponse {
+  dicom_bytes_b64: string;
+  dicom_source: string;
+  dicom_sha256: string;
+  dicom_size_bytes: number;
+  report_text: string;
+  patient_context: {
+    age?: number;
+    menopausal_status?: "pre" | "post" | "peri" | "unknown";
+    stage_ct?: string;
+    grade?: number;
+    notes?: string;
+    [k: string]: unknown;
+  };
+  warnings: string[];
+}
+
+export function getDemoCase() {
+  return get<DemoCaseResponse>("/v1/demo/case");
 }
 
 export interface CancerCapability {

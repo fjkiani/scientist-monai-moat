@@ -1,10 +1,12 @@
 import { useState } from "react";
 import {
+  getDemoCase,
   reasonTherapy,
   runCaseFull,
   type FullCaseResponse,
   type TherapyResponse,
 } from "../api";
+import { base64ToBytes, bytesToBase64Chunked } from "../lib/b64";
 import { EnvelopeCard } from "../components/Envelope";
 import { BboxOverlay } from "../components/BboxOverlay";
 import {
@@ -43,6 +45,7 @@ Pathology:
  * This keeps the demo honest (parser output is visible AND user-confirmed
  * separately) without doubling the round-trip cost.
  */
+
 export function CaseViewTab() {
   const [dicomFile, setDicomFile] = useState<File | null>(null);
   const [wsiFile, setWsiFile] = useState<File | null>(null);
@@ -53,10 +56,39 @@ export function CaseViewTab() {
 
   const [busy, setBusy] = useState(false);
   const [therapyBusy, setTherapyBusy] = useState(false);
+  const [demoBusy, setDemoBusy] = useState(false);
   const [result, setResult] = useState<FullCaseResponse | null>(null);
   const [confirmedTherapy, setConfirmedTherapy] = useState<TherapyResponse | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [demoWarnings, setDemoWarnings] = useState<string[]>([]);
+
+  // v0.2.2: pull a fully-formed demo case from GET /v1/demo/case and
+  // populate the form so a first-time user can click Run without hunting
+  // for a DICOM. base64 → Uint8Array → File plugs straight into the
+  // existing dicomFile state used by submit().
+  async function loadDemoCase() {
+    setDemoBusy(true);
+    setErr(null);
+    try {
+      const c = await getDemoCase();
+      const bytes = base64ToBytes(c.dicom_bytes_b64);
+      const file = new File([bytes], "demo.dcm", { type: "application/dicom" });
+      setDicomFile(file);
+      setImagePreview(URL.createObjectURL(file));
+      setReportText(c.report_text);
+      if (c.patient_context?.age != null) setAge(Number(c.patient_context.age));
+      if (c.patient_context?.menopausal_status) {
+        setMenopausal(c.patient_context.menopausal_status);
+      }
+      if (c.patient_context?.stage_ct) setStage(c.patient_context.stage_ct);
+      setDemoWarnings(c.warnings ?? []);
+    } catch (e: any) {
+      setErr(String(e?.message ?? e ?? "load demo case failed"));
+    } finally {
+      setDemoBusy(false);
+    }
+  }
 
   async function submit() {
     setBusy(true); setErr(null); setResult(null); setConfirmedTherapy(null);
@@ -73,7 +105,7 @@ export function CaseViewTab() {
       if (dicomFile) {
         const bytes = new Uint8Array(await dicomFile.arrayBuffer());
         body.screening_input = {
-          dicom_bytes_b64: btoa(String.fromCharCode(...bytes)),
+          dicom_bytes_b64: bytesToBase64Chunked(bytes),
         };
         setImagePreview(URL.createObjectURL(dicomFile));
       }
@@ -81,7 +113,7 @@ export function CaseViewTab() {
         const bi: Record<string, unknown> = {};
         if (wsiFile) {
           const bytes = new Uint8Array(await wsiFile.arrayBuffer());
-          bi.wsi_bytes_b64 = btoa(String.fromCharCode(...bytes));
+          bi.wsi_bytes_b64 = bytesToBase64Chunked(bytes);
         }
         if (reportText.trim()) bi.report_text = reportText.trim();
         body.biopsy_input = bi;
@@ -123,8 +155,63 @@ export function CaseViewTab() {
   const activeTherapy: TherapyResponse | null =
     confirmedTherapy ?? (result?.therapy ?? null);
 
+  // v0.2.2: workflow ribbon — visualizes which pipeline stage each output
+  // section corresponds to. State machine:
+  //   inputs = the DICOM/report has been provided
+  //   run = the /v1/case/full call is in flight
+  //   done = a sub-result exists for that stage
+  const hasInputs = dicomFile != null || wsiFile != null || reportText.trim().length > 0;
+  const stageDone = {
+    inputs: hasInputs,
+    screening: result?.screening != null,
+    biopsy: result?.biopsy != null,
+    therapy: activeTherapy != null,
+    arbiter: (result?.elo_ranked_hypotheses?.length ?? 0) > 0,
+  };
+
   return (
     <>
+      <div className="card" data-testid="workflow-ribbon" style={{ padding: "0.6rem 0.9rem" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.4rem" }}>
+          {[
+            { key: "inputs", label: "1. Inputs", hint: "DICOM + report" },
+            { key: "screening", label: "2. Screening", hint: "MONAI/MedSigLIP" },
+            { key: "biopsy", label: "3. Biopsy + Parse", hint: "regex + probe" },
+            { key: "therapy", label: "4. Therapy", hint: "rules-lite / TxGemma" },
+            { key: "arbiter", label: "5. Arbiter", hint: "Co-Scientist Elo" },
+          ].map((s, i, arr) => {
+            const done = stageDone[s.key as keyof typeof stageDone];
+            const active = !done && (i === 0 || stageDone[arr[i - 1].key as keyof typeof stageDone]);
+            const color = done ? "var(--accent-2, #15803d)" : active ? "var(--accent, #0279EE)" : "var(--fg-muted, #999)";
+            return (
+              <div key={s.key} style={{ display: "flex", alignItems: "center", flex: "1 1 auto", minWidth: 0 }}>
+                <div style={{ display: "flex", flexDirection: "column", flex: "1 1 auto", minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
+                    <span aria-hidden="true" style={{
+                      display: "inline-block", width: 8, height: 8, borderRadius: "50%",
+                      background: color, flex: "0 0 auto",
+                    }} />
+                    <span style={{
+                      fontSize: "0.78rem", fontWeight: done ? 700 : 600, color,
+                      whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                    }}>{s.label}</span>
+                  </div>
+                  <span style={{
+                    fontSize: "0.68rem", color: "var(--fg-muted, #999)",
+                    fontFamily: "Menlo, monospace", marginLeft: 14,
+                  }}>{s.hint}</span>
+                </div>
+                {i < arr.length - 1 && (
+                  <span aria-hidden="true" style={{
+                    flex: "0 0 auto", width: "0.75rem", textAlign: "center",
+                    color: "var(--fg-muted, #ccc)",
+                  }}>›</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
       <div className="card">
         <h2>Case view · end-to-end (screening → biopsy → therapy)</h2>
         <p style={{ fontSize: "0.85rem", color: "var(--fg-muted)" }}>
@@ -176,14 +263,35 @@ export function CaseViewTab() {
           </button>
           <button
             type="button"
+            onClick={loadDemoCase}
+            disabled={demoBusy}
+            style={{ background: "var(--accent)", color: "white", border: "1px solid var(--accent)",
+                     padding: "0.5rem 0.75rem", cursor: demoBusy ? "wait" : "pointer",
+                     opacity: demoBusy ? 0.6 : 1 }}
+            data-testid="load-demo-case-caseview"
+            title="Fetch a public CBIS-DDSM mammogram + synthetic pathology report from the server"
+          >
+            {demoBusy ? "Loading demo case…" : "Load demo case (DICOM + report)"}
+          </button>
+          <button
+            type="button"
             onClick={() => setReportText(LUMINAL_A_EXAMPLE)}
             style={{ background: "var(--panel)", border: "1px solid var(--border)",
                      padding: "0.5rem 0.75rem", cursor: "pointer" }}
             data-testid="load-luminal-a-example-caseview"
+            title="Populate only the pathology report field with the canned luminal-A text"
           >
-            Load ER+ luminal-A example
+            Load ER+ report only (no DICOM)
           </button>
         </div>
+        {demoWarnings.length > 0 && (
+          <div className="warning" style={{ marginTop: "0.75rem" }} data-testid="demo-warnings">
+            <div style={{ fontWeight: 600, marginBottom: "0.25rem" }}>Demo case loaded — honesty caveats:</div>
+            <ul style={{ margin: 0, paddingLeft: "1.25rem" }}>
+              {demoWarnings.map((w, i) => <li key={i}>{w}</li>)}
+            </ul>
+          </div>
+        )}
         {err && <div className="warning" style={{ marginTop: "0.75rem" }}>{err}</div>}
       </div>
 

@@ -77,12 +77,46 @@ export function SettingsDrawer(props: Props) {
         <button onClick={props.onClose} aria-label="Close settings" style={{ background: "transparent", border: "none", color: "inherit", fontSize: "1.5rem", cursor: "pointer" }}>×</button>
       </div>
 
+      <section style={{ marginTop: "0.75rem", padding: "0.6rem 0.75rem", background: "var(--panel)", border: "1px solid var(--border)", borderRadius: 6 }}>
+        <div style={{ fontSize: "0.75rem", fontWeight: 600, marginBottom: "0.25rem" }}>What is this?</div>
+        <div style={{ fontSize: "0.75rem", color: "var(--fg-muted, #999)", lineHeight: 1.45 }}>
+          <strong>Oncology Arbiter</strong> is a research-use-only multi-model
+          pipeline for breast + NSCLC cases: screening (mammogram) → biopsy
+          (WSI + pathology report) → therapy suggestion → Co-Scientist Elo
+          arbitration. Every response carries an RUO disclaimer + provenance
+          + honesty gates so you can see which model actually ran.
+        </div>
+        <div style={{ fontSize: "0.75rem", color: "var(--fg-muted, #999)", lineHeight: 1.45, marginTop: "0.4rem" }}>
+          <strong>How to run:</strong> paste the bootstrap API key below → go
+          to <em>Case View</em> → click <em>Load demo case</em> → click{" "}
+          <em>Run full case</em>. The pipeline runs end-to-end on a public
+          CBIS-DDSM mammogram + synthetic luminal-A pathology report.
+        </div>
+        <div style={{ fontSize: "0.75rem", color: "var(--fg-muted, #999)", lineHeight: 1.45, marginTop: "0.4rem" }}>
+          <strong>Local dev:</strong> from a clone,{" "}
+          <code>pip install -e .</code> then{" "}
+          <code>python -m uvicorn oncology_arbiter.api.app:create_app --factory --port 8080</code>.
+          Set <code>ONCOLOGY_ARBITER_AUTH_MODE=off</code> to skip the API-key gate.
+        </div>
+      </section>
+
       <section style={{ marginTop: "1rem" }}>
         <h3 style={{ margin: "0 0 0.25rem 0", fontSize: "0.95rem" }}>API key</h3>
-        <p style={{ fontSize: "0.8rem", color: "var(--fg-muted, #999)", margin: "0 0 0.5rem 0" }}>
-          Sent as <code>X-API-Key</code>. Get one from your admin via{" "}
-          <code>python -m oncology_arbiter.auth.cli issue &lt;tenant&gt;</code>.
-          Stored in this browser's localStorage only.
+        <p style={{ fontSize: "0.8rem", color: "var(--fg-muted, #999)", margin: "0 0 0.5rem 0", lineHeight: 1.45 }}>
+          Every request to <code>/v1/*</code> needs one. In this alpha
+          deployment, paste the bootstrap key given to you by the admin
+          (starts with <code>oa_live_…</code>).
+        </p>
+        <p style={{ fontSize: "0.8rem", color: "var(--fg-muted, #999)", margin: "0 0 0.5rem 0", lineHeight: 1.45 }}>
+          Admins mint new tenant keys inside the running container with{" "}
+          <code>python -m oncology_arbiter.auth.cli issue &lt;tenant&gt;</code>;{" "}
+          the CLI needs access to the server's tenant DB, so it doesn't
+          work from your laptop against the live deployment.
+        </p>
+        <p style={{ fontSize: "0.8rem", color: "var(--fg-muted, #999)", margin: "0 0 0.5rem 0", lineHeight: 1.45 }}>
+          Your key is stored in this browser's <code>localStorage</code>{" "}
+          only — never sent anywhere except this app's API. Clearing browser
+          data removes it.
         </p>
         <input
           type={showFull ? "text" : "password"}

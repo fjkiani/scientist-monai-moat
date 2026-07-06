@@ -2,6 +2,7 @@ import { useState } from "react";
 import { analyzeScreening, type ScreeningResponse } from "../api";
 import { EnvelopeCard } from "../components/Envelope";
 import { BboxOverlay } from "../components/BboxOverlay";
+import { bytesToBase64Chunked } from "../lib/b64";
 
 export function ScreeningTab() {
   const [file, setFile] = useState<File | null>(null);
@@ -27,7 +28,7 @@ export function ScreeningTab() {
     setBusy(true); setErr(null); setResult(null);
     try {
       const bytes = new Uint8Array(await file.arrayBuffer());
-      const b64 = btoa(String.fromCharCode(...bytes));
+      const b64 = bytesToBase64Chunked(bytes);
       const r = await analyzeScreening({ dicom_bytes_b64: b64 });
       setResult(r);
     } catch (e) {
