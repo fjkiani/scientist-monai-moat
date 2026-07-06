@@ -162,12 +162,14 @@ def test_prewarm_demo_case_returns_path_on_success(
 
 
 def test_download_from_hf_passes_writable_cache_dir(tmp_demo_cache, monkeypatch):
-    """Regression: hf_hub_download must receive our writable cache_dir kwarg.
+    """Regression: hf_hub_download must receive our writable cache_dir kwarg,
+    and HF_HOME / HF_XET_CACHE / HF_HUB_CACHE must be redirected under our
+    tree so hf-xet's Rust backend doesn't fall back to $HOME.
 
-    Fixes a live-smoke failure on Render where the container's HOME=/app
-    was owned by root but the app ran as UID 10001. Without cache_dir,
-    hf_hub_download defaulted to ~/.cache/huggingface = /app/.cache and
-    hit PermissionError [Errno 13].
+    Fixes two consecutive live-smoke failures on Render:
+      1. PermissionError [Errno 13] on /app/.cache (HOME unwritable)
+      2. hf-xet 'I/O error: Permission denied' (its own cache path,
+         controlled by HF_XET_CACHE, not by hf_hub_download's cache_dir).
     """
     calls = {}
     payload = b"\x00\x00DICM_fake_hf_return" + b"\x11" * 512
@@ -183,17 +185,31 @@ def test_download_from_hf_passes_writable_cache_dir(tmp_demo_cache, monkeypatch)
     monkeypatch.setenv(
         "ONCOLOGY_ARBITER_DEMO_LOCAL_DICOM", "/nonexistent/local.dcm"
     )
+    # Clear any pre-existing HF_HOME so the test verifies our code sets it.
+    monkeypatch.delenv("HF_HOME", raising=False)
+    monkeypatch.delenv("HF_XET_CACHE", raising=False)
+    monkeypatch.delenv("HF_HUB_CACHE", raising=False)
+
     with patch(
         "huggingface_hub.hf_hub_download",
         side_effect=fake_hf,
     ):
         case = build_demo_case()
 
-    # Verify the download call received our resolved cache_dir, not None.
+    # 1. hf_hub_download must receive our resolved cache_dir sub-path.
     assert "cache_dir" in calls, "hf_hub_download must be called with cache_dir"
-    assert calls["cache_dir"] == str(tmp_demo_cache), (
-        f"cache_dir must equal ONCOLOGY_ARBITER_DEMO_CACHE_DIR "
-        f"({tmp_demo_cache!s}), got {calls['cache_dir']!r}"
+    expected_hub = str(tmp_demo_cache / "hub")
+    assert calls["cache_dir"] == expected_hub, (
+        f"cache_dir must be <ONCOLOGY_ARBITER_DEMO_CACHE_DIR>/hub "
+        f"({expected_hub!r}), got {calls['cache_dir']!r}"
     )
+    # 2. HF_HOME must be set to our writable root (redirects hf-xet).
+    assert os.environ.get("HF_HOME") == str(tmp_demo_cache), (
+        f"HF_HOME must equal cache dir ({tmp_demo_cache!s}), "
+        f"got {os.environ.get('HF_HOME')!r}"
+    )
+    assert os.environ.get("HF_XET_CACHE") == str(tmp_demo_cache / "xet")
+    assert os.environ.get("HF_HUB_CACHE") == str(tmp_demo_cache / "hub")
+
     # Case still resolves correctly through our staging copy.
     assert base64.b64decode(case.dicom_bytes_b64) == payload

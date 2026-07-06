@@ -157,22 +157,31 @@ def _download_from_hf(dest: Path) -> Path:
             "huggingface_hub not installed; cannot download demo DICOM"
         ) from e
 
-    # cache_dir is set to our own writable location so containers where
-    # $HOME is unwritable (Render: HOME=/app, owned by root; process runs
-    # as UID 10001 without write access) don't fail on the default
-    # ~/.cache/huggingface directory. This is the same directory where we
-    # stage the final demo.dcm copy — HF's cache lives at
-    # <cache_dir>/<hub-style-blob-tree>/, our copy lives at
-    # <cache_dir>/demo.dcm.
+    # Point every HF cache at our writable location. This matters on
+    # containers where $HOME is unwritable (Render: HOME=/app, owned by
+    # root; process runs as UID 10001 without write access). Simply
+    # passing cache_dir= to hf_hub_download is not sufficient because
+    # hf-xet (the Rust download backend introduced in huggingface_hub
+    # >=1.0) has its own cache directory controlled by HF_XET_CACHE.
+    # Setting HF_HOME reroutes most sub-caches; HF_XET_CACHE and
+    # HF_HUB_CACHE are set explicitly as belt-and-suspenders in case
+    # HF_HOME propagation differs across versions.
     hf_cache_dir = _resolve_cache_dir()
     hf_cache_dir.mkdir(parents=True, exist_ok=True)
+    hf_hub_sub = hf_cache_dir / "hub"
+    hf_xet_sub = hf_cache_dir / "xet"
+    hf_hub_sub.mkdir(parents=True, exist_ok=True)
+    hf_xet_sub.mkdir(parents=True, exist_ok=True)
+    os.environ["HF_HOME"] = str(hf_cache_dir)
+    os.environ["HF_XET_CACHE"] = str(hf_xet_sub)
+    os.environ["HF_HUB_CACHE"] = str(hf_hub_sub)
 
     try:
         hf_path = hf_hub_download(
             repo_id=_HF_REPO_ID,
             repo_type=_HF_REPO_TYPE,
             filename=_HF_FILE_PATH,
-            cache_dir=str(hf_cache_dir),
+            cache_dir=str(hf_hub_sub),
         )
     except Exception as e:  # ConnectionError, HTTPError, GatedRepoError, ...
         raise DemoFixtureUnavailable(
