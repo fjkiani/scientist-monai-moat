@@ -67,14 +67,30 @@ export interface ScreeningResponse extends Envelope {
   arbiter_score: ArbiterScore | null;
 }
 
+export type ParseStateValue =
+  | "matched"
+  | "ambiguous"
+  | "no_match"
+  | "user_supplied";
+
+export interface ReceptorPanel {
+  er_positive: boolean | null;
+  pr_positive: boolean | null;
+  her2_status: "negative" | "equivocal" | "positive" | null;
+  ki67_percent: number | null;
+  // v0.2.1: per-field parser provenance. Absent when the backend didn't run
+  // the report parser (e.g., WSI-only path with no report_text).
+  parse_state?: {
+    er: ParseStateValue;
+    pr: ParseStateValue;
+    her2: ParseStateValue;
+    grade: ParseStateValue;
+  } | null;
+}
+
 export interface BiopsyResponse extends Envelope {
   subtype_prediction: string | null;
-  receptor_panel: {
-    er_positive: boolean | null;
-    pr_positive: boolean | null;
-    her2_status: "negative" | "equivocal" | "positive" | null;
-    ki67_percent: number | null;
-  };
+  receptor_panel: ReceptorPanel;
   grade: number | null;
   confidence: number | null;
   arbiter_score: ArbiterScore | null;
@@ -92,6 +108,11 @@ export interface TherapyResponse extends Envelope {
   recommended_options: TherapyOption[];
   not_recommended: TherapyOption[];
   arbiter_score: ArbiterScore | null;
+  // v0.2.1: rules-lite provenance surfaced in TherapyTab honesty banner.
+  // Optional because non-rules paths (TxGemma, placeholder) may omit them.
+  branch_id?: string | null;
+  rules_sha256?: string | null;
+  rules_model_id?: string | null;
 }
 
 export interface HealthResponse {

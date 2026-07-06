@@ -214,11 +214,26 @@ class BiopsyRequest(BaseModel):
 
 
 class BiopsyReceptorPanel(BaseModel):
-    """Standard breast biopsy receptor panel."""
+    """Standard breast biopsy receptor panel.
+
+    ``parse_state`` (v0.2.1) surfaces per-field provenance to the UI so the
+    clinician can see whether each value came from a confident regex match,
+    an ambiguous mention that needs review, or was never mentioned in the
+    report at all. When the UI submits an override, the state becomes
+    ``user_supplied``.
+    """
     er_positive: bool | None = None
     pr_positive: bool | None = None
     her2_status: Literal["negative", "equivocal", "positive"] | None = None
     ki67_percent: float | None = Field(default=None, ge=0.0, le=100.0)
+    parse_state: dict[
+        Literal["er", "pr", "her2", "grade"],
+        Literal["matched", "ambiguous", "no_match", "user_supplied"],
+    ] | None = Field(
+        default=None,
+        description="Per-field provenance from the report parser (proxy_regex_v0). "
+                    "Absent when biopsy analysis did not run a text parser.",
+    )
 
 
 class BiopsyResponse(ApiEnvelope):
@@ -253,6 +268,17 @@ class TherapyRequest(BaseModel):
         description="If provided, we skip re-running biopsy analysis and use this directly.",
     )
     patient_context: TherapyPatientContext = Field(default_factory=TherapyPatientContext)
+    # v0.2.1: user-confirmed receptor panel from the frontend Confirm gate.
+    # When present, this overrides whatever is in biopsy_output.receptor_panel
+    # for the purpose of branch selection. This is the honesty contract for
+    # the tumor-board demo: parser output is a *suggestion*, the pathologist
+    # confirms (or corrects) before therapy runs.
+    receptors_override: BiopsyReceptorPanel | None = Field(
+        default=None,
+        description="User-confirmed receptor panel. If provided, replaces "
+                    "biopsy_output.receptor_panel for branch selection. "
+                    "Frontend sends this after the Confirm gate.",
+    )
     # v0.2: opt in to strict input validation in the rules-lite branch.
     # When true and the rules-lite fallback fires, receptor_status / grade /
     # stage / menopausal_status are validated and 400 is returned on drift.
@@ -407,6 +433,15 @@ class FullCaseRequest(BaseModel):
     screening_input: ScreeningRequest | None = None
     biopsy_input: BiopsyRequest | None = None
     therapy_context: TherapyPatientContext = Field(default_factory=TherapyPatientContext)
+    # v0.2.1: user-confirmed receptor panel from the frontend Case View
+    # Confirm gate. When present, it replaces whatever the biopsy sub-call
+    # extracted from report_text — this is what the pathologist actually
+    # believes about the case, and it drives the therapy branch.
+    receptors_confirmed: BiopsyReceptorPanel | None = Field(
+        default=None,
+        description="User-confirmed receptor panel from Case View Confirm gate. "
+                    "Overrides biopsy receptor extraction for therapy branch selection.",
+    )
     # NSCLC track: point at a CT series on disk (LIDC-IDRI layout). Real
     # pipeline is only invoked when ONCOLOGY_ARBITER_ALLOW_SERIES_DIR=1 is
     # set on the server; otherwise the request falls back to shape-only.

@@ -232,6 +232,14 @@ def test_biopsy_requires_input(client):
 
 
 def test_biopsy_placeholder_returns_shape(client):
+    """v0.2.1 contract: placeholder path still runs the report parser.
+
+    The parser (proxy_regex_v0) deliberately does NOT match bare "ER+" / "PR+"
+    tokens — they're too ambiguous for a proxy to safely coerce to a bool.
+    Grade 2 and HER2 equivocal ARE extracted; equivocal is flagged
+    ``ambiguous`` in parse_state so the UI can force the pathologist to
+    confirm before therapy is called.
+    """
     r = client.post(
         "/v1/biopsy/analyze",
         json={"report_text": "Invasive ductal carcinoma, Nottingham grade 2, "
@@ -242,11 +250,21 @@ def test_biopsy_placeholder_returns_shape(client):
     assert body["disclaimer"] == RUO_DISCLAIMER
     assert body["provenance"]["model_state"] == "placeholder"
     assert body["subtype_prediction"] is None
-    assert body["grade"] is None
+    # Grade IS extracted now (was None pre-v0.2.1)
+    assert body["grade"] == 2
     assert body["confidence"] is None
-    assert body["receptor_panel"] == {
-        "er_positive": None, "pr_positive": None,
-        "her2_status": None, "ki67_percent": None,
+    panel = body["receptor_panel"]
+    # Bare "+" is not matched — ER/PR stay None with no_match state.
+    assert panel["er_positive"] is None
+    assert panel["pr_positive"] is None
+    # HER2 equivocal IS extracted, flagged ambiguous.
+    assert panel["her2_status"] == "equivocal"
+    assert panel["ki67_percent"] is None
+    assert panel["parse_state"] == {
+        "er": "no_match",
+        "pr": "no_match",
+        "her2": "ambiguous",
+        "grade": "matched",
     }
 
 

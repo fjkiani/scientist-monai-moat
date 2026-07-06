@@ -1,7 +1,7 @@
 {
   "$schema_version": "1.0.0",
-  "generated_at": "2026-07-05T22:17:03+00:00",
-  "git_sha": "08a58615276fbbe611ef6cb7f65ba7df1603c4a0",
+  "generated_at": "2026-07-06T05:46:19+00:00",
+  "git_sha": "75417bae460a8adbfe8c8cfa9c39168b4fc65ac6",
   "project": {
     "name": "oncology-arbiter",
     "one_line_goal": "Open-architecture breast oncology reasoning platform spanning screening \u2192 biopsy \u2192 therapy, with calibrated per-stage arbiters, cited evidence, and honest performance disclosure.",

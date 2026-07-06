@@ -1,14 +1,47 @@
 import { useState } from "react";
-import { runCaseFull, type FullCaseResponse } from "../api";
+import {
+  reasonTherapy,
+  runCaseFull,
+  type FullCaseResponse,
+  type TherapyResponse,
+} from "../api";
 import { EnvelopeCard } from "../components/Envelope";
 import { BboxOverlay } from "../components/BboxOverlay";
+import {
+  ReceptorPanelForm,
+  type ConfirmedPanel,
+} from "../components/ReceptorPanelForm";
 import { getCancer } from "../settings";
 
+// Canned luminal-A demo report — same as BiopsyTab, kept literal (not
+// imported) so each tab's demo affordance is self-documenting.
+const LUMINAL_A_EXAMPLE = `Age: 58, postmenopausal
+Stage: T1N0M0
+Pathology:
+  Invasive ductal carcinoma of the right breast, 1.4 cm.
+  Estrogen Receptor: Positive (95%).
+  Progesterone Receptor: Positive (80%).
+  HER2/neu: Negative (IHC 1+).
+  Nottingham Grade: 2.
+  Ki-67 index: 12%.`;
+
 /**
- * Runs the end-to-end tumor-board loop by chaining screening → biopsy →
- * therapy on the server. The Elo-ranked hypotheses block is surfaced as
- * raw JSON — the L5 Co-Scientist loop lives on worker-0 and populates it
- * with a real tournament in a later step.
+ * Two-stage tumor-board flow:
+ *
+ *   Stage 1 · Run full case
+ *     Sends the DICOM + WSI + report + patient context to /v1/case/full.
+ *     The backend runs screening → biopsy (regex parser) → therapy (using
+ *     the parser output) → co-scientist. We show every stage AS IS.
+ *
+ *   Stage 2 · Confirm receptors → re-run therapy
+ *     The pathologist reviews the parser's ER/PR/HER2/grade in the form.
+ *     Any correction flips the pill to user_supplied. On Confirm, we
+ *     re-issue only /v1/therapy/reason with receptors_override — the
+ *     screening + biopsy + co-scientist blocks stay as-is, only the
+ *     therapy card is swapped in-place.
+ *
+ * This keeps the demo honest (parser output is visible AND user-confirmed
+ * separately) without doubling the round-trip cost.
  */
 export function CaseViewTab() {
   const [dicomFile, setDicomFile] = useState<File | null>(null);
@@ -19,14 +52,16 @@ export function CaseViewTab() {
   const [stage, setStage] = useState<string>("T1N0M0");
 
   const [busy, setBusy] = useState(false);
+  const [therapyBusy, setTherapyBusy] = useState(false);
   const [result, setResult] = useState<FullCaseResponse | null>(null);
+  const [confirmedTherapy, setConfirmedTherapy] = useState<TherapyResponse | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   async function submit() {
-    setBusy(true); setErr(null); setResult(null);
+    setBusy(true); setErr(null); setResult(null); setConfirmedTherapy(null);
     try {
-      const body: any = {
+      const body: Record<string, unknown> = {
         therapy_context: {
           age,
           menopausal_status: menopausal,
@@ -43,12 +78,13 @@ export function CaseViewTab() {
         setImagePreview(URL.createObjectURL(dicomFile));
       }
       if (wsiFile || reportText.trim()) {
-        body.biopsy_input = {};
+        const bi: Record<string, unknown> = {};
         if (wsiFile) {
           const bytes = new Uint8Array(await wsiFile.arrayBuffer());
-          body.biopsy_input.wsi_bytes_b64 = btoa(String.fromCharCode(...bytes));
+          bi.wsi_bytes_b64 = btoa(String.fromCharCode(...bytes));
         }
-        if (reportText.trim()) body.biopsy_input.report_text = reportText.trim();
+        if (reportText.trim()) bi.report_text = reportText.trim();
+        body.biopsy_input = bi;
       }
       // Case view is breast-specific today (all sub-inputs are mammo + WSI +
       // free-text report). The cancer selector still governs which query
@@ -59,6 +95,34 @@ export function CaseViewTab() {
     } catch (e) { setErr(String(e)); } finally { setBusy(false); }
   }
 
+  async function reRunTherapyWithOverride(confirmed: ConfirmedPanel) {
+    if (!result || !result.biopsy) return;
+    setTherapyBusy(true); setErr(null); setConfirmedTherapy(null);
+    try {
+      const t = await reasonTherapy({
+        biopsy_output: result.biopsy,
+        receptors_override: {
+          er_positive: confirmed.er_positive,
+          pr_positive: confirmed.pr_positive,
+          her2_status: confirmed.her2_status,
+        },
+        patient_context: {
+          age,
+          menopausal_status: menopausal,
+          prior_therapies: [],
+          comorbidities: [],
+          genomic_markers: { stage },
+        },
+      });
+      setConfirmedTherapy(t);
+    } catch (e) { setErr(String(e)); } finally { setTherapyBusy(false); }
+  }
+
+  // The active therapy result — if user has confirmed, that wins; otherwise
+  // fall back to the initial parser-driven therapy block from case_full.
+  const activeTherapy: TherapyResponse | null =
+    confirmedTherapy ?? (result?.therapy ?? null);
+
   return (
     <>
       <div className="card">
@@ -66,7 +130,10 @@ export function CaseViewTab() {
         <p style={{ fontSize: "0.85rem", color: "var(--fg-muted)" }}>
           Chains all three stage endpoints server-side and returns the L5
           Elo-ranked hypotheses block. Any stage can be omitted — the server
-          will return that section as <code>null</code>.
+          will return that section as <code>null</code>. The pathology-report
+          receptors are parsed by <code>proxy_regex_v0</code> and displayed
+          below; <strong>you must confirm every field</strong> to re-run the
+          therapy branch with the values you approve.
         </p>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
@@ -83,7 +150,8 @@ export function CaseViewTab() {
           <div style={{ gridColumn: "1 / 3" }}>
             <label>Pathology report</label>
             <textarea value={reportText} onChange={(e) => setReportText(e.target.value)}
-                      placeholder="Free-text pathology report…" />
+                      placeholder="Free-text pathology report…"
+                      data-testid="caseview-report-textarea" />
           </div>
           <div>
             <label>Age</label>
@@ -102,9 +170,20 @@ export function CaseViewTab() {
           </div>
         </div>
 
-        <button className="primary" onClick={submit} disabled={busy} style={{ marginTop: "0.75rem" }}>
-          {busy ? "Running case…" : "Run full case"}
-        </button>
+        <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem", flexWrap: "wrap" }}>
+          <button className="primary" onClick={submit} disabled={busy}>
+            {busy ? "Running case…" : "Run full case"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setReportText(LUMINAL_A_EXAMPLE)}
+            style={{ background: "var(--panel)", border: "1px solid var(--border)",
+                     padding: "0.5rem 0.75rem", cursor: "pointer" }}
+            data-testid="load-luminal-a-example-caseview"
+          >
+            Load ER+ luminal-A example
+          </button>
+        </div>
         {err && <div className="warning" style={{ marginTop: "0.75rem" }}>{err}</div>}
       </div>
 
@@ -132,31 +211,64 @@ export function CaseViewTab() {
               </details>
             </div>
           )}
+
           {result.biopsy && (
-            <div className="card">
-              <h2>Biopsy summary</h2>
-              <div>
-                <span className={`pill ${result.biopsy.provenance.model_state}`}>
-                  {result.biopsy.provenance.model_state}
-                </span>
-                <span className="pill">subtype: {result.biopsy.subtype_prediction ?? "—"}</span>
-                <span className="pill">grade: {result.biopsy.grade ?? "—"}</span>
-                <span className="pill">
-                  confidence: {result.biopsy.confidence !== null ? (result.biopsy.confidence * 100).toFixed(1) + "%" : "—"}
-                </span>
+            <>
+              <div className="card">
+                <h2>Biopsy summary (parser output)</h2>
+                <div>
+                  <span className={`pill ${result.biopsy.provenance.model_state}`}>
+                    {result.biopsy.provenance.model_state}
+                  </span>
+                  <span className="pill">subtype: {result.biopsy.subtype_prediction ?? "—"}</span>
+                  <span className="pill">grade: {result.biopsy.grade ?? "—"}</span>
+                  <span className="pill">
+                    confidence: {result.biopsy.confidence !== null ? (result.biopsy.confidence * 100).toFixed(1) + "%" : "—"}
+                  </span>
+                </div>
+                <p style={{ fontSize: "0.8rem", color: "var(--fg-muted)", marginTop: "0.5rem" }}>
+                  The receptor panel below is what the regex parser saw. Confirm
+                  or correct it, then click the Confirm button to re-run the
+                  therapy branch with the values you approve.
+                </p>
               </div>
-            </div>
+
+              <ReceptorPanelForm
+                panel={result.biopsy.receptor_panel}
+                parsedGrade={result.biopsy.grade}
+                onConfirm={reRunTherapyWithOverride}
+                busy={therapyBusy}
+              />
+            </>
           )}
-          {result.therapy && (
+
+          {activeTherapy && (
             <div className="card">
-              <h2>Therapy summary</h2>
-              <div>
-                <span className={`pill ${result.therapy.provenance.model_state}`}>
-                  {result.therapy.provenance.model_state}
-                </span>
-                <span className="pill">{result.therapy.recommended_options.length} options</span>
+              <h2>
+                Therapy · {confirmedTherapy ? "user-confirmed" : "parser-driven"}{" "}
+                recommendation
+              </h2>
+              <div style={{ background: "#fef3c7", border: "1px solid #f59e0b",
+                            padding: "0.75rem", marginBottom: "0.75rem",
+                            fontSize: "0.85rem", borderRadius: 6 }}
+                   data-testid="therapy-caveat-banner">
+                <strong>Research-use disclaimer.</strong> {confirmedTherapy
+                  ? "This card reflects the values YOU confirmed. "
+                  : "This card is driven by the raw parser output — click Confirm above to override. "}
+                Recommendations come from a deterministic proxy of a small
+                NCCN-lite ruleset (<code>nccn-lite-v0</code>), not TxGemma.
+                Treat every recommendation as a discussion prompt, not a
+                clinical directive.
               </div>
-              {result.therapy.recommended_options.slice(0, 3).map((opt, i) => (
+              <div>
+                <span className={`pill ${activeTherapy.provenance.model_state}`}>
+                  {activeTherapy.provenance.model_state}
+                </span>
+                <span className="pill">
+                  {activeTherapy.recommended_options.length} options
+                </span>
+              </div>
+              {activeTherapy.recommended_options.slice(0, 5).map((opt, i) => (
                 <div key={i} style={{ marginTop: "0.5rem" }}>
                   <strong>{opt.regimen}</strong>{" "}
                   <span style={{ color: "var(--fg-muted)", fontSize: "0.8rem" }}>
@@ -167,9 +279,31 @@ export function CaseViewTab() {
               ))}
             </div>
           )}
+
           {result.elo_ranked_hypotheses.length > 0 && (
             <div className="card">
-              <h2>L5 Co-Scientist Elo tournament ({result.elo_ranked_hypotheses.length} hypotheses)</h2>
+              <h2>
+                L5 Co-Scientist Elo tournament ({result.elo_ranked_hypotheses.length} hypotheses)
+              </h2>
+              {confirmedTherapy && (
+                <div
+                  data-testid="elo-stale-notice"
+                  style={{
+                    background: "#fef3c7",
+                    borderLeft: "4px solid #f59e0b",
+                    color: "#78350f",
+                    padding: "0.5rem 0.75rem",
+                    borderRadius: "4px",
+                    fontSize: "0.85rem",
+                    marginBottom: "0.5rem",
+                  }}
+                >
+                  <strong>Note.</strong> This tournament was scored against the
+                  parser-driven pass. Your confirmed receptors above changed the
+                  therapy branch but this Elo block was not rerun — re-issue the
+                  full case to regenerate hypotheses against the confirmed panel.
+                </div>
+              )}
               <pre style={{ fontSize: "0.75rem", maxHeight: "300px", overflow: "auto" }}>
                 {JSON.stringify(result.elo_ranked_hypotheses, null, 2)}
               </pre>

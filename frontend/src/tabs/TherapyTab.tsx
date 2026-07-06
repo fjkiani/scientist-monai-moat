@@ -2,6 +2,8 @@ import { useState } from "react";
 import { reasonTherapy, type TherapyResponse } from "../api";
 import { EnvelopeCard } from "../components/Envelope";
 
+const NCCN_BREAST_URL = "https://www.nccn.org/professionals/physician_gls/pdf/breast.pdf";
+
 export function TherapyTab() {
   const [er, setEr] = useState<"positive" | "negative" | "unknown">("positive");
   const [pr, setPr] = useState<"positive" | "negative" | "unknown">("positive");
@@ -56,6 +58,33 @@ export function TherapyTab() {
 
   return (
     <>
+      <div
+        className="card"
+        data-testid="therapy-caveat-banner"
+        style={{
+          background: "#fef3c7",
+          borderLeft: "4px solid #f59e0b",
+          color: "#78350f",
+        }}
+      >
+        <div style={{ fontWeight: 600, fontSize: "0.95rem" }}>
+          ⚠ Research use only — nccn-lite-v0 proxy rules engine
+        </div>
+        <div style={{ fontSize: "0.85rem", marginTop: "0.35rem" }}>
+          This tab maps ER/PR/HER2/grade to a small fixed table of published NCCN
+          Guideline sections. It is NOT a trained ML model, NOT a live TxGemma agent,
+          and NOT a certified clinical decision support tool. It does not reason about
+          individual comorbidities, drug interactions, prior therapy, or trial
+          enrollment. Do not use for treatment decisions. Every recommendation links
+          back to its NCCN section — verify against the full guideline (
+          <a href={NCCN_BREAST_URL} target="_blank" rel="noreferrer"
+             style={{ color: "#78350f", textDecoration: "underline" }}>
+            NCCN Breast Cancer Guidelines PDF
+          </a>
+          ) with a certified breast oncologist before any clinical action.
+        </div>
+      </div>
+
       <div className="card">
         <h2>Therapy · NCCN-lite rules + TxGemma (gated)</h2>
         <p style={{ fontSize: "0.85rem", color: "var(--fg-muted)" }}>
@@ -130,6 +159,27 @@ export function TherapyTab() {
       {result && (
         <>
           <div className="card">
+            <div style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "0.5rem",
+              alignItems: "center",
+              marginBottom: "0.5rem",
+            }} data-testid="therapy-provenance-bar">
+              <span className="pill" style={{ background: "#eef2ff", color: "#3730a3" }}>
+                model: {result.provenance?.model_name ?? result.provenance?.model_state ?? "unknown"}
+              </span>
+              {result.branch_id && (
+                <span className="pill" style={{ background: "#ecfdf5", color: "#065f46" }}>
+                  branch: {result.branch_id}
+                </span>
+              )}
+              {result.rules_sha256 && (
+                <span className="pill" style={{ background: "#f5f5f4", color: "#57534e", fontFamily: "ui-monospace, monospace" }}>
+                  rules sha256: {result.rules_sha256.slice(0, 12)}…
+                </span>
+              )}
+            </div>
             <h2>Recommended options ({result.recommended_options.length})</h2>
             {result.recommended_options.length === 0 && (
               <div style={{ color: "var(--fg-muted)" }}>No options returned (placeholder or gated).</div>
@@ -143,11 +193,25 @@ export function TherapyTab() {
                 <div style={{ fontWeight: 600 }}>{opt.regimen}</div>
                 <div style={{ fontSize: "0.75rem", color: "var(--fg-muted)" }}>
                   <span className="pill">line {opt.line_of_therapy}</span>
-                  {opt.evidence?.[0] && (
-                    <a href={opt.evidence[0].url} target="_blank" rel="noreferrer"
-                       style={{ color: "var(--accent)", marginLeft: "0.5rem" }}>
-                      {opt.evidence[0].source || "evidence"}
-                    </a>
+                  {opt.evidence && opt.evidence.length > 0 && (
+                    <span style={{ marginLeft: "0.5rem" }} data-testid={`nccn-links-${i}`}>
+                      {opt.evidence.map((ev, j) => (
+                        <a
+                          key={j}
+                          href={ev.url || NCCN_BREAST_URL}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{
+                            color: "var(--accent)",
+                            marginRight: "0.5rem",
+                            textDecoration: "underline",
+                          }}
+                          title={ev.source || "NCCN Breast Cancer Guidelines"}
+                        >
+                          {ev.quoted_text || ev.source || "NCCN evidence"}
+                        </a>
+                      ))}
+                    </span>
                   )}
                 </div>
                 <div style={{ fontSize: "0.85rem", marginTop: "0.25rem" }}>{opt.rationale}</div>

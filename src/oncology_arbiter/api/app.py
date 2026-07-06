@@ -775,6 +775,48 @@ def create_app() -> FastAPI:
         except Exception:
             arbiter_block = None
 
+        # ------------------------------------------------------------------
+        # v0.2.1: Parse the free-text report for ER/PR/HER2/grade so the
+        # receptor panel is not silently defaulted to all-None. This is a
+        # regex proxy (parser_id=proxy_regex_v0); the frontend MUST show
+        # per-field parse_state and gate the therapy call on user confirmation
+        # so a wrong extraction cannot silently drive a wrong branch.
+        # ------------------------------------------------------------------
+        receptor_panel = BiopsyReceptorPanel()
+        parsed_grade: int | None = None
+        if req.report_text:
+            from oncology_arbiter.models.report_parser import (
+                parse_pathology_report,
+            )
+
+            parsed = parse_pathology_report(req.report_text)
+
+            # Map HER2 parser output (positive/negative/equivocal) straight
+            # onto the schema literal — the values line up 1:1.
+            her2_val = parsed.her2.value
+            if her2_val not in ("positive", "negative", "equivocal"):
+                her2_val = None
+
+            parse_state: dict[str, str] = {
+                "er": parsed.er.match_state,
+                "pr": parsed.pr.match_state,
+                "her2": parsed.her2.match_state,
+                "grade": parsed.grade.match_state,
+            }
+
+            receptor_panel = BiopsyReceptorPanel(
+                er_positive=parsed.er.value if isinstance(parsed.er.value, bool) else None,
+                pr_positive=parsed.pr.value if isinstance(parsed.pr.value, bool) else None,
+                her2_status=her2_val,  # type: ignore[arg-type]
+                ki67_percent=None,  # deliberately out of scope for v0.2.1 parser
+                parse_state=parse_state,  # type: ignore[arg-type]
+            )
+            parsed_grade = parsed.grade.value if isinstance(parsed.grade.value, int) else None
+            matched_count = sum(1 for s in parse_state.values() if s == "matched")
+            warnings.append(
+                f"receptor_panel_source:{parsed.parser_id}:matched={matched_count}/4"
+            )
+
         schema_gate_report = _to_schema_gate_report(runtime_gate_report)
         env = _envelope(
             request_id,
@@ -786,8 +828,8 @@ def create_app() -> FastAPI:
         return BiopsyResponse(
             **env,
             subtype_prediction=subtype_prediction,
-            receptor_panel=BiopsyReceptorPanel(),
-            grade=None,
+            receptor_panel=receptor_panel,
+            grade=parsed_grade,
             confidence=confidence,
             arbiter_score=arbiter_block,
         )
@@ -823,12 +865,23 @@ def create_app() -> FastAPI:
         warnings: list[str] = []
         runtime_gate_report = None  # populated by TxGemma preflight
 
-        # Extract features for rules engine from biopsy_output + patient_context
+        # Extract features for rules engine from biopsy_output + patient_context.
+        # v0.2.1: if receptors_override is set (user Confirm-gate output from
+        # the frontend), it wins over whatever is in biopsy_output.receptor_panel.
+        # This is the honesty contract for the tumor-board demo — the parser
+        # is a suggestion; the pathologist confirms.
         biopsy = req.biopsy_output
         subtype: str | None = biopsy.subtype_prediction if biopsy else None
-        er = bool(biopsy.receptor_panel.er_positive) if biopsy else False
-        pr = bool(biopsy.receptor_panel.pr_positive) if biopsy else False
-        her2_status = biopsy.receptor_panel.her2_status if biopsy else None
+        override = req.receptors_override
+        if override is not None:
+            er = bool(override.er_positive) if override.er_positive is not None else False
+            pr = bool(override.pr_positive) if override.pr_positive is not None else False
+            her2_status = override.her2_status
+            warnings.append("receptors_source:user_confirmed")
+        else:
+            er = bool(biopsy.receptor_panel.er_positive) if biopsy else False
+            pr = bool(biopsy.receptor_panel.pr_positive) if biopsy else False
+            her2_status = biopsy.receptor_panel.her2_status if biopsy else None
         her2 = her2_status == "positive"
         grade = biopsy.grade if biopsy and biopsy.grade else 2
         # Stage isn't in BiopsyResponse today; use a conservative default and
@@ -1292,8 +1345,15 @@ def create_app() -> FastAPI:
             screening = screening_analyze(req.screening_input, tenant=tenant)
         if req.biopsy_input:
             biopsy = biopsy_analyze(req.biopsy_input, tenant=tenant)
+        # v0.2.1: forward receptors_confirmed (from Case View Confirm gate)
+        # into therapy_reason as receptors_override so the user-confirmed
+        # panel wins over parser output.
         therapy = therapy_reason(
-            TherapyRequest(biopsy_output=biopsy, patient_context=req.therapy_context),
+            TherapyRequest(
+                biopsy_output=biopsy,
+                patient_context=req.therapy_context,
+                receptors_override=req.receptors_confirmed,
+            ),
             tenant=tenant,
         )
         # L5 Co-Scientist 4-phase loop (opt-in). When enabled, runs
@@ -1363,6 +1423,7 @@ def create_app() -> FastAPI:
     # produced by `npm --prefix frontend run build`. Base path is /ui/ so it
     # never collides with /v1/* API routes.
     if _is_env_true("ONCOLOGY_ARBITER_SERVE_FRONTEND"):
+        from fastapi.responses import RedirectResponse
         from fastapi.staticfiles import StaticFiles
 
         static_root = Path(__file__).parent / "static" / "dist"
@@ -1370,5 +1431,13 @@ def create_app() -> FastAPI:
             # `html=True` makes StaticFiles fall through to index.html for any
             # sub-path (SPA routing). It still 404s on missing static assets.
             app.mount("/ui", StaticFiles(directory=str(static_root), html=True), name="ui")
+
+            # v0.2.1: bare "/" was returning 404 because there is no root
+            # handler. Redirect to /ui/ so clinicians typing the base URL
+            # land on the SPA instead of a JSON not-found. 307 preserves the
+            # HTTP method (harmless for GET, correct for the general case).
+            @app.get("/", include_in_schema=False)
+            def _root_to_ui() -> RedirectResponse:
+                return RedirectResponse(url="/ui/", status_code=307)
 
     return app
