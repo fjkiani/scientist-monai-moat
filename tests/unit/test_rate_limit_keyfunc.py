@@ -286,9 +286,12 @@ def _build_limited_app(monkeypatch, *, trust: bool, limit: str = "3/second") -> 
     app.state.limiter = limiter
     app.add_middleware(SlowAPIMiddleware)
 
-    @app.exception_handler(RateLimitExceeded)
     def _handler(request, exc):
         return JSONResponse({"detail": "rate limit exceeded"}, status_code=429)
+
+    # Starlette >=1.3 removed the @app.exception_handler decorator; use the
+    # imperative registration API which both old and new Starlette support.
+    app.add_exception_handler(RateLimitExceeded, _handler)
 
     return TestClient(app)
 
