@@ -72,10 +72,13 @@ DEMO_DICOM_SOURCE = (
 
 _HF_REPO_ID = "helloerikaaa/cbis-ddsm-r"
 _HF_REPO_TYPE = "dataset"
+# Real path on HF as of v0.2.2 (verified via HfApi.list_repo_files 2026-07-06).
+# The Study/Series UIDs are CBIS-DDSM's — they are stable identifiers in the
+# public dataset, not something we chose.
 _HF_FILE_PATH = (
     "img/Mass-Test_P_00016_LEFT_CC/"
-    "1.3.6.1.4.1.9590.100.1.2.253817146311303055112013188031820262133/"
-    "1.3.6.1.4.1.9590.100.1.2.221881145710257050212215210330168260107/"
+    "1.3.6.1.4.1.9590.100.1.2.416403281812750683720028031170500130104/"
+    "1.3.6.1.4.1.9590.100.1.2.245063149211255120613007755642780114172/"
     "00000001.dcm"
 )
 
