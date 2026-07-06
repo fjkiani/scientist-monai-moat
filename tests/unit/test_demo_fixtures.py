@@ -159,3 +159,41 @@ def test_prewarm_demo_case_returns_path_on_success(
     assert result is not None
     assert result.is_file()
     assert result.stat().st_size == fake_local_fixture.stat().st_size
+
+
+def test_download_from_hf_passes_writable_cache_dir(tmp_demo_cache, monkeypatch):
+    """Regression: hf_hub_download must receive our writable cache_dir kwarg.
+
+    Fixes a live-smoke failure on Render where the container's HOME=/app
+    was owned by root but the app ran as UID 10001. Without cache_dir,
+    hf_hub_download defaulted to ~/.cache/huggingface = /app/.cache and
+    hit PermissionError [Errno 13].
+    """
+    calls = {}
+    payload = b"\x00\x00DICM_fake_hf_return" + b"\x11" * 512
+
+    def fake_hf(**kwargs):
+        calls.update(kwargs)
+        # Return a real file that fake-simulates HF's cache location.
+        fake_hf_out = tmp_demo_cache / "hf-cache-blob.dcm"
+        fake_hf_out.parent.mkdir(parents=True, exist_ok=True)
+        fake_hf_out.write_bytes(payload)
+        return str(fake_hf_out)
+
+    monkeypatch.setenv(
+        "ONCOLOGY_ARBITER_DEMO_LOCAL_DICOM", "/nonexistent/local.dcm"
+    )
+    with patch(
+        "huggingface_hub.hf_hub_download",
+        side_effect=fake_hf,
+    ):
+        case = build_demo_case()
+
+    # Verify the download call received our resolved cache_dir, not None.
+    assert "cache_dir" in calls, "hf_hub_download must be called with cache_dir"
+    assert calls["cache_dir"] == str(tmp_demo_cache), (
+        f"cache_dir must equal ONCOLOGY_ARBITER_DEMO_CACHE_DIR "
+        f"({tmp_demo_cache!s}), got {calls['cache_dir']!r}"
+    )
+    # Case still resolves correctly through our staging copy.
+    assert base64.b64decode(case.dicom_bytes_b64) == payload

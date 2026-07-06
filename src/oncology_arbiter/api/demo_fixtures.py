@@ -154,11 +154,22 @@ def _download_from_hf(dest: Path) -> Path:
             "huggingface_hub not installed; cannot download demo DICOM"
         ) from e
 
+    # cache_dir is set to our own writable location so containers where
+    # $HOME is unwritable (Render: HOME=/app, owned by root; process runs
+    # as UID 10001 without write access) don't fail on the default
+    # ~/.cache/huggingface directory. This is the same directory where we
+    # stage the final demo.dcm copy — HF's cache lives at
+    # <cache_dir>/<hub-style-blob-tree>/, our copy lives at
+    # <cache_dir>/demo.dcm.
+    hf_cache_dir = _resolve_cache_dir()
+    hf_cache_dir.mkdir(parents=True, exist_ok=True)
+
     try:
         hf_path = hf_hub_download(
             repo_id=_HF_REPO_ID,
             repo_type=_HF_REPO_TYPE,
             filename=_HF_FILE_PATH,
+            cache_dir=str(hf_cache_dir),
         )
     except Exception as e:  # ConnectionError, HTTPError, GatedRepoError, ...
         raise DemoFixtureUnavailable(
