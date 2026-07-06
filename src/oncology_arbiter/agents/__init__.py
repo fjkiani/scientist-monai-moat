@@ -1,27 +1,24 @@
-"""Co-Scientist-style supervisor agent scaffold.
+"""Co-Scientist-style supervisor agent.
 
-Phase 1 ships **only the interface** — a supervisor stub that maps a
-per-stage input to an ordered plan and a placeholder "not-yet-wired"
-response. Phase 5 (per :mod:`oncology_arbiter` PLAN) replaces the stub
-body with real agent orchestration (generate → reflect → tournament →
-meta-review) using the tools already ported into
-:mod:`oncology_arbiter.tools`.
+v0.3.0 ships the **real** supervisor loop — a five-phase Co-Scientist
+pipeline (generate → evidence → reflect → tournament → meta-review) that
+calls a live LLM (Gemma via Google direct, OpenRouter fallbacks) and
+retrieves real literature URLs through the same tool inventory the API
+already uses.
 
-Why ship a stub now:
+Backwards compatibility
+-----------------------
 
-* Every stage endpoint can reserve a slot for the eventual agent trace
-  in its response schema (``ApiEnvelope.honesty_gate`` + a future
-  ``orchestrator_trace`` block).
-* Every stage response can call :func:`plan_stage` today and get an
-  honest ``StagePlan`` with ``model_state="placeholder"`` so a downstream
-  consumer never sees a masquerading agent output.
-* The empty ``agents/`` directory that existed pre-Phase-1 was itself
-  a smell — a name in the scaffolding tree with no honest surface.
-
-The stub deliberately does NOT emit ``mock`` / ``fake`` / ``MagicMock``
-markers: it emits a real dataclass carrying the same shape a live agent
-would produce, so drop-in replacement in Phase 5 does not require any
-schema migration.
+* :func:`plan_stage` still returns the deterministic ``StagePlan`` shape
+  used by the Phase-1 tests and the ``ApiEnvelope.honesty_gate`` block.
+* :func:`run_placeholder` still returns a ``StageResult`` with
+  ``model_state="placeholder"`` — this is the legacy path when
+  :envvar:`ONCOLOGY_ARBITER_USE_LLM_SUPERVISOR` is off. It is honest by
+  construction: no fabricated evidence, no fabricated Elo.
+* :func:`execute_stage` is the new real path. It requires an LLM client
+  (see :class:`oncology_arbiter.models.llm_client.GemmaClient`). If the
+  LLM ladder is exhausted it returns ``model_state="llm_unavailable"``
+  and NEVER fabricates hypotheses or evidence.
 
 RESEARCH USE ONLY — see :data:`oncology_arbiter.RUO_DISCLAIMER`.
 """
@@ -29,18 +26,22 @@ from __future__ import annotations
 
 from .supervisor import (
     AgentPhase,
+    Hypothesis,
     StagePlan,
     StageResult,
     SUPERVISOR_VERSION,
+    execute_stage,
     plan_stage,
     run_placeholder,
 )
 
 __all__ = [
     "AgentPhase",
+    "Hypothesis",
     "StagePlan",
     "StageResult",
     "SUPERVISOR_VERSION",
+    "execute_stage",
     "plan_stage",
     "run_placeholder",
 ]

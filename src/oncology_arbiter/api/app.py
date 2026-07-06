@@ -1531,14 +1531,56 @@ def create_app() -> FastAPI:
                         if isinstance(e, dict) and "url" in e:
                             seen_urls.add(e["url"])
             try:
-                cs_out = run_co_scientist(
-                    screening=(screening.model_dump() if screening is not None else None),
-                    biopsy=(biopsy.model_dump() if biopsy is not None else None),
-                    therapy=(therapy.model_dump() if therapy is not None else None),
-                    seen_urls=seen_urls,
-                )
-                elo_ranked = cs_out["hypotheses"]
-                cs_warnings = cs_out["warnings"]
+                # v0.3.0: two paths
+                # (a) LLM supervisor (real Gemma loop) when env flag set
+                # (b) offline deterministic Elo loop (old path, test-pinned)
+                if _is_env_true("ONCOLOGY_ARBITER_USE_LLM_SUPERVISOR"):
+                    from oncology_arbiter.agents.supervisor import execute_stage
+                    llm_ctx = {
+                        "cancer": "breast",
+                        "screening_summary": (
+                            (screening.model_dump() if screening is not None else {}).get("findings")
+                        ),
+                        "biopsy_summary": (
+                            (biopsy.model_dump() if biopsy is not None else {}).get("subtype_alternates")
+                        ),
+                        "therapy_summary": (
+                            (therapy.model_dump() if therapy is not None else {}).get("recommended_options")
+                        ),
+                        "receptors": (
+                            req.receptors_confirmed.model_dump()
+                            if getattr(req, "receptors_confirmed", None) is not None else None
+                        ),
+                        "patient_context": (
+                            req.therapy_context.model_dump()
+                            if getattr(req, "therapy_context", None) is not None else None
+                        ),
+                    }
+                    stage_result = execute_stage(
+                        "case_full",
+                        llm_ctx,
+                        n_hypotheses=6,
+                        n_evidence_top_k=3,
+                        seed_urls=seen_urls,
+                    )
+                    elo_ranked = [h.as_dict() for h in stage_result.hypotheses]
+                    if stage_result.notes:
+                        cs_warnings.append(f"supervisor_note:{stage_result.notes}")
+                    cs_warnings.append(
+                        f"supervisor_state:{stage_result.model_state},"
+                        f"llm_calls={stage_result.llm_calls},"
+                        f"tokens={stage_result.llm_total_tokens},"
+                        f"cost=${stage_result.llm_cost_usd:.6f}"
+                    )
+                else:
+                    cs_out = run_co_scientist(
+                        screening=(screening.model_dump() if screening is not None else None),
+                        biopsy=(biopsy.model_dump() if biopsy is not None else None),
+                        therapy=(therapy.model_dump() if therapy is not None else None),
+                        seen_urls=seen_urls,
+                    )
+                    elo_ranked = cs_out["hypotheses"]
+                    cs_warnings = cs_out["warnings"]
             except Exception as e:
                 cs_warnings = [f"co_scientist_error:{type(e).__name__}:{e}"]
 
