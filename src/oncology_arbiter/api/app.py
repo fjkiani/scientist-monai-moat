@@ -1229,15 +1229,25 @@ def create_app() -> FastAPI:
     # 5 fixtures we already ship (~14 MB). No auth needed to fetch.
     # Pathology text: synthetic luminal-A case (matches the frontend
     # LUMINAL_A_EXAMPLE constant). Not a real patient.
+    #
+    # v0.2.2 fix (2026-07-06): PUBLIC endpoint (NO require_api_key). The
+    # whole point of the demo is to let an unauthenticated first-time
+    # visitor click "Load demo case" and see the pipeline work without
+    # first hunting for an API key. Locking this behind auth was
+    # UX-hostile *and* semantically wrong: it's a static server-hosted
+    # fixture (real CBIS-DDSM DICOM + synthetic luminal-A report +
+    # patient context) with no tenant data, no per-call cost beyond the
+    # one-time HF download that startup pre-warms into /tmp/oa-demo, and
+    # no scenario where knowing a tenant identity matters. Any endpoint
+    # that DOES touch tenant data (screening/biopsy/therapy/case_full)
+    # continues to require the header.
 
     @app.get(
         "/v1/demo/case",
         response_model=DemoCaseResponse,
         summary="Return a fully-formed sample case for demoing the pipeline.",
     )
-    def demo_case(
-        tenant: APIKey = Depends(require_api_key),
-    ) -> DemoCaseResponse:
+    def demo_case() -> DemoCaseResponse:
         from .demo_fixtures import DemoFixtureUnavailable, build_demo_case
 
         try:

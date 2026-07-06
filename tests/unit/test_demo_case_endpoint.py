@@ -1,4 +1,4 @@
-"""v0.2.2: GET /v1/demo/case — auth-gated, returns a fully-formed case."""
+"""v0.2.2: GET /v1/demo/case — PUBLIC endpoint, returns a fully-formed case."""
 from __future__ import annotations
 
 import base64
@@ -54,12 +54,29 @@ def anon_client(monkeypatch, demo_dicom_local):
 # --------------------------------------------------------------- auth behaviour
 
 
-def test_demo_case_requires_auth_when_enforced(secured_client):
+def test_demo_case_is_public_even_when_auth_enforced(secured_client):
+    """v0.2.2 fix (2026-07-06): /v1/demo/case is PUBLIC.
+
+    The demo endpoint returns a static server-hosted fixture (real CBIS-DDSM
+    DICOM + synthetic luminal-A report). It has no tenant data and no
+    per-call cost beyond the one-time HF download that startup pre-warms.
+    The whole point of a demo is to let an unauthenticated first-time
+    visitor click "Load demo case" and see the pipeline work.
+
+    Every other endpoint that touches tenant data (screening/biopsy/therapy/
+    case_full) continues to require the header. Regression tests for those
+    live in test_auth.py and test_case_full.py.
+    """
     client, _, _ = secured_client
-    r = client.get("/v1/demo/case")
-    assert r.status_code == 401
+    r = client.get("/v1/demo/case")  # NO X-API-Key header
+    assert r.status_code == 200, r.text
     body = r.json()
-    assert "X-API-Key" in str(body).replace("_", "-") or "api" in str(body).lower()
+    # Shape check — the payload should be a real demo case, not an error.
+    for k in [
+        "dicom_bytes_b64", "dicom_source", "dicom_sha256",
+        "dicom_size_bytes", "report_text", "patient_context", "warnings",
+    ]:
+        assert k in body, f"missing key {k}"
 
 
 def test_demo_case_accepts_valid_key(secured_client, demo_dicom_local):
