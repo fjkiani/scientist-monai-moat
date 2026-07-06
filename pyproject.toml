@@ -39,6 +39,11 @@ dependencies = [
   # SaaS observability + rate limiting
   "slowapi>=0.1.9",
   "prometheus-fastapi-instrumentator>=7.0",
+  # Demo case fixture download (v0.2.2 /v1/demo/case endpoint)
+  #   Pure-Python client, ~1 MB, Apache-2.0. Base dep (not [ml]) because the
+  #   demo endpoint needs to fetch CBIS-DDSM at runtime on hosts that don't
+  #   ship the fixture in the container (e.g. Render).
+  "huggingface_hub>=0.24",
 ]
 
 [project.optional-dependencies]
@@ -46,7 +51,6 @@ ml = [
   "torch>=2.3",
   "monai>=1.3",
   "transformers>=4.44",
-  "huggingface_hub>=0.24",
 ]
 dev = [
   "pytest>=8",
