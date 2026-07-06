@@ -1,0 +1,125 @@
+{
+  "dataset": {
+    "name": "CBIS-DDSM_1024",
+    "source": "https://huggingface.co/datasets/dbaek111/CBIS-DDSM_1024",
+    "hf_zip_sha256": "123239b7f68c3a309b33784aff0a7f91ff9200edc5a2f76c4507ce96cc7c0e53",
+    "n_total": 3086,
+    "n_train": 2445,
+    "n_test": 641,
+    "n_train_positive": 1098,
+    "n_train_negative": 1347,
+    "n_test_positive": 260,
+    "n_test_negative": 381
+  },
+  "features": {
+    "source_model": "google/medsiglip-448",
+    "modal_endpoint": "https://crispro-test--medsiglip-embed-batch.modal.run",
+    "modal_app_version": "medsiglip-modal-v0.3.0",
+    "embedding_dim": 1152,
+    "input_resolution": 448,
+    "input_format": "pixels",
+    "preprocessing_provenance": "raw 1024x1024 grayscale PNGs from CBIS-DDSM_1024 -> PIL.Image.open + convert('RGB') -> SiglipImageProcessor.resize(448) -> vision_model.forward -> pooler_output (1152-d)"
+  },
+  "classifier": {
+    "class": "sklearn.pipeline.Pipeline(StandardScaler, LogisticRegression)",
+    "penalty": "l2",
+    "C": 0.01,
+    "solver": "saga",
+    "max_iter": 5000,
+    "seed": 42,
+    "selected_over_baselines": {
+      "logreg_C1_test_auc": 0.7282,
+      "logreg_C0.01_test_auc": 0.7526,
+      "mlp_256_test_auc": 0.7555,
+      "mlp_512_128_test_auc": 0.7144,
+      "note": "LogReg C=0.01 chosen: same CV AUC as MLP with 30x fewer parameters and no overfit risk"
+    }
+  },
+  "cv_5fold": {
+    "auc_per_fold": [
+      0.791593,
+      0.791636,
+      0.801715,
+      0.764054,
+      0.798495
+    ],
+    "pr_auc_per_fold": [
+      0.749752,
+      0.746693,
+      0.761462,
+      0.707005,
+      0.760455
+    ],
+    "auc_mean": 0.789499,
+    "auc_std": 0.013316,
+    "pr_auc_mean": 0.745073,
+    "seconds": 4.531
+  },
+  "test": {
+    "auc": 0.752584,
+    "pr_auc": 0.681633,
+    "brier": 0.198746,
+    "at_threshold_0.5": {
+      "threshold": 0.5,
+      "accuracy": 0.6879875195007801,
+      "f1": 0.6183206106870229,
+      "precision": 0.6136363636363636,
+      "recall": 0.6230769230769231,
+      "confusion_matrix": [
+        [
+          279,
+          102
+        ],
+        [
+          98,
+          162
+        ]
+      ]
+    },
+    "at_youden_j_optimal": {
+      "threshold": 0.554904,
+      "accuracy": 0.719189,
+      "f1": 0.625,
+      "precision": 0.681818,
+      "recall": 0.576923,
+      "confusion_matrix": [
+        [
+          311,
+          70
+        ],
+        [
+          110,
+          150
+        ]
+      ]
+    },
+    "at_recall_0.85": {
+      "threshold": 0.283617,
+      "accuracy": 0.622465,
+      "f1": 0.646199,
+      "precision": 0.521226,
+      "recall": 0.85,
+      "confusion_matrix": [
+        [
+          178,
+          203
+        ],
+        [
+          39,
+          221
+        ]
+      ]
+    }
+  },
+  "fit_seconds_on_full_train": 1.153,
+  "software": {
+    "python": "3.11.14",
+    "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36"
+  },
+  "honesty_caveats": [
+    "MedSigLIP-448 pretraining did not include mammography \u2014 this probe is an off-label repurposing of a general medical vision model.",
+    "CBIS-DDSM_1024 uses derived 1024x1024 PNGs, not original DICOM pixel data \u2014 DICOM Modality LUT and Photometric Interpretation are not recoverable from the PNGs.",
+    "LogReg on 1152-d features has 1152 params; N_train = 2445 is only ~2x parameters. Regularization (C=0.01) is essential.",
+    "Test AUC ~0.75 falls short of a screening threshold (typical CBIS-DDSM benchmarks with fine-tuned CNNs hit 0.85\u20130.90). A production probe would fine-tune the vision backbone or use a larger training set."
+  ]
+}
