@@ -191,6 +191,14 @@ def evaluate(model, tokenizer, reports, device, max_len: int = 256):
 
 
 def main():
+    # Line-buffer stdout/stderr so long CPU epochs still surface progress
+    # to the training log even when stdout isn't a TTY (background jobs).
+    import sys
+    try:
+        sys.stdout.reconfigure(line_buffering=True)  # type: ignore[attr-defined]
+        sys.stderr.reconfigure(line_buffering=True)  # type: ignore[attr-defined]
+    except Exception:
+        pass
     p = argparse.ArgumentParser()
     p.add_argument("--base-model", default="emilyalsentzer/Bio_ClinicalBERT")
     p.add_argument("--out-dir", default="models/report_parser_clinicalbert_v1")
@@ -282,6 +290,14 @@ def main():
             f"[epoch {epoch}] train_loss={avg_loss:.4f} val_loss={vl:.4f} "
             f"val_micro_f1={val_metrics['micro']['f1']:.4f}"
         )
+        # v0.3.0: per-epoch checkpoint so a mid-run kill still leaves usable
+        # weights. Overwrites on each epoch (we keep the LAST epoch, not the
+        # best-val, because 3-epoch runs on synthetic data are stable).
+        ckpt_dir = out_dir / f"epoch_{epoch}"
+        ckpt_dir.mkdir(parents=True, exist_ok=True)
+        model.save_pretrained(ckpt_dir)
+        tokenizer.save_pretrained(ckpt_dir)
+        print(f"[ckpt] saved epoch {epoch} weights to {ckpt_dir}")
 
     train_seconds = time.time() - t0
 
