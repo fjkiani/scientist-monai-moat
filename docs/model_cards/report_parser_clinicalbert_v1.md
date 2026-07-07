@@ -168,13 +168,25 @@ rescue) vs the regex-only parser:
    "widely negative", "0.2 mm to the deep margin") and LVI ("focally present",
    "not identified in submitted tissue") is longer and less template-like
    than receptor phrasing. Regex layer handles most of these in fused mode.
-2. **Stage strict F1 = 0** — see per-field table above. Regex layer takes over.
+2. **Stage strict recall depressed (0.51–0.62)** — see strict per-field
+   table above. Relaxed F1 is 1.0 on all three (T/N/M) — the model
+   correctly identifies stage spans — but strict-view recall is lower
+   because the model often falls just below the 0.6 threshold on stage
+   entities, especially in off-template phrasing like "Pathologic
+   stage: pT2, N1, M0.". Regex layer handles these in fused mode.
 3. **Test set is entirely synthetic.** Model performance on real hospital
    pathology reports is unmeasured for `v1`. Do not represent these numbers
    as real-world clinical accuracy.
 4. **CPU-only inference.** 0.87 s/report is fine for dev / batch but not for
    the Render 0.1 CPU dyno; deploying this on the free tier would starve
    the API. Weights are deliberately excluded from the Docker image.
+5. **Tumor size integer-mm phrasing gap.** The synthetic corpus always
+   writes tumor size with `.0` suffix (e.g. `"Tumor size: 22.0 mm"`),
+   so the model never learned to tag integer-mm surfaces. On post-training
+   API smokes, `"Tumor size: 22 mm"` returned `no_match`; adding `.0`
+   makes it match. Not visible in the held-out eval (which uses corpus
+   phrasing) but a real gap for wild input. Regex layer handles integer
+   surfaces in fused mode.
 
 ## Usage
 
