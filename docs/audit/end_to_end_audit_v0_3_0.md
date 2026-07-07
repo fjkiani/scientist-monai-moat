@@ -49,7 +49,7 @@ Same three layers, updated:
 |---|---|
 | Repo shipped | 353+ tests (11 new v0.3.0 e2e), 5 model cards (SigLIP, MedSigLIP-448, MedGemma 4B & 27B, **report_parser_clinicalbert_v1**), 3 arbiter templates, 5 CBIS-DDSM DICOMs, 5 Co-Scientist tools, real supervisor loop, IRB templates, ledger SQL schema |
 | Wired in API | 6 real code paths (DICOM preproc, arbiter scoring, model card index, **screening probe**, **nsclc detection**, **fused report parser**) + 3 partial/placeholder (biopsy WSI subtyping proxy, therapy template, URL DICOM ingestion) |
-| Deployed on Render | `oncology-arbiter.onrender.com` (Docker, free plan, 512 MB / 0.1 CPU, us-west). CBIS-DDSM probe and ClinicalBERT parser NOT enabled in Docker image (weights ~430 MB + ~350 MB would OOM the 512 MB dyno). Local dev boxes have both. |
+| Deployed on Render | `oncology-arbiter.onrender.com` (Docker, free plan, 512 MB / 0.1 CPU, region=oregon). CBIS-DDSM probe and ClinicalBERT parser NOT enabled on the dyno. ClinicalBERT is a 430 MB safetensors load that would exceed the 512 MB memory ceiling; CBIS-DDSM probe requires `MEDSIGLIP_BACKEND=modal` + a Modal token (neither set on Render). Local dev boxes have both. |
 
 The five model cards are documentation only for four of them. **`report_parser_clinicalbert_v1.md` is the first model card in this repo whose weights are actually loaded by the wired API code path.**
 
@@ -115,7 +115,7 @@ Now indexes **5** cards (added `report_parser_clinicalbert_v1.md`).
 Unchanged. Public `/v1/demo/case` endpoint drops `require_api_key`.
 
 ### 3.5 CBIS-DDSM screening probe *(v0.3.0)*
-File: `src/oncology_arbiter/models/cbis_ddsm_probe.py`. Sklearn LogReg on 1152-d MedSigLIP embeddings. Coefficients + intercept + calibration stored in `docs/proofs/cbis_ddsm_logreg_v1_coeffs.npz` (not weights of the vision model — the LR is small enough to check into the repo).
+File: `src/oncology_arbiter/models/cbis_ddsm_probe.py`. Sklearn Pipeline (`StandardScaler` + `LogisticRegression`, penalty=l2, C=0.01) on 1152-d MedSigLIP embeddings. Trained pipeline persisted at `models/cbis_ddsm_logreg_v1.joblib` (33 KB) — small enough to check into the repo alongside the training data provenance JSON at `docs/proofs/cbis_ddsm_logreg_v1_metrics.json`.
 
 Provenance chain when enabled:
 ```
@@ -138,7 +138,7 @@ Files:
 - `src/oncology_arbiter/nlp/report_parser_v2.py` — fusion switch (regex / bert / fused)
 - `src/oncology_arbiter/nlp/corpus_synth.py` — synthetic corpus generator (train/val/test = 1200/300/300 reports)
 - `docs/model_cards/report_parser_clinicalbert_v1.md` — model card
-- `scripts/train_report_parser_clinicalbert.py` — training script (3 epochs, AdamW, lr=2e-5)
+- `src/oncology_arbiter/nlp/clinicalbert_train.py` — training script (3 epochs, AdamW, lr=2e-5)
 - `scripts/eval_report_parser_clinicalbert.py` — field-level eval harness
 - `tests/nlp/test_clinicalbert_e2e.py` — 11 e2e tests marked `@pytest.mark.models`
 
@@ -216,7 +216,7 @@ models_loaded = {
 }
 ```
 
-**Important caveat**: the `co_scientist` slot label is `PROXY_CO_SCIENTIST` even after `99113e3` moved the underlying implementation to a real GemmaClient LLM loop. The label was not tightened. Callers should not read PROXY as "no real work happens" for this slot — the deterministic Elo tournament wrapper does still run the real 5-phase LLM loop inside.
+**Important caveat**: on Render, `ONCOLOGY_ARBITER_ENABLE_CO_SCIENTIST=1` IS set (see `render.yaml`), so the `co_scientist` slot on the deployed `/health` will report `PROXY_CO_SCIENTIST`. The slot label was not tightened after `99113e3` moved the underlying implementation to a real GemmaClient LLM loop. Callers should not read PROXY as "no real work happens" for this slot — the deterministic Elo tournament wrapper does still run the real 5-phase LLM loop inside when the LLM route ladder resolves. (In production, the Gemma route ladder may still fail — Google direct requires an API key, OpenRouter free-tier hits 429/402 frequently — in which case `LlmUnavailable` bubbles up as a warning rather than as fabricated evidence.)
 
 Similarly, the ClinicalBERT parser and LUNA16 detector state are not surfaced through `/health` slots — they only appear in the per-response `provenance.model_state` field of `/v1/biopsy/analyze` and `/v1/case/full?cancer=nsclc` respectively. On the Render deploy where both env flags are off, no request will ever see `LOADED_CLINICALBERT_PARSER` or `LOADED_LUNA16_RETINANET` in the wire response — those states only surface on dev boxes with the flags on and weights present.
 
@@ -226,11 +226,11 @@ Similarly, the ClinicalBERT parser and LUNA16 detector state are not surfaced th
 
 ### 5.1 Real image data on disk
 - `data/cbis_ddsm/` — 5 real CBIS-DDSM DICOMs shipped in the repo for test data (unchanged from v0.2.2-alpha).
-- `/workspace/data/CBIS-DDSM_1024/` — full 3086 mammogram dataset (668 MB ZIP, `dbaek111/CBIS-DDSM_1024`, sha256 `123239b7...`), downloaded once, used for probe training. Not in repo (too large, licensed).
-- `/workspace/data/luna16/` — LUNA16 CT series (LIDC-IDRI subset) for nsclc detection dev, not shipped.
+- `dbaek111/CBIS-DDSM_1024` (Hugging Face, 668 MB ZIP, sha256 `123239b7f68c3a309b33784aff0a7f91ff9200edc5a2f76c4507ce96cc7c0e53`) — full 3086 mammogram dataset. Downloaded once onto a training worker under `/workspace/data/CBIS-DDSM_1024/`; not shipped with the repo (too large, CC-BY-NC 4.0). Full provenance: `docs/proofs/cbis_ddsm_logreg_v1_metrics.json` `dataset` block.
+- LUNA16 CT series (LIDC-IDRI subset) for NSCLC detection dev — downloaded onto a training/dev worker; not shipped with the repo. The API-side inference bundle (`models/luna16/lung_nodule_ct_detection/`) contains no source CT series, only the packaged inference weights + config.
 
 ### 5.2 Synthetic data used in training
-- `/workspace/data/report_parser_v0_3_0/{train,val,test}.jsonl` — 1200/300/300 synthetic pathology reports generated by `nlp/corpus_synth.py`.
+- `data/report_parser_v0_3_0/{train,val,test}.jsonl` — 1200/300/300 synthetic pathology reports generated on a training worker by `src/oncology_arbiter/nlp/corpus_synth.py`. Corpus itself not shipped (regeneratable from `corpus_synth.py` + fixed seed).
 - 11 entity types, 23 BIO labels. Random-but-reproducible via fixed seed (`--seed 20260703`).
 - **All 300 test-set metrics in §2.2 are on this synthetic corpus.**
 
@@ -238,7 +238,7 @@ Similarly, the ClinicalBERT parser and LUNA16 detector state are not surfaced th
 | Model | Data | Ckpt path | sha256 |
 |---|---|---|---|
 | `report_parser_clinicalbert_v1` | 1200 synth reports | `/workspace/models/report_parser_clinicalbert_v1/model.safetensors` (430 MB) | `3bead0422395211adf772edc57626934698da40cee1c40a6920a951dfd893851` |
-| `cbis_ddsm_logreg_v1` | 2445 CBIS-DDSM_1024 mammograms | `docs/proofs/cbis_ddsm_logreg_v1_coeffs.npz` (in repo) | via commit hash |
+| `cbis_ddsm_logreg_v1` | 2445 CBIS-DDSM_1024 mammograms | `models/cbis_ddsm_logreg_v1.joblib` (33 KB, in repo) | via commit hash |
 | `luna16_lung_nodule_detector` | MONAI publisher weights | `/workspace/monai_bundles/lung_nodule_ct_detection/models/` (~83 MB) | MONAI-hosted |
 
 Mirror for portability: **`/mnt/results/models/report_parser_clinicalbert_v1/`** contains all 9 files (weights + tokenizer + label_map + test_metrics.json + eval_summary.md + model_card.md). sha256 verified identical to worker-nsclc source. This is the fallback the 3-tier resolver uses when there's no `/workspace/models/` copy on the machine.
@@ -336,7 +336,7 @@ Deploy: Frontend prod bundle is served by the same Docker container on Render. N
 ## §8. Direct answers to persistent questions
 
 ### Q: "Are all these v0.3.0 models actually loaded in the deployed server?"
-**No.** On the Render free-plan dyno (512 MB / 0.1 CPU), we deliberately do NOT enable ClinicalBERT parser (`ONCOLOGY_ARBITER_ENABLE_CLINICALBERT_PARSER` unset) or CBIS-DDSM probe (`ONCOLOGY_ARBITER_ENABLE_CBIS_DDSM_PROBE` unset). Loading 430 MB of BERT weights + 350 MB of sklearn state would OOM the dyno. Deployed server serves the regex-only report parser and MedSigLIP-Modal for screening.
+**No.** On the Render free-plan dyno (512 MB / 0.1 CPU), we deliberately do NOT enable ClinicalBERT parser (`ONCOLOGY_ARBITER_ENABLE_CLINICALBERT_PARSER` unset) or CBIS-DDSM probe (`ONCOLOGY_ARBITER_ENABLE_CBIS_DDSM_PROBE` unset). The ClinicalBERT parser's 430 MB safetensors load would exceed the 512 MB memory ceiling. The CBIS-DDSM probe itself is trivially small (33 KB joblib) but requires `MEDSIGLIP_BACKEND=modal` and a Modal token to actually score — both intentionally absent on the deploy. Deployed server serves the regex-only report parser; screening/biopsy vision paths return placeholder envelopes with `model_state="placeholder"` and honest warnings, exactly per the render.yaml comment block.
 
 Local dev boxes (worker-nsclc, worker-1, worker-frontend) have both models wired and loaded — that is where all §2 numbers were measured.
 
