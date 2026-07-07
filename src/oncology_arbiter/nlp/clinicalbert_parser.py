@@ -254,11 +254,18 @@ class ClinicalBertReportParser:
                     value=None, match_state="no_match",
                     matched_text=None, span=None, confidence=0.0,
                 )
-            surface = sp["surface"]
+            # Prefer the raw text slice as the canonicalizer input: our
+            # whitespace tokenizer splits digit/symbol/letter boundaries
+            # (e.g. "3+" → ["3", "+"], "T2" → ["T", "2"]) and re-joins
+            # them with a space when it builds `sp["surface"]`. That
+            # breaks substring / regex checks like "3+" in s or the T-stage
+            # regex `[TNM]\d+`. Using the original character slice avoids
+            # that entire class of bug.
+            char_span = (sp["char_start"], sp["char_end"])
+            surface = text[char_span[0]:char_span[1]]
             conf = sp["confidence"]
             threshold = _ENTITY_THRESHOLDS.get(entity, 0.7)
             value, state = canonicalizer(surface, conf, threshold)
-            char_span = (sp["char_start"], sp["char_end"])
             return ClinicalBertField(
                 value=value, match_state=state,
                 matched_text=text[char_span[0]:char_span[1]],
@@ -266,20 +273,64 @@ class ClinicalBertReportParser:
             )
 
         # Canonicalizers: turn the surface text into the boolean / int /
-        # literal value the schema expects.
+        # literal value the schema expects.  The order of checks matters:
+        # weakly-positive / focal / equivocal patterns must match BEFORE
+        # the plain "positive" substring check, because "weakly positive"
+        # contains the substring "positive".
         def _receptor(surface: str, conf: float, thr: float):
-            s = surface.lower()
+            # Normalize whitespace: the whitespace tokenizer splits "3+"
+            # into ["3", "+"] and joins them back with a space, so a
+            # HER2 surface arrives here as "3 +" (or "2 + ( equivocal )").
+            # Collapse "N + " → "N+" so substring checks work.
+            s = surface.lower().strip()
+            s = re.sub(r"(\d)\s*\+", r"\1+", s)
+            s = re.sub(r"\s+", " ", s)
             state = "ambiguous" if conf < thr else "matched"
-            if "positive" in s or "3+" in s and "2+" not in s:
-                return ("positive" if state == "matched" else None,
-                        "matched" if state == "matched" else "ambiguous")
-            if "negative" in s or "no nuclear staining" in s or "no staining" in s or s.strip() in {"0", "1+"}:
-                return ("negative" if state == "matched" else None,
-                        "matched" if state == "matched" else "ambiguous")
-            if "equivocal" in s or "2+" in s or "weakly positive" in s or "focal" in s:
-                return ("equivocal" if state == "matched" else None,
-                        "matched" if state == "matched" else "ambiguous")
-            # Model claimed a receptor label but the surface is unusual — abstain.
+            match_state = "matched" if state == "matched" else "ambiguous"
+
+            def _out(val):
+                return (val if state == "matched" else None, match_state)
+
+            # --- equivocal / borderline patterns first ---
+            equiv_markers = (
+                "equivocal", "borderline",
+                "weakly positive", "weak positivity", "focal weak",
+                "1-5% of tumor cells", "1% weakly positive",
+                "~2% of cells", "clinical significance uncertain",
+                "reflex fish pending", "fish not yet resulted",
+                "awaiting fish",
+            )
+            if "2+" in s and "3+" not in s:
+                return _out("equivocal")
+            if any(m in s for m in equiv_markers):
+                return _out("equivocal")
+
+            # --- positive patterns ---
+            positive_markers = (
+                "positivity", "strongly positive", "moderate to strong",
+                "focally positive", "focal positive",
+                "moderate", "strong",
+            )
+            if s == "3+" or "3+" in s:
+                return _out("positive")
+            if "positive" in s:
+                return _out("positive")
+            if any(m in s for m in positive_markers):
+                return _out("positive")
+
+            # --- negative patterns ---
+            negative_markers = (
+                "no nuclear staining", "no staining", "no expression",
+                "no reactivity", "not expressed",
+            )
+            if s in {"0", "1+"}:
+                return _out("negative")
+            if "negative" in s:
+                return _out("negative")
+            if any(m in s for m in negative_markers):
+                return _out("negative")
+
+            # Model tagged something we didn't recognize — abstain.
             return (None, "ambiguous")
 
         def _er_bool(surface, conf, thr):
