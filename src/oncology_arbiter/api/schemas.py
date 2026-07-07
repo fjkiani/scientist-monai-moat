@@ -31,6 +31,7 @@ class ModelState(str, Enum):
     LOADED_MONAI_DETECTOR = "loaded_monai_detector"  # L4a MONAI detector with trained weights (unreachable until weights ship)
     PROXY_MONAI_HEURISTIC = "proxy_monai_heuristic"  # L4a MONAI mask-gradient heuristic when weights unavailable
     PROXY_LUNG_HEURISTIC = "proxy_lung_heuristic"  # NSCLC HU-threshold + CC blobs (LIDC-IDRI) — not a trained detector
+    LOADED_LUNA16_RETINANET = "loaded_luna16_retinanet"  # v0.3.0 MONAI Model Zoo lung_nodule_ct_detection@0.6.9 (LUNA16-trained)
     PROXY_RULES_LITE = "proxy_rules_lite"  # L4c NCCN-lite rules fallback when TxGemma gated
     LOADED_TXGEMMA = "loaded_txgemma"  # L4c HAI-DEF TxGemma inference (never reachable under current token)
     TEMPLATE = "template"             # L3 arbiter JSON templates loaded from disk (n_training=0)
@@ -405,6 +406,37 @@ class NsclcTherapyOption(BaseModel):
     nccn_section: str
 
 
+class Luna16Detection(BaseModel):
+    """One 3D bounding box returned by the LUNA16 RetinaNet detector.
+
+    Coordinates are in world millimeters (voxel index × spacing_mm).
+    """
+    center_z_mm: float
+    center_y_mm: float
+    center_x_mm: float
+    width_mm: float
+    height_mm: float
+    depth_mm: float
+    diameter_mm: float
+    score: float
+
+
+class Luna16DetectionBlock(BaseModel):
+    """LUNA16 RetinaNet output block on the NSCLC response.
+
+    Present only when ONCOLOGY_ARBITER_ENABLE_LUNA16_RETINANET=1 AND the
+    real pipeline branch fires (not the placeholder). Absent otherwise so
+    downstream clients can `if resp.nsclc.luna16 is not None:` gate on
+    real inference.
+    """
+    bundle_version: str = Field(..., description="MONAI bundle version, e.g. '0.6.9'")
+    n_detections: int
+    top_score: float
+    detections: list[Luna16Detection] = Field(default_factory=list)
+    inference_seconds: float
+    preprocessing_summary: dict[str, Any]
+
+
 class NsclcResponse(BaseModel):
     """Envelope for the real LIDC-IDRI + NCCN-lite path (or its placeholder)."""
     model_config = ConfigDict(extra="forbid")
@@ -417,6 +449,8 @@ class NsclcResponse(BaseModel):
     n_candidates_kept: int | None = None
     max_diameter_mm: float | None = None
     candidates: list[NsclcCandidate] = Field(default_factory=list)
+    # v0.3.0: LUNA16 RetinaNet block (present when detector is enabled).
+    luna16: Luna16DetectionBlock | None = None
     # Arbiter block
     risk_score: float | None = None
     risk_bucket: str | None = None

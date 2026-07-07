@@ -1538,21 +1538,79 @@ def create_app() -> FastAPI:
                 max_diameter_mm=heur.max_diameter_mm,
             )
 
-            model_name = "nsclc_lung_heuristic_v0+nccn_nsclc_lite_v0"
+            # ----- v0.3.0: LUNA16 RetinaNet upgrade path ------------------ #
+            # When the env flag is set, run the MONAI RetinaNet detector on
+            # the same volume. It replaces the heuristic-only diameter as
+            # the arbiter's `driving_feature` and stamps the response with a
+            # loaded_luna16_retinanet model_state. If loading fails we log
+            # and fall through — the heuristic result is still returned.
+            luna16_block = None
+            luna16_warning = None
+            luna16_seconds = None
+            if _is_env_true("ONCOLOGY_ARBITER_ENABLE_LUNA16_RETINANET"):
+                try:
+                    from oncology_arbiter.nsclc.luna16_retinanet import (
+                        LungNoduleDetector, LUNA16_WARNING,
+                    )
+                    t_l0 = time.perf_counter()
+                    det = LungNoduleDetector.get()
+                    luna16_res = det.detect(ct.volume, spacing_mm=spacing_mm)
+                    luna16_seconds = time.perf_counter() - t_l0
+                    from oncology_arbiter.api.schemas import (
+                        Luna16Detection, Luna16DetectionBlock,
+                    )
+                    luna16_block = Luna16DetectionBlock(
+                        bundle_version=luna16_res.bundle_version,
+                        n_detections=luna16_res.n_detections,
+                        top_score=luna16_res.top_score,
+                        detections=[
+                            Luna16Detection(**b.as_dict())
+                            for b in luna16_res.boxes[:20]  # cap wire payload
+                        ],
+                        inference_seconds=luna16_res.inference_seconds,
+                        preprocessing_summary=luna16_res.preprocessing_summary,
+                    )
+                    luna16_warning = LUNA16_WARNING
+                except Exception as exc:  # pylint: disable=broad-except
+                    log_event(
+                        request_id, "/v1/case/full",
+                        model_state="luna16_error",
+                        patient_id_hash=None,
+                        extra={"error": f"{type(exc).__name__}: {exc}"},
+                        tenant_id=tenant.tenant_id,
+                    )
+                    luna16_warning = (
+                        f"luna16_retinanet_error: {type(exc).__name__}: {exc}"
+                    )
+
+            if luna16_block is not None and luna16_block.n_detections > 0:
+                # Upgrade state / name so the frontend can badge this as a
+                # real inference. The heuristic block still travels for
+                # transparency.
+                model_name = "monai/lung_nodule_ct_detection@0.6.9+nccn_nsclc_lite_v0"
+                effective_state = ModelState.LOADED_LUNA16_RETINANET
+            else:
+                model_name = "nsclc_lung_heuristic_v0+nccn_nsclc_lite_v0"
+                effective_state = ModelState.PROXY_LUNG_HEURISTIC
+
             env = _envelope(
                 request_id,
-                model_state=ModelState.PROXY_LUNG_HEURISTIC,
+                model_state=effective_state,
                 model_name=model_name,
             )
-            warnings = [
-                "cancer=nsclc: PROXY pipeline. Classical HU thresholding + "
-                "connected components (not a trained detector). Diameter "
-                "buckets follow Fleischner-lite anchors; therapy is "
-                "rules-only.",
-                NSCLC_RULES_PROXY_WARNING,
-            ]
+            warnings = []
+            if effective_state == ModelState.PROXY_LUNG_HEURISTIC:
+                warnings.append(
+                    "cancer=nsclc: PROXY pipeline. Classical HU thresholding + "
+                    "connected components (not a trained detector). Diameter "
+                    "buckets follow Fleischner-lite anchors; therapy is "
+                    "rules-only."
+                )
+            warnings.append(NSCLC_RULES_PROXY_WARNING)
+            if luna16_warning:
+                warnings.append(luna16_warning)
             log_event(request_id, "/v1/case/full",
-                      model_state="proxy",
+                      model_state=effective_state.value,
                       patient_id_hash=None,
                       extra={
                           "cancer": "nsclc",
@@ -1564,6 +1622,13 @@ def create_app() -> FastAPI:
                           "has_screening": False,
                           "has_biopsy": False,
                           "elo_n_hypotheses": 0,
+                          "luna16_n_detections": (
+                              luna16_block.n_detections if luna16_block else 0
+                          ),
+                          "luna16_top_score": (
+                              luna16_block.top_score if luna16_block else 0.0
+                          ),
+                          "luna16_seconds": luna16_seconds or 0.0,
                       },
                       tenant_id=tenant.tenant_id,
                       )
@@ -1574,13 +1639,14 @@ def create_app() -> FastAPI:
                 biopsy=None,
                 therapy=None,
                 nsclc=NsclcResponse(
-                    model_state=ModelState.PROXY_LUNG_HEURISTIC,
+                    model_state=effective_state,
                     model_name=model_name,
                     warnings=warnings,
                     lung_voxel_fraction=float(heur.lung_voxel_fraction),
                     n_candidates_total=int(heur.n_candidates_total),
                     n_candidates_kept=int(heur.n_candidates_kept),
                     max_diameter_mm=float(heur.max_diameter_mm),
+                    luna16=luna16_block,
                     candidates=[
                         NsclcCandidate(
                             label=int(c.label),
