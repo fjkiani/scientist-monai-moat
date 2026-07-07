@@ -355,6 +355,48 @@ def _run_siglip_proxy_on_preprocessed(preprocess_result: Any) -> Any:
     return proxy.run("(preprocessed)")
 
 
+def _run_cbis_ddsm_probe_on_bytes(
+    dicom_bytes: bytes,
+    preprocess_result: Any,
+) -> Any | None:
+    """Run the trained CBIS-DDSM supervised probe on a mammogram.
+
+    Requires the Modal backend (only backend that returns 1152-d embeddings
+    today). For the local backend this returns ``None`` and callers should
+    skip the probe finding.
+
+    On Modal:
+      1. Get the 1152-d MedSigLIP-448 embedding (one POST to /embed).
+      2. Score it with the trained sklearn LogReg probe (in-process).
+      3. Return a :class:`CbisDdsmProbeResult`.
+
+    Any failure is caught and logged upstream; this returns ``None`` so a
+    probe failure does NOT poison the whole /v1/screening/analyze response.
+    The MedSigLIP zero-shot findings above still ship.
+    """
+    ms = _get_medsiglip()
+    from oncology_arbiter.models.medsiglip_modal_client import MedSigLipModalClient
+
+    if not isinstance(ms, MedSigLipModalClient):
+        # Local backend does not expose the raw embedding today — the
+        # supervised probe is Modal-only for now.
+        return None
+
+    # Write DICOM to a temp file, embed via Modal, discard.
+    with tempfile.NamedTemporaryFile(suffix=".dcm", delete=False) as tf:
+        tf.write(dicom_bytes)
+        tmp_path = tf.name
+    try:
+        embedding = ms.embed_dicom(tmp_path)
+    finally:
+        Path(tmp_path).unlink(missing_ok=True)
+
+    from oncology_arbiter.models.cbis_ddsm_probe import CbisDdsmProbe
+
+    probe = CbisDdsmProbe.get()
+    return probe.predict(embedding)
+
+
 # --------------------------------------------------------------------------- #
 # Artifact paths — mirrors progression_arbiter/router.py stream_artifact
 
@@ -752,6 +794,52 @@ def create_app() -> FastAPI:
                 backend_warnings.append(
                     f"monai_detector_error:{type(e).__name__}:{e}"
                 )
+
+        # ── L4b CBIS-DDSM supervised probe on MedSigLIP embedding ──
+        # Only fires when MedSigLIP-Modal ran successfully AND the probe
+        # is enabled. This is a trained sklearn LogReg over the 1152-d
+        # MedSigLIP-448 embedding (see docs/proofs/cbis_ddsm_logreg_v1_metrics.json).
+        # Held-out test AUC = 0.7526 on n=641. When the probe fires it:
+        #   * adds a finding labelled "cbis_ddsm_logreg_v1:cancer" with
+        #     the calibrated cancer probability
+        #   * OVERRIDES overall_score with the probe probability (the raw
+        #     zero-shot prob is off-label and ~10^-3, so the probe is
+        #     strictly more meaningful when it fires)
+        #   * appends CBIS_DDSM_PROBE_WARNING to backend_warnings
+        #   * upgrades model_name to "google/medsiglip-448+cbis_ddsm_logreg_v1"
+        if (
+            backend_result is not None
+            and backend_state == ModelState.LOADED_MEDSIGLIP
+            and _is_env_true("ONCOLOGY_ARBITER_ENABLE_CBIS_DDSM_PROBE")
+        ):
+            try:
+                from oncology_arbiter.models.cbis_ddsm_probe import CBIS_DDSM_PROBE_WARNING
+                probe_result = _run_cbis_ddsm_probe_on_bytes(raw_bytes, result)
+                if probe_result is not None:
+                    findings_list.append({
+                        "label": f"cbis_ddsm_logreg_v1:{probe_result.predicted_label}",
+                        "score": float(probe_result.proba_cancer),
+                        "location_bbox_normalized": None,
+                    })
+                    # The trained probe is a strictly better overall score
+                    # than the off-label zero-shot argmax we started with.
+                    overall_score = float(probe_result.proba_cancer)
+                    if CBIS_DDSM_PROBE_WARNING not in backend_warnings:
+                        backend_warnings.append(CBIS_DDSM_PROBE_WARNING)
+                    backend_name = (
+                        f"{backend_name}+{probe_result.probe_version}"
+                        if backend_name else probe_result.probe_version
+                    )
+            except Exception as e:  # noqa: BLE001 — surface, never hide
+                backend_warnings.append(
+                    f"cbis_ddsm_probe_error:{type(e).__name__}:{e}"
+                )
+                log_event(request_id, "/v1/screening/analyze",
+                          model_state=backend_state.value,
+                          patient_id_hash=req.patient_id_hash,
+                          extra={"cbis_ddsm_probe_error": str(e)[:200]},
+                          tenant_id=tenant.tenant_id,
+                          )
 
         # Score the L3 screening arbiter with a MINIMAL feature vector.
         # Phase 2: still no BI-RADS from a real reader — the classifier
