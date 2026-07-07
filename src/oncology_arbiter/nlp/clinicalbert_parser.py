@@ -36,6 +36,7 @@ through to the response for the UI.
 from __future__ import annotations
 
 import json
+import os
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -44,9 +45,34 @@ from typing import Any, Optional
 import numpy as np
 import torch
 
-# The trained model directory. Env override lets tests / prod point at
-# a mirror in /mnt/results/models/.
-_DEFAULT_MODEL_DIR = Path("/workspace/models/report_parser_clinicalbert_v1")
+# The trained model directory.  Resolution order (first hit wins):
+#   1. env var ``ONCOLOGY_ARBITER_CLINICALBERT_DIR`` — for tests / prod
+#      overrides / air-gapped mounts.
+#   2. ``/workspace/models/report_parser_clinicalbert_v1`` — worker-local
+#      dev store, fastest to load and where training writes.
+#   3. ``/mnt/results/models/report_parser_clinicalbert_v1`` — S3-backed
+#      deliverable mirror, portable across machines in a session.
+# A path counts as "present" if it contains ``label_map.json`` — the same
+# marker file ``_load()`` checks below.
+_DEFAULT_MODEL_SEARCH_PATH: list[Path] = [
+    Path("/workspace/models/report_parser_clinicalbert_v1"),
+    Path("/mnt/results/models/report_parser_clinicalbert_v1"),
+]
+
+
+def _resolve_default_model_dir() -> Path:
+    env = os.environ.get("ONCOLOGY_ARBITER_CLINICALBERT_DIR")
+    if env:
+        return Path(env)
+    for p in _DEFAULT_MODEL_SEARCH_PATH:
+        if (p / "label_map.json").exists():
+            return p
+    # No local checkpoint found — return the first candidate; ``_load()``
+    # will emit a clear FileNotFoundError with actionable guidance.
+    return _DEFAULT_MODEL_SEARCH_PATH[0]
+
+
+_DEFAULT_MODEL_DIR = _resolve_default_model_dir()
 
 # Per-entity probability thresholds. Anything below → downgrade to ambiguous.
 # These are conservative defaults; they can be tuned from the metrics.json
