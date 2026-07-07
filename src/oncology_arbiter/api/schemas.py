@@ -36,6 +36,8 @@ class ModelState(str, Enum):
     LOADED_TXGEMMA = "loaded_txgemma"  # L4c HAI-DEF TxGemma inference (never reachable under current token)
     TEMPLATE = "template"             # L3 arbiter JSON templates loaded from disk (n_training=0)
     PROXY_REGEX_V0 = "proxy_regex_v0" # v0.2.1 pathology-report regex parser (stateless code, always available)
+    LOADED_CLINICALBERT_PARSER = "loaded_clinicalbert_parser"  # v0.3.0 Bio_ClinicalBERT fine-tuned on synthetic corpus
+    FUSED_REGEX_CLINICALBERT = "fused_regex_clinicalbert"  # v0.3.0 regex ∧ ClinicalBERT fusion
     PROXY_CO_SCIENTIST = "proxy_co_scientist"  # L5 orchestrator: literature-derived Elo tournament (deterministic scoring)
 
 
@@ -240,6 +242,53 @@ class BiopsyReceptorPanel(BaseModel):
     )
 
 
+class ExtendedReceptorField(BaseModel):
+    """One field parsed by the v0.3.0 fused (regex + ClinicalBERT) parser.
+
+    Only used for extended fields the v0.2.1 regex parser could not produce:
+    ki67_pct, tumor_size_mm, T/N/M stage, margin, LVI. The four core fields
+    (er/pr/her2/grade) remain on ``BiopsyReceptorPanel`` for
+    backwards-compatibility with existing frontends.
+    """
+    value: Any = Field(default=None,
+        description="Canonicalised value (int/float/str/bool) or null.")
+    match_state: Literal["matched", "ambiguous", "no_match"] = "no_match"
+    matched_text: str | None = None
+    span: tuple[int, int] | None = None
+    confidence: float = Field(default=0.0, ge=0.0, le=1.0)
+    source: Literal["regex", "clinicalbert", "fused", "disagreement", "none"] = "none"
+
+
+class ReportParseBlock(BaseModel):
+    """v0.3.0 wire block describing HOW the pathology report was parsed.
+
+    Attached to ``BiopsyResponse`` when a report was actually parsed. The
+    UI reads ``parser_id`` and ``fusion_mode`` to render the source badge,
+    and ``extended_fields`` to show fields regex could not extract.
+    """
+    parser_id: str = Field(
+        ...,
+        description="e.g. proxy_regex_v0, clinicalbert_v1, clinicalbert_v1+regex_v0",
+    )
+    fusion_mode: Literal["regex", "bert", "fused"] = "regex"
+    per_field_confidence: dict[str, float] = Field(
+        default_factory=dict,
+        description="Confidence per field (0..1) as reported by the parser.",
+    )
+    per_field_source: dict[
+        str,
+        Literal["regex", "clinicalbert", "fused", "disagreement", "none"],
+    ] = Field(default_factory=dict)
+    extended_fields: dict[str, ExtendedReceptorField] = Field(
+        default_factory=dict,
+        description=(
+            "Fields the regex parser could not produce: ki67_pct, tumor_size_mm, "
+            "t_stage, n_stage, m_stage, margin, lvi. Only populated when a BERT "
+            "or fused parser ran."
+        ),
+    )
+
+
 class BiopsyResponse(ApiEnvelope):
     subtype_prediction: str | None = Field(
         default=None,
@@ -251,6 +300,14 @@ class BiopsyResponse(ApiEnvelope):
     arbiter_score: ArbiterScore | None = Field(
         default=None,
         description="L3 biopsy arbiter output (proceed to core-needle biopsy vs. follow-up).",
+    )
+    report_parse: ReportParseBlock | None = Field(
+        default=None,
+        description=(
+            "v0.3.0: describes which parser produced the receptor panel + any "
+            "extended fields (ki67_pct, tumor_size_mm, T/N/M, margin, LVI). "
+            "Absent for requests that did not include free-text report_text."
+        ),
     )
 
 

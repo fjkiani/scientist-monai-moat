@@ -1015,17 +1015,40 @@ def create_app() -> FastAPI:
         # per-field parse_state and gate the therapy call on user confirmation
         # so a wrong extraction cannot silently drive a wrong branch.
         # ------------------------------------------------------------------
+        # ------------------------------------------------------------------
+        # v0.3.0: FUSED parser. If ONCOLOGY_ARBITER_ENABLE_CLINICALBERT_PARSER=1
+        # AND weights are on disk, we use the regex ∨ ClinicalBERT fusion.
+        # Otherwise we fall back to the v0.2.1 regex-only parser (identical
+        # wire shape). Extended fields (ki67_pct/tumor_size_mm/T/N/M/margin/
+        # LVI) only surface when BERT is active. Regex output is always
+        # computed as a floor.
+        # ------------------------------------------------------------------
         receptor_panel = BiopsyReceptorPanel()
         parsed_grade: int | None = None
+        report_parse_block = None
         if req.report_text:
-            from oncology_arbiter.models.report_parser import (
-                parse_pathology_report,
+            from oncology_arbiter.nlp.report_parser_v2 import (
+                parse_pathology_report_v2,
+            )
+            from oncology_arbiter.api.schemas import (
+                ReportParseBlock,
+                ExtendedReceptorField,
             )
 
-            parsed = parse_pathology_report(req.report_text)
+            try:
+                parsed = parse_pathology_report_v2(req.report_text)
+            except Exception as exc:  # pragma: no cover — degrade gracefully
+                # BERT crashed (bad checkpoint, OOM, etc.) — fall back to
+                # regex-only and record the reason.
+                from oncology_arbiter.nlp.report_parser_v2 import (
+                    parse_pathology_report_v2 as _p,
+                )
+                parsed = _p(req.report_text, mode="regex")
+                warnings.append(
+                    f"clinicalbert_parser_error:{type(exc).__name__}:{exc}"
+                )
 
-            # Map HER2 parser output (positive/negative/equivocal) straight
-            # onto the schema literal — the values line up 1:1.
+            # HER2 canonicalisation is unchanged.
             her2_val = parsed.her2.value
             if her2_val not in ("positive", "negative", "equivocal"):
                 her2_val = None
@@ -1037,18 +1060,70 @@ def create_app() -> FastAPI:
                 "grade": parsed.grade.match_state,
             }
 
+            # KI-67 % from the BERT extended fields → panel numeric field.
+            ki67_val: float | None = None
+            ki67_ext = parsed.extended_fields.get("ki67_pct")
+            if ki67_ext is not None and ki67_ext.match_state == "matched":
+                try:
+                    ki67_val = float(ki67_ext.value)
+                    if not (0.0 <= ki67_val <= 100.0):
+                        ki67_val = None
+                except (TypeError, ValueError):
+                    ki67_val = None
+
             receptor_panel = BiopsyReceptorPanel(
                 er_positive=parsed.er.value if isinstance(parsed.er.value, bool) else None,
                 pr_positive=parsed.pr.value if isinstance(parsed.pr.value, bool) else None,
                 her2_status=her2_val,  # type: ignore[arg-type]
-                ki67_percent=None,  # deliberately out of scope for v0.2.1 parser
+                ki67_percent=ki67_val,
                 parse_state=parse_state,  # type: ignore[arg-type]
             )
             parsed_grade = parsed.grade.value if isinstance(parsed.grade.value, int) else None
+
+            # Build the ReportParseBlock. Every field carries its confidence
+            # + source so the UI can render (fused / regex-only / disagree).
+            per_field_conf = {
+                "er": parsed.er.confidence, "pr": parsed.pr.confidence,
+                "her2": parsed.her2.confidence, "grade": parsed.grade.confidence,
+            }
+            per_field_src = {
+                "er": parsed.er.source, "pr": parsed.pr.source,
+                "her2": parsed.her2.source, "grade": parsed.grade.source,
+            }
+            extended_out: dict[str, ExtendedReceptorField] = {}
+            for name, ef in parsed.extended_fields.items():
+                extended_out[name] = ExtendedReceptorField(
+                    value=ef.value, match_state=ef.match_state,
+                    matched_text=ef.matched_text, span=ef.span,
+                    confidence=ef.confidence, source=ef.source,
+                )
+            report_parse_block = ReportParseBlock(
+                parser_id=parsed.parser_id,
+                fusion_mode=parsed.fusion_mode,  # type: ignore[arg-type]
+                per_field_confidence=per_field_conf,
+                per_field_source=per_field_src,  # type: ignore[arg-type]
+                extended_fields=extended_out,
+            )
+
+            # Bump model_state/name so wire consumers know a real BERT ran.
+            if parsed.fusion_mode == "fused":
+                model_state = ModelState.FUSED_REGEX_CLINICALBERT
+                model_name = "clinicalbert_v1+regex_v0"
+            elif parsed.fusion_mode == "bert":
+                model_state = ModelState.LOADED_CLINICALBERT_PARSER
+                model_name = "clinicalbert_v1"
+            # regex-only leaves model_state at its prior value.
+
             matched_count = sum(1 for s in parse_state.values() if s == "matched")
             warnings.append(
                 f"receptor_panel_source:{parsed.parser_id}:matched={matched_count}/4"
             )
+            # Extended-field summary line for the audit trail.
+            if extended_out:
+                ext_matched = sum(1 for f in extended_out.values() if f.match_state == "matched")
+                warnings.append(
+                    f"receptor_panel_extended:matched={ext_matched}/{len(extended_out)}"
+                )
 
         schema_gate_report = _to_schema_gate_report(runtime_gate_report)
         env = _envelope(
@@ -1065,6 +1140,7 @@ def create_app() -> FastAPI:
             grade=parsed_grade,
             confidence=confidence,
             arbiter_score=arbiter_block,
+            report_parse=report_parse_block,
         )
 
     # ----------------------------------------------------------------------- #
