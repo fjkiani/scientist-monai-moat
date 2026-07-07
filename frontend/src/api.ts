@@ -11,7 +11,11 @@ export type ModelState =
   | "proxy_lung_heuristic"        // NSCLC HU-threshold + connected-components
   | "template"                    // L3 arbiter JSON templates (n_training=0)
   | "proxy_regex_v0"              // pathology-report regex parser (stateless)
-  | "proxy_co_scientist";         // Co-Scientist Elo tournament (deterministic)
+  | "proxy_co_scientist"          // Co-Scientist Elo tournament (deterministic)
+  // v0.3.0: real trained detectors + real ClinicalBERT parser.
+  | "loaded_clinicalbert_parser"  // Bio_ClinicalBERT fine-tuned on synthetic corpus
+  | "fused_regex_clinicalbert"    // regex ∧ ClinicalBERT fusion
+  | "loaded_luna16_retinanet";    // LUNA16-trained MONAI RetinaNet 3D CT detector
 
 export interface Provenance {
   model_state: ModelState;
@@ -93,12 +97,40 @@ export interface ReceptorPanel {
   } | null;
 }
 
+export type ParserFieldSource =
+  | "regex"
+  | "clinicalbert"
+  | "fused"
+  | "disagreement"
+  | "none";
+
+export interface ExtendedReceptorField {
+  value: unknown;
+  match_state: "matched" | "ambiguous" | "no_match";
+  matched_text: string | null;
+  span: [number, number] | null;
+  confidence: number;
+  source: ParserFieldSource;
+}
+
+export interface ReportParseBlock {
+  parser_id: string;
+  fusion_mode: "regex" | "bert" | "fused";
+  per_field_confidence: Record<string, number>;
+  per_field_source: Record<string, ParserFieldSource>;
+  extended_fields: Record<string, ExtendedReceptorField>;
+}
+
 export interface BiopsyResponse extends Envelope {
   subtype_prediction: string | null;
   receptor_panel: ReceptorPanel;
   grade: number | null;
   confidence: number | null;
   arbiter_score: ArbiterScore | null;
+  // v0.3.0: describes which parser produced the receptor panel + any
+  // extended fields (ki67_pct, tumor_size_mm, T/N/M, margin, LVI).
+  // Absent for requests that did not include free-text report_text.
+  report_parse?: ReportParseBlock | null;
 }
 
 export interface TherapyOption {
@@ -131,6 +163,63 @@ export interface HealthResponse {
 
 // Cancer selector — mirrors backend /v1/case/full?cancer=…
 export type CancerId = "breast" | "nsclc";
+
+// v0.3.0: LUNA16 RetinaNet output on the NSCLC response.
+export interface Luna16Detection {
+  center_z_mm: number;
+  center_y_mm: number;
+  center_x_mm: number;
+  width_mm: number;
+  height_mm: number;
+  depth_mm: number;
+  diameter_mm: number;
+  score: number;
+}
+
+export interface Luna16DetectionBlock {
+  bundle_version: string;
+  n_detections: number;
+  top_score: number;
+  detections: Luna16Detection[];
+  inference_seconds: number;
+  preprocessing_summary: Record<string, unknown>;
+}
+
+export interface NsclcCandidate {
+  id: string;
+  volume_mm3: number;
+  centroid_zyx: [number, number, number];
+  bbox_zyx: [number, number, number, number, number, number];
+}
+
+export interface NsclcTherapyOption {
+  regimen: string;
+  line_of_therapy: number;
+  rationale: string;
+  nccn_section: string;
+}
+
+export interface NsclcResponse {
+  model_state: ModelState;
+  model_name: string;
+  warnings: string[];
+  lung_voxel_fraction: number | null;
+  n_candidates_total: number | null;
+  n_candidates_kept: number | null;
+  max_diameter_mm: number | null;
+  candidates: NsclcCandidate[];
+  luna16?: Luna16DetectionBlock | null;
+  risk_score: number | null;
+  risk_bucket: string | null;
+  driving_feature: string | null;
+  logit: number | null;
+  therapy_recommended: NsclcTherapyOption[];
+  therapy_not_recommended: NsclcTherapyOption[];
+  series_dir: string | null;
+  n_slices: number | null;
+  read_seconds: number | null;
+  heuristic_seconds: number | null;
+}
 
 // ── HTTP helpers ─────────────────────────────────────────────────────────
 const API_BASE = "";
@@ -251,6 +340,9 @@ export interface FullCaseResponse extends Envelope {
   screening: ScreeningResponse | null;
   biopsy: BiopsyResponse | null;
   therapy: TherapyResponse | null;
+  // v0.3.0: nsclc block populated when ?cancer=nsclc. Includes an optional
+  // luna16 detection block (present when RetinaNet actually ran).
+  nsclc: NsclcResponse | null;
   elo_ranked_hypotheses: Array<Record<string, unknown>>;
 }
 
