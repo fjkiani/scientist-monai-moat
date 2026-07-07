@@ -94,9 +94,15 @@ const SLOT_LABELS: Record<string, string> = {
 
 export interface HonestyPillsProps {
   models: Partial<Record<string, ModelState>>;
+  // v0.3.0-alpha: render a leading "demo mode" pill if the /health
+  // response reports demo_mode=true. Clicking it opens a mini popover
+  // explaining what the demo gate does. Contact URL comes from the same
+  // /health response.
+  demoMode?: boolean;
+  contactUrl?: string | null;
 }
 
-export function HonestyPills({ models }: HonestyPillsProps) {
+export function HonestyPills({ models, demoMode, contactUrl }: HonestyPillsProps) {
   const [openSlot, setOpenSlot] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -124,10 +130,52 @@ export function HonestyPills({ models }: HonestyPillsProps) {
   }, [openSlot]);
 
   const entries = Object.entries(models).filter(([, v]) => !!v) as [string, ModelState][];
-  if (entries.length === 0) return null;
+  if (entries.length === 0 && !demoMode) return null;
+
+  const demoOpen = openSlot === "__demo__";
 
   return (
     <div ref={containerRef} style={{ position: "relative", display: "inline-flex", flexWrap: "wrap", gap: "0.5rem" }}>
+      {demoMode && (
+        <div style={{ position: "relative" }}>
+          <button
+            className="pill"
+            style={{ background: "#FF9400", color: "#000", fontWeight: 700 }}
+            onClick={() => setOpenSlot(demoOpen ? null : "__demo__")}
+            aria-expanded={demoOpen}
+            aria-haspopup="dialog"
+            title="This deployment is a read-only demo — click to see what that means"
+            data-testid="honesty-pill-demo-mode"
+          >
+            demo · read-only
+          </button>
+          {demoOpen && (
+            <div
+              role="dialog"
+              aria-label="demo mode details"
+              className="honesty-popover"
+              style={{ top: "calc(100% + 6px)", left: 0 }}
+              data-testid="honesty-popover-demo-mode"
+            >
+              <h4>demo · read-only</h4>
+              <div style={{ fontWeight: 600, marginBottom: "0.25rem" }}>Read-only showcase deployment</div>
+              <div style={{ color: "var(--fg-muted)" }}>
+                POST endpoints (screening, biopsy, therapy, case/full) return HTTP 403.
+                Pre-computed real inference outputs are served from
+                <code style={{ fontFamily: "Menlo, monospace" }}> /v1/demo/samples/{"{"}kind{"}"}</code>.
+                The Demo Samples tab shows all four.
+              </div>
+              {contactUrl && (
+                <div style={{ marginTop: "0.5rem" }}>
+                  <a href={contactUrl} target="_blank" rel="noreferrer" style={{ color: "var(--accent)", fontWeight: 600 }}>
+                    Run on your own data → Contact
+                  </a>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
       {entries.map(([slot, state]) => {
         const label = SLOT_LABELS[slot] ?? slot;
         const explain = STATE_EXPLAIN[state] ?? {

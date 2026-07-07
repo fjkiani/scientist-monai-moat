@@ -24,8 +24,8 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
 
-from fastapi import Depends, FastAPI, HTTPException, Query
-from fastapi.responses import JSONResponse
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
+from fastapi.responses import FileResponse, JSONResponse
 
 from oncology_arbiter import AUROC_CAVEAT, RUO_DISCLAIMER, __version__
 
@@ -173,6 +173,16 @@ _SIGLIP_PROXY_SINGLETON: Any = None
 def _is_env_true(name: str) -> bool:
     val = os.environ.get(name, "")
     return val.strip().lower() in ("1", "true", "yes", "on")
+
+
+def _demo_samples_dir() -> Path | None:
+    """Locate the demo-samples directory on disk. Returns None if it does
+    not exist. Points to `src/oncology_arbiter/api/static/demo_samples`
+    which ships with the package.
+    """
+    here = Path(__file__).resolve().parent
+    candidate = here / "static" / "demo_samples"
+    return candidate if candidate.exists() else None
 
 
 def _compute_models_loaded() -> dict[str, ModelState]:
@@ -532,6 +542,50 @@ def create_app() -> FastAPI:
     # 4) Request-id (last add = first inbound)
     app.add_middleware(RequestIdMiddleware)
 
+    # 4.5) v0.3.0-alpha DEMO_MODE gate.
+    #
+    # When ONCOLOGY_ARBITER_DEMO_MODE=1, this deployment is a read-only
+    # showcase: all POST endpoints return HTTP 403 with a contact
+    # placeholder, and pre-computed sample outputs are served under
+    # /v1/demo/samples/*. Read-only GET endpoints (health, model-cards,
+    # artifacts, demo/case, demo/samples/*) stay open.
+    #
+    # Rationale: the public showcase runs on modest hardware; letting
+    # anonymous callers fire real Modal / ClinicalBERT / MONAI inferences
+    # burns GPU credit and misrepresents throughput. In demo mode the
+    # frontend renders provenance-labeled real outputs captured on our
+    # workers, and routes any "run on your own data" click to the contact
+    # URL.
+    _contact_url = os.environ.get(
+        "ONCOLOGY_ARBITER_CONTACT_URL", "https://crispro.ai/contact"
+    )
+
+    @app.middleware("http")
+    async def _demo_mode_gate(request: Request, call_next):  # noqa: RUF029
+        if not _is_env_true("ONCOLOGY_ARBITER_DEMO_MODE"):
+            return await call_next(request)
+        # Only POST is gated. Everything else (GET, OPTIONS preflight,
+        # HEAD) flows through so the frontend can still read health,
+        # samples, model-cards, and artifacts.
+        if request.method != "POST":
+            return await call_next(request)
+        return JSONResponse(
+            status_code=403,
+            content={
+                "detail": (
+                    "This deployment is a read-only demo of Oncology Arbiter "
+                    "v0.3.0-alpha. Live inference (screening, biopsy, "
+                    "therapy, case/full) is disabled here. See "
+                    "GET /v1/demo/samples for pre-computed sample outputs "
+                    "captured on our workers, or contact us to run the API "
+                    "on your own data."
+                ),
+                "contact_url": _contact_url,
+                "demo_endpoint": "GET /v1/demo/samples",
+                "demo_mode": True,
+            },
+        )
+
     # 5) One-shot auth bootstrap from env
     #
     # On a fresh container the SQLite tenants table is empty. Flipping
@@ -568,21 +622,34 @@ def create_app() -> FastAPI:
         # `nsclc` is the LIDC-IDRI expansion track that worker-2 is wiring —
         # the endpoint currently returns a shape-only placeholder so the SPA
         # can already render a working NSCLC panel end-to-end.
+        _demo_active = _is_env_true("ONCOLOGY_ARBITER_DEMO_MODE")
+        _sample_files: list[str] = []
+        if _demo_active:
+            _sd = _demo_samples_dir()
+            if _sd is not None and _sd.exists():
+                _sample_files = sorted(p.stem for p in _sd.glob("*.json"))
+        endpoints = [
+            "POST /v1/screening/analyze",
+            "POST /v1/biopsy/analyze",
+            "POST /v1/therapy/reason",
+            "POST /v1/case/full",
+            "GET  /v1/demo/case",
+            "GET  /v1/model-cards",
+            "GET  /v1/artifacts/{category}/{filename}",
+            "GET  /health",
+        ]
+        if _demo_active:
+            endpoints.append("GET  /v1/demo/samples")
+            endpoints.append("GET  /v1/demo/samples/{kind}")
         return HealthResponse(
             status="ok",
             version=__version__,
             disclaimer=RUO_DISCLAIMER,
             caveat=AUROC_CAVEAT,
-            endpoints=[
-                "POST /v1/screening/analyze",
-                "POST /v1/biopsy/analyze",
-                "POST /v1/therapy/reason",
-                "POST /v1/case/full",
-                "GET  /v1/demo/case",
-                "GET  /v1/model-cards",
-                "GET  /v1/artifacts/{category}/{filename}",
-                "GET  /health",
-            ],
+            endpoints=endpoints,
+            demo_mode=_demo_active,
+            contact_url=_contact_url if _demo_active else None,
+            demo_samples=_sample_files,
             cancers={
                 "breast": {
                     "state": ModelState.PLACEHOLDER.value,
@@ -1491,6 +1558,82 @@ def create_app() -> FastAPI:
             report_text=case.report_text,
             patient_context=case.patient_context,
             warnings=case.warnings,
+        )
+
+    # ----------------------------------------------------------------------- #
+    # /v1/demo/samples/{index,kind} — v0.3.0-alpha DEMO_MODE outputs.
+    #
+    # These serve pre-computed real inference outputs captured on our
+    # workers (see src/oncology_arbiter/api/static/demo_samples/*.json).
+    # Every sample envelope carries a `demo_provenance` sub-block with the
+    # DICOM sha256, worker id, weights used, latency, and a plain-English
+    # note explaining what was real vs. synthetic. When DEMO_MODE is off
+    # these endpoints still serve the JSON — the samples are useful
+    # reference outputs regardless of gate state.
+
+    @app.get("/v1/demo/samples")
+    def demo_samples_index():
+        _sd = _demo_samples_dir()
+        if _sd is None:
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "samples": [],
+                    "demo_mode": _is_env_true("ONCOLOGY_ARBITER_DEMO_MODE"),
+                    "contact_url": _contact_url,
+                    "note": "demo_samples directory not present in this build",
+                },
+            )
+        samples = []
+        for p in sorted(_sd.glob("*.json")):
+            samples.append({
+                "kind": p.stem,
+                "path": f"/v1/demo/samples/{p.stem}",
+                "size_bytes": p.stat().st_size,
+            })
+        return JSONResponse(
+            status_code=200,
+            content={
+                "samples": samples,
+                "demo_mode": _is_env_true("ONCOLOGY_ARBITER_DEMO_MODE"),
+                "contact_url": _contact_url,
+                "note": (
+                    "Each sample is a real /v1/... response captured on our "
+                    "workers with real weights loaded. See the "
+                    "`demo_provenance` sub-block in each envelope for the "
+                    "DICOM sha256, weights used, latency, and a plain-English "
+                    "note on what was real vs. synthetic."
+                ),
+            },
+        )
+
+    @app.get("/v1/demo/samples/{kind}")
+    def demo_samples_read(kind: str):
+        # kind must be a safe identifier — reject any traversal or dotfile.
+        if not kind or not kind.replace("_", "").isalnum():
+            raise HTTPException(400, f"invalid sample kind: {kind!r}")
+        _sd = _demo_samples_dir()
+        if _sd is None:
+            raise HTTPException(404, "demo_samples not present in this build")
+        candidate = (_sd / f"{kind}.json").resolve()
+        try:
+            candidate.relative_to(_sd.resolve())
+        except ValueError:
+            raise HTTPException(403, "directory traversal forbidden")
+        if not candidate.exists() or not candidate.is_file():
+            raise HTTPException(
+                404,
+                (
+                    f"sample not found: {kind!r}. "
+                    "Available: GET /v1/demo/samples"
+                ),
+            )
+        # Serve as JSON with cache headers so the SPA can grab all four
+        # once and paint quickly.
+        return FileResponse(
+            candidate,
+            media_type="application/json",
+            headers={"Cache-Control": "public, max-age=300"},
         )
 
     # ----------------------------------------------------------------------- #

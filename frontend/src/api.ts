@@ -159,6 +159,12 @@ export interface HealthResponse {
   caveat: string;
   endpoints: string[];
   models_loaded: Record<string, ModelState>;
+  // v0.3.0-alpha: demo-mode deployment gate. When true, all POSTs return
+  // HTTP 403 with contact_url; pre-computed samples served under
+  // /v1/demo/samples/{kind}.
+  demo_mode?: boolean;
+  contact_url?: string | null;
+  demo_samples?: string[];
 }
 
 // Cancer selector — mirrors backend /v1/case/full?cancer=…
@@ -321,6 +327,93 @@ export interface DemoCaseResponse {
 
 export function getDemoCase() {
   return get<DemoCaseResponse>("/v1/demo/case");
+}
+
+// ── v0.3.0-alpha /v1/demo/samples ────────────────────────────────────────
+//
+// Pre-computed real inference outputs captured on our workers. Each
+// envelope carries a `demo_provenance` sub-block with weights used,
+// DICOM sha256, latency, and a plain-English note on what was real vs
+// synthetic. See src/oncology_arbiter/api/static/demo_samples/*.json.
+
+export type DemoSampleKind = "screening" | "biopsy" | "nsclc" | "case_full";
+
+export interface DemoProvenanceWeight {
+  role: string;
+  backend: string;
+  endpoint?: string;
+  model_repo?: string;
+  bundle_version?: string;
+  bundle_path?: string;
+  artifact?: string;
+  size_bytes?: number;
+  torchscript?: string;
+  pytorch?: string;
+  bundle_source?: string;
+  license?: string;
+  spec?: string;
+  embedding_dim?: number;
+  device?: string;
+  fusion_mode?: string;
+  [k: string]: unknown;
+}
+
+export interface DemoProvenance {
+  generated_at: string;
+  generated_on_commit: string;
+  worker: string;
+  input: Record<string, unknown>;
+  weights: DemoProvenanceWeight[];
+  metrics?: Record<string, unknown>;
+  latency_seconds?: number;
+  latency_seconds_warm?: number;
+  latency_seconds_cold_first_run?: number;
+  luna16_inference_seconds?: number;
+  n_detections?: number;
+  top_detection_score?: number;
+  notes: string;
+  model_states?: Record<string, string | null>;
+  n_elo_hypotheses?: number;
+  n_therapy_options_recommended?: number;
+  [k: string]: unknown;
+}
+
+export interface DemoSampleIndexEntry {
+  kind: DemoSampleKind;
+  path: string;
+  size_bytes: number;
+}
+
+export interface DemoSampleIndexResponse {
+  samples: DemoSampleIndexEntry[];
+  demo_mode: boolean;
+  contact_url: string;
+  note: string;
+}
+
+export function getDemoSampleIndex() {
+  return get<DemoSampleIndexResponse>("/v1/demo/samples");
+}
+
+// The concrete envelope for each demo sample kind. Because the wire
+// shape mirrors the live endpoints, we reuse existing types and append
+// the `demo_provenance` sub-block.
+export type DemoScreeningSample = ScreeningResponse & { demo_provenance: DemoProvenance };
+export type DemoBiopsySample    = BiopsyResponse   & { demo_provenance: DemoProvenance };
+export type DemoNsclcSample     = FullCaseResponse & { demo_provenance: DemoProvenance };
+export type DemoCaseFullSample  = FullCaseResponse & { demo_provenance: DemoProvenance };
+
+export function getDemoSampleScreening() {
+  return get<DemoScreeningSample>("/v1/demo/samples/screening");
+}
+export function getDemoSampleBiopsy() {
+  return get<DemoBiopsySample>("/v1/demo/samples/biopsy");
+}
+export function getDemoSampleNsclc() {
+  return get<DemoNsclcSample>("/v1/demo/samples/nsclc");
+}
+export function getDemoSampleCaseFull() {
+  return get<DemoCaseFullSample>("/v1/demo/samples/case_full");
 }
 
 export interface CancerCapability {

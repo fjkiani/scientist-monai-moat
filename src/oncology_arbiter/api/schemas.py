@@ -573,6 +573,14 @@ class HealthResponse(BaseModel):
     # per cancer without a schema migration; the SPA only reads the keys it
     # knows.
     cancers: dict[str, dict] = {}
+    # v0.3.0-alpha demo deployment gate. When true, all POST routes return
+    # HTTP 403 with a contact placeholder, and pre-computed sample outputs
+    # are served under /v1/demo/samples/*. Read-only GET endpoints stay
+    # open. `contact_url` is where the frontend routes "Run on your own
+    # data" CTA clicks.
+    demo_mode: bool = False
+    contact_url: str | None = None
+    demo_samples: list[str] = []
 
 
 # --------------------------------------------------------------------------- #

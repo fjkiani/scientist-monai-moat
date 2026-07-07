@@ -1,0 +1,223 @@
+{
+  "biopsy": null,
+  "caveat": "AUROC reflects the model's ability to discriminate within literature-derived events whose labels and features co-originate from the same published narratives. This circularity inflates apparent performance. Expected prospective AUROC: 0.70\u20130.85 based on independent validation.",
+  "demo_provenance": {
+    "generated_at": "2026-07-07T23:30:23Z",
+    "generated_on_commit": "ae7adede900c67ef6492ab9dc0628ad781ccd13f",
+    "input": {
+      "kind": "synthetic_ct_series",
+      "n_slices": 16,
+      "note": "Synthetic CT with a planted nodule instead of real LIDC-IDRI data \u2014 the real LUNA16 CT series is a credentialed TCIA download (~120 GB) and not shipped with the repo. This synthetic exercises the same MONAI RetinaNet inference path with realistic HU windowing (gantry -1200, lung -800, body -50, nodule +50). The detector still fires on the planted +50-HU inclusion.",
+      "planted_nodule": "9x9x5 hyperdense (~+50 HU) blob at volume center, slices 6..10",
+      "shape": [
+        128,
+        128
+      ],
+      "spacing_mm": [
+        1.0,
+        1.0,
+        2.5
+      ]
+    },
+    "latency_seconds": 7.398,
+    "luna16_inference_seconds": 2.9066336154937744,
+    "metrics": {
+      "mAP_IoU_0.10_0.50_0.05_MaxDet_100": 0.852,
+      "mAR_IoU_0.10_0.50_0.05_MaxDet_100": 0.998,
+      "source": "monai_bundles/lung_nodule_ct_detection/configs/metadata.json",
+      "training_data": "LUNA16 fold 0 (LIDC-IDRI subset, single-site chest CT, nodule sizes 3-30 mm)"
+    },
+    "n_detections": 4,
+    "notes": "Synthetic CT (16 slices, 128\u00d7128, 1.0\u00d71.0\u00d72.5 mm, planted +50-HU nodule at center slices 6-10) ran through /v1/case/full?cancer=nsclc with ONCOLOGY_ARBITER_ENABLE_LUNA16_RETINANET=1. The MONAI RetinaNet TorchScript detector produced 4 boxes with top score 0.999. The response envelope carries both the heuristic candidates (`nsclc.candidates`) AND the RetinaNet boxes (`nsclc.luna16.detections`) for transparency. Real LIDC-IDRI CT is not shipped in the repo; the synthetic exercises the same inference pipeline used on real data.",
+    "top_detection_score": 0.998678982257843,
+    "weights": [
+      {
+        "backend": "local_cpu",
+        "bundle_path": "/workspace/monai_bundles/lung_nodule_ct_detection",
+        "bundle_source": "MONAI Model Zoo \u2014 lung_nodule_ct_detection",
+        "bundle_version": "monai/lung_nodule_ct_detection@0.6.9",
+        "license": "Apache-2.0 (weights); LUNA16 training data under TCIA data use agreement",
+        "pytorch": "models/model.pt",
+        "role": "lung_nodule_detector",
+        "torchscript": "models/model.ts"
+      }
+    ],
+    "worker": "worker-nsclc"
+  },
+  "disclaimer": "RESEARCH USE ONLY \u2014 not validated for clinical decision-making. Not FDA-cleared. Not CE-marked. Investigational / IRB context only.",
+  "elo_ranked_hypotheses": [],
+  "evidence": [],
+  "honesty_gate": {
+    "evidence_dropped": 0,
+    "evidence_kept": 0,
+    "seen_urls_count": 0
+  },
+  "nsclc": {
+    "candidates": [
+      {
+        "centroid_zyx_vox": [
+          7.5,
+          63.5,
+          63.5
+        ],
+        "diameter_mm": 44.93926204847055,
+        "label": 1,
+        "mean_hu": -50.0,
+        "voxel_count": 19008
+      },
+      {
+        "centroid_zyx_vox": [
+          8.0,
+          64.0,
+          64.0
+        ],
+        "diameter_mm": 12.458491776231222,
+        "label": 2,
+        "mean_hu": 50.0,
+        "voxel_count": 405
+      }
+    ],
+    "driving_feature": "mass_diameter_gt_30mm",
+    "heuristic_seconds": 0.02052457100035099,
+    "logit": 3.7469631024235275,
+    "luna16": {
+      "bundle_version": "0.6.9",
+      "detections": [
+        {
+          "center_x_mm": 65.4013442993164,
+          "center_y_mm": 68.33214569091797,
+          "center_z_mm": 28.500096797943115,
+          "depth_mm": 22.99980640411377,
+          "diameter_mm": 22.99980640411377,
+          "height_mm": 12.28265380859375,
+          "score": 0.998678982257843,
+          "width_mm": 7.223575592041016
+        },
+        {
+          "center_x_mm": 66.83245849609375,
+          "center_y_mm": 89.46263122558594,
+          "center_z_mm": 28.26228141784668,
+          "depth_mm": 23.47543716430664,
+          "diameter_mm": 24.88812255859375,
+          "height_mm": 24.88812255859375,
+          "score": 0.13941659033298492,
+          "width_mm": 20.65390396118164
+        },
+        {
+          "center_x_mm": 61.98570251464844,
+          "center_y_mm": 65.74588775634766,
+          "center_z_mm": 25.16542911529541,
+          "depth_mm": 21.885719299316406,
+          "diameter_mm": 21.885719299316406,
+          "height_mm": 8.819995880126953,
+          "score": 0.11241719871759415,
+          "width_mm": 4.922466278076172
+        },
+        {
+          "center_x_mm": 61.973358154296875,
+          "center_y_mm": 89.89767456054688,
+          "center_z_mm": 38.526549339294434,
+          "depth_mm": 2.946901321411133,
+          "diameter_mm": 34.3038330078125,
+          "height_mm": 34.3038330078125,
+          "score": 0.05718866363167763,
+          "width_mm": 33.91080093383789
+        }
+      ],
+      "inference_seconds": 2.9066336154937744,
+      "n_detections": 4,
+      "preprocessing_summary": {
+        "actual_spacing_mm": [
+          2.5,
+          1.0,
+          1.0
+        ],
+        "hu_range": [
+          -1024.0,
+          300.0
+        ],
+        "nms_thresh": 0.22,
+        "roi_size": [
+          192,
+          192,
+          80
+        ],
+        "score_thresh": 0.02,
+        "sw_overlap": 0.25,
+        "target_spacing_mm": [
+          1.25,
+          0.703125,
+          0.703125
+        ]
+      },
+      "top_score": 0.998678982257843
+    },
+    "lung_voxel_fraction": 0.5846366882324219,
+    "max_diameter_mm": 44.93926204847055,
+    "model_name": "monai/lung_nodule_ct_detection@0.6.9+nccn_nsclc_lite_v0",
+    "model_state": "loaded_luna16_retinanet",
+    "n_candidates_kept": 2,
+    "n_candidates_total": 2,
+    "n_slices": 16,
+    "read_seconds": 0.01583285499964404,
+    "risk_bucket": "HIGH",
+    "risk_score": 0.9769543546739962,
+    "series_dir": "/tmp/demo_nsclc_bryt2qge/SYN-0001/STUDY/CT_SYN",
+    "therapy_not_recommended": [
+      {
+        "category": "surveillance",
+        "citation_url": "https://doi.org/10.1148/radiol.2017161659",
+        "name": "Surveillance only",
+        "nccn_section": "Fleischner 2017 Table 1",
+        "rationale": "Nodules \u22658 mm require workup, not surveillance alone, per Fleischner 2017 Table 1."
+      }
+    ],
+    "therapy_recommended": [
+      {
+        "category": "imaging",
+        "citation_url": "https://www.nccn.org/professionals/physician_gls/pdf/nscl.pdf",
+        "name": "PET/CT for staging",
+        "nccn_section": "NCCN NSCL v5.2026 LUNG-1",
+        "rationale": "Solid nodule \u22658 mm: NCCN LUNG-1 recommends PET/CT for staging and detection of distant metastases."
+      },
+      {
+        "category": "diagnostic",
+        "citation_url": "https://www.nccn.org/professionals/physician_gls/pdf/nscl.pdf",
+        "name": "CT-guided biopsy or bronchoscopy for tissue diagnosis",
+        "nccn_section": "NCCN NSCL v5.2026 LUNG-2",
+        "rationale": "NCCN LUNG-2 requires tissue diagnosis (biopsy or bronchoscopy) for nodules \u22658 mm before therapy selection."
+      },
+      {
+        "category": "coordination",
+        "citation_url": "https://www.nccn.org/professionals/physician_gls/pdf/nscl.pdf",
+        "name": "Multidisciplinary tumor board review",
+        "nccn_section": "NCCN NSCL v5.2026 Principles Section",
+        "rationale": "NCCN NSCL guidelines emphasize multidisciplinary review for all suspected lung malignancies."
+      },
+      {
+        "category": "coordination",
+        "citation_url": "https://www.nccn.org/professionals/physician_gls/pdf/nscl.pdf",
+        "name": "Urgent thoracic oncology referral for mass workup",
+        "nccn_section": "NCCN NSCL v5.2026 LUNG-1 (mass branch)",
+        "rationale": "Lung lesion >30 mm is a mass per Fleischner 2017 \u00a7Terminology and warrants urgent referral for staging (chest CT with contrast, PET/CT, brain MRI if symptomatic) per NCCN LUNG-1."
+      }
+    ],
+    "warnings": [
+      "This NSCLC recommendation is from a rules-lite lookup keyed on the lung heuristic's diameter bucket, NOT from a trained ML model or a live TxGemma agent. It does NOT reason about histology, PD-L1 status, actionable driver mutations, staging beyond a diameter proxy, comorbidities, prior therapy, tumor-board consensus, or trial enrollment. It MUST NOT be used for treatment decisions. Real clinical use requires a thoracic oncologist and a full NCCN + Fleischner consultation.",
+      "detector=monai/lung_nodule_ct_detection@0.6.9; trained on LUNA16 fold 0 (LIDC-IDRI subset, single-site chest CT). Not validated on screening CT, contrast CT, or pediatric CT. Nodule size range 3-30 mm. Detections are RESEARCH USE ONLY and require radiologist review."
+    ]
+  },
+  "provenance": {
+    "gate_report": null,
+    "model_name": "monai/lung_nodule_ct_detection@0.6.9+nccn_nsclc_lite_v0",
+    "model_state": "loaded_luna16_retinanet",
+    "model_version": null,
+    "request_id": "3ebc53d1c7bf4d5d9c5e0cc5c4b6d5e0"
+  },
+  "screening": null,
+  "therapy": null,
+  "warnings": [
+    "This NSCLC recommendation is from a rules-lite lookup keyed on the lung heuristic's diameter bucket, NOT from a trained ML model or a live TxGemma agent. It does NOT reason about histology, PD-L1 status, actionable driver mutations, staging beyond a diameter proxy, comorbidities, prior therapy, tumor-board consensus, or trial enrollment. It MUST NOT be used for treatment decisions. Real clinical use requires a thoracic oncologist and a full NCCN + Fleischner consultation.",
+    "detector=monai/lung_nodule_ct_detection@0.6.9; trained on LUNA16 fold 0 (LIDC-IDRI subset, single-site chest CT). Not validated on screening CT, contrast CT, or pediatric CT. Nodule size range 3-30 mm. Detections are RESEARCH USE ONLY and require radiologist review."
+  ]
+}

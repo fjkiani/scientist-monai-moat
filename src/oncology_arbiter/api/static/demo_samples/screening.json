@@ -1,0 +1,115 @@
+{
+  "arbiter_score": {
+    "caveat": "TEMPLATE \u2014 coefficients illustrative, not fit on real mammography outcomes. n_training=0. Do not report AUROC; there is nothing to average over. Prospective AUROC will be established only after Phase 3 EMBED / CBIS-DDSM training runs land with an independent test split. This artefact locks the schema and honesty gates; it does not encode a validated model.",
+    "driving_feature": "brca_status_known_pathogenic",
+    "driving_feature_contribution": 0.6,
+    "logit": -0.85,
+    "model_name": "screening_arbiter_template_v0",
+    "model_state": "template",
+    "n_training": 0,
+    "p_positive": 0.299433,
+    "positive_class": "recall_for_diagnostic_workup",
+    "recommendation": "ROUTINE_1YR_FOLLOWUP",
+    "risk_bucket": "LOW",
+    "term_contributions": {
+      "age_norm": 0.0,
+      "birads_BI_RADS_0": 0.0,
+      "birads_BI_RADS_1": 0.0,
+      "birads_BI_RADS_2": 0.0,
+      "birads_BI_RADS_3": 0.0,
+      "birads_BI_RADS_4": 0.0,
+      "birads_BI_RADS_5": 0.0,
+      "brca_status_known_pathogenic": 0.6,
+      "density_A_almost_entirely_fatty": 0.0,
+      "density_B_scattered_fibroglandular": 0.0,
+      "density_C_heterogeneously_dense": 0.0,
+      "density_D_extremely_dense": 0.0,
+      "family_history_first_degree": 0.25,
+      "intercept": -2.0,
+      "prior_biopsy_history": 0.3,
+      "years_since_last_mammo_norm": 0.0
+    }
+  },
+  "breast_mask_coverage": 0.23537797312698341,
+  "caveat": "AUROC reflects the model's ability to discriminate within literature-derived events whose labels and features co-originate from the same published narratives. This circularity inflates apparent performance. Expected prospective AUROC: 0.70\u20130.85 based on independent validation.",
+  "demo_provenance": {
+    "generated_at": "2026-07-07T23:22:33Z",
+    "generated_on_commit": "ae7adede900c67ef6492ab9dc0628ad781ccd13f",
+    "input": {
+      "filename": "Mass-Test_P_00016_LEFT_CC.dcm",
+      "kind": "dicom",
+      "sha256": "e4253ed10249b79249d1e417f35cfb8196b224db529015f439c501b2a4805bab",
+      "size_bytes": 14791254,
+      "source_repo": "helloerikaaa/cbis-ddsm-r (Hugging Face, CC-BY-NC 4.0)"
+    },
+    "latency_seconds": 7.286,
+    "metrics": {
+      "n_test": 641,
+      "source": "docs/proofs/cbis_ddsm_logreg_v1_metrics.json",
+      "test_auc": 0.7526
+    },
+    "notes": "Real CBIS-DDSM Mass-Test DICOM ran through /v1/screening/analyze. The vision embedding was computed by google/medsiglip-448 on an A10G GPU via Modal; the CBIS-DDSM linear probe scored the 1152-d embedding to P(cancer). Zero-shot MedSigLIP prompt findings are also returned (off-label \u2014 see warnings).",
+    "weights": [
+      {
+        "backend": "modal",
+        "embedding_dim": 1152,
+        "endpoint": "https://crispro-test--medsiglip-embed.modal.run",
+        "model": "google/medsiglip-448",
+        "role": "vision_encoder"
+      },
+      {
+        "kind": "sklearn Pipeline (StandardScaler + LogisticRegression)",
+        "path": "models/cbis_ddsm_logreg_v1.joblib",
+        "provenance": "docs/proofs/cbis_ddsm_logreg_v1_metrics.json",
+        "role": "probe"
+      }
+    ],
+    "worker": "worker-nsclc"
+  },
+  "disclaimer": "RESEARCH USE ONLY \u2014 not validated for clinical decision-making. Not FDA-cleared. Not CE-marked. Investigational / IRB context only.",
+  "evidence": [],
+  "findings": [
+    {
+      "label": "a mammogram of a breast with a malignant mass",
+      "location_bbox_normalized": null,
+      "score": 0.000783596362452954
+    },
+    {
+      "label": "a mammogram of a breast without a malignant mass",
+      "location_bbox_normalized": null,
+      "score": 0.0010665383888408542
+    },
+    {
+      "label": "cbis_ddsm_logreg_v1:cancer",
+      "location_bbox_normalized": null,
+      "score": 0.6293906569480896
+    }
+  ],
+  "honesty_gate": {
+    "evidence_dropped": 0,
+    "evidence_kept": 0,
+    "seen_urls_count": 0
+  },
+  "laterality": "L",
+  "orientation_flipped": true,
+  "overall_score": 0.6293906569480896,
+  "provenance": {
+    "gate_report": {
+      "access_level": "allowed",
+      "allowed": true,
+      "has_token": true,
+      "reason": "modal-remote model_repo=google/medsiglip-448 dim=1152",
+      "repo_id": "google/medsiglip-448",
+      "status_code": 200
+    },
+    "model_name": "google/medsiglip-448+cbis_ddsm_logreg_v1",
+    "model_state": "loaded_medsiglip",
+    "model_version": null,
+    "request_id": "5a6d63098e1e4c4098341d51e021dead"
+  },
+  "view": "CC",
+  "warnings": [
+    "This score is from google/medsiglip-448 (HAI-DEF-gated Health AI Developer Foundations model). MedSigLIP is a genuine medical vision-language model, but its published training corpus covers chest X-ray (MIMIC-CXR), dermatology (SCIN, PAD-UFES-20), ophthalmology (EyePACS), histopathology (TCGA, CAMELYON), and CT/MRI slices \u2014 it does NOT include mammography. Running MedSigLIP zero-shot on a mammogram is therefore OFF-LABEL and this score is an out-of-distribution probe, not a validated mammographic score. The only Google-published breast-related AUROC for MedSigLIP is histopathology (Invasive Breast Cancer, n=5000, 3-class, zero-shot 0.933 / linear-probe 0.930 / HAI-DEF LP 0.943).",
+    "This probe is a supervised classifier trained on 2445 CBIS-DDSM images using MedSigLIP-448 embeddings (held-out test AUC = 0.7526 on n=641). MedSigLIP-448 was NOT pretrained on mammography \u2014 the backbone is used off-label. Fine-tuned mammography CNNs on CBIS-DDSM typically reach AUC 0.85-0.90, so this probe is a research prototype, not a clinical tool."
+  ]
+}

@@ -1,0 +1,557 @@
+{
+  "biopsy": {
+    "arbiter_score": {
+      "caveat": "TEMPLATE \u2014 coefficients illustrative, not fit on real biopsy outcomes. n_training=0. Do not report AUROC; there is nothing to average over. Prospective AUROC will be established only after Phase 3 EMBED / CBIS-DDSM biopsy-outcome training runs land with an independent test split. This artefact locks the schema and honesty gates; it does not encode a validated model.",
+      "driving_feature": "us_correlate_simple_cyst",
+      "driving_feature_contribution": -1.1,
+      "logit": -1.8,
+      "model_name": "biopsy_arbiter_template_v0",
+      "model_state": "template",
+      "n_training": 0,
+      "p_positive": 0.141851,
+      "positive_class": "proceed_to_core_needle_biopsy",
+      "recommendation": "SHORT_INTERVAL_6MO_FOLLOWUP",
+      "risk_bucket": "LOW",
+      "term_contributions": {
+        "brca_status_known_pathogenic": 0.55,
+        "family_history_first_degree": 0.2,
+        "growth_delta_norm": 0.0,
+        "intercept": -1.5,
+        "lesion_type_architectural_distortion": 0.0,
+        "lesion_type_calcification_amorphous": 0.0,
+        "lesion_type_calcification_pleomorphic": 0.0,
+        "lesion_type_mass_circumscribed": 0.0,
+        "lesion_type_mass_spiculated": 0.0,
+        "prior_biopsy_benign_at_site": -0.6,
+        "size_norm": 0.0,
+        "us_correlate_hypoechoic_mass": 0.65,
+        "us_correlate_simple_cyst": -1.1
+      }
+    },
+    "caveat": "AUROC reflects the model's ability to discriminate within literature-derived events whose labels and features co-originate from the same published narratives. This circularity inflates apparent performance. Expected prospective AUROC: 0.70\u20130.85 based on independent validation.",
+    "confidence": null,
+    "disclaimer": "RESEARCH USE ONLY \u2014 not validated for clinical decision-making. Not FDA-cleared. Not CE-marked. Investigational / IRB context only.",
+    "evidence": [],
+    "grade": 1,
+    "honesty_gate": {
+      "evidence_dropped": 0,
+      "evidence_kept": 0,
+      "seen_urls_count": 0
+    },
+    "provenance": {
+      "gate_report": null,
+      "model_name": "clinicalbert_v1+regex_v0",
+      "model_state": "fused_regex_clinicalbert",
+      "model_version": null,
+      "request_id": "9bd38d2148bb4b399bc8c8b4ebcb1748"
+    },
+    "receptor_panel": {
+      "er_positive": true,
+      "her2_status": "positive",
+      "ki67_percent": 22.0,
+      "parse_state": {
+        "er": "matched",
+        "grade": "matched",
+        "her2": "matched",
+        "pr": "matched"
+      },
+      "pr_positive": true
+    },
+    "report_parse": {
+      "extended_fields": {
+        "ki67_pct": {
+          "confidence": 0.9928882718086243,
+          "match_state": "matched",
+          "matched_text": "22%",
+          "source": "clinicalbert",
+          "span": [
+            262,
+            265
+          ],
+          "value": 22
+        },
+        "lvi": {
+          "confidence": 0.980125367641449,
+          "match_state": "matched",
+          "matched_text": "present",
+          "source": "clinicalbert",
+          "span": [
+            164,
+            171
+          ],
+          "value": "present"
+        },
+        "m_stage": {
+          "confidence": 0.9845201373100281,
+          "match_state": "ambiguous",
+          "matched_text": "0",
+          "source": "clinicalbert",
+          "span": [
+            291,
+            292
+          ],
+          "value": null
+        },
+        "margin": {
+          "confidence": 0.9922826886177063,
+          "match_state": "matched",
+          "matched_text": "negative",
+          "source": "clinicalbert",
+          "span": [
+            190,
+            198
+          ],
+          "value": "negative"
+        },
+        "n_stage": {
+          "confidence": 0.9746188223361969,
+          "match_state": "ambiguous",
+          "matched_text": "1mi",
+          "source": "clinicalbert",
+          "span": [
+            285,
+            288
+          ],
+          "value": null
+        },
+        "t_stage": {
+          "confidence": 0.9910456538200378,
+          "match_state": "ambiguous",
+          "matched_text": "3",
+          "source": "clinicalbert",
+          "span": [
+            281,
+            282
+          ],
+          "value": null
+        },
+        "tumor_size_mm": {
+          "confidence": 0.9922852516174316,
+          "match_state": "matched",
+          "matched_text": "14.2 mm",
+          "source": "clinicalbert",
+          "span": [
+            358,
+            365
+          ],
+          "value": 14.2
+        }
+      },
+      "fusion_mode": "fused",
+      "parser_id": "clinicalbert_v1+regex_v0",
+      "per_field_confidence": {
+        "er": 0.98969566822052,
+        "grade": 1.0,
+        "her2": 1.0,
+        "pr": 0.9842564463615417
+      },
+      "per_field_source": {
+        "er": "clinicalbert",
+        "grade": "fused",
+        "her2": "fused",
+        "pr": "clinicalbert"
+      }
+    },
+    "subtype_prediction": null,
+    "warnings": [
+      "receptor_panel_source:clinicalbert_v1+regex_v0:matched=4/4",
+      "receptor_panel_extended:matched=4/7"
+    ]
+  },
+  "caveat": "AUROC reflects the model's ability to discriminate within literature-derived events whose labels and features co-originate from the same published narratives. This circularity inflates apparent performance. Expected prospective AUROC: 0.70\u20130.85 based on independent validation.",
+  "demo_provenance": {
+    "generated_at": "2026-07-07T23:33:14Z",
+    "generated_on_commit": "ae7adede900c67ef6492ab9dc0628ad781ccd13f",
+    "input": {
+      "dicom_filename": "Mass-Test_P_00016_LEFT_CC.dcm",
+      "dicom_sha256": "e4253ed10249b79249d1e417f35cfb8196b224db529015f439c501b2a4805bab",
+      "dicom_size_bytes": 14791254,
+      "dicom_source": "dbaek111/CBIS-DDSM_1024 (Hugging Face)",
+      "kind": "composite_breast_case",
+      "patient_context": {
+        "age": 62,
+        "menopausal_status": "post"
+      },
+      "report_dataset": "data/report_parser_v0_3_0/test.jsonl",
+      "report_kind": "synthetic_test_row",
+      "report_note": "Held-out row from the ClinicalBERT parser's synthetic test split (seed=20260703). Not a real patient report."
+    },
+    "latency_seconds_cold_first_run": 84.19,
+    "latency_seconds_warm": 6.288,
+    "model_states": {
+      "biopsy": "fused_regex_clinicalbert",
+      "envelope": "placeholder",
+      "screening": "loaded_medsiglip",
+      "therapy": "proxy_rules_lite"
+    },
+    "n_elo_hypotheses": 8,
+    "n_therapy_options_recommended": 3,
+    "notes": "One CBIS-DDSM mammogram + one synthetic pathology report ran through /v1/case/full end to end: MedSigLIP-448 embedding on Modal \u2192 CBIS-DDSM logreg probe \u2192 ClinicalBERT parser fused with regex \u2192 NCCN-Breast-lite therapy rules \u2192 offline Co-Scientist Elo loop. All four honesty gates preserved.",
+    "weights": [
+      {
+        "backend": "modal_gpu",
+        "device": "cuda",
+        "embedding_dim": 1152,
+        "endpoint": "https://crispro-test--medsiglip-embed-batch.modal.run",
+        "model_repo": "google/medsiglip-448",
+        "role": "mammography_embedding"
+      },
+      {
+        "artifact": "models/cbis_ddsm_logreg_v1.joblib",
+        "backend": "local",
+        "role": "mammography_probe",
+        "size_bytes": 33597,
+        "spec": "sklearn StandardScaler + LogReg(l2, C=0.01) on 1152-d MedSigLIP embeddings"
+      },
+      {
+        "artifact": "models/report_parser_clinicalbert_v1/",
+        "backend": "local_cpu",
+        "fusion_mode": "fused",
+        "role": "biopsy_parser_ner",
+        "spec": "ClinicalBERT NER fine-tune (BertForTokenClassification), 431 MB weights"
+      },
+      {
+        "backend": "local_lookup",
+        "role": "therapy_rules",
+        "spec": "NCCN-Breast-lite v0 keyed on receptors + menopausal status"
+      },
+      {
+        "backend": "offline_deterministic",
+        "role": "co_scientist",
+        "spec": "generate \u2192 reflect \u2192 rank(Elo) \u2192 evolve \u2192 rank; URL honesty gate strips unseen URLs. LLM supervisor OFF."
+      }
+    ],
+    "worker": "worker-nsclc"
+  },
+  "disclaimer": "RESEARCH USE ONLY \u2014 not validated for clinical decision-making. Not FDA-cleared. Not CE-marked. Investigational / IRB context only.",
+  "elo_ranked_hypotheses": [
+    {
+      "confidence": 0.7293906569480896,
+      "derived_from": "screening:cbis_ddsm_logreg_v1:cancer",
+      "draws": 0,
+      "evidence": [],
+      "honesty_markers": {
+        "gated": false,
+        "loaded": true,
+        "proxy": false
+      },
+      "hyp_id": "screening:cbis_ddsm_logreg_v1:cancer:conf0.73",
+      "losses": 0,
+      "rating": 1577.2699,
+      "stage": "screening",
+      "statement": "Screening finding 'cbis_ddsm_logreg_v1:cancer' scored 0.6294 (perturb conf +0.10)",
+      "wins": 11
+    },
+    {
+      "confidence": 0.6293906569480896,
+      "derived_from": null,
+      "draws": 0,
+      "evidence": [],
+      "honesty_markers": {
+        "gated": false,
+        "loaded": true,
+        "proxy": false
+      },
+      "hyp_id": "screening:cbis_ddsm_logreg_v1:cancer",
+      "losses": 1,
+      "rating": 1563.7183,
+      "stage": "screening",
+      "statement": "Screening finding 'cbis_ddsm_logreg_v1:cancer' scored 0.6294",
+      "wins": 10
+    },
+    {
+      "confidence": 0.5293906569480896,
+      "derived_from": "screening:cbis_ddsm_logreg_v1:cancer",
+      "draws": 0,
+      "evidence": [],
+      "honesty_markers": {
+        "gated": false,
+        "loaded": true,
+        "proxy": false
+      },
+      "hyp_id": "screening:cbis_ddsm_logreg_v1:cancer:conf0.53",
+      "losses": 2,
+      "rating": 1549.565,
+      "stage": "screening",
+      "statement": "Screening finding 'cbis_ddsm_logreg_v1:cancer' scored 0.6294 (perturb conf -0.10)",
+      "wins": 9
+    },
+    {
+      "confidence": 0.10106653838884086,
+      "derived_from": "screening:a mammogram of a breast without a malignant mass",
+      "draws": 0,
+      "evidence": [],
+      "honesty_markers": {
+        "gated": false,
+        "loaded": true,
+        "proxy": false
+      },
+      "hyp_id": "screening:a mammogram of a breast without a malignant mass:conf0.10",
+      "losses": 3,
+      "rating": 1536.7626,
+      "stage": "screening",
+      "statement": "Screening finding 'a mammogram of a breast without a malignant mass' scored 0.0011 (perturb conf +0.10)",
+      "wins": 8
+    },
+    {
+      "confidence": 0.10078359636245296,
+      "derived_from": "screening:a mammogram of a breast with a malignant mass",
+      "draws": 0,
+      "evidence": [],
+      "honesty_markers": {
+        "gated": false,
+        "loaded": true,
+        "proxy": false
+      },
+      "hyp_id": "screening:a mammogram of a breast with a malignant mass:conf0.10",
+      "losses": 4,
+      "rating": 1522.0888,
+      "stage": "screening",
+      "statement": "Screening finding 'a mammogram of a breast with a malignant mass' scored 0.0008 (perturb conf +0.10)",
+      "wins": 7
+    },
+    {
+      "confidence": 0.0010665383888408542,
+      "derived_from": null,
+      "draws": 0,
+      "evidence": [],
+      "honesty_markers": {
+        "gated": false,
+        "loaded": true,
+        "proxy": false
+      },
+      "hyp_id": "screening:a mammogram of a breast without a malignant mass",
+      "losses": 5,
+      "rating": 1507.6649,
+      "stage": "screening",
+      "statement": "Screening finding 'a mammogram of a breast without a malignant mass' scored 0.0011",
+      "wins": 6
+    },
+    {
+      "confidence": 0.000783596362452954,
+      "derived_from": null,
+      "draws": 0,
+      "evidence": [],
+      "honesty_markers": {
+        "gated": false,
+        "loaded": true,
+        "proxy": false
+      },
+      "hyp_id": "screening:a mammogram of a breast with a malignant mass",
+      "losses": 6,
+      "rating": 1494.3657,
+      "stage": "screening",
+      "statement": "Screening finding 'a mammogram of a breast with a malignant mass' scored 0.0008",
+      "wins": 5
+    },
+    {
+      "confidence": 0.0,
+      "derived_from": "screening:a mammogram of a breast with a malignant mass",
+      "draws": 1,
+      "evidence": [],
+      "honesty_markers": {
+        "gated": false,
+        "loaded": true,
+        "proxy": false
+      },
+      "hyp_id": "screening:a mammogram of a breast with a malignant mass:conf0.00",
+      "losses": 7,
+      "rating": 1478.1733,
+      "stage": "screening",
+      "statement": "Screening finding 'a mammogram of a breast with a malignant mass' scored 0.0008 (perturb conf -0.10)",
+      "wins": 4
+    }
+  ],
+  "evidence": [],
+  "honesty_gate": {
+    "evidence_dropped": 0,
+    "evidence_kept": 0,
+    "seen_urls_count": 0
+  },
+  "nsclc": null,
+  "provenance": {
+    "gate_report": null,
+    "model_name": null,
+    "model_state": "placeholder",
+    "model_version": null,
+    "request_id": "703018cad14e42a693e686e9d25b94d3"
+  },
+  "screening": {
+    "arbiter_score": {
+      "caveat": "TEMPLATE \u2014 coefficients illustrative, not fit on real mammography outcomes. n_training=0. Do not report AUROC; there is nothing to average over. Prospective AUROC will be established only after Phase 3 EMBED / CBIS-DDSM training runs land with an independent test split. This artefact locks the schema and honesty gates; it does not encode a validated model.",
+      "driving_feature": "brca_status_known_pathogenic",
+      "driving_feature_contribution": 0.6,
+      "logit": -0.85,
+      "model_name": "screening_arbiter_template_v0",
+      "model_state": "template",
+      "n_training": 0,
+      "p_positive": 0.299433,
+      "positive_class": "recall_for_diagnostic_workup",
+      "recommendation": "ROUTINE_1YR_FOLLOWUP",
+      "risk_bucket": "LOW",
+      "term_contributions": {
+        "age_norm": 0.0,
+        "birads_BI_RADS_0": 0.0,
+        "birads_BI_RADS_1": 0.0,
+        "birads_BI_RADS_2": 0.0,
+        "birads_BI_RADS_3": 0.0,
+        "birads_BI_RADS_4": 0.0,
+        "birads_BI_RADS_5": 0.0,
+        "brca_status_known_pathogenic": 0.6,
+        "density_A_almost_entirely_fatty": 0.0,
+        "density_B_scattered_fibroglandular": 0.0,
+        "density_C_heterogeneously_dense": 0.0,
+        "density_D_extremely_dense": 0.0,
+        "family_history_first_degree": 0.25,
+        "intercept": -2.0,
+        "prior_biopsy_history": 0.3,
+        "years_since_last_mammo_norm": 0.0
+      }
+    },
+    "breast_mask_coverage": 0.23537797312698341,
+    "caveat": "AUROC reflects the model's ability to discriminate within literature-derived events whose labels and features co-originate from the same published narratives. This circularity inflates apparent performance. Expected prospective AUROC: 0.70\u20130.85 based on independent validation.",
+    "disclaimer": "RESEARCH USE ONLY \u2014 not validated for clinical decision-making. Not FDA-cleared. Not CE-marked. Investigational / IRB context only.",
+    "evidence": [],
+    "findings": [
+      {
+        "label": "a mammogram of a breast with a malignant mass",
+        "location_bbox_normalized": null,
+        "score": 0.000783596362452954
+      },
+      {
+        "label": "a mammogram of a breast without a malignant mass",
+        "location_bbox_normalized": null,
+        "score": 0.0010665383888408542
+      },
+      {
+        "label": "cbis_ddsm_logreg_v1:cancer",
+        "location_bbox_normalized": null,
+        "score": 0.6293906569480896
+      }
+    ],
+    "honesty_gate": {
+      "evidence_dropped": 0,
+      "evidence_kept": 0,
+      "seen_urls_count": 0
+    },
+    "laterality": "L",
+    "orientation_flipped": true,
+    "overall_score": 0.6293906569480896,
+    "provenance": {
+      "gate_report": {
+        "access_level": "allowed",
+        "allowed": true,
+        "has_token": true,
+        "reason": "modal-remote model_repo=google/medsiglip-448 dim=1152",
+        "repo_id": "google/medsiglip-448",
+        "status_code": 200
+      },
+      "model_name": "google/medsiglip-448+cbis_ddsm_logreg_v1",
+      "model_state": "loaded_medsiglip",
+      "model_version": null,
+      "request_id": "09ce79d6714a453b804e64303ff987b2"
+    },
+    "view": "CC",
+    "warnings": [
+      "This score is from google/medsiglip-448 (HAI-DEF-gated Health AI Developer Foundations model). MedSigLIP is a genuine medical vision-language model, but its published training corpus covers chest X-ray (MIMIC-CXR), dermatology (SCIN, PAD-UFES-20), ophthalmology (EyePACS), histopathology (TCGA, CAMELYON), and CT/MRI slices \u2014 it does NOT include mammography. Running MedSigLIP zero-shot on a mammogram is therefore OFF-LABEL and this score is an out-of-distribution probe, not a validated mammographic score. The only Google-published breast-related AUROC for MedSigLIP is histopathology (Invasive Breast Cancer, n=5000, 3-class, zero-shot 0.933 / linear-probe 0.930 / HAI-DEF LP 0.943).",
+      "This probe is a supervised classifier trained on 2445 CBIS-DDSM images using MedSigLIP-448 embeddings (held-out test AUC = 0.7526 on n=641). MedSigLIP-448 was NOT pretrained on mammography \u2014 the backbone is used off-label. Fine-tuned mammography CNNs on CBIS-DDSM typically reach AUC 0.85-0.90, so this probe is a research prototype, not a clinical tool."
+    ]
+  },
+  "therapy": {
+    "arbiter_score": {
+      "caveat": "TEMPLATE \u2014 coefficients illustrative, not fit on real therapy-selection outcomes. n_training=0. Do not report AUROC; there is nothing to average over. Prospective AUROC will be established only after Phase 3 training runs with tumour-registry outcomes and an independent test split. This artefact locks the schema and honesty gates; it does not encode a validated model.",
+      "driving_feature": "node_status_positive",
+      "driving_feature_contribution": 1.05,
+      "logit": -0.45,
+      "model_name": "therapy_arbiter_template_v0",
+      "model_state": "template",
+      "n_training": 0,
+      "p_positive": 0.389361,
+      "positive_class": "escalate_to_neoadjuvant_chemotherapy",
+      "recommendation": "MULTIDISCIPLINARY_REVIEW",
+      "risk_bucket": "MID",
+      "term_contributions": {
+        "age_at_diagnosis_norm": -0.0,
+        "brca_status_known_pathogenic": 0.4,
+        "er_status_positive": -0.45,
+        "grade_1": 0.0,
+        "grade_2": 0.0,
+        "grade_3": 0.0,
+        "her2_status_positive": 0.65,
+        "histology_ductal_carcinoma_in_situ": 0.0,
+        "histology_invasive_ductal": 0.0,
+        "histology_invasive_lobular": 0.0,
+        "histology_lobular_carcinoma_in_situ": 0.0,
+        "intercept": -1.8,
+        "ki67_norm": 0.0,
+        "node_status_positive": 1.05,
+        "pr_status_positive": -0.3,
+        "tumor_size_norm": 0.0
+      }
+    },
+    "branch_id": "her2_positive",
+    "caveat": "AUROC reflects the model's ability to discriminate within literature-derived events whose labels and features co-originate from the same published narratives. This circularity inflates apparent performance. Expected prospective AUROC: 0.70\u20130.85 based on independent validation.",
+    "disclaimer": "RESEARCH USE ONLY \u2014 not validated for clinical decision-making. Not FDA-cleared. Not CE-marked. Investigational / IRB context only.",
+    "evidence": [],
+    "honesty_gate": {
+      "evidence_dropped": 0,
+      "evidence_kept": 0,
+      "seen_urls_count": 0
+    },
+    "not_recommended": [],
+    "provenance": {
+      "gate_report": null,
+      "model_name": "nccn-lite-v0",
+      "model_state": "proxy_rules_lite",
+      "model_version": null,
+      "request_id": "63d23bca8ee74bd7b098607541396c89"
+    },
+    "recommended_options": [
+      {
+        "contraindications": [],
+        "evidence": [
+          {
+            "quoted_text": "NCCN BINV-J",
+            "source": "nccn-guidelines",
+            "url": "https://www.nccn.org/professionals/physician_gls/pdf/breast.pdf"
+          }
+        ],
+        "line_of_therapy": 1,
+        "rationale": "HER2+ non-metastatic: HER2-directed therapy is standard (NCCN BINV-J)",
+        "regimen": "Trastuzumab (\u00b1 pertuzumab)"
+      },
+      {
+        "contraindications": [],
+        "evidence": [
+          {
+            "quoted_text": "NCCN BINV-K",
+            "source": "nccn-guidelines",
+            "url": "https://www.nccn.org/professionals/physician_gls/pdf/breast.pdf"
+          }
+        ],
+        "line_of_therapy": 1,
+        "rationale": "HER2+ \u2265 T2 or N+: neoadjuvant TCHP (NCCN BINV-K)",
+        "regimen": "Neoadjuvant TCHP (taxane + carboplatin + trastuzumab + pertuzumab)"
+      },
+      {
+        "contraindications": [],
+        "evidence": [
+          {
+            "quoted_text": "NCCN BINV-L",
+            "source": "nccn-guidelines",
+            "url": "https://www.nccn.org/professionals/physician_gls/pdf/breast.pdf"
+          }
+        ],
+        "line_of_therapy": 1,
+        "rationale": "HR+/HER2+: sequence endocrine therapy after chemotherapy (NCCN BINV-L)",
+        "regimen": "Endocrine therapy (after chemotherapy)"
+      }
+    ],
+    "rules_model_id": "nccn-lite-v0",
+    "rules_sha256": "6c3106470f8276e042109c61d04e4d2c95dc250682658c51de0ac827ed0ff316",
+    "warnings": [
+      "This therapy recommendation is from a rules-lite lookup, NOT from a trained ML model or a live TxGemma agent. It maps receptor/stage/grade to a small fixed table of published NCCN Guideline sections. It does NOT reason about individual comorbidities, drug interactions, prior therapy history, tumor board consensus, or trial enrollment. It MUST NOT be used for treatment decisions. Real clinical use requires a certified breast oncologist and a full guideline consultation."
+    ]
+  },
+  "warnings": []
+}

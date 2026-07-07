@@ -55,3 +55,56 @@ services:
       # surface — gated / placeholder / rules-lite — which itself demonstrates
       # the model_state contract to any client.
     autoDeploy: true
+
+  # ─────────────────────────────────────────────────────────────────────
+  # v0.3.0-alpha demo deployment
+  #
+  # A second read-only service that ships the same image but with
+  # ONCOLOGY_ARBITER_DEMO_MODE=1. Behaviour differences vs the main service:
+  #   - All POST endpoints (screening/analyze, biopsy/analyze, therapy/…,
+  #     case/full, nsclc/analyze) return HTTP 403 with contact_url and
+  #     demo_endpoint pointing at /v1/demo/samples/{kind}.
+  #   - New GET endpoints /v1/demo/samples and /v1/demo/samples/{kind}
+  #     serve four pre-computed JSON envelopes (screening, biopsy, nsclc,
+  #     case_full) that were generated on worker-nsclc against live weights:
+  #       * MedSigLIP-448 via Modal (crispro-test--medsiglip, cuda,
+  #         embedding_dim=1152)
+  #       * CBIS-DDSM logreg probe v1 (test AUC 0.7526, n_test=641)
+  #       * ClinicalBERT report parser v1 (micro F1 0.9546)
+  #       * MONAI lung_nodule_ct_detection 0.6.9 (LUNA16, mAP 0.852)
+  #     The samples ship in the repo under
+  #     src/oncology_arbiter/api/static/demo_samples/*.json (~44 KB total)
+  #     so the demo container never needs to load any real weights.
+  #   - /health advertises demo_mode:true, contact_url, and lists the four
+  #     available demo sample kinds.
+  #   - The React SPA sees demo_mode from /health and lands on the
+  #     "Demo samples" tab. All live workflow tabs render a read-only
+  #     placeholder that routes visitors to https://crispro.ai/contact.
+  #
+  # Plan sizing: Starter (512 MB / 0.5 CPU, always-on, ~$7/mo). Enough
+  # because DEMO_MODE blocks POSTs — no ClinicalBERT/MedSigLIP/LUNA16 are
+  # ever loaded in-process. Container just serves ~44 KB of static JSON.
+  # Standard (2 GB) would be overkill for this workload.
+  - type: web
+    name: oncology-arbiter-demo
+    runtime: docker
+    plan: starter
+    region: oregon
+    branch: main
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      # Flip the whole service into demo/read-only mode.
+      - key: ONCOLOGY_ARBITER_DEMO_MODE
+        value: "1"
+      # Contact URL surfaced in every 403 body + on the SPA placeholder.
+      - key: ONCOLOGY_ARBITER_CONTACT_URL
+        value: "https://crispro.ai/contact"
+      # Serve the SPA at /ui/ — same as the main service.
+      - key: ONCOLOGY_ARBITER_SERVE_FRONTEND
+        value: "1"
+      # Deliberately NOT setting any heavy backend flag. Demo mode blocks
+      # the POST paths that would ever trigger a real weight load; leaving
+      # them off keeps memory usage tight so 512 MB is comfortable.
+    autoDeploy: true

@@ -4,6 +4,7 @@ import { BiopsyTab } from "./tabs/BiopsyTab";
 import { TherapyTab } from "./tabs/TherapyTab";
 import { CaseViewTab } from "./tabs/CaseViewTab";
 import { NsclcTab } from "./tabs/NsclcTab";
+import { DemoSamplesTab } from "./tabs/DemoSamplesTab";
 import {
   getHealth, listModelCards, installApiHooks,
   type HealthResponseWithCancers, type ModelCardsIndex,
@@ -14,14 +15,17 @@ import {
 } from "./settings";
 import { SettingsDrawer } from "./components/SettingsDrawer";
 import { HonestyPills } from "./components/HonestyPills";
+import { DemoModePlaceholder } from "./components/DemoModePlaceholder";
 
-type Tab = "screening" | "biopsy" | "therapy" | "case" | "cards" | "nsclc";
+type Tab = "demo" | "screening" | "biopsy" | "therapy" | "case" | "cards" | "nsclc";
 
 export function App() {
-  // v0.2.2: Case View is the primary landing tab — it bundles the whole
-  // workflow (screening → biopsy → therapy → co-scientist) into one form,
-  // which is where a first-time user should start. Individual tabs stay
-  // available for narrower single-endpoint testing.
+  // v0.2.2 / v0.3.0-alpha: Landing tab is context-dependent —
+  // - if the deployment is a DEMO_MODE showcase, land on the Demo Samples
+  //   tab so a visitor immediately sees what the pipeline produces on real
+  //   data. Individual tabs still work but render a read-only placeholder.
+  // - otherwise land on Case View (v0.2.2 behaviour), which bundles
+  //   screening → biopsy → therapy → co-scientist for a first-time user.
   const [tab, setTab] = useState<Tab>("case");
   const [health, setHealth] = useState<HealthResponseWithCancers | null>(null);
   const [cards, setCards] = useState<ModelCardsIndex | null>(null);
@@ -46,9 +50,17 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    getHealth().then(setHealth).catch(() => setHealth(null));
+    getHealth().then((h) => {
+      setHealth(h);
+      // If the API reports DEMO_MODE, switch landing tab to Demo Samples
+      // exactly once. Anything the operator does after that overrides.
+      if (h?.demo_mode) setTab("demo");
+    }).catch(() => setHealth(null));
     listModelCards().then(setCards).catch(() => setCards(null));
   }, []);
+
+  const demoMode = !!health?.demo_mode;
+  const contactUrl = health?.contact_url ?? "https://crispro.ai/contact";
 
   const cancerCaps = useMemo(() => health?.cancers ?? {}, [health]);
 
@@ -74,6 +86,9 @@ export function App() {
             </div>
           </div>
           <nav className="tabs">
+            {demoMode && (
+              <button className={tab === "demo" ? "active" : ""} onClick={() => setTab("demo")} data-testid="tab-demo-samples">Demo samples</button>
+            )}
             <button className={tab === "screening" ? "active" : ""} onClick={() => setTab("screening")}>Screening</button>
             <button className={tab === "biopsy" ? "active" : ""} onClick={() => setTab("biopsy")}>Biopsy</button>
             <button className={tab === "therapy" ? "active" : ""} onClick={() => setTab("therapy")}>Therapy</button>
@@ -97,16 +112,48 @@ export function App() {
             </span>
           )}
           {health && (
-            <HonestyPills models={health.models_loaded || {}} />
+            <HonestyPills
+              models={health.models_loaded || {}}
+              demoMode={demoMode}
+              contactUrl={contactUrl}
+            />
           )}
         </div>
       </header>
 
-      {tab === "screening" && <ScreeningTab />}
-      {tab === "biopsy" && <BiopsyTab />}
-      {tab === "therapy" && <TherapyTab />}
-      {tab === "case" && <CaseViewTab />}
-      {tab === "nsclc" && <NsclcTab />}
+      {/* Demo Samples tab: only rendered when server reports demo_mode.
+          It is the primary landing surface for public demo deployments. */}
+      {tab === "demo" && demoMode && <DemoSamplesTab />}
+
+      {/* Live workflow tabs. In DEMO_MODE these render a read-only
+          placeholder that routes visitors to the contact page and the
+          Demo Samples tab (which has real pre-computed outputs). This
+          matches the API behaviour where POSTs return 403. */}
+      {tab === "screening" && (
+        demoMode
+          ? <DemoModePlaceholder tabLabel="Screening" contactUrl={contactUrl} demoSampleKind="screening" onOpenSamplesTab={() => setTab("demo")} />
+          : <ScreeningTab />
+      )}
+      {tab === "biopsy" && (
+        demoMode
+          ? <DemoModePlaceholder tabLabel="Biopsy" contactUrl={contactUrl} demoSampleKind="biopsy" onOpenSamplesTab={() => setTab("demo")} />
+          : <BiopsyTab />
+      )}
+      {tab === "therapy" && (
+        demoMode
+          ? <DemoModePlaceholder tabLabel="Therapy" contactUrl={contactUrl} demoSampleKind="case_full" onOpenSamplesTab={() => setTab("demo")} />
+          : <TherapyTab />
+      )}
+      {tab === "case" && (
+        demoMode
+          ? <DemoModePlaceholder tabLabel="Case view" contactUrl={contactUrl} demoSampleKind="case_full" onOpenSamplesTab={() => setTab("demo")} />
+          : <CaseViewTab />
+      )}
+      {tab === "nsclc" && (
+        demoMode
+          ? <DemoModePlaceholder tabLabel="NSCLC" contactUrl={contactUrl} demoSampleKind="nsclc" onOpenSamplesTab={() => setTab("demo")} />
+          : <NsclcTab />
+      )}
       {tab === "cards" && (
         <div className="card">
           <h2>Model cards</h2>
