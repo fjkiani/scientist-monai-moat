@@ -16,6 +16,7 @@ import {
 import { SettingsDrawer } from "./components/SettingsDrawer";
 import { HonestyPills } from "./components/HonestyPills";
 import { DemoModePlaceholder } from "./components/DemoModePlaceholder";
+import { ColdStartBanner } from "./components/ColdStartBanner";
 
 type Tab = "demo" | "screening" | "biopsy" | "therapy" | "case" | "cards" | "nsclc";
 
@@ -32,6 +33,11 @@ export function App() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [cancer, setCancerState] = useState<CancerId>(getCancer());
   const [lastRequestId, setLastRequestIdState] = useState<string>("");
+  // Cold-start banner state: unavailable=true while any api.ts fetch is
+  // in a "backend down / dyno warming" state. Auto-clears when the next
+  // successful response arrives.
+  const [backendUnavailable, setBackendUnavailable] = useState(false);
+  const [backendUnavailableReason, setBackendUnavailableReason] = useState("");
 
   // Wire the api.ts hooks once on mount. `apiKey` is read live from
   // localStorage so the operator can rotate keys mid-session without a
@@ -46,16 +52,40 @@ export function App() {
       on401: () => {
         setDrawerOpen(true);
       },
+      // Cold-start hooks — surface a warming-up banner when fetches
+      // fail with network error or 5xx (Render free-tier spin-down).
+      onBackendUnavailable: (reason) => {
+        setBackendUnavailableReason(reason);
+        setBackendUnavailable(true);
+      },
+      onBackendRecovered: () => {
+        setBackendUnavailable(false);
+      },
     });
   }, []);
 
   useEffect(() => {
+    // Arm the cold-start banner if /health hasn't answered in 2 s —
+    // typical for a Render free-tier dyno that just spun back up.
+    // The banner auto-dismisses when the next fetch succeeds.
+    let armed = false;
+    const t = window.setTimeout(() => {
+      armed = true;
+      setBackendUnavailableReason("initial /health probe > 2 s");
+      setBackendUnavailable(true);
+    }, 2000);
+
     getHealth().then((h) => {
+      window.clearTimeout(t);
+      if (armed) setBackendUnavailable(false);
       setHealth(h);
       // If the API reports DEMO_MODE, switch landing tab to Demo Samples
       // exactly once. Anything the operator does after that overrides.
       if (h?.demo_mode) setTab("demo");
-    }).catch(() => setHealth(null));
+    }).catch(() => {
+      window.clearTimeout(t);
+      setHealth(null);
+    });
     listModelCards().then(setCards).catch(() => setCards(null));
   }, []);
 
@@ -120,6 +150,11 @@ export function App() {
           )}
         </div>
       </header>
+
+      {/* Cold-start banner: warms visitors that a Render free-tier
+          demo is spinning up. Auto-dismisses on the next successful
+          fetch. See ColdStartBanner.tsx for the state machine. */}
+      <ColdStartBanner unavailable={backendUnavailable} reason={backendUnavailableReason} />
 
       {/* Demo Samples tab: only rendered when server reports demo_mode.
           It is the primary landing surface for public demo deployments. */}

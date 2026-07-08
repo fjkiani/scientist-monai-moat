@@ -81,14 +81,20 @@ services:
   #     "Demo samples" tab. All live workflow tabs render a read-only
   #     placeholder that routes visitors to https://crispro.ai/contact.
   #
-  # Plan sizing: Starter (512 MB / 0.5 CPU, always-on, ~$7/mo). Enough
-  # because DEMO_MODE blocks POSTs — no ClinicalBERT/MedSigLIP/LUNA16 are
-  # ever loaded in-process. Container just serves ~44 KB of static JSON.
-  # Standard (2 GB) would be overkill for this workload.
+  # Plan sizing: Free (512 MB / 0.1 CPU, spins down after 15 min idle,
+  # ~1 min cold start). Fits because DEMO_MODE blocks POSTs — no
+  # ClinicalBERT/MedSigLIP/LUNA16 are ever loaded in-process. Container
+  # just serves ~44 KB of static JSON.
+  #
+  # Cold-start UX: Render displays its own loading page during spin-up
+  # (~1 min), and the SPA additionally renders a "warming up backend"
+  # banner when /health takes longer than 2 s to respond (see
+  # frontend/src/components/ColdStartBanner.tsx). Together those cover
+  # both first-hit and mid-session spin-down cases.
   - type: web
     name: oncology-arbiter-demo
     runtime: docker
-    plan: starter
+    plan: free
     region: oregon
     branch: main
     dockerfilePath: ./Dockerfile

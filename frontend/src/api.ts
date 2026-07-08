@@ -244,15 +244,35 @@ export class Auth401Error extends Error {
 let _apiKeyProvider: () => string = () => "";
 let _requestIdSink: (rid: string) => void = () => { /* no-op */ };
 let _on401: (detail: string) => void = () => { /* no-op */ };
+let _onBackendUnavailable: (reason: string) => void = () => { /* no-op */ };
+let _onBackendRecovered: () => void = () => { /* no-op */ };
 
 export function installApiHooks(opts: {
   apiKey: () => string;
   onRequestId: (rid: string) => void;
   on401: (detail: string) => void;
+  onBackendUnavailable?: (reason: string) => void;
+  onBackendRecovered?: () => void;
 }): void {
   _apiKeyProvider = opts.apiKey;
   _requestIdSink = opts.onRequestId;
   _on401 = opts.on401;
+  if (opts.onBackendUnavailable) _onBackendUnavailable = opts.onBackendUnavailable;
+  if (opts.onBackendRecovered) _onBackendRecovered = opts.onBackendRecovered;
+}
+
+/** Signal the app when a fetch fails in a way that looks like a cold
+ *  Render free-tier dyno (network error, 502/503/504) so the SPA can
+ *  render a "warming up" banner. Also called when a subsequent request
+ *  succeeds so the banner can auto-dismiss. */
+function _classifyAndReport(err: unknown): void {
+  // TypeError from fetch(): network unreachable / CORS / DNS
+  if (err instanceof TypeError) {
+    _onBackendUnavailable("network error (dyno may be spinning up)");
+  }
+}
+function _isColdDynoStatus(status: number): boolean {
+  return status === 502 || status === 503 || status === 504;
 }
 
 function _headers(extra: HeadersInit = {}): HeadersInit {
@@ -275,20 +295,42 @@ async function _handleUnauthorized(resp: Response): Promise<never> {
 }
 
 async function post<T>(path: string, body: unknown): Promise<T> {
-  const resp = await fetch(`${API_BASE}${path}`, {
-    method: "POST",
-    headers: _headers({ "Content-Type": "application/json" }),
-    body: JSON.stringify(body),
-  });
+  let resp: Response;
+  try {
+    resp = await fetch(`${API_BASE}${path}`, {
+      method: "POST",
+      headers: _headers({ "Content-Type": "application/json" }),
+      body: JSON.stringify(body),
+    });
+  } catch (err) {
+    _classifyAndReport(err);
+    throw err;
+  }
   _captureRequestId(resp);
+  if (_isColdDynoStatus(resp.status)) {
+    _onBackendUnavailable(`HTTP ${resp.status} (dyno cold-start)`);
+  } else {
+    _onBackendRecovered();
+  }
   if (resp.status === 401) return _handleUnauthorized(resp);
   if (!resp.ok) throw new Error(`${resp.status} ${resp.statusText}: ${await resp.text()}`);
   return (await resp.json()) as T;
 }
 
 async function get<T>(path: string): Promise<T> {
-  const resp = await fetch(`${API_BASE}${path}`, { headers: _headers() });
+  let resp: Response;
+  try {
+    resp = await fetch(`${API_BASE}${path}`, { headers: _headers() });
+  } catch (err) {
+    _classifyAndReport(err);
+    throw err;
+  }
   _captureRequestId(resp);
+  if (_isColdDynoStatus(resp.status)) {
+    _onBackendUnavailable(`HTTP ${resp.status} (dyno cold-start)`);
+  } else {
+    _onBackendRecovered();
+  }
   if (resp.status === 401) return _handleUnauthorized(resp);
   if (!resp.ok) throw new Error(`${resp.status} ${resp.statusText}: ${await resp.text()}`);
   return (await resp.json()) as T;
