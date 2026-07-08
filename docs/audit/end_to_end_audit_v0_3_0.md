@@ -361,23 +361,112 @@ The wire contract carries `parser_id` and `per_field_source` on every response. 
 
 ---
 
-## §9. Post-deploy smoke — to be filled after §3.3
+## §9. Post-deploy smoke — v0.3.0-alpha demo deployment
 
-**Target URL**: `https://oncology-arbiter.onrender.com`
-**Fill-in trigger**: `git tag -a v0.3.0-alpha` push → autoDeploy → poll `/health` → curl smoke set → paste output verbatim below.
+**Target URL**: `https://oncology-arbiter-demo.onrender.com`
+**Render service id**: `srv-d96pn2rtqb8s73edkkrg` (workspace `tea-ctia5e52ng1s739ff5rg`, fjkiani1@gmail.com)
+**Deploy**: `dep-d96pn3btqb8s73edklr0`, commit `80d0cde5…`, went live `2026-07-08T00:39:34Z` (build+release ~3m 5s from `POST /v1/services`)
+**Smoke run**: `2026-07-08T00:43:17Z`, all requests from worker-nsclc
+**Plan**: Docker on Render **Free tier** (512 MB / 0.1 CPU, spins down after 15 min idle, ~1 min cold-start), region `oregon`, `autoDeploy=yes` on `main`
+**Env**: `ONCOLOGY_ARBITER_DEMO_MODE=1`, `ONCOLOGY_ARBITER_CONTACT_URL=https://crispro.ai/contact`, `ONCOLOGY_ARBITER_SERVE_FRONTEND=1`. No heavy backend flags — none of MedSigLIP / ClinicalBERT / LUNA16 are loaded in-process here (DEMO_MODE blocks the POST paths that would trigger a real weight load).
 
-Smoke set:
-1. `GET /health` — expect 200, `status=ok`, `version=0.3.0-alpha`, disclaimer + caveat intact, `models_loaded` shows CBIS-DDSM probe + ClinicalBERT parser as PLACEHOLDER on Render (both env flags off).
-2. `POST /v1/screening/analyze` with a small DICOM bytes payload — expect 200 with placeholder screening state.
-3. `POST /v1/biopsy/analyze` with a report_text — expect 200 with `report_parse.parser_id=proxy_regex_v0`, `fusion_mode=regex`.
-4. `POST /v1/case/full` with same biopsy input — expect 200 with `biopsy.report_parse` present and regex-only.
-5. Grep the honesty-gate string: response body must contain `"SYNTHETIC-v0.3.0"` provenance strings where synthetic labels are surfaced.
-6. `GET /` (frontend HTML root) — expect 200, HTML with expected Vite bundle asset hashes.
+### 9.1 Design (why the demo deployment exists, and what it isn't)
 
-**Curl output (to be appended verbatim after §3.3):**
+- v0.3.0-alpha has three pipelines that only work with substantial local weights + external services: CBIS-DDSM probe (needs Modal MedSigLIP-448), ClinicalBERT report parser (~430 MB safetensors), and LUNA16 RetinaNet (MONAI bundle 0.6.9, ~85 MB + torch). None of them fit a free-tier 512 MB dyno with torch loaded.
+- Rather than ship a version of the API to prod that would OOM the first time it saw a real DICOM, this deployment ships **pre-computed sample envelopes**: four real `/v1/…` responses that were captured on worker-nsclc against live weights (Modal MedSigLIP, ClinicalBERT, MONAI LUNA16) and pinned as JSON at `src/oncology_arbiter/api/static/demo_samples/*.json`. The container just serves that static JSON (~44 KB total).
+- All POST paths that would run inference are gated: `ONCOLOGY_ARBITER_DEMO_MODE=1` installs a middleware that returns HTTP 403 with a `{contact_url, demo_endpoint, demo_mode:true}` body. This is the same behaviour a visitor would see on any tab in the SPA — the client-side `DemoModePlaceholder` component mirrors the same message and routes to `https://crispro.ai/contact`.
+- The SPA has an additional `ColdStartBanner` component that surfaces when `/health` doesn't answer within 2 s or when any `fetch` returns a network error / 502 / 503 / 504. This covers the mid-session case where a user is browsing when the free-tier dyno spins down under them (Render's own loading page only shows for first-hit boot).
+
+### 9.2 Curl smoke — verbatim output
+
+**1) `GET /health`** — HTTP 200, 0.30 s. Reports `demo_mode:true`, `contact_url`, `demo_samples: [biopsy, case_full, nsclc, screening]`, and endpoints list includes the two new demo routes.
+
 ```
-[TBD — populated once Render deploy completes]
+{"status":"ok","version":"0.2.0-alpha","disclaimer":"RESEARCH USE ONLY — not validated for clinical decision-making. Not FDA-cleared. Not CE-marked. Investigational / IRB context only.","caveat":"AUROC reflects the model's ability to discriminate within literature-derived events whose labels and features co-originate from the same published narratives. This circularity inflates apparent performance. Expected prospective AUROC: 0.70–0.85 based on independent validation.","endpoints":["POST /v1/screening/analyze","POST /v1/biopsy/analyze","POST /v1/therapy/reason","POST /v1/case/full","GET  /v1/demo/case","GET  /v1/model-cards","GET  /v1/artifacts/{category}/{filename}","GET  /health","GET  /v1/demo/samples","GET  /v1/demo/samples/{kind}"],"models_loaded":{"monai_screening":"placeholder","medsiglip_biopsy":"placeholder","biopsy_report_parser":"proxy_regex_v0","txgemma_therapy":"placeholder","co_scientist":"placeholder","l3_arbiter":"template","nsclc_pipeline":"proxy_lung_heuristic"},"cancers":{...},"demo_mode":true,"contact_url":"https://crispro.ai/contact","demo_samples":["biopsy","case_full","nsclc","screening"]}
 ```
+
+**Known gap** flagged during smoke: `version` field still reads `"0.2.0-alpha"`. The `__version__` constant in the source was not bumped when v0.3.0 work landed (this is a pre-existing gap from the earlier audit closeout, not a demo-deploy regression). Everything else on the wire is v0.3.0. Fixing this requires bumping `_VERSION` and cutting a new deploy; deferred as a follow-up.
+
+**2) `GET /v1/demo/samples`** — HTTP 200, 0.13 s. Enumerates all four sample envelopes with byte sizes matching disk:
+
+```
+{"samples":[
+  {"kind":"biopsy",    "path":"/v1/demo/samples/biopsy",    "size_bytes":6683},
+  {"kind":"case_full", "path":"/v1/demo/samples/case_full", "size_bytes":21519},
+  {"kind":"nsclc",     "path":"/v1/demo/samples/nsclc",     "size_bytes":10026},
+  {"kind":"screening", "path":"/v1/demo/samples/screening", "size_bytes":5548}
+],"demo_mode":true,"contact_url":"https://crispro.ai/contact","note":"Each sample is a real /v1/... response captured on our workers with real weights loaded. See the `demo_provenance` sub-block in each envelope for the DICOM sha256, weights used, latency, and a plain-English note on what was real vs. synthetic."}
+```
+
+**3) `POST /v1/screening/analyze`** — HTTP 403, 0.13 s.
+
+```
+{"detail":"This deployment is a read-only demo of Oncology Arbiter v0.3.0-alpha. Live inference (screening, biopsy, therapy, case/full) is disabled here. See GET /v1/demo/samples for pre-computed sample outputs captured on our workers, or contact us to run the API on your own data.","contact_url":"https://crispro.ai/contact","demo_endpoint":"GET /v1/demo/samples","demo_mode":true}
+```
+
+Same 403 body confirmed for `POST /v1/biopsy/analyze`, `POST /v1/therapy/reason`, and `POST /v1/case/full`.
+
+**4) `GET /v1/demo/samples/screening`** — HTTP 200, 0.11 s.
+
+- `provenance.model_state = loaded_medsiglip`
+- `provenance.model_name = google/medsiglip-448+cbis_ddsm_logreg_v1`
+- `overall_score = 0.6293906569480896`
+- `findings.length = 3`
+- `demo_provenance` keys: `[generated_at, generated_on_commit, input, latency_seconds, metrics, notes, weights, worker]`
+- `demo_provenance.worker = "worker-nsclc"`, `demo_provenance.generated_on_commit = ae7adede900c67ef6492ab9dc0628ad781ccd13f`
+
+**5) `GET /v1/demo/samples/biopsy`** — HTTP 200.
+
+- `provenance.model_state = fused_regex_clinicalbert`
+- `provenance.model_name = clinicalbert_v1+regex_v0`
+- `receptor_panel.parse_state = {er:matched, pr:matched, her2:matched, grade:matched}`
+- `receptor_panel.er_positive = true`, `her2_status = "positive"`, `ki67_percent = 22.0`
+
+**6) `GET /v1/demo/samples/nsclc`** — HTTP 200.
+
+- `nsclc.model_state = loaded_luna16_retinanet`
+- `nsclc.model_name = monai/lung_nodule_ct_detection@0.6.9+nccn_nsclc_lite_v0`
+- `nsclc.risk_bucket = "HIGH"`
+- `nsclc.luna16.n_detections = 4`, `top_score = 0.998678982257843`, `inference_seconds = 2.9066336154937744`
+
+**7) `GET /v1/demo/samples/case_full`** — HTTP 200.
+
+- Envelope `provenance.model_state = "placeholder"` (envelope-level placeholder is by design — the interesting states live on the sub-blocks).
+- `screening.provenance.model_state = loaded_medsiglip`
+- `biopsy.provenance.model_state    = fused_regex_clinicalbert`
+- `therapy.provenance.model_state   = proxy_rules_lite`
+- `elo_ranked_hypotheses.length = 8`, top rating `1577.2699`
+
+**8) Path traversal + unknown kind**:
+
+```
+GET /v1/demo/samples/..%2Fetc%2Fpasswd  →  HTTP 404
+GET /v1/demo/samples/bogus              →  HTTP 404
+```
+
+**9) SPA served at `/ui/`** — HTTP 200. `<script src="/ui/assets/index-DA9kEHO6.js">` matches the local build. Grep of the served bundle for the demo/cold-start strings:
+
+```
+Backend is warming up
+Demo samples
+Run on your own data
+contact_url
+demo · read-only
+dyno cold-start
+initial /health probe
+```
+
+All six target strings present in the served JS — the bundle deployed matches what we compiled from `80d0cde`.
+
+### 9.3 Transient observed during rollout
+
+Immediately after Render flipped the deploy status to `live` (at 00:39:34 Z), the first POST attempt (~1 min later) returned HTTP 404 with `x-render-routing: no-server` — the LB was accepting traffic before the dyno's port was fully bound. Retries a few seconds later returned the correct 403. This is a known Render behaviour for the last few seconds of the update-in-progress → live transition, not a bug in our middleware. Any visitor landing in that ~10 s window would see a 404; the mitigation is client-side retry, which we did not add (the window is short enough that the cold-start banner already covers the common case).
+
+### 9.4 Follow-ups (deferred)
+
+- Bump `__version__` from `0.2.0-alpha` to `0.3.0-alpha` (source-level; drives `/health.version` and every artifact stamped with the running version).
+- Consider adding a client-side retry-on-`x-render-routing: no-server` in `api.ts` (cosmetic; only helps the 10 s post-deploy window).
+- Free-tier quota is workspace-level (750 instance hours/month across ALL free services in `tea-ctia5e52ng1s739ff5rg`). If aggregate traffic pushes over, Render suspends every free service in the workspace, not just the demo. Upgrade to Starter (~$7/mo, always-on) if the demo will be linked publicly.
 
 ---
 
