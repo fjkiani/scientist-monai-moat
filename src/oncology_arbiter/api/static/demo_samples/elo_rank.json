@@ -1,0 +1,518 @@
+{
+  "disclaimer": "RESEARCH USE ONLY \u2014 not validated for clinical decision-making. Not FDA-cleared. Not CE-marked. Investigational / IRB context only.",
+  "caveat": "AUROC reflects the model's ability to discriminate within literature-derived events whose labels and features co-originate from the same published narratives. This circularity inflates apparent performance. Expected prospective AUROC: 0.70\u20130.85 based on independent validation.",
+  "provenance": {
+    "model_state": "proxy_co_scientist",
+    "model_name": "oa/co_scientist_elo@v0.3.0-alpha",
+    "model_version": "v0.3.0-alpha",
+    "request_id": "8bcbf3b9c5f24b498657bdaa358990df",
+    "gate_report": null
+  },
+  "honesty_gate": {
+    "seen_urls_count": 8,
+    "evidence_kept": 8,
+    "evidence_dropped": 0
+  },
+  "evidence": [
+    {
+      "url": "https://pubmed.ncbi.nlm.nih.gov/30345884/",
+      "quoted_text": "SOLO1",
+      "source": "SOLO1"
+    },
+    {
+      "url": "https://www.nejm.org/doi/full/10.1056/NEJMoa1911361",
+      "quoted_text": "PAOLA-1",
+      "source": "PAOLA-1"
+    },
+    {
+      "url": "https://www.nejm.org/doi/full/10.1056/NEJMoa1611310",
+      "quoted_text": "NOVA",
+      "source": "NOVA"
+    },
+    {
+      "url": "https://www.nejm.org/doi/full/10.1056/NEJMoa1104390",
+      "quoted_text": "GOG-0218",
+      "source": "GOG-0218"
+    },
+    {
+      "url": "https://ascopubs.org/doi/10.1200/JCO.19.00294",
+      "quoted_text": "KEYNOTE-100",
+      "source": "KEYNOTE-100"
+    },
+    {
+      "url": "https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(17)32440-6/fulltext",
+      "quoted_text": "ARIEL3",
+      "source": "ARIEL3"
+    },
+    {
+      "url": "https://clincancerres.aacrjournals.org/content/26/17/4552",
+      "quoted_text": "CAPRI",
+      "source": "CAPRI"
+    },
+    {
+      "url": "https://www.nejm.org/doi/full/10.1056/NEJMoa2216691",
+      "quoted_text": "MIRASOL",
+      "source": "MIRASOL"
+    }
+  ],
+  "warnings": [
+    "unknown_modifier_drug_id:unknown_drug_xyz"
+  ],
+  "contract_version": "v0.3.0-alpha",
+  "baseline_ranking": [
+    {
+      "rank": 1,
+      "drug_id": "olaparib_maintenance",
+      "regimen": "Olaparib 300 mg BID maintenance",
+      "line": 1,
+      "rating": 1565.3128,
+      "wins": 9,
+      "losses": 0,
+      "draws": 0,
+      "confidence": 0.85,
+      "honesty_markers": {
+        "loaded": true
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 2,
+      "drug_id": "olaparib_bevacizumab_maintenance",
+      "regimen": "Olaparib + Bevacizumab",
+      "line": 1,
+      "rating": 1550.5911,
+      "wins": 8,
+      "losses": 1,
+      "draws": 0,
+      "confidence": 0.8,
+      "honesty_markers": {
+        "loaded": true
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 3,
+      "drug_id": "niraparib_maintenance",
+      "regimen": "Niraparib 200-300 mg QD",
+      "line": 1,
+      "rating": 1538.1392,
+      "wins": 7,
+      "losses": 2,
+      "draws": 0,
+      "confidence": 0.75,
+      "honesty_markers": {
+        "loaded": true
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 4,
+      "drug_id": "bevacizumab_gog0218",
+      "regimen": "GOG-0218 first-line",
+      "line": 1,
+      "rating": 1522.9581,
+      "wins": 6,
+      "losses": 3,
+      "draws": 1,
+      "confidence": 0.7,
+      "honesty_markers": {
+        "loaded": true
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 5,
+      "drug_id": "rucaparib_ariel3",
+      "regimen": "Rucaparib (ARIEL3)",
+      "line": 2,
+      "rating": 1506.4682,
+      "wins": 5,
+      "losses": 4,
+      "draws": 1,
+      "confidence": 0.7,
+      "honesty_markers": {
+        "loaded": true
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 6,
+      "drug_id": "mirvetuximab_soraventansine",
+      "regimen": "Mirvetuximab (MIRASOL)",
+      "line": 3,
+      "rating": 1492.4117,
+      "wins": 4,
+      "losses": 5,
+      "draws": 0,
+      "confidence": 0.6,
+      "honesty_markers": {
+        "loaded": true
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 7,
+      "drug_id": "carboplatin_paclitaxel",
+      "regimen": "Carboplatin+Paclitaxel doublet",
+      "line": 1,
+      "rating": 1477.0857,
+      "wins": 3,
+      "losses": 6,
+      "draws": 1,
+      "confidence": 0.65,
+      "honesty_markers": {
+        "loaded": true
+      },
+      "n_evidence": 0
+    },
+    {
+      "rank": 8,
+      "drug_id": "pembrolizumab_keynote100",
+      "regimen": "Pembrolizumab (KEYNOTE-100)",
+      "line": 2,
+      "rating": 1463.041,
+      "wins": 2,
+      "losses": 7,
+      "draws": 1,
+      "confidence": 0.55,
+      "honesty_markers": {
+        "loaded": true
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 9,
+      "drug_id": "ceralasertib_capri",
+      "regimen": "Ceralasertib+Olaparib (CAPRI)",
+      "line": 3,
+      "rating": 1449.6221,
+      "wins": 1,
+      "losses": 8,
+      "draws": 0,
+      "confidence": 0.45,
+      "honesty_markers": {
+        "loaded": true
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 10,
+      "drug_id": "topotecan_monotherapy",
+      "regimen": "Topotecan monotherapy",
+      "line": 4,
+      "rating": 1434.37,
+      "wins": 0,
+      "losses": 9,
+      "draws": 0,
+      "confidence": 0.3,
+      "honesty_markers": {
+        "loaded": true
+      },
+      "n_evidence": 0
+    }
+  ],
+  "enriched_ranking": [
+    {
+      "rank": 1,
+      "drug_id": "olaparib_maintenance",
+      "regimen": "Olaparib 300 mg BID maintenance",
+      "line": 1,
+      "rating": 1565.3128,
+      "wins": 9,
+      "losses": 0,
+      "draws": 0,
+      "confidence": 1.0,
+      "honesty_markers": {
+        "loaded": true
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 2,
+      "drug_id": "olaparib_bevacizumab_maintenance",
+      "regimen": "Olaparib + Bevacizumab",
+      "line": 1,
+      "rating": 1550.5911,
+      "wins": 8,
+      "losses": 1,
+      "draws": 0,
+      "confidence": 1.0,
+      "honesty_markers": {
+        "loaded": true
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 3,
+      "drug_id": "niraparib_maintenance",
+      "regimen": "Niraparib 200-300 mg QD",
+      "line": 1,
+      "rating": 1538.4992,
+      "wins": 7,
+      "losses": 2,
+      "draws": 0,
+      "confidence": 1.0,
+      "honesty_markers": {
+        "loaded": true
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 4,
+      "drug_id": "rucaparib_ariel3",
+      "regimen": "Rucaparib (ARIEL3)",
+      "line": 2,
+      "rating": 1521.7543,
+      "wins": 6,
+      "losses": 3,
+      "draws": 0,
+      "confidence": 0.8999999999999999,
+      "honesty_markers": {
+        "loaded": true
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 5,
+      "drug_id": "bevacizumab_gog0218",
+      "regimen": "GOG-0218 first-line",
+      "line": 1,
+      "rating": 1506.9497,
+      "wins": 5,
+      "losses": 4,
+      "draws": 0,
+      "confidence": 0.85,
+      "honesty_markers": {
+        "loaded": true
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 6,
+      "drug_id": "mirvetuximab_soraventansine",
+      "regimen": "Mirvetuximab (MIRASOL)",
+      "line": 3,
+      "rating": 1492.0605,
+      "wins": 4,
+      "losses": 5,
+      "draws": 0,
+      "confidence": 0.6,
+      "honesty_markers": {
+        "loaded": true
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 7,
+      "drug_id": "carboplatin_paclitaxel",
+      "regimen": "Carboplatin+Paclitaxel doublet",
+      "line": 1,
+      "rating": 1477.0857,
+      "wins": 3,
+      "losses": 6,
+      "draws": 1,
+      "confidence": 0.65,
+      "honesty_markers": {
+        "loaded": true
+      },
+      "n_evidence": 0
+    },
+    {
+      "rank": 8,
+      "drug_id": "ceralasertib_capri",
+      "regimen": "Ceralasertib+Olaparib (CAPRI)",
+      "line": 3,
+      "rating": 1465.6221,
+      "wins": 2,
+      "losses": 7,
+      "draws": 1,
+      "confidence": 0.55,
+      "honesty_markers": {
+        "loaded": true
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 9,
+      "drug_id": "pembrolizumab_keynote100",
+      "regimen": "Pembrolizumab (KEYNOTE-100)",
+      "line": 2,
+      "rating": 1447.7626,
+      "wins": 1,
+      "losses": 8,
+      "draws": 0,
+      "confidence": 0.35000000000000003,
+      "honesty_markers": {
+        "loaded": true
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 10,
+      "drug_id": "topotecan_monotherapy",
+      "regimen": "Topotecan monotherapy",
+      "line": 4,
+      "rating": 1434.3619,
+      "wins": 0,
+      "losses": 9,
+      "draws": 0,
+      "confidence": 0.15,
+      "honesty_markers": {
+        "loaded": true
+      },
+      "n_evidence": 0
+    }
+  ],
+  "matches": [
+    {
+      "drug_id": "olaparib_maintenance",
+      "regimen": "Olaparib 300 mg BID maintenance",
+      "line": 1,
+      "baseline_rank": 1,
+      "enriched_rank": 1,
+      "baseline_rating": 1565.3128,
+      "enriched_rating": 1565.3128,
+      "rank_delta": 0,
+      "rating_delta": 0.0,
+      "applied_modifier": 0.3,
+      "reason": "HRD+PARP boost (+0.30)"
+    },
+    {
+      "drug_id": "olaparib_bevacizumab_maintenance",
+      "regimen": "Olaparib + Bevacizumab",
+      "line": 1,
+      "baseline_rank": 2,
+      "enriched_rank": 2,
+      "baseline_rating": 1550.5911,
+      "enriched_rating": 1550.5911,
+      "rank_delta": 0,
+      "rating_delta": 0.0,
+      "applied_modifier": 0.3,
+      "reason": "HRD+PARP boost (+0.30)"
+    },
+    {
+      "drug_id": "niraparib_maintenance",
+      "regimen": "Niraparib 200-300 mg QD",
+      "line": 1,
+      "baseline_rank": 3,
+      "enriched_rank": 3,
+      "baseline_rating": 1538.1392,
+      "enriched_rating": 1538.4992,
+      "rank_delta": 0,
+      "rating_delta": 0.36,
+      "applied_modifier": 0.25,
+      "reason": "HRD+PARP boost (+0.25)"
+    },
+    {
+      "drug_id": "rucaparib_ariel3",
+      "regimen": "Rucaparib (ARIEL3)",
+      "line": 2,
+      "baseline_rank": 5,
+      "enriched_rank": 4,
+      "baseline_rating": 1506.4682,
+      "enriched_rating": 1521.7543,
+      "rank_delta": 1,
+      "rating_delta": 15.2861,
+      "applied_modifier": 0.2,
+      "reason": "HRD+PARP boost (+0.20)"
+    },
+    {
+      "drug_id": "bevacizumab_gog0218",
+      "regimen": "GOG-0218 first-line",
+      "line": 1,
+      "baseline_rank": 4,
+      "enriched_rank": 5,
+      "baseline_rating": 1522.9581,
+      "enriched_rating": 1506.9497,
+      "rank_delta": -1,
+      "rating_delta": -16.0084,
+      "applied_modifier": 0.15,
+      "reason": "Bevacizumab GOG-0218 posture (+0.15)"
+    },
+    {
+      "drug_id": "mirvetuximab_soraventansine",
+      "regimen": "Mirvetuximab (MIRASOL)",
+      "line": 3,
+      "baseline_rank": 6,
+      "enriched_rank": 6,
+      "baseline_rating": 1492.4117,
+      "enriched_rating": 1492.0605,
+      "rank_delta": 0,
+      "rating_delta": -0.3512,
+      "applied_modifier": 0.0,
+      "reason": "no modifier"
+    },
+    {
+      "drug_id": "carboplatin_paclitaxel",
+      "regimen": "Carboplatin+Paclitaxel doublet",
+      "line": 1,
+      "baseline_rank": 7,
+      "enriched_rank": 7,
+      "baseline_rating": 1477.0857,
+      "enriched_rating": 1477.0857,
+      "rank_delta": 0,
+      "rating_delta": 0.0,
+      "applied_modifier": 0.0,
+      "reason": "no modifier"
+    },
+    {
+      "drug_id": "ceralasertib_capri",
+      "regimen": "Ceralasertib+Olaparib (CAPRI)",
+      "line": 3,
+      "baseline_rank": 9,
+      "enriched_rank": 8,
+      "baseline_rating": 1449.6221,
+      "enriched_rating": 1465.6221,
+      "rank_delta": 1,
+      "rating_delta": 16.0,
+      "applied_modifier": 0.1,
+      "reason": "CAPRI ATR/PARP posture (+0.10)"
+    },
+    {
+      "drug_id": "pembrolizumab_keynote100",
+      "regimen": "Pembrolizumab (KEYNOTE-100)",
+      "line": 2,
+      "baseline_rank": 8,
+      "enriched_rank": 9,
+      "baseline_rating": 1463.041,
+      "enriched_rating": 1447.7626,
+      "rank_delta": -1,
+      "rating_delta": -15.2784,
+      "applied_modifier": -0.2,
+      "reason": "PD-L1 CPS<10 penalty (-0.20)"
+    },
+    {
+      "drug_id": "topotecan_monotherapy",
+      "regimen": "Topotecan monotherapy",
+      "line": 4,
+      "baseline_rank": 10,
+      "enriched_rank": 10,
+      "baseline_rating": 1434.37,
+      "enriched_rating": 1434.3619,
+      "rank_delta": 0,
+      "rating_delta": -0.0081,
+      "applied_modifier": -0.15,
+      "reason": "manual penalty (-0.15)"
+    }
+  ],
+  "disease_context": {
+    "cancer": "hgsoc",
+    "stage": "IV",
+    "hrd_positive": true,
+    "brca_mutated": true,
+    "pd_l1_cps": 5,
+    "prior_lines": 2
+  },
+  "applied_modifiers": {
+    "olaparib_maintenance": 0.3,
+    "olaparib_bevacizumab_maintenance": 0.3,
+    "niraparib_maintenance": 0.25,
+    "bevacizumab_gog0218": 0.15,
+    "rucaparib_ariel3": 0.2,
+    "pembrolizumab_keynote100": -0.2,
+    "ceralasertib_capri": 0.1,
+    "topotecan_monotherapy": -0.15,
+    "unknown_drug_xyz": 0.5
+  },
+  "n_candidates": 10
+}
