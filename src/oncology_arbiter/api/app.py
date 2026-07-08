@@ -623,6 +623,13 @@ def create_app() -> FastAPI:
         "ONCOLOGY_ARBITER_CONTACT_URL", "https://crispro.ai/contact"
     )
 
+    # POST routes that are safe to run even in read-only demo mode.
+    # These are pure-CPU, deterministic, no GPU / no external inference,
+    # so they do NOT burn Modal credit or misrepresent throughput:
+    #   * /v1/elo/rank — Co-Scientist Elo tournament (pure Python, seeded)
+    # Anything not on this list falls back to the 403 demo-mode error.
+    _DEMO_MODE_POST_ALLOWLIST = frozenset({"/v1/elo/rank"})
+
     @app.middleware("http")
     async def _demo_mode_gate(request: Request, call_next):  # noqa: RUF029
         if not _is_env_true("ONCOLOGY_ARBITER_DEMO_MODE"):
@@ -631,6 +638,9 @@ def create_app() -> FastAPI:
         # HEAD) flows through so the frontend can still read health,
         # samples, model-cards, and artifacts.
         if request.method != "POST":
+            return await call_next(request)
+        # Explicit allow-list for POSTs that are cheap + deterministic.
+        if request.url.path in _DEMO_MODE_POST_ALLOWLIST:
             return await call_next(request)
         return JSONResponse(
             status_code=403,

@@ -296,6 +296,36 @@ def test_elo_rank_confidence_clamped_but_order_preserved(client):
     ), f"olaparib_maintenance must outrank niraparib_maintenance even when both saturate; got {order}"
 
 
+def test_elo_rank_is_allowlisted_in_demo_mode(monkeypatch):
+    """DEMO_MODE=1 (as set on the public Render deploy) 403s every POST
+    by default to avoid burning GPU credit on Modal-backed inference
+    endpoints. /v1/elo/rank is pure-CPU deterministic Python with no
+    external calls, so it MUST be allow-listed. Regression guard against
+    a future refactor of the demo-mode middleware forgetting this.
+    """
+    monkeypatch.setenv("ONCOLOGY_ARBITER_DEMO_MODE", "1")
+    monkeypatch.setenv("ONCOLOGY_ARBITER_SKIP_DEMO_PREWARM", "1")
+    monkeypatch.setenv("ONCOLOGY_ARBITER_AUTH_MODE", "off")
+    from oncology_arbiter.api.app import create_app as _create_app
+    demo_client = TestClient(_create_app())
+
+    # A non-allowlisted POST is 403
+    r = demo_client.post("/v1/screening/analyze", json={})
+    assert r.status_code == 403, r.text
+
+    # /v1/elo/rank is 200 even in demo mode
+    r = demo_client.post(
+        "/v1/elo/rank",
+        json={
+            "drugs": _mini_hgsoc_bundle(),
+            "modifiers": {"olaparib_maintenance": 0.30},
+            "disease_context": HGSOC_DISEASE_CONTEXT,
+        },
+    )
+    assert r.status_code == 200, r.text
+    assert r.json()["contract_version"] == "v0.3.0-alpha"
+
+
 def test_elo_rank_demo_sample_fallback_is_baked(client):
     """The SPA demo fallback path — /v1/demo/samples/elo_rank — must resolve
     to the baked JSON when demo mode is enabled at build time. We don't
