@@ -1713,11 +1713,20 @@ def create_app() -> FastAPI:
 
     # ----------------------------------------------------------------------- #
     # /v1/elo/rank — v0.3.0-alpha therapy candidate re-ranking
+    #
+    # PUBLIC endpoint (no require_api_key). Reasoning:
+    #   * Pure-CPU deterministic Python tournament; no Modal / GPU cost.
+    #   * On the public demo deploy the SPA's Elo panel must be usable by
+    #     an anonymous browser session, matching the pattern used by
+    #     /v1/demo/case and /v1/model-cards. Gating this behind an API
+    #     key would silently break the read-only demo UX.
+    #   * DEMO_MODE middleware still gates every other POST via its
+    #     _DEMO_MODE_POST_ALLOWLIST — /v1/elo/rank is the only allow-listed
+    #     entry.
 
     @app.post("/v1/elo/rank", response_model=EloRankResponse)
     def elo_rank(
         req: EloRankRequest,
-        tenant: APIKey = Depends(require_api_key),
     ) -> EloRankResponse:
         """L5 Co-Scientist: re-rank a caller-supplied set of therapy candidates.
 
@@ -1894,7 +1903,7 @@ def create_app() -> FastAPI:
                 "k_factor": req.k_factor,
                 "disease_context_keys": sorted(req.disease_context.keys()),
             },
-            tenant_id=tenant.tenant_id,
+            tenant_id=None,  # public route: no authenticated tenant
         )
 
         return EloRankResponse(

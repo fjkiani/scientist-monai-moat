@@ -296,6 +296,44 @@ def test_elo_rank_confidence_clamped_but_order_preserved(client):
     ), f"olaparib_maintenance must outrank niraparib_maintenance even when both saturate; got {order}"
 
 
+def test_elo_rank_is_public_under_auth_on(monkeypatch):
+    """The public Render deploy has ONCOLOGY_ARBITER_AUTH_MODE unset →
+    defaults to 'on', which normally forces every non-public route to
+    return 401 without an X-API-Key header. The Elo tournament must
+    remain reachable without a key so the read-only demo SPA can drive
+    it from an anonymous browser session — same public-by-design
+    contract as /v1/demo/case and /v1/model-cards.
+    """
+    monkeypatch.setenv("ONCOLOGY_ARBITER_AUTH_MODE", "on")
+    monkeypatch.setenv("ONCOLOGY_ARBITER_SKIP_DEMO_PREWARM", "1")
+    # Seed a bootstrap tenant hash so require_api_key can load the table
+    # (the app refuses to start under AUTH_MODE=on with no seed).
+    import hashlib
+    monkeypatch.setenv(
+        "ONCOLOGY_ARBITER_BOOTSTRAP_API_KEY_SHA256",
+        hashlib.sha256(b"stub-key-not-used").hexdigest(),
+    )
+    monkeypatch.setenv("ONCOLOGY_ARBITER_BOOTSTRAP_TENANT_ID", "unittest")
+    from oncology_arbiter.api.app import create_app as _create_app
+    auth_client = TestClient(_create_app())
+
+    # Sanity: a gated route DOES 401 with no header
+    r = auth_client.post("/v1/screening/analyze", json={})
+    assert r.status_code == 401, r.text
+
+    # /v1/elo/rank: 200 with no X-API-Key header
+    r = auth_client.post(
+        "/v1/elo/rank",
+        json={
+            "drugs": _mini_hgsoc_bundle(),
+            "modifiers": {"olaparib_maintenance": 0.30},
+            "disease_context": HGSOC_DISEASE_CONTEXT,
+        },
+    )
+    assert r.status_code == 200, r.text
+    assert r.json()["contract_version"] == "v0.3.0-alpha"
+
+
 def test_elo_rank_is_allowlisted_in_demo_mode(monkeypatch):
     """DEMO_MODE=1 (as set on the public Render deploy) 403s every POST
     by default to avoid burning GPU credit on Modal-backed inference
