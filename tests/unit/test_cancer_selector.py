@@ -42,26 +42,39 @@ class TestHealthCancers:
         assert r.status_code == 200
         j = r.json()
         assert "cancers" in j, f"/health MUST expose the cancers map for the SPA; keys={sorted(j.keys())}"
-        assert set(j["cancers"].keys()) == {"breast", "nsclc"}, (
-            "cancers map must announce both wired-up cancer tracks"
+        # v0.4.0-alpha: hgsoc added for the AK MBD4-LOF tumor board track.
+        assert set(j["cancers"].keys()) == {"breast", "nsclc", "hgsoc"}, (
+            "cancers map must announce all wired-up cancer tracks"
         )
 
     def test_each_cancer_entry_declares_state_and_endpoints(self, client):
         j = client.get("/health").json()
+        # ModelState allow-list is deliberately open here — the goal is to
+        # catch typos (e.g. "loaed") rather than pin the enum. Any string
+        # from oncology_arbiter.api.schemas.ModelState is acceptable.
+        from oncology_arbiter.api.schemas import ModelState
+        allowed_states = {ms.value for ms in ModelState}
         for cancer, cap in j["cancers"].items():
             assert "state" in cap, f"{cancer} missing state"
-            assert cap["state"] in {
-                "placeholder", "loaded", "loading", "unavailable", "cached",
-                "gated", "proxy_siglip", "loaded_medsiglip",
-                "loaded_biopsy_probe", "loaded_monai_detector",
-                "proxy_monai_heuristic", "proxy_rules_lite", "loaded_txgemma",
-                "proxy_lung_heuristic",
-            }, f"{cancer}.state is not a recognized ModelState value"
-            assert "endpoints" in cap, f"{cancer} missing endpoints"
-            assert "case/full" in cap["endpoints"], (
-                f"{cancer} must at minimum declare 'case/full' — that's the "
-                "surface the SPA cancer selector needs to render a working panel"
+            assert cap["state"] in allowed_states, (
+                f"{cancer}.state={cap['state']!r} is not a recognized "
+                f"ModelState value ({sorted(allowed_states)})"
             )
+            assert "endpoints" in cap, f"{cancer} missing endpoints"
+            # v0.4.0-alpha: hgsoc explicitly does NOT wire case/full yet
+            # (case_full=False in the /health payload). The SPA reads
+            # cap["case_full"] to decide whether to render the case_full
+            # panel; other cancers must still advertise case/full.
+            if cap.get("case_full", True):
+                assert "case/full" in cap["endpoints"], (
+                    f"{cancer} declares case_full=true but 'case/full' is "
+                    f"absent from endpoints={cap['endpoints']}"
+                )
+            else:
+                # non-case_full tracks must still declare at least one endpoint
+                assert cap["endpoints"], (
+                    f"{cancer} has case_full=false but declares no endpoints"
+                )
 
     def test_nsclc_flagged_at_least_as_proxy(self, client):
         j = client.get("/health").json()
