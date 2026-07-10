@@ -107,4 +107,5 @@ jobs:
         run: |
           pytest -x --tb=short --disable-warnings \
             tests/unit/test_tumor_board_bundle_endpoint.py \
-            tests/unit/test_cancer_selector.py
+            tests/unit/test_cancer_selector.py \
+            tests/unit/test_parenchyma_mask.py

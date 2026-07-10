@@ -514,9 +514,13 @@ class Luna16Detection(BaseModel):
     # if it sits in the chest slab but outside lung tissue (skin, chest wall,
     # CT-table interface). Regression target: TCGA-24-1423 top-1 at
     # (z=-238.74, y=313.94, x=188.31)mm score=0.8962 must flip to False.
-    # Default True so existing consumers on LIDC-IDRI (pure parenchyma-only
-    # input) are unaffected.
-    in_lung_parenchyma: bool = True
+    #
+    # Default False (fail-safe): when Path C did NOT run (env flag off,
+    # or an exception during mask build) the frontend should treat the
+    # detection as UNVERIFIED. Setting the default True would falsely
+    # promote every unfiltered detection into "confirmed in parenchyma",
+    # which is the exact wrong bias for a screening/triage UX.
+    in_lung_parenchyma: bool = False
 
 
 class Luna16DetectionBlock(BaseModel):
