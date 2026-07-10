@@ -2107,6 +2107,39 @@ def create_app() -> FastAPI:
                         f"luna16_retinanet_error: {type(exc).__name__}: {exc}"
                     )
 
+            # ----- Path C: Otsu HU parenchyma filter --------------------- #
+            # LUNA16 was trained on nodules internal to lung parenchyma.
+            # Unfiltered inference on our pipeline has been observed to
+            # fire on chest-wall / mediastinum structures (regression
+            # anchor: TCGA-24-1423 top-1 at scanner z=-238.74 mm sits on
+            # rib/chest wall). Path C builds an aerated-lung mask and
+            # flags each detection with `in_lung_parenchyma`. It does
+            # NOT drop detections — downstream ranking / UX decides how
+            # to treat parenchyma-negative firings. Best-effort: if the
+            # mask build throws we log and continue with default False.
+            parenchyma_warning = None
+            if luna16_block is not None and luna16_block.detections:
+                try:
+                    from oncology_arbiter.nsclc.parenchyma_mask import (
+                        apply_parenchyma_filter,
+                    )
+                    apply_parenchyma_filter(
+                        luna16_block.detections, ct.volume, spacing_mm,
+                    )
+                except Exception as exc:  # pylint: disable=broad-except
+                    log_event(
+                        request_id, "/v1/case/full",
+                        model_state="parenchyma_filter_error",
+                        patient_id_hash=None,
+                        extra={"error": f"{type(exc).__name__}: {exc}"},
+                        tenant_id=tenant.tenant_id,
+                    )
+                    parenchyma_warning = (
+                        f"parenchyma_filter_error: {type(exc).__name__}: {exc}"
+                    )
+                    # Detections keep their default `in_lung_parenchyma`;
+                    # schema default (False) is the safe fallback.
+
             if luna16_block is not None and luna16_block.n_detections > 0:
                 # Upgrade state / name so the frontend can badge this as a
                 # real inference. The heuristic block still travels for
