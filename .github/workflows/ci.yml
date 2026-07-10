@@ -1,0 +1,101 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check_ak_bundle:
+    name: AK MBD4-LOF bundle audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install package (editable)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]" || pip install -e .
+      - name: Run audit_ak_bundle.py (36 checks)
+        run: python scripts/audit_ak_bundle.py -v
+
+  no_hf_token_grep:
+    name: No HuggingFace token leaks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Grep for HF tokens
+        run: |
+          # HuggingFace tokens: hf_[A-Za-z0-9]{30,}
+          # Exclude .github/workflows (this file mentions the pattern in a comment)
+          # and docs/regulatory/*.md (which also references the pattern).
+          if git grep -n -E 'hf_[A-Za-z0-9]{30,}' -- \
+                ':!.github/workflows/**' \
+                ':!docs/regulatory/**'; then
+            echo ""
+            echo "FAIL: HuggingFace token pattern detected. Rotate the token, "
+            echo "      remove it from history, and re-open the PR."
+            exit 1
+          fi
+          echo "PASS: no hf_[A-Za-z0-9]{30,} matches outside allowed docs."
+
+  weights_meet_floor:
+    name: Weight sidecars meet documented floors
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Check every proof sidecar under docs/proofs/
+        run: |
+          python -c '
+          import json, sys
+          from pathlib import Path
+          fails = []
+          for p in sorted(Path("docs/proofs").glob("*.json")):
+              d = json.loads(p.read_text())
+              # Not every sidecar tracks a floor — only enforce when the key exists.
+              blk = d.get("weights_meet_floor")
+              if not blk:
+                  print(f"  [skip] {p.name} (no weights_meet_floor block)")
+                  continue
+              meets = blk.get("weights_meet_floor")
+              got = blk.get("achieved_metric")
+              floor = blk.get("floor_metric")
+              metric = blk.get("metric_name", "?")
+              if not meets or (got is not None and floor is not None and got < floor):
+                  fails.append(f"{p.name}: {metric}={got} < floor={floor}")
+                  print(f"  [FAIL] {p.name}: {metric}={got} < floor={floor}")
+              else:
+                  print(f"  [pass] {p.name}: {metric}={got} >= floor={floor}")
+          if fails:
+              print()
+              print("FAIL: weights below documented floor:")
+              for f in fails: print(f"  - {f}")
+              sys.exit(1)
+          print("PASS: all sidecars meet documented floors")
+          '
+
+  pytest:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install package + test extras
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]" || pip install -e . pytest pytest-asyncio httpx
+      - name: Run pytest
+        run: pytest -x --tb=short --disable-warnings tests/

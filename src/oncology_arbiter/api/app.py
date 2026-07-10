@@ -68,6 +68,9 @@ from .schemas import (
     TherapyOption,
     TherapyRequest,
     TherapyResponse,
+    # v0.4.0-alpha: AK MBD4-LOF tumor board contract
+    TumorBoardBundle,
+    TumorBoardBundleResponse,
 )
 
 
@@ -740,6 +743,19 @@ def create_app() -> FastAPI:
                         "ONCOLOGY_ARBITER_ALLOW_SERIES_DIR=1 on the server; "
                         "otherwise the same endpoint returns a shape-only "
                         "placeholder response with a warning."
+                    ),
+                },
+                "hgsoc": {
+                    "state": ModelState.PROXY_CO_SCIENTIST.value,
+                    "case_full": False,
+                    "endpoints": ["tumor_board/bundle", "demo/samples/ak_mbd4_lof_case"],
+                    "notes": (
+                        "v0.4.0-alpha: MBD4-LOF SL therapy bridge lands from "
+                        "crispro-backend-v2 fix/mbd4-atr-strong-tier @ "
+                        "bfd6d11f. AK bundle at "
+                        "GET /v1/demo/samples/ak_mbd4_lof_case; upload path at "
+                        "POST /v1/tumor_board/bundle. /v1/case/full?cancer=hgsoc "
+                        "returns 501 until the SL-therapy bridge is wired."
                     ),
                 },
             },
@@ -1928,7 +1944,11 @@ def create_app() -> FastAPI:
     # /health.cancers to know which selectors to enable. Any value NOT in
     # this set is rejected with 400 (never silently coerced to breast) so
     # the honesty caveat never masquerades as covering another cancer.
-    _SUPPORTED_CANCERS = {"breast", "nsclc"}
+    # v0.4.0-alpha: hgsoc added for the AK MBD4-LOF tumor board case. The
+    # /v1/case/full path for HGSOC intentionally 501s until the SL-therapy
+    # bridge lands in PR #4; the surface exists here so the SPA can select
+    # 'hgsoc' from /health.cancers without a client-side hardcode.
+    _SUPPORTED_CANCERS = {"breast", "nsclc", "hgsoc"}
 
     @app.post("/v1/case/full", response_model=FullCaseResponse)
     def case_full(
@@ -2315,6 +2335,115 @@ def create_app() -> FastAPI:
             biopsy=biopsy,
             therapy=therapy,
             elo_ranked_hypotheses=elo_ranked,
+        )
+
+    # ----------------------------------------------------------------------- #
+    # /v1/tumor_board/bundle — v0.4.0-alpha AK MBD4-LOF tumor board upload
+    #
+    # Accepts a TumorBoardBundle (contract
+    # 'tumor_board.v3.multimodal-with-manuscript-claims') from an authorised
+    # caller and echoes it back with a computed bundle sha256 + envelope. Two
+    # invariants:
+    #
+    #   1. The route is a NULL-OP with respect to disk state — no PHI
+    #      persistence, no dossier writes, no side effects other than
+    #      the audit ledger. Real dossier writes happen in
+    #      crispro-backend-v2, not here. This route lets clinicians *upload*
+    #      a bundle for downstream Modal enrichment or Elo re-ranking
+    #      without the SPA needing to shove multi-megabyte JSON through
+    #      /v1/case/full.
+    #
+    #   2. If HIPAA_MODE=true is set on the deploy env, the response
+    #      surface is redacted via the same HIPAAPIIMiddleware pattern
+    #      described in the AK integration doc. The current stub returns
+    #      the bundle verbatim under model_state=LOADED_HIPAA_REDACTOR so
+    #      the SPA can trip its own PHI-check assertions; live redaction
+    #      wiring lands in PR #6 alongside the audit ledger tests.
+
+    @app.post("/v1/tumor_board/bundle", response_model=TumorBoardBundleResponse)
+    def tumor_board_bundle(
+        bundle: TumorBoardBundle,
+        tenant: APIKey = Depends(require_api_key),
+    ) -> TumorBoardBundleResponse:
+        """Accept a tumor board bundle, compute its SHA-256, return envelope.
+
+        The bundle is validated by pydantic against the
+        `tumor_board.v3.multimodal-with-manuscript-claims` contract. Any
+        deviation (missing field, wrong claim type, wrong manuscript sha)
+        raises 422 before we get here.
+        """
+        import hashlib
+        import json as _json
+        import os
+
+        # Reject bundles that don't match the pinned contract version — the
+        # SPA has no fallback renderer and mis-versioned bundles must not
+        # silently downgrade to a stale UI.
+        expected = "tumor_board.v3.multimodal-with-manuscript-claims"
+        if bundle.contract_version != expected:
+            raise HTTPException(
+                status_code=422,
+                detail=(
+                    f"contract_version={bundle.contract_version!r} "
+                    f"does not match server-pinned {expected!r}. "
+                    "See docs/audit/AK_MBD4_INTEGRATION.md."
+                ),
+            )
+
+        # Canonical bundle hash: pydantic dumps with sort_keys+ensure_ascii
+        # so an identical bundle round-tripped through v1 matches the
+        # audit ledger entry emitted by crispro-backend-v2 side-by-side.
+        canonical = _json.dumps(
+            bundle.model_dump(mode="json"),
+            sort_keys=True,
+            ensure_ascii=True,
+            separators=(",", ":"),
+        )
+        bundle_sha = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+        request_id = new_request_id()
+        hipaa_mode = os.environ.get("HIPAA_MODE", "").lower() in {"1", "true", "yes"}
+
+        # Model state depends on whether HIPAA redaction was applied. The
+        # actual redaction stub lives in a follow-up PR; today this route
+        # just tags the state so the frontend surface (SlEvidenceMoat) can
+        # render the PHI-safety banner.
+        state = (
+            ModelState.LOADED_HIPAA_REDACTOR if hipaa_mode
+            else ModelState.LOADED_AK_BUNDLE
+        )
+
+        log_event(
+            request_id,
+            "/v1/tumor_board/bundle",
+            model_state=state.value,
+            patient_id_hash=hashlib.sha256(
+                bundle.patient_id.encode("utf-8")
+            ).hexdigest()[:12],
+            extra={
+                "contract_version": bundle.contract_version,
+                "backend_head_sha": bundle.synthetic_lethality
+                    .provenance.backend_head_sha[:12],
+                "manuscript_sha": bundle.synthetic_lethality
+                    .provenance.manuscript_repo_sha_at_audit[:12],
+                "n_rows": len(
+                    bundle.synthetic_lethality.provenance.evidence_matrix.rows
+                ),
+                "n_drugs": len(bundle.synthetic_lethality.recommended_drugs),
+                "hipaa_mode": hipaa_mode,
+            },
+            tenant_id=tenant.tenant_id,
+        )
+
+        return TumorBoardBundleResponse(
+            **_envelope(
+                request_id,
+                model_state=state,
+                model_name="tumor_board_v3_multimodal",
+            ),
+            bundle=bundle,
+            bundle_sha256=bundle_sha,
+            persisted_path=None,  # no disk persistence yet — see PR #6
         )
 
     # ----------------------------------------------------------------------- #

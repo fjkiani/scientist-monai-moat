@@ -40,6 +40,16 @@ class ModelState(str, Enum):
     FUSED_REGEX_CLINICALBERT = "fused_regex_clinicalbert"  # v0.3.0 regex ∧ ClinicalBERT fusion
     PROXY_CO_SCIENTIST = "proxy_co_scientist"  # L5 orchestrator: literature-derived Elo tournament (deterministic scoring)
 
+    # v0.4.0-alpha additions (PLAN §2A):
+    LOADED_LUNA16_REFINED = "loaded_luna16_refined"        # fjkiani-luna16-refine-v1 (LUNA16+LIDC-IDRI fine-tune, target ΔFROC@2 ≥ +5% over 0.6.9)
+    LOADED_MAMMO_MONAI_V1 = "loaded_mammo_monai_v1"        # fjkiani-mammo-monai-v1 RetinaNet fine-tuned on CBIS-DDSM_1024, floor AUROC ≥ 0.85
+    LOADED_TXGEMMA_MODAL = "loaded_txgemma_modal"          # HAI-DEF TxGemma-9B served via Modal (cold-start ~90s, warm 2-4s)
+    LOADED_MEDSIGLIP_MODAL = "loaded_medsiglip_modal"      # HAI-DEF MedSigLIP-448 served via Modal (embedding_dim=1152, A10G)
+    LOADED_AK_BUNDLE = "loaded_ak_bundle"                  # AK MBD4-LOF tumor board bundle (crispro-backend-v2 bfd6d11f, manuscript d33f6403)
+    LOADED_MBD4_EVIDENCE_MATRIX = "loaded_mbd4_evidence_matrix"  # PR #11 evidence matrix (manuscript_claim_type + falsification_narrative + auxiliary_evidence)
+    LOADED_SL_THERAPY_BRIDGE = "loaded_sl_therapy_bridge"  # crispro-backend-v2 api/services/sl_therapy_bridge/ mirror
+    LOADED_HIPAA_REDACTOR = "loaded_hipaa_redactor"        # HIPAAPIIMiddleware log-redaction (mirror of backend v2 api/middleware/hipaa_pii.py)
+
 
 class EvidenceRecord(BaseModel):
     """A Co-Scientist-style piece of evidence. URL must have been seen
@@ -55,6 +65,11 @@ class HonestyGateReport(BaseModel):
     seen_urls_count: int = Field(..., ge=0)
     evidence_kept: int = Field(..., ge=0)
     evidence_dropped: int = Field(..., ge=0)
+    # v0.4.0-alpha (PLAN §2A + §7 bullet 7): Co-Scientist hostile-URL test asserts
+    # that when the LLM proposes hypotheses referencing URLs the run never saw,
+    # reflection.py drops the hypothesis (not just the evidence). Distinct from
+    # evidence_dropped because a single hostile URL fabricates the whole hypothesis.
+    hypotheses_dropped: int = Field(default=0, ge=0)
 
 
 class ArbiterScore(BaseModel):
@@ -134,6 +149,14 @@ class Provenance(BaseModel):
             "proxy path). Carries repo_id, access_level, status_code, reason, has_token. "
             "Consumers should surface `access_level` alongside `model_state=GATED`."
         ),
+    )
+    # v0.4.0-alpha (PLAN §2A): when a model runs on Modal, we surface the exact
+    # endpoint URL that served the request (e.g. `https://crispro-test--medsiglip-embed.modal.run`).
+    # None for local / disk-loaded models. Downstream consumers can echo this in
+    # the audit ledger for reproducible provenance.
+    model_endpoint_url: str | None = Field(
+        default=None,
+        description="Modal function URL (or other remote endpoint) that served the request. None for local inference.",
     )
 
 
@@ -476,6 +499,24 @@ class Luna16Detection(BaseModel):
     depth_mm: float
     diameter_mm: float
     score: float
+    # v0.3.0-alpha demo (Step 5): true when the detection sits inside the
+    # z-range where lung parenchyma is visible on the source series. For
+    # TCGA-24-1423 (a CAP CT), that range is inst 13-42 / z=-100 to -245mm.
+    # Detections outside the chest slab would be out-of-domain for a
+    # LUNA16-trained detector (LIDC-IDRI = chest-only). Default true so
+    # existing NSCLC callers (LIDC-IDRI single-body-part input) are
+    # unaffected.
+    in_domain: bool = True
+    # v0.4.0-alpha Path C (PLAN §1D + §7 bullet 5): stricter refinement on
+    # top of `in_domain`. `in_domain` is z-range-based (chest slab); this is
+    # HU-based (Otsu-thresholded lung parenchyma mask, HU ∈ [-1000, -400]).
+    # A detection can have `in_domain=True` but `in_lung_parenchyma=False`
+    # if it sits in the chest slab but outside lung tissue (skin, chest wall,
+    # CT-table interface). Regression target: TCGA-24-1423 top-1 at
+    # (z=-238.74, y=313.94, x=188.31)mm score=0.8962 must flip to False.
+    # Default True so existing consumers on LIDC-IDRI (pure parenchyma-only
+    # input) are unaffected.
+    in_lung_parenchyma: bool = True
 
 
 class Luna16DetectionBlock(BaseModel):
@@ -492,6 +533,16 @@ class Luna16DetectionBlock(BaseModel):
     detections: list[Luna16Detection] = Field(default_factory=list)
     inference_seconds: float
     preprocessing_summary: dict[str, Any]
+    # v0.3.0-alpha demo (Step 5): world-mm z-range that defines the "chest
+    # slab" for a whole-body CAP scan. All detections inside this range
+    # carry `in_domain=true`; detections outside carry `in_domain=false`.
+    # None for classic LIDC-IDRI single-body-part input (full volume is
+    # in-domain by construction).
+    in_domain_z_range_mm: list[float] | None = Field(
+        default=None,
+        description="[z_min_mm, z_max_mm] world-frame bounds of the in-domain chest slab. "
+                    "Only set when the caller filtered a whole-body CT to a lung-only slab.",
+    )
 
 
 class NsclcResponse(BaseModel):
@@ -551,6 +602,356 @@ class FullCaseResponse(ApiEnvelope):
         default_factory=list,
         description="Co-Scientist Elo tournament output over all stage hypotheses.",
     )
+
+
+# --------------------------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
+# v0.4.0-alpha — AK MBD4-LOF tumor board bundle contract (PLAN §2A)
+#
+# Consumes the `tumor_board.v3.multimodal-with-manuscript-claims` contract
+# shipped by crispro-backend-v2 branch `fix/mbd4-atr-strong-tier` at HEAD
+# `bfd6d11fc872c11a13365b0682cea776a136c7f3` (PR #11).  Field names, enums,
+# and defaults mirror
+#   api/services/synthetic_lethality/v3/multimodal/models.py
+# on the backend side — additive only, no renames, no removals.
+#
+# Manuscript SHA of record: d33f6403fb11b314c86fa74d9c56e07b7ac3d7b1.
+# Datasets_used per bundle provenance: ["GDSC2", "DepMap 24Q2"].
+# Reference clinical case: AK (real patient; rendered with redacted
+# patient_id="MBD4-LOF-DEMO-01" per backend v2 HIPAAPIIMiddleware discipline).
+
+
+class ModalityEvidence(BaseModel):
+    """One modality row (or auxiliary_evidence entry) on an EvidenceMatrixRow.
+
+    Mirrors backend v2 `EvidenceRow` / `AuxiliaryEvidence` (post-PR #11 additions).
+    Every field is optional except `modality`, `status`, and `origin_system`
+    because different modalities carry different fields (e.g. `stress_test`
+    entries carry `stratifier` + `effect_size`; `expression_association`
+    entries carry `pmids` + `summary` but no numeric p).
+    """
+    model_config = ConfigDict(str_strip_whitespace=True)
+    modality: Literal[
+        "crispr_dependency",
+        "expression_association",
+        "prism_pharmacologic",
+        "gdsc_pharmacologic",
+        "clinical",
+        "stress_test",
+        "axis_partner",
+        "falsification_arm",
+        "depmap_pool",
+        "manuscript",
+    ]
+    status: Literal["positive", "missing", "mixed", "negative"]
+    delta_dep: float | None = None
+    p_value: float | None = None
+    fdr: float | None = None
+    effect_size: float | None = None
+    n_mut: int | None = None
+    n_wt: int | None = None
+    delta_auc: float | None = None
+    delta_ln_ic50: float | None = None
+    drug_screen_dataset: str | None = None
+    stratifier: str | None = None
+    metric: str | None = None
+    summary: str | None = None
+    pmids: list[str] = Field(default_factory=list)
+    is_confound_flagged: bool = False
+    notes: str | None = None
+    origin_system: Literal[
+        "live_crispr",
+        "live_gdsc",
+        "live_prism",
+        "manuscript_receipt",
+    ]
+
+
+class EvidenceMatrixRow(BaseModel):
+    """One row of the 6-axis synthetic-lethality evidence matrix.
+
+    Post-PR #11 fields (backend v2 `bfd6d11f`):
+      * manuscript_claim_type: enum tag driving falsification badge + alpha-stat callout
+      * falsification_narrative: 500-750 char verbatim narrative when claim=falsified_mechanism
+      * auxiliary_evidence: [] for most rows; ATR row has 6 entries (4 stress + 1 axis_partner + 1 falsification_arm)
+      * tier_fusion_rule_id / _detail: which branch of the fusion ladder produced the tier
+    """
+    model_config = ConfigDict(str_strip_whitespace=True)
+    axis: Literal[
+        "cytidine_analogs",
+        "atr_wee1",
+        "parp_inhibitors",
+        "immunotherapy",
+        "pkmyt1",
+        "wrn",
+    ]
+    axis_label: str
+    mechanism: str
+    crispr: ModalityEvidence
+    expression: ModalityEvidence
+    prism: ModalityEvidence
+    gdsc: ModalityEvidence
+    depmap_pool: ModalityEvidence | None = None
+    manuscript: ModalityEvidence | None = None
+    clinical: ModalityEvidence | None = None
+    recommendation_tier: str = Field(
+        ...,
+        description=(
+            "Human-readable tier, e.g. 'Strong candidate dependency axis', "
+            "'Mechanistic candidate only', 'Validated SL therapeutic lever', "
+            "'Not supported / negative'."
+        ),
+    )
+    manuscript_claim_type: Literal[
+        "validated_benchmark",
+        "primary_new_candidate_axis",
+        "falsified_mechanism",
+    ] | None = Field(
+        default=None,
+        description=(
+            "PR #11 field. Drives the frontend MechanismFalsifiedBadge "
+            "(falsified_mechanism) and AlphaStatCallout eligibility "
+            "(primary_new_candidate_axis)."
+        ),
+    )
+    falsification_narrative: str | None = Field(
+        default=None,
+        description=(
+            "PR #11 field. Verbatim narrative (~500-750 chars) shown in "
+            "MechanismFalsifiedBadge expanded panel when claim="
+            "falsified_mechanism. None otherwise."
+        ),
+    )
+    auxiliary_evidence: list[ModalityEvidence] = Field(
+        default_factory=list,
+        description=(
+            "PR #11 field. Stress tests, axis partners, and falsification "
+            "arms attached to this row. The ATR row on the AK bundle has "
+            "6 entries: 4 stress_test (MSI_purge, TP53_mutant_only, "
+            "leave_one_out_LOF, non_bowel_lineage), 1 axis_partner "
+            "(MBD4_LOF_vs_WT for adavosertib), 1 falsification_arm "
+            "(PARP1_expression_LOF_vs_comparator)."
+        ),
+    )
+    tier_fusion_rule_id: str | None = Field(
+        default=None,
+        description=(
+            "PR #11 field. Machine identifier for the fusion-ladder branch "
+            "that produced this tier, e.g. "
+            "'base_strong_crispr_or_pharma_multi_positive', "
+            "'base_fallback_mechanistic_candidate_else_branch'."
+        ),
+    )
+    tier_fusion_rule_detail: str | None = Field(
+        default=None,
+        description=(
+            "PR #11 field. Longer-form 'Why this tier?' explanation for "
+            "ScoringBreakdown 'Why this tier?' expandable UI."
+        ),
+    )
+    bridge_recommended_drugs_policy: str | None = None
+    overall_evidence_level: str | None = None
+    interpretation: str | None = None
+
+
+class EvidenceMatrix(BaseModel):
+    """The 6-axis evidence matrix root."""
+    query_gene: str
+    cancer_type: str
+    depmap_release: str
+    rows: list[EvidenceMatrixRow]
+
+
+class RecommendedDrug(BaseModel):
+    """One drug row in the tumor board bundle's `recommended_drugs` list.
+
+    Note per bundle `recommended_drugs_provenance_note`: this projection is
+    materialized by the payload-build step, not by any single existing
+    backend drug-bridge function. Drug names come from the canonical audit
+    JSON, not invented.
+    """
+    model_config = ConfigDict(str_strip_whitespace=True)
+    drug_name: str
+    target: str
+    role: Literal[
+        "validated_benchmark",
+        "axis_partner",
+        "alternate",
+        "lead",
+        "falsified_on_transcriptional_basis",
+    ]
+    axis: str
+    axis_label: str
+    recommendation_tier: str
+    tier_rank: int
+    manuscript_claim_type: str | None = None
+    bridge_recommended_drugs_policy: str
+    surface_status: Literal[
+        "RECOMMENDED",
+        "NOT_RECOMMENDED_ON_THIS_MECHANISM",
+    ]
+
+
+class SlProvenance(BaseModel):
+    """Bundle provenance sub-block.
+
+    Every AK bundle carries:
+      * manuscript_repo_sha_at_audit == 'd33f6403fb11b314c86fa74d9c56e07b7ac3d7b1'
+      * backend_branch == 'fix/mbd4-atr-strong-tier'
+      * backend_head_sha == 'bfd6d11fc872c11a13365b0682cea776a136c7f3'
+      * datasets_used == ['GDSC2', 'DepMap 24Q2']
+    """
+    model_config = ConfigDict(str_strip_whitespace=True)
+    evidence_matrix: EvidenceMatrix
+    manuscript_repo_sha_at_audit: str
+    backend_branch: str
+    backend_head_sha: str
+    datasets_used: list[str]
+    statistical_test: str = "Mann-Whitney U one-sided (alternative=less)"
+    effect_size_metric: str = "Cohen's d (pooled)"
+    audit_artifact: str | None = None
+
+
+class SyntheticLethalityBundle(BaseModel):
+    """The synthetic_lethality sub-envelope of a TumorBoardBundle."""
+    model_config = ConfigDict(str_strip_whitespace=True)
+    patient_id: str
+    disease: str
+    query_gene: str
+    recommended_drugs: list[RecommendedDrug] = Field(
+        ...,
+        min_length=1,
+        description=(
+            "At least one recommended drug required. Bundles with zero drugs "
+            "have no SL surface to render and must be rejected upstream."
+        ),
+    )
+    provenance: SlProvenance
+    recommended_drugs_provenance_note: str | None = None
+
+
+class PrimaryAlteration(BaseModel):
+    gene: str
+    alteration_type: str
+    germline_or_somatic: str = "unspecified_in_demo"
+    vaf: float | None = None
+    zygosity: str = "unspecified_in_demo"
+
+
+class Diagnosis(BaseModel):
+    primary_site: str
+    histology: str
+    stage: str = "demo"
+    msi_status: str = "unknown_in_demo"
+    tp53_status: str = "assumed_mutant_per_HGSOC_prior"
+
+
+class LineagePriors(BaseModel):
+    tp53_mutant_prevalence_in_hgsoc_pct_lit: int | None = None
+    tp53_priors_source: str | None = None
+
+
+class PatientContext(BaseModel):
+    primary_alteration: PrimaryAlteration
+    diagnosis: Diagnosis
+    lineage_priors: LineagePriors | None = None
+
+
+class TumorBoardBundle(BaseModel):
+    """AK-style tumor board bundle — the full v3-multimodal contract.
+
+    Consumed by:
+      * `GET /v1/demo/samples/ak_mbd4_lof_case` (served by existing
+        /v1/demo/samples/{kind} route, which validates `kind` is
+        `[A-Za-z0-9_]+`).
+      * `POST /v1/tumor_board/bundle` (new in v0.4.0; validates + persists).
+
+    Emitted by:
+      * crispro-backend-v2 `api/services/synthetic_lethality/v3/multimodal/`
+        (matrix_builder + modality_fuser + literature_receipts).
+    """
+    model_config = ConfigDict(str_strip_whitespace=True)
+    contract_version: Literal[
+        "tumor_board.v3.multimodal-with-manuscript-claims"
+    ]
+    patient_id: str
+    generated_at: str
+    demo_disclaimer: str | None = None
+    patient_context: PatientContext
+    synthetic_lethality: SyntheticLethalityBundle
+
+
+class TumorBoardBundleResponse(ApiEnvelope):
+    """Envelope for POST /v1/tumor_board/bundle validation echo."""
+    bundle: TumorBoardBundle
+    bundle_sha256: str = Field(
+        ...,
+        description="SHA-256 of the JSON payload for audit-ledger reproducibility.",
+    )
+    persisted_path: str | None = Field(
+        default=None,
+        description=(
+            "When HIPAA_MODE=false and staging is enabled, the redacted "
+            "bundle is persisted to demo_samples/tumor_board/{patient_id}/. "
+            "None when staging is disabled or in HIPAA mode."
+        ),
+    )
+
+
+class WeightsProvenance(BaseModel):
+    """Per-checkpoint provenance for fine-tuned weights.
+
+    Ships with any model whose weights were trained in-house (mammo MONAI,
+    LUNA16 refine, biopsy probe). CI gate `weights_meet_floor` refuses to
+    green-light a release where achieved_metric < floor_metric.
+
+    Floors per PLAN §7 bullet 6:
+      * mammo MONAI RetinaNet: AUROC ≥ 0.85 (floor from published CBIS-DDSM CNN baseline)
+      * biopsy MedSigLIP probe: AUROC ≥ 0.85
+      * LUNA16 refine: ΔFROC@2 ≥ +5% over v0.6.9 baseline
+    """
+    model_config = ConfigDict(str_strip_whitespace=True)
+    weights_meet_floor: bool
+    achieved_metric: float
+    floor_metric: float
+    floor_source: str = Field(
+        ...,
+        description=(
+            "Documented source of the floor, e.g. "
+            "'docs/proofs/cbis_ddsm_logreg_v1_metrics.json (typical fine-tuned CNN baseline 0.85-0.90)'."
+        ),
+    )
+    metric_name: str = Field(
+        ...,
+        description="e.g. 'AUROC', 'FROC_at_2_FPs_per_scan', 'delta_FROC_at_2'.",
+    )
+    weights_sha256: str | None = Field(
+        default=None,
+        description="SHA-256 of the saved weights file when disk-loaded; None for Modal-loaded weights.",
+    )
+
+
+class CoScientistRunResponse(ApiEnvelope):
+    """Envelope for POST /v1/co_scientist/run."""
+    run_id: str
+    seed: int
+    n_hypotheses_generated: int
+    n_evidence_pulled: int
+    n_reflected_kept: int
+    n_reflected_dropped: int
+    n_tournament_matches: int
+    top_hypothesis: dict[str, Any]
+    elo_leaderboard: list[dict[str, Any]]
+    completion_state: Literal["completed", "partial", "failed"]
+
+
+class AuditExportResponse(BaseModel):
+    """Envelope for GET /v1/audit/export."""
+    since_iso: str
+    until_iso: str
+    n_events: int
+    events_ndjson_url: str | None = None
+    events_inline: list[dict[str, Any]] | None = None
 
 
 # --------------------------------------------------------------------------- #
