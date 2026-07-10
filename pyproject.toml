@@ -44,6 +44,10 @@ dependencies = [
   #   demo endpoint needs to fetch CBIS-DDSM at runtime on hosts that don't
   #   ship the fixture in the container (e.g. Render).
   "huggingface_hub>=0.24",
+  # v0.4.0-alpha: llm_client.py in oncology_arbiter.models imports requests
+  # for the Gemma HTTP client. Was implicit before (worker image shipped
+  # it) but the fresh CI runner does not, so make it explicit.
+  "requests>=2.31",
 ]
 
 [project.optional-dependencies]
