@@ -25,6 +25,11 @@ from .arbiter import (
     score_nsclc,
 )
 from .ct_reader import CtSeries, read_ct_series
+from .resample import (
+    LUNA16_TARGET_SPACING_MM,
+    ResampledVolume,
+    resample_for_luna16,
+)
 from .pipeline import (
     BODY_HU_MIN,
     LUNG_HU_MAX,
@@ -45,8 +50,10 @@ __all__ = [
     "BODY_HU_MIN",
     "CtSeries",
     "DIAMETER_LOGIT_ANCHORS",
+    "LUNA16_TARGET_SPACING_MM",
     "LUNG_HU_MAX",
     "LungHeuristicOutput",
+    "ResampledVolume",
     "NODULE_HU_MAX",
     "NODULE_HU_MIN",
     "NoduleCandidate",
@@ -54,6 +61,7 @@ __all__ = [
     "lung_mask_from_hu",
     "nodule_candidate_blobs",
     "read_ct_series",
+    "resample_for_luna16",
     "run_lung_heuristic",
     "score_nsclc",
     "summarize_candidates",

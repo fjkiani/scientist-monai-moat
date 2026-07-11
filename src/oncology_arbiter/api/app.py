@@ -2225,13 +2225,40 @@ def create_app() -> FastAPI:
                     from oncology_arbiter.nsclc.luna16_retinanet import (
                         LungNoduleDetector, LUNA16_WARNING,
                     )
+                    from oncology_arbiter.lung.resample import resample_for_luna16
+
+                    # LUNA16 RetinaNet was trained on LIDC/LUNA16 resampled
+                    # to (dz=1.25, dy=0.703125, dx=0.703125) mm. Clinical
+                    # CAP scans (e.g. TCGA-24-1423) come in at dz=5.0 mm,
+                    # and running the detector on that produces near-zero
+                    # scores because its z-anchors under-cover true nodule
+                    # scale. Resample z axis to 1.25 mm (in-plane kept at
+                    # source resolution).
+                    resamp = resample_for_luna16(
+                        ct.volume, spacing_mm, z_only=True,
+                    )
                     t_l0 = time.perf_counter()
                     det = LungNoduleDetector.get()
-                    luna16_res = det.detect(ct.volume, spacing_mm=spacing_mm)
+                    luna16_res = det.detect(
+                        resamp.volume, spacing_mm=resamp.spacing_mm,
+                    )
                     luna16_seconds = time.perf_counter() - t_l0
                     from oncology_arbiter.api.schemas import (
                         Luna16Detection, Luna16DetectionBlock,
                     )
+                    # Note: parenchyma_mask.apply_parenchyma_filter (below)
+                    # must be called on the SAME (volume, spacing) pair the
+                    # detector saw, so we thread `resamp.volume` +
+                    # `resamp.spacing_mm` through the parenchyma filter as
+                    # well. Detection center-mm coordinates are in the
+                    # resampled volume frame — that's the frame the API
+                    # response commits to (documented on Luna16Detection).
+                    preproc_summary = dict(luna16_res.preprocessing_summary)
+                    preproc_summary["actual_spacing_mm"] = list(resamp.spacing_mm)
+                    preproc_summary["source_spacing_mm"] = list(resamp.source_spacing_mm)
+                    preproc_summary["z_resample_scale"] = resamp.z_scale_factor
+                    preproc_summary["z_resample_method"] = resamp.method
+                    preproc_summary["z_resampled"] = resamp.was_resampled
                     luna16_block = Luna16DetectionBlock(
                         bundle_version=luna16_res.bundle_version,
                         n_detections=luna16_res.n_detections,
@@ -2241,7 +2268,7 @@ def create_app() -> FastAPI:
                             for b in luna16_res.boxes[:20]  # cap wire payload
                         ],
                         inference_seconds=luna16_res.inference_seconds,
-                        preprocessing_summary=luna16_res.preprocessing_summary,
+                        preprocessing_summary=preproc_summary,
                     )
                     luna16_warning = LUNA16_WARNING
                 except Exception as exc:  # pylint: disable=broad-except
@@ -2272,8 +2299,18 @@ def create_app() -> FastAPI:
                     from oncology_arbiter.nsclc.parenchyma_mask import (
                         apply_parenchyma_filter,
                     )
+                    # Detection center-mm coordinates are expressed in the
+                    # SAME voxel frame the detector saw — i.e. the
+                    # resampled volume when `resamp.was_resampled=True`,
+                    # otherwise the raw `ct.volume`. Threading the same
+                    # (volume, spacing) pair keeps voxel-index math
+                    # consistent between the detector and the mask query.
+                    _pmask_volume = resamp.volume
+                    _pmask_spacing = resamp.spacing_mm
                     apply_parenchyma_filter(
-                        luna16_block.detections, ct.volume, spacing_mm,
+                        luna16_block.detections,
+                        _pmask_volume,
+                        _pmask_spacing,
                     )
                 except Exception as exc:  # pylint: disable=broad-except
                     log_event(
