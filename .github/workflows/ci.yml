@@ -114,4 +114,5 @@ jobs:
             tests/unit/test_modal_training_apps.py \
             tests/unit/test_txgemma_modal_client.py \
             tests/unit/test_txgemma_app.py \
-            tests/unit/test_medsiglip_modal_prod_flip.py
+            tests/unit/test_medsiglip_modal_prod_flip.py \
+            tests/unit/test_co_scientist_endpoint.py

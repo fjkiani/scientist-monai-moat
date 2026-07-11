@@ -71,6 +71,9 @@ from .schemas import (
     # v0.4.0-alpha: AK MBD4-LOF tumor board contract
     TumorBoardBundle,
     TumorBoardBundleResponse,
+    # v0.4.0-alpha: standalone Co-Scientist endpoint (PLAN §5 PR #5)
+    CoScientistRunRequest,
+    CoScientistRunResponse,
 )
 
 
@@ -629,9 +632,13 @@ def create_app() -> FastAPI:
     # POST routes that are safe to run even in read-only demo mode.
     # These are pure-CPU, deterministic, no GPU / no external inference,
     # so they do NOT burn Modal credit or misrepresent throughput:
-    #   * /v1/elo/rank — Co-Scientist Elo tournament (pure Python, seeded)
+    #   * /v1/elo/rank         — Co-Scientist Elo tournament (pure Python, seeded)
+    #   * /v1/co_scientist/run — Co-Scientist 4-phase loop (pure Python, seeded)
     # Anything not on this list falls back to the 403 demo-mode error.
-    _DEMO_MODE_POST_ALLOWLIST = frozenset({"/v1/elo/rank"})
+    _DEMO_MODE_POST_ALLOWLIST = frozenset({
+        "/v1/elo/rank",
+        "/v1/co_scientist/run",
+    })
 
     @app.middleware("http")
     async def _demo_mode_gate(request: Request, call_next):  # noqa: RUF029
@@ -710,6 +717,8 @@ def create_app() -> FastAPI:
             "POST /v1/therapy/reason",
             "POST /v1/case/full",
             "POST /v1/elo/rank",
+            # v0.4.0-alpha: standalone Co-Scientist loop (PLAN §5 PR #5)
+            "POST /v1/co_scientist/run",
             "GET  /v1/demo/case",
             "GET  /v1/model-cards",
             "GET  /v1/artifacts/{category}/{filename}",
@@ -1935,6 +1944,146 @@ def create_app() -> FastAPI:
             disease_context=req.disease_context,
             applied_modifiers=dict(req.modifiers),
             n_candidates=len(req.drugs),
+        )
+
+    # ----------------------------------------------------------------------- #
+    # /v1/co_scientist/run — standalone 4-phase loop (PLAN §5 PR #5)
+    #
+    # Surfaces `run_co_scientist(...)` as a first-class endpoint so callers
+    # can run the honesty tournament without piping through /v1/case/full.
+    # Deterministic, no live LLM, free-tier safe.
+    #
+    # The load-bearing bit is REFLECT: any evidence URL not in
+    # `req.seed_urls` is dropped by `reflect_hypotheses`. A hostile input
+    # with N fake URLs will see `urls_dropped_hallucinated >= N` and
+    # matching warnings in the response envelope.
+
+    @app.post("/v1/co_scientist/run", response_model=CoScientistRunResponse)
+    def co_scientist_run(
+        req: CoScientistRunRequest,
+    ) -> CoScientistRunResponse:
+        """Run the 4-phase Co-Scientist loop over caller-supplied envelopes.
+
+        Phases: generate → reflect → rank → evolve → rank.
+
+        Honesty contract
+        ----------------
+        - `req.seed_urls` is the ONLY authority on what the tool-loop
+          actually fetched. Any evidence URL NOT in this set is stripped
+          by REFLECT before it can win Elo points.
+        - `urls_dropped_hallucinated` is the count of URLs stripped.
+        - `hypotheses_dropped` is the count of hypotheses whose evidence
+          list was emptied by REFLECT (they're kept in `hypotheses[]` but
+          a caller SHOULD treat them as untrusted).
+        - Deterministic given identical inputs — no LLM sampling, no
+          time-dependent randomness beyond the fixed-seed pair-order
+          shuffle inside `rank_hypotheses`.
+        """
+        request_id = new_request_id()
+
+        # Also parse hallucination markers from `screening.evidence[].url`,
+        # etc. — anything already in the input envelopes counts as seen
+        # unless the caller explicitly limits `seed_urls`. This mirrors the
+        # behaviour of /v1/case/full's Co-Scientist call.
+        seen_urls: set[str] = set(req.seed_urls or [])
+
+        # Import inside the handler so cold-start of the module doesn't
+        # depend on orchestrator imports (which pull in numpy).
+        from oncology_arbiter.orchestrator.co_scientist import run_co_scientist
+
+        cs_out = run_co_scientist(
+            screening=req.screening,
+            biopsy=req.biopsy,
+            therapy=req.therapy,
+            seen_urls=seen_urls,
+            top_n_evolve=req.top_n_evolve,
+            n_variants=req.n_variants,
+            return_top=req.return_top,
+        )
+
+        # Count what REFLECT actually removed. Two metrics matter:
+        #
+        # 1. `urls_dropped_hallucinated`: the number of DISTINCT URLs that
+        #    appeared in the input envelopes but were NOT in `seed_urls`.
+        #    This is what the "5 fake URLs → all dropped by REFLECT" test
+        #    checks — the honesty gate must strip every unseen URL, no
+        #    matter how many hypotheses reference it.
+        # 2. `hypotheses_dropped`: the number of hypotheses whose evidence
+        #    list was emptied by REFLECT. Read from the warnings channel
+        #    (`no_evidence_after_reflect:<hyp_id>`), which
+        #    `reflect_hypotheses` emits verbatim.
+        #
+        # Both are exposed on the wire so a reviewer can prove the honesty
+        # gate did its job on hostile input.
+        proposed_urls: set[str] = set()
+        for env in (req.screening, req.biopsy, req.therapy):
+            if not env:
+                continue
+            for e in env.get("evidence") or []:
+                if isinstance(e, dict) and e.get("url"):
+                    proposed_urls.add(e["url"])
+            for opt in env.get("recommended_options") or []:
+                for e in (opt or {}).get("evidence") or []:
+                    if isinstance(e, dict) and e.get("url"):
+                        proposed_urls.add(e["url"])
+        urls_dropped_total = len(proposed_urls - seen_urls)
+        hyps_dropped = sum(
+            1 for w in (cs_out.get("warnings") or [])
+            if str(w).startswith("no_evidence_after_reflect:")
+        )
+
+        # Provenance / honesty envelope. We echo the seen_urls set on
+        # `honesty_gate` so a caller can prove what was in scope; the
+        # evidence field is left empty because run_co_scientist doesn't
+        # produce a merged evidence list of its own (each hypothesis
+        # carries its own `evidence[]`).
+        prov = Provenance(
+            model_name="oa/co_scientist@v0.4.0-alpha",
+            model_version="v0.4.0-alpha",
+            model_state=ModelState.PROXY_CO_SCIENTIST,
+            request_id=request_id,
+        )
+        gate = HonestyGateReport(
+            seen_urls_count=len(seen_urls),
+            evidence_kept=0,  # Co-Scientist doesn't build a merged evidence list
+            evidence_dropped=urls_dropped_total,
+        )
+
+        log_event(
+            request_id, "/v1/co_scientist/run",
+            model_state=ModelState.PROXY_CO_SCIENTIST.value,
+            patient_id_hash=None,
+            extra={
+                "has_screening": req.screening is not None,
+                "has_biopsy": req.biopsy is not None,
+                "has_therapy": req.therapy is not None,
+                "n_seed_urls": len(seen_urls),
+                "initial_count": cs_out.get("initial_count", 0),
+                "after_reflect": cs_out.get("after_reflect", 0),
+                "after_evolve": cs_out.get("after_evolve", 0),
+                "urls_dropped_hallucinated": urls_dropped_total,
+                "hypotheses_dropped": hyps_dropped,
+                "top_n_evolve": req.top_n_evolve,
+                "n_variants": req.n_variants,
+                "return_top": req.return_top,
+            },
+            tenant_id=None,  # public route, matches /v1/elo/rank
+        )
+
+        return CoScientistRunResponse(
+            disclaimer=RUO_DISCLAIMER,
+            caveat=AUROC_CAVEAT,
+            provenance=prov,
+            honesty_gate=gate,
+            evidence=[],  # per-hypothesis evidence lives on `hypotheses[]`
+            warnings=list(cs_out.get("warnings") or []),
+            phases=list(cs_out.get("phases") or []),
+            hypotheses=list(cs_out.get("hypotheses") or []),
+            initial_count=int(cs_out.get("initial_count", 0)),
+            after_reflect=int(cs_out.get("after_reflect", 0)),
+            after_evolve=int(cs_out.get("after_evolve", 0)),
+            urls_dropped_hallucinated=urls_dropped_total,
+            hypotheses_dropped=hyps_dropped,
         )
 
     # ----------------------------------------------------------------------- #
