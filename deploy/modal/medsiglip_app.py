@@ -29,7 +29,16 @@ from typing import Any, Dict, List, Optional
 
 import modal
 
-APP_VERSION = "medsiglip-modal-v0.3.0"
+APP_VERSION = "medsiglip-modal-v0.4.0-alpha"
+
+# ── Prod flip knob ───────────────────────────────────────────────────
+# ``MEDSIGLIP_MODAL_MODE=prod`` deploys with min_containers=1 (keeps one
+# warm replica during prod hours; ~$0.10/h idle A10G). Default remains
+# min_containers=0 for zero-cost staging/dev deploys. Read at deploy
+# time, so switching modes needs a re-deploy.
+_MODAL_MODE = (os.environ.get("MEDSIGLIP_MODAL_MODE") or "staging").lower()
+_MIN_CONTAINERS = 1 if _MODAL_MODE == "prod" else 0
+_SCALEDOWN_S = 900 if _MODAL_MODE == "prod" else 300
 
 # ── Image ────────────────────────────────────────────────────────────
 # NB: sentencepiece + protobuf REQUIRED for SiglipTokenizer to import.
@@ -75,9 +84,9 @@ def healthz() -> Dict[str, str]:
     image=MEDSIGLIP_IMAGE,
     gpu="A10G",
     secrets=[HF_SECRET],
-    scaledown_window=300,
+    scaledown_window=_SCALEDOWN_S,
     timeout=180,
-    min_containers=0,
+    min_containers=_MIN_CONTAINERS,
 )
 class MedSigLipModal:
     @modal.enter()

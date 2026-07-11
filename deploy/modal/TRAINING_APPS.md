@@ -1,4 +1,53 @@
-# Modal training apps (v0.4.0-alpha)
+# Modal apps (v0.4.0-alpha)
+
+This directory hosts every Modal deployment for OncologyArbiter.
+
+| App | Modal name | Purpose | GPU |
+| --- | --- | --- | --- |
+| MedSigLIP-448 | `medsiglip-448` | Vision embedding + zero-shot (inference) | A10G |
+| TxGemma-9B chat | `txgemma-9b` | Therapy-reasoning LLM (inference) | A10G |
+| LUNA16 refine | `luna16-refine` | Fine-tune shipped bundle (training) | A10G |
+| CBIS-DDSM RetinaNet | `cbis-ddsm-detect` | Mass/calc detector (training) | A10G |
+
+## Prod flip for MedSigLIP
+
+The default deploy runs `min_containers=0` (cold start on each request,
+$0/h idle). Setting `MEDSIGLIP_MODAL_MODE=prod` at deploy time bumps to
+`min_containers=1` and `scaledown_window=900`s, keeping one warm A10G
+replica during prod hours.
+
+```bash
+MEDSIGLIP_MODAL_MODE=prod modal deploy deploy/modal/medsiglip_app.py
+```
+
+Flip back with `MEDSIGLIP_MODAL_MODE=staging` (or unset) + redeploy.
+
+## TxGemma deploy
+
+```bash
+# 1. Create the HF token secret if not present:
+modal secret create txgemma-hf-token HF_TOKEN=hf_...
+
+# 2. Deploy the endpoint
+modal deploy deploy/modal/txgemma_app.py
+
+# 3. Point oncology-arbiter at the deployment
+export TXGEMMA_BACKEND=modal
+export TXGEMMA_MODAL_URL="https://<workspace>--txgemma"
+```
+
+The API layer picks up `TXGEMMA_BACKEND=modal` and swaps
+`oncology_arbiter.models.txgemma_client.TxGemmaClient` for
+`oncology_arbiter.models.txgemma_modal_client.TxGemmaModalClient` at
+request time. No downstream code changes needed.
+
+`/reason` responses always include the `honesty_warning` string. If the
+underlying HF gate returns 403, the client raises
+`GatedAccessError(access_level=FORBIDDEN)` — mirrors the local client.
+
+---
+
+# Training apps (v0.4.0-alpha)
 
 Two GPU training apps for OncologyArbiter's imaging modules. Both are
 _cost-optimized_ (`min_containers=0`), meaning the container only spins up
