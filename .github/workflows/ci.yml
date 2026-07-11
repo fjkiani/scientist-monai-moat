@@ -110,4 +110,5 @@ jobs:
             tests/unit/test_cancer_selector.py \
             tests/unit/test_parenchyma_mask.py \
             tests/unit/test_luna16_finetune.py \
-            tests/unit/test_cbis_ddsm_detection.py
+            tests/unit/test_cbis_ddsm_detection.py \
+            tests/unit/test_modal_training_apps.py
