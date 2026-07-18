@@ -1,0 +1,317 @@
+{
+  "meta": {
+    "case_id": "hgsoc_mbd4_lof",
+    "contract_version": "1.0.0",
+    "example_data_ruo": true,
+    "generated_utc": "2026-07-18T19:00:29+00:00",
+    "regulatory_posture": "Research Use Only. Not FDA-cleared, not CE-marked, not for clinical use.",
+    "pipeline_run_id": "example-run-hgsoc_mbd4_lof",
+    "pipeline_layers_traversed": [
+      "L1",
+      "L2",
+      "L3",
+      "L4a",
+      "L4b",
+      "L4c",
+      "L5"
+    ]
+  },
+  "ruo_banner": {
+    "level": "root",
+    "text": "Research Use Only. Not FDA-cleared, not CE-marked. Not for clinical use. Every block below carries the same posture. No output is a treatment directive.",
+    "evidence": {
+      "entity_id": "regulatory_posture:oncology_arbiter_ruo",
+      "source_file": "scientist-monai-moat/docs/model_cards/errata.md"
+    }
+  },
+  "case_header": {
+    "cancer_type": "High-grade serous ovarian carcinoma (HGSOC)",
+    "primary_alteration": "MBD4 loss-of-function",
+    "example_data_ruo": true
+  },
+  "blocks": {
+    "molecular_context": {
+      "block": "molecular_context",
+      "claim_bound": "Descriptive, not diagnostic.",
+      "example_data_ruo": true,
+      "normalized_profile": {
+        "variants": [
+          {
+            "gene": "MBD4",
+            "alteration": "p.R468*",
+            "consequence": "stop_gained",
+            "vaf_percent": 46.0,
+            "zygosity": "biallelic_inferred",
+            "source_parser": "arbiter_model:report_parser_clinicalbert_v1"
+          }
+        ],
+        "clinical_context": {
+          "histology": "HGSOC",
+          "stage": "IIIC",
+          "prior_lines": 2,
+          "notes": "Prior platinum-taxane; platinum-refractory at data cutoff."
+        }
+      },
+      "evidence": {
+        "entity_id": "arbiter_layer:l2_input_normalizer",
+        "source_file": "scientist-monai-moat/README.md"
+      }
+    },
+    "mechanism_hypotheses": {
+      "block": "mechanism_hypotheses",
+      "claim_bound": "Hypotheses, not drug-response prediction.",
+      "example_data_ruo": true,
+      "ranked": [
+        {
+          "rank": 1,
+          "hypothesis": "MBD4 LoF elevates uracil misincorporation and drives replication stress; ATR/CHK1 axis becomes essential for survival.",
+          "confidence": 0.68,
+          "elo_rating": 1544.97,
+          "evidence": [
+            {
+              "entity_id": "capability:CAP_02",
+              "source_file": "crispro_kg_v2/kg_modules/capability_registry.json"
+            }
+          ]
+        },
+        {
+          "rank": 2,
+          "hypothesis": "Increased CpG hypermutation load may prime immunogenic phenotype; MMR-adjacent stress signaling engaged.",
+          "confidence": 0.55,
+          "elo_rating": 1530.9,
+          "evidence": [
+            {
+              "entity_id": "capability:CAP_02",
+              "source_file": "crispro_kg_v2/kg_modules/capability_registry.json"
+            }
+          ]
+        },
+        {
+          "rank": 3,
+          "hypothesis": "Base-excision repair bypass places WEE1 as a candidate synthetic-vulnerability node.",
+          "confidence": 0.5,
+          "elo_rating": 1514.6,
+          "evidence": [
+            {
+              "entity_id": "capability:CAP_02",
+              "source_file": "crispro_kg_v2/kg_modules/capability_registry.json"
+            }
+          ]
+        }
+      ],
+      "ranking_model": {
+        "model_name": "oa/co_scientist@v0.4.0-alpha (example)",
+        "model_state": "proxy_co_scientist",
+        "n_training": 0,
+        "auroc_caveat": "TEMPLATE. No AUROC. Ranked scores are illustrative.",
+        "elo_seed": 20260703,
+        "elo_k_factor": 16
+      },
+      "evidence": {
+        "entity_id": "capability:CAP_02",
+        "source_file": "crispro_kg_v2/kg_modules/capability_registry.json"
+      }
+    },
+    "vulnerabilities_synthetic_lethality": {
+      "block": "vulnerabilities_synthetic_lethality",
+      "claim_bound": "Not a proven patient-specific vulnerability. Candidate dependency axis only.",
+      "example_data_ruo": true,
+      "candidates": [
+        {
+          "axis": "ATR",
+          "tier": "Strong candidate dependency axis",
+          "n_positive_modalities": 6,
+          "modalities": [
+            "gdsc",
+            "in_vitro",
+            "expression"
+          ],
+          "notes": "Candidate axis at population level (RUO). Not patient-specific.",
+          "evidence": [
+            {
+              "entity_id": "capability:CAP_05",
+              "source_file": "crispro_kg_v2/kg_modules/capability_registry.json"
+            }
+          ]
+        },
+        {
+          "axis": "WEE1",
+          "tier": "Candidate dependency axis",
+          "n_positive_modalities": 4,
+          "modalities": [
+            "gdsc",
+            "in_vitro"
+          ],
+          "notes": "Complementary node on same replication-stress axis. Population-level only.",
+          "evidence": [
+            {
+              "entity_id": "capability:CAP_05",
+              "source_file": "crispro_kg_v2/kg_modules/capability_registry.json"
+            }
+          ]
+        }
+      ],
+      "evidence": {
+        "entity_id": "capability:CAP_05",
+        "source_file": "crispro_kg_v2/kg_modules/capability_registry.json"
+      }
+    },
+    "therapy_trial_exploration": {
+      "block": "therapy_trial_exploration",
+      "claim_bound": "Exploration only. Not a treatment directive or responder / enrollment prediction.",
+      "example_data_ruo": true,
+      "agents_to_investigate": [
+        {
+          "agent": "ATR inhibitor (research class)",
+          "example_asset": "ceralasertib",
+          "mechanism_link": "ATR",
+          "elo_rank": 3,
+          "elo_rating": 1499.81,
+          "why": "Aligns with rank-1 hypothesis (replication stress). No responder prediction.",
+          "evidence": [
+            {
+              "entity_id": "capability:CAP_03",
+              "source_file": "crispro_kg_v2/kg_modules/capability_registry.json"
+            }
+          ]
+        },
+        {
+          "agent": "WEE1 inhibitor (research class)",
+          "example_asset": "adavosertib",
+          "mechanism_link": "WEE1",
+          "elo_rank": 2,
+          "elo_rating": 1514.6,
+          "why": "Aligns with rank-3 hypothesis. Population-level rationale only.",
+          "evidence": [
+            {
+              "entity_id": "capability:CAP_03",
+              "source_file": "crispro_kg_v2/kg_modules/capability_registry.json"
+            }
+          ]
+        }
+      ],
+      "trials_to_explore": [
+        {
+          "nct_id": "NCT-EXAMPLE-00001",
+          "title": "Illustrative trial placeholder. Not a real registration.",
+          "mechanism_link": "ATR",
+          "example_data_ruo": true,
+          "evidence": [
+            {
+              "entity_id": "capability:CAP_03",
+              "source_file": "crispro_kg_v2/kg_modules/capability_registry.json"
+            }
+          ]
+        }
+      ],
+      "human_decision_required": true,
+      "evidence": {
+        "entity_id": "capability:CAP_03",
+        "source_file": "crispro_kg_v2/kg_modules/capability_registry.json"
+      }
+    },
+    "evidence_trace": {
+      "block": "evidence_trace",
+      "claim_bound": "Traceability, not certainty.",
+      "example_data_ruo": true,
+      "receipts": [
+        {
+          "claim": "MBD4 LoF elevates replication stress (rank-1 hypothesis).",
+          "entity_id": "capability:CAP_02",
+          "source_file": "crispro_kg_v2/kg_modules/capability_registry.json"
+        },
+        {
+          "claim": "ATR dependency at population level.",
+          "entity_id": "capability:CAP_05",
+          "source_file": "crispro_kg_v2/kg_modules/capability_registry.json"
+        },
+        {
+          "claim": "Therapy exploration mapping.",
+          "entity_id": "capability:CAP_03",
+          "source_file": "crispro_kg_v2/kg_modules/capability_registry.json"
+        },
+        {
+          "claim": "Input normalization.",
+          "entity_id": "arbiter_layer:l2_input_normalizer",
+          "source_file": "scientist-monai-moat/README.md"
+        },
+        {
+          "claim": "L5 assembly.",
+          "entity_id": "arbiter_layer:l5_arbiter_output",
+          "source_file": "scientist-monai-moat/README.md"
+        }
+      ],
+      "evidence": {
+        "entity_id": "arbiter_layer:l3_evidence_retriever",
+        "source_file": "scientist-monai-moat/README.md"
+      }
+    },
+    "safety_governance_flags": {
+      "block": "safety_governance_flags",
+      "claim_bound": "Does not substitute for clinical/regulatory review.",
+      "example_data_ruo": true,
+      "flags": [
+        {
+          "flag": "RUO",
+          "status": "active"
+        },
+        {
+          "flag": "AUROC_CAVEAT",
+          "status": "active",
+          "note": "Rank ordering derived from template arbiter (n_training=0)."
+        },
+        {
+          "flag": "HONESTY_GATE",
+          "status": "active",
+          "note": "0 hallucinated URLs surfaced."
+        },
+        {
+          "flag": "QUARANTINE_CHECK",
+          "status": "clean",
+          "note": "No prohibited-claim strings present in payload."
+        }
+      ],
+      "quarantines_active": [
+        "No treatment directives",
+        "No individual outcome predictions",
+        "No SL-as-patient-specific-therapeutic claims"
+      ],
+      "evidence": {
+        "entity_id": "gov_kgv2:mandatory_disclosures",
+        "source_file": "crispro_kg_v2/kg_modules/platform_identity_governance.json"
+      }
+    },
+    "missing_data_and_confidence": {
+      "block": "missing_data_and_confidence",
+      "claim_bound": "Surfaces uncertainty; does not resolve it.",
+      "example_data_ruo": true,
+      "unknown": [
+        "Germline vs somatic origin of MBD4 LoF not verified from input.",
+        "CRISPR-KO screen for MBD4-dependent context not attached.",
+        "Prior response to platinum documented as refractory; no HRD score input."
+      ],
+      "confidence_by_block": {
+        "mechanism_hypotheses": "moderate (template arbiter)",
+        "vulnerabilities_synthetic_lethality": "moderate (multi-modality signal, population-level)",
+        "therapy_trial_exploration": "low-moderate (mechanism-aligned, no responder prediction)"
+      },
+      "evidence": {
+        "entity_id": "arbiter_layer:l5_arbiter_output",
+        "source_file": "scientist-monai-moat/README.md"
+      }
+    }
+  },
+  "human_decision_footer": {
+    "text": "Tumor Board is the human decision surface: it assembles and traces; a clinician/translational team makes every actual clinical decision. No output is a treatment directive.",
+    "remains_human": [
+      "Diagnosis",
+      "Treatment selection and prescribing",
+      "Trial enrollment decision",
+      "Interpretation of RUO/heuristic outputs"
+    ],
+    "evidence": {
+      "entity_id": "regulatory_posture:oncology_arbiter_ruo",
+      "source_file": "scientist-monai-moat/docs/model_cards/errata.md"
+    }
+  }
+}

@@ -1,0 +1,267 @@
+{
+  "summary": {
+    "T1": "3/3",
+    "T2": "3/3",
+    "T3": "8/8",
+    "T4": "4/4",
+    "T5": "3/3",
+    "T6": "3/3",
+    "T7": "16/16"
+  },
+  "results": {
+    "T1": [
+      {
+        "case": "hgsoc_mbd4_lof",
+        "missing": [],
+        "extra": [],
+        "pass": true
+      },
+      {
+        "case": "tnbc_brca1_mut",
+        "missing": [],
+        "extra": [],
+        "pass": true
+      },
+      {
+        "case": "nsclc_kras_g12c",
+        "missing": [],
+        "extra": [],
+        "pass": true
+      }
+    ],
+    "T2": [
+      {
+        "case": "hgsoc_mbd4_lof",
+        "total_data_block_nodes": 35,
+        "unmarked": [],
+        "pass": true
+      },
+      {
+        "case": "tnbc_brca1_mut",
+        "total_data_block_nodes": 35,
+        "unmarked": [],
+        "pass": true
+      },
+      {
+        "case": "nsclc_kras_g12c",
+        "total_data_block_nodes": 35,
+        "unmarked": [],
+        "pass": true
+      }
+    ],
+    "T3": [
+      {
+        "file": "cases/hgsoc_mbd4_lof/mockup.html",
+        "hits": [],
+        "pass": true
+      },
+      {
+        "file": "cases/hgsoc_mbd4_lof/l5_output.json",
+        "hits": [],
+        "pass": true
+      },
+      {
+        "file": "cases/tnbc_brca1_mut/mockup.html",
+        "hits": [],
+        "pass": true
+      },
+      {
+        "file": "cases/tnbc_brca1_mut/l5_output.json",
+        "hits": [],
+        "pass": true
+      },
+      {
+        "file": "cases/nsclc_kras_g12c/mockup.html",
+        "hits": [],
+        "pass": true
+      },
+      {
+        "file": "cases/nsclc_kras_g12c/l5_output.json",
+        "hits": [],
+        "pass": true
+      },
+      {
+        "file": "case_router/mockup.html",
+        "hits": [],
+        "pass": true
+      },
+      {
+        "file": "component_spec.json",
+        "hits": [],
+        "pass": true
+      }
+    ],
+    "T4": [
+      {
+        "case": "hgsoc_mbd4_lof",
+        "missing": [],
+        "pass": true
+      },
+      {
+        "case": "tnbc_brca1_mut",
+        "missing": [],
+        "pass": true
+      },
+      {
+        "case": "nsclc_kras_g12c",
+        "missing": [],
+        "pass": true
+      },
+      {
+        "case": "case_router",
+        "missing": [],
+        "pass": true
+      }
+    ],
+    "T5": [
+      {
+        "case": "hgsoc_mbd4_lof",
+        "problems": [],
+        "pass": true
+      },
+      {
+        "case": "tnbc_brca1_mut",
+        "problems": [],
+        "pass": true
+      },
+      {
+        "case": "nsclc_kras_g12c",
+        "problems": [],
+        "pass": true
+      }
+    ],
+    "T6": [
+      {
+        "case": "hgsoc_mbd4_lof",
+        "per_state": {
+          "happy": 7,
+          "empty": 7,
+          "loading": 7,
+          "degraded": 7,
+          "quarantined": 7
+        },
+        "pass": true
+      },
+      {
+        "case": "tnbc_brca1_mut",
+        "per_state": {
+          "happy": 7,
+          "empty": 7,
+          "loading": 7,
+          "degraded": 7,
+          "quarantined": 7
+        },
+        "pass": true
+      },
+      {
+        "case": "nsclc_kras_g12c",
+        "per_state": {
+          "happy": 7,
+          "empty": 7,
+          "loading": 7,
+          "degraded": 7,
+          "quarantined": 7
+        },
+        "pass": true
+      }
+    ],
+    "T7": [
+      {
+        "file": "cases/hgsoc_mbd4_lof/wireframes/happy.png",
+        "exists": true,
+        "size": 196347,
+        "pass": true
+      },
+      {
+        "file": "cases/hgsoc_mbd4_lof/wireframes/empty.png",
+        "exists": true,
+        "size": 193852,
+        "pass": true
+      },
+      {
+        "file": "cases/hgsoc_mbd4_lof/wireframes/loading.png",
+        "exists": true,
+        "size": 188506,
+        "pass": true
+      },
+      {
+        "file": "cases/hgsoc_mbd4_lof/wireframes/degraded.png",
+        "exists": true,
+        "size": 200352,
+        "pass": true
+      },
+      {
+        "file": "cases/hgsoc_mbd4_lof/wireframes/quarantined.png",
+        "exists": true,
+        "size": 203249,
+        "pass": true
+      },
+      {
+        "file": "cases/tnbc_brca1_mut/wireframes/happy.png",
+        "exists": true,
+        "size": 195829,
+        "pass": true
+      },
+      {
+        "file": "cases/tnbc_brca1_mut/wireframes/empty.png",
+        "exists": true,
+        "size": 193393,
+        "pass": true
+      },
+      {
+        "file": "cases/tnbc_brca1_mut/wireframes/loading.png",
+        "exists": true,
+        "size": 187876,
+        "pass": true
+      },
+      {
+        "file": "cases/tnbc_brca1_mut/wireframes/degraded.png",
+        "exists": true,
+        "size": 199980,
+        "pass": true
+      },
+      {
+        "file": "cases/tnbc_brca1_mut/wireframes/quarantined.png",
+        "exists": true,
+        "size": 202879,
+        "pass": true
+      },
+      {
+        "file": "cases/nsclc_kras_g12c/wireframes/happy.png",
+        "exists": true,
+        "size": 197274,
+        "pass": true
+      },
+      {
+        "file": "cases/nsclc_kras_g12c/wireframes/empty.png",
+        "exists": true,
+        "size": 194611,
+        "pass": true
+      },
+      {
+        "file": "cases/nsclc_kras_g12c/wireframes/loading.png",
+        "exists": true,
+        "size": 189552,
+        "pass": true
+      },
+      {
+        "file": "cases/nsclc_kras_g12c/wireframes/degraded.png",
+        "exists": true,
+        "size": 201478,
+        "pass": true
+      },
+      {
+        "file": "cases/nsclc_kras_g12c/wireframes/quarantined.png",
+        "exists": true,
+        "size": 204234,
+        "pass": true
+      },
+      {
+        "file": "case_router/wireframe.png",
+        "exists": true,
+        "size": 112012,
+        "pass": true
+      }
+    ]
+  }
+}

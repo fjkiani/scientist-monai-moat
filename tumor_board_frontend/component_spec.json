@@ -1,0 +1,323 @@
+{
+  "meta": {
+    "purpose": "Frontend component + state matrix. Wire routing/state per this spec. Every component MUST honor RUO + quarantine invariants.",
+    "contract_version": "1.0.0",
+    "invariants_frontend_MUST_honor": [
+      "RUO banner is always rendered at the root layout \u2014 never skeletonized, never hidden.",
+      "Every claim-bearing block carries `data-ruo=\"true\"` in the DOM.",
+      "Every therapy/trial view renders the Human Decision footer with the 4 remains_human items \u2014 non-dismissible.",
+      "Any string matching quarantine_test_harness.json MUST NOT be rendered in user-visible surfaces. Reject the payload before render.",
+      "example_data_ruo=true MUST show a visible EXAMPLE-DATA badge next to the receipt.",
+      "Degraded state (model_state=proxy_co_scientist or n_training=0) MUST render the yellow 'template / rules-lite' chip."
+    ],
+    "invariants_derived_from": "tumor_board_frontend/contract_snapshot.json"
+  },
+  "components": [
+    {
+      "id": "RuoBanner",
+      "renders_block": null,
+      "position": "root_layout_top",
+      "states_supported": [
+        "always"
+      ],
+      "props": {
+        "text": "string (from ruo_banner.text)",
+        "level": "root|block",
+        "evidence": "{entity_id, source_file}"
+      },
+      "data_attrs": {
+        "data-ruo": "true",
+        "role": "note"
+      },
+      "must_not_skeletonize": true
+    },
+    {
+      "id": "CaseHeader",
+      "renders_block": null,
+      "position": "root_layout",
+      "states_supported": [
+        "happy",
+        "loading"
+      ],
+      "props": {
+        "case_id": "string",
+        "cancer_type": "string",
+        "primary_alteration": "string"
+      },
+      "data_attrs": {
+        "data-example-data": "true"
+      }
+    },
+    {
+      "id": "MolecularContext",
+      "renders_block": "molecular_context",
+      "position": "column_left_top",
+      "states_supported": [
+        "happy",
+        "empty",
+        "loading",
+        "degraded",
+        "quarantined"
+      ],
+      "props": {
+        "normalized_profile": "object",
+        "example_data_ruo": "bool",
+        "evidence": "object"
+      },
+      "empty_copy": "No molecular input provided. This block is not applicable for this run.",
+      "degraded_chip": "Parsed by ClinicalBERT proxy \u2014 verify against source report.",
+      "data_attrs": {
+        "data-ruo": "true",
+        "data-block": "molecular_context"
+      }
+    },
+    {
+      "id": "MechanismHypotheses",
+      "renders_block": "mechanism_hypotheses",
+      "position": "column_center_top",
+      "states_supported": [
+        "happy",
+        "empty",
+        "loading",
+        "degraded",
+        "quarantined"
+      ],
+      "props": {
+        "ranked": "array<{rank, hypothesis, confidence, elo_rating, evidence}>",
+        "ranking_model": "object",
+        "example_data_ruo": "bool",
+        "evidence": "object"
+      },
+      "empty_copy": "No hypotheses generated (empty input or generator returned empty set).",
+      "degraded_chip": "Template arbiter (n_training=0). Rank order is illustrative.",
+      "data_attrs": {
+        "data-ruo": "true",
+        "data-block": "mechanism_hypotheses"
+      }
+    },
+    {
+      "id": "Vulnerabilities",
+      "renders_block": "vulnerabilities_synthetic_lethality",
+      "position": "column_center_middle",
+      "states_supported": [
+        "happy",
+        "empty",
+        "loading",
+        "degraded",
+        "quarantined"
+      ],
+      "props": {
+        "candidates": "array<{axis, tier, n_positive_modalities, modalities, notes, evidence}>",
+        "example_data_ruo": "bool",
+        "evidence": "object"
+      },
+      "empty_copy": "No candidate dependency axes returned.",
+      "degraded_chip": "Population-level candidate only. Not patient-specific.",
+      "must_render_tag": "Candidate dependency axis (population). Not a proven patient-specific vulnerability.",
+      "data_attrs": {
+        "data-ruo": "true",
+        "data-block": "vulnerabilities_synthetic_lethality"
+      }
+    },
+    {
+      "id": "TherapyTrialExploration",
+      "renders_block": "therapy_trial_exploration",
+      "position": "column_center_bottom",
+      "states_supported": [
+        "happy",
+        "empty",
+        "loading",
+        "degraded",
+        "quarantined"
+      ],
+      "props": {
+        "agents_to_investigate": "array",
+        "trials_to_explore": "array",
+        "human_decision_required": "bool",
+        "example_data_ruo": "bool",
+        "evidence": "object"
+      },
+      "empty_copy": "No mechanism-aligned therapy/trial options to surface.",
+      "degraded_chip": "Exploration only \u2014 not a treatment directive. Rank order is illustrative.",
+      "must_render_footer": "HumanDecisionFooter (required, non-dismissible).",
+      "must_render_tag": "Exploration only. Not a treatment directive or responder / enrollment prediction.",
+      "data_attrs": {
+        "data-ruo": "true",
+        "data-block": "therapy_trial_exploration",
+        "data-human-decision-required": "true"
+      }
+    },
+    {
+      "id": "EvidenceTrace",
+      "renders_block": "evidence_trace",
+      "position": "column_right_top",
+      "states_supported": [
+        "happy",
+        "empty",
+        "loading",
+        "degraded",
+        "quarantined"
+      ],
+      "props": {
+        "receipts": "array<{claim, entity_id, source_file}>",
+        "evidence": "object"
+      },
+      "expandable": true,
+      "empty_copy": "No receipts available. Block cannot be verified.",
+      "data_attrs": {
+        "data-ruo": "true",
+        "data-block": "evidence_trace"
+      }
+    },
+    {
+      "id": "SafetyGovernanceFlags",
+      "renders_block": "safety_governance_flags",
+      "position": "column_right_middle",
+      "states_supported": [
+        "happy",
+        "empty",
+        "loading",
+        "degraded",
+        "quarantined"
+      ],
+      "props": {
+        "flags": "array<{flag, status, note}>",
+        "quarantines_active": "array<string>",
+        "evidence": "object"
+      },
+      "empty_copy": "No governance flags \u2014 verify by reviewing model card.",
+      "quarantined_chip": "Claim suppressed per contract.prohibited_in_output.",
+      "data_attrs": {
+        "data-ruo": "true",
+        "data-block": "safety_governance_flags"
+      }
+    },
+    {
+      "id": "MissingDataAndConfidence",
+      "renders_block": "missing_data_and_confidence",
+      "position": "column_right_bottom",
+      "states_supported": [
+        "happy",
+        "empty",
+        "loading",
+        "degraded",
+        "quarantined"
+      ],
+      "props": {
+        "unknown": "array<string>",
+        "confidence_by_block": "object",
+        "evidence": "object"
+      },
+      "empty_copy": "No missing-data list provided.",
+      "data_attrs": {
+        "data-ruo": "true",
+        "data-block": "missing_data_and_confidence"
+      }
+    },
+    {
+      "id": "HumanDecisionFooter",
+      "renders_block": null,
+      "position": "root_layout_bottom",
+      "states_supported": [
+        "always"
+      ],
+      "props": {
+        "text": "string",
+        "remains_human": "array<string> (length=4)",
+        "evidence": "object"
+      },
+      "must_render_all_items": true,
+      "dismissible": false,
+      "data_attrs": {
+        "data-ruo": "true",
+        "role": "contentinfo"
+      }
+    }
+  ],
+  "state_semantics": {
+    "happy": {
+      "description": "Fully populated. RUO tags visible. EvidenceTrace collapsed by default."
+    },
+    "empty": {
+      "description": "molecular_profile provided but no optional inputs. Related blocks render 'not applicable' copy."
+    },
+    "loading": {
+      "description": "Skeleton rows for list blocks. RuoBanner + HumanDecisionFooter NEVER skeletonized."
+    },
+    "degraded": {
+      "description": "Proxy model fired (model_state=proxy_co_scientist or n_training=0). Yellow inline chip on affected block."
+    },
+    "quarantined": {
+      "description": "A specific claim was blocked. Red chip on affected block referring to SafetyGovernanceFlags."
+    }
+  },
+  "state_matrix": {
+    "MolecularContext": [
+      "happy",
+      "empty",
+      "loading",
+      "degraded",
+      "quarantined"
+    ],
+    "MechanismHypotheses": [
+      "happy",
+      "empty",
+      "loading",
+      "degraded",
+      "quarantined"
+    ],
+    "Vulnerabilities": [
+      "happy",
+      "empty",
+      "loading",
+      "degraded",
+      "quarantined"
+    ],
+    "TherapyTrialExploration": [
+      "happy",
+      "empty",
+      "loading",
+      "degraded",
+      "quarantined"
+    ],
+    "EvidenceTrace": [
+      "happy",
+      "empty",
+      "loading",
+      "degraded",
+      "quarantined"
+    ],
+    "SafetyGovernanceFlags": [
+      "happy",
+      "empty",
+      "loading",
+      "degraded",
+      "quarantined"
+    ],
+    "MissingDataAndConfidence": [
+      "happy",
+      "empty",
+      "loading",
+      "degraded",
+      "quarantined"
+    ]
+  },
+  "layout_grid": {
+    "columns": 3,
+    "layout_notes": [
+      "3-column desktop grid. Collapses to 1-column on <=900px.",
+      "column_left: MolecularContext (full column).",
+      "column_center: MechanismHypotheses (top) \u2192 Vulnerabilities (middle) \u2192 TherapyTrialExploration (bottom).",
+      "column_right: EvidenceTrace (top) \u2192 SafetyGovernanceFlags (middle) \u2192 MissingDataAndConfidence (bottom).",
+      "RuoBanner spans full width top; HumanDecisionFooter spans full width bottom."
+    ]
+  },
+  "css_hooks": {
+    "ruo_chip": ".tb-chip.tb-chip--ruo { background:#000000; color:#FAF9F3; }",
+    "degraded_chip": ".tb-chip.tb-chip--degraded { background:#E9ED4C; color:#000; }",
+    "quarantined_chip": ".tb-chip.tb-chip--quarantined { background:#FF9400; color:#000; }",
+    "example_badge": ".tb-badge--example { background:#ECE9E2; color:#000; }",
+    "font_stack": "\"Liberation Sans\", \"Arimo\", \"DejaVu Sans\", sans-serif",
+    "palette": "#000000 (RUO), #ECE9E2 (bg-lite), #FAF9F3 (bg), #E9ED4C (warn), #FF9400 (block), #75A025 (ok), #FD9BED (accent-alt), #0279EE (link)"
+  }
+}
