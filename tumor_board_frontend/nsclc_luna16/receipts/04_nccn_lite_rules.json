@@ -1,0 +1,40 @@
+{
+  "model_state": "proxy_rules_lite",
+  "rules_source": "NCCN NSCL v5.2026 + Fleischner 2017 Table 1",
+  "warnings_verbatim": [
+    "This NSCLC recommendation is from a rules-lite lookup keyed on the lung heuristic's diameter bucket, NOT from a trained ML model or a live TxGemma agent. It does NOT reason about histology, PD-L1 status, actionable driver mutations, staging beyond a diameter proxy, comorbidities, prior therapy, tumor-board consensus, or trial enrollment. It MUST NOT be used for treatment decisions. Real clinical use requires a thoracic oncologist and a full NCCN + Fleischner consultation.",
+    "detector=monai/lung_nodule_ct_detection@0.6.9; trained on LUNA16 fold 0 (LIDC-IDRI subset, single-site chest CT). Not validated on screening CT, contrast CT, or pediatric CT. Nodule size range 3-30 mm. Detections are RESEARCH USE ONLY and require radiologist review."
+  ],
+  "recommended_options": [
+    {
+      "name": "PET/CT for staging",
+      "category": "imaging",
+      "nccn_section": "NCCN NSCL v5.2026 LUNG-1",
+      "rationale": "Solid nodule \u22658 mm: NCCN LUNG-1 recommends PET/CT for staging and detection of distant metastases.",
+      "citation_url": "https://www.nccn.org/professionals/physician_gls/pdf/nscl.pdf"
+    },
+    {
+      "name": "CT-guided biopsy or bronchoscopy for tissue diagnosis",
+      "category": "diagnostic",
+      "nccn_section": "NCCN NSCL v5.2026 LUNG-2",
+      "rationale": "NCCN LUNG-2 requires tissue diagnosis (biopsy or bronchoscopy) for nodules \u22658 mm before therapy selection.",
+      "citation_url": "https://www.nccn.org/professionals/physician_gls/pdf/nscl.pdf"
+    },
+    {
+      "name": "Multidisciplinary tumor board review",
+      "category": "coordination",
+      "nccn_section": "NCCN NSCL v5.2026 Principles Section",
+      "rationale": "NCCN NSCL guidelines emphasize multidisciplinary review for all suspected lung malignancies.",
+      "citation_url": "https://www.nccn.org/professionals/physician_gls/pdf/nscl.pdf"
+    }
+  ],
+  "not_recommended": [
+    {
+      "name": "Surveillance only",
+      "category": "surveillance",
+      "nccn_section": "Fleischner 2017 Table 1",
+      "rationale": "Nodules \u22658 mm require workup, not surveillance alone, per Fleischner 2017 Table 1.",
+      "citation_url": "https://doi.org/10.1148/radiol.2017161659"
+    }
+  ]
+}

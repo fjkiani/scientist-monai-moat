@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AK MBD4-LOF — manuscript-anchored bundle ingestion + audit | Oncology Arbiter</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root{
+    --ink:#0b1220; --paper:#faf9f3; --ecru:#ece9e2; --accent:#0279ee;
+    --amber:#e0a800; --amber-bg:#fff7d6;
+    --green:#75a025; --green-bg:#e5f2cf;
+    --grey:#6b7280; --grey-bg:#e5e7eb;
+    --danger:#c0392b; --danger-bg:#f8d7d5;
+    --code:'Menlo','Consolas','Liberation Mono',monospace;
+  }
+  html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);
+    font-family:'Liberation Sans','Arimo','DejaVu Sans',sans-serif;line-height:1.5}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code,kbd,pre{font-family:var(--code);font-size:0.92em}
+  main{max-width:1180px;margin:0 auto;padding:0 24px 96px}
+  .ruo-strip{background:#000;color:#ECE9E2;font-size:0.85rem;letter-spacing:0.03em;
+    padding:8px 24px;text-align:center;position:sticky;top:0;z-index:50}
+  .ruo-strip strong{color:#E9ED4C}
+
+  header.title{padding:26px 0 12px;border-bottom:1px solid var(--ecru)}
+  header.title .crumbs{color:var(--grey);font-size:0.86rem;margin-bottom:6px}
+  header.title h1{margin:0;font-size:1.8rem;font-weight:700}
+  header.title .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;align-items:center}
+
+  /* Mandatory disclosure — MUST be visible, first-view, non-collapsed */
+  .disclosure{border:2px solid var(--ink);background:#fffbe6;border-radius:10px;
+    padding:16px 20px;margin:18px 0}
+  .disclosure h2{margin:0 0 6px;font-size:1.05rem;letter-spacing:0.02em}
+  .disclosure p{margin:6px 0 0;font-size:0.95rem;color:#2b2f3a}
+  .disclosure .flag{background:var(--ink);color:var(--paper);padding:2px 8px;
+    border-radius:4px;font-size:0.78rem;font-weight:700;letter-spacing:0.03em}
+
+  .chip{display:inline-block;padding:2px 10px;border-radius:999px;font-size:0.78rem;
+    font-weight:600;letter-spacing:0.02em;border:1px solid transparent}
+  .chip.green{background:var(--green-bg);color:#3d5b12;border-color:var(--green)}
+  .chip.amber{background:var(--amber-bg);color:#7a5900;border-color:var(--amber)}
+  .chip.grey {background:var(--grey-bg);color:#374151;border-color:var(--grey)}
+  .chip.danger{background:var(--danger-bg);color:#7a1e14;border-color:var(--danger)}
+  .badge{background:#e0eaff;color:#123c8a;border:1px solid var(--accent);
+    padding:2px 6px;border-radius:4px;font-size:0.76rem}
+
+  section.card{border:1px solid var(--ecru);border-radius:10px;background:#fff;
+    padding:18px 22px;margin:16px 0;box-shadow:0 1px 0 rgba(0,0,0,0.02)}
+  section.card h2{margin:0 0 6px;font-size:1.15rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  section.card p{margin:6px 0 8px;color:#3a4152;font-size:0.94rem}
+  .kv{display:grid;grid-template-columns:230px 1fr;gap:4px 16px;margin:8px 0;font-size:0.92rem}
+  .kv dt{color:var(--grey)}
+  .kv dd{margin:0;font-family:var(--code);overflow-wrap:anywhere}
+  table{width:100%;border-collapse:collapse;margin-top:8px;font-size:0.92rem}
+  th,td{border-bottom:1px solid var(--ecru);padding:6px 8px;text-align:left;vertical-align:top}
+  th{background:var(--ecru);font-weight:600}
+  td.num{font-family:var(--code);white-space:nowrap}
+  td.small{font-size:0.85rem;color:#3a4152}
+
+  /* Falsification is first-class, styled prominently */
+  .falsified{border:2px solid var(--danger);background:#fff5f3;border-radius:8px;
+    padding:14px 16px;margin:12px 0}
+  .falsified h3{margin:0 0 6px;color:var(--danger);font-size:1rem;letter-spacing:0.02em}
+  .falsified em{color:var(--danger);font-style:normal;font-weight:600}
+  .honesty{background:#f4f4f4;border:1px dashed var(--grey);
+    padding:10px 12px;margin:10px 0;font-size:0.9rem}
+
+  details{border:1px solid var(--ecru);border-radius:6px;padding:8px 12px;margin-top:10px}
+  details summary{cursor:pointer;font-weight:600;font-size:0.9rem;color:#3a4152}
+  details pre{background:#f7f7f2;padding:10px;border-radius:4px;overflow:auto;max-height:340px}
+
+  footer.human-decision{background:var(--ink);color:var(--paper);padding:22px 26px;
+    border-radius:10px;margin-top:26px}
+  footer.human-decision h3{margin:0 0 8px;font-size:1rem;letter-spacing:0.02em}
+  footer.human-decision ul{margin:0;padding-left:20px}
+  footer.human-decision li{margin:4px 0}
+</style>
+</head>
+<body data-case="ak_mbd4_lof" data-ruo="true">
+
+<div class="ruo-strip">
+  <strong>RESEARCH USE ONLY</strong> · Not FDA-cleared · Live API mock over
+  <code>oncology-arbiter@0.3.0-alpha</code> · Not for clinical decisions
+</div>
+
+<main>
+
+<header class="title">
+  <div class="crumbs">Tumor board · <strong>AK MBD4-LOF</strong> — manuscript-anchored bundle ingestion + audit</div>
+  <h1>MBD4 loss-of-function tumor — validated audit trail over the manuscript bundle</h1>
+  <div class="row">
+    <span class="chip green">loaded_ak_bundle</span>
+    <span class="chip green">loaded_manuscript_receipt</span>
+    <span class="chip green">loaded_mbd4_evidence_matrix</span>
+    <span class="chip amber">proxy_co_scientist (audit-sort only)</span>
+  </div>
+</header>
+
+<!-- ============= MANDATORY DISCLOSURE (top-of-page) ============= -->
+<div class="disclosure" data-ruo="true" data-role="mandatory-disclosure">
+  <h2><span class="flag">CONTRIBUTION BOUNDARY</span> manuscript-anchored, arbiter validates+audits+surfaces</h2>
+  <p>
+    All p-values, effect sizes, n_mut / n_wt counts, and the PARP falsification result on this page
+    come from the SHA-locked <code>crispro-backend-v2 @ bfd6d11f…</code> bundle, keyed to
+    manuscript repo SHA <code>d33f6403…</code>. <strong>The arbiter did NOT generate them.</strong>
+  </p>
+  <p>
+    On this case the <strong>arbiter contributes contract validation</strong> against the
+    <code>TumorBoardBundle</code> pydantic schema, a URL honesty gate that strips
+    non-<code>seed_urls</code> references from any co-scientist reflect pass, the
+    <code>bundle_sha256</code> audit-of-record echoed back on
+    <code>POST /v1/tumor_board/bundle</code>, and the deterministic Elo audit sort with
+    the manuscript-derived weights surfaced as labeled modifiers. MONAI, MedSigLIP, TxGemma,
+    ClinicalBERT, and the CBIS-DDSM logreg were <em>not</em> invoked on this case — different
+    modality. Nothing here was discovered by the arbiter. Everything here is verifiable.
+  </p>
+</div>
+
+<!-- ============= Contract invariants ============= -->
+<section class="card" data-ruo="true" data-block="contract">
+  <h2>Contract invariants &nbsp;<span class="chip green">loaded_ak_bundle</span></h2>
+  <p>Pinned to the bundle payload; every field below is re-verifiable against the linked SHAs.</p>
+  <dl class="kv">
+    <dt>contract_version</dt><dd>tumor_board.v3.multimodal-with-manuscript-claims</dd>
+    <dt>patient_id</dt><dd>MBD4-LOF-DEMO-01</dd>
+    <dt>generated_at</dt><dd>2026-06-17T18:19:46+00:00</dd>
+    <dt>manuscript_repo_sha_at_audit</dt><dd><a href="https://github.com/fjkiani/crispro/tree/d33f6403fb11b314c86fa74d9c56e07b7ac3d7b1" target="_blank" rel="noopener">d33f6403fb11b314c86fa74d9c56e07b7ac3d7b1</a></dd>
+    <dt>backend_head_sha</dt><dd><a href="https://github.com/fjkiani/crispro-backend-v2/tree/bfd6d11fc872c11a13365b0682cea776a136c7f3" target="_blank" rel="noopener">bfd6d11fc872c11a13365b0682cea776a136c7f3</a></dd>
+    <dt>backend_branch</dt><dd>fix/mbd4-atr-strong-tier</dd>
+    <dt>audit artifact</dt><dd>tumor_board_evidence_chain.json (canonical_atr_wee1_rerun.json)</dd>
+  </dl>
+</section>
+
+<!-- ============= Arbiter audit receipt ============= -->
+<section class="card" data-ruo="true" data-block="audit-receipt">
+  <h2>Arbiter audit receipt &nbsp;<span class="chip green">loaded_ak_bundle</span></h2>
+  <p>Issued by <code>POST /v1/tumor_board/bundle</code> after contract validation and canonical hashing.</p>
+  <dl class="kv">
+    <dt>endpoint</dt><dd>POST /v1/tumor_board/bundle</dd>
+    <dt>model_state</dt><dd>loaded_ak_bundle</dd>
+    <dt>request_id</dt><dd>42a80e12fec94e0fadc5d9d6c3d0e360</dd>
+    <dt>bundle_sha256 (API echo)</dt>
+    <dd style="font-size:0.82rem;overflow-wrap:anywhere">0121fc84fc798af57aad78f2c9274506eac769313d4b21329ad9e3775c5b3a4c</dd>
+    <dt>contract check</dt><dd>PASSED (6 evidence axes, ATR/WEE1 auxiliary_evidence: 4 stress_test + 1 axis_partner + 1 falsification_arm)</dd>
+  </dl>
+  <div class="honesty">
+    <strong>What the arbiter did NOT do on this case:</strong>
+    (a) run drug screens (came from GDSC2 / DepMap 24Q2 upstream);
+    (b) compute p-values or effect sizes (Mann-Whitney U + Cohen's d were computed
+    offline in crispro-backend-v2 @ bfd6d11f);
+    (c) falsify the PARP hypothesis (that was the manuscript's own falsification arm);
+    (d) invoke MONAI / MedSigLIP / TxGemma / ClinicalBERT / CBIS-DDSM logreg.
+  </div>
+</section>
+
+<!-- ============= Manuscript provenance ============= -->
+<section class="card" data-ruo="true" data-block="manuscript-provenance">
+  <h2>Manuscript provenance &nbsp;<span class="chip green">loaded_manuscript_receipt</span></h2>
+  <dl class="kv">
+    <dt>datasets used</dt><dd>GDSC2, DepMap 24Q2</dd>
+    <dt>statistical test</dt><dd>Mann-Whitney U one-sided (alternative=less)</dd>
+    <dt>effect size metric</dt><dd>Cohen's d (pooled)</dd>
+    <dt>primary stratifier</dt><dd>MBD4_LOF_vs_WT</dd>
+    <dt>primary metric</dt><dd>ln(IC50)</dd>
+  </dl>
+  <div class="honesty">
+    <strong>One-sided hypothesis</strong> — the manuscript pre-registered that MBD4-LOF lines
+    are MORE sensitive (lower IC50) to ATR inhibition, not simply different. This is important
+    for interpreting the p-values below.
+  </div>
+</section>
+
+<!-- ============= PARP falsification — FIRST CLASS ============= -->
+<section class="card" data-ruo="true" data-block="parp-falsification">
+  <h2>PARP hypothesis — falsified &nbsp;<span class="chip green">loaded_manuscript_receipt</span></h2>
+  <div class="falsified">
+    <h3>Mechanism falsified</h3>
+    <p style="margin:0">
+      PARP inhibitors (olaparib, talazoparib) are <em>NOT recommended</em> for MBD4-LOF tumors
+      on a transcriptional-upregulation basis. Competing hypothesis — MBD4-LOF benefits from PARPi
+      via PARP1 transcriptional upregulation — <em>falsified</em>: PARP1 expression in MBD4-LOF
+      NOT elevated vs comparator (n=19 vs 1498, p=0.605). Recommended axis is ATR/WEE1
+      inhibition (lead: ceralasertib).
+    </p>
+    <dl class="kv" style="margin-top:10px">
+      <dt>test</dt><dd>PARP1 expression, LOF vs comparator</dd>
+      <dt>n_mut / n_wt</dt><dd>19 / 1498</dd>
+      <dt>p-value</dt><dd>0.6047878879741422</dd>
+      <dt>direction</dt><dd>NOT elevated → hypothesis falsified</dd>
+    </dl>
+  </div>
+</section>
+
+<!-- ============= 6-axis evidence matrix ============= -->
+<section class="card" data-ruo="true" data-block="evidence-matrix">
+  <h2>6-axis evidence matrix &nbsp;<span class="chip green">loaded_mbd4_evidence_matrix</span></h2>
+  <p>All 6 rows shown as first-class. Empty cells labeled <code>missing</code>, never erased.
+     PARP row lives alongside ATR/WEE1 — no hidden pane. The failing-claim strings enforced by
+     <code>quarantine_test_harness.json</code> are the ones that must never render anywhere on the deliverable.</p>
+  <table>
+    <thead>
+      <tr>
+        <th>axis</th><th>tier</th><th>manuscript claim</th>
+        <th>CRISPR</th><th>expression</th><th>PRISM</th><th>GDSC2</th>
+        <th>in vitro</th><th>in vivo</th><th>clinical</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>cytidine_analogs</td><td>Validated SL therapeutic lever</td><td class="small">validated_benchmark</td>
+          <td class="small">missing</td><td class="small">positive</td><td class="small">missing</td>
+          <td class="small">positive</td><td class="small">supportive</td><td class="small">supportive</td><td class="small">clinical guideline present</td></tr>
+      <tr><td>parp_inhibitors</td><td>Mechanistic candidate only</td><td class="small">falsified_competing_hypothesis</td>
+          <td class="small">missing</td><td class="small">null</td><td class="small">missing</td>
+          <td class="small">null</td><td class="small">supportive_confounded</td><td class="small">supportive_confounded</td><td class="small">supportive_confounded</td></tr>
+      <tr style="background:#e5f2cf"><td>atr_wee1</td><td>Strong candidate dependency axis (LEAD)</td><td class="small">primary_new_candidate_axis</td>
+          <td class="small">missing</td><td class="small">positive</td><td class="small">missing</td>
+          <td class="num"><strong>p=0.0215</strong></td>
+          <td class="small">mechanistic</td><td class="small">missing</td><td class="small">missing</td></tr>
+      <tr><td>wrn</td><td>Emerging axis</td><td class="small">supporting_secondary</td>
+          <td class="small">missing</td><td class="small">positive</td><td class="small">missing</td>
+          <td class="small">null</td><td class="small">mechanistic</td><td class="small">missing</td><td class="small">missing</td></tr>
+      <tr><td>immunotherapy</td><td>Contextual axis</td><td class="small">context_specific</td>
+          <td class="small">missing</td><td class="small">missing</td><td class="small">missing</td>
+          <td class="small">missing</td><td class="small">missing</td><td class="small">missing</td><td class="small">missing</td></tr>
+      <tr><td>pkmyt1</td><td>Emerging axis</td><td class="small">supporting_secondary</td>
+          <td class="small">missing</td><td class="small">missing</td><td class="small">missing</td>
+          <td class="small">null</td><td class="small">mechanistic</td><td class="small">missing</td><td class="small">missing</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:10px;color:var(--grey);font-size:0.86rem">Full row payloads at
+     <code>receipts/02_evidence_matrix_6axes.json</code>.</p>
+</section>
+
+<!-- ============= Anchor p-values ============= -->
+<section class="card" data-ruo="true" data-block="anchor-pvalues">
+  <h2>Anchor p-values (verbatim manuscript receipts) &nbsp;<span class="chip green">loaded_manuscript_receipt</span></h2>
+  <p>All 7 anchors from the atr_wee1 evidence chain — primary + 4 stress tests + 1 axis partner + 1 falsification arm.</p>
+  <table>
+    <thead><tr><th>#</th><th>modality</th><th>stratifier</th><th>n_mut</th><th>n_wt</th><th>p-value</th><th>Cohen's d</th><th>Δ ln(IC50)</th><th>dataset</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>gdsc_pharmacologic (primary)</td><td>MBD4_LOF_vs_WT</td>
+          <td class="num">14</td><td class="num">914</td>
+          <td class="num">0.021484496737088882</td>
+          <td class="num">-0.5032867186922607</td>
+          <td class="num">-0.7324529879649893</td>
+          <td>GDSC2</td></tr>
+      <tr><td>2</td><td>stress_test #1 (MSI purge)</td><td>MSI_purge</td>
+          <td class="num">10</td><td class="num">906</td>
+          <td class="num">0.015328932966132268</td>
+          <td class="num">-0.6227047947387747</td>
+          <td class="num">-0.9095277046357615</td>
+          <td>GDSC2</td></tr>
+      <tr><td>3</td><td>stress_test #2 (TP53 stratification)</td><td>TP53_mutant_only</td>
+          <td class="num">11</td><td class="num">619</td>
+          <td class="num">0.003002668797799231</td>
+          <td class="num">-0.7404782024497254</td>
+          <td class="num">-1.0692019443383756</td>
+          <td>GDSC2</td></tr>
+      <tr><td>4</td><td>stress_test #3 (leave-one-out)</td><td>leave_one_out_LOF</td>
+          <td class="num">13</td><td class="num">914</td>
+          <td class="num">0.045165724128583974</td>
+          <td class="num">—</td>
+          <td class="num">—</td>
+          <td>GDSC2</td></tr>
+      <tr><td>5</td><td>stress_test #4 (non-bowel lineage)</td><td>non_bowel_lineage</td>
+          <td class="num">9</td><td class="num">873</td>
+          <td class="num">0.02533035508952329</td>
+          <td class="num">-0.5988100454283156</td>
+          <td class="num">-0.8706814558991984</td>
+          <td>GDSC2</td></tr>
+      <tr><td>6</td><td>axis_partner (adavosertib WEE1i)</td><td>MBD4_LOF_vs_WT</td>
+          <td class="num">15</td><td class="num">920</td>
+          <td class="num">0.07445705343975263</td>
+          <td class="num">-0.3594348912682576</td>
+          <td class="num">-0.5080370851449276</td>
+          <td>GDSC2</td></tr>
+      <tr style="background:var(--danger-bg)"><td>7</td><td>falsification_arm (PARP1 expression)</td><td>PARP1_expression_LOF_vs_comparator</td>
+          <td class="num">19</td><td class="num">1498</td>
+          <td class="num">0.6047878879741422</td>
+          <td class="num">—</td>
+          <td class="num">—</td>
+          <td>—</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============= Recommended drugs ============= -->
+<section class="card" data-ruo="true" data-block="recommended-drugs">
+  <h2>Recommended drugs (manuscript surface) &nbsp;<span class="chip green">loaded_manuscript_receipt</span></h2>
+  <table>
+    <thead><tr><th>drug</th><th>target</th><th>axis</th><th>tier</th><th>surface status</th></tr></thead>
+    <tbody>
+      <tr><td>cytarabine</td><td>DNA-pol α (Ara-CTP)</td><td>cytidine_analogs</td>
+          <td>Validated SL therapeutic lever</td><td><span class="chip green">RECOMMENDED</span></td></tr>
+      <tr><td>decitabine</td><td>DNMT1</td><td>cytidine_analogs</td>
+          <td>Validated SL therapeutic lever</td><td><span class="chip green">RECOMMENDED</span></td></tr>
+      <tr><td>adavosertib</td><td>WEE1</td><td>atr_wee1</td>
+          <td>Strong candidate dependency axis</td><td><span class="chip green">RECOMMENDED</span></td></tr>
+      <tr><td>berzosertib</td><td>ATR</td><td>atr_wee1</td>
+          <td>Strong candidate dependency axis</td><td><span class="chip green">RECOMMENDED</span></td></tr>
+      <tr style="background:#f0f9dd"><td>ceralasertib <em style="color:var(--green);font-style:normal">(LEAD per manuscript)</em></td><td>ATR</td><td>atr_wee1</td>
+          <td>Strong candidate dependency axis</td><td><span class="chip green">RECOMMENDED</span></td></tr>
+      <tr style="background:var(--danger-bg)"><td>olaparib</td><td>PARP1</td><td>parp_inhibitors</td>
+          <td>Mechanistic candidate only (falsified)</td>
+          <td><span class="chip danger">NOT_RECOMMENDED_ON_THIS_MECHANISM</span></td></tr>
+      <tr style="background:var(--danger-bg)"><td>talazoparib</td><td>PARP1</td><td>parp_inhibitors</td>
+          <td>Mechanistic candidate only (falsified)</td>
+          <td><span class="chip danger">NOT_RECOMMENDED_ON_THIS_MECHANISM</span></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============= Elo audit sort ============= -->
+<section class="card" data-ruo="true" data-block="elo-audit-sort">
+  <h2>Elo audit sort &nbsp;<span class="chip amber">proxy_co_scientist</span></h2>
+  <p>Deterministic (<code>seed=20260619</code>, <code>k_factor=16</code>) audit sort over the 7
+     manuscript-surfaced drugs. Modifiers are visible, <em>labeled</em> manuscript weights — NOT
+     hidden priors. This is the ONLY block on this page that carries a proxy chip.</p>
+  <table>
+    <thead><tr><th>rank</th><th>drug_id</th><th>baseline rating</th><th>enriched rating</th>
+      <th>Δ rank</th><th>modifier</th><th>reason (per-drug)</th></tr></thead>
+    <tbody>
+      <tr style="background:#e5f2cf"><td>1</td><td>ceralasertib_atr_wee1</td>
+          <td class="num">1515.1</td><td class="num">1545.6</td>
+          <td class="num" style="color:var(--green);font-weight:700">↑ +2</td>
+          <td class="num">+0.20</td><td>CAPRI ATR/PARP posture (+0.20)</td></tr>
+      <tr><td>2</td><td>adavosertib_atr_wee1</td>
+          <td class="num">1545.2</td><td class="num">1529.5</td>
+          <td class="num">↓ -1</td>
+          <td class="num">+0.10</td><td>manual boost (+0.10)</td></tr>
+      <tr><td>3</td><td>berzosertib_atr_wee1</td>
+          <td class="num">1530.1</td><td class="num">1514.8</td>
+          <td class="num">↓ -1</td>
+          <td class="num">+0.05</td><td>manual boost (+0.05)</td></tr>
+      <tr><td>4</td><td>cytarabine_cytidine_analogs</td>
+          <td class="num">1499.6</td><td class="num">1500.3</td>
+          <td class="num">+0</td>
+          <td class="num">0.00</td><td>no modifier</td></tr>
+      <tr><td>5</td><td>decitabine_cytidine_analogs</td>
+          <td class="num">1485.4</td><td class="num">1485.1</td>
+          <td class="num">+0</td>
+          <td class="num">0.00</td><td>no modifier</td></tr>
+      <tr style="background:var(--danger-bg)"><td>6</td><td>olaparib_parp_inhibitors</td>
+          <td class="num">1470.2</td><td class="num">1470.5</td>
+          <td class="num">+0</td>
+          <td class="num">-0.30</td><td>manual penalty (-0.30)</td></tr>
+      <tr style="background:var(--danger-bg)"><td>7</td><td>talazoparib_parp_inhibitors</td>
+          <td class="num">1454.5</td><td class="num">1454.1</td>
+          <td class="num">+0</td>
+          <td class="num">-0.30</td><td>manual penalty (-0.30)</td></tr>
+    </tbody>
+  </table>
+  <div class="honesty">
+    Ceralasertib rises from baseline #3 to enriched #1 under the labeled
+    <code>manuscript_lead_axis_boost (+0.20)</code>. The arbiter also independently
+    recognized the axis by name — the reason string returned by the API is
+    <code>CAPRI ATR/PARP posture (+0.20)</code>. Everything above is verifiable
+    against the modifier map in
+    <code>e2e_run/ak_ingestion/03_elo_audit_sort_request.json</code>.
+  </div>
+</section>
+
+<!-- ============= Live audit trail ============= -->
+<section class="card" data-ruo="true" data-block="live-audit-trail">
+  <h2>Live audit trail · 3 real calls, all 2xx</h2>
+  <table>
+    <thead><tr><th>step</th><th>method</th><th>path</th><th>status</th><th>request_id</th><th>model_state</th></tr></thead>
+    <tbody>
+      <tr><td>01_get_sample</td><td>GET</td><td>/v1/demo/samples/ak_mbd4_lof_case</td><td>200</td>
+          <td class="num">—</td><td><span class="chip green">loaded_ak_bundle</span></td></tr>
+      <tr><td>02_validate_bundle</td><td>POST</td><td>/v1/tumor_board/bundle</td><td>200</td>
+          <td class="num">42a80e12…</td><td><span class="chip green">loaded_ak_bundle</span></td></tr>
+      <tr><td>03_elo_audit_sort</td><td>POST</td><td>/v1/elo/rank</td><td>200</td>
+          <td class="num">—</td><td><span class="chip amber">proxy_co_scientist</span></td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:12px;color:var(--grey);font-size:0.86rem">Full transcript at
+     <code>e2e_run/ak_ingestion/transcript.jsonl</code>. Extracted receipts at
+     <code>receipts/{00..99}_*.json</code>.</p>
+</section>
+
+<footer class="human-decision" data-ruo="true">
+  <h3>What remains a human decision</h3>
+  <ul>
+    <li><strong>Diagnosis</strong> — remains with the treating pathologist / medical oncologist.</li>
+    <li><strong>Treatment selection and prescribing</strong> — remains with the treating oncologist.</li>
+    <li><strong>Trial enrollment decision</strong> — remains with the trial PI + coordinator.</li>
+    <li><strong>Interpretation of RUO/heuristic outputs</strong> — remains with the reader; this system reports evidence and audit receipts, not orders.</li>
+  </ul>
+</footer>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,40 @@
+{
+  "bundle_id": "monai/lung_nodule_ct_detection",
+  "bundle_version": "0.6.9",
+  "bundle_license": "Apache-2.0",
+  "bundle_source": "https://monai.io/model-zoo.html",
+  "task": "3D lung-nodule detection (RetinaNet)",
+  "training_data_note": "LIDC-IDRI + trainer-provided negatives; nodules 3\u201330 mm.",
+  "reported_metrics": {
+    "mAP_IoU_0.10_0.50_step_0.05_MaxDet_100": 0.852,
+    "mAR": 0.998,
+    "source": "monai_bundles/lung_nodule_ct_detection/configs/metadata.json"
+  },
+  "preprocessing": {
+    "hu_clamp": [
+      -1024,
+      300
+    ],
+    "target_spacing_mm_zyx": [
+      1.25,
+      0.703,
+      0.703
+    ],
+    "roi_size": [
+      192,
+      192,
+      80
+    ],
+    "nms_thresh": 0.22,
+    "score_thresh": 0.02,
+    "note": "The 41.5-mm detection here is OUTSIDE the training-distribution size range (3\u201330 mm). The detector still spatially localizes the planted mass but reports low confidence (0.042). The lung heuristic's diameter measure is what drives the HIGH risk-bucket, not the RetinaNet score. Both are surfaced."
+  },
+  "invocation": {
+    "model_state": "loaded_luna16_retinanet",
+    "model_name": "monai/lung_nodule_ct_detection@0.6.9+nccn_nsclc_lite_v0",
+    "request_id": "8d0b5f865ba74feaa8930a30537a401f",
+    "inference_seconds": 6.368048667907715,
+    "n_detections": 1,
+    "top_score": 0.04246260225772858
+  }
+}

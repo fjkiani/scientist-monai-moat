@@ -1,0 +1,89 @@
+{
+  "drugs": [
+    {
+      "drug_id": "pet_ct_for_staging",
+      "regimen": "PET/CT for staging",
+      "line": 1,
+      "confidence": 0.75,
+      "evidence": [
+        {
+          "url": "https://www.nccn.org/professionals/physician_gls/pdf/nscl.pdf",
+          "quoted_text": "Solid nodule \u22658 mm: NCCN LUNG-1 recommends PET/CT for staging and detection of distant metastases.",
+          "source": "nccn"
+        }
+      ],
+      "honesty_markers": {
+        "proxy": true,
+        "gated": false,
+        "loaded": false
+      }
+    },
+    {
+      "drug_id": "ct-guided_biopsy_or_bronchoscopy_for_tissue_diagnosis",
+      "regimen": "CT-guided biopsy or bronchoscopy for tissue diagnosis",
+      "line": 1,
+      "confidence": 0.75,
+      "evidence": [
+        {
+          "url": "https://www.nccn.org/professionals/physician_gls/pdf/nscl.pdf",
+          "quoted_text": "NCCN LUNG-2 requires tissue diagnosis (biopsy or bronchoscopy) for nodules \u22658 mm before therapy selection.",
+          "source": "nccn"
+        }
+      ],
+      "honesty_markers": {
+        "proxy": true,
+        "gated": false,
+        "loaded": false
+      }
+    },
+    {
+      "drug_id": "multidisciplinary_tumor_board_review",
+      "regimen": "Multidisciplinary tumor board review",
+      "line": 1,
+      "confidence": 0.75,
+      "evidence": [
+        {
+          "url": "https://www.nccn.org/professionals/physician_gls/pdf/nscl.pdf",
+          "quoted_text": "NCCN NSCL guidelines emphasize multidisciplinary review for all suspected lung malignancies.",
+          "source": "nccn"
+        }
+      ],
+      "honesty_markers": {
+        "proxy": true,
+        "gated": false,
+        "loaded": false
+      }
+    },
+    {
+      "drug_id": "surveillance_only_notrec",
+      "regimen": "Surveillance only",
+      "line": 1,
+      "confidence": 0.2,
+      "evidence": [
+        {
+          "url": "https://doi.org/10.1148/radiol.2017161659",
+          "quoted_text": "Nodules \u22658 mm require workup, not surveillance alone, per Fleischner 2017 Table 1.",
+          "source": "nccn"
+        }
+      ],
+      "honesty_markers": {
+        "proxy": true,
+        "gated": false,
+        "loaded": false
+      }
+    }
+  ],
+  "modifiers": {
+    "ct-guided_biopsy_or_bronchoscopy_for_tissue_diagnosis": 0.15,
+    "pet_ct_for_staging": 0.1
+  },
+  "disease_context": {
+    "cancer": "nsclc",
+    "risk_bucket": "HIGH",
+    "max_diameter_mm": 26.84100686818948,
+    "driving_feature": "max_diameter_mm",
+    "risk_score": 0.9360819173831365
+  },
+  "k_factor": 16,
+  "seed": 20260619
+}

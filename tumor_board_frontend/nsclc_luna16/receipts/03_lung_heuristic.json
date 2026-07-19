@@ -1,0 +1,11 @@
+{
+  "model_state_before_upgrade": "proxy_lung_heuristic",
+  "risk_score": 0.9360819173831365,
+  "risk_bucket": "HIGH",
+  "logit": 2.6841006868189483,
+  "driving_feature": "max_diameter_mm",
+  "max_diameter_mm": 26.84100686818948,
+  "lung_voxel_fraction": 0.12710189819335938,
+  "n_candidates_considered": null,
+  "note": "Heuristic bucketing on Fleischner-inspired thresholds. NOT a trained ML classifier. Diameter > 30 mm \u2192 HIGH bucket \u2192 mass branch."
+}

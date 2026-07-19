@@ -1,0 +1,23 @@
+{
+  "case_id": "SYN-0001",
+  "n_calls": 3,
+  "all_2xx": true,
+  "monai_bundle": "monai/lung_nodule_ct_detection@0.6.9",
+  "monai_bundle_license": "Apache-2.0",
+  "monai_metrics_source": "monai_bundles/lung_nodule_ct_detection/configs/metadata.json",
+  "monai_mAP_reported": 0.852,
+  "monai_mAR_reported": 0.998,
+  "live_luna16_inference_seconds": 6.368048667907715,
+  "live_luna16_top_score": 0.04246260225772858,
+  "live_luna16_n_detections": 1,
+  "live_max_diameter_mm": 26.84100686818948,
+  "live_risk_bucket": "HIGH",
+  "live_risk_score": 0.9360819173831365,
+  "live_driving_feature": "max_diameter_mm",
+  "n_therapy_recommended": 3,
+  "n_therapy_not_recommended": 1,
+  "n_co_scientist_hypotheses": 8,
+  "co_scientist_urls_dropped": 0,
+  "co_scientist_hypotheses_dropped": 0,
+  "elo_seed": 20260619
+}

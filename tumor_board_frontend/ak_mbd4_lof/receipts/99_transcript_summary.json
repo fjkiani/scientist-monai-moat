@@ -1,0 +1,68 @@
+{
+  "case_id": "MBD4-LOF-DEMO-01",
+  "case_type": "ampullary_adenocarcinoma / HGSOC-like, MBD4-LOF biomarker",
+  "case_role": "demonstrates the arbiter ingesting a manuscript-anchored bundle, validating it, issuing an audit receipt, and surfacing labeled audit-sort",
+  "contribution_boundary": {
+    "manuscript_receipts": [
+      "6 anchor p-values",
+      "Cohen's d values",
+      "n_mut / n_wt counts",
+      "GDSC2 / DepMap 24Q2 datasets",
+      "PARP1 falsification result",
+      "Mann-Whitney U one-sided test choice"
+    ],
+    "arbiter_contribution": [
+      "TumorBoardBundle contract validation",
+      "Honesty gate: URLs not in seed_urls stripped from co-scientist reflect",
+      "bundle_sha256 API-echoed audit-of-record",
+      "Deterministic Elo audit sort (modifiers labeled, weights visible)"
+    ],
+    "not_invoked_on_this_case": [
+      "MONAI RetinaNet (radiology)",
+      "MedSigLIP-448 (pathology)",
+      "TxGemma-9B chat (therapy reasoning)",
+      "ClinicalBERT report parser",
+      "CBIS-DDSM logreg (mammography)"
+    ]
+  },
+  "n_calls": 3,
+  "all_2xx": true,
+  "calls": [
+    {
+      "step": "01_get_sample",
+      "method": "GET",
+      "path": "/v1/demo/samples/ak_mbd4_lof_case",
+      "status": 200,
+      "latency_s": 0.006615,
+      "size_bytes": 63498,
+      "request_id": null,
+      "model_state": null,
+      "model_name": null,
+      "saved_as": "01_sample.json"
+    },
+    {
+      "step": "02_validate_bundle",
+      "method": "POST",
+      "path": "/v1/tumor_board/bundle",
+      "status": 200,
+      "latency_s": 0.004692,
+      "size_bytes": 35905,
+      "request_id": "42a80e12fec94e0fadc5d9d6c3d0e360",
+      "model_state": "loaded_ak_bundle",
+      "model_name": "tumor_board_v3_multimodal",
+      "saved_as": "02_validate_bundle.json"
+    },
+    {
+      "step": "03_elo_audit_sort",
+      "method": "POST",
+      "path": "/v1/elo/rank",
+      "status": 200,
+      "latency_s": 0.003779,
+      "size_bytes": 9964,
+      "request_id": "41f44c7c4a44459e815c895603e9bd34",
+      "model_state": "proxy_co_scientist",
+      "model_name": "oa/co_scientist_elo@v0.3.0-alpha",
+      "saved_as": "03_elo_audit_sort.json"
+    }
+  ]
+}

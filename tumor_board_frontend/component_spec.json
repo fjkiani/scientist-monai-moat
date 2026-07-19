@@ -1,323 +1,220 @@
 {
   "meta": {
-    "purpose": "Frontend component + state matrix. Wire routing/state per this spec. Every component MUST honor RUO + quarantine invariants.",
-    "contract_version": "1.0.0",
-    "invariants_frontend_MUST_honor": [
-      "RUO banner is always rendered at the root layout \u2014 never skeletonized, never hidden.",
-      "Every claim-bearing block carries `data-ruo=\"true\"` in the DOM.",
-      "Every therapy/trial view renders the Human Decision footer with the 4 remains_human items \u2014 non-dismissible.",
-      "Any string matching quarantine_test_harness.json MUST NOT be rendered in user-visible surfaces. Reject the payload before render.",
-      "example_data_ruo=true MUST show a visible EXAMPLE-DATA badge next to the receipt.",
-      "Degraded state (model_state=proxy_co_scientist or n_training=0) MUST render the yellow 'template / rules-lite' chip."
+    "purpose": "Frontend component + state matrix for the tumor board deliverable. Two cases, biology-first hierarchy, honesty inline (not hidden behind a 'degraded' tab). Every component wires directly against the live pydantic schemas in src/oncology_arbiter/api/schemas.py — nothing invented.",
+    "contract_version": "2.0.0-two-case",
+    "generated_at": "2026-07-19",
+    "schemas_source_file": "src/oncology_arbiter/api/schemas.py",
+    "backend_head_at_spec": "e3185e1 (feat/tumor-board-frontend-spec)",
+    "cases_covered": [
+      {
+        "case_id": "nsclc_luna16",
+        "role": "reasoning_case",
+        "claim": "The arbiter reasons end-to-end from CT bytes to Elo tournament: L1 CT ingestion → L2 MONAI RetinaNet detection → L3 lung heuristic bucketing → L4 NCCN-lite rule lookup → L5 co-scientist + Elo audit sort. Every layer's model_state is real."
+      },
+      {
+        "case_id": "ak_mbd4_lof",
+        "role": "manuscript_anchored_ingestion_case",
+        "claim": "The arbiter is NOT the source of the p-values, effect sizes, or PARP falsification. Those live in the SHA-locked crispro-backend-v2 bundle. The arbiter contributes contract validation, bundle_sha256 audit-of-record, URL honesty gate, and Elo audit sort with visible manuscript-derived weights."
+      }
     ],
-    "invariants_derived_from": "tumor_board_frontend/contract_snapshot.json"
+    "invariants_frontend_MUST_honor": [
+      "RUO strip is always visible at the root — never skeletonized, never hidden.",
+      "Every claim-bearing block carries data-ruo=\"true\" and a model_state chip.",
+      "Every therapy view renders a non-dismissible Human Decision footer.",
+      "model_state chip color-coding is enforced: loaded_* = green, proxy_* = amber, template = grey.",
+      "For the AK case: no proxy_co_scientist chip on manuscript-anchored blocks. The only proxy chip on the AK page is on the Elo audit-sort panel.",
+      "For the NSCLC case: the LUNA16 low-confidence signal (top_score=0.042 on an out-of-distribution 41.5 mm mass) is surfaced inline — NOT hidden behind a 'debug' tab.",
+      "Zero fake NCT numbers. All ClinicalTrials.gov references are real live search URLs.",
+      "Zero placeholder text. Every rendered value comes from receipts/*.json."
+    ]
   },
-  "components": [
+
+  "shared_components": [
     {
-      "id": "RuoBanner",
-      "renders_block": null,
-      "position": "root_layout_top",
-      "states_supported": [
-        "always"
-      ],
-      "props": {
-        "text": "string (from ruo_banner.text)",
-        "level": "root|block",
-        "evidence": "{entity_id, source_file}"
-      },
-      "data_attrs": {
-        "data-ruo": "true",
-        "role": "note"
-      },
-      "must_not_skeletonize": true
+      "id": "RuoStrip",
+      "role": "root-layout persistent banner",
+      "position": "top",
+      "text": "RESEARCH USE ONLY — this deliverable is a UI mock over live API calls; nothing here is validated for clinical decision-making.",
+      "data_attrs": {"data-ruo": "true", "role": "note"}
     },
     {
-      "id": "CaseHeader",
-      "renders_block": null,
-      "position": "root_layout",
-      "states_supported": [
-        "happy",
-        "loading"
-      ],
+      "id": "ModelStateChip",
+      "role": "inline chip surfaced next to every claim-bearing block",
       "props": {
-        "case_id": "string",
-        "cancer_type": "string",
-        "primary_alteration": "string"
+        "state": "string enum (schemas.ModelState)",
+        "label": "human-readable label",
+        "color": "green | amber | grey"
       },
-      "data_attrs": {
-        "data-example-data": "true"
-      }
-    },
-    {
-      "id": "MolecularContext",
-      "renders_block": "molecular_context",
-      "position": "column_left_top",
-      "states_supported": [
-        "happy",
-        "empty",
-        "loading",
-        "degraded",
-        "quarantined"
-      ],
-      "props": {
-        "normalized_profile": "object",
-        "example_data_ruo": "bool",
-        "evidence": "object"
-      },
-      "empty_copy": "No molecular input provided. This block is not applicable for this run.",
-      "degraded_chip": "Parsed by ClinicalBERT proxy \u2014 verify against source report.",
-      "data_attrs": {
-        "data-ruo": "true",
-        "data-block": "molecular_context"
-      }
-    },
-    {
-      "id": "MechanismHypotheses",
-      "renders_block": "mechanism_hypotheses",
-      "position": "column_center_top",
-      "states_supported": [
-        "happy",
-        "empty",
-        "loading",
-        "degraded",
-        "quarantined"
-      ],
-      "props": {
-        "ranked": "array<{rank, hypothesis, confidence, elo_rating, evidence}>",
-        "ranking_model": "object",
-        "example_data_ruo": "bool",
-        "evidence": "object"
-      },
-      "empty_copy": "No hypotheses generated (empty input or generator returned empty set).",
-      "degraded_chip": "Template arbiter (n_training=0). Rank order is illustrative.",
-      "data_attrs": {
-        "data-ruo": "true",
-        "data-block": "mechanism_hypotheses"
-      }
-    },
-    {
-      "id": "Vulnerabilities",
-      "renders_block": "vulnerabilities_synthetic_lethality",
-      "position": "column_center_middle",
-      "states_supported": [
-        "happy",
-        "empty",
-        "loading",
-        "degraded",
-        "quarantined"
-      ],
-      "props": {
-        "candidates": "array<{axis, tier, n_positive_modalities, modalities, notes, evidence}>",
-        "example_data_ruo": "bool",
-        "evidence": "object"
-      },
-      "empty_copy": "No candidate dependency axes returned.",
-      "degraded_chip": "Population-level candidate only. Not patient-specific.",
-      "must_render_tag": "Candidate dependency axis (population). Not a proven patient-specific vulnerability.",
-      "data_attrs": {
-        "data-ruo": "true",
-        "data-block": "vulnerabilities_synthetic_lethality"
-      }
-    },
-    {
-      "id": "TherapyTrialExploration",
-      "renders_block": "therapy_trial_exploration",
-      "position": "column_center_bottom",
-      "states_supported": [
-        "happy",
-        "empty",
-        "loading",
-        "degraded",
-        "quarantined"
-      ],
-      "props": {
-        "agents_to_investigate": "array",
-        "trials_to_explore": "array",
-        "human_decision_required": "bool",
-        "example_data_ruo": "bool",
-        "evidence": "object"
-      },
-      "empty_copy": "No mechanism-aligned therapy/trial options to surface.",
-      "degraded_chip": "Exploration only \u2014 not a treatment directive. Rank order is illustrative.",
-      "must_render_footer": "HumanDecisionFooter (required, non-dismissible).",
-      "must_render_tag": "Exploration only. Not a treatment directive or responder / enrollment prediction.",
-      "data_attrs": {
-        "data-ruo": "true",
-        "data-block": "therapy_trial_exploration",
-        "data-human-decision-required": "true"
-      }
-    },
-    {
-      "id": "EvidenceTrace",
-      "renders_block": "evidence_trace",
-      "position": "column_right_top",
-      "states_supported": [
-        "happy",
-        "empty",
-        "loading",
-        "degraded",
-        "quarantined"
-      ],
-      "props": {
-        "receipts": "array<{claim, entity_id, source_file}>",
-        "evidence": "object"
-      },
-      "expandable": true,
-      "empty_copy": "No receipts available. Block cannot be verified.",
-      "data_attrs": {
-        "data-ruo": "true",
-        "data-block": "evidence_trace"
-      }
-    },
-    {
-      "id": "SafetyGovernanceFlags",
-      "renders_block": "safety_governance_flags",
-      "position": "column_right_middle",
-      "states_supported": [
-        "happy",
-        "empty",
-        "loading",
-        "degraded",
-        "quarantined"
-      ],
-      "props": {
-        "flags": "array<{flag, status, note}>",
-        "quarantines_active": "array<string>",
-        "evidence": "object"
-      },
-      "empty_copy": "No governance flags \u2014 verify by reviewing model card.",
-      "quarantined_chip": "Claim suppressed per contract.prohibited_in_output.",
-      "data_attrs": {
-        "data-ruo": "true",
-        "data-block": "safety_governance_flags"
-      }
-    },
-    {
-      "id": "MissingDataAndConfidence",
-      "renders_block": "missing_data_and_confidence",
-      "position": "column_right_bottom",
-      "states_supported": [
-        "happy",
-        "empty",
-        "loading",
-        "degraded",
-        "quarantined"
-      ],
-      "props": {
-        "unknown": "array<string>",
-        "confidence_by_block": "object",
-        "evidence": "object"
-      },
-      "empty_copy": "No missing-data list provided.",
-      "data_attrs": {
-        "data-ruo": "true",
-        "data-block": "missing_data_and_confidence"
+      "color_map": {
+        "loaded_luna16_retinanet": "green",
+        "loaded_ak_bundle": "green",
+        "loaded_mbd4_evidence_matrix": "green",
+        "loaded_manuscript_receipt": "green",
+        "proxy_lung_heuristic": "amber",
+        "proxy_rules_lite": "amber",
+        "proxy_co_scientist": "amber",
+        "template": "grey"
       }
     },
     {
       "id": "HumanDecisionFooter",
-      "renders_block": null,
-      "position": "root_layout_bottom",
-      "states_supported": [
-        "always"
-      ],
-      "props": {
-        "text": "string",
-        "remains_human": "array<string> (length=4)",
-        "evidence": "object"
-      },
-      "must_render_all_items": true,
-      "dismissible": false,
-      "data_attrs": {
-        "data-ruo": "true",
-        "role": "contentinfo"
-      }
+      "role": "non-dismissible footer on every therapy/trial view",
+      "items": [
+        "Final therapy selection remains with the treating oncologist.",
+        "Enrollment eligibility remains with the trial PI + coordinator.",
+        "Tissue biopsy and histopathology remain with the pathologist.",
+        "This system reports evidence and audit receipts, not orders."
+      ]
+    },
+    {
+      "id": "ProvenanceChain",
+      "role": "expandable receipt panel per block",
+      "shows": ["request_id", "model_state", "model_name", "endpoint hit", "latency_s", "size_bytes"]
+    },
+    {
+      "id": "HonestyGateBadge",
+      "role": "shown on any panel derived from co-scientist output",
+      "shows": ["seed_urls_count", "urls_dropped_hallucinated", "hypotheses_dropped"]
     }
   ],
-  "state_semantics": {
-    "happy": {
-      "description": "Fully populated. RUO tags visible. EvidenceTrace collapsed by default."
+
+  "nsclc_luna16_components": [
+    {
+      "id": "L1_CtIngestionHero",
+      "renders_from": "receipts/99_transcript_summary.json + demo synth-CT provenance",
+      "shows": [
+        "n_slices=16, matrix=128×128, spacing=1.0×1.0×2.5 mm",
+        "HU planted range: gantry=-1200, lung=-800, body=-50, mass=+50",
+        "case_id=SYN-0001 (synthetic phantom)"
+      ],
+      "chip": "template",
+      "note": "L1 is the ingestion contract, not a model — chip is grey."
     },
-    "empty": {
-      "description": "molecular_profile provided but no optional inputs. Related blocks render 'not applicable' copy."
+    {
+      "id": "L2_MonaiDetectionPanel",
+      "renders_from": "receipts/01_monai_bundle_card.json + 02_detections.json",
+      "hero_number": "top_score=0.042 (low)",
+      "shows": [
+        "bundle=monai/lung_nodule_ct_detection@0.6.9 (Apache-2.0)",
+        "inference_seconds=6.47",
+        "detection at center (47.5, 73.8, 27.7) mm, diameter=41.5 mm, in_lung=true",
+        "in_distribution=FALSE (41.5 mm > 3–30 mm training range)"
+      ],
+      "chip": "loaded_luna16_retinanet",
+      "in_distribution_warning": "Detector's low confidence is HONEST — the mass exceeds training range. The lung-heuristic diameter measure drives HIGH bucketing, not the RetinaNet score.",
+      "reported_metrics": {"mAP": 0.852, "mAR": 0.998, "source": "monai_bundles/lung_nodule_ct_detection/configs/metadata.json"}
     },
-    "loading": {
-      "description": "Skeleton rows for list blocks. RuoBanner + HumanDecisionFooter NEVER skeletonized."
+    {
+      "id": "L3_LungHeuristicArbiter",
+      "renders_from": "receipts/03_lung_heuristic.json",
+      "hero_number": "max_diameter_mm=26.84 → HIGH bucket (risk_score=0.936)",
+      "shows": ["driving_feature=max_diameter_mm", "logit=inline from response", "lung_voxel_fraction=inline"],
+      "chip": "proxy_lung_heuristic",
+      "note": "Amber chip — this layer is a rules-lite heuristic, not a trained ML classifier."
     },
-    "degraded": {
-      "description": "Proxy model fired (model_state=proxy_co_scientist or n_training=0). Yellow inline chip on affected block."
+    {
+      "id": "L4_NccnLiteRules",
+      "renders_from": "receipts/04_nccn_lite_rules.json",
+      "shows": [
+        "3 recommended: PET/CT (LUNG-1), CT-guided biopsy (LUNG-2), Tumor board review (Principles Section)",
+        "1 not_recommended: Surveillance only (Fleischner 2017 Table 1)",
+        "warnings_verbatim rendered inline"
+      ],
+      "chip": "proxy_rules_lite",
+      "note": "Amber chip — deterministic rule lookup keyed on the L3 diameter bucket."
     },
-    "quarantined": {
-      "description": "A specific claim was blocked. Red chip on affected block referring to SafetyGovernanceFlags."
+    {
+      "id": "L5_EloTournament",
+      "renders_from": "receipts/05_elo_transcript.json",
+      "hero_visualization": "baseline vs enriched Elo (per-drug rating chart)",
+      "shows": [
+        "baseline: biopsy #1, tumor board #2, PET/CT #3, surveillance #4",
+        "enriched: biopsy #1, PET/CT #2 (↑1), tumor board #3 (↓1), surveillance #4",
+        "applied_modifiers: biopsy +0.15, PET/CT +0.10 (labeled mass-branch weights)",
+        "disease_context echo shows risk_bucket=HIGH driving the modifier choice"
+      ],
+      "chip": "proxy_co_scientist"
     }
-  },
-  "state_matrix": {
-    "MolecularContext": [
-      "happy",
-      "empty",
-      "loading",
-      "degraded",
-      "quarantined"
-    ],
-    "MechanismHypotheses": [
-      "happy",
-      "empty",
-      "loading",
-      "degraded",
-      "quarantined"
-    ],
-    "Vulnerabilities": [
-      "happy",
-      "empty",
-      "loading",
-      "degraded",
-      "quarantined"
-    ],
-    "TherapyTrialExploration": [
-      "happy",
-      "empty",
-      "loading",
-      "degraded",
-      "quarantined"
-    ],
-    "EvidenceTrace": [
-      "happy",
-      "empty",
-      "loading",
-      "degraded",
-      "quarantined"
-    ],
-    "SafetyGovernanceFlags": [
-      "happy",
-      "empty",
-      "loading",
-      "degraded",
-      "quarantined"
-    ],
-    "MissingDataAndConfidence": [
-      "happy",
-      "empty",
-      "loading",
-      "degraded",
-      "quarantined"
+  ],
+
+  "ak_mbd4_lof_components": [
+    {
+      "id": "HeaderDisclosure",
+      "role": "top-of-page disclosure — MANDATORY, not collapsed",
+      "verbatim_text": "This case is manuscript-anchored, arbiter validates+audits+surfaces. All p-values, effect sizes, and the PARP falsification come from the SHA-locked crispro-backend-v2 bundle. The arbiter contributes contract validation, bundle_sha256 audit-of-record, URL honesty gate, and a labeled Elo audit sort — nothing more.",
+      "chips": ["loaded_ak_bundle", "loaded_manuscript_receipt"]
+    },
+    {
+      "id": "ContractInvariantsCard",
+      "renders_from": "receipts/00_contract_invariants.json",
+      "shows": [
+        "contract_version=tumor_board.v3.multimodal-with-manuscript-claims",
+        "patient_id=MBD4-LOF-DEMO-01",
+        "manuscript_repo_sha_at_audit=d33f6403… (linked)",
+        "backend_head_sha=bfd6d11f… (linked)",
+        "backend_branch=fix/mbd4-atr-strong-tier"
+      ],
+      "chip": "loaded_ak_bundle"
+    },
+    {
+      "id": "MechanismFalsifiedBadge",
+      "renders_from": "receipts/04_parp_falsification.json",
+      "role": "first-class row in evidence matrix — NOT quarantined, NOT hidden",
+      "verbatim_narrative": "PARP inhibitors (olaparib, talazoparib) are NOT recommended for MBD4-LOF tumors on a transcriptional-upregulation basis. Competing hypothesis — MBD4-LOF benefits from PARPi via PARP1 transcriptional upregulation — falsified: PARP1 expression in MBD4-LOF NOT elevated vs comparator (n=19 vs 1498, p=0.605). Recommended axis is ATR/WEE1 inhibition (lead: ceralasertib).",
+      "chip": "loaded_manuscript_receipt"
+    },
+    {
+      "id": "EvidenceMatrix6Axes",
+      "renders_from": "receipts/02_evidence_matrix_6axes.json",
+      "shows": "6 rows × 7 modalities table. Empty cells labeled 'missing' — never erased. parp_inhibitors row is first-class alongside atr_wee1, cytidine_analogs, wrn, immunotherapy, pkmyt1.",
+      "chip": "loaded_mbd4_evidence_matrix"
+    },
+    {
+      "id": "AnchorPValuesCallout",
+      "renders_from": "receipts/03_anchor_pvalues.json",
+      "shows": "7 anchor p-values verbatim (6 in atr_wee1 chain + 1 GDSC2 primary). Each row shows p_value, effect_size, n_mut/n_wt, stratifier, PMID URL.",
+      "chip": "loaded_manuscript_receipt"
+    },
+    {
+      "id": "RecommendedDrugsTable",
+      "renders_from": "receipts/05_recommended_drugs_table.json",
+      "shows": "7 drugs. RECOMMENDED (5): cytarabine, decitabine, adavosertib, berzosertib, ceralasertib. NOT_RECOMMENDED_ON_THIS_MECHANISM (2): olaparib, talazoparib.",
+      "chip": "loaded_manuscript_receipt"
+    },
+    {
+      "id": "ArbiterAuditReceipt",
+      "renders_from": "receipts/06_arbiter_audit_receipt.json",
+      "shows": [
+        "endpoint=POST /v1/tumor_board/bundle",
+        "request_id=42a80e12…",
+        "bundle_sha256=0121fc84fc798af57aad78f2c9274506eac769313d4b21329ad9e3775c5b3a4c",
+        "arbiter_contribution + what_the_arbiter_did_not_do (verbatim from receipt)"
+      ],
+      "chip": "loaded_ak_bundle"
+    },
+    {
+      "id": "EloAuditSort",
+      "renders_from": "receipts/07_elo_audit_sort.json",
+      "role": "audit sort with visible labeled weights — NOT a discovery ranking",
+      "chip": "proxy_co_scientist",
+      "shows": [
+        "baseline vs enriched rankings",
+        "applied_modifiers labeled by manuscript claim (ceralasertib=lead, olaparib/talazoparib=falsified)",
+        "per-drug reason strings (e.g. 'CAPRI ATR/PARP posture (+0.20)')"
+      ],
+      "note": "This is the ONLY block on the AK page that carries a proxy chip. Everything else is loaded_*."
+    }
+  ],
+
+  "landing_page": {
+    "id": "Landing",
+    "renders_two_cases": true,
+    "shows": [
+      "brief description of each case's role",
+      "link to nsclc_luna16/mockup.html",
+      "link to ak_mbd4_lof/mockup.html",
+      "shared_components summary",
+      "acceptance test summary (T1-T10 results)"
     ]
-  },
-  "layout_grid": {
-    "columns": 3,
-    "layout_notes": [
-      "3-column desktop grid. Collapses to 1-column on <=900px.",
-      "column_left: MolecularContext (full column).",
-      "column_center: MechanismHypotheses (top) \u2192 Vulnerabilities (middle) \u2192 TherapyTrialExploration (bottom).",
-      "column_right: EvidenceTrace (top) \u2192 SafetyGovernanceFlags (middle) \u2192 MissingDataAndConfidence (bottom).",
-      "RuoBanner spans full width top; HumanDecisionFooter spans full width bottom."
-    ]
-  },
-  "css_hooks": {
-    "ruo_chip": ".tb-chip.tb-chip--ruo { background:#000000; color:#FAF9F3; }",
-    "degraded_chip": ".tb-chip.tb-chip--degraded { background:#E9ED4C; color:#000; }",
-    "quarantined_chip": ".tb-chip.tb-chip--quarantined { background:#FF9400; color:#000; }",
-    "example_badge": ".tb-badge--example { background:#ECE9E2; color:#000; }",
-    "font_stack": "\"Liberation Sans\", \"Arimo\", \"DejaVu Sans\", sans-serif",
-    "palette": "#000000 (RUO), #ECE9E2 (bg-lite), #FAF9F3 (bg), #E9ED4C (warn), #FF9400 (block), #75A025 (ok), #FD9BED (accent-alt), #0279EE (link)"
   }
 }

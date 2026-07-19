@@ -1,0 +1,411 @@
+{
+  "disclaimer": "RESEARCH USE ONLY \u2014 not validated for clinical decision-making. Not FDA-cleared. Not CE-marked. Investigational / IRB context only.",
+  "caveat": "AUROC reflects the model's ability to discriminate within literature-derived events whose labels and features co-originate from the same published narratives. This circularity inflates apparent performance. Expected prospective AUROC: 0.70\u20130.85 based on independent validation.",
+  "provenance": {
+    "model_state": "proxy_co_scientist",
+    "model_name": "oa/co_scientist_elo@v0.3.0-alpha",
+    "model_version": "v0.3.0-alpha",
+    "request_id": "41f44c7c4a44459e815c895603e9bd34",
+    "gate_report": null,
+    "model_endpoint_url": null
+  },
+  "honesty_gate": {
+    "seen_urls_count": 8,
+    "evidence_kept": 8,
+    "evidence_dropped": 0,
+    "hypotheses_dropped": 0
+  },
+  "evidence": [
+    {
+      "url": "",
+      "quoted_text": "BER substrate accumulation in MBD4-LOF (dU:dG mispairs). Gemcitabine / cytarabine triphosphate incorporation into BER repair patches stalls replication. MBD4-specific: rescue by WT-MBD4 but not catalytic-dead mutant.",
+      "source": "manuscript_receipt.mechanism"
+    },
+    {
+      "url": "github.com/fjkiani/crispro@d33f640:publications/00-mbd4-manuscript/mbd4_parp_response/artifacts/canonical_atr_wee1_rerun_20260405/canonical_atr_wee1_rerun.json",
+      "quoted_text": "GDSC2 pharmacologic stratification, drug=ceralasertib (ATR inhibitor): MBD4 True-LOF cell lines (n=14) show increased sensitivity vs MBD4-WT (n=914) on the Methods-rule cohort (no somatic MBD4). LN_IC50: \u0394=-0.732, p=0.0215, Cohen's d=-0.503. AUC and",
+      "source": "manuscript_receipt.gdsc"
+    },
+    {
+      "url": "github.com/fjkiani/crispro@d33f640:publications/00-mbd4-manuscript/mbd4_parp_response/artifacts/canonical_atr_wee1_rerun_20260405/canonical_atr_wee1_rerun.json#stress_tests.1_msi_purge",
+      "quoted_text": "Stress test #1 \u2014 MSI purge. Re-runs ceralasertib LN_IC50 with all MSI-H lines excluded from both arms (rationale: MBD4-LOF correlates with MSI-H; signal could be confounded by global MSI sensitivity to ATR). Result: signal STRENGTHENS without MSI-H l",
+      "source": "manuscript_receipt.stress_test"
+    },
+    {
+      "url": "github.com/fjkiani/crispro@d33f640:publications/00-mbd4-manuscript/mbd4_parp_response/artifacts/canonical_atr_wee1_rerun_20260405/canonical_atr_wee1_rerun.json#stress_tests.2_tp53_stratification",
+      "quoted_text": "Stress test #2 \u2014 TP53 stratification. Restricts both arms to TP53-mutant lines (rationale: TP53 status modifies ATR-pathway dependency; >95% of HGSOC is TP53-mutant). Result: effect size LARGEST in TP53-mutant subpopulation. LN_IC50: \u0394=-1.069, p=0.00",
+      "source": "manuscript_receipt.stress_test"
+    },
+    {
+      "url": "github.com/fjkiani/crispro@d33f640:publications/00-mbd4-manuscript/mbd4_parp_response/artifacts/canonical_atr_wee1_rerun_20260405/canonical_atr_wee1_rerun.json#stress_tests.3_leave_one_out",
+      "quoted_text": "Stress test #3 \u2014 Leave-one-out. Removes one MBD4-LOF line at a time and re-runs the primary endpoint (rationale: a single highly-sensitive line could drive the n=14 result). Result: 14/14 iterations remain significant. max p=0.0452, min p=0.0082, all",
+      "source": "manuscript_receipt.stress_test"
+    },
+    {
+      "url": "github.com/fjkiani/crispro@d33f640:publications/00-mbd4-manuscript/mbd4_parp_response/artifacts/canonical_atr_wee1_rerun_20260405/canonical_atr_wee1_rerun.json#stress_tests.4_lineage_stratification",
+      "quoted_text": "Stress test #4 \u2014 Lineage stratification (non-bowel). Splits the primary endpoint by bowel/non-bowel lineage (rationale: MSI-H bowel lines are over-represented in MBD4-LOF pool; effect could be bowel-specific artifact). Result: non-bowel cohort holds",
+      "source": "manuscript_receipt.stress_test"
+    },
+    {
+      "url": "github.com/fjkiani/crispro@d33f640:publications/00-mbd4-manuscript/mbd4_parp_response/artifacts/canonical_atr_wee1_rerun_20260405/canonical_atr_wee1_rerun.json#axis_partner_confirmation",
+      "quoted_text": "Axis partner \u2014 adavosertib (MK-1775; WEE1 inhibitor), same replication-stress checkpoint axis as ATR. Direction-consistent with the ATR primary endpoint (negative \u0394 = more sensitive in MBD4-LOF) and similar effect magnitude (Cohen's d=-0.359), but p=",
+      "source": "manuscript_receipt.axis_partner"
+    },
+    {
+      "url": "github.com/fjkiani/crispro@d33f640:publications/00-mbd4-manuscript/mbd4_parp_response/artifacts/canonical_atr_wee1_rerun_20260405/canonical_atr_wee1_rerun.json#falsification_arm",
+      "quoted_text": "Falsification arm \u2014 PARP1 expression in MBD4-LOF lines. Tests the competing hypothesis that MBD4-LOF sensitivity is driven by PARP1 upregulation (PARP-trapping pathway). Result: PARP1 is NOT elevated in MBD4-LOF \u2014 Mann-Whitney U p=0.605, median LOF 6",
+      "source": "manuscript_receipt.falsification_arm"
+    }
+  ],
+  "warnings": [],
+  "contract_version": "v0.3.0-alpha",
+  "baseline_ranking": [
+    {
+      "rank": 1,
+      "drug_id": "adavosertib_atr_wee1",
+      "regimen": "adavosertib",
+      "line": 1,
+      "rating": 1545.1541,
+      "wins": 6,
+      "losses": 0,
+      "draws": 2,
+      "confidence": 0.85,
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "n_evidence": 7
+    },
+    {
+      "rank": 2,
+      "drug_id": "berzosertib_atr_wee1",
+      "regimen": "berzosertib",
+      "line": 1,
+      "rating": 1530.0572,
+      "wins": 5,
+      "losses": 1,
+      "draws": 2,
+      "confidence": 0.85,
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "n_evidence": 7
+    },
+    {
+      "rank": 3,
+      "drug_id": "ceralasertib_atr_wee1",
+      "regimen": "ceralasertib",
+      "line": 1,
+      "rating": 1515.0874,
+      "wins": 4,
+      "losses": 2,
+      "draws": 2,
+      "confidence": 0.85,
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "n_evidence": 7
+    },
+    {
+      "rank": 4,
+      "drug_id": "cytarabine_cytidine_analogs",
+      "regimen": "cytarabine",
+      "line": 1,
+      "rating": 1499.6401,
+      "wins": 3,
+      "losses": 3,
+      "draws": 1,
+      "confidence": 0.85,
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 5,
+      "drug_id": "decitabine_cytidine_analogs",
+      "regimen": "decitabine",
+      "line": 1,
+      "rating": 1485.4213,
+      "wins": 2,
+      "losses": 4,
+      "draws": 1,
+      "confidence": 0.85,
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 6,
+      "drug_id": "olaparib_parp_inhibitors",
+      "regimen": "olaparib",
+      "line": 1,
+      "rating": 1470.1805,
+      "wins": 1,
+      "losses": 5,
+      "draws": 1,
+      "confidence": 0.15,
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 7,
+      "drug_id": "talazoparib_parp_inhibitors",
+      "regimen": "talazoparib",
+      "line": 1,
+      "rating": 1454.4593,
+      "wins": 0,
+      "losses": 6,
+      "draws": 1,
+      "confidence": 0.15,
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "n_evidence": 1
+    }
+  ],
+  "enriched_ranking": [
+    {
+      "rank": 1,
+      "drug_id": "ceralasertib_atr_wee1",
+      "regimen": "ceralasertib",
+      "line": 1,
+      "rating": 1545.6476,
+      "wins": 6,
+      "losses": 0,
+      "draws": 0,
+      "confidence": 1.0,
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "n_evidence": 7
+    },
+    {
+      "rank": 2,
+      "drug_id": "adavosertib_atr_wee1",
+      "regimen": "adavosertib",
+      "line": 1,
+      "rating": 1529.5182,
+      "wins": 5,
+      "losses": 1,
+      "draws": 0,
+      "confidence": 0.95,
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "n_evidence": 7
+    },
+    {
+      "rank": 3,
+      "drug_id": "berzosertib_atr_wee1",
+      "regimen": "berzosertib",
+      "line": 1,
+      "rating": 1514.7806,
+      "wins": 4,
+      "losses": 2,
+      "draws": 0,
+      "confidence": 0.9,
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "n_evidence": 7
+    },
+    {
+      "rank": 4,
+      "drug_id": "cytarabine_cytidine_analogs",
+      "regimen": "cytarabine",
+      "line": 1,
+      "rating": 1500.3326,
+      "wins": 3,
+      "losses": 3,
+      "draws": 1,
+      "confidence": 0.85,
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 5,
+      "drug_id": "decitabine_cytidine_analogs",
+      "regimen": "decitabine",
+      "line": 1,
+      "rating": 1485.0573,
+      "wins": 2,
+      "losses": 4,
+      "draws": 1,
+      "confidence": 0.85,
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 6,
+      "drug_id": "olaparib_parp_inhibitors",
+      "regimen": "olaparib",
+      "line": 1,
+      "rating": 1470.5195,
+      "wins": 1,
+      "losses": 5,
+      "draws": 1,
+      "confidence": 0.0,
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 7,
+      "drug_id": "talazoparib_parp_inhibitors",
+      "regimen": "talazoparib",
+      "line": 1,
+      "rating": 1454.1443,
+      "wins": 0,
+      "losses": 6,
+      "draws": 1,
+      "confidence": 0.0,
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "n_evidence": 1
+    }
+  ],
+  "matches": [
+    {
+      "drug_id": "ceralasertib_atr_wee1",
+      "regimen": "ceralasertib",
+      "line": 1,
+      "baseline_rank": 3,
+      "enriched_rank": 1,
+      "baseline_rating": 1515.0874,
+      "enriched_rating": 1545.6476,
+      "rank_delta": 2,
+      "rating_delta": 30.5602,
+      "applied_modifier": 0.2,
+      "reason": "CAPRI ATR/PARP posture (+0.20)"
+    },
+    {
+      "drug_id": "adavosertib_atr_wee1",
+      "regimen": "adavosertib",
+      "line": 1,
+      "baseline_rank": 1,
+      "enriched_rank": 2,
+      "baseline_rating": 1545.1541,
+      "enriched_rating": 1529.5182,
+      "rank_delta": -1,
+      "rating_delta": -15.6359,
+      "applied_modifier": 0.1,
+      "reason": "manual boost (+0.10)"
+    },
+    {
+      "drug_id": "berzosertib_atr_wee1",
+      "regimen": "berzosertib",
+      "line": 1,
+      "baseline_rank": 2,
+      "enriched_rank": 3,
+      "baseline_rating": 1530.0572,
+      "enriched_rating": 1514.7806,
+      "rank_delta": -1,
+      "rating_delta": -15.2766,
+      "applied_modifier": 0.05,
+      "reason": "manual boost (+0.05)"
+    },
+    {
+      "drug_id": "cytarabine_cytidine_analogs",
+      "regimen": "cytarabine",
+      "line": 1,
+      "baseline_rank": 4,
+      "enriched_rank": 4,
+      "baseline_rating": 1499.6401,
+      "enriched_rating": 1500.3326,
+      "rank_delta": 0,
+      "rating_delta": 0.6925,
+      "applied_modifier": 0.0,
+      "reason": "no modifier"
+    },
+    {
+      "drug_id": "decitabine_cytidine_analogs",
+      "regimen": "decitabine",
+      "line": 1,
+      "baseline_rank": 5,
+      "enriched_rank": 5,
+      "baseline_rating": 1485.4213,
+      "enriched_rating": 1485.0573,
+      "rank_delta": 0,
+      "rating_delta": -0.364,
+      "applied_modifier": 0.0,
+      "reason": "no modifier"
+    },
+    {
+      "drug_id": "olaparib_parp_inhibitors",
+      "regimen": "olaparib",
+      "line": 1,
+      "baseline_rank": 6,
+      "enriched_rank": 6,
+      "baseline_rating": 1470.1805,
+      "enriched_rating": 1470.5195,
+      "rank_delta": 0,
+      "rating_delta": 0.339,
+      "applied_modifier": -0.3,
+      "reason": "manual penalty (-0.30)"
+    },
+    {
+      "drug_id": "talazoparib_parp_inhibitors",
+      "regimen": "talazoparib",
+      "line": 1,
+      "baseline_rank": 7,
+      "enriched_rank": 7,
+      "baseline_rating": 1454.4593,
+      "enriched_rating": 1454.1443,
+      "rank_delta": 0,
+      "rating_delta": -0.315,
+      "applied_modifier": -0.3,
+      "reason": "manual penalty (-0.30)"
+    }
+  ],
+  "disease_context": {
+    "cancer": "ampullary_adenocarcinoma_hgsoc_like",
+    "biomarker": "MBD4_LOF",
+    "manuscript_repo_sha_at_audit": null,
+    "backend_head_sha": null
+  },
+  "applied_modifiers": {
+    "ceralasertib_atr_wee1": 0.2,
+    "adavosertib_atr_wee1": 0.1,
+    "berzosertib_atr_wee1": 0.05,
+    "olaparib_parp_inhibitors": -0.3,
+    "talazoparib_parp_inhibitors": -0.3
+  },
+  "n_candidates": 7
+}
