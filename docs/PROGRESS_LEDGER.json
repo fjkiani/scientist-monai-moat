@@ -1,7 +1,7 @@
 {
   "$schema_version": "1.0.0",
-  "generated_at": "2026-07-06T20:51:20+00:00",
-  "git_sha": "d0dfc9a6c7d68083f61d0110c72f976adb5a6b08",
+  "generated_at": "2026-07-20T01:37:37+00:00",
+  "git_sha": "84f333ab4e70d39f3911b3facbdd168660fcb716",
   "project": {
     "name": "oncology-arbiter",
     "one_line_goal": "Open-architecture breast oncology reasoning platform spanning screening \u2192 biopsy \u2192 therapy, with calibrated per-stage arbiters, cited evidence, and honest performance disclosure.",
@@ -147,6 +147,32 @@
         "tests/integration/test_arxiv_live.py",
         "tests/integration/test_europe_pmc_live.py",
         "tests/integration/test_web_fetch_live.py"
+      ]
+    },
+    {
+      "id": "L2-report-parser",
+      "layer": "L2",
+      "role": "ClinicalBERT report parser fine-tuned to extract 21 breast + NSCLC pathology entities from free-text pathology reports; emits parsed_report + parsed_report_provenance onto the NSCLC branch of /v1/case/full.",
+      "status": "LIVE",
+      "not_wired_reason": null,
+      "current_backend": "emilyalsentzer/Bio_ClinicalBERT fine-tuned on SYNTHETIC-v0.3.1 (5 seeds, mean test micro-F1 = 0.9716 \u00b1 0.0001, best = 0.9717 @ seed 42, all 5 clear 0.85 floor). Modal-hosted in prod (crispro-test--clinicalbert, min_containers=1 warm), in-process torch fallback for local dev.",
+      "hai_def_gate_state": null,
+      "wired_files": [
+        "src/oncology_arbiter/api/app.py",
+        "src/oncology_arbiter/api/schemas.py",
+        "src/oncology_arbiter/nlp/clinicalbert_train.py",
+        "src/oncology_arbiter/nlp/corpus_synth.py",
+        "src/oncology_arbiter/nlp/clinicalbert_modal_client.py",
+        "src/oncology_arbiter/nlp/clinicalbert_local_client.py",
+        "deploy/modal/clinicalbert_app.py",
+        "render.yaml",
+        "docs/model_cards/report_parser_clinicalbert_v1.md"
+      ],
+      "evidence": [
+        "tests/regression/test_clinicalbert_f1_floor.py",
+        "tests/regression/test_clinicalbert_modal_wire.py",
+        "/mnt/shared-workspace/shared/clinicalbert_runs/AGGREGATE.json",
+        "/mnt/shared-workspace/shared/apex_case/local_v0.4.1_response.json"
       ]
     },
     {

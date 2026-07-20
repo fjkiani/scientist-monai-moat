@@ -2211,6 +2211,100 @@ def create_app() -> FastAPI:
                 max_diameter_mm=heur.max_diameter_mm,
             )
 
+            # ----- v0.4.1: fine-tuned ClinicalBERT report parser (Modal) --- #
+            # If biopsy_input.report_text is set AND
+            # CLINICALBERT_BACKEND=modal, POST the pathology narrative to
+            # the Modal endpoint and stamp the parsed entities onto the
+            # NSCLC response. Failure modes:
+            #   (a) BACKEND not "modal" -> skip; parsed_report stays None.
+            #   (b) URL not set / network error -> warn + None; NEVER
+            #       fabricate a parse.
+            #   (c) Model returns {"error": ...} -> warn + None.
+            # The RUO disclaimer travels on every Modal payload; we don't
+            # duplicate it into the case_full envelope since the case-level
+            # disclaimer already covers it.
+            parsed_report_dict: dict[str, Any] | None = None
+            parsed_report_provenance: dict[str, Any] | None = None
+            _cbert_backend = os.environ.get("CLINICALBERT_BACKEND", "").lower()
+            _report_text_for_cbert: str | None = None
+            if (
+                getattr(req, "biopsy_input", None) is not None
+                and getattr(req.biopsy_input, "report_text", None)
+            ):
+                _report_text_for_cbert = req.biopsy_input.report_text
+            if _cbert_backend == "modal" and _report_text_for_cbert:
+                try:
+                    from oncology_arbiter.nlp.clinicalbert_modal_client import (
+                        ClinicalBertModalClient,
+                        ClinicalBertModalError,
+                    )
+                    t_cb0 = time.perf_counter()
+                    _cbert_client = ClinicalBertModalClient()
+                    _cbert_resp = _cbert_client.parse(_report_text_for_cbert)
+                    parsed_report_dict = _cbert_resp.get("parsed") or {}
+                    parsed_report_provenance = {
+                        "provenance": _cbert_resp.get("provenance"),
+                        "base_model": _cbert_resp.get("base_model"),
+                        "training_seed": _cbert_resp.get("training_seed"),
+                        "test_micro_f1": _cbert_resp.get("test_micro_f1"),
+                        "app_version": _cbert_resp.get("app_version"),
+                        "n_tokens": _cbert_resp.get("n_tokens"),
+                        "seconds": _cbert_resp.get("seconds"),
+                        "n_entity_types": len(parsed_report_dict),
+                        "wall_seconds": round(time.perf_counter() - t_cb0, 3),
+                        "source": "clinicalbert_modal",
+                    }
+                except Exception as _cbert_exc:  # pylint: disable=broad-except
+                    log_event(
+                        request_id, "/v1/case/full",
+                        model_state="clinicalbert_modal_error",
+                        patient_id_hash=None,
+                        extra={"error": f"{type(_cbert_exc).__name__}: {_cbert_exc}"},
+                        tenant_id=tenant.tenant_id,
+                    )
+                    parsed_report_provenance = {
+                        "source": "clinicalbert_modal",
+                        "error": f"{type(_cbert_exc).__name__}: {_cbert_exc}",
+                    }
+            elif _cbert_backend == "local" and _report_text_for_cbert:
+                # v0.4.1 local smoke path: load fine-tuned Bio_ClinicalBERT
+                # in-process (torch + transformers). Used ONLY when Modal
+                # is unavailable during local uvicorn testing; the deployed
+                # Render dyno never sets CLINICALBERT_BACKEND=local (would
+                # blow the 512 MB memory ceiling).
+                try:
+                    from oncology_arbiter.nlp.clinicalbert_local_client import (
+                        ClinicalBertLocalClient,
+                    )
+                    t_cb0 = time.perf_counter()
+                    _cbert_client = ClinicalBertLocalClient()
+                    _cbert_resp = _cbert_client.parse(_report_text_for_cbert)
+                    parsed_report_dict = _cbert_resp.get("parsed") or {}
+                    parsed_report_provenance = {
+                        "provenance": _cbert_resp.get("provenance"),
+                        "base_model": _cbert_resp.get("base_model"),
+                        "training_seed": _cbert_resp.get("training_seed"),
+                        "test_micro_f1": _cbert_resp.get("test_micro_f1"),
+                        "app_version": _cbert_resp.get("app_version"),
+                        "n_tokens": _cbert_resp.get("n_tokens"),
+                        "seconds": _cbert_resp.get("seconds"),
+                        "n_entity_types": len(parsed_report_dict),
+                        "wall_seconds": round(time.perf_counter() - t_cb0, 3),
+                        "source": "clinicalbert_local",
+                    }
+                except Exception as _cbert_exc:  # pylint: disable=broad-except
+                    log_event(
+                        request_id, "/v1/case/full",
+                        model_state="clinicalbert_local_error",
+                        patient_id_hash=None,
+                        extra={"error": f"{type(_cbert_exc).__name__}: {_cbert_exc}"},
+                        tenant_id=tenant.tenant_id,
+                    )
+                    parsed_report_provenance = {
+                        "source": "clinicalbert_local",
+                        "error": f"{type(_cbert_exc).__name__}: {_cbert_exc}",
+                    }
+
             # ----- v0.3.0: LUNA16 RetinaNet upgrade path ------------------ #
             # When the env flag is set, run the MONAI RetinaNet detector on
             # the same volume. It replaces the heuristic-only diameter as
@@ -2338,6 +2432,76 @@ def create_app() -> FastAPI:
                       },
                       tenant_id=tenant.tenant_id,
                       )
+
+            # v0.4.1: run the Co-Scientist Elo loop against the NSCLC
+            # envelope so /v1/case/full?cancer=nsclc surfaces
+            # `elo_ranked_hypotheses` just like the breast branch. Gated
+            # on the same env flag; the loop is pure Python and seeded
+            # (see docs/PROGRESS_LEDGER.json → co_scientist_v0.3.0).
+            nsclc_elo_ranked: list[dict[str, Any]] = []
+            nsclc_cs_warnings: list[str] = []
+            if _is_env_true("ONCOLOGY_ARBITER_ENABLE_CO_SCIENTIST"):
+                try:
+                    from oncology_arbiter.orchestrator.co_scientist import (
+                        run_co_scientist,
+                    )
+                    # Build a stand-in biopsy-like envelope from the
+                    # NSCLC therapy result + parsed_report. This is the
+                    # minimum shape the co_scientist loop expects
+                    # (dict with `evidence` + `recommended_options` keys).
+                    nsclc_seen_urls: set[str] = set()
+                    for opt in therapy.recommended_options:
+                        if getattr(opt, "citation_url", None):
+                            nsclc_seen_urls.add(opt.citation_url)
+                    _bio_stub = {
+                        "evidence": [],
+                        "recommended_options": [],
+                        "parsed_report": parsed_report_dict or {},
+                        "cancer": "nsclc",
+                    }
+                    # Map NSCLC therapy schema (name/category/citation_url)
+                    # onto the shape run_co_scientist expects (regimen /
+                    # line_of_therapy). Category becomes the line proxy:
+                    # SBRT/lobectomy/pembrolizumab = 1st-line intent, etc.
+                    _thx_stub = {
+                        "evidence": [
+                            {"url": o.citation_url, "rationale": o.rationale}
+                            for o in therapy.recommended_options
+                            if getattr(o, "citation_url", None)
+                        ],
+                        "recommended_options": [
+                            {
+                                "regimen": o.name,
+                                "line_of_therapy": 1,
+                                "category": o.category,
+                                "citation_url": o.citation_url,
+                                "rationale": o.rationale,
+                                "nccn_section": o.nccn_section,
+                                "evidence": (
+                                    [{"url": o.citation_url,
+                                      "rationale": o.rationale}]
+                                    if getattr(o, "citation_url", None) else []
+                                ),
+                            }
+                            for o in therapy.recommended_options
+                        ],
+                    }
+                    cs_out = run_co_scientist(
+                        screening=None,
+                        biopsy=_bio_stub,
+                        therapy=_thx_stub,
+                        seen_urls=nsclc_seen_urls,
+                    )
+                    nsclc_elo_ranked = cs_out.get("hypotheses", [])
+                    nsclc_cs_warnings = cs_out.get("warnings", [])
+                except Exception as _cs_exc:  # pylint: disable=broad-except
+                    nsclc_cs_warnings = [
+                        f"co_scientist_error:{type(_cs_exc).__name__}:{_cs_exc}"
+                    ]
+
+            if nsclc_cs_warnings:
+                warnings = list(warnings) + list(nsclc_cs_warnings)
+
             return FullCaseResponse(
                 **env,
                 warnings=warnings,
@@ -2395,8 +2559,10 @@ def create_app() -> FastAPI:
                     n_slices=int(ct.volume.shape[0]),
                     read_seconds=float(t1 - t0),
                     heuristic_seconds=float(t2 - t1),
+                    parsed_report=parsed_report_dict,
+                    parsed_report_provenance=parsed_report_provenance,
                 ),
-                elo_ranked_hypotheses=[],
+                elo_ranked_hypotheses=nsclc_elo_ranked,
             )
 
         # ------- Breast branch (existing behaviour) ----------------------- #

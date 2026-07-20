@@ -80,4 +80,5 @@ markers = [
     "models: downloads and runs HuggingFace models (multi-GB)",
     "data: requires real mammography data on disk (CBIS-DDSM / EMBED)",
     "slow: takes > 30 seconds",
+    "regression: enforces v0.4.1 numerical / config invariants (F1 floor, prod wiring)",
 ]

@@ -45,6 +45,17 @@ services:
       # Operates over envelopes, no ML runtime — fits 512 MB.
       - key: ONCOLOGY_ARBITER_ENABLE_CO_SCIENTIST
         value: "1"
+      # ClinicalBERT report parser — the free-tier Render dyno cannot host
+      # the fine-tuned model (~430 MB safetensors + torch runtime blows the
+      # 512 MB budget). Instead the parser is deployed to Modal and Render
+      # calls it over HTTP via a stdlib-only urllib client. The Modal app
+      # keeps 1 warm container (min_containers=1) for sub-second latency.
+      # Fine-tuned on SYNTHETIC-v0.3.1 across 5 seeds (42/123/456/789/1234);
+      # best seed = 42 (test micro-F1 = 0.9716, mean ± sd = 0.9716 ± 0.0001).
+      - key: CLINICALBERT_BACKEND
+        value: modal
+      - key: CLINICALBERT_MODAL_URL
+        value: https://crispro-test--clinicalbert
       # DELIBERATELY NOT SET (would OOM the free tier dyno):
       #   ONCOLOGY_ARBITER_ENABLE_MEDSIGLIP
       #   ONCOLOGY_ARBITER_ENABLE_MONAI_DETECTOR

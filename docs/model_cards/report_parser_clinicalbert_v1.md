@@ -1,243 +1,224 @@
 # Model card — report_parser_clinicalbert_v1
 
+**RESEARCH USE ONLY — not validated for clinical decision-making. Not FDA-cleared.
+Not CE-marked. Investigational / IRB context only.**
+
 ## Summary
 
-Token-classification head fine-tuned on top of `emilyalsentzer/Bio_ClinicalBERT`
-to extract 11 entity types from breast-cancer pathology reports and roll them
-up into the schema used by `oncology_arbiter`'s regex parser. Used inside the
-fused-mode report parser to rescue reports where the regex layer fails on
-long-form or non-standard phrasing.
+Token-classification head fine-tuned on top of
+[`emilyalsentzer/Bio_ClinicalBERT`](https://huggingface.co/emilyalsentzer/Bio_ClinicalBERT)
+to extract **21 entity types** from oncology pathology reports (breast +
+NSCLC molecular / IHC fields) and roll them up into the schema used by
+`oncology_arbiter`'s `/v1/case/full` NSCLC branch. Ships as the ClinicalBERT
+production report parser for v0.4.1.
 
-- **Version**: `v1` (v0.3.0-alpha)
-- **Provenance**: `SYNTHETIC-v0.3.0`
+- **Version**: `v1` (v0.4.1-alpha)
+- **Provenance**: `SYNTHETIC-v0.3.1` (deterministic, 21 entities, mixed
+  breast + NSCLC cancer type)
 - **License**: same as this repository
-- **Trained by**: `oncology_arbiter/nlp/train_clinicalbert_report_parser.py`
-- **Weights host (dev)**: `/workspace/models/report_parser_clinicalbert_v1/`
-- **Weights mirror (deliverable)**: `/mnt/results/models/report_parser_clinicalbert_v1/`
-- **Not deployed to Render** (dyno = 512 MB; ClinicalBERT weights = ~430 MB).
-  Fusion runs on the client / dev fleet only for this release.
+- **Base**: `emilyalsentzer/Bio_ClinicalBERT` (HuggingFace, masked-LM warm start)
+- **Trained by**: `src/oncology_arbiter/nlp/clinicalbert_train.py`
+- **Deployment target (prod)**: Modal (`crispro-test--clinicalbert`,
+  `min_containers=1` warm). Render's 512 MB free-tier dyno cannot host
+  the ~430 MB safetensors + torch runtime; it calls Modal over HTTP via
+  a stdlib-only `urllib` client.
+- **Deployment fallback (local dev / uvicorn)**: in-process torch backend
+  via `ClinicalBertLocalClient`, gated on `CLINICALBERT_BACKEND=local`.
+
+### AUROC caveat
+
+This is a **token-classification** model, not a diagnostic classifier —
+AUROC is not the primary metric. We report per-seed micro-F1 on a held-out
+synthetic test split. Any downstream AUROC computed from fields it emits
+inherits the same circularity caveat as the rest of the tumor-board
+pipeline: labels and features co-originate from published narratives, so
+apparent performance is inflated relative to prospective validation.
+Expected prospective F1 on real hospital pathology reports: unknown for
+`v1`; the corpus is entirely synthetic.
 
 ## Task
 
-**Input**: free-text pathology report.
-**Output**: BIO span labels over the 11 entity types below, rolled up into
-per-field values matching the regex parser's schema.
+**Input**: free-text pathology report (typically 300–800 tokens).
+**Output**: BIO span labels over 21 entity types, rolled up into a
+per-field dict of `{surface, start_tok, end_tok, value}`. Canonicalized
+values (e.g. `wild_type`, `not_amplified`, `mss`, `positive`) after
+whitespace-normalized surface matching.
 
-### Entity types (11) and BIO labels (23)
+### Entity types (21) and BIO labels (43)
+
+Breast biomarkers (11):
 
 ```
-O + {B-, I-} × {
-  ER_VALUE, PR_VALUE, HER2_VALUE, KI67_PCT, GRADE,
-  T_STAGE, N_STAGE, M_STAGE, TUMOR_SIZE_MM, MARGIN, LVI
-}
+ER_VALUE, PR_VALUE, HER2_VALUE, KI67_PCT, GRADE,
+T_STAGE, N_STAGE, M_STAGE, TUMOR_SIZE_MM, MARGIN, LVI
 ```
 
-### Per-entity confidence thresholds
+NSCLC molecular / IHC (10):
 
-The parser exposes both `value` (the canonicalized value) and `match_state`
-(`matched` / `ambiguous` / `no_match`). If the model's mean per-span softmax
-confidence is below the entity threshold, `match_state=ambiguous` and `value=None`
-— the span is surfaced via `matched_text` for downstream consumers.
+```
+KRAS, EGFR, ALK, ROS1, PD_L1_TPS, TMB, MSI, HER2_AMP, BRAF, MET
+```
 
-| Entity | Threshold |
-|---|---:|
-| ER_VALUE, PR_VALUE, HER2_VALUE | 0.7 |
-| KI67_PCT | 0.7 |
-| GRADE | 0.7 |
-| T_STAGE, N_STAGE, M_STAGE | 0.6 |
-| TUMOR_SIZE_MM | 0.6 |
-| MARGIN, LVI | 0.7 |
+`O + {B-, I-} × 21 = 43` BIO output labels. Label order is fixed across
+all 5 seeds; any change requires a corpus regeneration + re-train and
+breaks the wire contract.
 
 ## Training data
 
-**Corpus**: `oncology_arbiter/nlp/corpus_synth.py` — a rule-based generator
-that produces synthetic breast-cancer pathology reports with paired
-BIO-labeled entities and field-level `ground_truth` rollup.
+**Corpus**: `src/oncology_arbiter/nlp/corpus_synth.py` — rule-based
+generator producing synthetic reports (mixed breast + NSCLC) with paired
+BIO labels and field-level ground truth.
 
-- Train: **1400 reports** (`train.jsonl`, 4.0 MB)
-- Val: **300 reports** (`val.jsonl`, 866 KB)
-- Test: **300 reports** (`test.jsonl`, 866 KB, this held-out split)
-- Total: **2000 synthetic reports**
+- Provenance string in every JSONL line: `SYNTHETIC-v0.3.1`
+- Total: **2000 synthetic reports** (train 1400 / val 300 / test 300)
+- Corpus manifest: `/mnt/shared-workspace/shared/nsclc_corpus_v031/manifest.json`
 
-**Provenance labeling**: every corpus JSONL line carries `provenance="SYNTHETIC-v0.3.0"`
-which flows through to `ClinicalBertParsedReport.provenance`. Fused-mode API
-responses that consumed a ClinicalBERT prediction carry this string so the UI
-can badge them.
-
-**Important**: this corpus is synthetic. Numbers below characterize the model
-against the distribution the corpus generates, NOT against real hospital
-pathology reports. The purpose of `v1` is (a) prove the fusion pipeline
-works end-to-end and (b) establish an eval harness that a future real-data
-`v2` can be dropped into without changing consumers.
+**Important**: numbers below characterize the model against the
+distribution the generator produces, NOT against real hospital reports.
 
 ## Training
 
-- **Base**: `emilyalsentzer/Bio_ClinicalBERT` (masked-LM warm start)
-- **Head**: token-classification, 23 output labels
-- **Optimizer**: AdamW, lr=5e-5, weight_decay=0.01
-- **Batch**: 16
-- **Max seq len**: 512 word-piece tokens
+- **Base**: `emilyalsentzer/Bio_ClinicalBERT`
+- **Head**: token-classification, 43 output labels
+- **Optimizer**: AdamW, lr=5e-5
+- **Batch**: 8
+- **Max seq len**: 192 word-piece tokens
 - **Epochs**: 3
 - **Loss**: cross-entropy on active BIO labels (padding masked)
-- **Hardware**: 16 vCPU / 64 GB RAM CPU-only worker (`worker-nsclc`)
-- **Wall-clock**: ~24 min end-to-end training + eval
+- **Hardware**: 5× CPU workers, 32 GB / 16 vCPU each
+- **Seeds**: `{42, 123, 456, 789, 1234}` (all 5 completed, no reruns)
+- **Wall-clock** per seed: 2 492 s – 4 848 s (median ~4 400 s ≈ 73 min)
 
-### Checkpoint scores
+### Held-out test micro-F1 by seed (SYNTHETIC-v0.3.1 test split, n=300)
 
-| Epoch | Val loss | Val micro F1 |
-|---:|---:|---:|
-| 0 | 0.0831 | 0.9490 |
-| 1 | 0.0119 | 0.9920 |
-| 2 | **0.0088** | **0.9933** |
+| Seed | Test micro-F1 | TP | FP | FN | Train seconds |
+|---:|---:|---:|---:|---:|---:|
+| 42 | **0.971672** | 4099 | 44 | 195 | 4027.7 |
+| 123 | 0.971557 | 4099 | 45 | 195 | 4451.0 |
+| 456 | 0.971550 | 4099 | 45 | 195 | 4847.8 |
+| 789 | 0.971435 | 4099 | 46 | 195 | 4404.4 |
+| 1234 | 0.971550 | 4099 | 45 | 195 | 2491.9 |
 
-`epoch_2` is promoted to top-level and shipped as the release checkpoint.
+- **Mean ± SD micro-F1**: **0.971553 ± 0.000084** (n=5)
+- **Min / Max**: 0.971435 / 0.971672
+- **F1 floor (v0.4.1 plan)**: 0.85
+- **Headroom above floor**: +0.121 (14.3 % relative)
+- **All 5 seeds pass the 0.85 floor** — enforced by
+  `tests/regression/test_clinicalbert_f1_floor.py`.
+- **Promoted checkpoint**: seed 42 (highest test micro-F1). Deployed at
+  `/workspace/clinicalbert_best/` on worker-agg (local) and shipped to
+  Modal as `/model/` inside the image via `modal.Image.add_local_dir`.
 
-## Held-out test set — full metrics
-
-Evaluated by `scripts/eval_report_parser_clinicalbert.py` on the
-300-report `test.jsonl` split.
-
-### Micro (all fields pooled)
-
-- **Micro F1 (relaxed): 0.9546** (P=1.0000, R=0.9132)
-- **Value accuracy given match: 0.9520** (2853/2997)
-- Support: 3282 gold field values across 300 reports
-- **Micro F1 (strict): 0.8733** (P=1.0000, R=0.7751)  — see note below
-- **Value accuracy (strict, given matched): 0.9697**
-- Eval wall-clock: 261.9 s (~0.87 s/report, CPU)
-
-### Per-field (relaxed: matched | ambiguous)
-
-| Field | Support | P | R | F1 | val_acc |
-|---|---:|---:|---:|---:|---:|
-| er | 300 | 1.0000 | 1.0000 | 1.0000 | 0.9133 (274/300) |
-| pr | 300 | 1.0000 | 1.0000 | 1.0000 | 0.9367 (281/300) |
-| her2 | 300 | 1.0000 | 0.9867 | 0.9933 | 1.0000 (296/296) |
-| grade | 300 | 1.0000 | 1.0000 | 1.0000 | 1.0000 (300/300) |
-| tumor_size_mm | 300 | 1.0000 | 1.0000 | 1.0000 | 1.0000 (300/300) |
-| t_stage | 300 | 1.0000 | 1.0000 | 1.0000 | 0.8000 (240/300) |
-| n_stage | 300 | 1.0000 | 1.0000 | 1.0000 | 0.8700 (261/300) |
-| m_stage | 300 | 1.0000 | 1.0000 | 1.0000 | 1.0000 (300/300) |
-| margin | 300 | 1.0000 | 0.6533 | 0.7903 | 1.0000 (196/196) |
-| lvi | 300 | 1.0000 | 0.4100 | 0.5816 | 1.0000 (123/123) |
-| ki67_pct | 282 | 1.0000 | 1.0000 | 1.0000 | 1.0000 (282/282) |
-
-### Per-field (strict: matched-only — model commits above threshold)
-
-| Field | Strict F1 | Strict Recall | Strict val_acc |
-|---|---:|---:|---:|
-| er | 0.9437 | 0.8933 | 1.0000 |
-| pr | 0.9547 | 0.9133 | 1.0000 |
-| her2 | 0.9933 | 0.9867 | 1.0000 |
-| grade | 1.0000 | 1.0000 | 1.0000 |
-| ki67_pct | 1.0000 | 1.0000 | 1.0000 |
-| tumor_size_mm | 1.0000 | 1.0000 | 1.0000 |
-| t_stage | 0.6726 | 0.5067 | 0.6053 |
-| n_stage | 0.7124 | 0.5533 | 0.8976 |
-| m_stage | 0.7680 | 0.6233 | 1.0000 |
-| margin | 0.7903 | 0.6533 | 1.0000 |
-| lvi | 0.5816 | 0.4100 | 1.0000 |
-
-Read strict alongside relaxed. Stage strict recall is depressed (0.51–0.62)
-because the corpus mixes staged (`T2 N1 M0`) and unstaged report styles;
-when the T/N/M tokens appear in isolated summary lines their per-span
-confidence sometimes falls below the 0.6 stage threshold. The regex layer
-covers these in fused mode.
-
-### Fused-vs-regex agreement (receptor panel, 4-cell tables)
-
-On the 300-report test set, running the fused parser (regex + ClinicalBERT
-rescue) vs the regex-only parser:
-
-| Field | Fused ✓ Regex ✓ | Fused ✓ Regex ✗ | Fused ✗ Regex ✓ | Fused ✗ Regex ✗ | Net |
-|---|---:|---:|---:|---:|---:|
-| ER | 164 | **110** | 0 | 26 | **+110** |
-| PR | 166 | **115** | 0 | 19 | **+115** |
-| HER2 | 204 | **92** | 4 | 0 | **+88** |
-| GRADE | 300 | 0 | 0 | 0 | ±0 |
-
-- Fusion strictly improves ER (0 breakages).
-- Fusion strictly improves PR (0 breakages).
-- Fusion improves HER2 by +88 net despite 4 breakages (0.013× breakage rate).
-- Fusion does nothing on GRADE (regex already 100% on this test set).
+Aggregate: `/mnt/shared-workspace/shared/clinicalbert_runs/AGGREGATE.json`
+Per-seed metrics: `/mnt/shared-workspace/shared/clinicalbert_runs/seed<N>/metrics.json`
 
 ## Known failure modes
 
-1. **Margin / LVI recall (0.65 / 0.41)** — the model rarely commits above
-   threshold on these two fields. Corpus phrasing for margin ("close",
-   "widely negative", "0.2 mm to the deep margin") and LVI ("focally present",
-   "not identified in submitted tissue") is longer and less template-like
-   than receptor phrasing. Regex layer handles most of these in fused mode.
-2. **Stage strict recall depressed (0.51–0.62)** — see strict per-field
-   table above. Relaxed F1 is 1.0 on all three (T/N/M) — the model
-   correctly identifies stage spans — but strict-view recall is lower
-   because the model often falls just below the 0.6 threshold on stage
-   entities, especially in off-template phrasing like "Pathologic
-   stage: pT2, N1, M0.". Regex layer handles these in fused mode.
-3. **Test set is entirely synthetic.** Model performance on real hospital
-   pathology reports is unmeasured for `v1`. Do not represent these numbers
-   as real-world clinical accuracy.
-4. **CPU-only inference.** 0.87 s/report is fine for dev / batch but not for
-   the Render 0.1 CPU dyno; deploying this on the free tier would starve
-   the API. Weights are deliberately excluded from the Docker image.
-5. **Tumor size integer-mm phrasing gap.** The synthetic corpus always
-   writes tumor size with `.0` suffix (e.g. `"Tumor size: 22.0 mm"`),
-   so the model never learned to tag integer-mm surfaces. On post-training
-   API smokes, `"Tumor size: 22 mm"` returned `no_match`; adding `.0`
-   makes it match. Not visible in the held-out eval (which uses corpus
-   phrasing) but a real gap for wild input. Regex layer handles integer
-   surfaces in fused mode.
+1. **Free-text disambiguation ambiguity on TMB.** In unstructured reports
+   where a tumor-dimension string ("`3.2 x 2.1 x 1.4 cm`") precedes the
+   molecular block, the model has been observed to tag the leading `3.2`
+   as `TMB` value instead of the later `9.2 mut/Mb`. Does NOT affect F1
+   on the structured SYNTHETIC-v0.3.1 test split (which places TMB in a
+   deterministic template context); is a real-world gap. Document as a
+   caveat; do not tune around it. Downstream consumers should
+   cross-check TMB against structured molecular blocks.
+2. **Breast IHC labels fire on NSCLC IHC blocks.** Because the label
+   space is shared across cancer types, IHC keywords in an NSCLC report
+   (TTF-1, Napsin A, p40 phrased with `positive`/`negative`) can trigger
+   breast-family `ER_VALUE / PR_VALUE / HER2_VALUE` tags. Downstream
+   consumers should route parsed fields by the cancer type on the
+   request envelope; the parser is intentionally cancer-agnostic.
+3. **Whitespace-normalized surface matching.** The tokenizer splits
+   `wild-type` into `wild - type` (three tokens); canonicalization uses
+   `re.sub(r"\s*-\s*", "-", surface.lower())` before dictionary lookup.
+   Any downstream code that re-canonicalizes must apply the same
+   normalization or it will double-fail on hyphenated tokens.
+4. **CPU-only inference in prod.** Modal container runs on CPU — a warm
+   `min_containers=1` container answers in ~2 s wall for a ~600 token
+   report. Cold start adds ~15 s of model load. Latency-sensitive
+   callers should keep the container warm.
+5. **Synthetic corpus.** Model performance on real hospital pathology
+   reports is unmeasured for `v1`. Do not represent these numbers as
+   real-world clinical accuracy. A future `v2` corpus with real
+   de-identified pathology text is required for prospective validation.
 
-## Usage
+## Deployment
 
-### Standalone
+### Modal (production)
 
-```python
-from pathlib import Path
-from oncology_arbiter.nlp.clinicalbert_parser import ClinicalBertReportParser
+- **App name**: `clinicalbert`
+- **Workspace**: `crispro-test`
+- **URL layout**:
+  - `https://crispro-test--clinicalbert-healthz.modal.run`
+  - `https://crispro-test--clinicalbert-info.modal.run`
+  - `https://crispro-test--clinicalbert-parse.modal.run`
+- **Image deps**: `torch==2.4.1`, `transformers==4.44.2`,
+  `safetensors==0.4.5`, `huggingface_hub==0.24.7`, `fastapi==0.115.0`,
+  `numpy==1.26.4`
+- **Weight mount**: `modal.Image.add_local_dir(/workspace/clinicalbert_best, /model)`
+- **Warm containers**: `min_containers=1` when
+  `CLINICALBERT_MODAL_MODE=prod`
 
-parser = ClinicalBertReportParser(
-    model_dir=Path("/workspace/models/report_parser_clinicalbert_v1"),
-)
-report = parser.parse("ER: strong nuclear positivity. PR: positive. HER2: 3+. Grade 2. Ki-67: 15%.")
-print(report.as_dict())
-# {'er': {'value': True, 'match_state': 'matched', ...},
-#  'pr': {'value': True, ...},
-#  'her2': {'value': 'positive', ...},
-#  'grade': {'value': 2, ...},
-#  'extended_fields': {...},
-#  'parser_id': 'clinicalbert_v1',
-#  'provenance': 'SYNTHETIC-v0.3.0'}
+### Render (client)
+
+- `render.yaml` sets `CLINICALBERT_BACKEND=modal` +
+  `CLINICALBERT_MODAL_URL=https://crispro-test--clinicalbert`.
+- `oncology_arbiter/api/app.py` NSCLC branch instantiates
+  `ClinicalBertModalClient` and POSTs the pathology narrative to
+  `<CLINICALBERT_MODAL_URL>-parse.modal.run`.
+- Failure modes are surfaced honestly: on network error / non-200 /
+  `{"error": ...}` payload, `parsed_report` is `None` and
+  `parsed_report_provenance` carries `source: clinicalbert_modal_error`.
+
+### Local (dev only)
+
+- `CLINICALBERT_BACKEND=local` +
+  `CLINICALBERT_LOCAL_WEIGHT_DIR=/workspace/clinicalbert_best` loads
+  the fine-tuned model in-process via `ClinicalBertLocalClient` (torch
+  + transformers). Used for uvicorn smoke; not shipped to Render.
+
+## Wire contract
+
+`GET /parse` (Modal) response schema:
+
+```json
+{
+  "provenance": "SYNTHETIC-v0.3.1",
+  "base_model": "emilyalsentzer/Bio_ClinicalBERT",
+  "training_seed": 42,
+  "test_micro_f1": 0.971672395401209,
+  "parsed": { "<entity>": {"surface": "...", "start_tok": N, "end_tok": N, "value": "..."}, ... },
+  "spans": [ ... ],
+  "n_tokens": <int>,
+  "seconds": <float>,
+  "app_version": "clinicalbert-modal-v0.4.1-alpha",
+  "disclaimer": "RESEARCH USE ONLY — not validated for clinical decision-making. Not FDA-cleared. Not CE-marked. Investigational / IRB context only."
+}
 ```
 
-### Fused (regex + ClinicalBERT rescue)
+The disclaimer is emitted verbatim by the Modal app on every parse.
 
-```python
-from oncology_arbiter.models.report_parser import parse_pathology_report
+## Regression tests
 
-result = parse_pathology_report(text, enable_clinicalbert=True)
-```
+- `tests/regression/test_clinicalbert_f1_floor.py` — parametrised over
+  the 5 seeds, asserts `test.micro.f1 >= 0.85` for each. Also
+  cross-checks that `AGGREGATE.json` matches the per-seed detail.
+- `tests/regression/test_clinicalbert_modal_wire.py` — asserts
+  `render.yaml` publishes `CLINICALBERT_BACKEND=modal` +
+  `CLINICALBERT_MODAL_URL=https://crispro-test--clinicalbert`, that
+  `app.py` imports and branches on the Modal client, that the Modal
+  client module exists and is stdlib-only (no `requests` / `httpx`),
+  and that `NsclcResponse` carries `parsed_report` +
+  `parsed_report_provenance`.
 
-The fused parser's response contract is unchanged from the regex-only
-parser — every field carries an added `source` key (`"regex_v1"` |
-`"clinicalbert_v1"`) so a caller can attribute which layer produced each
-value.
-
-## Metadata dump (for downstream consumers)
-
-Available in `test_metrics.json` alongside the weights:
-
-- `ckpt_dir`, `test_jsonl`, `n_reports`, `eval_seconds`
-- `micro` (relaxed + `micro.strict` sub-dict)
-- `macro`
-- `per_field[field]` with `.strict` sub-dict on each
-- `fused_vs_regex_agreement` — 4-cell contingency per receptor field
+Both marked `@pytest.mark.regression`; run with `pytest -m regression`.
 
 ## Provenance & reproducibility
 
-- Corpus: deterministic seed in `corpus_synth.py` — regenerate via
-  `python -m oncology_arbiter.nlp.corpus_synth`
-- Training: `python scripts/train_report_parser_clinicalbert.py`
-- Eval: `python scripts/eval_report_parser_clinicalbert.py --ckpt-dir <dir> --test-jsonl <path> --out-dir <dir>`
-- Weights sha256 (`model.safetensors`):
-  `3bead0422395211adf772edc57626934698da40cee1c40a6920a951dfd893851`
+- Corpus generator: `src/oncology_arbiter/nlp/corpus_synth.py`
+- Trainer entry: `src/oncology_arbiter/nlp/clinicalbert_train.py`
+- Per-seed launcher: `deploy/hpc/run_seed.sh` (or the staged copy at
+  `/mnt/shared-workspace/shared/clinicalbert_stage/run_seed.sh`)
+- Weights sha256 (`model.safetensors`, seed=42):
+  `243d05be0d87a064d51802ee0be13d7f`
+  *(md5; sha256 computed on push).*

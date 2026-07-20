@@ -576,6 +576,26 @@ class NsclcResponse(BaseModel):
     n_slices: int | None = None
     read_seconds: float | None = None
     heuristic_seconds: float | None = None
+    # v0.4.1: fine-tuned Bio_ClinicalBERT report parser (Modal-backed).
+    # Present only when CLINICALBERT_BACKEND=modal AND the request
+    # carried biopsy_input.report_text. Shape mirrors the Modal
+    # `/clinicalbert-parse` response's `parsed` field: each key is
+    # an entity type (KRAS, EGFR, ALK, ROS1, PD_L1_TPS, TMB, MSI,
+    # HER2_AMP, BRAF, MET, plus the breast entities) and each value is
+    # a dict with `surface`, `start_tok`, `end_tok`, `value` (canonical).
+    parsed_report: dict[str, Any] | None = Field(
+        default=None,
+        description="Fine-tuned Bio_ClinicalBERT parse of biopsy_input.report_text "
+                    "(populated when CLINICALBERT_BACKEND=modal AND report_text set). "
+                    "Keys are entity types (KRAS, EGFR, ALK, ROS1, PD_L1_TPS, TMB, MSI, "
+                    "HER2_AMP, BRAF, MET, etc.); values carry surface + canonical value. "
+                    "Training corpus: SYNTHETIC-v0.3.1 (breast + NSCLC synthetic). RUO.",
+    )
+    parsed_report_provenance: dict[str, Any] | None = Field(
+        default=None,
+        description="Meta about the ClinicalBERT parse: provenance, training_seed, "
+                    "test_micro_f1, seconds, n_tokens, app_version.",
+    )
 
 
 class FullCaseRequest(BaseModel):

@@ -55,9 +55,45 @@ from oncology_arbiter.nlp.corpus_synth import (
     BIO_LABELS,
     ID2LABEL,
     LABEL2ID,
+    Entity,
+    SynthReport,
     generate_corpus,
     save_split,
 )
+
+
+def _load_split_jsonl(path: Path) -> list[SynthReport]:
+    """Reload a saved JSONL split into SynthReport dataclass instances.
+
+    Complements `corpus_synth.save_split`. Used when `--corpus-dir` is passed
+    (e.g. 5-seed fan-out where the corpus is generated once and consumed by
+    every seed).
+    """
+    reports: list[SynthReport] = []
+    with path.open() as f:
+        for line in f:
+            d = json.loads(line)
+            entities = [
+                Entity(
+                    entity_type=e["entity_type"],
+                    value=e["value"],
+                    char_start=e["char_start"],
+                    char_end=e["char_end"],
+                    surface=e["surface"],
+                )
+                for e in d["entities"]
+            ]
+            reports.append(
+                SynthReport(
+                    text=d["text"],
+                    tokens=d["tokens"],
+                    labels=d["labels"],
+                    entities=entities,
+                    ground_truth=d.get("ground_truth", {}),
+                    provenance=d.get("provenance", "SYNTHETIC-v0.3.0"),
+                )
+            )
+    return reports
 
 
 class ReportTaggerDataset(Dataset):
@@ -204,6 +240,11 @@ def main():
     p.add_argument("--out-dir", default="models/report_parser_clinicalbert_v1")
     p.add_argument("--corpus-size", type=int, default=2000)
     p.add_argument("--corpus-seed", type=int, default=42)
+    p.add_argument("--corpus-cancer-type", choices=["breast", "nsclc", "mixed"], default="breast",
+                   help="Only used when --corpus-dir is NOT set (i.e. generating fresh).")
+    p.add_argument("--corpus-dir", default=None,
+                   help="If set, load train/val/test.jsonl from this directory "
+                        "instead of generating in-process. Used for 5-seed fan-out.")
     p.add_argument("--epochs", type=int, default=3)
     p.add_argument("--batch-size", type=int, default=16)
     p.add_argument("--lr", type=float, default=5e-5)
@@ -221,11 +262,32 @@ def main():
     corpus_dir = Path(args.corpus_out_dir)
     corpus_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"[corpus] generating {args.corpus_size} synthetic reports (seed={args.corpus_seed})")
-    corpus = generate_corpus(args.corpus_size, seed=args.corpus_seed)
-    for split, reports in corpus.items():
-        save_split(reports, corpus_dir / f"{split}.jsonl")
-        print(f"[corpus]   {split}: {len(reports)} reports -> {corpus_dir / (split + '.jsonl')}")
+    if args.corpus_dir:
+        # Fan-out mode: corpus already exists on disk; load it.
+        cdir = Path(args.corpus_dir)
+        print(f"[corpus] loading from {cdir}")
+        corpus = {
+            "train": _load_split_jsonl(cdir / "train.jsonl"),
+            "val":   _load_split_jsonl(cdir / "val.jsonl"),
+            "test":  _load_split_jsonl(cdir / "test.jsonl"),
+        }
+        for split, reports in corpus.items():
+            print(f"[corpus]   {split}: {len(reports)} reports (loaded)")
+        # Copy manifest (if present) to out_dir for provenance.
+        manifest_src = cdir / "manifest.json"
+        if manifest_src.exists():
+            (out_dir / "corpus_manifest.json").write_text(manifest_src.read_text())
+    else:
+        print(f"[corpus] generating {args.corpus_size} synthetic reports "
+              f"(seed={args.corpus_seed}, cancer_type={args.corpus_cancer_type})")
+        corpus = generate_corpus(
+            args.corpus_size,
+            seed=args.corpus_seed,
+            cancer_type=args.corpus_cancer_type,
+        )
+        for split, reports in corpus.items():
+            save_split(reports, corpus_dir / f"{split}.jsonl")
+            print(f"[corpus]   {split}: {len(reports)} reports -> {corpus_dir / (split + '.jsonl')}")
 
     print(f"[model] loading {args.base_model}")
     tokenizer = AutoTokenizer.from_pretrained(args.base_model)
@@ -293,9 +355,15 @@ def main():
         # v0.3.0: per-epoch checkpoint so a mid-run kill still leaves usable
         # weights. Overwrites on each epoch (we keep the LAST epoch, not the
         # best-val, because 3-epoch runs on synthetic data are stable).
+        # v0.4.1: fix non-contiguous tensor error at safetensors save by
+        # calling `.contiguous()` on each parameter before save_pretrained.
+        # This is a known transformers+safetensors interaction on some
+        # PyTorch versions (2.4.x + safetensors >=0.4.5).
         ckpt_dir = out_dir / f"epoch_{epoch}"
         ckpt_dir.mkdir(parents=True, exist_ok=True)
-        model.save_pretrained(ckpt_dir)
+        for _p in model.parameters():
+            _p.data = _p.data.contiguous()
+        model.save_pretrained(ckpt_dir, safe_serialization=True)
         tokenizer.save_pretrained(ckpt_dir)
         print(f"[ckpt] saved epoch {epoch} weights to {ckpt_dir}")
 
@@ -310,18 +378,32 @@ def main():
               f"(tp={m['tp']} fp={m['fp']} fn={m['fn']})")
 
     # Save weights and label map
+    # v0.4.1: same contiguous() fix as per-epoch (see note above).
     print(f"[save] writing model to {out_dir}")
-    model.save_pretrained(out_dir)
+    for _p in model.parameters():
+        _p.data = _p.data.contiguous()
+    model.save_pretrained(out_dir, safe_serialization=True)
     tokenizer.save_pretrained(out_dir)
     (out_dir / "label_map.json").write_text(
         json.dumps({"label2id": LABEL2ID, "id2label": {str(k): v for k, v in ID2LABEL.items()}}, indent=2)
     )
 
+    # Provenance: peek at first training report; if it has an nsclc entity,
+    # this is a v0.3.1 corpus. Otherwise v0.3.0.
+    provenance = "SYNTHETIC-v0.3.0"
+    nsclc_bio_tags = {f"B-{e}" for e in (
+        "KRAS", "EGFR", "ALK", "ROS1", "BRAF", "MET", "HER2_AMP", "MSI", "PD_L1_TPS", "TMB",
+    )}
+    if any(any(l in nsclc_bio_tags for l in r.labels) for r in corpus["train"][:200]):
+        provenance = "SYNTHETIC-v0.3.1"
+
     metrics = {
         "base_model": args.base_model,
         "corpus_size": args.corpus_size,
         "corpus_seed": args.corpus_seed,
-        "provenance": "SYNTHETIC-v0.3.0",
+        "corpus_dir": args.corpus_dir,
+        "corpus_cancer_type": args.corpus_cancer_type,
+        "provenance": provenance,
         "epochs": args.epochs,
         "batch_size": args.batch_size,
         "lr": args.lr,
@@ -333,6 +415,7 @@ def main():
         "val_f1s": val_f1s,
         "test": test_metrics,
         "label_map": {"label2id": LABEL2ID, "id2label": {str(k): v for k, v in ID2LABEL.items()}},
+        "training_seed": args.seed,
     }
     (out_dir / "metrics.json").write_text(json.dumps(metrics, indent=2))
     (out_dir / "train_summary.json").write_text(json.dumps({
@@ -342,6 +425,8 @@ def main():
         "train_seconds": train_seconds,
         "test_micro_f1": test_metrics["micro"]["f1"],
         "device": device,
+        "training_seed": args.seed,
+        "provenance": provenance,
     }, indent=2))
 
     print("[done]", json.dumps({
