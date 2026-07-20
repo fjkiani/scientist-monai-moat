@@ -48,7 +48,7 @@ from typing import Any, Dict, List
 
 import modal
 
-APP_VERSION = "clinicalbert-modal-v0.4.1-alpha"
+APP_VERSION = "clinicalbert-modal-v0.5.1"
 
 _MODAL_MODE = (os.environ.get("CLINICALBERT_MODAL_MODE") or "staging").lower()
 _MIN_CONTAINERS = 1 if _MODAL_MODE == "prod" else 0
@@ -248,6 +248,18 @@ class ClinicalBertModal:
             self.training_seed = metrics.get("training_seed")
             self.test_micro_f1 = metrics.get("test", {}).get("micro", {}).get("f1")
             self.base_model = metrics.get("base_model", "emilyalsentzer/Bio_ClinicalBERT")
+            # v0.5.1 additions
+            per_cancer = metrics.get("per_cancer", {}) or {}
+            self.per_cancer_micro_f1 = {
+                k: (v.get("micro", {}) or {}).get("f1")
+                for k, v in per_cancer.items()
+                if isinstance(v, dict)
+            }
+            self.annotator_kappa_nsclc = metrics.get("annotator_kappa_nsclc")
+            self.snorkel_label_model_accuracy = metrics.get("snorkel_label_model_accuracy")
+            self.bio_alignment_error_rate = metrics.get("bio_alignment_error_rate")
+            self.class_weighted_loss = metrics.get("class_weighted_loss")
+            self.label_smoothing = metrics.get("label_smoothing")
         else:
             self.metrics = None
             self.id2label = {int(k): v for k, v in self.model.config.id2label.items()}
@@ -255,6 +267,12 @@ class ClinicalBertModal:
             self.training_seed = None
             self.test_micro_f1 = None
             self.base_model = "emilyalsentzer/Bio_ClinicalBERT"
+            self.per_cancer_micro_f1 = {}
+            self.annotator_kappa_nsclc = None
+            self.snorkel_label_model_accuracy = None
+            self.bio_alignment_error_rate = None
+            self.class_weighted_loss = None
+            self.label_smoothing = None
 
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.model.to(self.device)
@@ -275,6 +293,16 @@ class ClinicalBertModal:
             "device": self.device,
             "load_seconds": self.load_seconds,
             "warmed_at": self.warmed_at,
+            # v0.5.1 additions
+            "real_text_micro_f1_breast_crc": self.per_cancer_micro_f1.get("breast_crc"),
+            "real_text_micro_f1_nsclc": self.per_cancer_micro_f1.get("nsclc"),
+            "real_text_micro_f1_combined": self.per_cancer_micro_f1.get("combined")
+                or self.test_micro_f1,
+            "annotator_kappa_nsclc": self.annotator_kappa_nsclc,
+            "snorkel_label_model_accuracy": self.snorkel_label_model_accuracy,
+            "bio_alignment_error_rate": self.bio_alignment_error_rate,
+            "class_weighted_loss": self.class_weighted_loss,
+            "label_smoothing": self.label_smoothing,
             "disclaimer": (
                 "Research Use Only. Not FDA-cleared. Not CE-marked. Not intended "
                 "for clinical use."

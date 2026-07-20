@@ -251,6 +251,10 @@ def main():
     p.add_argument("--max-len", type=int, default=256)
     p.add_argument("--corpus-out-dir", default="data/report_parser_v0_3_0")
     p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--class-weighted-loss", action="store_true",
+                   help="v0.5.1: enable class-weighted CE loss to counter ~98% O imbalance.")
+    p.add_argument("--label-smoothing", type=float, default=0.0,
+                   help="v0.5.1: label smoothing epsilon (0.0 = off). Recommended: 0.1 for Snorkel labels.")
     args = p.parse_args()
 
     torch.manual_seed(args.seed)
@@ -269,9 +273,28 @@ def main():
         corpus = {
             "train": _load_split_jsonl(cdir / "train.jsonl"),
             "val":   _load_split_jsonl(cdir / "val.jsonl"),
-            "test":  _load_split_jsonl(cdir / "test.jsonl"),
         }
+        # v0.5.1 corpus layout: separate test splits per cancer group.
+        # v0.5.0 corpus layout: single test.jsonl.
+        v51_test_nsclc = cdir / "test_nsclc.jsonl"
+        v51_test_breast_crc = cdir / "test_breast_crc.jsonl"
+        legacy_test = cdir / "test.jsonl"
+        if v51_test_nsclc.exists() or v51_test_breast_crc.exists():
+            test_splits: dict[str, list] = {}
+            if v51_test_breast_crc.exists():
+                test_splits["breast_crc"] = _load_split_jsonl(v51_test_breast_crc)
+            if v51_test_nsclc.exists():
+                test_splits["nsclc"] = _load_split_jsonl(v51_test_nsclc)
+            # Combined test for legacy micro-F1 reporting.
+            corpus["test"] = sum(test_splits.values(), [])
+            corpus["_test_splits"] = test_splits  # type: ignore[assignment]
+        elif legacy_test.exists():
+            corpus["test"] = _load_split_jsonl(legacy_test)
+        else:
+            raise FileNotFoundError(f"No test.jsonl or test_*.jsonl under {cdir}")
         for split, reports in corpus.items():
+            if split.startswith("_"):
+                continue
             print(f"[corpus]   {split}: {len(reports)} reports (loaded)")
         # Copy manifest (if present) to out_dir for provenance.
         manifest_src = cdir / "manifest.json"
@@ -307,6 +330,36 @@ def main():
     train_dl = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True)
     val_dl = DataLoader(val_ds, batch_size=args.batch_size, shuffle=False)
 
+    # v0.5.1: class-weighted CE loss to counteract the ~98% "O" imbalance
+    # that makes the model collapse to "predict O".
+    # Weights = (1 / freq)^0.5, normalized by median; O clamped to 0.5.
+    class_weights = None
+    if args.class_weighted_loss:
+        from collections import Counter
+        cnt = Counter()
+        for report in corpus["train"]:
+            for lbl in report.labels:
+                cnt[lbl] += 1
+        # inverse-sqrt frequency, then floor rare-tag weights so O_weight ~= 1
+        # and non-O tags upweight by ~5-25x. This preserves O learning while
+        # forcing the model to learn rare biomarker tokens (98% class imbalance).
+        freqs = torch.tensor([max(1, cnt.get(BIO_LABELS[i], 1)) for i in range(len(BIO_LABELS))],
+                             dtype=torch.float)
+        inv_sqrt = 1.0 / freqs.sqrt()
+        o_idx = LABEL2ID.get("O")
+        # normalize so O_weight = 1.0
+        weights = inv_sqrt / inv_sqrt[o_idx] if o_idx is not None else inv_sqrt
+        # cap max weight to 25x to prevent noisy-label instability from Snorkel
+        weights = weights.clamp(max=25.0)
+        class_weights = weights.to(device)
+        o_weight = weights[o_idx].item() if o_idx is not None else float("nan")
+        print(f"[train] class-weighted CE loss enabled. min={weights.min():.3f} "
+              f"max={weights.max():.3f} O_weight={o_weight:.3f}")
+        # Log top 5 highest-weighted tags for visibility.
+        w_np = weights.numpy()
+        top_idx = w_np.argsort()[::-1][:6]
+        print(f"[train] top-weighted tags: {[(ID2LABEL[int(i)], round(float(w_np[i]),2)) for i in top_idx]}")
+
     optim = torch.optim.AdamW(model.parameters(), lr=args.lr)
     n_steps = len(train_dl) * args.epochs
     sched = get_linear_schedule_with_warmup(
@@ -322,8 +375,20 @@ def main():
         total_loss = 0.0
         for step, batch in enumerate(train_dl):
             batch = {k: v.to(device) for k, v in batch.items()}
-            out = model(**batch)
-            loss = out.loss
+            if class_weights is not None:
+                # Custom class-weighted CE loss.
+                labels = batch.pop("labels")
+                out = model(**batch)
+                logits = out.logits  # (B, T, C)
+                loss_fct = torch.nn.CrossEntropyLoss(
+                    weight=class_weights,
+                    ignore_index=-100,
+                    label_smoothing=args.label_smoothing,
+                )
+                loss = loss_fct(logits.view(-1, len(BIO_LABELS)), labels.view(-1))
+            else:
+                out = model(**batch)
+                loss = out.loss
             loss.backward()
             optim.step()
             sched.step()
@@ -377,6 +442,19 @@ def main():
         print(f"[eval]   {et:14s} P={m['precision']:.3f} R={m['recall']:.3f} F1={m['f1']:.3f} "
               f"(tp={m['tp']} fp={m['fp']} fn={m['fn']})")
 
+    # v0.5.1: per-cancer eval when test_splits was populated.
+    per_cancer_metrics: dict = {}
+    if "_test_splits" in corpus:
+        for cancer_group, reports in corpus["_test_splits"].items():  # type: ignore[attr-defined]
+            print(f"[eval] running per-cancer evaluation: {cancer_group} (n={len(reports)})")
+            m = evaluate(model, tokenizer, reports, device, args.max_len)
+            per_cancer_metrics[cancer_group] = m
+            print(f"[eval]   {cancer_group} micro F1: {m['micro']['f1']:.4f}")
+        # Also compute combined micro-F1 across ALL cancer groups.
+        combined = evaluate(model, tokenizer, corpus["test"], device, args.max_len)
+        per_cancer_metrics["combined"] = combined
+        print(f"[eval]   combined micro F1: {combined['micro']['f1']:.4f}")
+
     # Save weights and label map
     # v0.4.1: same contiguous() fix as per-epoch (see note above).
     print(f"[save] writing model to {out_dir}")
@@ -388,14 +466,23 @@ def main():
         json.dumps({"label2id": LABEL2ID, "id2label": {str(k): v for k, v in ID2LABEL.items()}}, indent=2)
     )
 
-    # Provenance: peek at first training report; if it has an nsclc entity,
-    # this is a v0.3.1 corpus. Otherwise v0.3.0.
+    # Provenance: prefer the manifest.json we copied from the corpus dir,
+    # else fall back to peeking at training reports for the legacy synthetic detection.
     provenance = "SYNTHETIC-v0.3.0"
-    nsclc_bio_tags = {f"B-{e}" for e in (
-        "KRAS", "EGFR", "ALK", "ROS1", "BRAF", "MET", "HER2_AMP", "MSI", "PD_L1_TPS", "TMB",
-    )}
-    if any(any(l in nsclc_bio_tags for l in r.labels) for r in corpus["train"][:200]):
-        provenance = "SYNTHETIC-v0.3.1"
+    manifest_path = out_dir / "corpus_manifest.json"
+    if manifest_path.exists():
+        try:
+            manifest_prov = json.loads(manifest_path.read_text()).get("provenance")
+            if isinstance(manifest_prov, str) and manifest_prov:
+                provenance = manifest_prov
+        except Exception:
+            pass
+    else:
+        nsclc_bio_tags = {f"B-{e}" for e in (
+            "KRAS", "EGFR", "ALK", "ROS1", "BRAF", "MET", "HER2_AMP", "MSI", "PD_L1_TPS", "TMB",
+        )}
+        if any(any(l in nsclc_bio_tags for l in r.labels) for r in corpus["train"][:200]):
+            provenance = "SYNTHETIC-v0.3.1"
 
     metrics = {
         "base_model": args.base_model,
@@ -413,7 +500,12 @@ def main():
         "train_losses": train_losses,
         "val_losses": val_losses,
         "val_f1s": val_f1s,
+        "class_weighted_loss": args.class_weighted_loss,
+        "label_smoothing": args.label_smoothing,
+        "snorkel_label_model_accuracy": snorkel_lf_accuracies,
+        "annotator_kappa_nsclc": annotator_kappa_nsclc,
         "test": test_metrics,
+        "per_cancer": per_cancer_metrics,
         "label_map": {"label2id": LABEL2ID, "id2label": {str(k): v for k, v in ID2LABEL.items()}},
         "training_seed": args.seed,
     }
