@@ -529,6 +529,110 @@ def _elo_reason_for_modifier(
     return f"manual penalty ({delta:+.2f})"
 
 
+def _run_clinicalbert_parse(
+    request_id: str,
+    tenant_id: str | None,
+    report_text: str | None,
+    log_event_fn: Any,
+) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+    """Dispatch the fine-tuned ClinicalBERT report parser.
+
+    Pure report -> entities transform. Independent of CT / series_dir, so
+    both the placeholder and the real-pipeline NSCLC branches call this to
+    stamp ``parsed_report`` + ``parsed_report_provenance`` on their
+    response. Failure modes:
+      * backend unset or report_text empty  -> (None, None)   (silent skip)
+      * modal / local client raises         -> (None, {source, error})
+      * successful parse                    -> (parsed, provenance-with-source)
+    Never fabricates a parse; the provenance dict always carries
+    ``source`` (``clinicalbert_modal`` or ``clinicalbert_local``).
+    """
+    if not report_text:
+        return None, None
+    cbert_backend = os.environ.get("CLINICALBERT_BACKEND", "").lower()
+    if cbert_backend not in ("modal", "local"):
+        return None, None
+
+    import time as _time  # local rebind for wall-clock timing
+    t_cb0 = _time.perf_counter()
+    parsed_dict: dict[str, Any] | None = None
+    provenance: dict[str, Any] | None = None
+
+    if cbert_backend == "modal":
+        try:
+            from oncology_arbiter.nlp.clinicalbert_modal_client import (
+                ClinicalBertModalClient,
+            )
+            client = ClinicalBertModalClient()
+            resp = client.parse(report_text)
+            parsed_dict = resp.get("parsed") or {}
+            provenance = {
+                "provenance": resp.get("provenance"),
+                "base_model": resp.get("base_model"),
+                "training_seed": resp.get("training_seed"),
+                "test_micro_f1": resp.get("test_micro_f1"),
+                "app_version": resp.get("app_version"),
+                "n_tokens": resp.get("n_tokens"),
+                "seconds": resp.get("seconds"),
+                "n_entity_types": len(parsed_dict),
+                "wall_seconds": round(_time.perf_counter() - t_cb0, 3),
+                "source": "clinicalbert_modal",
+            }
+        except Exception as exc:  # pylint: disable=broad-except
+            try:
+                log_event_fn(
+                    request_id, "/v1/case/full",
+                    model_state="clinicalbert_modal_error",
+                    patient_id_hash=None,
+                    extra={"error": f"{type(exc).__name__}: {exc}"},
+                    tenant_id=tenant_id,
+                )
+            except Exception:
+                pass
+            provenance = {
+                "source": "clinicalbert_modal",
+                "error": f"{type(exc).__name__}: {exc}",
+                "wall_seconds": round(_time.perf_counter() - t_cb0, 3),
+            }
+    else:  # local
+        try:
+            from oncology_arbiter.nlp.clinicalbert_local_client import (
+                ClinicalBertLocalClient,
+            )
+            client = ClinicalBertLocalClient()
+            resp = client.parse(report_text)
+            parsed_dict = resp.get("parsed") or {}
+            provenance = {
+                "provenance": resp.get("provenance"),
+                "base_model": resp.get("base_model"),
+                "training_seed": resp.get("training_seed"),
+                "test_micro_f1": resp.get("test_micro_f1"),
+                "app_version": resp.get("app_version"),
+                "n_tokens": resp.get("n_tokens"),
+                "seconds": resp.get("seconds"),
+                "n_entity_types": len(parsed_dict),
+                "wall_seconds": round(_time.perf_counter() - t_cb0, 3),
+                "source": "clinicalbert_local",
+            }
+        except Exception as exc:  # pylint: disable=broad-except
+            try:
+                log_event_fn(
+                    request_id, "/v1/case/full",
+                    model_state="clinicalbert_local_error",
+                    patient_id_hash=None,
+                    extra={"error": f"{type(exc).__name__}: {exc}"},
+                    tenant_id=tenant_id,
+                )
+            except Exception:
+                pass
+            provenance = {
+                "source": "clinicalbert_local",
+                "error": f"{type(exc).__name__}: {exc}",
+                "wall_seconds": round(_time.perf_counter() - t_cb0, 3),
+            }
+    return parsed_dict, provenance
+
+
 def create_app() -> FastAPI:
     app = FastAPI(
         title="oncology-arbiter",
@@ -2151,11 +2255,29 @@ def create_app() -> FastAPI:
                         "ONCOLOGY_ARBITER_ALLOW_SERIES_DIR is not truthy on "
                         "the server; ignoring series_dir for safety."
                     )
+                # v0.4.1: parse the pathology report on the placeholder
+                # path too. Report parse is CT-independent and lets the
+                # deployed Render dyno (which cannot open the series_dir
+                # gate safely) still fire ClinicalBERT and stamp the
+                # response with parsed entities + provenance.
+                _placeholder_report_text: str | None = None
+                if (
+                    getattr(req, "biopsy_input", None) is not None
+                    and getattr(req.biopsy_input, "report_text", None)
+                ):
+                    _placeholder_report_text = req.biopsy_input.report_text
+                _placeholder_parsed, _placeholder_prov = _run_clinicalbert_parse(
+                    request_id=request_id,
+                    tenant_id=tenant.tenant_id,
+                    report_text=_placeholder_report_text,
+                    log_event_fn=log_event,
+                )
                 log_event(request_id, "/v1/case/full",
                           model_state="placeholder",
                           patient_id_hash=None,
                           extra={"cancer": "nsclc", "has_screening": False,
-                                 "has_biopsy": False, "elo_n_hypotheses": 0},
+                                 "has_biopsy": False, "elo_n_hypotheses": 0,
+                                 "clinicalbert": bool(_placeholder_prov)},
                           tenant_id=tenant.tenant_id,
                           )
                 return FullCaseResponse(
@@ -2168,6 +2290,8 @@ def create_app() -> FastAPI:
                         model_state=ModelState.PLACEHOLDER,
                         model_name="nsclc_placeholder_v0",
                         warnings=warnings,
+                        parsed_report=_placeholder_parsed,
+                        parsed_report_provenance=_placeholder_prov,
                     ),
                     elo_ranked_hypotheses=[],
                 )
@@ -2213,97 +2337,23 @@ def create_app() -> FastAPI:
 
             # ----- v0.4.1: fine-tuned ClinicalBERT report parser (Modal) --- #
             # If biopsy_input.report_text is set AND
-            # CLINICALBERT_BACKEND=modal, POST the pathology narrative to
-            # the Modal endpoint and stamp the parsed entities onto the
-            # NSCLC response. Failure modes:
-            #   (a) BACKEND not "modal" -> skip; parsed_report stays None.
-            #   (b) URL not set / network error -> warn + None; NEVER
-            #       fabricate a parse.
-            #   (c) Model returns {"error": ...} -> warn + None.
-            # The RUO disclaimer travels on every Modal payload; we don't
-            # duplicate it into the case_full envelope since the case-level
-            # disclaimer already covers it.
-            parsed_report_dict: dict[str, Any] | None = None
-            parsed_report_provenance: dict[str, Any] | None = None
-            _cbert_backend = os.environ.get("CLINICALBERT_BACKEND", "").lower()
+            # CLINICALBERT_BACKEND=modal|local, dispatched via a shared
+            # helper so both the placeholder (report-only, no CT) branch
+            # and the real-pipeline branch produce identical
+            # parsed_report / parsed_report_provenance semantics. Parse is
+            # a pure report -> entities transform; independent of CT.
             _report_text_for_cbert: str | None = None
             if (
                 getattr(req, "biopsy_input", None) is not None
                 and getattr(req.biopsy_input, "report_text", None)
             ):
                 _report_text_for_cbert = req.biopsy_input.report_text
-            if _cbert_backend == "modal" and _report_text_for_cbert:
-                try:
-                    from oncology_arbiter.nlp.clinicalbert_modal_client import (
-                        ClinicalBertModalClient,
-                        ClinicalBertModalError,
-                    )
-                    t_cb0 = time.perf_counter()
-                    _cbert_client = ClinicalBertModalClient()
-                    _cbert_resp = _cbert_client.parse(_report_text_for_cbert)
-                    parsed_report_dict = _cbert_resp.get("parsed") or {}
-                    parsed_report_provenance = {
-                        "provenance": _cbert_resp.get("provenance"),
-                        "base_model": _cbert_resp.get("base_model"),
-                        "training_seed": _cbert_resp.get("training_seed"),
-                        "test_micro_f1": _cbert_resp.get("test_micro_f1"),
-                        "app_version": _cbert_resp.get("app_version"),
-                        "n_tokens": _cbert_resp.get("n_tokens"),
-                        "seconds": _cbert_resp.get("seconds"),
-                        "n_entity_types": len(parsed_report_dict),
-                        "wall_seconds": round(time.perf_counter() - t_cb0, 3),
-                        "source": "clinicalbert_modal",
-                    }
-                except Exception as _cbert_exc:  # pylint: disable=broad-except
-                    log_event(
-                        request_id, "/v1/case/full",
-                        model_state="clinicalbert_modal_error",
-                        patient_id_hash=None,
-                        extra={"error": f"{type(_cbert_exc).__name__}: {_cbert_exc}"},
-                        tenant_id=tenant.tenant_id,
-                    )
-                    parsed_report_provenance = {
-                        "source": "clinicalbert_modal",
-                        "error": f"{type(_cbert_exc).__name__}: {_cbert_exc}",
-                    }
-            elif _cbert_backend == "local" and _report_text_for_cbert:
-                # v0.4.1 local smoke path: load fine-tuned Bio_ClinicalBERT
-                # in-process (torch + transformers). Used ONLY when Modal
-                # is unavailable during local uvicorn testing; the deployed
-                # Render dyno never sets CLINICALBERT_BACKEND=local (would
-                # blow the 512 MB memory ceiling).
-                try:
-                    from oncology_arbiter.nlp.clinicalbert_local_client import (
-                        ClinicalBertLocalClient,
-                    )
-                    t_cb0 = time.perf_counter()
-                    _cbert_client = ClinicalBertLocalClient()
-                    _cbert_resp = _cbert_client.parse(_report_text_for_cbert)
-                    parsed_report_dict = _cbert_resp.get("parsed") or {}
-                    parsed_report_provenance = {
-                        "provenance": _cbert_resp.get("provenance"),
-                        "base_model": _cbert_resp.get("base_model"),
-                        "training_seed": _cbert_resp.get("training_seed"),
-                        "test_micro_f1": _cbert_resp.get("test_micro_f1"),
-                        "app_version": _cbert_resp.get("app_version"),
-                        "n_tokens": _cbert_resp.get("n_tokens"),
-                        "seconds": _cbert_resp.get("seconds"),
-                        "n_entity_types": len(parsed_report_dict),
-                        "wall_seconds": round(time.perf_counter() - t_cb0, 3),
-                        "source": "clinicalbert_local",
-                    }
-                except Exception as _cbert_exc:  # pylint: disable=broad-except
-                    log_event(
-                        request_id, "/v1/case/full",
-                        model_state="clinicalbert_local_error",
-                        patient_id_hash=None,
-                        extra={"error": f"{type(_cbert_exc).__name__}: {_cbert_exc}"},
-                        tenant_id=tenant.tenant_id,
-                    )
-                    parsed_report_provenance = {
-                        "source": "clinicalbert_local",
-                        "error": f"{type(_cbert_exc).__name__}: {_cbert_exc}",
-                    }
+            parsed_report_dict, parsed_report_provenance = _run_clinicalbert_parse(
+                request_id=request_id,
+                tenant_id=tenant.tenant_id,
+                report_text=_report_text_for_cbert,
+                log_event_fn=log_event,
+            )
 
             # ----- v0.3.0: LUNA16 RetinaNet upgrade path ------------------ #
             # When the env flag is set, run the MONAI RetinaNet detector on
