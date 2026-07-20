@@ -502,8 +502,11 @@ def main():
         "val_f1s": val_f1s,
         "class_weighted_loss": args.class_weighted_loss,
         "label_smoothing": args.label_smoothing,
-        "snorkel_label_model_accuracy": snorkel_lf_accuracies,
-        "annotator_kappa_nsclc": annotator_kappa_nsclc,
+        # v0.5.1: populated by finalize_and_deploy_v51.sh from corpus manifest +
+        # NSCLC gold quality file. Left None here to avoid the trainer needing
+        # access to those artifacts at runtime.
+        "snorkel_label_model_accuracy": None,
+        "annotator_kappa_nsclc": None,
         "test": test_metrics,
         "per_cancer": per_cancer_metrics,
         "label_map": {"label2id": LABEL2ID, "id2label": {str(k): v for k, v in ID2LABEL.items()}},

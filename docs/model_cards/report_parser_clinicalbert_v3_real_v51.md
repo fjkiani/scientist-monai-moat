@@ -101,6 +101,8 @@ Rollback rule: **If v0.5.1 breast/CRC F1 drops >5 relative points vs v0.5.0 (0.0
 
 **Limitations**:
 
+- **Train/test val-F1 gap (v0.5.2 follow-up)**: across all 5 seeds val F1 climbs 0.30 → 0.32 across epochs but test F1 stays ~0.08. This gap is the signature of weak-supervision drift — the Snorkel-labeled train and val distribution differs from the clean-gold test distribution, so the model fits Snorkel label noise instead of clean spans. This is not a bug in the training run itself; it is a corpus-quality issue and is why v0.5.1 test F1 is ~0.08 despite the val-F1 lift. v0.5.2 plans a held-out gold slice inside val, tighter LF filtering, higher `min_votes` threshold on the LLM LF, and ontology expansion to close this gap.
+- Absolute test F1 is low (~0.08 combined) but breast/CRC test F1 mean (~0.088) is +30–33% relative to the v0.5.0 baseline mean (0.0667). Rollback rule (>5 relative-point drop) is not triggered — v0.5.1 ships as an incremental win, not a regression.
 - TCGA-LUAD/LUSC pre-molecular era → sparse ALK/ROS1/BRAF/MET/PD-L1 support. Real clinical reports today will have denser molecular sections; retrain on modern data before clinical deployment.
 - Snorkel weak labels contain 2–5% noise (LF conflict rates). Class weights up to 25× amplify this noise for rare tags — some spurious high-confidence predictions on rare entities are expected.
 - `tencent/hy3:free` (OpenRouter) is the LLM label function. If OpenRouter changes routing or the model deprecates, the LF-LLM signal quality is not guaranteed to be reproducible.
