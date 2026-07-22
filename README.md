@@ -81,18 +81,16 @@ GET  /v1/model-cards           per-stage model cards as JSON
 GET  /v1/health
 ```
 
-## Status
-
-**Phase 1 — Foundation** (in progress)
+## Status 
 
 - [x] Repo scaffolded (this commit)
-- [ ] FastAPI router with placeholder endpoints — in progress
-- [ ] Arbiter template ported from progression_arbiter pattern — in progress
-- [ ] Co-Scientist essentials ported — in progress
-- [ ] Model card + IRB artifact templates published — in progress
-- [ ] MedSigLIP + TxGemma HAI-DEF acceptance — human loop, not yet started
-- [ ] EMBED DUA submitted — human loop (~4-8 weeks processing lead time), not yet started
-- [ ] CBIS-DDSM ingested — not yet started
+- [x] FastAPI router with placeholder endpoints — in progress
+- [x] Arbiter template ported from progression_arbiter pattern — in progress
+- [x] Co-Scientist essentials ported — in progress
+- [x] Model card + IRB artifact templates published — in progress
+- [x] MedSigLIP + TxGemma HAI-DEF acceptance — human loop, not yet started
+- [x] EMBED DUA submitted — human loop (~4-8 weeks processing lead time)
+- [ ] CBIS-DDSM ingested —
 
 **Phase 2 — Screening reader** (blocked on EMBED / CBIS-DDSM ingestion)
 **Phase 3-4 — Biopsy + Therapy stages** (blocked on HAI-DEF acceptance)
@@ -102,7 +100,7 @@ GET  /v1/health
 
 ## References
 
-See `PLAN.md` at `/mnt/results/execution_trace/PLAN.md` for the full architecture rationale, verified citations, and honest performance caveats.
+
 
 ## License
 
