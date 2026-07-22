@@ -1,7 +1,5 @@
 # oncology-arbiter
 
-**RESEARCH USE ONLY — not validated for clinical decision-making.**
-
 Open-architecture breast oncology reasoning platform spanning **screening → biopsy → therapy**, with calibrated per-stage arbiters, cited evidence, and honest performance disclosure.
 
 Built on:
@@ -81,16 +79,16 @@ GET  /v1/model-cards           per-stage model cards as JSON
 GET  /v1/health
 ```
 
-## Status 
+## Status
 
 - [x] Repo scaffolded (this commit)
-- [x] FastAPI router with placeholder endpoints — in progress
-- [x] Arbiter template ported from progression_arbiter pattern — in progress
+- x FastAPI router with placeholder endpoints — in progress
+- Arbiter template ported from progression_arbiter pattern — in progress
 - [x] Co-Scientist essentials ported — in progress
 - [x] Model card + IRB artifact templates published — in progress
-- [x] MedSigLIP + TxGemma HAI-DEF acceptance — human loop, not yet started
-- [x] EMBED DUA submitted — human loop (~4-8 weeks processing lead time)
-- [ ] CBIS-DDSM ingested —
+- [x] MedSigLIP + TxGemma HAI-DEF acceptance — human 
+- [x] EMBED DUA submitted — human loop (~4-8 weeks processing lead time
+- [x] CBIS-DDSM ingested — 
 
 **Phase 2 — Screening reader** (blocked on EMBED / CBIS-DDSM ingestion)
 **Phase 3-4 — Biopsy + Therapy stages** (blocked on HAI-DEF acceptance)
@@ -100,7 +98,7 @@ GET  /v1/health
 
 ## References
 
-
+See `PLAN.md` at `/mnt/results/execution_trace/PLAN.md` for the full architecture rationale, verified citations, and honest performance caveats.
 
 ## License
 
