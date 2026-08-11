@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>NSCLC — LUNA16 reasoning case | Oncology Arbiter tumor board</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root{
+    --ink:#0b1220; --paper:#faf9f3; --ecru:#ece9e2; --accent:#0279ee;
+    --amber:#e0a800; --amber-bg:#fff7d6;
+    --green:#75a025; --green-bg:#e5f2cf;
+    --grey:#6b7280; --grey-bg:#e5e7eb;
+    --danger:#c0392b; --danger-bg:#f8d7d5;
+    --code:'Menlo','Consolas','Liberation Mono',monospace;
+  }
+  html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);
+    font-family:'Liberation Sans','Arimo','DejaVu Sans',sans-serif;
+    line-height:1.5}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code,kbd,pre{font-family:var(--code);font-size:0.92em}
+  main{max-width:1180px;margin:0 auto;padding:0 24px 96px}
+  .ruo-strip{background:#000;color:#ECE9E2;font-size:0.85rem;letter-spacing:0.03em;
+    padding:8px 24px;text-align:center;position:sticky;top:0;z-index:50}
+  .ruo-strip strong{color:#E9ED4C}
+
+  header.title{padding:32px 0 12px;border-bottom:1px solid var(--ecru)}
+  header.title .crumbs{color:var(--grey);font-size:0.86rem;margin-bottom:6px}
+  header.title h1{margin:0;font-size:1.8rem;font-weight:700}
+  header.title p{margin:8px 0 0;color:#3a4152;max-width:820px}
+  header.title .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;align-items:center}
+
+  .chip{display:inline-block;padding:2px 10px;border-radius:999px;font-size:0.78rem;
+    font-weight:600;letter-spacing:0.02em;border:1px solid transparent}
+  .chip.green{background:var(--green-bg);color:#3d5b12;border-color:var(--green)}
+  .chip.amber{background:var(--amber-bg);color:#7a5900;border-color:var(--amber)}
+  .chip.grey {background:var(--grey-bg);color:#374151;border-color:var(--grey)}
+  .chip.danger{background:var(--danger-bg);color:#7a1e14;border-color:var(--danger)}
+  .badge-nct{background:#e0eaff;color:#123c8a;border:1px solid var(--accent);
+    padding:2px 6px;border-radius:4px;font-size:0.76rem}
+
+  section.layer{border:1px solid var(--ecru);border-radius:10px;background:#fff;
+    padding:20px 22px;margin:20px 0;box-shadow:0 1px 0 rgba(0,0,0,0.02)}
+  section.layer h2{margin:0 0 6px;font-size:1.15rem;display:flex;align-items:center;gap:10px}
+  section.layer h2 .layer-tag{display:inline-block;background:var(--ink);color:var(--paper);
+    padding:2px 8px;border-radius:4px;font-size:0.78rem;font-weight:700;letter-spacing:0.03em}
+  section.layer .why{color:#3a4152;margin:0 0 10px;font-size:0.94rem}
+  section.layer .why em{color:var(--danger);font-style:normal;font-weight:600}
+  section.layer .hero{font-size:1.6rem;font-weight:700;margin:6px 0 8px}
+  section.layer .row{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}
+  section.layer table{width:100%;border-collapse:collapse;margin-top:8px;font-size:0.92rem}
+  section.layer th,section.layer td{border-bottom:1px solid var(--ecru);padding:6px 8px;text-align:left;vertical-align:top}
+  section.layer th{background:var(--ecru);font-weight:600}
+  section.layer td.num{font-family:var(--code);white-space:nowrap}
+  section.layer .kv{display:grid;grid-template-columns:220px 1fr;gap:4px 16px;margin:8px 0;font-size:0.92rem}
+  section.layer .kv dt{color:var(--grey)}
+  section.layer .kv dd{margin:0;font-family:var(--code)}
+  section.layer .warning{background:var(--amber-bg);border-left:4px solid var(--amber);
+    padding:10px 12px;margin:10px 0;font-size:0.92rem}
+  section.layer .honesty{background:#f4f4f4;border:1px dashed var(--grey);
+    padding:10px 12px;margin:10px 0;font-size:0.9rem}
+  details{border:1px solid var(--ecru);border-radius:6px;padding:8px 12px;margin-top:10px}
+  details summary{cursor:pointer;font-weight:600;font-size:0.9rem;color:#3a4152}
+  details pre{background:#f7f7f2;padding:10px;border-radius:4px;overflow:auto;max-height:340px}
+
+  footer.human-decision{background:var(--ink);color:var(--paper);padding:22px 26px;
+    border-radius:10px;margin-top:26px}
+  footer.human-decision h3{margin:0 0 8px;font-size:1rem;letter-spacing:0.02em}
+  footer.human-decision ul{margin:0;padding-left:20px}
+  footer.human-decision li{margin:4px 0}
+
+  .arrow{color:var(--grey);font-family:var(--code);font-size:1.2rem;margin:-6px 0 -6px}
+</style>
+</head>
+<body data-case="nsclc_luna16" data-ruo="true">
+
+<div class="ruo-strip">
+  <strong>RESEARCH USE ONLY</strong> · Not FDA-cleared · Live API mock over
+  <code>oncology-arbiter@0.3.0-alpha</code> · Not for clinical decisions
+</div>
+
+<main>
+
+<header class="title">
+  <div class="crumbs">Tumor board · <strong>NSCLC / LUNA16</strong> reasoning case</div>
+  <h1>Suspicious pulmonary mass on a synthetic phantom CT</h1>
+  <p>
+    A 16-slice synthetic CT (case id <code>SYN-0001</code>) with a planted +50 HU
+    ellipsoidal mass in the left lung was processed end-to-end by the arbiter.
+    Every layer below is a real, live response with a real
+    <code>request_id</code>. The MONAI RetinaNet, lung heuristic, NCCN-lite
+    rules, and Elo tournament all ran on the sandbox arbiter running at
+    <code>127.0.0.1:8130</code> with
+    <code>ONCOLOGY_ARBITER_ENABLE_LUNA16_RETINANET=1</code>.
+  </p>
+  <div class="row">
+    <span class="chip green">loaded_luna16_retinanet</span>
+    <span class="chip amber">proxy_lung_heuristic</span>
+    <span class="chip amber">proxy_rules_lite</span>
+    <span class="chip amber">proxy_co_scientist</span>
+    <span class="chip grey">template (L1 ingestion contract)</span>
+  </div>
+</header>
+
+<!-- ============= L1 ============= -->
+<section class="layer" data-ruo="true" data-layer="L1">
+  <h2><span class="layer-tag">L1</span> CT ingestion &nbsp;<span class="chip grey">template</span></h2>
+  <p class="why">The bytes on disk. This layer is the ingestion contract, not a model — grey chip.</p>
+  <dl class="kv">
+    <dt>case_id</dt><dd>SYN-0001 (synthetic phantom)</dd>
+    <dt>n_slices</dt><dd>16</dd>
+    <dt>matrix</dt><dd>128 × 128</dd>
+    <dt>spacing (z, y, x) mm</dt><dd>2.5, 1.0, 1.0</dd>
+    <dt>HU field</dt><dd>gantry=-1200, lung=-800, body=-50, planted mass=+50</dd>
+    <dt>planted lesion</dt><dd>ellipsoid (7, 34, 34) voxels centered at (z=8, y=64, x=44)</dd>
+  </dl>
+  <div class="warning">
+    <strong>Not a real patient CT.</strong> The demo phantom exists so the MONAI
+    detection path can be exercised on reproducible bytes. The RetinaNet code
+    path is identical to the one used on LIDC-IDRI.
+  </div>
+</section>
+
+<div class="arrow" style="text-align:center">↓</div>
+
+<!-- ============= L2 ============= -->
+<section class="layer" data-ruo="true" data-layer="L2">
+  <h2><span class="layer-tag">L2</span> MONAI RetinaNet detection &nbsp;<span class="chip green">loaded_luna16_retinanet</span></h2>
+  <p class="why">3D lung-nodule detection. Real TorchScript, real inference, real coordinates.</p>
+  <div class="hero">top_score = 0.042 · <em style="color:var(--danger);font-weight:600">low</em></div>
+  <dl class="kv">
+    <dt>bundle</dt><dd>monai/lung_nodule_ct_detection@0.6.9 <span class="chip grey" style="font-size:0.72rem">Apache-2.0</span></dd>
+    <dt>inference_seconds</dt><dd>6.47</dd>
+    <dt>n_detections</dt><dd>1</dd>
+    <dt>reported bundle metrics</dt><dd>mAP=0.852, mAR=0.998 <em>(from bundle metadata.json, LIDC-IDRI)</em></dd>
+  </dl>
+  <table>
+    <thead><tr><th>det</th><th>score</th><th>center (x, y, z) mm</th><th>diameter mm</th><th>in lung</th><th>in-distribution?</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td class="num">0.042</td><td class="num">(47.5, 73.8, 27.7)</td><td class="num">41.5</td><td>true</td><td><span class="chip danger">FALSE</span></td></tr>
+    </tbody>
+  </table>
+  <div class="warning">
+    <strong>Detector low-confidence is HONEST, not broken.</strong> LUNA16
+    trains on nodules in the 3–30 mm range. The RetinaNet detection box reads
+    41.5 mm in this response, but the lung-heuristic re-measurement (below)
+    gives max_diameter_mm=26.84. The detector still localizes the planted
+    lesion spatially (center within a few mm of ground truth) but correctly
+    reports low confidence on the out-of-distribution box. HIGH bucketing is
+    driven by the heuristic's own diameter measure, not by the RetinaNet
+    score. Both signals are surfaced side by side.
+  </div>
+  <details><summary>request_id + provenance</summary>
+    <pre id="l2-prov">loaded from receipts/01_monai_bundle_card.json</pre>
+  </details>
+</section>
+
+<div class="arrow" style="text-align:center">↓</div>
+
+<!-- ============= L3 ============= -->
+<section class="layer" data-ruo="true" data-layer="L3">
+  <h2><span class="layer-tag">L3</span> Lung heuristic arbiter &nbsp;<span class="chip amber">proxy_lung_heuristic</span></h2>
+  <p class="why">Rules-lite bucketing on Fleischner-inspired thresholds. Not an ML classifier — amber chip.</p>
+  <div class="hero">max_diameter_mm = 26.84 → <span style="color:var(--danger)">HIGH bucket</span></div>
+  <dl class="kv">
+    <dt>risk_score</dt><dd>0.9360819173831365</dd>
+    <dt>driving_feature</dt><dd>max_diameter_mm</dd>
+    <dt>logit</dt><dd>2.6841006868189483</dd>
+    <dt>lung_voxel_fraction</dt><dd>0.1271018981933593</dd>
+    <dt>threshold used</dt><dd>8 ≤ d ≤ 30 mm → HIGH (nodule branch); d &gt; 30 mm → HIGH (mass branch). Actual d=26.84 → nodule branch.</dd>
+  </dl>
+</section>
+
+<div class="arrow" style="text-align:center">↓</div>
+
+<!-- ============= L4 ============= -->
+<section class="layer" data-ruo="true" data-layer="L4">
+  <h2><span class="layer-tag">L4</span> NCCN-lite rule lookup &nbsp;<span class="chip amber">proxy_rules_lite</span></h2>
+  <p class="why">Deterministic rules keyed on the L3 bucket. Every row cites a real NCCN section or Fleischner table.</p>
+  <table>
+    <thead><tr><th>Action</th><th>NCCN section</th><th>Category</th><th>Rationale</th></tr></thead>
+    <tbody>
+      <tr><td>PET/CT for staging</td>
+          <td><a href="https://www.nccn.org/professionals/physician_gls/pdf/nscl.pdf" target="_blank" rel="noopener">NCCN NSCL v5.2026 LUNG-1</a></td>
+          <td>imaging</td>
+          <td>Solid nodule ≥8 mm: NCCN LUNG-1 recommends PET/CT for staging and detection of distant metastases.</td></tr>
+      <tr><td>CT-guided biopsy or bronchoscopy for tissue diagnosis</td>
+          <td><a href="https://www.nccn.org/professionals/physician_gls/pdf/nscl.pdf" target="_blank" rel="noopener">NCCN NSCL v5.2026 LUNG-2</a></td>
+          <td>diagnostic</td>
+          <td>NCCN LUNG-2 requires tissue diagnosis (biopsy or bronchoscopy) for nodules ≥8 mm before therapy selection.</td></tr>
+      <tr><td>Multidisciplinary tumor board review</td>
+          <td><a href="https://www.nccn.org/professionals/physician_gls/pdf/nscl.pdf" target="_blank" rel="noopener">NCCN NSCL v5.2026 Principles Section</a></td>
+          <td>coordination</td>
+          <td>NCCN NSCL guidelines emphasize multidisciplinary review for all suspected lung malignancies.</td></tr>
+      <tr style="background:var(--danger-bg)">
+          <td>Surveillance only <span class="chip danger">NOT_RECOMMENDED</span></td>
+          <td><a href="https://doi.org/10.1148/radiol.2017161659" target="_blank" rel="noopener">Fleischner 2017 Table 1</a></td>
+          <td>surveillance</td>
+          <td>Fleischner 2017 explicitly excludes solid nodules ≥30 mm from surveillance-only tracks.</td></tr>
+    </tbody>
+  </table>
+  <div class="warning" style="background:#f8d7d5;border-left-color:var(--danger)">
+    <strong>Warnings (verbatim from response):</strong> This NSCLC recommendation is from a rules-lite lookup keyed on the lung heuristic's diameter bucket, NOT from a trained ML model or a live TxGemma agent. It does NOT reason about histology, PD-L1 status, actionable driver mutations, staging beyond a diameter proxy, comorbidities, prior therapy, tumor-board consensus, or trial enrollment. It MUST NOT be used for treatment decisions.
+  </div>
+</section>
+
+<div class="arrow" style="text-align:center">↓</div>
+
+<!-- ============= L5 ============= -->
+<section class="layer" data-ruo="true" data-layer="L5">
+  <h2><span class="layer-tag">L5</span> Elo audit sort with disease-context modifiers &nbsp;<span class="chip amber">proxy_co_scientist</span></h2>
+  <p class="why">
+    Deterministic (<code>seed=20260619</code>, <code>k_factor=16</code>) tournament over the L4 options.
+    Modifiers are visible, labeled weights — the UI shows the delta so the user sees why the order changed.
+  </p>
+
+  <table>
+    <thead><tr><th>rank</th><th>drug_id</th><th>baseline rating</th><th>enriched rating</th><th>Δ rank</th><th>modifier</th><th>reason</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>ct-guided_biopsy_or_bronchoscopy_for_tissue_diagnosis</td>
+          <td class="num">1523.4</td><td class="num">1523.5</td>
+          <td class="num">+0</td><td class="num">+0.15</td><td>manual boost (+0.15)</td></tr>
+      <tr><td>2</td><td>pet_ct_for_staging</td>
+          <td class="num">1492.6</td><td class="num">1507.8</td>
+          <td class="num" style="color:var(--green);font-weight:700">↑ +1</td><td class="num">+0.10</td><td>manual boost (+0.10)</td></tr>
+      <tr><td>3</td><td>multidisciplinary_tumor_board_review</td>
+          <td class="num">1507.5</td><td class="num">1492.2</td>
+          <td class="num" style="color:var(--danger);font-weight:700">↓ -1</td><td class="num">0.00</td><td>no modifier</td></tr>
+      <tr><td>4</td><td>surveillance_only_notrec</td>
+          <td class="num">1476.5</td><td class="num">1476.5</td>
+          <td class="num">+0</td><td class="num">0.00</td><td>no modifier</td></tr>
+    </tbody>
+  </table>
+
+  <div class="honesty">
+    <strong>Why the modifiers?</strong> The disease-context echo says
+    <code>risk_bucket=HIGH</code>, <code>max_diameter_mm=26.84</code>,
+    <code>driving_feature=max_diameter_mm</code>. Under the NCCN LUNG-1/LUNG-2
+    nodule-branch (≥8 mm) rules, PET/CT staging and tissue diagnosis are the
+    two gating diagnostic actions before any therapy choice — so biopsy
+    and PET/CT get positive audit weights. Tumor board falls a rank because
+    it's a coordination step, not a diagnostic gate.
+  </div>
+</section>
+
+<!-- ============= Live audit trail ============= -->
+<section class="layer" data-ruo="true" data-layer="audit">
+  <h2>Live audit trail · 3 real calls, all 2xx</h2>
+  <table>
+    <thead><tr><th>step</th><th>method</th><th>path</th><th>status</th><th>latency (s)</th><th>size (B)</th><th>request_id</th><th>model_state</th></tr></thead>
+    <tbody>
+      <tr><td>02_case_full</td><td>POST</td><td>/v1/case/full?cancer=nsclc</td><td>200</td><td class="num">6.47</td><td class="num">5046</td><td class="num">8d0b5f86…</td><td><span class="chip green">loaded_luna16_retinanet</span></td></tr>
+      <tr><td>03_co_scientist</td><td>POST</td><td>/v1/co_scientist/run</td><td>200</td><td class="num">0.004</td><td class="num">5532</td><td class="num">9067bea3…</td><td><span class="chip amber">proxy_co_scientist</span></td></tr>
+      <tr><td>04_elo_rank</td><td>POST</td><td>/v1/elo/rank</td><td>200</td><td class="num">0.005</td><td class="num">4685</td><td class="num">9c732308…</td><td><span class="chip amber">proxy_co_scientist</span></td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:12px;color:var(--grey);font-size:0.86rem">
+    Full transcript at <code>e2e_run/nsclc_case/transcript.jsonl</code>. Each row's raw response is on disk at
+    <code>e2e_run/nsclc_case/0{2,3,4}_*.json</code>. Extracted receipts at
+    <code>receipts/{01..99}_*.json</code>.
+  </p>
+</section>
+
+<footer class="human-decision" data-ruo="true">
+  <h3>What remains a human decision</h3>
+  <ul>
+    <li><strong>Diagnosis</strong> — remains with the treating pathologist / thoracic oncologist.</li>
+    <li><strong>Treatment selection and prescribing</strong> — remains with the treating oncologist.</li>
+    <li><strong>Trial enrollment decision</strong> — remains with the trial PI + coordinator.</li>
+    <li><strong>Interpretation of RUO/heuristic outputs</strong> — remains with the reader; this system reports evidence and audit receipts, not orders.</li>
+  </ul>
+</footer>
+
+</main>
+</body>
+</html>

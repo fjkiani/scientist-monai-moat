@@ -1,0 +1,69 @@
+{
+  "summary": {
+    "total": 10,
+    "pass": 10,
+    "fail": 0
+  },
+  "results": [
+    {
+      "test": "T01",
+      "name": "RUO strip + FDA-cleared token on every page",
+      "status": "PASS",
+      "detail": "3/3 pages OK"
+    },
+    {
+      "test": "T02",
+      "name": "AK contribution-boundary disclosure verbatim",
+      "status": "PASS",
+      "detail": "all 4 tokens present"
+    },
+    {
+      "test": "T03",
+      "name": "AK page carries the 3 SHAs, manuscript linked",
+      "status": "PASS",
+      "detail": "3/3 SHAs + link OK"
+    },
+    {
+      "test": "T04",
+      "name": "AK all 7 anchor p-values verbatim",
+      "status": "PASS",
+      "detail": "7/7 present with full decimals"
+    },
+    {
+      "test": "T05",
+      "name": "PARP falsification is first-class, not quarantined",
+      "status": "PASS",
+      "detail": "narrative + first-class row + no quarantine tab"
+    },
+    {
+      "test": "T06",
+      "name": "chip discipline on AK",
+      "status": "PASS",
+      "detail": "proxy chip constrained to Elo block; all 3 loaded_* chips present"
+    },
+    {
+      "test": "T07",
+      "name": "NSCLC low-confidence surfaced inline",
+      "status": "PASS",
+      "detail": "0.042 + honest explanation + chip visible inline"
+    },
+    {
+      "test": "T08",
+      "name": "Zero fake NCT identifiers",
+      "status": "PASS",
+      "detail": "scanned 5 files"
+    },
+    {
+      "test": "T09",
+      "name": "Zero quarantine-forbidden strings/patterns",
+      "status": "PASS",
+      "detail": "scanned 5 files, 11 substrings, 5 regex patterns"
+    },
+    {
+      "test": "T10",
+      "name": "Live 3-call transcripts on disk, all 2xx, real request_ids",
+      "status": "PASS",
+      "detail": "both cases: >=3 calls, all 2xx, real UUIDs, expected states"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "detections": [
+    {
+      "det_id": 0,
+      "score": 0.04246260225772858,
+      "center_x_mm": 47.508052825927734,
+      "center_y_mm": 73.80682373046875,
+      "center_z_mm": 27.691242218017578,
+      "diameter_mm": 41.549373626708984,
+      "in_lung_parenchyma": true,
+      "in_distribution": false
+    }
+  ],
+  "note": "in_distribution=false \u2192 detection larger than LUNA16 training range."
+}

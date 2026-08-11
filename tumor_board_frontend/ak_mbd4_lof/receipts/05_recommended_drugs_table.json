@@ -1,0 +1,90 @@
+{
+  "n_drugs": 7,
+  "drugs": [
+    {
+      "drug_name": "cytarabine",
+      "target": "DNA-pol \u03b1 (Ara-CTP)",
+      "role": "validated_benchmark",
+      "axis": "cytidine_analogs",
+      "axis_label": "Cytidine Analogs (gemcitabine, cytarabine)",
+      "recommendation_tier": "Validated SL therapeutic lever",
+      "tier_rank": 1,
+      "manuscript_claim_type": "validated_benchmark",
+      "bridge_recommended_drugs_policy": "eligible_matrix_positive_tier",
+      "surface_status": "RECOMMENDED"
+    },
+    {
+      "drug_name": "decitabine",
+      "target": "DNMT1",
+      "role": "validated_benchmark",
+      "axis": "cytidine_analogs",
+      "axis_label": "Cytidine Analogs (gemcitabine, cytarabine)",
+      "recommendation_tier": "Validated SL therapeutic lever",
+      "tier_rank": 1,
+      "manuscript_claim_type": "validated_benchmark",
+      "bridge_recommended_drugs_policy": "eligible_matrix_positive_tier",
+      "surface_status": "RECOMMENDED"
+    },
+    {
+      "drug_name": "adavosertib",
+      "target": "WEE1",
+      "role": "axis_partner",
+      "axis": "atr_wee1",
+      "axis_label": "ATR / WEE1 Inhibitors (berzosertib, adavosertib, ceralasertib)",
+      "recommendation_tier": "Strong candidate dependency axis",
+      "tier_rank": 2,
+      "manuscript_claim_type": "primary_new_candidate_axis",
+      "bridge_recommended_drugs_policy": "eligible_matrix_positive_tier",
+      "surface_status": "RECOMMENDED"
+    },
+    {
+      "drug_name": "berzosertib",
+      "target": "ATR",
+      "role": "alternate",
+      "axis": "atr_wee1",
+      "axis_label": "ATR / WEE1 Inhibitors (berzosertib, adavosertib, ceralasertib)",
+      "recommendation_tier": "Strong candidate dependency axis",
+      "tier_rank": 2,
+      "manuscript_claim_type": "primary_new_candidate_axis",
+      "bridge_recommended_drugs_policy": "eligible_matrix_positive_tier",
+      "surface_status": "RECOMMENDED"
+    },
+    {
+      "drug_name": "ceralasertib",
+      "target": "ATR",
+      "role": "lead",
+      "axis": "atr_wee1",
+      "axis_label": "ATR / WEE1 Inhibitors (berzosertib, adavosertib, ceralasertib)",
+      "recommendation_tier": "Strong candidate dependency axis",
+      "tier_rank": 2,
+      "manuscript_claim_type": "primary_new_candidate_axis",
+      "bridge_recommended_drugs_policy": "eligible_matrix_positive_tier",
+      "surface_status": "RECOMMENDED"
+    },
+    {
+      "drug_name": "olaparib",
+      "target": "PARP1",
+      "role": "falsified_on_transcriptional_basis",
+      "axis": "parp_inhibitors",
+      "axis_label": "PARP Inhibitors (olaparib, niraparib, talazoparib, rucaparib)",
+      "recommendation_tier": "Mechanistic candidate only",
+      "tier_rank": 3,
+      "manuscript_claim_type": "falsified_mechanism",
+      "bridge_recommended_drugs_policy": "eligible_matrix_positive_tier",
+      "surface_status": "NOT_RECOMMENDED_ON_THIS_MECHANISM"
+    },
+    {
+      "drug_name": "talazoparib",
+      "target": "PARP1",
+      "role": "falsified_on_transcriptional_basis",
+      "axis": "parp_inhibitors",
+      "axis_label": "PARP Inhibitors (olaparib, niraparib, talazoparib, rucaparib)",
+      "recommendation_tier": "Mechanistic candidate only",
+      "tier_rank": 3,
+      "manuscript_claim_type": "falsified_mechanism",
+      "bridge_recommended_drugs_policy": "eligible_matrix_positive_tier",
+      "surface_status": "NOT_RECOMMENDED_ON_THIS_MECHANISM"
+    }
+  ],
+  "policy_note": "The `recommended_drugs` list is a frontend-shaped projection assembled from the live-built evidence matrix (each row's recommendation_tier, manuscript_claim_type, and bridge_recommended_drugs_policy). Drug names are from the canonical audit JSON / PARP falsification narrative \u2014 not invented \u2014 but the per-drug envelope (drug_name, target, role, surface_status) is materialised in the payload-build step, NOT by an existing backend drug-bridge function (which is not present at HEAD bfd6d11f under the name `build_drug_bridge_recommendations`). For source-of-truth use, downstream consumers should also read `provenance.evidence_matrix.rows[*]` directly."
+}

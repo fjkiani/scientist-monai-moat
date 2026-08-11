@@ -1,0 +1,238 @@
+{
+  "disclaimer": "RESEARCH USE ONLY \u2014 not validated for clinical decision-making. Not FDA-cleared. Not CE-marked. Investigational / IRB context only.",
+  "caveat": "AUROC reflects the model's ability to discriminate within literature-derived events whose labels and features co-originate from the same published narratives. This circularity inflates apparent performance. Expected prospective AUROC: 0.70\u20130.85 based on independent validation.",
+  "provenance": {
+    "model_state": "proxy_co_scientist",
+    "model_name": "oa/co_scientist_elo@v0.3.0-alpha",
+    "model_version": "v0.3.0-alpha",
+    "request_id": "9c732308114a4b9a9237b807de9d2aa6",
+    "gate_report": null,
+    "model_endpoint_url": null
+  },
+  "honesty_gate": {
+    "seen_urls_count": 2,
+    "evidence_kept": 2,
+    "evidence_dropped": 0,
+    "hypotheses_dropped": 0
+  },
+  "evidence": [
+    {
+      "url": "https://www.nccn.org/professionals/physician_gls/pdf/nscl.pdf",
+      "quoted_text": "Solid nodule \u22658 mm: NCCN LUNG-1 recommends PET/CT for staging and detection of distant metastases.",
+      "source": "nccn"
+    },
+    {
+      "url": "https://doi.org/10.1148/radiol.2017161659",
+      "quoted_text": "Nodules \u22658 mm require workup, not surveillance alone, per Fleischner 2017 Table 1.",
+      "source": "nccn"
+    }
+  ],
+  "warnings": [],
+  "contract_version": "v0.3.0-alpha",
+  "baseline_ranking": [
+    {
+      "rank": 1,
+      "drug_id": "ct-guided_biopsy_or_bronchoscopy_for_tissue_diagnosis",
+      "regimen": "CT-guided biopsy or bronchoscopy for tissue diagnosis",
+      "line": 1,
+      "rating": 1523.448,
+      "wins": 3,
+      "losses": 0,
+      "draws": 2,
+      "confidence": 0.75,
+      "honesty_markers": {
+        "proxy": true,
+        "gated": false,
+        "loaded": false
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 2,
+      "drug_id": "multidisciplinary_tumor_board_review",
+      "regimen": "Multidisciplinary tumor board review",
+      "line": 1,
+      "rating": 1507.456,
+      "wins": 2,
+      "losses": 1,
+      "draws": 2,
+      "confidence": 0.75,
+      "honesty_markers": {
+        "proxy": true,
+        "gated": false,
+        "loaded": false
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 3,
+      "drug_id": "pet_ct_for_staging",
+      "regimen": "PET/CT for staging",
+      "line": 1,
+      "rating": 1492.5564,
+      "wins": 1,
+      "losses": 2,
+      "draws": 2,
+      "confidence": 0.75,
+      "honesty_markers": {
+        "proxy": true,
+        "gated": false,
+        "loaded": false
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 4,
+      "drug_id": "surveillance_only_notrec",
+      "regimen": "Surveillance only",
+      "line": 1,
+      "rating": 1476.5396,
+      "wins": 0,
+      "losses": 3,
+      "draws": 0,
+      "confidence": 0.2,
+      "honesty_markers": {
+        "proxy": true,
+        "gated": false,
+        "loaded": false
+      },
+      "n_evidence": 1
+    }
+  ],
+  "enriched_ranking": [
+    {
+      "rank": 1,
+      "drug_id": "ct-guided_biopsy_or_bronchoscopy_for_tissue_diagnosis",
+      "regimen": "CT-guided biopsy or bronchoscopy for tissue diagnosis",
+      "line": 1,
+      "rating": 1523.456,
+      "wins": 3,
+      "losses": 0,
+      "draws": 0,
+      "confidence": 0.9,
+      "honesty_markers": {
+        "proxy": true,
+        "gated": false,
+        "loaded": false
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 2,
+      "drug_id": "pet_ct_for_staging",
+      "regimen": "PET/CT for staging",
+      "line": 1,
+      "rating": 1507.8201,
+      "wins": 2,
+      "losses": 1,
+      "draws": 0,
+      "confidence": 0.85,
+      "honesty_markers": {
+        "proxy": true,
+        "gated": false,
+        "loaded": false
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 3,
+      "drug_id": "multidisciplinary_tumor_board_review",
+      "regimen": "Multidisciplinary tumor board review",
+      "line": 1,
+      "rating": 1492.1924,
+      "wins": 1,
+      "losses": 2,
+      "draws": 0,
+      "confidence": 0.75,
+      "honesty_markers": {
+        "proxy": true,
+        "gated": false,
+        "loaded": false
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 4,
+      "drug_id": "surveillance_only_notrec",
+      "regimen": "Surveillance only",
+      "line": 1,
+      "rating": 1476.5315,
+      "wins": 0,
+      "losses": 3,
+      "draws": 0,
+      "confidence": 0.2,
+      "honesty_markers": {
+        "proxy": true,
+        "gated": false,
+        "loaded": false
+      },
+      "n_evidence": 1
+    }
+  ],
+  "matches": [
+    {
+      "drug_id": "ct-guided_biopsy_or_bronchoscopy_for_tissue_diagnosis",
+      "regimen": "CT-guided biopsy or bronchoscopy for tissue diagnosis",
+      "line": 1,
+      "baseline_rank": 1,
+      "enriched_rank": 1,
+      "baseline_rating": 1523.448,
+      "enriched_rating": 1523.456,
+      "rank_delta": 0,
+      "rating_delta": 0.008,
+      "applied_modifier": 0.15,
+      "reason": "manual boost (+0.15)"
+    },
+    {
+      "drug_id": "pet_ct_for_staging",
+      "regimen": "PET/CT for staging",
+      "line": 1,
+      "baseline_rank": 3,
+      "enriched_rank": 2,
+      "baseline_rating": 1492.5564,
+      "enriched_rating": 1507.8201,
+      "rank_delta": 1,
+      "rating_delta": 15.2637,
+      "applied_modifier": 0.1,
+      "reason": "manual boost (+0.10)"
+    },
+    {
+      "drug_id": "multidisciplinary_tumor_board_review",
+      "regimen": "Multidisciplinary tumor board review",
+      "line": 1,
+      "baseline_rank": 2,
+      "enriched_rank": 3,
+      "baseline_rating": 1507.456,
+      "enriched_rating": 1492.1924,
+      "rank_delta": -1,
+      "rating_delta": -15.2636,
+      "applied_modifier": 0.0,
+      "reason": "no modifier"
+    },
+    {
+      "drug_id": "surveillance_only_notrec",
+      "regimen": "Surveillance only",
+      "line": 1,
+      "baseline_rank": 4,
+      "enriched_rank": 4,
+      "baseline_rating": 1476.5396,
+      "enriched_rating": 1476.5315,
+      "rank_delta": 0,
+      "rating_delta": -0.0081,
+      "applied_modifier": 0.0,
+      "reason": "no modifier"
+    }
+  ],
+  "disease_context": {
+    "cancer": "nsclc",
+    "risk_bucket": "HIGH",
+    "max_diameter_mm": 26.84100686818948,
+    "driving_feature": "max_diameter_mm",
+    "risk_score": 0.9360819173831365
+  },
+  "applied_modifiers": {
+    "ct-guided_biopsy_or_bronchoscopy_for_tissue_diagnosis": 0.15,
+    "pet_ct_for_staging": 0.1
+  },
+  "n_candidates": 4
+}

@@ -1,0 +1,67 @@
+{
+  "case_id": "MBD4-LOF-DEMO-01",
+  "n_calls": 3,
+  "all_2xx": true,
+  "contract_version": "tumor_board.v3.multimodal-with-manuscript-claims",
+  "manuscript_repo_sha_at_audit": "d33f6403fb11b314c86fa74d9c56e07b7ac3d7b1",
+  "backend_head_sha": "bfd6d11fc872c11a13365b0682cea776a136c7f3",
+  "backend_branch": "fix/mbd4-atr-strong-tier",
+  "datasets_used": [
+    "GDSC2",
+    "DepMap 24Q2"
+  ],
+  "statistical_test": "Mann-Whitney U one-sided (alternative=less)",
+  "effect_size_metric": "Cohen's d (pooled)",
+  "audit_artifact": "tumor_board_evidence_chain.json (canonical_atr_wee1_rerun.json)",
+  "generated_at": "2026-06-17T18:19:46+00:00",
+  "bundle_sha256_api_echo": "0121fc84fc798af57aad78f2c9274506eac769313d4b21329ad9e3775c5b3a4c",
+  "tumor_board_bundle_request_id": "42a80e12fec94e0fadc5d9d6c3d0e360",
+  "evidence_matrix_axes": [],
+  "n_recommended_drugs": 7,
+  "elo_seed": 20260619,
+  "elo_modifiers": {
+    "ceralasertib_atr_wee1": {
+      "weight": 0.2,
+      "label": "manuscript_lead_axis_boost"
+    },
+    "adavosertib_atr_wee1": {
+      "weight": 0.1,
+      "label": "manuscript_supporting_axis_partner"
+    },
+    "berzosertib_atr_wee1": {
+      "weight": 0.05,
+      "label": "manuscript_supporting_axis"
+    },
+    "olaparib_parp_inhibitors": {
+      "weight": -0.3,
+      "label": "manuscript_falsified_penalty"
+    },
+    "talazoparib_parp_inhibitors": {
+      "weight": -0.3,
+      "label": "manuscript_falsified_penalty"
+    }
+  },
+  "contribution_boundary": {
+    "manuscript_receipts": [
+      "6 anchor p-values",
+      "Cohen's d values",
+      "n_mut / n_wt counts",
+      "GDSC2 / DepMap 24Q2 datasets",
+      "PARP1 falsification result",
+      "Mann-Whitney U one-sided test choice"
+    ],
+    "arbiter_contribution": [
+      "TumorBoardBundle contract validation",
+      "Honesty gate: URLs not in seed_urls stripped from co-scientist reflect",
+      "bundle_sha256 API-echoed audit-of-record",
+      "Deterministic Elo audit sort (modifiers labeled, weights visible)"
+    ],
+    "not_invoked_on_this_case": [
+      "MONAI RetinaNet (radiology)",
+      "MedSigLIP-448 (pathology)",
+      "TxGemma-9B chat (therapy reasoning)",
+      "ClinicalBERT report parser",
+      "CBIS-DDSM logreg (mammography)"
+    ]
+  }
+}

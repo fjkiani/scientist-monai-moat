@@ -1,0 +1,53 @@
+{
+  "meta": {
+    "purpose": "CI-checkable list of strings/patterns that MUST NEVER appear in user-visible output. Enforce as CI check on every L5 payload + rendered HTML.",
+    "derived_from": "contract_snapshot.json.prohibited_in_output",
+    "enforcement": "Reject the response if any pattern matches any user-visible field.",
+    "generated": "2026-07-18T18:58:29+00:00"
+  },
+  "forbidden_substrings": [
+    "ZEB1 escape marker",
+    "ZEB1 as an escape",
+    "LATIFY delta",
+    "DDR 0.983",
+    "DDR=0.983",
+    "recommend treatment with",
+    "prescribe",
+    "will respond to",
+    "predicted responder",
+    "patient-specific therapeutic",
+    "synthetic lethality is a patient-specific"
+  ],
+  "forbidden_patterns_regex": [
+    {
+      "pattern": "(?i)\\bshould (be treated with|take|receive)\\b",
+      "reason": "treatment directive"
+    },
+    {
+      "pattern": "(?i)\\bwill (respond|respond to|benefit from)\\b",
+      "reason": "individual outcome prediction"
+    },
+    {
+      "pattern": "(?i)\\bDDR\\s*[=:]?\\s*0\\.983\\b",
+      "reason": "quarantined case figure"
+    },
+    {
+      "pattern": "(?i)\\bZEB1\\b[^.]{0,60}\\bescape\\b",
+      "reason": "GBM ZEB1 escape framing"
+    },
+    {
+      "pattern": "(?i)\\bLATIFY\\s+delta\\b",
+      "reason": "quarantined case figure"
+    }
+  ],
+  "required_ruo_tokens_anywhere_in_response": [
+    "Research Use Only",
+    "Not FDA-cleared"
+  ],
+  "required_human_decision_boundary_items": [
+    "Diagnosis",
+    "Treatment selection and prescribing",
+    "Trial enrollment decision",
+    "Interpretation of RUO/heuristic outputs"
+  ]
+}

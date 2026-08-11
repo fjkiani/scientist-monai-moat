@@ -1,0 +1,30 @@
+{
+  "series_dir": "/tmp/e2e_synth_ct/SYN-0001/STUDY/CT_SYN",
+  "shape": [
+    16,
+    128,
+    128
+  ],
+  "spacing_mm_zyx": [
+    2.5,
+    1.0,
+    1.0
+  ],
+  "hu_range": {
+    "gantry": -1200,
+    "lung": -800,
+    "body": -50,
+    "planted_nodule": 50
+  },
+  "planted_ellipsoid_shape_zyx": [
+    7,
+    34,
+    34
+  ],
+  "planted_center_zyx_mm_approx": [
+    20.0,
+    64.0,
+    44.0
+  ],
+  "notes": "Synthetic phantom matching the demo_provenance profile in demo_samples/nsclc.json. Not a real patient CT. The MONAI RetinaNet code path is the same one used on LIDC-IDRI."
+}

@@ -1,0 +1,376 @@
+{
+  "model_state": "proxy_co_scientist",
+  "seed": 20260619,
+  "k_factor": 16,
+  "disease_context": {
+    "cancer": "ampullary_adenocarcinoma_hgsoc_like",
+    "biomarker": "MBD4_LOF",
+    "manuscript_repo_sha_at_audit": null,
+    "backend_head_sha": null
+  },
+  "applied_modifiers": {
+    "ceralasertib_atr_wee1": 0.2,
+    "adavosertib_atr_wee1": 0.1,
+    "berzosertib_atr_wee1": 0.05,
+    "olaparib_parp_inhibitors": -0.3,
+    "talazoparib_parp_inhibitors": -0.3
+  },
+  "modifier_labels": {
+    "ceralasertib_atr_wee1": {
+      "weight": 0.2,
+      "label": "manuscript_lead_axis_boost"
+    },
+    "adavosertib_atr_wee1": {
+      "weight": 0.1,
+      "label": "manuscript_supporting_axis_partner"
+    },
+    "berzosertib_atr_wee1": {
+      "weight": 0.05,
+      "label": "manuscript_supporting_axis"
+    },
+    "olaparib_parp_inhibitors": {
+      "weight": -0.3,
+      "label": "manuscript_falsified_penalty"
+    },
+    "talazoparib_parp_inhibitors": {
+      "weight": -0.3,
+      "label": "manuscript_falsified_penalty"
+    }
+  },
+  "baseline_ranking": [
+    {
+      "rank": 1,
+      "drug_id": "adavosertib_atr_wee1",
+      "regimen": "adavosertib",
+      "line": 1,
+      "rating": 1545.1541,
+      "wins": 6,
+      "losses": 0,
+      "draws": 2,
+      "confidence": 0.85,
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "n_evidence": 7
+    },
+    {
+      "rank": 2,
+      "drug_id": "berzosertib_atr_wee1",
+      "regimen": "berzosertib",
+      "line": 1,
+      "rating": 1530.0572,
+      "wins": 5,
+      "losses": 1,
+      "draws": 2,
+      "confidence": 0.85,
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "n_evidence": 7
+    },
+    {
+      "rank": 3,
+      "drug_id": "ceralasertib_atr_wee1",
+      "regimen": "ceralasertib",
+      "line": 1,
+      "rating": 1515.0874,
+      "wins": 4,
+      "losses": 2,
+      "draws": 2,
+      "confidence": 0.85,
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "n_evidence": 7
+    },
+    {
+      "rank": 4,
+      "drug_id": "cytarabine_cytidine_analogs",
+      "regimen": "cytarabine",
+      "line": 1,
+      "rating": 1499.6401,
+      "wins": 3,
+      "losses": 3,
+      "draws": 1,
+      "confidence": 0.85,
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 5,
+      "drug_id": "decitabine_cytidine_analogs",
+      "regimen": "decitabine",
+      "line": 1,
+      "rating": 1485.4213,
+      "wins": 2,
+      "losses": 4,
+      "draws": 1,
+      "confidence": 0.85,
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 6,
+      "drug_id": "olaparib_parp_inhibitors",
+      "regimen": "olaparib",
+      "line": 1,
+      "rating": 1470.1805,
+      "wins": 1,
+      "losses": 5,
+      "draws": 1,
+      "confidence": 0.15,
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 7,
+      "drug_id": "talazoparib_parp_inhibitors",
+      "regimen": "talazoparib",
+      "line": 1,
+      "rating": 1454.4593,
+      "wins": 0,
+      "losses": 6,
+      "draws": 1,
+      "confidence": 0.15,
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "n_evidence": 1
+    }
+  ],
+  "enriched_ranking": [
+    {
+      "rank": 1,
+      "drug_id": "ceralasertib_atr_wee1",
+      "regimen": "ceralasertib",
+      "line": 1,
+      "rating": 1545.6476,
+      "wins": 6,
+      "losses": 0,
+      "draws": 0,
+      "confidence": 1.0,
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "n_evidence": 7
+    },
+    {
+      "rank": 2,
+      "drug_id": "adavosertib_atr_wee1",
+      "regimen": "adavosertib",
+      "line": 1,
+      "rating": 1529.5182,
+      "wins": 5,
+      "losses": 1,
+      "draws": 0,
+      "confidence": 0.95,
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "n_evidence": 7
+    },
+    {
+      "rank": 3,
+      "drug_id": "berzosertib_atr_wee1",
+      "regimen": "berzosertib",
+      "line": 1,
+      "rating": 1514.7806,
+      "wins": 4,
+      "losses": 2,
+      "draws": 0,
+      "confidence": 0.9,
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "n_evidence": 7
+    },
+    {
+      "rank": 4,
+      "drug_id": "cytarabine_cytidine_analogs",
+      "regimen": "cytarabine",
+      "line": 1,
+      "rating": 1500.3326,
+      "wins": 3,
+      "losses": 3,
+      "draws": 1,
+      "confidence": 0.85,
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 5,
+      "drug_id": "decitabine_cytidine_analogs",
+      "regimen": "decitabine",
+      "line": 1,
+      "rating": 1485.0573,
+      "wins": 2,
+      "losses": 4,
+      "draws": 1,
+      "confidence": 0.85,
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 6,
+      "drug_id": "olaparib_parp_inhibitors",
+      "regimen": "olaparib",
+      "line": 1,
+      "rating": 1470.5195,
+      "wins": 1,
+      "losses": 5,
+      "draws": 1,
+      "confidence": 0.0,
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "n_evidence": 1
+    },
+    {
+      "rank": 7,
+      "drug_id": "talazoparib_parp_inhibitors",
+      "regimen": "talazoparib",
+      "line": 1,
+      "rating": 1454.1443,
+      "wins": 0,
+      "losses": 6,
+      "draws": 1,
+      "confidence": 0.0,
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "n_evidence": 1
+    }
+  ],
+  "matches": [
+    {
+      "drug_id": "ceralasertib_atr_wee1",
+      "regimen": "ceralasertib",
+      "line": 1,
+      "baseline_rank": 3,
+      "enriched_rank": 1,
+      "baseline_rating": 1515.0874,
+      "enriched_rating": 1545.6476,
+      "rank_delta": 2,
+      "rating_delta": 30.5602,
+      "applied_modifier": 0.2,
+      "reason": "CAPRI ATR/PARP posture (+0.20)"
+    },
+    {
+      "drug_id": "adavosertib_atr_wee1",
+      "regimen": "adavosertib",
+      "line": 1,
+      "baseline_rank": 1,
+      "enriched_rank": 2,
+      "baseline_rating": 1545.1541,
+      "enriched_rating": 1529.5182,
+      "rank_delta": -1,
+      "rating_delta": -15.6359,
+      "applied_modifier": 0.1,
+      "reason": "manual boost (+0.10)"
+    },
+    {
+      "drug_id": "berzosertib_atr_wee1",
+      "regimen": "berzosertib",
+      "line": 1,
+      "baseline_rank": 2,
+      "enriched_rank": 3,
+      "baseline_rating": 1530.0572,
+      "enriched_rating": 1514.7806,
+      "rank_delta": -1,
+      "rating_delta": -15.2766,
+      "applied_modifier": 0.05,
+      "reason": "manual boost (+0.05)"
+    },
+    {
+      "drug_id": "cytarabine_cytidine_analogs",
+      "regimen": "cytarabine",
+      "line": 1,
+      "baseline_rank": 4,
+      "enriched_rank": 4,
+      "baseline_rating": 1499.6401,
+      "enriched_rating": 1500.3326,
+      "rank_delta": 0,
+      "rating_delta": 0.6925,
+      "applied_modifier": 0.0,
+      "reason": "no modifier"
+    },
+    {
+      "drug_id": "decitabine_cytidine_analogs",
+      "regimen": "decitabine",
+      "line": 1,
+      "baseline_rank": 5,
+      "enriched_rank": 5,
+      "baseline_rating": 1485.4213,
+      "enriched_rating": 1485.0573,
+      "rank_delta": 0,
+      "rating_delta": -0.364,
+      "applied_modifier": 0.0,
+      "reason": "no modifier"
+    },
+    {
+      "drug_id": "olaparib_parp_inhibitors",
+      "regimen": "olaparib",
+      "line": 1,
+      "baseline_rank": 6,
+      "enriched_rank": 6,
+      "baseline_rating": 1470.1805,
+      "enriched_rating": 1470.5195,
+      "rank_delta": 0,
+      "rating_delta": 0.339,
+      "applied_modifier": -0.3,
+      "reason": "manual penalty (-0.30)"
+    },
+    {
+      "drug_id": "talazoparib_parp_inhibitors",
+      "regimen": "talazoparib",
+      "line": 1,
+      "baseline_rank": 7,
+      "enriched_rank": 7,
+      "baseline_rating": 1454.4593,
+      "enriched_rating": 1454.1443,
+      "rank_delta": 0,
+      "rating_delta": -0.315,
+      "applied_modifier": -0.3,
+      "reason": "manual penalty (-0.30)"
+    }
+  ],
+  "note": "This is an audit sort, not a discovery ranking. The modifiers are labeled weights taken verbatim from the manuscript's own claims (ceralasertib = LEAD; PARP arm = FALSIFIED). The value the arbiter adds is (a) determinism (seed=20260619), (b) visibility of the weights, and (c) making the reordering auditable via bundle_sha256."
+}

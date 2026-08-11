@@ -1,0 +1,218 @@
+{
+  "disclaimer": "RESEARCH USE ONLY \u2014 not validated for clinical decision-making. Not FDA-cleared. Not CE-marked. Investigational / IRB context only.",
+  "caveat": "AUROC reflects the model's ability to discriminate within literature-derived events whose labels and features co-originate from the same published narratives. This circularity inflates apparent performance. Expected prospective AUROC: 0.70\u20130.85 based on independent validation.",
+  "provenance": {
+    "model_state": "proxy_co_scientist",
+    "model_name": "oa/co_scientist@v0.4.0-alpha",
+    "model_version": "v0.4.0-alpha",
+    "request_id": "9067bea3030945a487fcf4e68eb8143b",
+    "gate_report": null,
+    "model_endpoint_url": null
+  },
+  "honesty_gate": {
+    "seen_urls_count": 2,
+    "evidence_kept": 0,
+    "evidence_dropped": 0,
+    "hypotheses_dropped": 0
+  },
+  "evidence": [],
+  "warnings": [],
+  "phases": [
+    "generate",
+    "reflect",
+    "rank",
+    "evolve",
+    "rank"
+  ],
+  "hypotheses": [
+    {
+      "hyp_id": "therapy:CT-guided biopsy or bronchoscopy for tissue diagnosis:line1",
+      "stage": "therapy",
+      "statement": "Therapy: CT-guided biopsy or bronchoscopy for tissue diagnosis (line 1)",
+      "confidence": 0.5,
+      "evidence": [
+        {
+          "url": "https://www.nccn.org/professionals/physician_gls/pdf/nscl.pdf",
+          "quoted_text": "NCCN LUNG-2 requires tissue diagnosis (biopsy or bronchoscopy) for nodules \u22658 mm before therapy selection.",
+          "source": "nccn"
+        }
+      ],
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "derived_from": null,
+      "rating": 1558.4739,
+      "wins": 8,
+      "losses": 0,
+      "draws": 8
+    },
+    {
+      "hyp_id": "therapy:CT-guided biopsy or bronchoscopy for tissue diagnosis:line1:line+1",
+      "stage": "therapy",
+      "statement": "Therapy: CT-guided biopsy or bronchoscopy for tissue diagnosis (line 1) \u2192 line_of_therapy +1",
+      "confidence": 0.5,
+      "evidence": [
+        {
+          "url": "https://www.nccn.org/professionals/physician_gls/pdf/nscl.pdf",
+          "quoted_text": "NCCN LUNG-2 requires tissue diagnosis (biopsy or bronchoscopy) for nodules \u22658 mm before therapy selection.",
+          "source": "nccn"
+        }
+      ],
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "derived_from": "therapy:CT-guided biopsy or bronchoscopy for tissue diagnosis:line1",
+      "rating": 1543.5808,
+      "wins": 7,
+      "losses": 1,
+      "draws": 8
+    },
+    {
+      "hyp_id": "therapy:CT-guided biopsy or bronchoscopy for tissue diagnosis:line1:line-1",
+      "stage": "therapy",
+      "statement": "Therapy: CT-guided biopsy or bronchoscopy for tissue diagnosis (line 1) \u2192 line_of_therapy -1",
+      "confidence": 0.5,
+      "evidence": [
+        {
+          "url": "https://www.nccn.org/professionals/physician_gls/pdf/nscl.pdf",
+          "quoted_text": "NCCN LUNG-2 requires tissue diagnosis (biopsy or bronchoscopy) for nodules \u22658 mm before therapy selection.",
+          "source": "nccn"
+        }
+      ],
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "derived_from": "therapy:CT-guided biopsy or bronchoscopy for tissue diagnosis:line1",
+      "rating": 1528.492,
+      "wins": 6,
+      "losses": 2,
+      "draws": 8
+    },
+    {
+      "hyp_id": "therapy:Multidisciplinary tumor board review:line1",
+      "stage": "therapy",
+      "statement": "Therapy: Multidisciplinary tumor board review (line 1)",
+      "confidence": 0.5,
+      "evidence": [
+        {
+          "url": "https://www.nccn.org/professionals/physician_gls/pdf/nscl.pdf",
+          "quoted_text": "NCCN NSCL guidelines emphasize multidisciplinary review for all suspected lung malignancies.",
+          "source": "nccn"
+        }
+      ],
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "derived_from": null,
+      "rating": 1515.2648,
+      "wins": 5,
+      "losses": 3,
+      "draws": 8
+    },
+    {
+      "hyp_id": "therapy:Multidisciplinary tumor board review:line1:line+1",
+      "stage": "therapy",
+      "statement": "Therapy: Multidisciplinary tumor board review (line 1) \u2192 line_of_therapy +1",
+      "confidence": 0.5,
+      "evidence": [
+        {
+          "url": "https://www.nccn.org/professionals/physician_gls/pdf/nscl.pdf",
+          "quoted_text": "NCCN NSCL guidelines emphasize multidisciplinary review for all suspected lung malignancies.",
+          "source": "nccn"
+        }
+      ],
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "derived_from": "therapy:Multidisciplinary tumor board review:line1",
+      "rating": 1500.3887,
+      "wins": 4,
+      "losses": 4,
+      "draws": 8
+    },
+    {
+      "hyp_id": "therapy:Multidisciplinary tumor board review:line1:line-1",
+      "stage": "therapy",
+      "statement": "Therapy: Multidisciplinary tumor board review (line 1) \u2192 line_of_therapy -1",
+      "confidence": 0.5,
+      "evidence": [
+        {
+          "url": "https://www.nccn.org/professionals/physician_gls/pdf/nscl.pdf",
+          "quoted_text": "NCCN NSCL guidelines emphasize multidisciplinary review for all suspected lung malignancies.",
+          "source": "nccn"
+        }
+      ],
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "derived_from": "therapy:Multidisciplinary tumor board review:line1",
+      "rating": 1484.3614,
+      "wins": 3,
+      "losses": 5,
+      "draws": 8
+    },
+    {
+      "hyp_id": "therapy:PET/CT for staging:line1",
+      "stage": "therapy",
+      "statement": "Therapy: PET/CT for staging (line 1)",
+      "confidence": 0.5,
+      "evidence": [
+        {
+          "url": "https://www.nccn.org/professionals/physician_gls/pdf/nscl.pdf",
+          "quoted_text": "Solid nodule \u22658 mm: NCCN LUNG-1 recommends PET/CT for staging and detection of distant metastases.",
+          "source": "nccn"
+        }
+      ],
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "derived_from": null,
+      "rating": 1471.7005,
+      "wins": 2,
+      "losses": 6,
+      "draws": 8
+    },
+    {
+      "hyp_id": "therapy:PET/CT for staging:line1:line+1",
+      "stage": "therapy",
+      "statement": "Therapy: PET/CT for staging (line 1) \u2192 line_of_therapy +1",
+      "confidence": 0.5,
+      "evidence": [
+        {
+          "url": "https://www.nccn.org/professionals/physician_gls/pdf/nscl.pdf",
+          "quoted_text": "Solid nodule \u22658 mm: NCCN LUNG-1 recommends PET/CT for staging and detection of distant metastases.",
+          "source": "nccn"
+        }
+      ],
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "derived_from": "therapy:PET/CT for staging:line1",
+      "rating": 1456.287,
+      "wins": 1,
+      "losses": 7,
+      "draws": 8
+    }
+  ],
+  "initial_count": 3,
+  "after_reflect": 3,
+  "after_evolve": 9,
+  "urls_dropped_hallucinated": 0,
+  "hypotheses_dropped": 0
+}

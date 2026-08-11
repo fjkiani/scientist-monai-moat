@@ -1,0 +1,35 @@
+{
+  "as_first_class_row_in_evidence_matrix": true,
+  "not_quarantined": true,
+  "parp_axis_row": {
+    "axis": "parp_inhibitors",
+    "recommendation_tier": "Mechanistic candidate only",
+    "manuscript_claim_type": "falsified_mechanism",
+    "mechanism": "Pan-cancer screens and expression\u2013sensitivity correlates link PARP pathway activity or PARP1 levels to drug response in HRD/DDR contexts; those signals are not MBD4-specific. Separately, some preclinical work discusses BER load or RNF144A\u2013PARP1 routing as a hypothetical sensitization narrative in MBD4-deficient models \u2014 a distinct layer, not interchangeable with pan-tumor PARP1 biomarker claims.",
+    "overall_evidence_level": "Mechanistic-only"
+  },
+  "falsification_test_from_atr_wee1_row": {
+    "modality": "falsification_arm",
+    "status": "positive",
+    "delta_dep": null,
+    "p_value": 0.6047878879741422,
+    "fdr": null,
+    "effect_size": null,
+    "n_mut": 19,
+    "n_wt": 1498,
+    "delta_auc": null,
+    "delta_ln_ic50": null,
+    "drug_screen_dataset": null,
+    "stratifier": "PARP1_expression_LOF_vs_comparator",
+    "metric": null,
+    "summary": "Falsification arm \u2014 PARP1 expression in MBD4-LOF lines. Tests the competing hypothesis that MBD4-LOF sensitivity is driven by PARP1 upregulation (PARP-trapping pathway). Result: PARP1 is NOT elevated in MBD4-LOF \u2014 Mann-Whitney U p=0.605, median LOF 6.770 vs comparator 6.656. n_LOF=19, n_comparator=1498. Encoded POSITIVE because this *rules out* PARP-trapping as the mechanism, which IS positive evidence for ATR over PARP (justifies recommending ATR inhibitors rather than olaparib/talazoparib). Sanity check: pan-cancer PARP1\u00d7PARPi correlation \u03c1=-0.416, p=1.4e-21 (n=481) confirms the framework \u2014 high PARP1 \u2192 more PARPi-sensitive is real, MBD4-LOF lines just don't show it.",
+    "pmids": [
+      "github.com/fjkiani/crispro@d33f640:publications/00-mbd4-manuscript/mbd4_parp_response/artifacts/canonical_atr_wee1_rerun_20260405/canonical_atr_wee1_rerun.json#falsification_arm"
+    ],
+    "is_confound_flagged": false,
+    "notes": null,
+    "origin_system": "manuscript_receipt"
+  },
+  "narrative": "PARP inhibitors (olaparib, talazoparib) are NOT recommended for MBD4-LOF tumors on a transcriptional-upregulation basis. Competing hypothesis \u2014 MBD4-LOF benefits from PARPi via PARP1 transcriptional upregulation \u2014 falsified: PARP1 expression in MBD4-LOF NOT elevated vs comparator (n=19 vs 1498, p=0.605). Recommended axis is ATR/WEE1 inhibition (lead: ceralasertib).",
+  "narrative_source": "manuscript_receipt"
+}

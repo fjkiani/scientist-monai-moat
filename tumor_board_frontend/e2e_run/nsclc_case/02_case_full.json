@@ -1,0 +1,145 @@
+{
+  "disclaimer": "RESEARCH USE ONLY \u2014 not validated for clinical decision-making. Not FDA-cleared. Not CE-marked. Investigational / IRB context only.",
+  "caveat": "AUROC reflects the model's ability to discriminate within literature-derived events whose labels and features co-originate from the same published narratives. This circularity inflates apparent performance. Expected prospective AUROC: 0.70\u20130.85 based on independent validation.",
+  "provenance": {
+    "model_state": "loaded_luna16_retinanet",
+    "model_name": "monai/lung_nodule_ct_detection@0.6.9+nccn_nsclc_lite_v0",
+    "model_version": null,
+    "request_id": "8d0b5f865ba74feaa8930a30537a401f",
+    "gate_report": null,
+    "model_endpoint_url": null
+  },
+  "honesty_gate": {
+    "seen_urls_count": 0,
+    "evidence_kept": 0,
+    "evidence_dropped": 0,
+    "hypotheses_dropped": 0
+  },
+  "evidence": [],
+  "warnings": [
+    "This NSCLC recommendation is from a rules-lite lookup keyed on the lung heuristic's diameter bucket, NOT from a trained ML model or a live TxGemma agent. It does NOT reason about histology, PD-L1 status, actionable driver mutations, staging beyond a diameter proxy, comorbidities, prior therapy, tumor-board consensus, or trial enrollment. It MUST NOT be used for treatment decisions. Real clinical use requires a thoracic oncologist and a full NCCN + Fleischner consultation.",
+    "detector=monai/lung_nodule_ct_detection@0.6.9; trained on LUNA16 fold 0 (LIDC-IDRI subset, single-site chest CT). Not validated on screening CT, contrast CT, or pediatric CT. Nodule size range 3-30 mm. Detections are RESEARCH USE ONLY and require radiologist review."
+  ],
+  "screening": null,
+  "biopsy": null,
+  "therapy": null,
+  "nsclc": {
+    "model_state": "loaded_luna16_retinanet",
+    "model_name": "monai/lung_nodule_ct_detection@0.6.9+nccn_nsclc_lite_v0",
+    "warnings": [
+      "This NSCLC recommendation is from a rules-lite lookup keyed on the lung heuristic's diameter bucket, NOT from a trained ML model or a live TxGemma agent. It does NOT reason about histology, PD-L1 status, actionable driver mutations, staging beyond a diameter proxy, comorbidities, prior therapy, tumor-board consensus, or trial enrollment. It MUST NOT be used for treatment decisions. Real clinical use requires a thoracic oncologist and a full NCCN + Fleischner consultation.",
+      "detector=monai/lung_nodule_ct_detection@0.6.9; trained on LUNA16 fold 0 (LIDC-IDRI subset, single-site chest CT). Not validated on screening CT, contrast CT, or pediatric CT. Nodule size range 3-30 mm. Detections are RESEARCH USE ONLY and require radiologist review."
+    ],
+    "lung_voxel_fraction": 0.12710189819335938,
+    "n_candidates_total": 2,
+    "n_candidates_kept": 1,
+    "max_diameter_mm": 26.84100686818948,
+    "candidates": [
+      {
+        "label": 2,
+        "voxel_count": 4050,
+        "diameter_mm": 26.84100686818948,
+        "mean_hu": 50.0,
+        "centroid_zyx_vox": [
+          8.0,
+          64.0,
+          44.0
+        ]
+      }
+    ],
+    "luna16": {
+      "bundle_version": "0.6.9",
+      "n_detections": 1,
+      "top_score": 0.04246260225772858,
+      "detections": [
+        {
+          "center_z_mm": 27.691242218017578,
+          "center_y_mm": 73.80682373046875,
+          "center_x_mm": 47.508052825927734,
+          "width_mm": 25.85523223876953,
+          "height_mm": 41.549373626708984,
+          "depth_mm": 24.617515563964844,
+          "diameter_mm": 41.549373626708984,
+          "score": 0.04246260225772858,
+          "in_domain": true,
+          "in_lung_parenchyma": true
+        }
+      ],
+      "inference_seconds": 6.368048667907715,
+      "preprocessing_summary": {
+        "hu_range": [
+          -1024.0,
+          300.0
+        ],
+        "target_spacing_mm": [
+          1.25,
+          0.703125,
+          0.703125
+        ],
+        "actual_spacing_mm": [
+          1.25,
+          1.0,
+          1.0
+        ],
+        "roi_size": [
+          192,
+          192,
+          80
+        ],
+        "sw_overlap": 0.25,
+        "score_thresh": 0.02,
+        "nms_thresh": 0.22,
+        "source_spacing_mm": [
+          2.5,
+          1.0,
+          1.0
+        ],
+        "z_resample_scale": 2.0,
+        "z_resample_method": "sitk_linear",
+        "z_resampled": true
+      },
+      "in_domain_z_range_mm": null
+    },
+    "risk_score": 0.9360819173831365,
+    "risk_bucket": "HIGH",
+    "driving_feature": "max_diameter_mm",
+    "logit": 2.6841006868189483,
+    "therapy_recommended": [
+      {
+        "name": "PET/CT for staging",
+        "category": "imaging",
+        "citation_url": "https://www.nccn.org/professionals/physician_gls/pdf/nscl.pdf",
+        "rationale": "Solid nodule \u22658 mm: NCCN LUNG-1 recommends PET/CT for staging and detection of distant metastases.",
+        "nccn_section": "NCCN NSCL v5.2026 LUNG-1"
+      },
+      {
+        "name": "CT-guided biopsy or bronchoscopy for tissue diagnosis",
+        "category": "diagnostic",
+        "citation_url": "https://www.nccn.org/professionals/physician_gls/pdf/nscl.pdf",
+        "rationale": "NCCN LUNG-2 requires tissue diagnosis (biopsy or bronchoscopy) for nodules \u22658 mm before therapy selection.",
+        "nccn_section": "NCCN NSCL v5.2026 LUNG-2"
+      },
+      {
+        "name": "Multidisciplinary tumor board review",
+        "category": "coordination",
+        "citation_url": "https://www.nccn.org/professionals/physician_gls/pdf/nscl.pdf",
+        "rationale": "NCCN NSCL guidelines emphasize multidisciplinary review for all suspected lung malignancies.",
+        "nccn_section": "NCCN NSCL v5.2026 Principles Section"
+      }
+    ],
+    "therapy_not_recommended": [
+      {
+        "name": "Surveillance only",
+        "category": "surveillance",
+        "citation_url": "https://doi.org/10.1148/radiol.2017161659",
+        "rationale": "Nodules \u22658 mm require workup, not surveillance alone, per Fleischner 2017 Table 1.",
+        "nccn_section": "Fleischner 2017 Table 1"
+      }
+    ],
+    "series_dir": "/tmp/e2e_synth_ct/SYN-0001/STUDY/CT_SYN",
+    "n_slices": 16,
+    "read_seconds": 0.010847154999964914,
+    "heuristic_seconds": 0.023400186000117174
+  },
+  "elo_ranked_hypotheses": []
+}

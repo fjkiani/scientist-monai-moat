@@ -1,0 +1,220 @@
+{
+  "meta": {
+    "purpose": "Frontend component + state matrix for the tumor board deliverable. Two cases, biology-first hierarchy, honesty inline (not hidden behind a 'degraded' tab). Every component wires directly against the live pydantic schemas in src/oncology_arbiter/api/schemas.py — nothing invented.",
+    "contract_version": "2.0.0-two-case",
+    "generated_at": "2026-07-19",
+    "schemas_source_file": "src/oncology_arbiter/api/schemas.py",
+    "backend_head_at_spec": "e3185e1 (feat/tumor-board-frontend-spec)",
+    "cases_covered": [
+      {
+        "case_id": "nsclc_luna16",
+        "role": "reasoning_case",
+        "claim": "The arbiter reasons end-to-end from CT bytes to Elo tournament: L1 CT ingestion → L2 MONAI RetinaNet detection → L3 lung heuristic bucketing → L4 NCCN-lite rule lookup → L5 co-scientist + Elo audit sort. Every layer's model_state is real."
+      },
+      {
+        "case_id": "ak_mbd4_lof",
+        "role": "manuscript_anchored_ingestion_case",
+        "claim": "The arbiter is NOT the source of the p-values, effect sizes, or PARP falsification. Those live in the SHA-locked crispro-backend-v2 bundle. The arbiter contributes contract validation, bundle_sha256 audit-of-record, URL honesty gate, and Elo audit sort with visible manuscript-derived weights."
+      }
+    ],
+    "invariants_frontend_MUST_honor": [
+      "RUO strip is always visible at the root — never skeletonized, never hidden.",
+      "Every claim-bearing block carries data-ruo=\"true\" and a model_state chip.",
+      "Every therapy view renders a non-dismissible Human Decision footer.",
+      "model_state chip color-coding is enforced: loaded_* = green, proxy_* = amber, template = grey.",
+      "For the AK case: no proxy_co_scientist chip on manuscript-anchored blocks. The only proxy chip on the AK page is on the Elo audit-sort panel.",
+      "For the NSCLC case: the LUNA16 low-confidence signal (top_score=0.042 on an out-of-distribution 41.5 mm mass) is surfaced inline — NOT hidden behind a 'debug' tab.",
+      "Zero fake NCT numbers. All ClinicalTrials.gov references are real live search URLs.",
+      "Zero placeholder text. Every rendered value comes from receipts/*.json."
+    ]
+  },
+
+  "shared_components": [
+    {
+      "id": "RuoStrip",
+      "role": "root-layout persistent banner",
+      "position": "top",
+      "text": "RESEARCH USE ONLY — this deliverable is a UI mock over live API calls; nothing here is validated for clinical decision-making.",
+      "data_attrs": {"data-ruo": "true", "role": "note"}
+    },
+    {
+      "id": "ModelStateChip",
+      "role": "inline chip surfaced next to every claim-bearing block",
+      "props": {
+        "state": "string enum (schemas.ModelState)",
+        "label": "human-readable label",
+        "color": "green | amber | grey"
+      },
+      "color_map": {
+        "loaded_luna16_retinanet": "green",
+        "loaded_ak_bundle": "green",
+        "loaded_mbd4_evidence_matrix": "green",
+        "loaded_manuscript_receipt": "green",
+        "proxy_lung_heuristic": "amber",
+        "proxy_rules_lite": "amber",
+        "proxy_co_scientist": "amber",
+        "template": "grey"
+      }
+    },
+    {
+      "id": "HumanDecisionFooter",
+      "role": "non-dismissible footer on every therapy/trial view",
+      "items": [
+        "Final therapy selection remains with the treating oncologist.",
+        "Enrollment eligibility remains with the trial PI + coordinator.",
+        "Tissue biopsy and histopathology remain with the pathologist.",
+        "This system reports evidence and audit receipts, not orders."
+      ]
+    },
+    {
+      "id": "ProvenanceChain",
+      "role": "expandable receipt panel per block",
+      "shows": ["request_id", "model_state", "model_name", "endpoint hit", "latency_s", "size_bytes"]
+    },
+    {
+      "id": "HonestyGateBadge",
+      "role": "shown on any panel derived from co-scientist output",
+      "shows": ["seed_urls_count", "urls_dropped_hallucinated", "hypotheses_dropped"]
+    }
+  ],
+
+  "nsclc_luna16_components": [
+    {
+      "id": "L1_CtIngestionHero",
+      "renders_from": "receipts/99_transcript_summary.json + demo synth-CT provenance",
+      "shows": [
+        "n_slices=16, matrix=128×128, spacing=1.0×1.0×2.5 mm",
+        "HU planted range: gantry=-1200, lung=-800, body=-50, mass=+50",
+        "case_id=SYN-0001 (synthetic phantom)"
+      ],
+      "chip": "template",
+      "note": "L1 is the ingestion contract, not a model — chip is grey."
+    },
+    {
+      "id": "L2_MonaiDetectionPanel",
+      "renders_from": "receipts/01_monai_bundle_card.json + 02_detections.json",
+      "hero_number": "top_score=0.042 (low)",
+      "shows": [
+        "bundle=monai/lung_nodule_ct_detection@0.6.9 (Apache-2.0)",
+        "inference_seconds=6.47",
+        "detection at center (47.5, 73.8, 27.7) mm, diameter=41.5 mm, in_lung=true",
+        "in_distribution=FALSE (41.5 mm > 3–30 mm training range)"
+      ],
+      "chip": "loaded_luna16_retinanet",
+      "in_distribution_warning": "Detector's low confidence is HONEST — the mass exceeds training range. The lung-heuristic diameter measure drives HIGH bucketing, not the RetinaNet score.",
+      "reported_metrics": {"mAP": 0.852, "mAR": 0.998, "source": "monai_bundles/lung_nodule_ct_detection/configs/metadata.json"}
+    },
+    {
+      "id": "L3_LungHeuristicArbiter",
+      "renders_from": "receipts/03_lung_heuristic.json",
+      "hero_number": "max_diameter_mm=26.84 → HIGH bucket (risk_score=0.936)",
+      "shows": ["driving_feature=max_diameter_mm", "logit=inline from response", "lung_voxel_fraction=inline"],
+      "chip": "proxy_lung_heuristic",
+      "note": "Amber chip — this layer is a rules-lite heuristic, not a trained ML classifier."
+    },
+    {
+      "id": "L4_NccnLiteRules",
+      "renders_from": "receipts/04_nccn_lite_rules.json",
+      "shows": [
+        "3 recommended: PET/CT (LUNG-1), CT-guided biopsy (LUNG-2), Tumor board review (Principles Section)",
+        "1 not_recommended: Surveillance only (Fleischner 2017 Table 1)",
+        "warnings_verbatim rendered inline"
+      ],
+      "chip": "proxy_rules_lite",
+      "note": "Amber chip — deterministic rule lookup keyed on the L3 diameter bucket."
+    },
+    {
+      "id": "L5_EloTournament",
+      "renders_from": "receipts/05_elo_transcript.json",
+      "hero_visualization": "baseline vs enriched Elo (per-drug rating chart)",
+      "shows": [
+        "baseline: biopsy #1, tumor board #2, PET/CT #3, surveillance #4",
+        "enriched: biopsy #1, PET/CT #2 (↑1), tumor board #3 (↓1), surveillance #4",
+        "applied_modifiers: biopsy +0.15, PET/CT +0.10 (labeled mass-branch weights)",
+        "disease_context echo shows risk_bucket=HIGH driving the modifier choice"
+      ],
+      "chip": "proxy_co_scientist"
+    }
+  ],
+
+  "ak_mbd4_lof_components": [
+    {
+      "id": "HeaderDisclosure",
+      "role": "top-of-page disclosure — MANDATORY, not collapsed",
+      "verbatim_text": "This case is manuscript-anchored, arbiter validates+audits+surfaces. All p-values, effect sizes, and the PARP falsification come from the SHA-locked crispro-backend-v2 bundle. The arbiter contributes contract validation, bundle_sha256 audit-of-record, URL honesty gate, and a labeled Elo audit sort — nothing more.",
+      "chips": ["loaded_ak_bundle", "loaded_manuscript_receipt"]
+    },
+    {
+      "id": "ContractInvariantsCard",
+      "renders_from": "receipts/00_contract_invariants.json",
+      "shows": [
+        "contract_version=tumor_board.v3.multimodal-with-manuscript-claims",
+        "patient_id=MBD4-LOF-DEMO-01",
+        "manuscript_repo_sha_at_audit=d33f6403… (linked)",
+        "backend_head_sha=bfd6d11f… (linked)",
+        "backend_branch=fix/mbd4-atr-strong-tier"
+      ],
+      "chip": "loaded_ak_bundle"
+    },
+    {
+      "id": "MechanismFalsifiedBadge",
+      "renders_from": "receipts/04_parp_falsification.json",
+      "role": "first-class row in evidence matrix — NOT quarantined, NOT hidden",
+      "verbatim_narrative": "PARP inhibitors (olaparib, talazoparib) are NOT recommended for MBD4-LOF tumors on a transcriptional-upregulation basis. Competing hypothesis — MBD4-LOF benefits from PARPi via PARP1 transcriptional upregulation — falsified: PARP1 expression in MBD4-LOF NOT elevated vs comparator (n=19 vs 1498, p=0.605). Recommended axis is ATR/WEE1 inhibition (lead: ceralasertib).",
+      "chip": "loaded_manuscript_receipt"
+    },
+    {
+      "id": "EvidenceMatrix6Axes",
+      "renders_from": "receipts/02_evidence_matrix_6axes.json",
+      "shows": "6 rows × 7 modalities table. Empty cells labeled 'missing' — never erased. parp_inhibitors row is first-class alongside atr_wee1, cytidine_analogs, wrn, immunotherapy, pkmyt1.",
+      "chip": "loaded_mbd4_evidence_matrix"
+    },
+    {
+      "id": "AnchorPValuesCallout",
+      "renders_from": "receipts/03_anchor_pvalues.json",
+      "shows": "7 anchor p-values verbatim (6 in atr_wee1 chain + 1 GDSC2 primary). Each row shows p_value, effect_size, n_mut/n_wt, stratifier, PMID URL.",
+      "chip": "loaded_manuscript_receipt"
+    },
+    {
+      "id": "RecommendedDrugsTable",
+      "renders_from": "receipts/05_recommended_drugs_table.json",
+      "shows": "7 drugs. RECOMMENDED (5): cytarabine, decitabine, adavosertib, berzosertib, ceralasertib. NOT_RECOMMENDED_ON_THIS_MECHANISM (2): olaparib, talazoparib.",
+      "chip": "loaded_manuscript_receipt"
+    },
+    {
+      "id": "ArbiterAuditReceipt",
+      "renders_from": "receipts/06_arbiter_audit_receipt.json",
+      "shows": [
+        "endpoint=POST /v1/tumor_board/bundle",
+        "request_id=42a80e12…",
+        "bundle_sha256=0121fc84fc798af57aad78f2c9274506eac769313d4b21329ad9e3775c5b3a4c",
+        "arbiter_contribution + what_the_arbiter_did_not_do (verbatim from receipt)"
+      ],
+      "chip": "loaded_ak_bundle"
+    },
+    {
+      "id": "EloAuditSort",
+      "renders_from": "receipts/07_elo_audit_sort.json",
+      "role": "audit sort with visible labeled weights — NOT a discovery ranking",
+      "chip": "proxy_co_scientist",
+      "shows": [
+        "baseline vs enriched rankings",
+        "applied_modifiers labeled by manuscript claim (ceralasertib=lead, olaparib/talazoparib=falsified)",
+        "per-drug reason strings (e.g. 'CAPRI ATR/PARP posture (+0.20)')"
+      ],
+      "note": "This is the ONLY block on the AK page that carries a proxy chip. Everything else is loaded_*."
+    }
+  ],
+
+  "landing_page": {
+    "id": "Landing",
+    "renders_two_cases": true,
+    "shows": [
+      "brief description of each case's role",
+      "link to nsclc_luna16/mockup.html",
+      "link to ak_mbd4_lof/mockup.html",
+      "shared_components summary",
+      "acceptance test summary (T1-T10 results)"
+    ]
+  }
+}

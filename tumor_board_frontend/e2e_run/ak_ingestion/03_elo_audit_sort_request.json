@@ -1,0 +1,235 @@
+{
+  "drugs": [
+    {
+      "drug_id": "cytarabine_cytidine_analogs",
+      "regimen": "cytarabine",
+      "line": 1,
+      "confidence": 0.85,
+      "evidence": [
+        {
+          "url": "",
+          "quoted_text": "BER substrate accumulation in MBD4-LOF (dU:dG mispairs). Gemcitabine / cytarabine triphosphate incorporation into BER repair patches stalls replication. MBD4-specific: rescue by WT-MBD4 but not catalytic-dead mutant.",
+          "source": "manuscript_receipt.mechanism"
+        }
+      ],
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      }
+    },
+    {
+      "drug_id": "decitabine_cytidine_analogs",
+      "regimen": "decitabine",
+      "line": 1,
+      "confidence": 0.85,
+      "evidence": [
+        {
+          "url": "",
+          "quoted_text": "BER substrate accumulation in MBD4-LOF (dU:dG mispairs). Gemcitabine / cytarabine triphosphate incorporation into BER repair patches stalls replication. MBD4-specific: rescue by WT-MBD4 but not catalytic-dead mutant.",
+          "source": "manuscript_receipt.mechanism"
+        }
+      ],
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      }
+    },
+    {
+      "drug_id": "adavosertib_atr_wee1",
+      "regimen": "adavosertib",
+      "line": 1,
+      "confidence": 0.85,
+      "evidence": [
+        {
+          "url": "github.com/fjkiani/crispro@d33f640:publications/00-mbd4-manuscript/mbd4_parp_response/artifacts/canonical_atr_wee1_rerun_20260405/canonical_atr_wee1_rerun.json",
+          "quoted_text": "GDSC2 pharmacologic stratification, drug=ceralasertib (ATR inhibitor): MBD4 True-LOF cell lines (n=14) show increased sensitivity vs MBD4-WT (n=914) on the Methods-rule cohort (no somatic MBD4). LN_IC50: \u0394=-0.732, p=0.0215, Cohen's d=-0.503. AUC and ",
+          "source": "manuscript_receipt.gdsc"
+        },
+        {
+          "url": "github.com/fjkiani/crispro@d33f640:publications/00-mbd4-manuscript/mbd4_parp_response/artifacts/canonical_atr_wee1_rerun_20260405/canonical_atr_wee1_rerun.json#stress_tests.1_msi_purge",
+          "quoted_text": "Stress test #1 \u2014 MSI purge. Re-runs ceralasertib LN_IC50 with all MSI-H lines excluded from both arms (rationale: MBD4-LOF correlates with MSI-H; signal could be confounded by global MSI sensitivity to ATR). Result: signal STRENGTHENS without MSI-H l",
+          "source": "manuscript_receipt.stress_test"
+        },
+        {
+          "url": "github.com/fjkiani/crispro@d33f640:publications/00-mbd4-manuscript/mbd4_parp_response/artifacts/canonical_atr_wee1_rerun_20260405/canonical_atr_wee1_rerun.json#stress_tests.2_tp53_stratification",
+          "quoted_text": "Stress test #2 \u2014 TP53 stratification. Restricts both arms to TP53-mutant lines (rationale: TP53 status modifies ATR-pathway dependency; >95% of HGSOC is TP53-mutant). Result: effect size LARGEST in TP53-mutant subpopulation. LN_IC50: \u0394=-1.069, p=0.00",
+          "source": "manuscript_receipt.stress_test"
+        },
+        {
+          "url": "github.com/fjkiani/crispro@d33f640:publications/00-mbd4-manuscript/mbd4_parp_response/artifacts/canonical_atr_wee1_rerun_20260405/canonical_atr_wee1_rerun.json#stress_tests.3_leave_one_out",
+          "quoted_text": "Stress test #3 \u2014 Leave-one-out. Removes one MBD4-LOF line at a time and re-runs the primary endpoint (rationale: a single highly-sensitive line could drive the n=14 result). Result: 14/14 iterations remain significant. max p=0.0452, min p=0.0082, all",
+          "source": "manuscript_receipt.stress_test"
+        },
+        {
+          "url": "github.com/fjkiani/crispro@d33f640:publications/00-mbd4-manuscript/mbd4_parp_response/artifacts/canonical_atr_wee1_rerun_20260405/canonical_atr_wee1_rerun.json#stress_tests.4_lineage_stratification",
+          "quoted_text": "Stress test #4 \u2014 Lineage stratification (non-bowel). Splits the primary endpoint by bowel/non-bowel lineage (rationale: MSI-H bowel lines are over-represented in MBD4-LOF pool; effect could be bowel-specific artifact). Result: non-bowel cohort holds ",
+          "source": "manuscript_receipt.stress_test"
+        },
+        {
+          "url": "github.com/fjkiani/crispro@d33f640:publications/00-mbd4-manuscript/mbd4_parp_response/artifacts/canonical_atr_wee1_rerun_20260405/canonical_atr_wee1_rerun.json#axis_partner_confirmation",
+          "quoted_text": "Axis partner \u2014 adavosertib (MK-1775; WEE1 inhibitor), same replication-stress checkpoint axis as ATR. Direction-consistent with the ATR primary endpoint (negative \u0394 = more sensitive in MBD4-LOF) and similar effect magnitude (Cohen's d=-0.359), but p=",
+          "source": "manuscript_receipt.axis_partner"
+        },
+        {
+          "url": "github.com/fjkiani/crispro@d33f640:publications/00-mbd4-manuscript/mbd4_parp_response/artifacts/canonical_atr_wee1_rerun_20260405/canonical_atr_wee1_rerun.json#falsification_arm",
+          "quoted_text": "Falsification arm \u2014 PARP1 expression in MBD4-LOF lines. Tests the competing hypothesis that MBD4-LOF sensitivity is driven by PARP1 upregulation (PARP-trapping pathway). Result: PARP1 is NOT elevated in MBD4-LOF \u2014 Mann-Whitney U p=0.605, median LOF 6",
+          "source": "manuscript_receipt.falsification_arm"
+        }
+      ],
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      }
+    },
+    {
+      "drug_id": "berzosertib_atr_wee1",
+      "regimen": "berzosertib",
+      "line": 1,
+      "confidence": 0.85,
+      "evidence": [
+        {
+          "url": "github.com/fjkiani/crispro@d33f640:publications/00-mbd4-manuscript/mbd4_parp_response/artifacts/canonical_atr_wee1_rerun_20260405/canonical_atr_wee1_rerun.json",
+          "quoted_text": "GDSC2 pharmacologic stratification, drug=ceralasertib (ATR inhibitor): MBD4 True-LOF cell lines (n=14) show increased sensitivity vs MBD4-WT (n=914) on the Methods-rule cohort (no somatic MBD4). LN_IC50: \u0394=-0.732, p=0.0215, Cohen's d=-0.503. AUC and ",
+          "source": "manuscript_receipt.gdsc"
+        },
+        {
+          "url": "github.com/fjkiani/crispro@d33f640:publications/00-mbd4-manuscript/mbd4_parp_response/artifacts/canonical_atr_wee1_rerun_20260405/canonical_atr_wee1_rerun.json#stress_tests.1_msi_purge",
+          "quoted_text": "Stress test #1 \u2014 MSI purge. Re-runs ceralasertib LN_IC50 with all MSI-H lines excluded from both arms (rationale: MBD4-LOF correlates with MSI-H; signal could be confounded by global MSI sensitivity to ATR). Result: signal STRENGTHENS without MSI-H l",
+          "source": "manuscript_receipt.stress_test"
+        },
+        {
+          "url": "github.com/fjkiani/crispro@d33f640:publications/00-mbd4-manuscript/mbd4_parp_response/artifacts/canonical_atr_wee1_rerun_20260405/canonical_atr_wee1_rerun.json#stress_tests.2_tp53_stratification",
+          "quoted_text": "Stress test #2 \u2014 TP53 stratification. Restricts both arms to TP53-mutant lines (rationale: TP53 status modifies ATR-pathway dependency; >95% of HGSOC is TP53-mutant). Result: effect size LARGEST in TP53-mutant subpopulation. LN_IC50: \u0394=-1.069, p=0.00",
+          "source": "manuscript_receipt.stress_test"
+        },
+        {
+          "url": "github.com/fjkiani/crispro@d33f640:publications/00-mbd4-manuscript/mbd4_parp_response/artifacts/canonical_atr_wee1_rerun_20260405/canonical_atr_wee1_rerun.json#stress_tests.3_leave_one_out",
+          "quoted_text": "Stress test #3 \u2014 Leave-one-out. Removes one MBD4-LOF line at a time and re-runs the primary endpoint (rationale: a single highly-sensitive line could drive the n=14 result). Result: 14/14 iterations remain significant. max p=0.0452, min p=0.0082, all",
+          "source": "manuscript_receipt.stress_test"
+        },
+        {
+          "url": "github.com/fjkiani/crispro@d33f640:publications/00-mbd4-manuscript/mbd4_parp_response/artifacts/canonical_atr_wee1_rerun_20260405/canonical_atr_wee1_rerun.json#stress_tests.4_lineage_stratification",
+          "quoted_text": "Stress test #4 \u2014 Lineage stratification (non-bowel). Splits the primary endpoint by bowel/non-bowel lineage (rationale: MSI-H bowel lines are over-represented in MBD4-LOF pool; effect could be bowel-specific artifact). Result: non-bowel cohort holds ",
+          "source": "manuscript_receipt.stress_test"
+        },
+        {
+          "url": "github.com/fjkiani/crispro@d33f640:publications/00-mbd4-manuscript/mbd4_parp_response/artifacts/canonical_atr_wee1_rerun_20260405/canonical_atr_wee1_rerun.json#axis_partner_confirmation",
+          "quoted_text": "Axis partner \u2014 adavosertib (MK-1775; WEE1 inhibitor), same replication-stress checkpoint axis as ATR. Direction-consistent with the ATR primary endpoint (negative \u0394 = more sensitive in MBD4-LOF) and similar effect magnitude (Cohen's d=-0.359), but p=",
+          "source": "manuscript_receipt.axis_partner"
+        },
+        {
+          "url": "github.com/fjkiani/crispro@d33f640:publications/00-mbd4-manuscript/mbd4_parp_response/artifacts/canonical_atr_wee1_rerun_20260405/canonical_atr_wee1_rerun.json#falsification_arm",
+          "quoted_text": "Falsification arm \u2014 PARP1 expression in MBD4-LOF lines. Tests the competing hypothesis that MBD4-LOF sensitivity is driven by PARP1 upregulation (PARP-trapping pathway). Result: PARP1 is NOT elevated in MBD4-LOF \u2014 Mann-Whitney U p=0.605, median LOF 6",
+          "source": "manuscript_receipt.falsification_arm"
+        }
+      ],
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      }
+    },
+    {
+      "drug_id": "ceralasertib_atr_wee1",
+      "regimen": "ceralasertib",
+      "line": 1,
+      "confidence": 0.85,
+      "evidence": [
+        {
+          "url": "github.com/fjkiani/crispro@d33f640:publications/00-mbd4-manuscript/mbd4_parp_response/artifacts/canonical_atr_wee1_rerun_20260405/canonical_atr_wee1_rerun.json",
+          "quoted_text": "GDSC2 pharmacologic stratification, drug=ceralasertib (ATR inhibitor): MBD4 True-LOF cell lines (n=14) show increased sensitivity vs MBD4-WT (n=914) on the Methods-rule cohort (no somatic MBD4). LN_IC50: \u0394=-0.732, p=0.0215, Cohen's d=-0.503. AUC and ",
+          "source": "manuscript_receipt.gdsc"
+        },
+        {
+          "url": "github.com/fjkiani/crispro@d33f640:publications/00-mbd4-manuscript/mbd4_parp_response/artifacts/canonical_atr_wee1_rerun_20260405/canonical_atr_wee1_rerun.json#stress_tests.1_msi_purge",
+          "quoted_text": "Stress test #1 \u2014 MSI purge. Re-runs ceralasertib LN_IC50 with all MSI-H lines excluded from both arms (rationale: MBD4-LOF correlates with MSI-H; signal could be confounded by global MSI sensitivity to ATR). Result: signal STRENGTHENS without MSI-H l",
+          "source": "manuscript_receipt.stress_test"
+        },
+        {
+          "url": "github.com/fjkiani/crispro@d33f640:publications/00-mbd4-manuscript/mbd4_parp_response/artifacts/canonical_atr_wee1_rerun_20260405/canonical_atr_wee1_rerun.json#stress_tests.2_tp53_stratification",
+          "quoted_text": "Stress test #2 \u2014 TP53 stratification. Restricts both arms to TP53-mutant lines (rationale: TP53 status modifies ATR-pathway dependency; >95% of HGSOC is TP53-mutant). Result: effect size LARGEST in TP53-mutant subpopulation. LN_IC50: \u0394=-1.069, p=0.00",
+          "source": "manuscript_receipt.stress_test"
+        },
+        {
+          "url": "github.com/fjkiani/crispro@d33f640:publications/00-mbd4-manuscript/mbd4_parp_response/artifacts/canonical_atr_wee1_rerun_20260405/canonical_atr_wee1_rerun.json#stress_tests.3_leave_one_out",
+          "quoted_text": "Stress test #3 \u2014 Leave-one-out. Removes one MBD4-LOF line at a time and re-runs the primary endpoint (rationale: a single highly-sensitive line could drive the n=14 result). Result: 14/14 iterations remain significant. max p=0.0452, min p=0.0082, all",
+          "source": "manuscript_receipt.stress_test"
+        },
+        {
+          "url": "github.com/fjkiani/crispro@d33f640:publications/00-mbd4-manuscript/mbd4_parp_response/artifacts/canonical_atr_wee1_rerun_20260405/canonical_atr_wee1_rerun.json#stress_tests.4_lineage_stratification",
+          "quoted_text": "Stress test #4 \u2014 Lineage stratification (non-bowel). Splits the primary endpoint by bowel/non-bowel lineage (rationale: MSI-H bowel lines are over-represented in MBD4-LOF pool; effect could be bowel-specific artifact). Result: non-bowel cohort holds ",
+          "source": "manuscript_receipt.stress_test"
+        },
+        {
+          "url": "github.com/fjkiani/crispro@d33f640:publications/00-mbd4-manuscript/mbd4_parp_response/artifacts/canonical_atr_wee1_rerun_20260405/canonical_atr_wee1_rerun.json#axis_partner_confirmation",
+          "quoted_text": "Axis partner \u2014 adavosertib (MK-1775; WEE1 inhibitor), same replication-stress checkpoint axis as ATR. Direction-consistent with the ATR primary endpoint (negative \u0394 = more sensitive in MBD4-LOF) and similar effect magnitude (Cohen's d=-0.359), but p=",
+          "source": "manuscript_receipt.axis_partner"
+        },
+        {
+          "url": "github.com/fjkiani/crispro@d33f640:publications/00-mbd4-manuscript/mbd4_parp_response/artifacts/canonical_atr_wee1_rerun_20260405/canonical_atr_wee1_rerun.json#falsification_arm",
+          "quoted_text": "Falsification arm \u2014 PARP1 expression in MBD4-LOF lines. Tests the competing hypothesis that MBD4-LOF sensitivity is driven by PARP1 upregulation (PARP-trapping pathway). Result: PARP1 is NOT elevated in MBD4-LOF \u2014 Mann-Whitney U p=0.605, median LOF 6",
+          "source": "manuscript_receipt.falsification_arm"
+        }
+      ],
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      }
+    },
+    {
+      "drug_id": "olaparib_parp_inhibitors",
+      "regimen": "olaparib",
+      "line": 1,
+      "confidence": 0.15,
+      "evidence": [
+        {
+          "url": "",
+          "quoted_text": "Pan-cancer screens and expression\u2013sensitivity correlates link PARP pathway activity or PARP1 levels to drug response in HRD/DDR contexts; those signals are not MBD4-specific. Separately, some preclinical work discusses BER load or RNF144A\u2013PARP1 routi",
+          "source": "manuscript_receipt.mechanism"
+        }
+      ],
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      }
+    },
+    {
+      "drug_id": "talazoparib_parp_inhibitors",
+      "regimen": "talazoparib",
+      "line": 1,
+      "confidence": 0.15,
+      "evidence": [
+        {
+          "url": "",
+          "quoted_text": "Pan-cancer screens and expression\u2013sensitivity correlates link PARP pathway activity or PARP1 levels to drug response in HRD/DDR contexts; those signals are not MBD4-specific. Separately, some preclinical work discusses BER load or RNF144A\u2013PARP1 routi",
+          "source": "manuscript_receipt.mechanism"
+        }
+      ],
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      }
+    }
+  ],
+  "modifiers": {
+    "ceralasertib_atr_wee1": 0.2,
+    "adavosertib_atr_wee1": 0.1,
+    "berzosertib_atr_wee1": 0.05,
+    "olaparib_parp_inhibitors": -0.3,
+    "talazoparib_parp_inhibitors": -0.3
+  },
+  "disease_context": {
+    "cancer": "ampullary_adenocarcinoma_hgsoc_like",
+    "biomarker": "MBD4_LOF",
+    "manuscript_repo_sha_at_audit": null,
+    "backend_head_sha": null
+  },
+  "k_factor": 16,
+  "seed": 20260619
+}

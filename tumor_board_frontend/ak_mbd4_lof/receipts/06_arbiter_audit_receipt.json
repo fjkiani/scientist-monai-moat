@@ -1,0 +1,20 @@
+{
+  "endpoint": "POST /v1/tumor_board/bundle",
+  "model_state": "loaded_ak_bundle",
+  "request_id": "42a80e12fec94e0fadc5d9d6c3d0e360",
+  "bundle_sha256_api_echo": "0121fc84fc798af57aad78f2c9274506eac769313d4b21329ad9e3775c5b3a4c",
+  "contract_check_passed": true,
+  "arbiter_contribution_summary": {
+    "contract_validation": "TumorBoardBundle pydantic schema enforced",
+    "structural_checks": "6 evidence axes, ATR/WEE1 auxiliary_evidence has 4 stress_test + 1 axis_partner + 1 falsification_arm",
+    "audit_receipt": "bundle_sha256 canonicalized + hashed server-side",
+    "honesty_gate": "URLs not in seed_urls are stripped from any co-scientist reflect run",
+    "audit_sort": "Elo re-ranking with visible, labeled manuscript-derived weights"
+  },
+  "what_the_arbiter_did_not_do": [
+    "Run drug screens (came from GDSC2 / DepMap 24Q2 upstream)",
+    "Compute p-values or effect sizes (Mann-Whitney U + Cohen's d were computed offline in crispro-backend-v2 @ bfd6d11f)",
+    "Falsify the PARP hypothesis (that was the manuscript's own falsification arm)",
+    "Invoke MONAI / MedSigLIP / TxGemma / ClinicalBERT (all radiology/pathology \u2014 different modality)"
+  ]
+}
