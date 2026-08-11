@@ -160,3 +160,38 @@ def test_nsclc_response_schema_carries_parsed_report() -> None:
         "NsclcResponse missing 'parsed_report_provenance' field; "
         f"found {sorted(field_names)}"
     )
+
+
+@pytest.mark.regression
+def test_modal_deployment_uses_release_locked_sliding_windows() -> None:
+    """Modal inference must package and call the shared 192/32 chunker."""
+    modal_app_py = REPO_ROOT / "deploy" / "modal" / "clinicalbert_app.py"
+    helper_py = (
+        REPO_ROOT
+        / "src"
+        / "oncology_arbiter"
+        / "nlp"
+        / "clinicalbert_sliding_window.py"
+    )
+    assert modal_app_py.exists(), f"missing {modal_app_py}"
+    assert helper_py.exists(), f"missing {helper_py}"
+
+    src = modal_app_py.read_text()
+    helper_src = helper_py.read_text()
+    ast.parse(src)
+    ast.parse(helper_src)
+
+    assert ".add_local_file(" in src
+    assert '"/root/clinicalbert_sliding_window.py"' in src
+    assert "from clinicalbert_sliding_window import" in src
+    assert "predict_words_sliding_window(" in src
+    assert "window_tokens=WINDOW_TOKENS" in src
+    assert "overlap_tokens=OVERLAP_TOKENS" in src
+    assert "max_length=512" not in src
+    assert "max_len=512" not in src
+
+    assert "WINDOW_TOKENS = 192" in helper_src
+    assert "OVERLAP_TOKENS = 32" in helper_src
+    assert "return_overflowing_tokens=True" in helper_src
+    assert 'padding="max_length"' in helper_src
+    assert "mean_logits = logit_sums / observations[:, None]" in helper_src

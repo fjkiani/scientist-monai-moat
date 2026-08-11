@@ -31,9 +31,16 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+from oncology_arbiter.nlp.clinicalbert_sliding_window import (
+    AGGREGATION,
+    OVERLAP_TOKENS,
+    WINDOW_TOKENS,
+    predict_words_sliding_window,
+)
+
 logger = logging.getLogger(__name__)
 
-APP_VERSION = "clinicalbert-local-v0.4.1-alpha"
+APP_VERSION = "clinicalbert-local-v0.5.2-sliding-window"
 
 _DEFAULT_WEIGHT_DIR = os.environ.get(
     "CLINICALBERT_LOCAL_WEIGHT_DIR", "/workspace/clinicalbert_best"
@@ -256,10 +263,19 @@ class ClinicalBertLocalClient:
         self,
         *,
         weight_dir: Optional[str] = None,
-        max_length: int = 512,
+        max_length: int = WINDOW_TOKENS,
     ) -> None:
         self.weight_dir = weight_dir or _DEFAULT_WEIGHT_DIR
-        self.max_length = int(max_length)
+        # Keep the keyword for source compatibility, but fail closed rather
+        # than silently running the fine-tuned head beyond its 192-token
+        # training horizon. The overlap is part of the released contract.
+        if int(max_length) != WINDOW_TOKENS:
+            raise ClinicalBertLocalError(
+                f"max_length is locked to the trained horizon {WINDOW_TOKENS}; "
+                f"got {max_length}"
+            )
+        self.max_length = WINDOW_TOKENS
+        self.overlap_tokens = OVERLAP_TOKENS
 
     # ---------- lifecycle ----------
     def _get(self):
@@ -295,8 +311,6 @@ class ClinicalBertLocalClient:
         if len(report_text) > 20_000:
             raise ClinicalBertLocalError("report_text too long (max 20000 chars)")
 
-        import torch
-
         tokenizer, model, id2label, meta = self._get()
         t0 = time.time()
 
@@ -317,49 +331,39 @@ class ClinicalBertLocalClient:
                 "parsed": {},
                 "spans": [],
                 "n_tokens": 0,
+                "n_windows": 0,
+                "window_tokens": WINDOW_TOKENS,
+                "overlap_tokens": OVERLAP_TOKENS,
+                "window_aggregation": AGGREGATION,
                 "seconds": round(time.time() - t0, 3),
                 **common,
             }
 
         try:
-            enc = tokenizer(
-                tokens,
-                is_split_into_words=True,
-                padding="max_length",
-                truncation=True,
-                max_length=self.max_length,
-                return_tensors="pt",
+            prediction = predict_words_sliding_window(
+                tokenizer=tokenizer,
+                model=model,
+                words=tokens,
+                id2label=id2label,
+                window_tokens=self.max_length,
+                overlap_tokens=self.overlap_tokens,
             )
         except Exception as e:
-            raise ClinicalBertLocalError(f"tokenize: {type(e).__name__}: {e}") from e
+            raise ClinicalBertLocalError(
+                f"sliding_window_forward: {type(e).__name__}: {e}"
+            ) from e
 
-        try:
-            with torch.no_grad():
-                logits = model(
-                    input_ids=enc["input_ids"],
-                    attention_mask=enc["attention_mask"],
-                ).logits
-            preds = logits.argmax(-1)[0].cpu().tolist()
-        except Exception as e:
-            raise ClinicalBertLocalError(f"forward: {type(e).__name__}: {e}") from e
-
-        word_ids = enc.word_ids(batch_index=0)
-        pred_labels_per_word: List[str] = ["O"] * len(tokens)
-        prev = None
-        for tok_idx, wid in enumerate(word_ids):
-            if wid is None or wid == prev:
-                continue
-            if wid < len(pred_labels_per_word):
-                pred_labels_per_word[wid] = id2label.get(int(preds[tok_idx]), "O")
-            prev = wid
-
-        spans = _decode_bio_spans(tokens, pred_labels_per_word)
+        spans = _decode_bio_spans(tokens, prediction.labels)
         parsed = _canonicalize(spans)
 
         return {
             "parsed": parsed,
             "spans": spans,
             "n_tokens": len(tokens),
+            "n_windows": prediction.n_windows,
+            "window_tokens": WINDOW_TOKENS,
+            "overlap_tokens": OVERLAP_TOKENS,
+            "window_aggregation": AGGREGATION,
             "seconds": round(time.time() - t0, 3),
             **common,
         }
