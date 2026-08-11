@@ -26,6 +26,8 @@ from pathlib import Path
 
 import pytest
 
+from tests._gate import require_gate_input
+
 pytestmark = pytest.mark.regression
 
 AGG = Path("/mnt/shared-workspace/shared/clinicalbert_runs_v51/AGGREGATE_v51.json")
@@ -43,8 +45,7 @@ V051_MIN_SEED_F1_FLOOR = 0.05
 
 
 def _load_agg() -> dict:
-    if not AGG.exists():
-        pytest.skip(f"v0.5.1 aggregate file not yet generated: {AGG}")
+    require_gate_input(AGG, 'the v0.5.1 release rollback rule and the 5-seed real-text F1 figures')
     return json.loads(AGG.read_text())
 
 
