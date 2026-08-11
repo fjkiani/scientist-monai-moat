@@ -43,6 +43,7 @@ from .schemas import (
     BiopsyReceptorPanel,
     BiopsyRequest,
     BiopsyResponse,
+    BreastDssPrognosis,
     DemoCaseResponse,
     NsclcCTInput,
     NsclcResponse,
@@ -1204,8 +1205,16 @@ def create_app() -> FastAPI:
           response's ``warnings`` list surfaces this on every call.
         """
         request_id = new_request_id()
-        if not req.wsi_url and not req.wsi_bytes_b64 and not req.report_text:
-            raise HTTPException(400, "must provide wsi_url, wsi_bytes_b64, or report_text")
+        if (
+            not req.wsi_url
+            and not req.wsi_bytes_b64
+            and not req.report_text
+            and req.dss_features is None
+        ):
+            raise HTTPException(
+                400,
+                "must provide wsi_url, wsi_bytes_b64, report_text, or dss_features",
+            )
 
         model_state = ModelState.PLACEHOLDER
         model_name: str | None = None
@@ -1395,6 +1404,40 @@ def create_app() -> FastAPI:
                     f"receptor_panel_extended:matched={ext_matched}/{len(extended_out)}"
                 )
 
+        # Breast DSS v3 is a frozen, seven-feature prognosis model.  It runs
+        # only from an explicit complete vector; parser output is never used
+        # to guess age, positive-node count, or absent receptor values.
+        dss_prognosis: BreastDssPrognosis | None = None
+        if req.dss_features is not None:
+            from oncology_arbiter.models.breast_dss_arbiter import (
+                score_breast_dss,
+            )
+
+            f = req.dss_features
+            dss_result = score_breast_dss({
+                "age": f.age,
+                "tumor_size_mm": f.tumor_size_mm,
+                "nodes_positive": f.nodes_positive,
+                "grade": f.grade,
+                "er_pos": f.er_positive,
+                "pr_pos": f.pr_positive,
+                "her2_pos": f.her2_positive,
+            })
+            dss_prognosis = BreastDssPrognosis(
+                model_name=dss_result.model_name,
+                disease_specific_mortality_score=dss_result.score,
+                logit=dss_result.logit,
+                term_contributions=dss_result.term_contributions,
+                artifact_sha256=dss_result.artifact_sha256,
+                n_training=dss_result.n_training,
+                events=dss_result.events,
+                oof_auroc=dss_result.oof_auroc,
+                caveats=list(dss_result.caveats),
+            )
+            warnings.append(
+                "breast_dss_prognosis:frozen_metabric:explicit_features:no_imputation"
+            )
+
         schema_gate_report = _to_schema_gate_report(runtime_gate_report)
         env = _envelope(
             request_id,
@@ -1411,6 +1454,7 @@ def create_app() -> FastAPI:
             confidence=confidence,
             arbiter_score=arbiter_block,
             report_parse=report_parse_block,
+            dss_prognosis=dss_prognosis,
         )
 
     # ----------------------------------------------------------------------- #
@@ -1442,6 +1486,11 @@ def create_app() -> FastAPI:
         recommended: list[TherapyOption] = []
         not_recommended: list[TherapyOption] = []
         warnings: list[str] = []
+        # Access __dict__ directly so merely serving the endpoint does not emit
+        # Pydantic's Python deprecation warning; the OpenAPI field remains
+        # marked deprecated for clients.
+        if req.__dict__.get("legacy_therapy_benefit_model_name") is not None:
+            warnings.append("deprecated_prognostic_model_alias_remapped")
         runtime_gate_report = None  # populated by TxGemma preflight
 
         # Extract features for rules engine from biopsy_output + patient_context.

@@ -14,6 +14,15 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 
 
+THERAPY_PROGNOSIS_MODEL_NAME = "therapy_prognosis_metabric_v1"
+LEGACY_THERAPY_BENEFIT_MODEL_NAME = "therapy_benefit_metabric_v1"
+THERAPY_PROGNOSIS_UNCERTAINTY = (
+    "Single-arm METABRIC prognosis under the cohort's treatment mix; this "
+    "design cannot identify a causal treatment effect. Not externally "
+    "calibrated for contemporary care."
+)
+
+
 # --------------------------------------------------------------------------- #
 # Shared
 
@@ -232,12 +241,52 @@ class ScreeningResponse(ApiEnvelope):
 # /v1/biopsy/analyze
 
 
+class BreastDssFeatures(BaseModel):
+    """Complete feature vector for the frozen METABRIC DSS model.
+
+    Every field is required. Report-parser values are never silently used to
+    fill missing clinical inputs because age and positive-node count are not
+    reliably recoverable from a pathology report.
+    """
+
+    age: float = Field(..., ge=18.0, le=120.0)
+    tumor_size_mm: float = Field(..., gt=0.0, le=500.0)
+    nodes_positive: int = Field(..., ge=0, le=100)
+    grade: int = Field(..., ge=1, le=3)
+    er_positive: bool
+    pr_positive: bool
+    her2_positive: bool
+
+
+class BreastDssPrognosis(BaseModel):
+    """Frozen disease-specific prognostic score with auditable decomposition."""
+
+    model_name: Literal["breast_dss_arbiter_v3_metabric"]
+    disease_specific_mortality_score: float = Field(..., ge=0.0, le=1.0)
+    logit: float
+    term_contributions: dict[str, float]
+    artifact_sha256: str = Field(..., min_length=64, max_length=64)
+    n_training: int = Field(..., ge=1)
+    events: int = Field(..., ge=1)
+    oof_auroc: float = Field(..., ge=0.0, le=1.0)
+    endpoint_label: Literal["disease-specific mortality"] = "disease-specific mortality"
+    model_state: Literal["frozen"] = "frozen"
+    caveats: list[str] = Field(default_factory=list)
+
+
 class BiopsyRequest(BaseModel):
     wsi_url: HttpUrl | None = None
     wsi_bytes_b64: str | None = None
     report_text: str | None = Field(
         default=None,
         description="Free-text pathology report; TxGemma will read this alongside the WSI.",
+    )
+    dss_features: BreastDssFeatures | None = Field(
+        default=None,
+        description=(
+            "Complete seven-feature vector for breast_dss_arbiter_v3_metabric. "
+            "When absent, the endpoint does not fabricate or impute a DSS score."
+        ),
     )
     patient_id_hash: str | None = Field(default=None, min_length=64, max_length=64)
 
@@ -332,6 +381,13 @@ class BiopsyResponse(ApiEnvelope):
             "Absent for requests that did not include free-text report_text."
         ),
     )
+    dss_prognosis: BreastDssPrognosis | None = Field(
+        default=None,
+        description=(
+            "Frozen METABRIC disease-specific mortality prognosis. Populated "
+            "only when all seven explicit dss_features were supplied; never imputed."
+        ),
+    )
 
 
 # --------------------------------------------------------------------------- #
@@ -347,6 +403,15 @@ class TherapyPatientContext(BaseModel):
 
 
 class TherapyRequest(BaseModel):
+    legacy_therapy_benefit_model_name: Literal["therapy_benefit_metabric_v1"] | None = Field(
+        default=None,
+        deprecated=True,
+        exclude=True,
+        description=(
+            "Deprecated input alias accepted for one release and remapped to "
+            "therapy_prognosis_metabric_v1. It is never emitted in a response."
+        ),
+    )
     biopsy_output: BiopsyResponse | None = Field(
         default=None,
         description="If provided, we skip re-running biopsy analysis and use this directly.",
@@ -386,6 +451,23 @@ class TherapyOption(BaseModel):
 class TherapyResponse(ApiEnvelope):
     recommended_options: list[TherapyOption] = Field(default_factory=list)
     not_recommended: list[TherapyOption] = Field(default_factory=list)
+    prognostic_model_name: Literal["therapy_prognosis_metabric_v1"] = (
+        THERAPY_PROGNOSIS_MODEL_NAME
+    )
+    prognostic_model_executed: bool = Field(
+        default=False,
+        description=(
+            "False until a complete METABRIC prognosis feature vector is wired "
+            "to this therapy route; prevents the model name from implying inference."
+        ),
+    )
+    prognostic_score: float | None = Field(
+        default=None,
+        ge=0.0,
+        le=1.0,
+        description="Null unless the canonical prognosis model actually executed.",
+    )
+    prognostic_uncertainty: str = THERAPY_PROGNOSIS_UNCERTAINTY
     arbiter_score: ArbiterScore | None = Field(
         default=None,
         description="L3 therapy arbiter output (escalate to neoadjuvant chemo vs. surgery-first).",
