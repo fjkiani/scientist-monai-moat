@@ -151,9 +151,43 @@ def test_therapy_arbiter_scores_only_from_explicit_inputs(client: TestClient) ->
     assert ab["model_name"] == "therapy_arbiter_template_v0"
 
 
-def test_therapy_arbiter_suppressed_when_nodes_missing(client: TestClient) -> None:
-    """Absent nodes suppress the score -- they are never imputed to 0.5."""
-    assert _triage(client, lymph_nodes_pos=_OMIT) is None
+def test_therapy_arbiter_gates_when_nodes_missing(client: TestClient) -> None:
+    """Absent nodes are gated, not imputed and not silently dropped.
+
+    MIGRATED from ``test_therapy_arbiter_suppressed_when_nodes_missing``.
+
+    The original invariant -- an unobserved node status is never imputed to
+    0.5 -- is preserved and strengthened. The old contract returned
+    ``therapy_triage: None`` with a "skipped" receipt, which satisfied the
+    letter of "never impute" while telling the caller nothing: they could not
+    distinguish "we declined to score" from "we scored and it was low", and
+    they never learned how much the missing covariate actually cost.
+
+    The new contract refuses with HTTP 422 and hands back the identified set.
+    On this panel an unobserved ``node_status_positive`` (coefficient +2.1,
+    the largest in the artefact) spans [0.168682, 0.623634] -- width 0.454952,
+    nearly half the probability scale from a single missing field. That is the
+    number the old test threw away.
+    """
+    payload = {k: v for k, v in COMPLETE_TRIAGE.items() if k != "lymph_nodes_pos"}
+    resp = client.post(
+        "/v1/therapy/reason",
+        json={"biopsy_output": None, "patient_context": {},
+              "therapy_features": payload},
+    )
+    assert resp.status_code == 422, resp.text
+    body = resp.json()
+    assert body["error"] == "ManskiBoundsExceeded"
+    assert body["missing_features"] == ["node_status_positive"]
+    assert body["bounds"] == [0.168682, 0.623634]
+    assert body["width"] == 0.454952
+    assert body["max_width"] == 0.25
+    assert body["public_bypass_available"] is False
+    # The original invariant, checked directly: no imputed point estimate
+    # anywhere in the refusal, and specifically nothing near 0.5.
+    assert body["point_estimate_withheld"] is True
+    assert "p_positive" not in body and "arbiter_score" not in body
+
     resp = client.post(
         "/v1/therapy/reason",
         json={"biopsy_output": None, "patient_context": {}, "therapy_features": None},
@@ -164,10 +198,36 @@ def test_therapy_arbiter_suppressed_when_nodes_missing(client: TestClient) -> No
     stages = {r["stage"]: r for r in body["stage_receipts"]}
     triage_receipt = stages["therapy_research_triage"]
     assert triage_receipt["status"] == "skipped_not_applicable"
-    assert any("unknown=0.5" in w for w in triage_receipt["warnings"]), (
-        "the skip reason must record that unknown=0.5 is never used: "
+    assert any("nothing to identify" in w for w in triage_receipt["warnings"]), (
+        f"the skip reason must say why nothing was scored: "
         f"{triage_receipt['warnings']}"
     )
+
+    # MIGRATED assertion. The old test proved "unknown is never 0.5" by
+    # grepping for the string "unknown=0.5" in a warning message -- a claim
+    # about prose, which a rewording silently voids. The invariant is now
+    # checked where it actually lives: in the frozen artefact, whose boolean
+    # encodings must map `unknown` to null, and in the loader, which refuses
+    # any template declaring anything else.
+    import json as _json
+    from pathlib import Path as _Path
+
+    artefact = _json.loads(
+        _Path(__file__).resolve().parents[2].joinpath(
+            "src/oncology_arbiter/arbiter/models/therapy_arbiter_template_v0.json"
+        ).read_text()
+    )
+    bool_encodings = {
+        k: v for k, v in artefact["feature_encodings"].items()
+        if isinstance(v, dict) and set(v) <= {"true", "false", "unknown"}
+    }
+    assert bool_encodings, "expected boolean-encoded features in the artefact"
+    for name, enc in bool_encodings.items():
+        assert enc["unknown"] is None, (
+            f"{name} declares unknown={enc['unknown']!r}; an unobserved "
+            f"boolean must stay unobserved, never be imputed"
+        )
+        assert enc["false"] == 0.0 and enc["true"] == 1.0
 
 
 def test_zero_nodes_is_observed_negative_contributing_exactly_zero(

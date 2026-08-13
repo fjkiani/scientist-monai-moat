@@ -21,7 +21,46 @@ import time
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterator
+from typing import Iterator, Sequence
+
+
+#: Scopes are stored as a comma-separated string. SQLite has no array type
+#: and a join table would be three queries for a field that is read on every
+#: request; the separator is forbidden inside a scope name so the encoding is
+#: unambiguous.
+SCOPE_SEPARATOR = ","
+
+
+def _pack_scopes(scopes: Sequence[str]) -> str:
+    for s in scopes:
+        if SCOPE_SEPARATOR in s:
+            raise ValueError(
+                f"scope {s!r} contains the separator {SCOPE_SEPARATOR!r}"
+            )
+    return SCOPE_SEPARATOR.join(sorted(set(scopes)))
+
+
+def _unpack_scopes(raw: str | None) -> tuple[str, ...]:
+    if not raw:
+        return ()
+    return tuple(sorted({s.strip() for s in raw.split(SCOPE_SEPARATOR) if s.strip()}))
+
+
+def _row_to_key(row) -> "APIKey":
+    # `scopes` is absent from rows produced by a pre-migration database read;
+    # treat that as no scopes rather than as an error.
+    try:
+        raw_scopes = row["scopes"]
+    except (IndexError, KeyError):
+        raw_scopes = ""
+    return APIKey(
+        tenant_id=row["tenant_id"],
+        tenant_name=row["tenant_name"],
+        key_prefix=row["key_prefix"],
+        created_ts=row["created_ts"],
+        revoked_ts=row["revoked_ts"],
+        scopes=_unpack_scopes(raw_scopes),
+    )
 
 
 DEFAULT_DB = Path(os.environ.get("ONCOLOGY_ARBITER_AUTH_DB_PATH", "/tmp/oa-audit/tenants.sqlite"))
@@ -35,6 +74,14 @@ class APIKey:
     key_prefix: str        # first 12 chars of the key (oa_live_XXXX) for logs
     created_ts: float
     revoked_ts: float | None
+    #: Capabilities granted to this tenant beyond ordinary inference access.
+    #: Empty for every key minted before scopes existed and for the anonymous
+    #: principal used when auth is disabled, so a scope check fails closed by
+    #: default rather than by explicit denial.
+    scopes: tuple[str, ...] = ()
+
+    def has_scope(self, scope: str) -> bool:
+        return scope in self.scopes
 
 
 def make_key() -> str:
@@ -83,14 +130,30 @@ class APIKeyDB:
                     key_hash    TEXT NOT NULL UNIQUE,
                     key_prefix  TEXT NOT NULL,
                     created_ts  REAL NOT NULL,
-                    revoked_ts  REAL
+                    revoked_ts  REAL,
+                    scopes      TEXT NOT NULL DEFAULT ''
                 )
                 """
             )
             con.execute("CREATE INDEX IF NOT EXISTS idx_key_hash ON tenants(key_hash)")
+            # Migrate databases created before scopes existed. Adding the
+            # column with an empty default means every pre-existing key comes
+            # back with no scopes, which is the fail-closed answer: an old key
+            # must not silently acquire a privilege that did not exist when it
+            # was issued.
+            cols = {r["name"] for r in con.execute("PRAGMA table_info(tenants)")}
+            if "scopes" not in cols:
+                con.execute(
+                    "ALTER TABLE tenants ADD COLUMN scopes TEXT NOT NULL DEFAULT ''"
+                )
 
     # ------------------------------------------------------------- write
-    def issue(self, tenant_name: str, tenant_id: str | None = None) -> tuple[str, APIKey]:
+    def issue(
+        self,
+        tenant_name: str,
+        tenant_id: str | None = None,
+        scopes: Sequence[str] = (),
+    ) -> tuple[str, APIKey]:
         """Mint + persist a new key. Returns (raw_key, record).
 
         The raw_key is shown to the operator ONCE — never again.
@@ -103,12 +166,20 @@ class APIKeyDB:
             key_prefix=raw[: len(KEY_PREFIX) + 4],  # oa_live_XXXX
             created_ts=time.time(),
             revoked_ts=None,
+            scopes=tuple(sorted(set(scopes))),
         )
         with self._conn() as con:
             con.execute(
-                "INSERT INTO tenants(tenant_id, tenant_name, key_hash, key_prefix, created_ts, revoked_ts) "
-                "VALUES (?, ?, ?, ?, ?, NULL)",
-                (rec.tenant_id, rec.tenant_name, hash_key(raw), rec.key_prefix, rec.created_ts),
+                "INSERT INTO tenants(tenant_id, tenant_name, key_hash, key_prefix, "
+                "created_ts, revoked_ts, scopes) VALUES (?, ?, ?, ?, ?, NULL, ?)",
+                (
+                    rec.tenant_id,
+                    rec.tenant_name,
+                    hash_key(raw),
+                    rec.key_prefix,
+                    rec.created_ts,
+                    _pack_scopes(rec.scopes),
+                ),
             )
         return raw, rec
 
@@ -125,36 +196,21 @@ class APIKeyDB:
         h = hash_key(raw_key)
         with self._conn() as con:
             row = con.execute(
-                "SELECT tenant_id, tenant_name, key_prefix, created_ts, revoked_ts "
-                "FROM tenants WHERE key_hash = ?",
+                "SELECT tenant_id, tenant_name, key_prefix, created_ts, revoked_ts, "
+                "scopes FROM tenants WHERE key_hash = ?",
                 (h,),
             ).fetchone()
         if row is None:
             return None
-        return APIKey(
-            tenant_id=row["tenant_id"],
-            tenant_name=row["tenant_name"],
-            key_prefix=row["key_prefix"],
-            created_ts=row["created_ts"],
-            revoked_ts=row["revoked_ts"],
-        )
+        return _row_to_key(row)
 
     def list_all(self) -> list[APIKey]:
         with self._conn() as con:
             rows = con.execute(
-                "SELECT tenant_id, tenant_name, key_prefix, created_ts, revoked_ts "
-                "FROM tenants ORDER BY created_ts"
+                "SELECT tenant_id, tenant_name, key_prefix, created_ts, revoked_ts, "
+                "scopes FROM tenants ORDER BY created_ts"
             ).fetchall()
-        return [
-            APIKey(
-                tenant_id=r["tenant_id"],
-                tenant_name=r["tenant_name"],
-                key_prefix=r["key_prefix"],
-                created_ts=r["created_ts"],
-                revoked_ts=r["revoked_ts"],
-            )
-            for r in rows
-        ]
+        return [_row_to_key(r) for r in rows]
 
 
 def verify_api_key(raw_key: str, db: APIKeyDB | None = None) -> APIKey | None:

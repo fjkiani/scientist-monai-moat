@@ -135,6 +135,45 @@ class HonestyGateReport(BaseModel):
     hypotheses_dropped: int = Field(default=0, ge=0)
 
 
+class ManskiBoundsBlock(BaseModel):
+    """The identified set for a stage probability, attached to every point estimate.
+
+    These are assumption-free (Manski) bounds: each feature the caller did not
+    supply is ranged over its *entire* admissible support and the endpoints are
+    the resulting extremes of the sigmoid. They are NOT a confidence interval —
+    there is no sampling model here, only the logical consequence of not knowing
+    a covariate.
+
+    `width == 0.0` means the panel was complete and the estimate is
+    point-identified. On every public route `identified == False` is
+    unreachable in a 200 response: the gate raises HTTP 422 first, and no
+    header, query parameter or environment variable relaxes it. The only
+    way to see `identified == False` is the authenticated research route
+    `/v1/research/arbiter/identified_set`, which requires the privileged
+    `research:blind_inference` scope and stamps every release with an audit
+    receipt.
+    """
+    model_config = ConfigDict(str_strip_whitespace=True)
+    stage: str
+    model_name: str
+    lower: float = Field(..., ge=0.0, le=1.0)
+    upper: float = Field(..., ge=0.0, le=1.0)
+    width: float = Field(..., ge=0.0, le=1.0)
+    max_width: float = Field(..., gt=0.0)
+    identified: bool = Field(
+        ..., description="True when width <= max_width and a point estimate is admissible.",
+    )
+    missing_features: list[str] = Field(
+        default_factory=list,
+        description="Declared features the caller did not supply, from the artefact schema — not only the booleans.",
+    )
+    unobserved_unbounded: list[str] = Field(
+        default_factory=list,
+        description="Unobserved continuous covariates with no declared support; each forces the interval to [0, 1].",
+    )
+    interval_semantics: str
+
+
 class ArbiterScore(BaseModel):
     """L3 calibrated logistic arbiter output, matching progression_arbiter shape.
 
@@ -162,6 +201,20 @@ class ArbiterScore(BaseModel):
         description="'template' when n_training==0 (illustrative), 'frozen' after Phase 3 fit.",
     )
     caveat: str = Field(..., description="AUROC caveat from the frozen JSON")
+    manski: ManskiBoundsBlock | None = Field(
+        default=None,
+        description=(
+            "Identified set for `p_positive` given the unobserved part of the feature "
+            "panel. Absent only on legacy paths that predate the gate."
+        ),
+    )
+    provenance_warnings: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Non-empty only when the Manski gate was bypassed via "
+            "X-Allow-Blind-Inference; the first entry is PROVISIONAL_UNOBSERVED_WARNING."
+        ),
+    )
 
 
 class GateReport(BaseModel):
@@ -1555,3 +1608,76 @@ class CoScientistRunResponse(ApiEnvelope):
             "in `hypotheses[]` but a caller SHOULD treat them as untrusted."
         ),
     )
+
+
+# --------------------------------------------------------------------------- #
+# Research-only blind inference (authenticated, privileged scope)
+#
+# These models back `/v1/research/arbiter/identified_set`, the ONLY route in
+# the API that may return a point estimate whose Manski interval is wider than
+# `MANSKI_MAX_WIDTH`. It is not a bypass of the public gate: it is a different
+# contract. The caller must hold the `research:blind_inference` scope, the
+# response carries the raw bounds and the full unobserved-feature list rather
+# than hiding them, and every release writes an audit receipt naming the
+# tenant. `not_for_clinical_use` is a literal True and cannot be negotiated.
+
+
+class ResearchIdentifiedSetRequest(BaseModel):
+    """Ask for the identified set of a stage probability under an incomplete panel."""
+    model_config = ConfigDict(extra="forbid")
+    arbiter: Literal["screening", "biopsy", "therapy"] = Field(
+        ...,
+        description="Which frozen L2 arbiter to interrogate.",
+    )
+    features: dict[str, Any] = Field(
+        default_factory=dict,
+        description=(
+            "Partial feature panel. Any declared feature omitted here is "
+            "ranged over its entire admissible support to build the bounds."
+        ),
+    )
+    acknowledge_not_for_clinical_use: Literal[True] = Field(
+        ...,
+        description=(
+            "Must be literal true. A research release is only meaningful if "
+            "the caller has stated in the request that it is not clinical."
+        ),
+    )
+
+
+class ResearchIdentifiedSetResponse(BaseModel):
+    """Raw bounds plus the point estimate the public gate would have refused."""
+    model_config = ConfigDict(extra="forbid")
+    request_id: str
+    arbiter: str
+    model_name: str
+    point_estimate: float = Field(
+        ...,
+        ge=0.0, le=1.0,
+        description=(
+            "One coordinate inside `bounds`. When `identified` is False this "
+            "number is NOT an estimate of anything; it is the value the "
+            "encoder happens to produce when unobserved covariates are pinned "
+            "at their reference level."
+        ),
+    )
+    bounds: ManskiBoundsBlock
+    would_have_been_rejected: bool = Field(
+        ...,
+        description="True when a public route would have answered HTTP 422 for this exact panel.",
+    )
+    public_route_error_code: str | None = Field(
+        None,
+        description="`ManskiBoundsExceeded`, `IDENTIFIED_SET_UNBOUNDED`, or null when the panel is identified.",
+    )
+    missing_features: list[str] = Field(default_factory=list)
+    unobserved_unbounded: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(
+        default_factory=list,
+        description="Mandatory provenance warnings. Never empty when `identified` is False.",
+    )
+    audit_receipt: dict[str, Any] = Field(
+        ...,
+        description="Receipt written to the tenant audit ledger for this release.",
+    )
+    not_for_clinical_use: Literal[True] = True

@@ -5,6 +5,8 @@ import ast
 import base64
 import importlib
 import math
+
+from oncology_arbiter.arbiter.manski import ManskiBoundsExceeded
 from pathlib import Path
 
 import pytest
@@ -272,7 +274,19 @@ def test_therapy_triage_contrasts_are_mathematically_exact() -> None:
     assert math.isclose(grade3.logit - zero.logit, 1.2, rel_tol=0, abs_tol=1e-12)
     assert math.isclose(larger.logit - zero.logit, 1.4, rel_tol=0, abs_tol=1e-12)
     assert math.isclose(older.logit - zero.logit, -0.05, rel_tol=0, abs_tol=1e-12)
-    assert _score_explicit_therapy_triage(_triage_features(lymph_nodes_pos=None)) is None
+    # MIGRATED: an explicitly-null node status used to return None. It now
+    # raises through the Manski gate, and the exception carries the interval
+    # that the silent None concealed. The arithmetic contrasts above are
+    # unchanged -- only the missing-data branch moved.
+    with pytest.raises(ManskiBoundsExceeded) as exc:
+        _score_explicit_therapy_triage(_triage_features(lymph_nodes_pos=None))
+    bounds = exc.value.bounds
+    assert bounds.missing_features == ("node_status_positive",)
+    assert (round(bounds.lower, 6), round(bounds.upper, 6)) == (0.153164, 0.596283)
+    assert round(bounds.width, 6) == 0.443119
+    # The width is exactly the sigmoid span of the +2.1 node coefficient over
+    # the base logit, so the refusal is arithmetic, not a policy guess.
+    assert round(bounds.upper - bounds.lower, 6) == round(bounds.width, 6)
 
 
 def test_therapy_endpoint_uses_bridge_as_only_recommendation_source(monkeypatch) -> None:

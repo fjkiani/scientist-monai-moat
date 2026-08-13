@@ -27,13 +27,17 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
 
-from fastapi import Depends, FastAPI, HTTPException, Query, Request
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 from fastapi.responses import FileResponse, JSONResponse
 
 from oncology_arbiter import AUROC_CAVEAT, RUO_DISCLAIMER, __version__
 
+from ..arbiter.manski import (
+    RESEARCH_BLIND_INFERENCE_SCOPE,
+    ManskiGateError,
+)
 from .audit import log_event, new_request_id
-from ..auth import APIKey, bootstrap_from_env, require_api_key
+from ..auth import APIKey, bootstrap_from_env, require_api_key, require_scope
 from ..observability import (
     RequestIdMiddleware,
     configure_logging,
@@ -42,6 +46,7 @@ from ..observability import (
 from .schemas import (
     ApiEnvelope,
     ArbiterScore,
+    ManskiBoundsBlock,
     ArtifactCategory,
     BiopsyReceptorPanel,
     BiopsyRequest,
@@ -65,6 +70,8 @@ from .schemas import (
     ModelCardSummary,
     ModelState,
     Provenance,
+    ResearchIdentifiedSetRequest,
+    ResearchIdentifiedSetResponse,
     EloDrugCandidate,
     EloMatchRecord,
     EloRankedEntry,
@@ -143,15 +150,39 @@ def _decode_bytes_arg(bytes_b64: str | None) -> bytes | None:
         raise HTTPException(400, f"invalid base64 dicom_bytes: {e}")
 
 
-def _score_arbiter(name: str, features: dict[str, Any]) -> ArbiterScore:
-    """Load the named L2 arbiter and score `features`.
+def _score_arbiter(
+    name: str,
+    features: dict[str, Any],
+    *,
+    stage: str | None = None,
+) -> ArbiterScore:
+    """Load the named L2 arbiter, score `features`, and apply the Manski gate.
 
     Wraps :func:`oncology_arbiter.arbiter.load_arbiter` and marshals the
     :class:`ArbiterResult` into the wire-level :class:`ArbiterScore` pydantic.
+
+    This is the single choke point through which every stage's L2 point
+    estimate reaches the wire, so it is where partial identification is
+    enforced. When the assumption-free interval implied by the *unobserved*
+    part of the declared feature schema is wider than
+    :data:`MANSKI_MAX_WIDTH`, no point estimate is marshalled at all:
+    :class:`ManskiGateError` propagates to the app-level handler and the caller
+    receives 422 plus the raw interval.
+
+    There is no bypass. This function takes no argument, reads no header and
+    consults no environment variable that could release an unidentified point
+    estimate on a public route. The research override is a separate route with
+    its own privileged scope; see ``/v1/research/arbiter/identified_set``.
     """
     from oncology_arbiter.arbiter import load_arbiter
+    from oncology_arbiter.arbiter.manski import ManskiBounds, enforce_manski_gate
+
     arb = load_arbiter(name)
     r = arb.score(features)
+    bounds = ManskiBounds.from_arbiter(
+        stage=stage or name, arbiter=arb, features=features, result=r,
+    )
+    provenance_warnings = enforce_manski_gate(bounds)
     return ArbiterScore(
         model_name=arb.model_name,
         p_positive=r.p_positive,
@@ -165,6 +196,8 @@ def _score_arbiter(name: str, features: dict[str, Any]) -> ArbiterScore:
         n_training=arb.n_training,
         model_state=r.metadata["model_state"],  # type: ignore[arg-type]
         caveat=r.caveat,
+        manski=ManskiBoundsBlock(**bounds.as_dict()),
+        provenance_warnings=list(provenance_warnings),
     )
 
 
@@ -273,26 +306,47 @@ _TRIAGE_REQUIRED_FIELDS = {
 }
 
 
-def _score_explicit_therapy_triage(raw: dict[str, Any] | None) -> ArbiterScore | None:
+
+
+def _score_explicit_therapy_triage(
+    raw: dict[str, Any] | None,
+) -> ArbiterScore | None:
+    """Score the explicit therapy triage vector, or return None if none was asked for.
+
+    A *partial* panel is no longer silently dropped. Previously any missing
+    field returned None with a "skipped" receipt, which hid from the caller
+    both the fact that the arbiter could still have produced a number and how
+    little that number would have been worth. The partial panel is now scored
+    and handed to the Manski gate, so the caller either gets a point estimate
+    that is genuinely identified, or a 422 carrying the interval and the list
+    of features that would collapse it.
+    """
     if raw is None:
         return None
     from oncology_arbiter.api.schemas import TherapyTriageFeatures
     validated = TherapyTriageFeatures.model_validate(raw).model_dump()
-    if any(validated[field] is None for field in _TRIAGE_REQUIRED_FIELDS):
+    if all(validated[field] is None for field in _TRIAGE_REQUIRED_FIELDS):
+        # Nothing at all was supplied: this is "no triage requested", not
+        # "triage requested with an unobserved panel".
         return None
     nodes = validated["lymph_nodes_pos"]
-    return _score_arbiter("therapy", features={
+    features = {
         "histology": validated["histology"],
-        "grade": str(validated["grade"]),
+        "grade": None if validated["grade"] is None else str(validated["grade"]),
         "er_status_positive": validated["er_positive"],
         "pr_status_positive": validated["pr_positive"],
         "her2_status_positive": validated["her2_positive"],
         "ki67_norm": validated["ki67_pct"],
         "tumor_size_norm": validated["tumor_size_mm"],
-        "node_status_positive": nodes > 0,
+        "node_status_positive": None if nodes is None else nodes > 0,
         "brca_status_known_pathogenic": validated["brca_pathogenic"],
         "age_at_diagnosis_norm": validated["age_years"],
-    })
+    }
+    return _score_arbiter(
+        "therapy",
+        features=features,
+        stage="therapy_research_triage",
+    )
 
 
 # --------------------------------------------------------------------------- #
@@ -720,6 +774,24 @@ def create_app() -> FastAPI:
 
     configure_logging(os.environ.get("ONCOLOGY_ARBITER_LOG_LEVEL", "INFO"))
     _logger = get_logger()
+
+    # 0) Partial-identification gate.
+    #
+    # Registered before every other handler because it must not be reachable
+    # around: a stage that cannot bound its own probability to within
+    # MANSKI_MAX_WIDTH has no point estimate to serve, and the correct HTTP
+    # semantics for "your input is well-formed but does not identify the
+    # quantity you asked for" is 422, not a 200 carrying a number.
+    @app.exception_handler(ManskiGateError)
+    def _manski_bounds_handler(request: Request, exc: ManskiGateError):  # type: ignore[no-untyped-def]
+        payload = exc.payload()
+        _logger.warning(
+            "manski gate blocked %s stage=%s width=%.6f bounds=[%.6f,%.6f] missing=%s",
+            request.url.path, payload["stage"], payload["width"],
+            payload["bounds"][0], payload["bounds"][1],
+            ",".join(payload["missing_features"]) or "none",
+        )
+        return JSONResponse(status_code=exc.status_code, content=payload)
 
     # 1) Prometheus /metrics
     try:
@@ -1291,7 +1363,14 @@ def create_app() -> FastAPI:
 
         triage: ArbiterScore | None = None
         try:
-            triage = _score_explicit_therapy_triage(req.therapy_features)
+            triage = _score_explicit_therapy_triage(
+                req.therapy_features
+            )
+        except ManskiGateError:
+            # Never downgrade a partial-identification block into a soft
+            # optional-stage failure: the caller must see the 422 and the
+            # interval, not a 200 with therapy_triage=null.
+            raise
         except Exception as exc:
             receipts.append(_failed_stage_receipt(
                 "therapy_research_triage", False, request_id, "invalid_triage_features",
@@ -1300,16 +1379,22 @@ def create_app() -> FastAPI:
         if triage is None and not any(r["stage"] == "therapy_research_triage" for r in receipts):
             receipts.append(_skipped_stage_receipt(
                 "therapy_research_triage", request_id,
-                "complete explicit triage vector required; missing nodes never use unknown=0.5",
+                "no explicit triage vector supplied; nothing to identify",
             ))
         elif triage is not None:
             receipts.append({
                 "stage": "therapy_research_triage", "required": False, "status": "succeeded",
                 "request_id": request_id, "service_name": "oncology-arbiter",
                 "model_name": triage.model_name, "model_version": "template-v0",
-                "input_reference": "explicit_complete_patient_features",
+                "input_reference": (
+                    "explicit_complete_patient_features" if not triage.provenance_warnings
+                    else "partially_unobserved_panel"
+                ),
                 "latency_ms": 0.0,
-                "warnings": ["illustrative_research_triage_not_recommendation_or_treatment_benefit"],
+                "warnings": [
+                    "illustrative_research_triage_not_recommendation_or_treatment_benefit",
+                    *triage.provenance_warnings,
+                ],
                 "error": None,
             })
 
@@ -1334,6 +1419,106 @@ def create_app() -> FastAPI:
             prognostic_model_executed=False,
             prognostic_score=None,
             arbiter_score=triage,
+        )
+
+    # ----------------------------------------------------------------------- #
+    # /v1/research/arbiter/identified_set — the ONLY blind-inference surface
+    #
+    # The public gate has no bypass: no header, query parameter or environment
+    # variable releases an unidentified point estimate from /v1/screening,
+    # /v1/biopsy, /v1/therapy, /v1/tumor_board or /v1/case. Blind inference
+    # lives here instead, behind four separate locks:
+    #
+    #   1. a valid API key,
+    #   2. the privileged `research:blind_inference` scope — `require_scope`
+    #      deliberately does NOT honour ONCOLOGY_ARBITER_AUTH_MODE=off, so the
+    #      anonymous dev principal (which holds no scopes) is refused even in a
+    #      local process where every other route is wide open,
+    #   3. an explicit `acknowledge_not_for_clinical_use: true` in the body,
+    #   4. an audit receipt naming the tenant, written before the response is
+    #      marshalled, recording exactly what the public route would have
+    #      refused.
+    #
+    # The response returns the raw interval and the unobserved-feature list
+    # alongside the number, so the caller cannot receive a point estimate
+    # without simultaneously receiving the evidence that it is uninformative.
+
+    @app.post(
+        "/v1/research/arbiter/identified_set",
+        response_model=ResearchIdentifiedSetResponse,
+    )
+    def research_identified_set(
+        req: ResearchIdentifiedSetRequest,
+        tenant: APIKey = Depends(require_scope(RESEARCH_BLIND_INFERENCE_SCOPE)),
+    ) -> ResearchIdentifiedSetResponse:
+        """Return the Manski identified set for a partial panel, un-gated.
+
+        This is a research instrument for measuring how much a missing
+        covariate costs, not a clinical endpoint. When the panel is complete
+        the response is identical in content to the public route; when it is
+        not, the caller gets the interval that the public route converts into
+        an HTTP 422.
+        """
+        from oncology_arbiter.arbiter import load_arbiter
+        from oncology_arbiter.arbiter.manski import (
+            MANSKI_ERROR_CODE,
+            UNBOUNDED_ERROR_CODE,
+            ManskiBounds,
+            blind_inference_receipt,
+            research_release,
+        )
+
+        request_id = new_request_id()
+        try:
+            arb = load_arbiter(req.arbiter)
+        except (ValueError, FileNotFoundError) as exc:
+            raise HTTPException(400, f"unknown arbiter {req.arbiter!r}: {exc}")
+
+        result = arb.score(req.features)
+        bounds = ManskiBounds.from_arbiter(
+            stage=f"research_{req.arbiter}",
+            arbiter=arb,
+            features=req.features,
+            result=result,
+        )
+        warnings = research_release(bounds)
+        receipt = blind_inference_receipt(
+            bounds,
+            tenant_id=tenant.tenant_id,
+            key_prefix=tenant.key_prefix,
+            route="/v1/research/arbiter/identified_set",
+            request_features=req.features,
+        )
+        error_code = (
+            UNBOUNDED_ERROR_CODE
+            if bounds.unbounded
+            else (MANSKI_ERROR_CODE if not bounds.identified else None)
+        )
+        log_event(
+            request_id,
+            "/v1/research/arbiter/identified_set",
+            model_state=str(result.metadata["model_state"]),
+            tenant_id=tenant.tenant_id,
+            extra={"blind_inference_receipt": receipt},
+        )
+        _logger.warning(
+            "blind inference released stage=%s tenant=%s width=%.6f "
+            "bounds=[%.6f,%.6f] public_route_would_have_returned=%s",
+            bounds.stage, tenant.tenant_id, bounds.width,
+            bounds.lower, bounds.upper, error_code,
+        )
+        return ResearchIdentifiedSetResponse(
+            request_id=request_id,
+            arbiter=req.arbiter,
+            model_name=arb.model_name,
+            point_estimate=result.p_positive,
+            bounds=ManskiBoundsBlock(**bounds.as_dict()),
+            would_have_been_rejected=error_code is not None,
+            public_route_error_code=error_code,
+            missing_features=list(bounds.missing_features),
+            unobserved_unbounded=list(bounds.unobserved_unbounded),
+            warnings=list(warnings),
+            audit_receipt=receipt,
         )
 
     # ----------------------------------------------------------------------- #
@@ -2169,7 +2354,9 @@ def create_app() -> FastAPI:
             ))
 
         if req.cancer == "breast" and req.therapy_features is not None:
-            therapy_triage = _score_explicit_therapy_triage(req.therapy_features.model_dump())
+            therapy_triage = _score_explicit_therapy_triage(
+                req.therapy_features.model_dump(),
+            )
             if therapy_triage is not None:
                 receipts.append({
                     "stage": "therapy_research_triage",
@@ -2243,7 +2430,9 @@ def create_app() -> FastAPI:
         tenant: APIKey = Depends(require_api_key),
     ) -> DynamicTumorBoardResponse:
         request_id = new_request_id()
-        response = _assemble_dynamic_tumor_board(req, request_id=request_id)
+        response = _assemble_dynamic_tumor_board(
+            req, request_id=request_id
+        )
         log_event(
             request_id, "/v1/tumor_board/dynamic",
             model_state=response.provenance.model_state.value,
@@ -2283,7 +2472,9 @@ def create_app() -> FastAPI:
                 clinical_baseline=req.therapy_context.model_dump(mode="json"),
                 run_co_scientist=req.run_co_scientist,
             )
-            dynamic = _assemble_dynamic_tumor_board(dynamic_request, request_id=request_id)
+            dynamic = _assemble_dynamic_tumor_board(
+                dynamic_request, request_id=request_id,
+            )
             screening = screening_analyze(req.screening_input, tenant=tenant) if req.screening_input else None
             log_event(
                 request_id, "/v1/case/full",

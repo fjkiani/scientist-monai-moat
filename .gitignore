@@ -14,8 +14,15 @@ __pycache__/
 .vscode/
 .idea/
 
-# Runtime artifacts
-artifacts/audit/
+# Runtime artifacts.
+# artifacts/audit/ holds two different kinds of file:
+#   1. runtime audit-log tenant directories (artifacts/audit/<tenant>/audit-*.jsonl)
+#   2. deliberate audit receipts committed as evidence for the external audit
+# Ignore the directory *contents* (not the directory itself, otherwise the
+# negation below cannot re-include anything) and re-admit the top-level
+# receipt JSONs only.
+artifacts/audit/*
+!artifacts/audit/*.json
 artifacts/logs/
 *.log
 
