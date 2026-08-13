@@ -162,7 +162,7 @@ def plot(rows: list[dict], out: Path) -> None:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="/mnt/results/audit_v2/figures/missingness_encoding_impact_v3.png")
+    ap.add_argument("--out", default="/mnt/results/audit_v2/figures/missingness_encoding_impact_v4.png")
     args = ap.parse_args()
 
     rows = [analyse(t) for t in TEMPLATES]
