@@ -1,0 +1,69 @@
+{
+  "retired_tests": [
+    {
+      "path": "tests/unit/test_biopsy_report_parser_wiring.py",
+      "n_test_functions": 6,
+      "reason": "asserts regex report-parser spans; parsing is ClinicalBERT v0.5.2 only"
+    },
+    {
+      "path": "tests/unit/test_biopsy_therapy_endpoints.py",
+      "n_test_functions": 8,
+      "reason": "asserts rules-lite / TxGemma therapy branches; therapy is SL-bridge only"
+    },
+    {
+      "path": "tests/unit/test_biopsy_therapy_gate_report.py",
+      "n_test_functions": 6,
+      "reason": "asserts rules-proxy gate-report shapes for retired therapy proxies"
+    },
+    {
+      "path": "tests/unit/test_therapy_api_rules_fingerprint.py",
+      "n_test_functions": 5,
+      "reason": "asserts NCCN-lite rules_sha256/branch_id fingerprints; NCCN-lite retired"
+    },
+    {
+      "path": "tests/unit/test_therapy_receptors_override.py",
+      "n_test_functions": 6,
+      "reason": "asserts regex-parsed receptor override feeding therapy; parser retired"
+    },
+    {
+      "path": "tests/unit/test_monai_detector_endpoint.py",
+      "n_test_functions": 4,
+      "reason": "asserts MONAI HU-heuristic bbox findings promoted to a proxy state"
+    },
+    {
+      "path": "tests/unit/test_health_runtime_state.py",
+      "n_test_functions": 16,
+      "reason": "asserts the proxy-state health registry (PROXY_SIGLIP/PROXY_LUNG_HEURISTIC/PROXY_REGEX_V0)"
+    },
+    {
+      "path": "tests/unit/test_case_full_nsclc_api.py",
+      "n_test_functions": 4,
+      "reason": "asserts local series_dir ingestion and lung HU heuristic; LUNA16 takes verified case IDs only"
+    },
+    {
+      "path": "tests/models/test_siglip_baseline.py",
+      "n_test_functions": 21,
+      "reason": "asserts the general-domain google/siglip-base-patch16-224 proxy on mammograms"
+    },
+    {
+      "path": "tests/integration/test_screening_endpoint_modal_smoke.py",
+      "n_test_functions": 5,
+      "reason": "smoke-tests the pre-strict screening envelope with proxy fallback"
+    }
+  ],
+  "retargeted": [
+    {
+      "path": "tests/unit/test_co_scientist_endpoint.py",
+      "change": "/v1/co_scientist/run -> /v1/offline_ranker/run",
+      "reason": "deterministic Elo ranker must never be labelled LLM output; honesty-gate coverage retained"
+    }
+  ],
+  "replacement_coverage": [
+    "tests/unit/test_production_specialist_contracts.py",
+    "tests/unit/test_screening_production_contract.py",
+    "tests/unit/test_arbiter_missingness_encoding.py",
+    "tests/unit/test_ovarian_retirement_validation.py",
+    "tests/unit/test_clinicalbert_sliding_window.py",
+    "tests/regression/test_clinicalbert_modal_wire.py"
+  ]
+}

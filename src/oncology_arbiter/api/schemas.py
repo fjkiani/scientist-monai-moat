@@ -47,7 +47,12 @@ class ModelState(str, Enum):
     PROXY_REGEX_V0 = "proxy_regex_v0" # v0.2.1 pathology-report regex parser (stateless code, always available)
     LOADED_CLINICALBERT_PARSER = "loaded_clinicalbert_parser"  # v0.3.0 Bio_ClinicalBERT fine-tuned on synthetic corpus
     FUSED_REGEX_CLINICALBERT = "fused_regex_clinicalbert"  # v0.3.0 regex ∧ ClinicalBERT fusion
-    PROXY_CO_SCIENTIST = "proxy_co_scientist"  # L5 orchestrator: literature-derived Elo tournament (deterministic scoring)
+    PROXY_CO_SCIENTIST = "proxy_co_scientist"  # offline deterministic ranker; never an LLM result
+    LOADED_CASE_STORAGE = "loaded_case_storage"
+    LOADED_PHIKON = "loaded_phikon"
+    LOADED_MEDGEMMA_27B = "loaded_medgemma_27b"
+    RETIRED = "retired"
+    CONFIGURED_UNVERIFIED = "configured_unverified"  # endpoint configured; successful inference not yet proven
 
     # v0.4.0-alpha additions (PLAN §2A):
     LOADED_LUNA16_REFINED = "loaded_luna16_refined"        # fjkiani-luna16-refine-v1 (LUNA16+LIDC-IDRI fine-tune, target ΔFROC@2 ≥ +5% over 0.6.9)
@@ -68,6 +73,39 @@ class EvidenceRecord(BaseModel):
     quoted_text: str = Field(..., description="Verbatim quote used from that URL")
     source: str = Field(default="unknown",
                         description="Source module (pubmed, arxiv, europe_pmc, web_fetch)")
+
+
+class StageError(BaseModel):
+    code: str
+    message: str
+
+
+class StageReceipt(BaseModel):
+    """Additive receipt for one specialist stage; never contains raw PHI."""
+
+    stage: str
+    required: bool
+    status: Literal[
+        "succeeded",
+        "failed_required",
+        "failed_optional",
+        "skipped_not_applicable",
+        "retired",
+    ]
+    request_id: str
+    service_name: str | None = None
+    endpoint_label: str | None = None
+    app_version: str | None = None
+    model_name: str | None = None
+    model_version: str | None = None
+    artifact_sha256: str | None = Field(default=None, min_length=64, max_length=64)
+    input_reference: str | None = Field(
+        default=None,
+        description="Content hash, case identifier, or manifest hash; never raw patient data.",
+    )
+    latency_ms: float | None = Field(default=None, ge=0.0)
+    warnings: list[str] = Field(default_factory=list)
+    error: StageError | None = None
 
 
 class HonestyGateReport(BaseModel):
@@ -222,6 +260,8 @@ class ScreeningFinding(BaseModel):
 
 
 class ScreeningResponse(ApiEnvelope):
+    pipeline_status: Literal["complete", "partial_failure", "failed_required_stage"] = "complete"
+    stage_receipts: list[StageReceipt] = Field(default_factory=list)
     laterality: Literal["L", "R", "U"]
     view: Literal["CC", "MLO", "U"]
     orientation_flipped: bool
@@ -229,11 +269,15 @@ class ScreeningResponse(ApiEnvelope):
     findings: list[ScreeningFinding] = Field(default_factory=list)
     overall_score: float | None = Field(
         default=None, ge=0.0, le=1.0,
-        description="Overall malignancy suspicion score; None if model not wired.",
+        description="Uncalibrated off-label MedSigLIP zero-shot score; null on required-stage failure.",
+    )
+    medsiglip: dict[str, Any] | None = Field(
+        default=None,
+        description="Strict production MedSigLIP-448 inference provenance and embedding receipt.",
     )
     arbiter_score: ArbiterScore | None = Field(
         default=None,
-        description="L3 screening arbiter output (recall vs. routine follow-up).",
+        description="Optional downstream arbiter output; never calculated from a missing MedSigLIP stage.",
     )
 
 
@@ -342,7 +386,7 @@ class ReportParseBlock(BaseModel):
         ...,
         description="e.g. proxy_regex_v0, clinicalbert_v1, clinicalbert_v1+regex_v0",
     )
-    fusion_mode: Literal["regex", "bert", "fused"] = "regex"
+    fusion_mode: Literal["regex", "bert", "fused", "clinicalbert"] = "clinicalbert"
     per_field_confidence: dict[str, float] = Field(
         default_factory=dict,
         description="Confidence per field (0..1) as reported by the parser.",
@@ -351,17 +395,25 @@ class ReportParseBlock(BaseModel):
         str,
         Literal["regex", "clinicalbert", "fused", "disagreement", "none"],
     ] = Field(default_factory=dict)
-    extended_fields: dict[str, ExtendedReceptorField] = Field(
+    extended_fields: dict[str, ExtendedReceptorField] = Field(default_factory=dict)
+    parsed_entities: dict[str, Any] = Field(
         default_factory=dict,
-        description=(
-            "Fields the regex parser could not produce: ki67_pct, tumor_size_mm, "
-            "t_stage, n_stage, m_stage, margin, lvi. Only populated when a BERT "
-            "or fused parser ran."
-        ),
+        description="Canonical ClinicalBERT entity output, without regex fusion.",
     )
+    n_tokens: int | None = Field(default=None, ge=0)
+    n_windows: int | None = Field(default=None, ge=0)
+    window_tokens: int | None = Field(default=None, ge=1)
+    overlap_tokens: int | None = Field(default=None, ge=0)
+    window_aggregation: str | None = None
+    app_version: str | None = None
+    model_sha256: str | None = Field(default=None, min_length=64, max_length=64)
+    metrics_sha256: str | None = Field(default=None, min_length=64, max_length=64)
 
 
 class BiopsyResponse(ApiEnvelope):
+    pipeline_status: Literal["complete", "partial_failure", "failed_required_stage"] = "complete"
+    stage_receipts: list[StageReceipt] = Field(default_factory=list)
+    phikon_embedding: dict[str, Any] | None = None
     subtype_prediction: str | None = Field(
         default=None,
         description="One of: DCIS, IDC, ILC, mucinous, tubular, other. None if model not wired.",
@@ -432,11 +484,15 @@ class TherapyRequest(BaseModel):
     # When true and the rules-lite fallback fires, receptor_status / grade /
     # stage / menopausal_status are validated and 400 is returned on drift.
     # Default false to preserve the existing wire contract.
-    strict: bool = Field(
-        default=False,
-        description="If true, rules-lite branch runs strict input validation "
-                    "and returns HTTP 400 on receptor_status / grade / stage / "
-                    "menopausal_status drift. Default false (permissive).",
+    strict: bool = Field(default=False, deprecated=True)
+    disease: str = Field(default="breast cancer", min_length=1, max_length=128)
+    cancer_type: str = Field(default="breast", min_length=1, max_length=64)
+    mutations: list[dict[str, Any]] = Field(default_factory=list, max_length=64)
+    germline_mutations: list[dict[str, Any]] = Field(default_factory=list, max_length=64)
+    ranked_drugs: list[dict[str, Any]] = Field(default_factory=list, max_length=100)
+    therapy_features: dict[str, Any] | None = Field(
+        default=None,
+        description="Explicit patient features for the research triage decomposition.",
     )
 
 
@@ -449,6 +505,10 @@ class TherapyOption(BaseModel):
 
 
 class TherapyResponse(ApiEnvelope):
+    pipeline_status: Literal["complete", "partial_failure", "failed_required_stage"] = "complete"
+    stage_receipts: list[StageReceipt] = Field(default_factory=list)
+    therapy_bridge: dict[str, Any] | None = None
+    therapy_triage: ArbiterScore | None = None
     recommended_options: list[TherapyOption] = Field(default_factory=list)
     not_recommended: list[TherapyOption] = Field(default_factory=list)
     prognostic_model_name: Literal["therapy_prognosis_metabric_v1"] = (
@@ -693,21 +753,108 @@ class FullCaseRequest(BaseModel):
         description="User-confirmed receptor panel from Case View Confirm gate. "
                     "Overrides biopsy receptor extraction for therapy branch selection.",
     )
-    # NSCLC track: point at a CT series on disk (LIDC-IDRI layout). Real
-    # pipeline is only invoked when ONCOLOGY_ARBITER_ALLOW_SERIES_DIR=1 is
-    # set on the server; otherwise the request falls back to shape-only.
-    nsclc_ct_input: "NsclcCTInput | None" = None
+    case_id: str | None = Field(
+        default=None,
+        pattern=r"^[0-9a-f]{16}$",
+        description="Verified case-storage identifier for production CT ingress.",
+    )
+    therapy_features: "TherapyTriageFeatures | None" = None
+    mutations: list["PatientMutation"] = Field(default_factory=list, max_length=64)
+    germline_mutations: list["PatientMutation"] = Field(default_factory=list, max_length=64)
+    ranked_drugs: list["RankedDrug"] = Field(default_factory=list, max_length=100)
+    run_co_scientist: bool = True
 
 
 class FullCaseResponse(ApiEnvelope):
+    pipeline_status: Literal["complete", "partial_failure", "failed_required_stage"] = "complete"
+    cancer: Literal["breast", "nsclc", "hgsoc"] | None = None
+    stage_receipts: list[StageReceipt] = Field(default_factory=list)
+    ovarian_arbiter: dict[str, Any] | None = None
+    case_manifest: dict[str, Any] | None = None
+    report_parse: ReportParseBlock | None = None
+    phikon_embedding: dict[str, Any] | None = None
+    luna16_detection: dict[str, Any] | None = None
+    dss_prognosis: BreastDssPrognosis | None = None
+    therapy_bridge: dict[str, Any] | None = None
+    therapy_triage: ArbiterScore | None = None
+    co_scientist: dict[str, Any] | None = None
     screening: ScreeningResponse | None = None
     biopsy: BiopsyResponse | None = None
     therapy: TherapyResponse | None = None
     nsclc: "NsclcResponse | None" = None
     elo_ranked_hypotheses: list[dict[str, Any]] = Field(
         default_factory=list,
-        description="Co-Scientist Elo tournament output over all stage hypotheses.",
+        description="Offline deterministic Elo output, never labelled as an LLM result.",
     )
+
+
+class PatientMutation(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    gene: str = Field(..., min_length=1, max_length=32)
+    hgvs_p: str | None = Field(default=None, max_length=128)
+    hgvs_c: str | None = Field(default=None, max_length=128)
+    chrom: str | None = Field(default=None, max_length=16)
+    pos: int | None = Field(default=None, ge=1)
+    ref: str | None = Field(default=None, max_length=512)
+    alt: str | None = Field(default=None, max_length=512)
+
+
+class RankedDrug(BaseModel):
+    model_config = ConfigDict(extra="allow", str_strip_whitespace=True)
+    name: str = Field(..., min_length=1, max_length=128)
+    moa: str | None = Field(default=None, max_length=256)
+    therapy_class: str | None = Field(default=None, max_length=128)
+    efficacy_score: float | None = Field(default=None, ge=0.0, le=1.0)
+
+
+class TherapyTriageFeatures(BaseModel):
+    """Explicit complete inputs for the illustrative therapy triage decomposition."""
+
+    histology: Literal[
+        "invasive_ductal",
+        "invasive_lobular",
+        "ductal_carcinoma_in_situ",
+        "lobular_carcinoma_in_situ",
+        "OTHER_OR_UNCLEAR",
+    ] | None = None
+    grade: Literal[1, 2, 3] | None = None
+    er_positive: bool | None = None
+    pr_positive: bool | None = None
+    her2_positive: bool | None = None
+    ki67_pct: float | None = Field(default=None, ge=0.0, le=100.0)
+    tumor_size_mm: float | None = Field(default=None, gt=0.0, le=500.0)
+    lymph_nodes_pos: int | None = Field(default=None, ge=0, le=100)
+    brca_pathogenic: bool | None = None
+    age_years: float | None = Field(default=None, ge=18.0, le=120.0)
+
+
+class DynamicTumorBoardRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    cancer: Literal["breast", "hgsoc"]
+    case_id: str | None = Field(default=None, pattern=r"^[0-9a-f]{16}$")
+    report_text: str | None = Field(default=None, min_length=1, max_length=20_000)
+    pathology_image_b64: str | None = None
+    dss_features: BreastDssFeatures | None = None
+    therapy_features: TherapyTriageFeatures | None = None
+    mutations: list[PatientMutation] = Field(default_factory=list, max_length=64)
+    germline_mutations: list[PatientMutation] = Field(default_factory=list, max_length=64)
+    ranked_drugs: list[RankedDrug] = Field(default_factory=list, max_length=100)
+    clinical_baseline: dict[str, Any] = Field(default_factory=dict)
+    run_co_scientist: bool = True
+
+
+class DynamicTumorBoardResponse(ApiEnvelope):
+    pipeline_status: Literal["complete", "partial_failure", "failed_required_stage"]
+    cancer: Literal["breast", "hgsoc"]
+    stage_receipts: list[StageReceipt] = Field(default_factory=list)
+    ovarian_arbiter: dict[str, Any] | None = None
+    report_parse: ReportParseBlock | None = None
+    phikon_embedding: dict[str, Any] | None = None
+    case_manifest: dict[str, Any] | None = None
+    dss_prognosis: BreastDssPrognosis | None = None
+    therapy_bridge: dict[str, Any] | None = None
+    therapy_triage: ArbiterScore | None = None
+    co_scientist: dict[str, Any] | None = None
 
 
 # --------------------------------------------------------------------------- #

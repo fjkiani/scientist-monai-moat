@@ -120,7 +120,7 @@ def test_placeholder_response_has_no_gate_report(monkeypatch):
         resp = client.post("/v1/therapy/reason", json={})
         assert resp.status_code == 200
         body = resp.json()
-        assert body["provenance"]["model_state"] == "placeholder"
+        assert body["provenance"]["model_state"] == "unavailable"
         assert body["provenance"]["gate_report"] is None
 
 

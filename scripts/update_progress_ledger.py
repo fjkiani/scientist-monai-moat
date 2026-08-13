@@ -224,7 +224,15 @@ SUBSYSTEMS = [
     {
         "id": "L3-screening-arbiter",
         "layer": "L3",
-        "role": "L2-regularised logistic arbiter mapping BI-RADS-like features → p_positive → risk_bucket for screening triage.",
+        "role": (
+            "L2-regularised logistic arbiter mapping BI-RADS-like features to "
+            "p_positive and a risk bucket for screening triage (illustrative "
+            "template coefficients, n_training=0). Unobserved booleans encode "
+            "to the reference level 0.0 and contribute exactly zero log-odds; "
+            "the prior 0.5 midpoint injected +1.15 log-odds and inflated p "
+            "from 0.11920292202211755 to 0.29943286 (+151.20%) from absent "
+            "data alone."
+        ),
         "status": "LIVE",
         "not_wired_reason": None,
         "current_backend": "hand-drafted template coefficients (n_training=0)",
@@ -241,22 +249,41 @@ SUBSYSTEMS = [
     {
         "id": "L3-biopsy-arbiter",
         "layer": "L3",
-        "role": "Logistic arbiter for biopsy stage classification.",
-        "status": "LIVE",
-        "not_wired_reason": None,
+        "role": (
+            "RETIRED. Hand-drafted template logistic arbiter for the biopsy "
+            "stage. The biopsy route now returns arbiter_score=None and emits "
+            "breast_dss_prognosis only when the full explicit seven-feature "
+            "vector is supplied (no parser imputation)."
+        ),
+        "status": "RETIRED",
+        "not_wired_reason": (
+            "Superseded by breast_dss_arbiter_v3_metabric (n=1375, events=601, "
+            "OOF AUROC 0.7074686031463495, incremental vs NPI+age delta "
+            "0.019632112929677783, p=0.006). The template carried n_training=0 "
+            "and illustrative coefficients."
+        ),
         "current_backend": "hand-drafted template coefficients (n_training=0)",
         "hai_def_gate_state": None,
         "wired_files": [
             "src/oncology_arbiter/arbiter/models/biopsy_arbiter_template_v0.json",
         ],
+        "superseded_by": "breast_dss_v3",
         "evidence": [
-            "tests/unit/test_api_arbiter_wiring.py::test_biopsy_endpoint_returns_arbiter_score",
+            "tests/unit/test_breast_dss_api.py",
+            "tests/unit/test_api_arbiter_wiring.py::test_biopsy_endpoint_emits_no_template_arbiter_score",
         ],
     },
     {
         "id": "L3-therapy-arbiter",
         "layer": "L3",
-        "role": "Logistic arbiter for therapy recommendation.",
+        "role": (
+            "Deterministic logistic TRIAGE over explicit patient inputs only "
+            "(illustrative coefficients, n_training=0). node_status_positive = "
+            "lymph_nodes_pos > 0; zero nodes contributes exactly 0.0; missing "
+            "nodes suppress scoring entirely and are never encoded as 0.5. Not "
+            "treatment-benefit evidence and not a therapy recommendation -- "
+            "recommendations come only from the authenticated SL bridge."
+        ),
         "status": "LIVE",
         "not_wired_reason": None,
         "current_backend": "hand-drafted template coefficients (n_training=0)",
@@ -265,7 +292,8 @@ SUBSYSTEMS = [
             "src/oncology_arbiter/arbiter/models/therapy_arbiter_template_v0.json",
         ],
         "evidence": [
-            "tests/unit/test_api_arbiter_wiring.py::test_therapy_endpoint_returns_arbiter_score",
+            "tests/unit/test_api_arbiter_wiring.py::test_therapy_arbiter_scores_only_from_explicit_inputs",
+            "tests/unit/test_api_arbiter_wiring.py::test_therapy_arbiter_suppressed_when_nodes_missing",
         ],
     },
     # --- L4a: screening model ---
@@ -299,19 +327,26 @@ SUBSYSTEMS = [
     {
         "id": "L4a-screening-siglip-proxy",
         "layer": "L4a",
-        "role": "Apache-2.0 ungated general-domain SigLIP used ONLY as a development proxy when HAI-DEF is denied. NEVER labeled as MedSigLIP.",
-        "status": "LIVE",
-        "not_wired_reason": None,
-        "current_backend": "google/siglip-base-patch16-224",
+        "role": (
+            "RETIRED. General-domain google/siglip-base-patch16-224 was used as "
+            "a development proxy on mammograms when HAI-DEF was denied. The "
+            "screening route is now strict MedSigLIP-448 only: a denied or "
+            "failing required stage returns pipeline_status="
+            "'failed_required_stage' with findings=[] and overall_score=None "
+            "rather than degrading to a non-medical image encoder."
+        ),
+        "status": "RETIRED",
+        "not_wired_reason": (
+            "Retired by production-integrity policy. A general-domain image "
+            "encoder is not an acceptable substitute for MedSigLIP-448 on "
+            "mammography, and its zero-shot scores were never calibrated for "
+            "malignancy."
+        ),
+        "current_backend": None,
         "hai_def_gate_state": None,
-        "wired_files": [
-            "src/oncology_arbiter/models/siglip_baseline.py",
-            "src/oncology_arbiter/api/app.py",
-        ],
+        "wired_files": [],
         "evidence": [
-            "tests/models/test_siglip_baseline.py",
-            "tests/unit/test_screening_medsiglip_wiring.py::test_medsiglip_disabled_proxy_still_works",
-            "/mnt/results/screening_response_medsiglip_gated_with_proxy_fallback.json",
+            "tests/unit/test_screening_production_contract.py",
         ],
     },
     {

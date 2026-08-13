@@ -143,9 +143,9 @@ def test_every_not_wired_entry_has_reason(ledger: dict) -> None:
         assert reason, f"{e['id']} is NOT_WIRED but not_wired_reason is empty"
 
 
-def test_status_is_one_of_the_two_tiers(ledger: dict) -> None:
+def test_status_is_one_of_the_three_tiers(ledger: dict) -> None:
     for e in _iter_status_entries(ledger):
-        assert e["status"] in ("LIVE", "NOT_WIRED"), (
+        assert e["status"] in ("LIVE", "NOT_WIRED", "RETIRED"), (
             f"{e['id']} has invalid status: {e['status']!r}"
         )
 

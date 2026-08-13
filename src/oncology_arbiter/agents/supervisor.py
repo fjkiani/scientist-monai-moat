@@ -126,7 +126,15 @@ class StageResult:
     evidence_dropped: int = 0
     llm_calls: int = 0
     llm_total_tokens: int = 0
+    llm_prompt_tokens: int = 0
+    llm_completion_tokens: int = 0
     llm_cost_usd: float = 0.0
+    llm_provider: str | None = None
+    llm_model: str | None = None
+    llm_app_version: str | None = None
+    llm_request_ids: List[str] = field(default_factory=list)
+    llm_latency_s: float = 0.0
+    llm_honesty_warnings: List[str] = field(default_factory=list)
     latency_s: float = 0.0
     notes: str = ""
     disclaimer: str = RUO_DISCLAIMER
@@ -145,7 +153,15 @@ class StageResult:
             "evidence_dropped": self.evidence_dropped,
             "llm_calls": self.llm_calls,
             "llm_total_tokens": self.llm_total_tokens,
+            "llm_prompt_tokens": self.llm_prompt_tokens,
+            "llm_completion_tokens": self.llm_completion_tokens,
             "llm_cost_usd": round(self.llm_cost_usd, 6),
+            "llm_provider": self.llm_provider,
+            "llm_model": self.llm_model,
+            "llm_app_version": self.llm_app_version,
+            "llm_request_ids": list(self.llm_request_ids),
+            "llm_latency_s": round(self.llm_latency_s, 3),
+            "llm_honesty_warnings": list(self.llm_honesty_warnings),
             "latency_s": round(self.latency_s, 2),
             "notes": self.notes,
             "disclaimer": self.disclaimer,
@@ -691,5 +707,20 @@ def _run_tournament(
 
 def _record_llm(result: StageResult, resp: LlmResponse) -> None:
     result.llm_calls += 1
+    result.llm_prompt_tokens += resp.prompt_tokens
+    result.llm_completion_tokens += resp.completion_tokens
     result.llm_total_tokens += resp.prompt_tokens + resp.completion_tokens
     result.llm_cost_usd += resp.est_cost_usd
+    result.llm_latency_s += resp.latency_s
+    result.llm_provider = resp.route if result.llm_provider in {None, resp.route} else "mixed"
+    result.llm_model = resp.model if result.llm_model in {None, resp.model} else "mixed"
+    app_version = resp.app_version or None
+    result.llm_app_version = (
+        app_version
+        if result.llm_app_version in {None, app_version}
+        else "mixed"
+    )
+    if resp.request_id and resp.request_id not in result.llm_request_ids:
+        result.llm_request_ids.append(resp.request_id)
+    if resp.honesty_warning and resp.honesty_warning not in result.llm_honesty_warnings:
+        result.llm_honesty_warnings.append(resp.honesty_warning)

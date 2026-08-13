@@ -115,7 +115,10 @@ def test_aggregate_records_provenance():
     can be trusted."""
     d = _load_agg()
     prov = d.get("provenance", "")
-    assert prov.startswith("REAL-v0.5.0"), f"provenance mismatch: {prov!r}"
+    assert prov.startswith("REAL-v0.5."), f"provenance mismatch: {prov!r}"
+    assert "SYNTHETIC" not in prov.upper(), (
+        f"aggregate provenance must not be synthetic: {prov!r}"
+    )
 
 def test_real_text_val_f1_mean_at_or_above_floor():
     """A-14: the 0.30 floor belongs to the VALIDATION split, so assert it there.

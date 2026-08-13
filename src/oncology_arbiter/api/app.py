@@ -18,8 +18,11 @@ Design invariants for these placeholders:
 from __future__ import annotations
 
 import base64
+import hashlib
 import io
+import json
 import tempfile
+import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
@@ -45,6 +48,10 @@ from .schemas import (
     BiopsyResponse,
     BreastDssPrognosis,
     DemoCaseResponse,
+    DynamicTumorBoardRequest,
+    DynamicTumorBoardResponse,
+    ExtendedReceptorField,
+    ReportParseBlock,
     NsclcCTInput,
     NsclcResponse,
     NsclcCandidate,
@@ -162,6 +169,133 @@ def _score_arbiter(name: str, features: dict[str, Any]) -> ArbiterScore:
     )
 
 
+def _failed_stage_receipt(stage: str, required: bool, request_id: str, code: str, message: str, *, service_name: str | None = None, input_reference: str | None = None) -> dict[str, Any]:
+    return {
+        "stage": stage, "required": required,
+        "status": "failed_required" if required else "failed_optional",
+        "request_id": request_id, "service_name": service_name,
+        "input_reference": input_reference, "warnings": [],
+        "error": {"code": code, "message": message[:500]},
+    }
+
+
+def _skipped_stage_receipt(stage: str, request_id: str, message: str, *, required: bool = False) -> dict[str, Any]:
+    return {
+        "stage": stage, "required": required, "status": "skipped_not_applicable",
+        "request_id": request_id, "warnings": [message], "error": None,
+    }
+
+
+def _pipeline_status(receipts: list[dict[str, Any]]) -> str:
+    if any(receipt.get("status") == "failed_required" for receipt in receipts):
+        return "failed_required_stage"
+    if any(receipt.get("status") == "failed_optional" for receipt in receipts):
+        return "partial_failure"
+    return "complete"
+
+
+def _clinicalbert_biopsy_parse(report_text: str, *, request_id: str) -> tuple[ReportParseBlock | None, BiopsyReceptorPanel, int | None, dict[str, Any]]:
+    """Run only pinned production ClinicalBERT; never regex/fuse/fallback."""
+    from oncology_arbiter.nlp.clinicalbert_modal_client import ClinicalBertModalClient, ClinicalBertModalError
+
+    input_sha = hashlib.sha256(report_text.encode("utf-8")).hexdigest()
+    started = time.perf_counter()
+    try:
+        client = ClinicalBertModalClient()
+        response = client.parse(report_text)
+        parsed = response.get("parsed") or {}
+        if not isinstance(parsed, dict):
+            raise ClinicalBertModalError("clinicalbert_contract_mismatch:parsed")
+
+        def value(entity: str) -> Any:
+            item = parsed.get(entity)
+            return item.get("value") if isinstance(item, dict) else None
+
+        er_value, pr_value = value("ER_VALUE"), value("PR_VALUE")
+        her2_value, grade_value, ki67_value = value("HER2_VALUE"), value("GRADE"), value("KI67_PCT")
+        panel = BiopsyReceptorPanel(
+            er_positive=True if er_value == "positive" else False if er_value == "negative" else None,
+            pr_positive=True if pr_value == "positive" else False if pr_value == "negative" else None,
+            her2_status=her2_value if her2_value in {"positive", "negative", "equivocal"} else None,
+            ki67_percent=float(ki67_value) if isinstance(ki67_value, (int, float)) and 0 <= float(ki67_value) <= 100 else None,
+            parse_state={
+                "er": "matched" if "ER_VALUE" in parsed else "no_match",
+                "pr": "matched" if "PR_VALUE" in parsed else "no_match",
+                "her2": "matched" if "HER2_VALUE" in parsed else "no_match",
+                "grade": "matched" if "GRADE" in parsed else "no_match",
+            },
+        )
+        extended: dict[str, ExtendedReceptorField] = {}
+        for entity, output_name in {
+            "KI67_PCT": "ki67_pct", "TUMOR_SIZE_MM": "tumor_size_mm",
+            "T_STAGE": "t_stage", "N_STAGE": "n_stage", "M_STAGE": "m_stage",
+            "MARGIN": "margin", "LVI": "lvi",
+        }.items():
+            item = parsed.get(entity)
+            if isinstance(item, dict):
+                extended[output_name] = ExtendedReceptorField(
+                    value=item.get("value"), match_state="matched",
+                    matched_text=item.get("surface"), confidence=0.0, source="clinicalbert",
+                )
+        block = ReportParseBlock(
+            parser_id="clinicalbert_v0.5.2_sliding_window", fusion_mode="clinicalbert",
+            per_field_confidence={},
+            per_field_source={key: "clinicalbert" if entity in parsed else "none" for key, entity in {
+                "er": "ER_VALUE", "pr": "PR_VALUE", "her2": "HER2_VALUE", "grade": "GRADE",
+            }.items()},
+            extended_fields=extended, parsed_entities=parsed,
+            n_tokens=response.get("n_tokens"), n_windows=response.get("n_windows"),
+            window_tokens=response.get("window_tokens"), overlap_tokens=response.get("overlap_tokens"),
+            window_aggregation=response.get("window_aggregation"), app_version=response.get("app_version"),
+            model_sha256=response.get("model_sha256"), metrics_sha256=response.get("metrics_sha256"),
+        )
+        receipt = {
+            "stage": "clinicalbert_pathology_parse", "required": True, "status": "succeeded",
+            "request_id": request_id, "service_name": "clinicalbert",
+            "endpoint_label": client.endpoints.parse, "app_version": response.get("app_version"),
+            "model_name": response.get("base_model"), "model_version": "v0.5.2-sliding-window",
+            "artifact_sha256": response.get("model_sha256"), "input_reference": f"sha256:{input_sha}",
+            "latency_ms": round((time.perf_counter() - started) * 1000.0, 3),
+            "warnings": [str(response.get("disclaimer") or "")], "error": None,
+        }
+        grade = int(grade_value) if grade_value in {1, 2, 3} else None
+        return block, panel, grade, receipt
+    except Exception as exc:
+        return None, BiopsyReceptorPanel(), None, _failed_stage_receipt(
+            "clinicalbert_pathology_parse", True, request_id,
+            getattr(exc, "code", "clinicalbert_failed"), f"{type(exc).__name__}: {exc}",
+            service_name="clinicalbert", input_reference=f"sha256:{input_sha}",
+        )
+
+
+_TRIAGE_REQUIRED_FIELDS = {
+    "histology", "grade", "er_positive", "pr_positive", "her2_positive",
+    "ki67_pct", "tumor_size_mm", "lymph_nodes_pos", "brca_pathogenic", "age_years",
+}
+
+
+def _score_explicit_therapy_triage(raw: dict[str, Any] | None) -> ArbiterScore | None:
+    if raw is None:
+        return None
+    from oncology_arbiter.api.schemas import TherapyTriageFeatures
+    validated = TherapyTriageFeatures.model_validate(raw).model_dump()
+    if any(validated[field] is None for field in _TRIAGE_REQUIRED_FIELDS):
+        return None
+    nodes = validated["lymph_nodes_pos"]
+    return _score_arbiter("therapy", features={
+        "histology": validated["histology"],
+        "grade": str(validated["grade"]),
+        "er_status_positive": validated["er_positive"],
+        "pr_status_positive": validated["pr_positive"],
+        "her2_status_positive": validated["her2_positive"],
+        "ki67_norm": validated["ki67_pct"],
+        "tumor_size_norm": validated["tumor_size_mm"],
+        "node_status_positive": nodes > 0,
+        "brca_status_known_pathogenic": validated["brca_pathogenic"],
+        "age_at_diagnosis_norm": validated["age_years"],
+    })
+
+
 # --------------------------------------------------------------------------- #
 # MedSigLIP / SigLIP proxy singletons + runners
 #
@@ -198,61 +332,24 @@ def _demo_samples_dir() -> Path | None:
 
 
 def _compute_models_loaded() -> dict[str, ModelState]:
-    """Compute each model slot's live state from env vars at request time.
-
-    v0.2.2: replaces the previous static hardcode. Each slot's precedence
-    mirrors the endpoint's own precedence — see the /v1/{screening,biopsy,
-    therapy,case/full} handlers. Slots that run stateless code (regex
-    parser, l3 arbiter JSON templates) always report their "running" state.
-
-    Never raises. Never touches disk or network.
-    """
-    # Screening: MedSigLIP > SigLIP proxy > MONAI heuristic > placeholder.
-    if _is_env_true("ONCOLOGY_ARBITER_ENABLE_MEDSIGLIP"):
-        screening = ModelState.LOADED_MEDSIGLIP
-    elif _is_env_true("ONCOLOGY_ARBITER_ENABLE_SIGLIP_PROXY"):
-        screening = ModelState.PROXY_SIGLIP
-    elif _is_env_true("ONCOLOGY_ARBITER_ENABLE_MONAI_DETECTOR"):
-        screening = ModelState.PROXY_MONAI_HEURISTIC
-    else:
-        screening = ModelState.PLACEHOLDER
-
-    # Biopsy classifier: MedSigLIP probe only. Regex parser is a separate slot.
-    biopsy = (
-        ModelState.LOADED_BIOPSY_PROBE
-        if _is_env_true("ONCOLOGY_ARBITER_ENABLE_BIOPSY_MEDSIGLIP")
-        else ModelState.PLACEHOLDER
-    )
-
-    # Therapy: TxGemma > rules-lite > placeholder.
-    if _is_env_true("ONCOLOGY_ARBITER_ENABLE_THERAPY_TXGEMMA"):
-        therapy = ModelState.LOADED_TXGEMMA
-    elif _is_env_true("ONCOLOGY_ARBITER_ENABLE_THERAPY_RULES_PROXY"):
-        therapy = ModelState.PROXY_RULES_LITE
-    else:
-        therapy = ModelState.PLACEHOLDER
-
-    co_sci = (
-        ModelState.PROXY_CO_SCIENTIST
-        if _is_env_true("ONCOLOGY_ARBITER_ENABLE_CO_SCIENTIST")
-        else ModelState.PLACEHOLDER
-    )
+    """Report configuration state without claiming successful inference readiness."""
+    def configured(*names: str) -> ModelState:
+        return (
+            ModelState.CONFIGURED_UNVERIFIED
+            if any(os.environ.get(name) for name in names)
+            else ModelState.UNAVAILABLE
+        )
 
     return {
-        "monai_screening": screening,
-        "medsiglip_biopsy": biopsy,
-        # v0.2.1 regex parser: stateless code, always available. This is
-        # honest — the parser is what actually populates receptor_panel
-        # today, not the medsiglip probe.
-        "biopsy_report_parser": ModelState.PROXY_REGEX_V0,
-        "txgemma_therapy": therapy,
-        "co_scientist": co_sci,
-        # L3 arbiter templates are JSON on disk with n_training=0. They're
-        # "loaded" as templates; the per-response arbiter_score.model_state
-        # Literal ("template" | "frozen") carries the same honesty note.
-        "l3_arbiter": ModelState.TEMPLATE,
-        # NSCLC track: real heuristic + rules-lite. Unchanged from v0.2.1.
-        "nsclc_pipeline": ModelState.PROXY_LUNG_HEURISTIC,
+        "case_storage": configured("CASE_STORAGE_MODAL_URL"),
+        "medsiglip_448": configured("MODAL_MEDSIGLIP_URL"),
+        "phikon": configured("PHIKON_MODAL_URL"),
+        "luna16": configured("LUNA16_MODAL_URL"),
+        "clinicalbert": configured("CLINICALBERT_MODAL_URL"),
+        "medgemma_27b": configured("MEDGEMMA_MODAL_URL"),
+        "breast_dss_v3": ModelState.LOADED,
+        "ovarian_arbiter": ModelState.RETIRED,
+        "offline_deterministic_ranker": ModelState.PROXY_CO_SCIENTIST,
     }
 
 
@@ -656,14 +753,32 @@ def create_app() -> FastAPI:
 
     # 1) Prometheus /metrics
     try:
+        from prometheus_client import CollectorRegistry
         from prometheus_fastapi_instrumentator import Instrumentator
 
+        # Each app gets its OWN CollectorRegistry. Against the global default
+        # registry, a second create_app() in the same process raises
+        # "Duplicated timeseries in CollectorRegistry"; the except-clause below
+        # swallowed that into a warning, so those apps exposed /metrics with no
+        # HTTP metrics and no visible error. Production runs one app, so the
+        # bug was invisible there and only surfaced under test.
+        _metrics_registry = CollectorRegistry(auto_describe=True)
         Instrumentator(
             excluded_handlers=["/metrics"],
             should_group_status_codes=False,
+            registry=_metrics_registry,
         ).instrument(app).expose(app, endpoint="/metrics", include_in_schema=False)
+    except ImportError as exc:  # pragma: no cover - optional dependency
+        _logger.warning("prometheus instrumentator unavailable: %s", exc)
     except Exception as exc:  # pragma: no cover
-        _logger.warning("prometheus instrumentator disabled: %s", exc)
+        # Previously this branch swallowed genuine wiring errors (e.g. a bad
+        # kwarg or a duplicated CollectorRegistry timeseries) into a warning,
+        # so the app served /metrics as 404 while looking healthy. Log it at
+        # error level with the exception type so it cannot pass unnoticed.
+        _logger.error(
+            "prometheus instrumentation FAILED (%s): %s; /metrics will not be served",
+            type(exc).__name__, exc,
+        )
 
     # 2) Rate limit
     #
@@ -742,7 +857,7 @@ def create_app() -> FastAPI:
     # Anything not on this list falls back to the 403 demo-mode error.
     _DEMO_MODE_POST_ALLOWLIST = frozenset({
         "/v1/elo/rank",
-        "/v1/co_scientist/run",
+        "/v1/offline_ranker/run",
     })
 
     @app.middleware("http")
@@ -823,7 +938,8 @@ def create_app() -> FastAPI:
             "POST /v1/case/full",
             "POST /v1/elo/rank",
             # v0.4.0-alpha: standalone Co-Scientist loop (PLAN §5 PR #5)
-            "POST /v1/co_scientist/run",
+            "POST /v1/offline_ranker/run",
+            "POST /v1/tumor_board/dynamic",
             "GET  /v1/demo/case",
             "GET  /v1/model-cards",
             "GET  /v1/artifacts/{category}/{filename}",
@@ -843,343 +959,173 @@ def create_app() -> FastAPI:
             demo_samples=_sample_files,
             cancers={
                 "breast": {
-                    "state": ModelState.PLACEHOLDER.value,
+                    "state": ModelState.CONFIGURED_UNVERIFIED.value,
                     "case_full": True,
-                    "endpoints": ["screening", "biopsy", "therapy", "case/full"],
+                    "patient_probability_emitted": True,
+                    "endpoints": ["screening", "biopsy", "therapy", "tumor_board/dynamic", "case/full"],
+                    "notes": "Completion depends on successful specialist stage receipts; URL configuration alone is not inference readiness.",
                 },
                 "nsclc": {
-                    "state": ModelState.PROXY_LUNG_HEURISTIC.value,
+                    "state": ModelState.CONFIGURED_UNVERIFIED.value,
                     "case_full": True,
+                    "patient_probability_emitted": True,
                     "endpoints": ["case/full"],
-                    "notes": (
-                        "LIDC-IDRI CT + HU-threshold heuristic + NCCN-lite rules. "
-                        "Real pipeline requires nsclc_ct_input.series_dir and "
-                        "ONCOLOGY_ARBITER_ALLOW_SERIES_DIR=1 on the server; "
-                        "otherwise the same endpoint returns a shape-only "
-                        "placeholder response with a warning."
-                    ),
+                    "notes": "Production flow requires verified case storage followed by LUNA16 RetinaNet bundle 0.6.9; no local series path or HU heuristic is accepted.",
                 },
                 "hgsoc": {
-                    "state": ModelState.PROXY_CO_SCIENTIST.value,
-                    "case_full": False,
-                    "endpoints": ["tumor_board/bundle", "demo/samples/ak_mbd4_lof_case"],
-                    "notes": (
-                        "v0.4.0-alpha: MBD4-LOF SL therapy bridge lands from "
-                        "crispro-backend-v2 fix/mbd4-atr-strong-tier @ "
-                        "bfd6d11f. AK bundle at "
-                        "GET /v1/demo/samples/ak_mbd4_lof_case; upload path at "
-                        "POST /v1/tumor_board/bundle. /v1/case/full?cancer=hgsoc "
-                        "returns 501 until the SL-therapy bridge is wired."
-                    ),
+                    "state": ModelState.RETIRED.value,
+                    # case_full is True because /v1/case/full genuinely accepts
+                    # cancer=hgsoc. It is NOT a claim that a scorer runs: the
+                    # two keys below carry that, so route reachability can no
+                    # longer be misread as scoring availability.
+                    "case_full": True,
+                    "patient_probability_emitted": False,
+                    "retired_scope": "ovarian_prognostic_arbiter_patient_level_scoring",
+                    "endpoints": ["tumor_board/dynamic", "tumor_board/bundle", "case/full"],
+                    "notes": "Route reachable; the ovarian prognostic arbiter is retired and emits no patient probability or risk bucket. Therapy and MedGemma stages remain independently receipt-gated.",
                 },
             },
             models_loaded=_compute_models_loaded(),
         )
 
     # ----------------------------------------------------------------------- #
-    # /v1/screening/analyze — REAL preprocessing, placeholder classifier
+    # /v1/screening/analyze — production MedSigLIP-448 only
 
     @app.post("/v1/screening/analyze", response_model=ScreeningResponse)
     def screening_analyze(
         req: ScreeningRequest,
         tenant: APIKey = Depends(require_api_key),
     ) -> ScreeningResponse:
+        """Run strict production MedSigLIP without proxy or heuristic fallback."""
         request_id = new_request_id()
-
-        if not req.dicom_url and not req.dicom_bytes_b64:
-            raise HTTPException(400, "must provide dicom_url or dicom_bytes_b64")
-        if req.dicom_url and req.dicom_bytes_b64:
-            raise HTTPException(400, "provide exactly one of dicom_url or dicom_bytes_b64")
-
-        raw_bytes = _decode_bytes_arg(req.dicom_bytes_b64)
-        if raw_bytes is None and req.dicom_url is not None:
-            # Placeholder: URL ingestion goes through our SSRF-guarded fetcher
-            # in Phase 2. For now, refuse cleanly.
-            log_event(request_id, "/v1/screening/analyze",
-                      model_state="placeholder",
-                      patient_id_hash=req.patient_id_hash,
-                      extra={"reason": "url_ingestion_not_wired"},
-                          tenant_id=tenant.tenant_id,
-                      )
+        if not req.dicom_bytes_b64 or req.dicom_url:
             raise HTTPException(
-                501, "dicom_url ingestion not yet wired (Phase 2). "
-                "Send dicom_bytes_b64 for now.",
+                400,
+                "production screening requires exactly dicom_bytes_b64; remote URL ingestion is not accepted",
             )
+        raw_bytes = _decode_bytes_arg(req.dicom_bytes_b64)
+        assert raw_bytes is not None
+        input_sha = hashlib.sha256(raw_bytes).hexdigest()
 
-        # Real preprocessing on the uploaded bytes.
         from oncology_arbiter.mammography import preprocess_mammogram
-        assert raw_bytes is not None  # type narrowing
-        with tempfile.NamedTemporaryFile(suffix=".dcm", delete=False) as tf:
-            tf.write(raw_bytes)
-            tmp_path = tf.name
+        with tempfile.NamedTemporaryFile(suffix=".dcm", delete=False) as temp_file:
+            temp_file.write(raw_bytes)
+            temp_path = temp_file.name
         try:
-            result = preprocess_mammogram(
-                tmp_path,
+            preprocessed = preprocess_mammogram(
+                temp_path,
                 laterality_hint=req.laterality_hint,
                 view_hint=req.view_hint,
             )
-        except Exception as e:
-            log_event(request_id, "/v1/screening/analyze",
-                      model_state="unavailable",
-                      patient_id_hash=req.patient_id_hash,
-                      extra={"error": str(e)[:200]},
-                          tenant_id=tenant.tenant_id,
-                      )
-            raise HTTPException(422, f"preprocessing failed: {e}")
-        finally:
-            Path(tmp_path).unlink(missing_ok=True)
+        except Exception as exc:
+            Path(temp_path).unlink(missing_ok=True)
+            raise HTTPException(422, f"preprocessing failed: {exc}") from exc
 
-        # Run the vision backbone according to Phase-2 precedence rules.
-        # Default posture is placeholder — the model states below only
-        # activate when the operator explicitly turned them on via env.
-        backend_result: Any = None
-        backend_state: ModelState = ModelState.PLACEHOLDER
-        backend_name: str | None = None
-        backend_warnings: list[str] = []
-        # runtime_gate_report is the hai_def.GateReport dataclass; converted
-        # to schema.GateReport for the wire at envelope time.
-        runtime_gate_report: Any = None
-
-        if _is_env_true("ONCOLOGY_ARBITER_ENABLE_MEDSIGLIP"):
-            try:
-                # Pass raw bytes so the Modal backend can preprocess remotely;
-                # local backend ignores this and uses ``preprocess_result``.
-                backend_result = _run_medsiglip_on_preprocessed(
-                    result, dicom_bytes=raw_bytes,
-                )
-                backend_state = ModelState.LOADED_MEDSIGLIP
-                backend_name = backend_result.model_repo
-                backend_warnings = list(backend_result.warnings)
-                if backend_result.gate_report is not None:
-                    runtime_gate_report = backend_result.gate_report
-            except Exception as e:
-                # HAI-DEF gate denial or model load failure. Import lazily
-                # so the module-level `import` doesn't force transformers.
-                from oncology_arbiter.models.hai_def import GatedAccessError, GateReport as _RGR
-                if isinstance(e, GatedAccessError):
-                    backend_state = ModelState.GATED
-                    backend_name = e.repo_id
-                    backend_warnings = [
-                        f"medsiglip_gated:{e.access_level.value}:{e.reason}"
-                    ]
-                    # Build a runtime GateReport from the exception. has_token
-                    # is not carried on the exception, so we discover it once
-                    # here — the same source of truth used by check_hai_def_access.
-                    from oncology_arbiter.models.hai_def import _discover_hf_token
-                    runtime_gate_report = _RGR(
-                        repo_id=e.repo_id,
-                        access_level=e.access_level,
-                        status_code=e.status_code,
-                        reason=e.reason,
-                        has_token=_discover_hf_token() is not None,
-                    )
-                else:
-                    backend_state = ModelState.UNAVAILABLE
-                    backend_warnings = [f"medsiglip_load_error:{type(e).__name__}: {e}"]
-                    log_event(request_id, "/v1/screening/analyze",
-                              model_state="unavailable",
-                              patient_id_hash=req.patient_id_hash,
-                              extra={"medsiglip_error": str(e)[:200]},
-                                  tenant_id=tenant.tenant_id,
-                              )
-
-        # Proxy fallback is OPT-IN and only activates if MedSigLIP either
-        # was disabled OR the request landed as GATED and the operator has
-        # explicitly enabled the proxy. This is the code path that used to
-        # silently fire and mis-label proxy scores as MedSigLIP — locked
-        # behind an env flag now.
-        if (
-            backend_result is None
-            and backend_state in (ModelState.PLACEHOLDER, ModelState.GATED)
-            and _is_env_true("ONCOLOGY_ARBITER_ENABLE_SIGLIP_PROXY")
-        ):
-            try:
-                proxy_result = _run_siglip_proxy_on_preprocessed(result)
-                # If MedSigLIP was gated, keep the gate report + warning
-                # alongside the proxy warning so the response is honest
-                # about WHY we fell back.
-                prior_warnings = list(backend_warnings)
-                backend_result = proxy_result
-                backend_state = ModelState.PROXY_SIGLIP
-                backend_name = proxy_result.model_repo
-                backend_warnings = prior_warnings + list(proxy_result.warnings)
-            except Exception as e:
-                backend_state = ModelState.UNAVAILABLE
-                backend_warnings.append(f"proxy_siglip_load_error:{type(e).__name__}: {e}")
-                log_event(request_id, "/v1/screening/analyze",
-                          model_state="unavailable",
-                          patient_id_hash=req.patient_id_hash,
-                          extra={"proxy_error": str(e)[:200]},
-                              tenant_id=tenant.tenant_id,
-                          )
-
-        # Extract overall_score + findings from whichever backend ran.
+        started = time.perf_counter()
+        receipt: dict[str, Any]
+        medsiglip_block: dict[str, Any] | None = None
+        findings: list[dict[str, Any]] = []
         overall_score: float | None = None
-        findings_list: list[dict[str, Any]] = []
-        if backend_result is not None:
-            # SigLIP-family convention: probs[0] is the "malignant" label
-            # and probs[1] is the "without" label (see
-            # oncology_arbiter.models.siglip_baseline.DEFAULT_ZERO_SHOT_LABELS).
-            probs = list(backend_result.probs)
-            labels = list(backend_result.labels)
-            if len(probs) >= 1:
-                overall_score = float(probs[0])
-            for lbl, p in zip(labels, probs):
-                findings_list.append({
-                    "label": lbl,
-                    "score": float(p),
-                    "location_bbox_normalized": None,
-                })
-
-        # ── L4a MONAI detector (mask-gradient heuristic) ──
-        # Opt-in via ONCOLOGY_ARBITER_ENABLE_MONAI_DETECTOR=1. When on, we
-        # run the detector on the real preprocessed image + breast mask
-        # from the mammography pipeline. Findings are added with
-        # ``location_bbox_normalized`` set and a ``monai_heuristic:...``
-        # score prefix so downstream UI can distinguish them from SigLIP-
-        # family classification findings. NEVER silently upgrades the
-        # response's model_state to LOADED_MONAI_DETECTOR unless real
-        # trained weights load, which under Phase 3 they do not.
-        if _is_env_true("ONCOLOGY_ARBITER_ENABLE_MONAI_DETECTOR"):
-            try:
-                from oncology_arbiter.models.monai_detector import (
-                    MONAI_DETECTOR_WARNING,
-                    MonaiDetector,
-                )
-                det_result = MonaiDetector().detect(
-                    result.image.astype("float32"),
-                    result.breast_mask,
-                )
-                for box in det_result.boxes:
-                    findings_list.append({
-                        "label": f"monai_heuristic:{box.label}",
-                        "score": float(box.score),
-                        "location_bbox_normalized": [box.x0, box.y0, box.x1, box.y1],
-                    })
-                if MONAI_DETECTOR_WARNING not in backend_warnings:
-                    backend_warnings.append(MONAI_DETECTOR_WARNING)
-                if backend_state == ModelState.PLACEHOLDER:
-                    backend_state = ModelState.PROXY_MONAI_HEURISTIC
-                    backend_name = det_result.model_name
-            except Exception as e:  # noqa: BLE001 — surface, never hide
-                backend_warnings.append(
-                    f"monai_detector_error:{type(e).__name__}:{e}"
-                )
-
-        # ── L4b CBIS-DDSM supervised probe on MedSigLIP embedding ──
-        # Only fires when MedSigLIP-Modal ran successfully AND the probe
-        # is enabled. This is a trained sklearn LogReg over the 1152-d
-        # MedSigLIP-448 embedding (see docs/proofs/cbis_ddsm_logreg_v1_metrics.json).
-        # Held-out test AUC = 0.7526 on n=641. When the probe fires it:
-        #   * adds a finding labelled "cbis_ddsm_logreg_v1:cancer" with
-        #     the calibrated cancer probability
-        #   * OVERRIDES overall_score with the probe probability (the raw
-        #     zero-shot prob is off-label and ~10^-3, so the probe is
-        #     strictly more meaningful when it fires)
-        #   * appends CBIS_DDSM_PROBE_WARNING to backend_warnings
-        #   * upgrades model_name to "google/medsiglip-448+cbis_ddsm_logreg_v1"
-        if (
-            backend_result is not None
-            and backend_state == ModelState.LOADED_MEDSIGLIP
-            and _is_env_true("ONCOLOGY_ARBITER_ENABLE_CBIS_DDSM_PROBE")
-        ):
-            try:
-                from oncology_arbiter.models.cbis_ddsm_probe import CBIS_DDSM_PROBE_WARNING
-                probe_result = _run_cbis_ddsm_probe_on_bytes(raw_bytes, result)
-                if probe_result is not None:
-                    findings_list.append({
-                        "label": f"cbis_ddsm_logreg_v1:{probe_result.predicted_label}",
-                        "score": float(probe_result.proba_cancer),
-                        "location_bbox_normalized": None,
-                    })
-                    # The trained probe is a strictly better overall score
-                    # than the off-label zero-shot argmax we started with.
-                    overall_score = float(probe_result.proba_cancer)
-                    if CBIS_DDSM_PROBE_WARNING not in backend_warnings:
-                        backend_warnings.append(CBIS_DDSM_PROBE_WARNING)
-                    backend_name = (
-                        f"{backend_name}+{probe_result.probe_version}"
-                        if backend_name else probe_result.probe_version
-                    )
-            except Exception as e:  # noqa: BLE001 — surface, never hide
-                backend_warnings.append(
-                    f"cbis_ddsm_probe_error:{type(e).__name__}:{e}"
-                )
-                log_event(request_id, "/v1/screening/analyze",
-                          model_state=backend_state.value,
-                          patient_id_hash=req.patient_id_hash,
-                          extra={"cbis_ddsm_probe_error": str(e)[:200]},
-                          tenant_id=tenant.tenant_id,
-                          )
-
-        # Score the L3 screening arbiter with a MINIMAL feature vector.
-        # Phase 2: still no BI-RADS from a real reader — the classifier
-        # isn't wired — so we deliberately submit the empty feature dict.
-        # That falls through to intercept-only (base rate). Phase 3 will
-        # feed features extracted from the L4a detector output.
-        arbiter_block: ArbiterScore | None = None
+        warnings: list[str] = []
+        model_state = ModelState.UNAVAILABLE
+        model_name: str | None = "google/medsiglip-448"
+        gate_report: Any = None
         try:
-            arbiter_block = _score_arbiter("screening", features={})
-        except Exception as e:
-            log_event(request_id, "/v1/screening/analyze",
-                      model_state="unavailable",
-                      patient_id_hash=req.patient_id_hash,
-                      extra={"arbiter_error": str(e)[:200]},
-                          tenant_id=tenant.tenant_id,
-                      )
-            arbiter_block = None
+            from oncology_arbiter.models.medsiglip_modal_client import MedSigLipModalClient
 
-        # Attach the structured gate_report onto Provenance. When populated,
-        # `provenance.gate_report` carries repo_id + access_level +
-        # status_code + reason + has_token — enough for a downstream UI or
-        # audit log to explain WHY the endpoint returned GATED / LOADED /
-        # UNAVAILABLE without having to string-parse the warnings.
-        schema_gate_report = _to_schema_gate_report(runtime_gate_report)
-        env = _envelope(
+            result = MedSigLipModalClient().run(temp_path)
+            if result.embedding_dim != 1152 or not result.embedding_sha256:
+                raise RuntimeError("medsiglip_contract_mismatch:embedding_receipt")
+            gate_report = result.gate_report
+            latency_ms = (time.perf_counter() - started) * 1000.0
+            findings = [
+                {
+                    "label": label,
+                    "score": float(score),
+                    "location_bbox_normalized": None,
+                }
+                for label, score in zip(result.labels, result.probs)
+            ]
+            overall_score = float(result.probs[0])
+            warnings = list(result.warnings) + [
+                "Zero-shot probabilities are uncalibrated, off-label, and are not diagnostic or treatment evidence."
+            ]
+            medsiglip_block = {
+                "model_name": result.model_repo,
+                "app_version": result.app_version,
+                "input_resolution": result.input_resolution,
+                "embedding_dim": result.embedding_dim,
+                "embedding_sha256": result.embedding_sha256,
+                "prompts": list(result.prompts),
+                "inference_seconds": result.inference_seconds,
+                "input_sha256": input_sha,
+                "score_semantics": "independent_uncalibrated_sigmoid_zero_shot",
+            }
+            receipt = {
+                "stage": "medsiglip_screening",
+                "required": True,
+                "status": "succeeded",
+                "request_id": request_id,
+                "service_name": "crispro--medsiglip",
+                "endpoint_label": "medsiglip-zero-shot+medsiglip-embed",
+                "app_version": result.app_version,
+                "model_name": result.model_repo,
+                "input_reference": input_sha,
+                "latency_ms": latency_ms,
+                "warnings": warnings,
+                "error": None,
+            }
+            model_state = ModelState.LOADED_MEDSIGLIP
+        except Exception as exc:  # required failure remains a failure
+            latency_ms = (time.perf_counter() - started) * 1000.0
+            warnings = [f"medsiglip_required_stage_failed:{type(exc).__name__}"]
+            receipt = _failed_stage_receipt(
+                "medsiglip_screening",
+                True,
+                request_id,
+                "medsiglip_inference_failed",
+                str(exc),
+                service_name="crispro--medsiglip",
+                input_reference=input_sha,
+            )
+            receipt["latency_ms"] = latency_ms
+        finally:
+            Path(temp_path).unlink(missing_ok=True)
+
+        schema_gate_report = _to_schema_gate_report(gate_report)
+        envelope = _envelope(
             request_id,
-            model_state=backend_state,
-            model_name=backend_name,
+            model_state=model_state,
+            model_name=model_name,
             gate_report=schema_gate_report,
         )
-        if runtime_gate_report is not None:
-            log_event(request_id, "/v1/screening/analyze",
-                      model_state=backend_state.value,
-                      patient_id_hash=req.patient_id_hash,
-                      extra={"gate_report": {
-                          "repo_id": runtime_gate_report.repo_id,
-                          "access_level": runtime_gate_report.access_level.value,
-                          "status_code": runtime_gate_report.status_code,
-                          "reason": runtime_gate_report.reason,
-                          "has_token": runtime_gate_report.has_token,
-                      }},
-                          tenant_id=tenant.tenant_id,
-                      )
-
         response = ScreeningResponse(
-            **env,
-            laterality=result.metadata.laterality.value,
-            view=result.metadata.view.value,
-            orientation_flipped=result.metadata.orientation_flipped,
-            breast_mask_coverage=float(result.breast_mask.mean()),
-            findings=[dict(f) for f in findings_list],
+            **envelope,
+            pipeline_status=_pipeline_status([receipt]),
+            stage_receipts=[receipt],
+            laterality=preprocessed.metadata.laterality.value,
+            view=preprocessed.metadata.view.value,
+            orientation_flipped=preprocessed.metadata.orientation_flipped,
+            breast_mask_coverage=float(preprocessed.breast_mask.mean()),
+            findings=findings,
             overall_score=overall_score,
-            arbiter_score=arbiter_block,
-            warnings=backend_warnings,
+            medsiglip=medsiglip_block,
+            arbiter_score=None,
+            warnings=warnings,
         )
-        log_event(request_id, "/v1/screening/analyze",
-                  model_state=backend_state.value,
-                  patient_id_hash=req.patient_id_hash,
-                  extra={
-                      "shape": [result.image.shape[0], result.image.shape[1]],
-                      "laterality": result.metadata.laterality.value,
-                      "view": result.metadata.view.value,
-                      "mask_coverage": float(result.breast_mask.mean()),
-                      "backend": backend_state.value,
-                      "overall_score": overall_score,
-                      "n_warnings": len(backend_warnings),
-                  },
-                      tenant_id=tenant.tenant_id,
-                  )
+        log_event(
+            request_id,
+            "/v1/screening/analyze",
+            model_state=model_state.value,
+            patient_id_hash=req.patient_id_hash,
+            extra={
+                "pipeline_status": response.pipeline_status,
+                "input_sha256": input_sha,
+                "embedding_dim": medsiglip_block.get("embedding_dim") if medsiglip_block else None,
+                "app_version": medsiglip_block.get("app_version") if medsiglip_block else None,
+            },
+            tenant_id=tenant.tenant_id,
+        )
         return response
 
     # ----------------------------------------------------------------------- #
@@ -1190,237 +1136,72 @@ def create_app() -> FastAPI:
         req: BiopsyRequest,
         tenant: APIKey = Depends(require_api_key),
     ) -> BiopsyResponse:
-        """L4b: MedSigLIP-448 embed → synthetic 3-class linear probe.
-
-        Opt-in via ``ONCOLOGY_ARBITER_ENABLE_BIOPSY_MEDSIGLIP=1``.
-
-        Contract:
-        * NO WSI parser (no OpenSlide) — treats ``wsi_bytes_b64`` / ``wsi_url``
-          as an image the MedSigLIP vision encoder can consume. This is a
-          research proxy for a real WSI patcher.
-        * Preflight HAI-DEF gate first; on FORBIDDEN/UNAUTHENTICATED emits
-          ``ModelState.GATED`` with a ``biopsy_medsiglip_gated:<level>``
-          warning — NEVER silently fabricates a subtype.
-        * Weights are synthetic (n_training=48 synthetic=True) → the
-          response's ``warnings`` list surfaces this on every call.
-        """
+        """Run required ClinicalBERT and Phikon stages without proxy substitution."""
         request_id = new_request_id()
-        if (
-            not req.wsi_url
-            and not req.wsi_bytes_b64
-            and not req.report_text
-            and req.dss_features is None
-        ):
-            raise HTTPException(
-                400,
-                "must provide wsi_url, wsi_bytes_b64, report_text, or dss_features",
-            )
+        if not any((req.wsi_url, req.wsi_bytes_b64, req.report_text, req.dss_features is not None)):
+            raise HTTPException(400, "must provide pathology image, report_text, or dss_features")
 
-        model_state = ModelState.PLACEHOLDER
-        model_name: str | None = None
-        subtype_prediction: str | None = None
-        confidence: float | None = None
+        receipts: list[dict[str, Any]] = []
         warnings: list[str] = []
-        # Runtime dataclass (from hai_def), converted to schema at envelope time.
-        runtime_gate_report = None  # type: ignore[assignment]
-
-        if _is_env_true("ONCOLOGY_ARBITER_ENABLE_BIOPSY_MEDSIGLIP"):
-            if not (req.wsi_url or req.wsi_bytes_b64):
-                warnings.append(
-                    "biopsy_medsiglip_skipped:report_text_only:no_image_provided"
-                )
-            else:
-                try:
-                    from oncology_arbiter.models.biopsy_medsiglip_probe import (
-                        BiopsyMedSigLipProbe,
-                    )
-                    from oncology_arbiter.models.hai_def import (
-                        GatedAccessError,
-                        GateReport as RuntimeGateReport,
-                        _discover_hf_token,
-                    )
-
-                    probe = BiopsyMedSigLipProbe()
-                    image_bytes = _decode_bytes_arg(req.wsi_bytes_b64)
-                    image_url = str(req.wsi_url) if req.wsi_url else None
-                    result = probe.run(
-                        image_bytes=image_bytes,
-                        image_url=image_url,
-                    )
-                    subtype_prediction = result.subtype
-                    confidence = float(result.subtype_probs[result.subtype])
-                    model_state = ModelState.LOADED_BIOPSY_PROBE
-                    model_name = "google/medsiglip-448+biopsy_probe_v0"
-                    warnings.extend(result.warnings)
-                    # If the probe surfaced a runtime GateReport (allowed
-                    # preflight), thread it through.
-                    runtime_gate_report = getattr(result, "gate_report", None)
-                except GatedAccessError as gate_err:
-                    model_state = ModelState.GATED
-                    model_name = gate_err.repo_id
-                    warnings.append(
-                        f"biopsy_medsiglip_gated:{gate_err.access_level.value}:{gate_err.reason}"
-                    )
-                    runtime_gate_report = RuntimeGateReport(
-                        repo_id=gate_err.repo_id,
-                        access_level=gate_err.access_level,
-                        status_code=gate_err.status_code,
-                        reason=gate_err.reason,
-                        has_token=_discover_hf_token() is not None,
-                    )
-                except Exception as e:  # noqa: BLE001 — surface, never hide
-                    warnings.append(f"biopsy_medsiglip_error:{type(e).__name__}:{e}")
-
-        log_event(request_id, "/v1/biopsy/analyze",
-                  model_state=model_state.value,
-                  patient_id_hash=req.patient_id_hash,
-                  extra={"has_wsi": bool(req.wsi_url or req.wsi_bytes_b64),
-                         "has_report": bool(req.report_text),
-                         "subtype": subtype_prediction,
-                         "n_warnings": len(warnings)},
-                             tenant_id=tenant.tenant_id,
-                         )
-
-        arbiter_block: ArbiterScore | None = None
-        try:
-            arbiter_block = _score_arbiter("biopsy", features={})
-        except Exception:
-            arbiter_block = None
-
-        # ------------------------------------------------------------------
-        # v0.2.1: Parse the free-text report for ER/PR/HER2/grade so the
-        # receptor panel is not silently defaulted to all-None. This is a
-        # regex proxy (parser_id=proxy_regex_v0); the frontend MUST show
-        # per-field parse_state and gate the therapy call on user confirmation
-        # so a wrong extraction cannot silently drive a wrong branch.
-        # ------------------------------------------------------------------
-        # ------------------------------------------------------------------
-        # v0.3.0: FUSED parser. If ONCOLOGY_ARBITER_ENABLE_CLINICALBERT_PARSER=1
-        # AND weights are on disk, we use the regex ∨ ClinicalBERT fusion.
-        # Otherwise we fall back to the v0.2.1 regex-only parser (identical
-        # wire shape). Extended fields (ki67_pct/tumor_size_mm/T/N/M/margin/
-        # LVI) only surface when BERT is active. Regex output is always
-        # computed as a floor.
-        # ------------------------------------------------------------------
+        report_parse_block: ReportParseBlock | None = None
         receptor_panel = BiopsyReceptorPanel()
         parsed_grade: int | None = None
-        report_parse_block = None
+        phikon_embedding: dict[str, Any] | None = None
+        model_state = ModelState.PLACEHOLDER
+        model_name: str | None = None
+
         if req.report_text:
-            from oncology_arbiter.nlp.report_parser_v2 import (
-                parse_pathology_report_v2,
+            report_parse_block, receptor_panel, parsed_grade, receipt = _clinicalbert_biopsy_parse(
+                req.report_text, request_id=request_id
             )
-            from oncology_arbiter.api.schemas import (
-                ReportParseBlock,
-                ExtendedReceptorField,
-            )
-
-            try:
-                parsed = parse_pathology_report_v2(req.report_text)
-            except Exception as exc:  # pragma: no cover — degrade gracefully
-                # BERT crashed (bad checkpoint, OOM, etc.) — fall back to
-                # regex-only and record the reason.
-                from oncology_arbiter.nlp.report_parser_v2 import (
-                    parse_pathology_report_v2 as _p,
-                )
-                parsed = _p(req.report_text, mode="regex")
-                warnings.append(
-                    f"clinicalbert_parser_error:{type(exc).__name__}:{exc}"
-                )
-
-            # HER2 canonicalisation is unchanged.
-            her2_val = parsed.her2.value
-            if her2_val not in ("positive", "negative", "equivocal"):
-                her2_val = None
-
-            parse_state: dict[str, str] = {
-                "er": parsed.er.match_state,
-                "pr": parsed.pr.match_state,
-                "her2": parsed.her2.match_state,
-                "grade": parsed.grade.match_state,
-            }
-
-            # KI-67 % from the BERT extended fields → panel numeric field.
-            ki67_val: float | None = None
-            ki67_ext = parsed.extended_fields.get("ki67_pct")
-            if ki67_ext is not None and ki67_ext.match_state == "matched":
-                try:
-                    ki67_val = float(ki67_ext.value)
-                    if not (0.0 <= ki67_val <= 100.0):
-                        ki67_val = None
-                except (TypeError, ValueError):
-                    ki67_val = None
-
-            receptor_panel = BiopsyReceptorPanel(
-                er_positive=parsed.er.value if isinstance(parsed.er.value, bool) else None,
-                pr_positive=parsed.pr.value if isinstance(parsed.pr.value, bool) else None,
-                her2_status=her2_val,  # type: ignore[arg-type]
-                ki67_percent=ki67_val,
-                parse_state=parse_state,  # type: ignore[arg-type]
-            )
-            parsed_grade = parsed.grade.value if isinstance(parsed.grade.value, int) else None
-
-            # Build the ReportParseBlock. Every field carries its confidence
-            # + source so the UI can render (fused / regex-only / disagree).
-            per_field_conf = {
-                "er": parsed.er.confidence, "pr": parsed.pr.confidence,
-                "her2": parsed.her2.confidence, "grade": parsed.grade.confidence,
-            }
-            per_field_src = {
-                "er": parsed.er.source, "pr": parsed.pr.source,
-                "her2": parsed.her2.source, "grade": parsed.grade.source,
-            }
-            extended_out: dict[str, ExtendedReceptorField] = {}
-            for name, ef in parsed.extended_fields.items():
-                extended_out[name] = ExtendedReceptorField(
-                    value=ef.value, match_state=ef.match_state,
-                    matched_text=ef.matched_text, span=ef.span,
-                    confidence=ef.confidence, source=ef.source,
-                )
-            report_parse_block = ReportParseBlock(
-                parser_id=parsed.parser_id,
-                fusion_mode=parsed.fusion_mode,  # type: ignore[arg-type]
-                per_field_confidence=per_field_conf,
-                per_field_source=per_field_src,  # type: ignore[arg-type]
-                extended_fields=extended_out,
-            )
-
-            # Bump model_state/name so wire consumers know a real BERT ran.
-            if parsed.fusion_mode == "fused":
-                model_state = ModelState.FUSED_REGEX_CLINICALBERT
-                model_name = "clinicalbert_v1+regex_v0"
-            elif parsed.fusion_mode == "bert":
+            receipts.append(receipt)
+            if receipt["status"] == "succeeded":
                 model_state = ModelState.LOADED_CLINICALBERT_PARSER
-                model_name = "clinicalbert_v1"
-            # regex-only leaves model_state at its prior value.
+                model_name = "emilyalsentzer/Bio_ClinicalBERT+v0.5.2-sliding-window"
+            else:
+                warnings.append(f"clinicalbert_required_stage_failed:{receipt['error']['code']}")
+        else:
+            receipts.append(_skipped_stage_receipt(
+                "clinicalbert_pathology_parse", request_id, "no report_text supplied"
+            ))
 
-            matched_count = sum(1 for s in parse_state.values() if s == "matched")
-            warnings.append(
-                f"receptor_panel_source:{parsed.parser_id}:matched={matched_count}/4"
-            )
-            # Extended-field summary line for the audit trail.
-            if extended_out:
-                ext_matched = sum(1 for f in extended_out.values() if f.match_state == "matched")
-                warnings.append(
-                    f"receptor_panel_extended:matched={ext_matched}/{len(extended_out)}"
-                )
+        if req.wsi_bytes_b64:
+            try:
+                from oncology_arbiter.models.specialist_clients import PhikonClient
+                image_bytes = _decode_bytes_arg(req.wsi_bytes_b64)
+                call = PhikonClient().embed(image_bytes or b"", request_id=request_id, required=True)
+                phikon_embedding = call.output
+                receipts.append(call.receipt)
+                if model_state == ModelState.PLACEHOLDER:
+                    model_state = ModelState.LOADED_PHIKON
+                    model_name = "Phikon"
+            except Exception as exc:
+                receipts.append(_failed_stage_receipt(
+                    "phikon_embedding", True, request_id,
+                    getattr(exc, "code", "phikon_failed"), f"{type(exc).__name__}: {exc}",
+                    service_name="phikon",
+                ))
+                warnings.append("phikon_required_stage_failed")
+        elif req.wsi_url:
+            receipts.append(_failed_stage_receipt(
+                "phikon_embedding", True, request_id, "direct_url_disabled",
+                "Remote pathology-image fetching is disabled; submit de-identified image bytes.",
+                service_name="phikon",
+            ))
+            warnings.append("phikon_required_stage_failed:direct_url_disabled")
+        else:
+            receipts.append(_skipped_stage_receipt(
+                "phikon_embedding", request_id, "no pathology image supplied"
+            ))
 
-        # Breast DSS v3 is a frozen, seven-feature prognosis model.  It runs
-        # only from an explicit complete vector; parser output is never used
-        # to guess age, positive-node count, or absent receptor values.
         dss_prognosis: BreastDssPrognosis | None = None
         if req.dss_features is not None:
-            from oncology_arbiter.models.breast_dss_arbiter import (
-                score_breast_dss,
-            )
-
+            from oncology_arbiter.models.breast_dss_arbiter import score_breast_dss
             f = req.dss_features
             dss_result = score_breast_dss({
-                "age": f.age,
-                "tumor_size_mm": f.tumor_size_mm,
-                "nodes_positive": f.nodes_positive,
-                "grade": f.grade,
-                "er_pos": f.er_positive,
-                "pr_pos": f.pr_positive,
+                "age": f.age, "tumor_size_mm": f.tumor_size_mm,
+                "nodes_positive": f.nodes_positive, "grade": f.grade,
+                "er_pos": f.er_positive, "pr_pos": f.pr_positive,
                 "her2_pos": f.her2_positive,
             })
             dss_prognosis = BreastDssPrognosis(
@@ -1434,25 +1215,41 @@ def create_app() -> FastAPI:
                 oof_auroc=dss_result.oof_auroc,
                 caveats=list(dss_result.caveats),
             )
-            warnings.append(
-                "breast_dss_prognosis:frozen_metabric:explicit_features:no_imputation"
-            )
+            receipts.append({
+                "stage": "breast_dss_prognosis", "required": False, "status": "succeeded",
+                "request_id": request_id, "service_name": "oncology-arbiter",
+                "model_name": dss_result.model_name, "model_version": "v3",
+                "artifact_sha256": dss_result.artifact_sha256,
+                "input_reference": "explicit_complete_seven_feature_vector",
+                "latency_ms": 0.0,
+                "warnings": ["prognosis_under_metabric_treatment_mix_not_treatment_benefit"],
+                "error": None,
+            })
+            warnings.append("breast_dss_prognosis:frozen_metabric:explicit_features:no_imputation")
+        else:
+            receipts.append(_skipped_stage_receipt(
+                "breast_dss_prognosis", request_id, "complete explicit seven-feature vector not supplied"
+            ))
 
-        schema_gate_report = _to_schema_gate_report(runtime_gate_report)
-        env = _envelope(
-            request_id,
-            model_state=model_state,
-            model_name=model_name,
-            gate_report=schema_gate_report,
+        pipeline_status = _pipeline_status(receipts)
+        log_event(
+            request_id, "/v1/biopsy/analyze", model_state=model_state.value,
+            patient_id_hash=req.patient_id_hash,
+            extra={"pipeline_status": pipeline_status, "stage_statuses": [r["status"] for r in receipts]},
+            tenant_id=tenant.tenant_id,
         )
+        env = _envelope(request_id, model_state=model_state, model_name=model_name)
         env["warnings"] = warnings
         return BiopsyResponse(
             **env,
-            subtype_prediction=subtype_prediction,
+            pipeline_status=pipeline_status,
+            stage_receipts=receipts,
+            phikon_embedding=phikon_embedding,
+            subtype_prediction=None,
             receptor_panel=receptor_panel,
             grade=parsed_grade,
-            confidence=confidence,
-            arbiter_score=arbiter_block,
+            confidence=None,
+            arbiter_score=None,
             report_parse=report_parse_block,
             dss_prognosis=dss_prognosis,
         )
@@ -1465,205 +1262,108 @@ def create_app() -> FastAPI:
         req: TherapyRequest,
         tenant: APIKey = Depends(require_api_key),
     ) -> TherapyResponse:
-        """L4c: TxGemma-preferred, NCCN-lite rules fallback.
-
-        Precedence (matches screening's MedSigLIP → SigLIP proxy pattern):
-
-        1. If ``ONCOLOGY_ARBITER_ENABLE_THERAPY_TXGEMMA=1``: try TxGemma.
-           * On ALLOWED preflight (never reached under current token):
-             ``ModelState.LOADED_TXGEMMA``.
-           * On FORBIDDEN/UNAUTHENTICATED: emit ``txgemma_gated:<level>``
-             warning and FALL THROUGH to (2) only if the rules-lite proxy
-             is enabled.
-        2. If ``ONCOLOGY_ARBITER_ENABLE_THERAPY_RULES_PROXY=1``: run
-           deterministic NCCN-lite rules. ``ModelState.PROXY_RULES_LITE``.
-        3. Otherwise: placeholder (recommended_options=[]).
-        """
+        """Return only live SL-bridge recommendations plus an optional research triage decomposition."""
         request_id = new_request_id()
-
-        model_state = ModelState.PLACEHOLDER
-        model_name: str | None = None
+        receipts: list[dict[str, Any]] = []
+        warnings: list[str] = []
+        if req.legacy_therapy_benefit_model_name is not None:
+            warnings.append("deprecated_prognostic_model_alias_remapped")
+        bridge_output: dict[str, Any] | None = None
         recommended: list[TherapyOption] = []
         not_recommended: list[TherapyOption] = []
-        warnings: list[str] = []
-        # Access __dict__ directly so merely serving the endpoint does not emit
-        # Pydantic's Python deprecation warning; the OpenAPI field remains
-        # marked deprecated for clients.
-        if req.__dict__.get("legacy_therapy_benefit_model_name") is not None:
-            warnings.append("deprecated_prognostic_model_alias_remapped")
-        runtime_gate_report = None  # populated by TxGemma preflight
 
-        # Extract features for rules engine from biopsy_output + patient_context.
-        # v0.2.1: if receptors_override is set (user Confirm-gate output from
-        # the frontend), it wins over whatever is in biopsy_output.receptor_panel.
-        # This is the honesty contract for the tumor-board demo — the parser
-        # is a suggestion; the pathologist confirms.
-        biopsy = req.biopsy_output
-        subtype: str | None = biopsy.subtype_prediction if biopsy else None
-        override = req.receptors_override
-        if override is not None:
-            er = bool(override.er_positive) if override.er_positive is not None else False
-            pr = bool(override.pr_positive) if override.pr_positive is not None else False
-            her2_status = override.her2_status
-            warnings.append("receptors_source:user_confirmed")
+        if req.mutations or req.germline_mutations:
+            try:
+                from oncology_arbiter.models.specialist_clients import SLTherapyBridgeClient
+                payload = {
+                    "disease": req.disease,
+                    "cancer_type": req.cancer_type,
+                    "mutations": req.mutations,
+                    "germline_mutations": req.germline_mutations,
+                    "ranked_drugs": req.ranked_drugs,
+                    "include_explanations": False,
+                }
+                call = SLTherapyBridgeClient().run(payload, request_id=request_id, required=True)
+                bridge_output = call.output
+                receipts.append(call.receipt)
+                for item in bridge_output.get("sl_indicated_drugs") or []:
+                    if not isinstance(item, dict) or not item.get("drug_name"):
+                        continue
+                    recommended.append(TherapyOption(
+                        regimen=str(item["drug_name"]),
+                        line_of_therapy=1,
+                        rationale=str(item.get("sl_rationale") or "Synthetic-lethality actionability hypothesis"),
+                    ))
+                for item in bridge_output.get("policy_overlays") or []:
+                    if not isinstance(item, dict) or item.get("policy_decision") != "DISALLOW":
+                        continue
+                    drug = item.get("drug_name") or item.get("name")
+                    if drug:
+                        not_recommended.append(TherapyOption(
+                            regimen=str(drug), line_of_therapy=1,
+                            rationale=str(item.get("policy_rationale_short") or "SL bridge policy DISALLOW"),
+                        ))
+            except Exception as exc:
+                receipts.append(_failed_stage_receipt(
+                    "synthetic_lethality_therapy_bridge", True, request_id,
+                    getattr(exc, "code", "sl_bridge_failed"), f"{type(exc).__name__}: {exc}",
+                    service_name="crispro-backend-v2",
+                ))
+                warnings.append("sl_bridge_required_stage_failed:no_therapy_recommendations_emitted")
         else:
-            er = bool(biopsy.receptor_panel.er_positive) if biopsy else False
-            pr = bool(biopsy.receptor_panel.pr_positive) if biopsy else False
-            her2_status = biopsy.receptor_panel.her2_status if biopsy else None
-        her2 = her2_status == "positive"
-        grade = biopsy.grade if biopsy and biopsy.grade else 2
-        # Stage isn't in BiopsyResponse today; use a conservative default and
-        # let the frontend pass stage via patient_context.genomic_markers.
-        pc = req.patient_context
-        stage = str(pc.genomic_markers.get("stage", "T1N0M0")) if pc.genomic_markers else "T1N0M0"
-        menopausal_map = {"pre": "premenopausal", "post": "postmenopausal",
-                          "peri": "premenopausal", "unknown": None, None: None}
-        menopausal_status = menopausal_map.get(pc.menopausal_status)
+            receipts.append(_skipped_stage_receipt(
+                "synthetic_lethality_therapy_bridge", request_id,
+                "no patient mutation profile supplied; no therapy recommendation computed",
+            ))
 
-        # ── (1) TxGemma path ──
-        txgemma_tried = False
-        if _is_env_true("ONCOLOGY_ARBITER_ENABLE_THERAPY_TXGEMMA"):
-            txgemma_tried = True
-            try:
-                from oncology_arbiter.models.txgemma_client import TxGemmaClient
-                from oncology_arbiter.models.hai_def import (
-                    GatedAccessError,
-                    GateReport as RuntimeGateReport,
-                    _discover_hf_token,
-                )
-
-                tx = TxGemmaClient()
-                tx_result = tx.recommend_therapy(
-                    receptor_status={"ER": er, "PR": pr, "HER2": her2},
-                    grade=grade,
-                    stage=stage,
-                    age=pc.age,
-                    menopausal_status=menopausal_status,
-                    subtype=subtype,
-                )
-                recommended = [
-                    TherapyOption(regimen=r, line_of_therapy=1, rationale="TxGemma")
-                    for r in tx_result.recommendations
-                ]
-                warnings.extend(tx_result.warnings)
-                model_state = ModelState.LOADED_TXGEMMA
-                model_name = tx.repo_id
-                runtime_gate_report = getattr(tx_result, "gate_report", None)
-            except GatedAccessError as gate_err:
-                warnings.append(
-                    f"txgemma_gated:{gate_err.access_level.value}:{gate_err.reason}"
-                )
-                runtime_gate_report = RuntimeGateReport(
-                    repo_id=gate_err.repo_id,
-                    access_level=gate_err.access_level,
-                    status_code=gate_err.status_code,
-                    reason=gate_err.reason,
-                    has_token=_discover_hf_token() is not None,
-                )
-
-        # ── (2) NCCN-lite rules fallback ──
-        if model_state == ModelState.PLACEHOLDER and _is_env_true(
-            "ONCOLOGY_ARBITER_ENABLE_THERAPY_RULES_PROXY"
-        ):
-            try:
-                from oncology_arbiter.models.therapy_rules_lite import (
-                    apply_nccn_lite_rules,
-                )
-                rules_result = apply_nccn_lite_rules(
-                    receptor_status={"ER": er, "PR": pr, "HER2": her2},
-                    grade=grade,
-                    stage=stage,
-                    age=pc.age,
-                    menopausal_status=menopausal_status,
-                    subtype=subtype,
-                    strict=bool(req.strict),
-                )
-                recommended = [
-                    TherapyOption(
-                        regimen=o.name,
-                        line_of_therapy=1,
-                        rationale=o.rationale,
-                        evidence=[EvidenceRecord(
-                            url=o.citation_url,
-                            quoted_text=f"NCCN {o.nccn_section}",
-                            source="nccn-guidelines",
-                        )],
-                    )
-                    for o in rules_result.recommended_options
-                ]
-                not_recommended = [
-                    TherapyOption(
-                        regimen=o.name,
-                        line_of_therapy=1,
-                        rationale=o.rationale,
-                        evidence=[EvidenceRecord(
-                            url=o.citation_url,
-                            quoted_text=f"NCCN {o.nccn_section}",
-                            source="nccn-guidelines",
-                        )],
-                    )
-                    for o in rules_result.not_recommended
-                ]
-                warnings.extend(rules_result.warnings)
-                model_state = ModelState.PROXY_RULES_LITE
-                model_name = "nccn-lite-v0"
-            except Exception as e:  # noqa: BLE001
-                # strict=True input drift → HTTP 400 (surfaces validation
-                # errors instead of hiding them in the warnings list).
-                from oncology_arbiter.models.therapy_rules_lite import (
-                    InvalidInputError as _InvalidInputError,
-                )
-                if isinstance(e, _InvalidInputError):
-                    raise HTTPException(
-                        status_code=400,
-                        detail=f"therapy_rules_lite_invalid_input: {e}",
-                    ) from e
-                warnings.append(f"therapy_rules_lite_error:{type(e).__name__}:{e}")
-
-        log_event(request_id, "/v1/therapy/reason",
-                  model_state=model_state.value,
-                  patient_id_hash=None,
-                  extra={"has_biopsy_input": biopsy is not None,
-                         "txgemma_tried": txgemma_tried,
-                         "n_recommended": len(recommended),
-                         "n_not_recommended": len(not_recommended),
-                         "n_warnings": len(warnings)},
-                             tenant_id=tenant.tenant_id,
-                         )
-
-        arbiter_block: ArbiterScore | None = None
+        triage: ArbiterScore | None = None
         try:
-            arbiter_block = _score_arbiter("therapy", features={})
-        except Exception:
-            arbiter_block = None
+            triage = _score_explicit_therapy_triage(req.therapy_features)
+        except Exception as exc:
+            receipts.append(_failed_stage_receipt(
+                "therapy_research_triage", False, request_id, "invalid_triage_features",
+                f"{type(exc).__name__}: {exc}", service_name="oncology-arbiter",
+            ))
+        if triage is None and not any(r["stage"] == "therapy_research_triage" for r in receipts):
+            receipts.append(_skipped_stage_receipt(
+                "therapy_research_triage", request_id,
+                "complete explicit triage vector required; missing nodes never use unknown=0.5",
+            ))
+        elif triage is not None:
+            receipts.append({
+                "stage": "therapy_research_triage", "required": False, "status": "succeeded",
+                "request_id": request_id, "service_name": "oncology-arbiter",
+                "model_name": triage.model_name, "model_version": "template-v0",
+                "input_reference": "explicit_complete_patient_features",
+                "latency_ms": 0.0,
+                "warnings": ["illustrative_research_triage_not_recommendation_or_treatment_benefit"],
+                "error": None,
+            })
 
-        schema_gate_report = _to_schema_gate_report(runtime_gate_report)
-        env = _envelope(
-            request_id,
-            model_state=model_state,
-            model_name=model_name,
-            gate_report=schema_gate_report,
-        )
+        status = _pipeline_status(receipts)
+        state = ModelState.LOADED_SL_THERAPY_BRIDGE if bridge_output is not None else ModelState.UNAVAILABLE
+        env = _envelope(request_id, model_state=state, model_name="SLTherapyBridge-v3.1" if bridge_output else None)
         env["warnings"] = warnings
-        # v0.2: only surface the ruleset fingerprint when the rules-lite
-        # branch actually ran (model_state == PROXY_RULES_LITE). If TxGemma
-        # was reachable, or we fell through to placeholder, these stay None.
-        _rules_sha: str | None = None
-        _rules_model_id: str | None = None
-        _rules_branch_id: str | None = None
-        if model_state == ModelState.PROXY_RULES_LITE and "rules_result" in locals():
-            _rules_sha = getattr(rules_result, "rules_sha256", None)
-            _rules_model_id = getattr(rules_result, "rules_model_id", None)
-            _rules_branch_id = getattr(rules_result, "branch_id", None)
-
+        log_event(
+            request_id, "/v1/therapy/reason", model_state=state.value,
+            patient_id_hash=None,
+            extra={"pipeline_status": status, "n_bridge_recommended": len(recommended)},
+            tenant_id=tenant.tenant_id,
+        )
         return TherapyResponse(
             **env,
+            pipeline_status=status,
+            stage_receipts=receipts,
+            therapy_bridge=bridge_output,
+            therapy_triage=triage,
             recommended_options=recommended,
             not_recommended=not_recommended,
-            arbiter_score=arbiter_block,
-            rules_sha256=_rules_sha,
-            rules_model_id=_rules_model_id,
-            branch_id=_rules_branch_id,
+            prognostic_model_executed=False,
+            prognostic_score=None,
+            arbiter_score=triage,
+            rules_sha256=None,
+            rules_model_id=None,
+            branch_id=None,
         )
 
     # ----------------------------------------------------------------------- #
@@ -2111,7 +1811,7 @@ def create_app() -> FastAPI:
     # with N fake URLs will see `urls_dropped_hallucinated >= N` and
     # matching warnings in the response envelope.
 
-    @app.post("/v1/co_scientist/run", response_model=CoScientistRunResponse)
+    @app.post("/v1/offline_ranker/run", response_model=CoScientistRunResponse)
     def co_scientist_run(
         req: CoScientistRunRequest,
     ) -> CoScientistRunResponse:
@@ -2203,7 +1903,7 @@ def create_app() -> FastAPI:
         )
 
         log_event(
-            request_id, "/v1/co_scientist/run",
+            request_id, "/v1/offline_ranker/run",
             model_state=ModelState.PROXY_CO_SCIENTIST.value,
             patient_id_hash=None,
             extra={
@@ -2240,548 +1940,573 @@ def create_app() -> FastAPI:
         )
 
     # ----------------------------------------------------------------------- #
-    # /v1/case/full — placeholder that chains sub-endpoints
+    # Production dynamic tumor board and full-case specialist assembly
 
-    # Cancer tracks the endpoint knows how to route. The SPA reads
-    # /health.cancers to know which selectors to enable. Any value NOT in
-    # this set is rejected with 400 (never silently coerced to breast) so
-    # the honesty caveat never masquerades as covering another cancer.
-    # v0.4.0-alpha: hgsoc added for the AK MBD4-LOF tumor board case. The
-    # /v1/case/full path for HGSOC intentionally 501s until the SL-therapy
-    # bridge lands in PR #4; the surface exists here so the SPA can select
-    # 'hgsoc' from /health.cancers without a client-side hardcode.
     _SUPPORTED_CANCERS = {"breast", "nsclc", "hgsoc"}
+
+    def _breast_dss_from_features(features: Any) -> BreastDssPrognosis:
+        from oncology_arbiter.models.breast_dss_arbiter import score_breast_dss
+
+        result = score_breast_dss({
+            "age": features.age,
+            "tumor_size_mm": features.tumor_size_mm,
+            "nodes_positive": features.nodes_positive,
+            "grade": features.grade,
+            "er_pos": features.er_positive,
+            "pr_pos": features.pr_positive,
+            "her2_pos": features.her2_positive,
+        })
+        return BreastDssPrognosis(
+            model_name=result.model_name,
+            disease_specific_mortality_score=result.score,
+            logit=result.logit,
+            term_contributions=result.term_contributions,
+            artifact_sha256=result.artifact_sha256,
+            n_training=result.n_training,
+            events=result.events,
+            oof_auroc=result.oof_auroc,
+            caveats=list(result.caveats),
+        )
+
+    def _ovarian_retirement(request_id: str) -> tuple[dict[str, Any], dict[str, Any]]:
+        block = {
+            "model_name": "ovarian_mortality_arbiter_v3_tcga",
+            "model_state": "retired",
+            "endpoint": "2-year overall mortality",
+            "retirement_reason": (
+                "FIGO stage did not demonstrate incremental discrimination over age; "
+                "the paired OOF AUROC increment was +0.02475247524752467 with an "
+                "approximate 95% interval spanning zero."
+            ),
+            "retirement_evidence": {
+                "cohort": "TCGA-OV",
+                "n": 271,
+                "age_only_oof_auroc": 0.658057110058832,
+                "age_plus_figo_oof_auroc": 0.6828095853063567,
+                "delta_oof_auroc": 0.02475247524752467,
+                "delta_ci95_approx": [-0.041, 0.095],
+                "external_validation": "no_feature_compatible_external_cohort_available",
+            },
+            "warning": "Retired research model; no patient probability, risk bucket, or driving feature is emitted.",
+        }
+        receipt = {
+            "stage": "ovarian_prognostic_arbiter",
+            "required": False,
+            "status": "retired",
+            "request_id": request_id,
+            "service_name": "oncology-arbiter",
+            "model_name": "ovarian_mortality_arbiter_v3_tcga",
+            "model_version": "v3-retired",
+            "warnings": ["retired_no_incremental_figo_discrimination_over_age"],
+            "error": None,
+        }
+        return block, receipt
+
+    def _run_medgemma_co_scientist(
+        *,
+        context: dict[str, Any],
+        request_id: str,
+        requested: bool,
+        has_patient_signal: bool,
+        receipts: list[dict[str, Any]],
+    ) -> dict[str, Any] | None:
+        if not requested:
+            receipts.append(_skipped_stage_receipt(
+                "medgemma_co_scientist", request_id, "Co-Scientist was not requested"
+            ))
+            return None
+        if not has_patient_signal:
+            receipts.append(_skipped_stage_receipt(
+                "medgemma_co_scientist", request_id,
+                "No validated patient stage output was available for synthesis",
+            ))
+            return None
+        if not os.environ.get("MEDGEMMA_MODAL_URL"):
+            receipts.append(_failed_stage_receipt(
+                "medgemma_co_scientist", False, request_id,
+                "medgemma_not_configured",
+                "MEDGEMMA_MODAL_URL is required; alternate LLMs and deterministic Elo are not substitutes.",
+                service_name="medgemma-27b",
+            ))
+            return None
+        try:
+            from oncology_arbiter.agents.supervisor import execute_stage
+
+            result = execute_stage(
+                "case_full",
+                context,
+                n_hypotheses=6,
+                n_evidence_top_k=3,
+            )
+            output = result.as_dict()
+            if (
+                result.model_state != "executed"
+                or output.get("llm_provider") != "medgemma_modal"
+                or output.get("llm_model") != "google/medgemma-27b-it"
+                or output.get("llm_app_version") != "medgemma-27b-modal-v0.5.0-production-ready"
+                or not output.get("llm_request_ids")
+            ):
+                raise RuntimeError(
+                    "MedGemma Co-Scientist did not complete with required provider provenance"
+                )
+            receipts.append({
+                "stage": "medgemma_co_scientist",
+                "required": False,
+                "status": "succeeded",
+                "request_id": request_id,
+                "service_name": "medgemma-27b",
+                "endpoint_label": os.environ.get("MEDGEMMA_MODAL_URL"),
+                "app_version": output["llm_app_version"],
+                "model_name": output["llm_model"],
+                "model_version": "27b-it",
+                "latency_ms": round(float(output.get("llm_latency_s") or 0.0) * 1000.0, 3),
+                "warnings": list(output.get("llm_honesty_warnings") or []),
+                "error": None,
+            })
+            return output
+        except Exception as exc:
+            receipts.append(_failed_stage_receipt(
+                "medgemma_co_scientist", False, request_id,
+                "medgemma_unavailable", f"{type(exc).__name__}: {exc}",
+                service_name="medgemma-27b",
+            ))
+            return None
+
+    def _assemble_dynamic_tumor_board(
+        req: DynamicTumorBoardRequest,
+        *,
+        request_id: str,
+    ) -> DynamicTumorBoardResponse:
+        receipts: list[dict[str, Any]] = []
+        warnings: list[str] = []
+        ovarian_arbiter: dict[str, Any] | None = None
+        report_parse: ReportParseBlock | None = None
+        phikon_embedding: dict[str, Any] | None = None
+        case_manifest: dict[str, Any] | None = None
+        dss_prognosis: BreastDssPrognosis | None = None
+        therapy_bridge: dict[str, Any] | None = None
+        therapy_triage: ArbiterScore | None = None
+
+        if req.cancer == "hgsoc":
+            ovarian_arbiter, retired_receipt = _ovarian_retirement(request_id)
+            receipts.append(retired_receipt)
+        else:
+            receipts.append(_skipped_stage_receipt(
+                "ovarian_prognostic_arbiter", request_id, "not applicable to breast cancer"
+            ))
+
+        if req.case_id:
+            try:
+                from oncology_arbiter.models.specialist_clients import CaseStorageClient
+
+                call = CaseStorageClient().manifest(req.case_id, request_id=request_id, required=True)
+                case_manifest = call.output
+                receipts.append(call.receipt)
+            except Exception as exc:
+                receipts.append(_failed_stage_receipt(
+                    "case_storage", True, request_id,
+                    getattr(exc, "code", "case_storage_failed"), f"{type(exc).__name__}: {exc}",
+                    service_name="case-storage", input_reference=f"case_id:{req.case_id}",
+                ))
+        else:
+            receipts.append(_skipped_stage_receipt(
+                "case_storage", request_id, "no case_id supplied"
+            ))
+
+        if req.report_text:
+            report_parse, _panel, _grade, receipt = _clinicalbert_biopsy_parse(
+                req.report_text, request_id=request_id
+            )
+            receipts.append(receipt)
+        else:
+            receipts.append(_skipped_stage_receipt(
+                "clinicalbert_pathology_parse", request_id, "no report_text supplied"
+            ))
+
+        if req.pathology_image_b64:
+            try:
+                from oncology_arbiter.models.specialist_clients import PhikonClient
+
+                image_bytes = _decode_bytes_arg(req.pathology_image_b64) or b""
+                call = PhikonClient().embed(image_bytes, request_id=request_id, required=True)
+                phikon_embedding = call.output
+                receipts.append(call.receipt)
+            except Exception as exc:
+                receipts.append(_failed_stage_receipt(
+                    "phikon_embedding", True, request_id,
+                    getattr(exc, "code", "phikon_failed"), f"{type(exc).__name__}: {exc}",
+                    service_name="phikon",
+                ))
+        else:
+            receipts.append(_skipped_stage_receipt(
+                "phikon_embedding", request_id, "no pathology image supplied"
+            ))
+
+        if req.cancer == "breast" and req.dss_features is not None:
+            dss_prognosis = _breast_dss_from_features(req.dss_features)
+            receipts.append({
+                "stage": "breast_dss_prognosis",
+                "required": False,
+                "status": "succeeded",
+                "request_id": request_id,
+                "service_name": "oncology-arbiter",
+                "model_name": dss_prognosis.model_name,
+                "model_version": "v3",
+                "artifact_sha256": dss_prognosis.artifact_sha256,
+                "input_reference": "explicit_complete_seven_feature_vector",
+                "latency_ms": 0.0,
+                "warnings": ["prognosis_under_metabric_treatment_mix_not_treatment_benefit"],
+                "error": None,
+            })
+        else:
+            reason = (
+                "not applicable to HGSOC"
+                if req.cancer == "hgsoc"
+                else "complete explicit seven-feature vector not supplied"
+            )
+            receipts.append(_skipped_stage_receipt(
+                "breast_dss_prognosis", request_id, reason
+            ))
+
+        mutation_payload = [item.model_dump(exclude_none=True) for item in req.mutations]
+        germline_payload = [item.model_dump(exclude_none=True) for item in req.germline_mutations]
+        ranked_payload = [item.model_dump(exclude_none=True) for item in req.ranked_drugs]
+        if mutation_payload or germline_payload:
+            try:
+                from oncology_arbiter.models.specialist_clients import SLTherapyBridgeClient
+
+                call = SLTherapyBridgeClient().run({
+                    "disease": "high-grade serous ovarian cancer" if req.cancer == "hgsoc" else "breast cancer",
+                    "cancer_type": req.cancer,
+                    "mutations": mutation_payload,
+                    "germline_mutations": germline_payload,
+                    "ranked_drugs": ranked_payload,
+                    "rs_features": req.clinical_baseline,
+                    "include_explanations": False,
+                }, request_id=request_id, required=True)
+                therapy_bridge = call.output
+                receipts.append(call.receipt)
+            except Exception as exc:
+                receipts.append(_failed_stage_receipt(
+                    "synthetic_lethality_therapy_bridge", True, request_id,
+                    getattr(exc, "code", "sl_bridge_failed"), f"{type(exc).__name__}: {exc}",
+                    service_name="crispro-backend-v2",
+                ))
+        else:
+            receipts.append(_skipped_stage_receipt(
+                "synthetic_lethality_therapy_bridge", request_id,
+                "no patient mutation profile supplied; no therapy recommendation computed",
+            ))
+
+        if req.cancer == "breast" and req.therapy_features is not None:
+            therapy_triage = _score_explicit_therapy_triage(req.therapy_features.model_dump())
+            if therapy_triage is not None:
+                receipts.append({
+                    "stage": "therapy_research_triage",
+                    "required": False,
+                    "status": "succeeded",
+                    "request_id": request_id,
+                    "service_name": "oncology-arbiter",
+                    "model_name": therapy_triage.model_name,
+                    "model_version": "template-v0",
+                    "input_reference": "explicit_complete_patient_features",
+                    "latency_ms": 0.0,
+                    "warnings": ["illustrative_research_triage_not_recommendation_or_treatment_benefit"],
+                    "error": None,
+                })
+            else:
+                receipts.append(_skipped_stage_receipt(
+                    "therapy_research_triage", request_id,
+                    "complete explicit triage vector required; missing nodes never use unknown=0.5",
+                ))
+        else:
+            receipts.append(_skipped_stage_receipt(
+                "therapy_research_triage", request_id,
+                "not applicable to HGSOC" if req.cancer == "hgsoc" else "no explicit triage features supplied",
+            ))
+
+        has_signal = any((
+            report_parse is not None,
+            phikon_embedding is not None,
+            case_manifest is not None,
+            dss_prognosis is not None,
+            therapy_bridge is not None,
+            bool(req.clinical_baseline),
+        ))
+        co_scientist = _run_medgemma_co_scientist(
+            context={
+                "cancer": req.cancer,
+                "clinical_baseline": req.clinical_baseline,
+                "report_parse": report_parse.model_dump(mode="json") if report_parse else None,
+                "phikon_embedding": phikon_embedding,
+                "dss_prognosis": dss_prognosis.model_dump(mode="json") if dss_prognosis else None,
+                "therapy_bridge": therapy_bridge,
+            },
+            request_id=request_id,
+            requested=req.run_co_scientist,
+            has_patient_signal=has_signal,
+            receipts=receipts,
+        )
+
+        status = _pipeline_status(receipts)
+        state = ModelState.UNAVAILABLE if status == "failed_required_stage" else ModelState.LOADED
+        env = _envelope(request_id, model_state=state, model_name="specialist-stack-composite")
+        env["warnings"] = warnings
+        return DynamicTumorBoardResponse(
+            **env,
+            pipeline_status=status,
+            cancer=req.cancer,
+            stage_receipts=receipts,
+            ovarian_arbiter=ovarian_arbiter,
+            report_parse=report_parse,
+            phikon_embedding=phikon_embedding,
+            case_manifest=case_manifest,
+            dss_prognosis=dss_prognosis,
+            therapy_bridge=therapy_bridge,
+            therapy_triage=therapy_triage,
+            co_scientist=co_scientist,
+        )
+
+    @app.post("/v1/tumor_board/dynamic", response_model=DynamicTumorBoardResponse)
+    def dynamic_tumor_board(
+        req: DynamicTumorBoardRequest,
+        tenant: APIKey = Depends(require_api_key),
+    ) -> DynamicTumorBoardResponse:
+        request_id = new_request_id()
+        response = _assemble_dynamic_tumor_board(req, request_id=request_id)
+        log_event(
+            request_id, "/v1/tumor_board/dynamic",
+            model_state=response.provenance.model_state.value,
+            patient_id_hash=None,
+            extra={
+                "cancer": req.cancer,
+                "pipeline_status": response.pipeline_status,
+                "stage_statuses": [receipt.status for receipt in response.stage_receipts],
+            },
+            tenant_id=tenant.tenant_id,
+        )
+        return response
 
     @app.post("/v1/case/full", response_model=FullCaseResponse)
     def case_full(
         req: FullCaseRequest,
-        cancer: str = Query(
-            default="breast",
-            description="Cancer track: 'breast' (full pipeline) or 'nsclc' "
-                        "(shape-only placeholder; LIDC-IDRI pipeline lands "
-                        "from worker-2).",
-        ),
+        cancer: str = Query(default="breast", description="Cancer track: breast, nsclc, or hgsoc."),
         tenant: APIKey = Depends(require_api_key),
     ) -> FullCaseResponse:
         cancer_norm = cancer.lower().strip()
         if cancer_norm not in _SUPPORTED_CANCERS:
-            raise HTTPException(
-                status_code=400,
-                detail=(
-                    f"Unsupported cancer={cancer!r}. "
-                    f"Supported: {sorted(_SUPPORTED_CANCERS)}. "
-                    f"See /health.cancers for the wired-up set."
-                ),
-            )
-
+            raise HTTPException(400, f"Unsupported cancer={cancer!r}; supported={sorted(_SUPPORTED_CANCERS)}")
         request_id = new_request_id()
 
-        # ------- NSCLC branch --------------------------------------------- #
-        # Two paths:
-        #   (1) placeholder / shape-only    (no series_dir OR feature-gate off)
-        #   (2) real lung heuristic + NCCN-lite rules
-        #       (nsclc_ct_input.series_dir set AND
-        #        ONCOLOGY_ARBITER_ALLOW_SERIES_DIR=1)
-        # The env gate prevents client-controlled filesystem paths from
-        # being trusted in shared / public deployments; local dev flips
-        # the gate on.
-        if cancer_norm == "nsclc":
-            ct_in = req.nsclc_ct_input
-            allow_series_dir = _is_env_true("ONCOLOGY_ARBITER_ALLOW_SERIES_DIR")
-
-            # ----- (1) shape-only placeholder --------------------------- #
-            if ct_in is None or not allow_series_dir:
-                env = _envelope(request_id, model_name="nsclc_placeholder_v0")
-                warnings = [
-                    "cancer=nsclc: placeholder shape only. Set "
-                    "nsclc_ct_input.series_dir AND "
-                    "ONCOLOGY_ARBITER_ALLOW_SERIES_DIR=1 for the real "
-                    "LIDC-IDRI CT pipeline + NCCN-NSCLC-lite rules.",
-                ]
-                if ct_in is not None and not allow_series_dir:
-                    warnings.append(
-                        "nsclc_ct_input was provided but "
-                        "ONCOLOGY_ARBITER_ALLOW_SERIES_DIR is not truthy on "
-                        "the server; ignoring series_dir for safety."
-                    )
-                # v0.4.1: parse the pathology report on the placeholder
-                # path too. Report parse is CT-independent and lets the
-                # deployed Render dyno (which cannot open the series_dir
-                # gate safely) still fire ClinicalBERT and stamp the
-                # response with parsed entities + provenance.
-                _placeholder_report_text: str | None = None
-                if (
-                    getattr(req, "biopsy_input", None) is not None
-                    and getattr(req.biopsy_input, "report_text", None)
-                ):
-                    _placeholder_report_text = req.biopsy_input.report_text
-                _placeholder_parsed, _placeholder_prov = _run_clinicalbert_parse(
-                    request_id=request_id,
-                    tenant_id=tenant.tenant_id,
-                    report_text=_placeholder_report_text,
-                    log_event_fn=log_event,
-                )
-                log_event(request_id, "/v1/case/full",
-                          model_state="placeholder",
-                          patient_id_hash=None,
-                          extra={"cancer": "nsclc", "has_screening": False,
-                                 "has_biopsy": False, "elo_n_hypotheses": 0,
-                                 "clinicalbert": bool(_placeholder_prov)},
-                          tenant_id=tenant.tenant_id,
-                          )
-                return FullCaseResponse(
-                    **env,
-                    warnings=warnings,
-                    screening=None,
-                    biopsy=None,
-                    therapy=None,
-                    nsclc=NsclcResponse(
-                        model_state=ModelState.PLACEHOLDER,
-                        model_name="nsclc_placeholder_v0",
-                        warnings=warnings,
-                        parsed_report=_placeholder_parsed,
-                        parsed_report_provenance=_placeholder_prov,
-                    ),
-                    elo_ranked_hypotheses=[],
-                )
-
-            # ----- (2) real pipeline ------------------------------------ #
-            import time
-            from oncology_arbiter.lung import (
-                read_ct_series,
-                run_lung_heuristic,
-                score_nsclc,
-                NsclcArbiterFeatures,
+        if cancer_norm in {"breast", "hgsoc"}:
+            biopsy_input = req.biopsy_input
+            dynamic_request = DynamicTumorBoardRequest(
+                cancer=cancer_norm,
+                case_id=req.case_id,
+                report_text=biopsy_input.report_text if biopsy_input else None,
+                pathology_image_b64=biopsy_input.wsi_bytes_b64 if biopsy_input else None,
+                dss_features=(biopsy_input.dss_features if biopsy_input and cancer_norm == "breast" else None),
+                therapy_features=req.therapy_features if cancer_norm == "breast" else None,
+                mutations=req.mutations,
+                germline_mutations=req.germline_mutations,
+                ranked_drugs=req.ranked_drugs,
+                clinical_baseline=req.therapy_context.model_dump(mode="json"),
+                run_co_scientist=req.run_co_scientist,
             )
-            from oncology_arbiter.models.nccn_nsclc_rules import (
-                score_nsclc_therapy,
-                NSCLC_RULES_PROXY_WARNING,
-            )
-
-            series_dir = str(ct_in.series_dir)
-            t0 = time.perf_counter()
-            try:
-                ct = read_ct_series(series_dir)
-            except FileNotFoundError as exc:
-                raise HTTPException(400, f"series_dir not found: {exc}") from exc
-            except Exception as exc:
-                raise HTTPException(400, f"failed to read CT series: {exc}") from exc
-            t1 = time.perf_counter()
-            spacing_mm = (
-                float(ct.slice_thickness_mm),
-                float(ct.pixel_spacing_mm[0]),
-                float(ct.pixel_spacing_mm[1]),
-            )
-            heur = run_lung_heuristic(
-                ct.volume, spacing_mm=spacing_mm, top_n=int(ct_in.top_n)
-            )
-            t2 = time.perf_counter()
-            arb_feats = NsclcArbiterFeatures.from_lung_output(heur)
-            arb = score_nsclc(arb_feats)
-            therapy = score_nsclc_therapy(
-                risk_bucket=arb.risk_bucket,
-                driving_feature=arb.driving_feature,
-                max_diameter_mm=heur.max_diameter_mm,
-            )
-
-            # ----- v0.4.1: fine-tuned ClinicalBERT report parser (Modal) --- #
-            # If biopsy_input.report_text is set AND
-            # CLINICALBERT_BACKEND=modal|local, dispatched via a shared
-            # helper so both the placeholder (report-only, no CT) branch
-            # and the real-pipeline branch produce identical
-            # parsed_report / parsed_report_provenance semantics. Parse is
-            # a pure report -> entities transform; independent of CT.
-            _report_text_for_cbert: str | None = None
-            if (
-                getattr(req, "biopsy_input", None) is not None
-                and getattr(req.biopsy_input, "report_text", None)
-            ):
-                _report_text_for_cbert = req.biopsy_input.report_text
-            parsed_report_dict, parsed_report_provenance = _run_clinicalbert_parse(
-                request_id=request_id,
+            dynamic = _assemble_dynamic_tumor_board(dynamic_request, request_id=request_id)
+            screening = screening_analyze(req.screening_input, tenant=tenant) if req.screening_input else None
+            log_event(
+                request_id, "/v1/case/full",
+                model_state=dynamic.provenance.model_state.value,
+                patient_id_hash=None,
+                extra={"cancer": cancer_norm, "pipeline_status": dynamic.pipeline_status},
                 tenant_id=tenant.tenant_id,
-                report_text=_report_text_for_cbert,
-                log_event_fn=log_event,
             )
-
-            # ----- v0.3.0: LUNA16 RetinaNet upgrade path ------------------ #
-            # When the env flag is set, run the MONAI RetinaNet detector on
-            # the same volume. It replaces the heuristic-only diameter as
-            # the arbiter's `driving_feature` and stamps the response with a
-            # loaded_luna16_retinanet model_state. If loading fails we log
-            # and fall through — the heuristic result is still returned.
-            luna16_block = None
-            luna16_warning = None
-            luna16_seconds = None
-            if _is_env_true("ONCOLOGY_ARBITER_ENABLE_LUNA16_RETINANET"):
-                try:
-                    from oncology_arbiter.nsclc.luna16_retinanet import (
-                        LungNoduleDetector, LUNA16_WARNING,
-                    )
-                    t_l0 = time.perf_counter()
-                    det = LungNoduleDetector.get()
-                    luna16_res = det.detect(ct.volume, spacing_mm=spacing_mm)
-                    luna16_seconds = time.perf_counter() - t_l0
-                    from oncology_arbiter.api.schemas import (
-                        Luna16Detection, Luna16DetectionBlock,
-                    )
-                    luna16_block = Luna16DetectionBlock(
-                        bundle_version=luna16_res.bundle_version,
-                        n_detections=luna16_res.n_detections,
-                        top_score=luna16_res.top_score,
-                        detections=[
-                            Luna16Detection(**b.as_dict())
-                            for b in luna16_res.boxes[:20]  # cap wire payload
-                        ],
-                        inference_seconds=luna16_res.inference_seconds,
-                        preprocessing_summary=luna16_res.preprocessing_summary,
-                    )
-                    luna16_warning = LUNA16_WARNING
-                except Exception as exc:  # pylint: disable=broad-except
-                    log_event(
-                        request_id, "/v1/case/full",
-                        model_state="luna16_error",
-                        patient_id_hash=None,
-                        extra={"error": f"{type(exc).__name__}: {exc}"},
-                        tenant_id=tenant.tenant_id,
-                    )
-                    luna16_warning = (
-                        f"luna16_retinanet_error: {type(exc).__name__}: {exc}"
-                    )
-
-            # ----- Path C: Otsu HU parenchyma filter --------------------- #
-            # LUNA16 was trained on nodules internal to lung parenchyma.
-            # Unfiltered inference on our pipeline has been observed to
-            # fire on chest-wall / mediastinum structures (regression
-            # anchor: TCGA-24-1423 top-1 at scanner z=-238.74 mm sits on
-            # rib/chest wall). Path C builds an aerated-lung mask and
-            # flags each detection with `in_lung_parenchyma`. It does
-            # NOT drop detections — downstream ranking / UX decides how
-            # to treat parenchyma-negative firings. Best-effort: if the
-            # mask build throws we log and continue with default False.
-            parenchyma_warning = None
-            if luna16_block is not None and luna16_block.detections:
-                try:
-                    from oncology_arbiter.nsclc.parenchyma_mask import (
-                        apply_parenchyma_filter,
-                    )
-                    apply_parenchyma_filter(
-                        luna16_block.detections, ct.volume, spacing_mm,
-                    )
-                except Exception as exc:  # pylint: disable=broad-except
-                    log_event(
-                        request_id, "/v1/case/full",
-                        model_state="parenchyma_filter_error",
-                        patient_id_hash=None,
-                        extra={"error": f"{type(exc).__name__}: {exc}"},
-                        tenant_id=tenant.tenant_id,
-                    )
-                    parenchyma_warning = (
-                        f"parenchyma_filter_error: {type(exc).__name__}: {exc}"
-                    )
-                    # Detections keep their default `in_lung_parenchyma`;
-                    # schema default (False) is the safe fallback.
-
-            if luna16_block is not None and luna16_block.n_detections > 0:
-                # Upgrade state / name so the frontend can badge this as a
-                # real inference. The heuristic block still travels for
-                # transparency.
-                model_name = "monai/lung_nodule_ct_detection@0.6.9+nccn_nsclc_lite_v0"
-                effective_state = ModelState.LOADED_LUNA16_RETINANET
-            else:
-                model_name = "nsclc_lung_heuristic_v0+nccn_nsclc_lite_v0"
-                effective_state = ModelState.PROXY_LUNG_HEURISTIC
-
-            env = _envelope(
-                request_id,
-                model_state=effective_state,
-                model_name=model_name,
-            )
-            warnings = []
-            if effective_state == ModelState.PROXY_LUNG_HEURISTIC:
-                warnings.append(
-                    "cancer=nsclc: PROXY pipeline. Classical HU thresholding + "
-                    "connected components (not a trained detector). Diameter "
-                    "buckets follow Fleischner-lite anchors; therapy is "
-                    "rules-only."
-                )
-            warnings.append(NSCLC_RULES_PROXY_WARNING)
-            if luna16_warning:
-                warnings.append(luna16_warning)
-            log_event(request_id, "/v1/case/full",
-                      model_state=effective_state.value,
-                      patient_id_hash=None,
-                      extra={
-                          "cancer": "nsclc",
-                          "series_dir": series_dir,
-                          "n_slices": int(ct.volume.shape[0]),
-                          "n_candidates_kept": heur.n_candidates_kept,
-                          "max_diameter_mm": float(heur.max_diameter_mm),
-                          "risk_bucket": arb.risk_bucket,
-                          "has_screening": False,
-                          "has_biopsy": False,
-                          "elo_n_hypotheses": 0,
-                          "luna16_n_detections": (
-                              luna16_block.n_detections if luna16_block else 0
-                          ),
-                          "luna16_top_score": (
-                              luna16_block.top_score if luna16_block else 0.0
-                          ),
-                          "luna16_seconds": luna16_seconds or 0.0,
-                      },
-                      tenant_id=tenant.tenant_id,
-                      )
-
-            # v0.4.1: run the Co-Scientist Elo loop against the NSCLC
-            # envelope so /v1/case/full?cancer=nsclc surfaces
-            # `elo_ranked_hypotheses` just like the breast branch. Gated
-            # on the same env flag; the loop is pure Python and seeded
-            # (see docs/PROGRESS_LEDGER.json → co_scientist_v0.3.0).
-            nsclc_elo_ranked: list[dict[str, Any]] = []
-            nsclc_cs_warnings: list[str] = []
-            if _is_env_true("ONCOLOGY_ARBITER_ENABLE_CO_SCIENTIST"):
-                try:
-                    from oncology_arbiter.orchestrator.co_scientist import (
-                        run_co_scientist,
-                    )
-                    # Build a stand-in biopsy-like envelope from the
-                    # NSCLC therapy result + parsed_report. This is the
-                    # minimum shape the co_scientist loop expects
-                    # (dict with `evidence` + `recommended_options` keys).
-                    nsclc_seen_urls: set[str] = set()
-                    for opt in therapy.recommended_options:
-                        if getattr(opt, "citation_url", None):
-                            nsclc_seen_urls.add(opt.citation_url)
-                    _bio_stub = {
-                        "evidence": [],
-                        "recommended_options": [],
-                        "parsed_report": parsed_report_dict or {},
-                        "cancer": "nsclc",
-                    }
-                    # Map NSCLC therapy schema (name/category/citation_url)
-                    # onto the shape run_co_scientist expects (regimen /
-                    # line_of_therapy). Category becomes the line proxy:
-                    # SBRT/lobectomy/pembrolizumab = 1st-line intent, etc.
-                    _thx_stub = {
-                        "evidence": [
-                            {"url": o.citation_url, "rationale": o.rationale}
-                            for o in therapy.recommended_options
-                            if getattr(o, "citation_url", None)
-                        ],
-                        "recommended_options": [
-                            {
-                                "regimen": o.name,
-                                "line_of_therapy": 1,
-                                "category": o.category,
-                                "citation_url": o.citation_url,
-                                "rationale": o.rationale,
-                                "nccn_section": o.nccn_section,
-                                "evidence": (
-                                    [{"url": o.citation_url,
-                                      "rationale": o.rationale}]
-                                    if getattr(o, "citation_url", None) else []
-                                ),
-                            }
-                            for o in therapy.recommended_options
-                        ],
-                    }
-                    cs_out = run_co_scientist(
-                        screening=None,
-                        biopsy=_bio_stub,
-                        therapy=_thx_stub,
-                        seen_urls=nsclc_seen_urls,
-                    )
-                    nsclc_elo_ranked = cs_out.get("hypotheses", [])
-                    nsclc_cs_warnings = cs_out.get("warnings", [])
-                except Exception as _cs_exc:  # pylint: disable=broad-except
-                    nsclc_cs_warnings = [
-                        f"co_scientist_error:{type(_cs_exc).__name__}:{_cs_exc}"
-                    ]
-
-            if nsclc_cs_warnings:
-                warnings = list(warnings) + list(nsclc_cs_warnings)
-
             return FullCaseResponse(
-                **env,
-                warnings=warnings,
-                screening=None,
+                **_envelope(
+                    request_id,
+                    model_state=dynamic.provenance.model_state,
+                    model_name="specialist-stack-composite",
+                ),
+                warnings=list(dynamic.warnings),
+                pipeline_status=dynamic.pipeline_status,
+                cancer=cancer_norm,
+                stage_receipts=dynamic.stage_receipts,
+                ovarian_arbiter=dynamic.ovarian_arbiter,
+                case_manifest=dynamic.case_manifest,
+                report_parse=dynamic.report_parse,
+                phikon_embedding=dynamic.phikon_embedding,
+                dss_prognosis=dynamic.dss_prognosis,
+                therapy_bridge=dynamic.therapy_bridge,
+                therapy_triage=dynamic.therapy_triage,
+                co_scientist=dynamic.co_scientist,
+                screening=screening,
                 biopsy=None,
                 therapy=None,
-                nsclc=NsclcResponse(
-                    model_state=effective_state,
-                    model_name=model_name,
-                    warnings=warnings,
-                    lung_voxel_fraction=float(heur.lung_voxel_fraction),
-                    n_candidates_total=int(heur.n_candidates_total),
-                    n_candidates_kept=int(heur.n_candidates_kept),
-                    max_diameter_mm=float(heur.max_diameter_mm),
-                    luna16=luna16_block,
-                    candidates=[
-                        NsclcCandidate(
-                            label=int(c.label),
-                            voxel_count=int(c.voxel_count),
-                            diameter_mm=float(c.diameter_mm),
-                            mean_hu=float(c.mean_hu),
-                            centroid_zyx_vox=(
-                                float(c.centroid_zyx_vox[0]),
-                                float(c.centroid_zyx_vox[1]),
-                                float(c.centroid_zyx_vox[2]),
-                            ),
-                        )
-                        for c in heur.candidates
-                    ],
-                    risk_score=float(arb.prob),
-                    risk_bucket=str(arb.risk_bucket),
-                    driving_feature=str(arb.driving_feature),
-                    logit=float(arb.logit),
-                    therapy_recommended=[
-                        NsclcTherapyOption(
-                            name=o.name,
-                            category=o.category,
-                            citation_url=o.citation_url,
-                            rationale=o.rationale,
-                            nccn_section=o.nccn_section,
-                        )
-                        for o in therapy.recommended_options
-                    ],
-                    therapy_not_recommended=[
-                        NsclcTherapyOption(
-                            name=o.name,
-                            category=o.category,
-                            citation_url=o.citation_url,
-                            rationale=o.rationale,
-                            nccn_section=o.nccn_section,
-                        )
-                        for o in therapy.not_recommended
-                    ],
-                    series_dir=series_dir,
-                    n_slices=int(ct.volume.shape[0]),
-                    read_seconds=float(t1 - t0),
-                    heuristic_seconds=float(t2 - t1),
-                    parsed_report=parsed_report_dict,
-                    parsed_report_provenance=parsed_report_provenance,
-                ),
-                elo_ranked_hypotheses=nsclc_elo_ranked,
+                nsclc=None,
+                elo_ranked_hypotheses=[],
             )
 
-        # ------- Breast branch (existing behaviour) ----------------------- #
-        screening: ScreeningResponse | None = None
-        biopsy: BiopsyResponse | None = None
-        therapy: TherapyResponse | None = None
-        # If sub-inputs are provided, run them through the placeholder subroutes.
-        if req.screening_input:
-            screening = screening_analyze(req.screening_input, tenant=tenant)
-        if req.biopsy_input:
-            biopsy = biopsy_analyze(req.biopsy_input, tenant=tenant)
-        # v0.2.1: forward receptors_confirmed (from Case View Confirm gate)
-        # into therapy_reason as receptors_override so the user-confirmed
-        # panel wins over parser output.
-        therapy = therapy_reason(
-            TherapyRequest(
-                biopsy_output=biopsy,
-                patient_context=req.therapy_context,
-                receptors_override=req.receptors_confirmed,
-            ),
-            tenant=tenant,
-        )
-        # L5 Co-Scientist 4-phase loop (opt-in). When enabled, runs
-        # generate → reflect → rank (Elo) → evolve → rank over the stage
-        # envelopes and returns the ranked hypotheses on
-        # `elo_ranked_hypotheses`. Honesty gate: only URLs found in the
-        # combined evidence[] of the stage responses count as "seen"; any
-        # hypothesis carrying an unseen URL is stripped of that URL by
-        # `reflect_hypotheses` before it can win Elo points.
-        elo_ranked: list[dict[str, Any]] = []
-        cs_warnings: list[str] = []
-        if _is_env_true("ONCOLOGY_ARBITER_ENABLE_CO_SCIENTIST"):
-            from oncology_arbiter.orchestrator.co_scientist import run_co_scientist
-            seen_urls: set[str] = set()
-            for env_dict in (
-                screening.model_dump() if screening is not None else None,
-                biopsy.model_dump() if biopsy is not None else None,
-                therapy.model_dump() if therapy is not None else None,
-            ):
-                if env_dict is None:
-                    continue
-                for e in env_dict.get("evidence") or []:
-                    if isinstance(e, dict) and "url" in e:
-                        seen_urls.add(e["url"])
-                # Therapy option evidence lives one level deeper
-                for opt in env_dict.get("recommended_options") or []:
-                    for e in (opt or {}).get("evidence") or []:
-                        if isinstance(e, dict) and "url" in e:
-                            seen_urls.add(e["url"])
-            try:
-                # v0.3.0: two paths
-                # (a) LLM supervisor (real Gemma loop) when env flag set
-                # (b) offline deterministic Elo loop (old path, test-pinned)
-                if _is_env_true("ONCOLOGY_ARBITER_USE_LLM_SUPERVISOR"):
-                    from oncology_arbiter.agents.supervisor import execute_stage
-                    llm_ctx = {
-                        "cancer": "breast",
-                        "screening_summary": (
-                            (screening.model_dump() if screening is not None else {}).get("findings")
-                        ),
-                        "biopsy_summary": (
-                            (biopsy.model_dump() if biopsy is not None else {}).get("subtype_alternates")
-                        ),
-                        "therapy_summary": (
-                            (therapy.model_dump() if therapy is not None else {}).get("recommended_options")
-                        ),
-                        "receptors": (
-                            req.receptors_confirmed.model_dump()
-                            if getattr(req, "receptors_confirmed", None) is not None else None
-                        ),
-                        "patient_context": (
-                            req.therapy_context.model_dump()
-                            if getattr(req, "therapy_context", None) is not None else None
-                        ),
-                    }
-                    stage_result = execute_stage(
-                        "case_full",
-                        llm_ctx,
-                        n_hypotheses=6,
-                        n_evidence_top_k=3,
-                        seed_urls=seen_urls,
-                    )
-                    elo_ranked = [h.as_dict() for h in stage_result.hypotheses]
-                    if stage_result.notes:
-                        cs_warnings.append(f"supervisor_note:{stage_result.notes}")
-                    cs_warnings.append(
-                        f"supervisor_state:{stage_result.model_state},"
-                        f"llm_calls={stage_result.llm_calls},"
-                        f"tokens={stage_result.llm_total_tokens},"
-                        f"cost=${stage_result.llm_cost_usd:.6f}"
-                    )
-                else:
-                    cs_out = run_co_scientist(
-                        screening=(screening.model_dump() if screening is not None else None),
-                        biopsy=(biopsy.model_dump() if biopsy is not None else None),
-                        therapy=(therapy.model_dump() if therapy is not None else None),
-                        seen_urls=seen_urls,
-                    )
-                    elo_ranked = cs_out["hypotheses"]
-                    cs_warnings = cs_out["warnings"]
-            except Exception as e:
-                cs_warnings = [f"co_scientist_error:{type(e).__name__}:{e}"]
+        receipts: list[dict[str, Any]] = []
+        warnings: list[str] = []
+        case_manifest: dict[str, Any] | None = None
+        luna_output: dict[str, Any] | None = None
+        report_parse: ReportParseBlock | None = None
+        therapy_bridge: dict[str, Any] | None = None
 
-        log_event(request_id, "/v1/case/full",
-                  model_state="placeholder",
-                  patient_id_hash=None,
-                  extra={
-                      "cancer": "breast",
-                      "has_screening": screening is not None,
-                      "has_biopsy": biopsy is not None,
-                      "elo_n_hypotheses": len(elo_ranked),
-                  },
-                      tenant_id=tenant.tenant_id,
-                  )
+        if not req.case_id:
+            receipts.append(_failed_stage_receipt(
+                "case_storage", True, request_id, "case_id_required",
+                "NSCLC production inference requires a verified case-storage case_id.",
+                service_name="case-storage",
+            ))
+            receipts.append(_failed_stage_receipt(
+                "luna16_detection", True, request_id, "blocked_by_missing_case_id",
+                "LUNA16 cannot run without a verified case-storage case_id.",
+                service_name="luna16-infer",
+            ))
+            # Surface the suppression at the top level too. stage_receipts and
+            # pipeline_status already carry it, but an all-None NSCLC envelope
+            # with an empty warnings[] can be misread by a downstream consumer
+            # as a completed inference that simply found nothing.
+            warnings.append(
+                "nsclc_required_stages_not_executed:no_verified_case_id_supplied:"
+                "empty_result_is_not_a_negative_finding"
+            )
+        else:
+            try:
+                from oncology_arbiter.models.specialist_clients import CaseStorageClient, Luna16Client
+
+                manifest_call = CaseStorageClient().manifest(req.case_id, request_id=request_id, required=True)
+                case_manifest = manifest_call.output
+                receipts.append(manifest_call.receipt)
+                luna_call = Luna16Client().detect(req.case_id, request_id=request_id, required=True)
+                luna_output = luna_call.output
+                luna_call.receipt["input_reference"] = (
+                    f"case_id:{req.case_id};manifest_sha256:{case_manifest['manifest_sha256']}"
+                )
+                receipts.append(luna_call.receipt)
+            except Exception as exc:
+                failed_stage = "luna16_detection" if case_manifest is not None else "case_storage"
+                receipts.append(_failed_stage_receipt(
+                    failed_stage, True, request_id,
+                    getattr(exc, "code", f"{failed_stage}_failed"), f"{type(exc).__name__}: {exc}",
+                    service_name="luna16-infer" if failed_stage == "luna16_detection" else "case-storage",
+                    input_reference=f"case_id:{req.case_id}",
+                ))
+                if failed_stage == "case_storage":
+                    receipts.append(_failed_stage_receipt(
+                        "luna16_detection", True, request_id, "blocked_by_case_storage",
+                        "LUNA16 was not called because case-storage manifest verification failed.",
+                        service_name="luna16-infer", input_reference=f"case_id:{req.case_id}",
+                    ))
+
+        if req.biopsy_input and req.biopsy_input.report_text:
+            report_parse, _panel, _grade, receipt = _clinicalbert_biopsy_parse(
+                req.biopsy_input.report_text, request_id=request_id
+            )
+            receipts.append(receipt)
+        else:
+            receipts.append(_skipped_stage_receipt(
+                "clinicalbert_pathology_parse", request_id, "no report_text supplied"
+            ))
+
+        mutation_payload = [item.model_dump(exclude_none=True) for item in req.mutations]
+        germline_payload = [item.model_dump(exclude_none=True) for item in req.germline_mutations]
+        if mutation_payload or germline_payload:
+            try:
+                from oncology_arbiter.models.specialist_clients import SLTherapyBridgeClient
+
+                call = SLTherapyBridgeClient().run({
+                    "disease": "non-small cell lung cancer",
+                    "cancer_type": "nsclc",
+                    "mutations": mutation_payload,
+                    "germline_mutations": germline_payload,
+                    "ranked_drugs": [item.model_dump(exclude_none=True) for item in req.ranked_drugs],
+                    "include_explanations": False,
+                }, request_id=request_id, required=True)
+                therapy_bridge = call.output
+                receipts.append(call.receipt)
+            except Exception as exc:
+                receipts.append(_failed_stage_receipt(
+                    "synthetic_lethality_therapy_bridge", True, request_id,
+                    getattr(exc, "code", "sl_bridge_failed"), f"{type(exc).__name__}: {exc}",
+                    service_name="crispro-backend-v2",
+                ))
+        else:
+            receipts.append(_skipped_stage_receipt(
+                "synthetic_lethality_therapy_bridge", request_id,
+                "no patient mutation profile supplied; no therapy recommendation computed",
+            ))
+
+        co_scientist = _run_medgemma_co_scientist(
+            context={
+                "cancer": "nsclc",
+                "case_manifest": case_manifest,
+                "luna16_detection": luna_output,
+                "report_parse": report_parse.model_dump(mode="json") if report_parse else None,
+                "therapy_bridge": therapy_bridge,
+                "patient_context": req.therapy_context.model_dump(mode="json"),
+            },
+            request_id=request_id,
+            requested=req.run_co_scientist,
+            has_patient_signal=any((luna_output, report_parse, therapy_bridge)),
+            receipts=receipts,
+        )
+
+        status = _pipeline_status(receipts)
+        state = ModelState.LOADED_LUNA16_RETINANET if luna_output is not None else ModelState.UNAVAILABLE
+        luna_block = None
+        if luna_output is not None:
+            luna_block = {
+                "bundle_version": luna_output["bundle_version"],
+                "n_detections": int(luna_output.get("n_detections", len(luna_output.get("detections") or []))),
+                "top_score": float(luna_output.get("top_score", 0.0)),
+                "detections": list(luna_output.get("detections") or []),
+                "inference_seconds": float(luna_output.get("inference_seconds", 0.0)),
+                "preprocessing_summary": dict(luna_output.get("preprocessing_summary") or {}),
+            }
+        nsclc = NsclcResponse(
+            model_state=state,
+            model_name=(luna_output or {}).get("model_name", "monai/lung_nodule_ct_detection@0.6.9"),
+            warnings=warnings,
+            luna16=luna_block,
+            parsed_report=report_parse.parsed_entities if report_parse else None,
+            parsed_report_provenance=(
+                {
+                    "parser_id": report_parse.parser_id,
+                    "app_version": report_parse.app_version,
+                    "model_sha256": report_parse.model_sha256,
+                    "metrics_sha256": report_parse.metrics_sha256,
+                    "window_tokens": report_parse.window_tokens,
+                    "overlap_tokens": report_parse.overlap_tokens,
+                    "window_aggregation": report_parse.window_aggregation,
+                }
+                if report_parse else None
+            ),
+        )
+        log_event(
+            request_id, "/v1/case/full", model_state=state.value,
+            patient_id_hash=None,
+            extra={"cancer": "nsclc", "pipeline_status": status},
+            tenant_id=tenant.tenant_id,
+        )
         return FullCaseResponse(
-            **_envelope(request_id),
-            screening=screening,
-            biopsy=biopsy,
-            therapy=therapy,
-            elo_ranked_hypotheses=elo_ranked,
+            **_envelope(request_id, model_state=state, model_name="specialist-stack-composite"),
+            warnings=warnings,
+            pipeline_status=status,
+            cancer="nsclc",
+            stage_receipts=receipts,
+            case_manifest=case_manifest,
+            report_parse=report_parse,
+            luna16_detection=luna_output,
+            therapy_bridge=therapy_bridge,
+            co_scientist=co_scientist,
+            screening=None,
+            biopsy=None,
+            therapy=None,
+            nsclc=nsclc,
+            elo_ranked_hypotheses=[],
         )
 
     # ----------------------------------------------------------------------- #

@@ -147,7 +147,11 @@ def test_demo_sample_matches_post_body(client: TestClient, bundle: dict) -> None
 def test_health_cancers_lists_hgsoc(client: TestClient) -> None:
     h = client.get("/health").json()
     assert "hgsoc" in h["cancers"]
-    assert h["cancers"]["hgsoc"]["case_full"] is False
+    # The route accepts cancer=hgsoc, so case_full is True; the retirement
+    # guarantee is that no patient-level probability is emitted.
+    assert h["cancers"]["hgsoc"]["case_full"] is True
+    assert h["cancers"]["hgsoc"]["state"] == "retired"
+    assert h["cancers"]["hgsoc"]["patient_probability_emitted"] is False
     # POST /v1/tumor_board/bundle must be advertised on the cancer entry
     assert "tumor_board/bundle" in h["cancers"]["hgsoc"]["endpoints"]
 

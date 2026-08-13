@@ -1,7 +1,7 @@
 {
   "$schema_version": "1.0.0",
-  "generated_at": "2026-07-20T01:37:37+00:00",
-  "git_sha": "84f333ab4e70d39f3911b3facbdd168660fcb716",
+  "generated_at": "2026-08-13T00:10:39+00:00",
+  "git_sha": "715aca9c8bacc1b2945e733ccdfc1cda240ea251",
   "project": {
     "name": "oncology-arbiter",
     "one_line_goal": "Open-architecture breast oncology reasoning platform spanning screening \u2192 biopsy \u2192 therapy, with calibrated per-stage arbiters, cited evidence, and honest performance disclosure.",
@@ -150,35 +150,9 @@
       ]
     },
     {
-      "id": "L2-report-parser",
-      "layer": "L2",
-      "role": "ClinicalBERT report parser fine-tuned to extract 21 breast + NSCLC pathology entities from free-text pathology reports; emits parsed_report + parsed_report_provenance onto the NSCLC branch of /v1/case/full.",
-      "status": "LIVE",
-      "not_wired_reason": null,
-      "current_backend": "emilyalsentzer/Bio_ClinicalBERT fine-tuned on SYNTHETIC-v0.3.1 (5 seeds, mean test micro-F1 = 0.9716 \u00b1 0.0001, best = 0.9717 @ seed 42, all 5 clear 0.85 floor). Modal-hosted in prod (crispro-test--clinicalbert, min_containers=1 warm), in-process torch fallback for local dev.",
-      "hai_def_gate_state": null,
-      "wired_files": [
-        "src/oncology_arbiter/api/app.py",
-        "src/oncology_arbiter/api/schemas.py",
-        "src/oncology_arbiter/nlp/clinicalbert_train.py",
-        "src/oncology_arbiter/nlp/corpus_synth.py",
-        "src/oncology_arbiter/nlp/clinicalbert_modal_client.py",
-        "src/oncology_arbiter/nlp/clinicalbert_local_client.py",
-        "deploy/modal/clinicalbert_app.py",
-        "render.yaml",
-        "docs/model_cards/report_parser_clinicalbert_v1.md"
-      ],
-      "evidence": [
-        "tests/regression/test_clinicalbert_f1_floor.py",
-        "tests/regression/test_clinicalbert_modal_wire.py",
-        "/mnt/shared-workspace/shared/clinicalbert_runs/AGGREGATE.json",
-        "/mnt/shared-workspace/shared/apex_case/local_v0.4.1_response.json"
-      ]
-    },
-    {
       "id": "L3-screening-arbiter",
       "layer": "L3",
-      "role": "L2-regularised logistic arbiter mapping BI-RADS-like features \u2192 p_positive \u2192 risk_bucket for screening triage.",
+      "role": "L2-regularised logistic arbiter mapping BI-RADS-like features to p_positive and a risk bucket for screening triage (illustrative template coefficients, n_training=0). Unobserved booleans encode to the reference level 0.0 and contribute exactly zero log-odds; the prior 0.5 midpoint injected +1.15 log-odds and inflated p from 0.11920292202211755 to 0.29943286 (+151.20%) from absent data alone.",
       "status": "LIVE",
       "not_wired_reason": null,
       "current_backend": "hand-drafted template coefficients (n_training=0)",
@@ -195,22 +169,24 @@
     {
       "id": "L3-biopsy-arbiter",
       "layer": "L3",
-      "role": "Logistic arbiter for biopsy stage classification.",
-      "status": "LIVE",
-      "not_wired_reason": null,
+      "role": "RETIRED. Hand-drafted template logistic arbiter for the biopsy stage. The biopsy route now returns arbiter_score=None and emits breast_dss_prognosis only when the full explicit seven-feature vector is supplied (no parser imputation).",
+      "status": "RETIRED",
+      "not_wired_reason": "Superseded by breast_dss_arbiter_v3_metabric (n=1375, events=601, OOF AUROC 0.7074686031463495, incremental vs NPI+age delta 0.019632112929677783, p=0.006). The template carried n_training=0 and illustrative coefficients.",
       "current_backend": "hand-drafted template coefficients (n_training=0)",
       "hai_def_gate_state": null,
       "wired_files": [
         "src/oncology_arbiter/arbiter/models/biopsy_arbiter_template_v0.json"
       ],
+      "superseded_by": "breast_dss_v3",
       "evidence": [
-        "tests/unit/test_api_arbiter_wiring.py::test_biopsy_endpoint_returns_arbiter_score"
+        "tests/unit/test_breast_dss_api.py",
+        "tests/unit/test_api_arbiter_wiring.py::test_biopsy_endpoint_emits_no_template_arbiter_score"
       ]
     },
     {
       "id": "L3-therapy-arbiter",
       "layer": "L3",
-      "role": "Logistic arbiter for therapy recommendation.",
+      "role": "Deterministic logistic TRIAGE over explicit patient inputs only (illustrative coefficients, n_training=0). node_status_positive = lymph_nodes_pos > 0; zero nodes contributes exactly 0.0; missing nodes suppress scoring entirely and are never encoded as 0.5. Not treatment-benefit evidence and not a therapy recommendation -- recommendations come only from the authenticated SL bridge.",
       "status": "LIVE",
       "not_wired_reason": null,
       "current_backend": "hand-drafted template coefficients (n_training=0)",
@@ -219,7 +195,8 @@
         "src/oncology_arbiter/arbiter/models/therapy_arbiter_template_v0.json"
       ],
       "evidence": [
-        "tests/unit/test_api_arbiter_wiring.py::test_therapy_endpoint_returns_arbiter_score"
+        "tests/unit/test_api_arbiter_wiring.py::test_therapy_arbiter_scores_only_from_explicit_inputs",
+        "tests/unit/test_api_arbiter_wiring.py::test_therapy_arbiter_suppressed_when_nodes_missing"
       ]
     },
     {
@@ -252,19 +229,14 @@
     {
       "id": "L4a-screening-siglip-proxy",
       "layer": "L4a",
-      "role": "Apache-2.0 ungated general-domain SigLIP used ONLY as a development proxy when HAI-DEF is denied. NEVER labeled as MedSigLIP.",
-      "status": "LIVE",
-      "not_wired_reason": null,
-      "current_backend": "google/siglip-base-patch16-224",
+      "role": "RETIRED. General-domain google/siglip-base-patch16-224 was used as a development proxy on mammograms when HAI-DEF was denied. The screening route is now strict MedSigLIP-448 only: a denied or failing required stage returns pipeline_status='failed_required_stage' with findings=[] and overall_score=None rather than degrading to a non-medical image encoder.",
+      "status": "RETIRED",
+      "not_wired_reason": "Retired by production-integrity policy. A general-domain image encoder is not an acceptable substitute for MedSigLIP-448 on mammography, and its zero-shot scores were never calibrated for malignancy.",
+      "current_backend": null,
       "hai_def_gate_state": null,
-      "wired_files": [
-        "src/oncology_arbiter/models/siglip_baseline.py",
-        "src/oncology_arbiter/api/app.py"
-      ],
+      "wired_files": [],
       "evidence": [
-        "tests/models/test_siglip_baseline.py",
-        "tests/unit/test_screening_medsiglip_wiring.py::test_medsiglip_disabled_proxy_still_works",
-        "/mnt/results/screening_response_medsiglip_gated_with_proxy_fallback.json"
+        "tests/unit/test_screening_production_contract.py"
       ]
     },
     {
