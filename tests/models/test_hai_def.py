@@ -359,12 +359,17 @@ def test_model_state_enum_has_gated_variant() -> None:
     assert ModelState.GATED.value == "gated"
 
 
-def test_model_state_enum_has_proxy_siglip_variant() -> None:
-    """Ungated proxy fallback MUST get a distinct wire value so downstream
-    consumers know NOT to treat it as MedSigLIP output."""
-    from oncology_arbiter.api.schemas import ModelState
-    assert hasattr(ModelState, "PROXY_SIGLIP")
-    assert ModelState.PROXY_SIGLIP.value == "proxy_siglip"
+def test_model_state_enum_cannot_express_the_retired_siglip_proxy() -> None:
+    """The ungated general-domain proxy is retired, so no route may emit it.
+
+    Inverts the original assertion. The wire value stays recorded in
+    RETIRED_MODEL_STATE_VALUES so archived receipts remain readable, but it is
+    not constructible as a ModelState any more.
+    """
+    from oncology_arbiter.api.schemas import RETIRED_MODEL_STATE_VALUES, ModelState
+    assert not hasattr(ModelState, "PROXY_SIGLIP")
+    assert "proxy_siglip" not in {m.value for m in ModelState}
+    assert "proxy_siglip" in RETIRED_MODEL_STATE_VALUES
 
 
 def test_model_state_placeholder_and_loaded_survive() -> None:

@@ -1,0 +1,33 @@
+{
+  "script": "scripts/repair_proxy_surface_removal.py",
+  "applied": 4,
+  "already_applied": 32,
+  "deleted_source_modules": [
+    "src/oncology_arbiter/models/siglip_baseline.py"
+  ],
+  "deleted_test_files": [
+    "tests/unit/test_screening_medsiglip_wiring.py"
+  ],
+  "deleted_test_reason": "pinned model_state==proxy_siglip, ONCOLOGY_ARBITER_ENABLE_SIGLIP_PROXY, and a template arbiter_score the production route no longer emits; 8 of 9 tests were skip-masked by the missing CBIS-DDSM fixture",
+  "retired_model_state_values": [
+    "fused_regex_clinicalbert",
+    "proxy_lung_heuristic",
+    "proxy_monai_heuristic",
+    "proxy_regex_v0",
+    "proxy_rules_lite",
+    "proxy_siglip"
+  ],
+  "replacement_coverage": [
+    "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible",
+    "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend",
+    "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores",
+    "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy"
+  ],
+  "residual_unreachable_modules": [
+    "src/oncology_arbiter/nlp/report_parser_v2.py",
+    "src/oncology_arbiter/models/therapy_rules_lite.py",
+    "src/oncology_arbiter/models/nccn_nsclc_rules.py",
+    "src/oncology_arbiter/lung/pipeline.py"
+  ],
+  "residual_note": "These modules are NOT imported by api/app.py (verified by AST test), so no route can reach them. They are retained as tested research code; the import ban test is what prevents re-wiring."
+}

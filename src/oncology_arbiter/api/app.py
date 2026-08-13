@@ -52,7 +52,6 @@ from .schemas import (
     DynamicTumorBoardResponse,
     ExtendedReceptorField,
     ReportParseBlock,
-    NsclcCTInput,
     NsclcResponse,
     NsclcCandidate,
     NsclcTherapyOption,
@@ -313,7 +312,6 @@ def _score_explicit_therapy_triage(raw: dict[str, Any] | None) -> ArbiterScore |
 import os
 
 _MEDSIGLIP_SINGLETON: Any = None
-_SIGLIP_PROXY_SINGLETON: Any = None
 
 
 def _is_env_true(name: str) -> bool:
@@ -370,15 +368,6 @@ def _get_medsiglip() -> Any:
         from oncology_arbiter.models.medsiglip_modal_client import get_medsiglip_client
         _MEDSIGLIP_SINGLETON = get_medsiglip_client()
     return _MEDSIGLIP_SINGLETON
-
-
-def _get_siglip_proxy() -> Any:
-    """Lazy-construct the SigLIP proxy client."""
-    global _SIGLIP_PROXY_SINGLETON
-    if _SIGLIP_PROXY_SINGLETON is None:
-        from oncology_arbiter.models.siglip_baseline import SiglipBaseline
-        _SIGLIP_PROXY_SINGLETON = SiglipBaseline()
-    return _SIGLIP_PROXY_SINGLETON
 
 
 def _run_medsiglip_on_preprocessed(
@@ -453,25 +442,6 @@ def _run_medsiglip_on_preprocessed(
 
     ms._preprocess_fn = _inject
     return ms.run("(preprocessed)")
-
-
-def _run_siglip_proxy_on_preprocessed(preprocess_result: Any) -> Any:
-    """Run the SigLIP proxy on an already-preprocessed mammogram.
-
-    Same Phase 2 caveat as :func:`_run_medsiglip_on_preprocessed` — the
-    proxy singleton's ``_preprocess_fn`` is mutated for the call. Safe
-    under single-thread async; not safe under a threadpool. Phase 3 fix.
-    """
-    proxy = _get_siglip_proxy()
-
-    class _AlreadyPreprocessed:
-        image = preprocess_result.image
-
-    def _inject(_path: str) -> Any:
-        return _AlreadyPreprocessed()
-
-    proxy._preprocess_fn = _inject
-    return proxy.run("(preprocessed)")
 
 
 def _run_cbis_ddsm_probe_on_bytes(
@@ -1060,6 +1030,9 @@ def create_app() -> FastAPI:
                 "inference_seconds": result.inference_seconds,
                 "input_sha256": input_sha,
                 "score_semantics": "independent_uncalibrated_sigmoid_zero_shot",
+                "probs": [float(p) for p in result.probs],
+                "probs_sum": float(sum(float(p) for p in result.probs)),
+                "probs_are_normalised_distribution": False,
             }
             receipt = {
                 "stage": "medsiglip_screening",
@@ -1361,9 +1334,6 @@ def create_app() -> FastAPI:
             prognostic_model_executed=False,
             prognostic_score=None,
             arbiter_score=triage,
-            rules_sha256=None,
-            rules_model_id=None,
-            branch_id=None,
         )
 
     # ----------------------------------------------------------------------- #

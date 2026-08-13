@@ -1,7 +1,7 @@
 {
   "$schema_version": "1.0.0",
-  "generated_at": "2026-08-13T00:10:39+00:00",
-  "git_sha": "715aca9c8bacc1b2945e733ccdfc1cda240ea251",
+  "generated_at": "2026-08-13T00:29:11+00:00",
+  "git_sha": "759c17f16667b0a51ce5b0e41b62cd8edb46d9d7",
   "project": {
     "name": "oncology-arbiter",
     "one_line_goal": "Open-architecture breast oncology reasoning platform spanning screening \u2192 biopsy \u2192 therapy, with calibrated per-stage arbiters, cited evidence, and honest performance disclosure.",
@@ -29,7 +29,7 @@
       "not_wired_reason": null,
       "evidence": [
         "src/oncology_arbiter/api/app.py",
-        "tests/unit/test_screening_medsiglip_wiring.py",
+        "tests/unit/test_screening_production_contract.py",
         "/mnt/results/screening_response_medsiglip_smoke_final.json"
       ]
     },
@@ -172,7 +172,7 @@
       "role": "RETIRED. Hand-drafted template logistic arbiter for the biopsy stage. The biopsy route now returns arbiter_score=None and emits breast_dss_prognosis only when the full explicit seven-feature vector is supplied (no parser imputation).",
       "status": "RETIRED",
       "not_wired_reason": "Superseded by breast_dss_arbiter_v3_metabric (n=1375, events=601, OOF AUROC 0.7074686031463495, incremental vs NPI+age delta 0.019632112929677783, p=0.006). The template carried n_training=0 and illustrative coefficients.",
-      "current_backend": "hand-drafted template coefficients (n_training=0)",
+      "current_backend": null,
       "hai_def_gate_state": null,
       "wired_files": [
         "src/oncology_arbiter/arbiter/models/biopsy_arbiter_template_v0.json"
@@ -214,7 +214,7 @@
       ],
       "evidence": [
         "tests/unit/test_medsiglip_wiring.py",
-        "tests/unit/test_screening_medsiglip_wiring.py",
+        "tests/unit/test_screening_production_contract.py",
         "/mnt/results/screening_response_medsiglip_smoke_final.json"
       ],
       "live_smoke": {
@@ -319,16 +319,16 @@
     {
       "id": "endpoint-screening-analyze",
       "layer": "API",
-      "role": "POST /v1/screening/analyze \u2014 DICOM in, screening arbiter + MedSigLIP score out.",
+      "role": "POST /v1/screening/analyze \u2014 de-identified DICOM in, MedSigLIP-448 zero-shot agreement scores out. arbiter_score is always None on this route. Scores are independent uncalibrated sigmoid values (they do not sum to 1) and are not diagnostic evidence.",
       "status": "LIVE",
       "not_wired_reason": null,
-      "current_backend": "MedSigLIP-448 (default) or SigLIP proxy (opt-in fallback)",
+      "current_backend": "MedSigLIP-448 via Modal (strict; no proxy fallback exists)",
       "hai_def_gate_state": "allowed",
       "wired_files": [
         "src/oncology_arbiter/api/app.py"
       ],
       "evidence": [
-        "tests/unit/test_screening_medsiglip_wiring.py",
+        "tests/unit/test_screening_production_contract.py",
         "tests/data/test_api_real_dicom.py"
       ]
     },
@@ -429,7 +429,7 @@
         "src/oncology_arbiter/api/app.py"
       ],
       "evidence": [
-        "tests/unit/test_screening_medsiglip_wiring.py"
+        "tests/unit/test_screening_production_contract.py"
       ]
     },
     {
@@ -558,7 +558,7 @@
       ],
       "goal": "Wire the ungated general-domain SigLIP as a development proxy so we can run end-to-end on real DICOM before HAI-DEF is granted.",
       "delivered": [
-        "src/oncology_arbiter/models/siglip_baseline.py \u2014 SigLIP proxy client with mammography honesty warning",
+        "src/oncology_arbiter/models/siglip_baseline.py \u2014 DELETED this pass (proxy client removed, not disabled)",
         "Real zero-shot smoke on Calc-Test_P_00038_LEFT_CC.dcm",
         "21 tests including a real-network CBIS-DDSM smoke"
       ],
@@ -639,6 +639,7 @@
         "Live smoke on Calc-Test_P_00038_LEFT_CC.dcm: overall_score=7.976839697221294e-06 (bit-exact to pre-hibernation)",
         "Live gated smoke: model_state=gated, no silent fallback",
         "Live proxy-fallback smoke: model_state=proxy_siglip with BOTH warnings",
+        "RETIRED LATER: the proxy fallback described in this sprint no longer exists. models/siglip_baseline.py was deleted, ModelState.PROXY_SIGLIP was removed, and tests/unit/test_screening_medsiglip_wiring.py was retired. The lines above are kept as the historical record of what this sprint shipped, not as a description of the current surface.",
         "Full regression 370 passed"
       ],
       "not_delivered": [

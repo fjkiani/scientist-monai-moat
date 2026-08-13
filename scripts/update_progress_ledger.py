@@ -84,7 +84,7 @@ USER_STORIES = [
         "not_wired_reason": None,
         "evidence": [
             "src/oncology_arbiter/api/app.py",
-            "tests/unit/test_screening_medsiglip_wiring.py",
+            "tests/unit/test_screening_production_contract.py",
             "/mnt/results/screening_response_medsiglip_smoke_final.json",
         ],
     },
@@ -262,7 +262,10 @@ SUBSYSTEMS = [
             "0.019632112929677783, p=0.006). The template carried n_training=0 "
             "and illustrative coefficients."
         ),
-        "current_backend": "hand-drafted template coefficients (n_training=0)",
+        # RETIRED entries carry no backend: the biopsy route emits
+        # arbiter_score=None, so naming a backend here would imply the template
+        # still serves traffic (the L4a siglip proxy entry already uses None).
+        "current_backend": None,
         "hai_def_gate_state": None,
         "wired_files": [
             "src/oncology_arbiter/arbiter/models/biopsy_arbiter_template_v0.json",
@@ -312,7 +315,7 @@ SUBSYSTEMS = [
         ],
         "evidence": [
             "tests/unit/test_medsiglip_wiring.py",
-            "tests/unit/test_screening_medsiglip_wiring.py",
+            "tests/unit/test_screening_production_contract.py",
             "/mnt/results/screening_response_medsiglip_smoke_final.json",
         ],
         "live_smoke": {
@@ -454,14 +457,19 @@ SUBSYSTEMS = [
     {
         "id": "endpoint-screening-analyze",
         "layer": "API",
-        "role": "POST /v1/screening/analyze — DICOM in, screening arbiter + MedSigLIP score out.",
+        "role": (
+            "POST /v1/screening/analyze — de-identified DICOM in, MedSigLIP-448 "
+            "zero-shot agreement scores out. arbiter_score is always None on "
+            "this route. Scores are independent uncalibrated sigmoid values "
+            "(they do not sum to 1) and are not diagnostic evidence."
+        ),
         "status": "LIVE",
         "not_wired_reason": None,
-        "current_backend": "MedSigLIP-448 (default) or SigLIP proxy (opt-in fallback)",
+        "current_backend": "MedSigLIP-448 via Modal (strict; no proxy fallback exists)",
         "hai_def_gate_state": "allowed",
         "wired_files": ["src/oncology_arbiter/api/app.py"],
         "evidence": [
-            "tests/unit/test_screening_medsiglip_wiring.py",
+            "tests/unit/test_screening_production_contract.py",
             "tests/data/test_api_real_dicom.py",
         ],
     },
@@ -540,7 +548,7 @@ SUBSYSTEMS = [
         "current_backend": "src/oncology_arbiter/api/schemas.py",
         "hai_def_gate_state": None,
         "wired_files": ["src/oncology_arbiter/api/schemas.py", "src/oncology_arbiter/api/app.py"],
-        "evidence": ["tests/unit/test_screening_medsiglip_wiring.py"],
+        "evidence": ["tests/unit/test_screening_production_contract.py"],
     },
     {
         "id": "response-gate-report-in-provenance",
@@ -654,7 +662,7 @@ SPRINTS = [
         "commits": ["c77370a"],
         "goal": "Wire the ungated general-domain SigLIP as a development proxy so we can run end-to-end on real DICOM before HAI-DEF is granted.",
         "delivered": [
-            "src/oncology_arbiter/models/siglip_baseline.py — SigLIP proxy client with mammography honesty warning",
+            "src/oncology_arbiter/models/siglip_baseline.py — DELETED this pass (proxy client removed, not disabled)",
             "Real zero-shot smoke on Calc-Test_P_00038_LEFT_CC.dcm",
             "21 tests including a real-network CBIS-DDSM smoke",
         ],
@@ -728,6 +736,11 @@ SPRINTS = [
             "Live smoke on Calc-Test_P_00038_LEFT_CC.dcm: overall_score=7.976839697221294e-06 (bit-exact to pre-hibernation)",
             "Live gated smoke: model_state=gated, no silent fallback",
             "Live proxy-fallback smoke: model_state=proxy_siglip with BOTH warnings",
+            "RETIRED LATER: the proxy fallback described in this sprint no longer "
+            "exists. models/siglip_baseline.py was deleted, ModelState.PROXY_SIGLIP "
+            "was removed, and tests/unit/test_screening_medsiglip_wiring.py was "
+            "retired. The lines above are kept as the historical record of what "
+            "this sprint shipped, not as a description of the current surface.",
             "Full regression 370 passed",
         ],
         "not_delivered": [

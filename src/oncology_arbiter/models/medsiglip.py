@@ -2,7 +2,7 @@
 
 This module wires the real Google Health MedSigLIP-448 weights into the
 oncology-arbiter, replacing the general-domain SigLIP proxy in
-:mod:`oncology_arbiter.models.siglip_baseline`. It differs from the proxy
+:mod:`oncology_arbiter.models.siglip_baseline` (now deleted). It differed from that proxy
 in three important ways:
 
 1. **Gated access**. MedSigLIP is distributed under the Health AI Developer
@@ -62,11 +62,10 @@ from oncology_arbiter.models.hai_def import (
     _discover_hf_token,
     check_hai_def_access,
 )
-# NOTE: we import ONE helper from siglip_baseline (the PIL float-array
-# converter is generic image I/O, not a model reference) and the shared
-# label pair, so the honesty test can still assert that we do NOT import
-# the ``SiglipBaseline`` *class* itself.
-from oncology_arbiter.models.siglip_baseline import (
+# Generic image I/O + the neutral prompt pair. These live in image_io.py so
+# this module has no import edge to any proxy backbone; the SigLIP proxy module
+# was deleted when the proxy screening path was retired.
+from oncology_arbiter.models.image_io import (
     DEFAULT_ZERO_SHOT_LABELS,
     _to_pil_from_float01,
 )

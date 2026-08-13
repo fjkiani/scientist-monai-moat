@@ -339,7 +339,7 @@ def resolve_backend_for_task(
 
     If the primary repo is denied, the caller is responsible for deciding
     whether to fall back to the ungated proxy (and, if so, must mark the
-    response as `ModelState.PROXY_SIGLIP` NOT `ModelState.LOADED`).
+    response as `ModelState.GATED` NOT `ModelState.LOADED`; the former `proxy_siglip` substitute state has been retired).
 
     Returns
     -------

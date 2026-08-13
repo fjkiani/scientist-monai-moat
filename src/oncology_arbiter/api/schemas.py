@@ -26,6 +26,20 @@ THERAPY_PROGNOSIS_UNCERTAINTY = (
 # --------------------------------------------------------------------------- #
 # Shared
 
+# Wire values that appear in audit envelopes written before the proxy surface
+# was retired. They are deliberately NOT members of :class:`ModelState`, so no
+# route can emit one; the frozen set exists only so an auditor reading an
+# archived receipt can still resolve the string. Each of these labelled a
+# substitute standing in for a required specialist stage.
+RETIRED_MODEL_STATE_VALUES: frozenset[str] = frozenset({
+    "proxy_siglip",              # google/siglip-base-patch16-224, general-domain
+    "proxy_monai_heuristic",     # mask-gradient heuristic, not a detector
+    "proxy_lung_heuristic",      # HU threshold + connected components
+    "proxy_rules_lite",          # NCCN-lite static rules
+    "proxy_regex_v0",            # regex pathology parser
+    "fused_regex_clinicalbert",  # regex AND ClinicalBERT fusion
+})
+
 
 class ModelState(str, Enum):
     PLACEHOLDER = "placeholder"       # no model wired yet, stub response
@@ -34,25 +48,27 @@ class ModelState(str, Enum):
     UNAVAILABLE = "unavailable"       # model failed to load; error path
     CACHED = "cached"                 # result served from cache
     GATED = "gated"                   # HAI-DEF access denied (401/403)
-    PROXY_SIGLIP = "proxy_siglip"     # ungated general-domain SigLIP fallback (NOT MedSigLIP output)
     LOADED_MEDSIGLIP = "loaded_medsiglip"  # HAI-DEF MedSigLIP-448 inference (medical but off-label for mammography)
     LOADED_BIOPSY_PROBE = "loaded_biopsy_probe"  # L4b MedSigLIP embed + synthetic linear probe (RUO, off-label)
     LOADED_MONAI_DETECTOR = "loaded_monai_detector"  # L4a MONAI detector with trained weights (unreachable until weights ship)
-    PROXY_MONAI_HEURISTIC = "proxy_monai_heuristic"  # L4a MONAI mask-gradient heuristic when weights unavailable
-    PROXY_LUNG_HEURISTIC = "proxy_lung_heuristic"  # NSCLC HU-threshold + CC blobs (LIDC-IDRI) — not a trained detector
     LOADED_LUNA16_RETINANET = "loaded_luna16_retinanet"  # v0.3.0 MONAI Model Zoo lung_nodule_ct_detection@0.6.9 (LUNA16-trained)
-    PROXY_RULES_LITE = "proxy_rules_lite"  # L4c NCCN-lite rules fallback when TxGemma gated
     LOADED_TXGEMMA = "loaded_txgemma"  # L4c HAI-DEF TxGemma inference (never reachable under current token)
     TEMPLATE = "template"             # L3 arbiter JSON templates loaded from disk (n_training=0)
-    PROXY_REGEX_V0 = "proxy_regex_v0" # v0.2.1 pathology-report regex parser (stateless code, always available)
     LOADED_CLINICALBERT_PARSER = "loaded_clinicalbert_parser"  # v0.3.0 Bio_ClinicalBERT fine-tuned on synthetic corpus
-    FUSED_REGEX_CLINICALBERT = "fused_regex_clinicalbert"  # v0.3.0 regex ∧ ClinicalBERT fusion
     PROXY_CO_SCIENTIST = "proxy_co_scientist"  # offline deterministic ranker; never an LLM result
     LOADED_CASE_STORAGE = "loaded_case_storage"
     LOADED_PHIKON = "loaded_phikon"
     LOADED_MEDGEMMA_27B = "loaded_medgemma_27b"
     RETIRED = "retired"
     CONFIGURED_UNVERIFIED = "configured_unverified"  # endpoint configured; successful inference not yet proven
+    # NOTE: the six substitute states (proxy_siglip, proxy_monai_heuristic,
+    # proxy_lung_heuristic, proxy_rules_lite, proxy_regex_v0,
+    # fused_regex_clinicalbert) were removed from this enum. See
+    # RETIRED_MODEL_STATE_VALUES below.
+    # NOTE: the six substitute states (proxy_siglip, proxy_monai_heuristic,
+    # proxy_lung_heuristic, proxy_rules_lite, proxy_regex_v0,
+    # fused_regex_clinicalbert) were removed from this enum. See
+    # RETIRED_MODEL_STATE_VALUES below.
 
     # v0.4.0-alpha additions (PLAN §2A):
     LOADED_LUNA16_REFINED = "loaded_luna16_refined"        # fjkiani-luna16-refine-v1 (LUNA16+LIDC-IDRI fine-tune, target ΔFROC@2 ≥ +5% over 0.6.9)
@@ -338,11 +354,11 @@ class BiopsyRequest(BaseModel):
 class BiopsyReceptorPanel(BaseModel):
     """Standard breast biopsy receptor panel.
 
-    ``parse_state`` (v0.2.1) surfaces per-field provenance to the UI so the
-    clinician can see whether each value came from a confident regex match,
-    an ambiguous mention that needs review, or was never mentioned in the
-    report at all. When the UI submits an override, the state becomes
-    ``user_supplied``.
+    ``parse_state`` surfaces per-field provenance to the UI so the clinician
+    can see whether each value came from a confident ClinicalBERT span, an
+    ambiguous mention that needs review, or was never mentioned in the report
+    at all. When the UI submits an override, the state becomes
+    ``user_supplied``. No regex parser is wired on any route.
     """
     er_positive: bool | None = None
     pr_positive: bool | None = None
@@ -353,15 +369,16 @@ class BiopsyReceptorPanel(BaseModel):
         Literal["matched", "ambiguous", "no_match", "user_supplied"],
     ] | None = Field(
         default=None,
-        description="Per-field provenance from the report parser (proxy_regex_v0). "
-                    "Absent when biopsy analysis did not run a text parser.",
+        description="Per-field provenance from the ClinicalBERT v0.5.2 "
+                    "sliding-window pathology parser. Absent when biopsy "
+                    "analysis did not run a text parser.",
     )
 
 
 class ExtendedReceptorField(BaseModel):
-    """One field parsed by the v0.3.0 fused (regex + ClinicalBERT) parser.
+    """One extended field parsed by the ClinicalBERT v0.5.2 pathology parser.
 
-    Only used for extended fields the v0.2.1 regex parser could not produce:
+    Carries the extended entities beyond the receptor core:
     ki67_pct, tumor_size_mm, T/N/M stage, margin, LVI. The four core fields
     (er/pr/her2/grade) remain on ``BiopsyReceptorPanel`` for
     backwards-compatibility with existing frontends.
@@ -384,9 +401,10 @@ class ReportParseBlock(BaseModel):
     """
     parser_id: str = Field(
         ...,
-        description="e.g. proxy_regex_v0, clinicalbert_v1, clinicalbert_v1+regex_v0",
+        description="Always clinicalbert_v0.5.2_sliding_window; no regex or "
+                    "fused parser is wired on any route.",
     )
-    fusion_mode: Literal["regex", "bert", "fused", "clinicalbert"] = "clinicalbert"
+    fusion_mode: Literal["clinicalbert"] = "clinicalbert"
     per_field_confidence: dict[str, float] = Field(
         default_factory=dict,
         description="Confidence per field (0..1) as reported by the parser.",
@@ -590,24 +608,10 @@ class ArtifactCategory(str, Enum):
 # --------------------------------------------------------------------------- #
 # NSCLC-specific inputs / outputs
 #
-# `NsclcCTInput.series_dir` points at a LIDC-IDRI CT series directory on the
-# server (e.g. `/workspace/lidc_cohort/lidc_idri/LIDC-IDRI-0001/<StudyUID>/CT_<SeriesUID>`).
-# Real pipeline execution is gated behind the `ONCOLOGY_ARBITER_ALLOW_SERIES_DIR=1`
-# env var so untrusted deployments never trust a client-controlled filesystem
-# path. When gated off, the branch falls back to shape-only placeholder.
-
-
-class NsclcCTInput(BaseModel):
-    """Point at a CT series on disk for the real lung heuristic + NCCN rules.
-
-    Only honored when `ONCOLOGY_ARBITER_ALLOW_SERIES_DIR=1` is set on the server;
-    otherwise ignored to avoid client-controlled path traversal in shared
-    deployments.
-    """
-    model_config = ConfigDict(extra="forbid")
-    series_dir: str = Field(..., description="Absolute path to a CT_<SeriesUID> directory")
-    patient_id: str | None = Field(default=None, description="LIDC patient id if known")
-    top_n: int = Field(default=10, ge=1, le=100, description="Max candidate blobs to summarize")
+# NSCLC CT input by client-supplied server path (`NsclcCTInput.series_dir`,
+# gated behind ONCOLOGY_ARBITER_ALLOW_SERIES_DIR) is RETIRED. Production NSCLC
+# consumes a verified case-storage `case_id` only, so the detector runs on an
+# uploaded, hash-receipted series rather than a path the caller chose.
 
 
 class NsclcCandidate(BaseModel):
@@ -713,11 +717,10 @@ class NsclcResponse(BaseModel):
     # Therapy block
     therapy_recommended: list[NsclcTherapyOption] = Field(default_factory=list)
     therapy_not_recommended: list[NsclcTherapyOption] = Field(default_factory=list)
-    # Provenance
-    series_dir: str | None = None
+    # Provenance. n_slices comes from the verified case manifest, not from a
+    # local read; series_dir/read_seconds/heuristic_seconds belonged to the
+    # retired local-CT + HU-heuristic path and were never set on this route.
     n_slices: int | None = None
-    read_seconds: float | None = None
-    heuristic_seconds: float | None = None
     # v0.4.1: fine-tuned Bio_ClinicalBERT report parser (Modal-backed).
     # Present only when CLINICALBERT_BACKEND=modal AND the request
     # carried biopsy_input.report_text. Shape mirrors the Modal
@@ -1442,12 +1445,14 @@ class EloRankResponse(ApiEnvelope):
 
 
 class CoScientistRunRequest(BaseModel):
-    """Input for POST /v1/co_scientist/run.
+    """Input for POST /v1/offline_ranker/run.
 
-    Callers pass whatever stage envelopes they already have (screening,
-    biopsy, therapy), plus the union of URLs their tool-loop actually
-    fetched. Anything the model returns citing an unseen URL will be
-    dropped by REFLECT.
+    The wired endpoint is an OFFLINE DETERMINISTIC RANKER: a fixed Elo-style
+    ordering over caller-supplied stage envelopes. It performs no LLM call and
+    its output must never be labelled as model-generated reasoning. Callers
+    pass whatever stage envelopes they already have (screening, biopsy,
+    therapy) plus the union of URLs their own tool loop fetched; any citation
+    to an unseen URL is dropped.
     """
 
     screening: dict[str, Any] | None = Field(
