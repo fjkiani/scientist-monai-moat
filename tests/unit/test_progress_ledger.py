@@ -194,23 +194,70 @@ def test_medsiglip_live_smoke_number_matches_envelope(ledger: dict) -> None:
 
 
 # --------------------------------------------------------------------------- #
-# 5. `--dry-run` on an unchanged repo prints "no changes" — PLAN.md §5 rule 6.
+# 5. The committed ledger must already be current — checked WITHOUT writing.
+#
+# The previous version of this section regenerated the ledger in place and then
+# dry-ran against its own fresh output. That is vacuous: the comparison target
+# was overwritten a moment earlier, so no amount of drift in the committed file
+# could ever fail the assertion. It also dirtied a tracked file (and the
+# user-facing mirror) on every single test run, which destroys `git status` as
+# an integrity signal. `--check` is read-only and returns 1 on drift.
 # --------------------------------------------------------------------------- #
 
 
-def test_dry_run_reports_no_changes_when_repo_is_current() -> None:
-    # Regenerate to ensure the on-disk copy is current, then dry-run.
-    subprocess.check_call(
-        [sys.executable, str(SCRIPT_PATH)],
-        cwd=str(REPO_ROOT),
-        stdout=subprocess.DEVNULL,
-    )
-    out = subprocess.check_output(
-        [sys.executable, str(SCRIPT_PATH), "--dry-run"],
+def _run_script(*extra: str) -> subprocess.CompletedProcess:
+    return subprocess.run(
+        [sys.executable, str(SCRIPT_PATH), *extra],
         cwd=str(REPO_ROOT),
         text=True,
+        capture_output=True,
     )
-    assert "no changes" in out, f"expected 'no changes' in dry-run output; got:\n{out}"
+
+
+def test_committed_ledger_is_current_without_regenerating_it(script_module) -> None:
+    before = LEDGER_PATH.read_bytes()
+    mirror = Path(script_module.MIRROR_PATH)
+    before_mirror = mirror.read_bytes() if mirror.exists() else None
+
+    proc = _run_script("--check")
+
+    assert proc.returncode == 0, (
+        "committed docs/PROGRESS_LEDGER.json is stale — regenerate it with "
+        f"scripts/update_progress_ledger.py\n{proc.stdout}{proc.stderr}"
+    )
+    assert "no changes" in proc.stdout, proc.stdout
+    assert LEDGER_PATH.read_bytes() == before, (
+        "--check wrote to the tracked ledger; it must be read-only"
+    )
+    if before_mirror is not None:
+        assert mirror.read_bytes() == before_mirror, (
+            "--check wrote to the user-facing mirror; it must be read-only"
+        )
+
+
+def test_check_fails_on_a_stale_ledger(tmp_path: Path) -> None:
+    """Mutation proof that the check above can actually fail."""
+    stale = json.loads(LEDGER_PATH.read_text())
+    assert len(stale["milestones"]) > 1, "need >1 milestone to build a stale copy"
+    stale["milestones"] = stale["milestones"][:-1]
+    stale_path = tmp_path / "PROGRESS_LEDGER.json"
+    stale_path.write_text(json.dumps(stale, indent=2) + "\n")
+
+    proc = _run_script("--check", "--ledger-path", str(stale_path))
+
+    assert proc.returncode == 1, (
+        f"--check passed a deliberately stale ledger:\n{proc.stdout}{proc.stderr}"
+    )
+    assert "changed:" in proc.stdout, proc.stdout
+
+
+def test_ledger_path_override_cannot_be_used_to_write(tmp_path: Path) -> None:
+    target = tmp_path / "would_be_written.json"
+
+    proc = _run_script("--ledger-path", str(target))
+
+    assert proc.returncode == 2, proc.stdout + proc.stderr
+    assert not target.exists(), "--ledger-path must never be a write target"
 
 
 # --------------------------------------------------------------------------- #

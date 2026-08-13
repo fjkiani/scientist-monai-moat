@@ -1130,7 +1130,35 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Validate + print diff summary without writing.",
     )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help=(
+            "Validate + compare the on-disk ledger against freshly generated "
+            "content, ignoring generated_at/git_sha. Exit 1 on drift. Never "
+            "writes, so CI and the test suite cannot dirty a tracked file."
+        ),
+    )
+    parser.add_argument(
+        "--ledger-path",
+        default=None,
+        help=(
+            "Compare against this ledger instead of the tracked one. Read-only: "
+            "only accepted together with --check or --dry-run, so it can never "
+            "be used to write somewhere unexpected."
+        ),
+    )
     args = parser.parse_args(argv)
+
+    ledger_path = LEDGER_PATH
+    if args.ledger_path is not None:
+        if not (args.check or args.dry_run):
+            print(
+                "--ledger-path is read-only: pass it with --check or --dry-run",
+                file=sys.stderr,
+            )
+            return 2
+        ledger_path = Path(args.ledger_path)
 
     ledger = build_ledger()
 
@@ -1149,12 +1177,25 @@ def main(argv: list[str] | None = None) -> int:
 
     new_text = _serialise(ledger)
 
-    old_text = LEDGER_PATH.read_text() if LEDGER_PATH.exists() else ""
+    old_text = ledger_path.read_text() if ledger_path.exists() else ""
     summary = _diff_summary(old_text, new_text)
+    is_current = _strip_volatile_fields(old_text) == _strip_volatile_fields(new_text)
+
+    if args.check:
+        print(f"check: {summary}")
+        print(f"    ledger: {ledger_path}")
+        if is_current:
+            return 0
+        print(
+            f"{ledger_path} is stale relative to scripts/update_progress_ledger.py "
+            "— regenerate it and commit the result",
+            file=sys.stderr,
+        )
+        return 1
 
     if args.dry_run:
         print(f"dry-run: {summary}")
-        print(f"    ledger: {LEDGER_PATH}")
+        print(f"    ledger: {ledger_path}")
         print(f"    mirror: {MIRROR_PATH}")
         return 0
 
