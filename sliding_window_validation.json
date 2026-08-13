@@ -1,0 +1,377 @@
+{
+  "status": "IN_CORPUS_REPRODUCIBILITY_NOT_HELD_OUT_VALIDATION",
+  "checkpoint": "/mnt/shared-workspace/shared/clinicalbert_runs_v51/seed_123",
+  "n_reports": 296,
+  "total_words": 237141,
+  "window_tokens": 192,
+  "overlap_tokens": 32,
+  "aggregation": "mean_logits_per_word_across_overlapping_windows",
+  "n_windows_total": 2084,
+  "n_windows_min": 1,
+  "n_windows_max": 28,
+  "overall": {
+    "micro": {
+      "tp": 521,
+      "fp": 1511,
+      "fn": 1558,
+      "precision": 0.2563976377952756,
+      "recall": 0.2506012506012506,
+      "f1": 0.2534663099002676
+    },
+    "per_entity": {
+      "ALK": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "EGFR": {
+        "tp": 0,
+        "fp": 68,
+        "fn": 12,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "ER_VALUE": {
+        "tp": 16,
+        "fp": 20,
+        "fn": 4,
+        "precision": 0.4444444444444444,
+        "recall": 0.8,
+        "f1": 0.5714285714285714
+      },
+      "GRADE": {
+        "tp": 15,
+        "fp": 136,
+        "fn": 303,
+        "precision": 0.09933774834437085,
+        "recall": 0.04716981132075472,
+        "f1": 0.06396588486140725
+      },
+      "HER2_AMP": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 3,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "HER2_VALUE": {
+        "tp": 0,
+        "fp": 41,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "KI67_PCT": {
+        "tp": 0,
+        "fp": 5,
+        "fn": 3,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "KRAS": {
+        "tp": 0,
+        "fp": 26,
+        "fn": 3,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "LVI": {
+        "tp": 12,
+        "fp": 48,
+        "fn": 183,
+        "precision": 0.2,
+        "recall": 0.06153846153846154,
+        "f1": 0.09411764705882354
+      },
+      "MARGIN": {
+        "tp": 66,
+        "fp": 342,
+        "fn": 249,
+        "precision": 0.16176470588235295,
+        "recall": 0.20952380952380953,
+        "f1": 0.18257261410788383
+      },
+      "M_STAGE": {
+        "tp": 118,
+        "fp": 22,
+        "fn": 19,
+        "precision": 0.8428571428571429,
+        "recall": 0.8613138686131386,
+        "f1": 0.8519855595667869
+      },
+      "N_STAGE": {
+        "tp": 78,
+        "fp": 123,
+        "fn": 72,
+        "precision": 0.3880597014925373,
+        "recall": 0.52,
+        "f1": 0.4444444444444445
+      },
+      "PR_VALUE": {
+        "tp": 15,
+        "fp": 10,
+        "fn": 1,
+        "precision": 0.6,
+        "recall": 0.9375,
+        "f1": 0.7317073170731707
+      },
+      "TUMOR_SIZE_MM": {
+        "tp": 2,
+        "fp": 538,
+        "fn": 672,
+        "precision": 0.003703703703703704,
+        "recall": 0.002967359050445104,
+        "f1": 0.0032948929159802307
+      },
+      "T_STAGE": {
+        "tp": 199,
+        "fp": 132,
+        "fn": 31,
+        "precision": 0.6012084592145015,
+        "recall": 0.8652173913043478,
+        "f1": 0.7094474153297683
+      }
+    }
+  },
+  "by_cancer": {
+    "breast_crc": {
+      "micro": {
+        "tp": 250,
+        "fp": 510,
+        "fn": 63,
+        "precision": 0.32894736842105265,
+        "recall": 0.7987220447284346,
+        "f1": 0.46598322460391434
+      },
+      "per_entity": {
+        "ER_VALUE": {
+          "tp": 16,
+          "fp": 14,
+          "fn": 1,
+          "precision": 0.5333333333333333,
+          "recall": 0.9411764705882353,
+          "f1": 0.6808510638297872
+        },
+        "GRADE": {
+          "tp": 14,
+          "fp": 34,
+          "fn": 20,
+          "precision": 0.2916666666666667,
+          "recall": 0.4117647058823529,
+          "f1": 0.34146341463414637
+        },
+        "HER2_VALUE": {
+          "tp": 0,
+          "fp": 37,
+          "fn": 1,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "LVI": {
+          "tp": 12,
+          "fp": 2,
+          "fn": 0,
+          "precision": 0.8571428571428571,
+          "recall": 1.0,
+          "f1": 0.923076923076923
+        },
+        "MARGIN": {
+          "tp": 65,
+          "fp": 112,
+          "fn": 1,
+          "precision": 0.3672316384180791,
+          "recall": 0.9848484848484849,
+          "f1": 0.5349794238683128
+        },
+        "M_STAGE": {
+          "tp": 48,
+          "fp": 7,
+          "fn": 1,
+          "precision": 0.8727272727272727,
+          "recall": 0.9795918367346939,
+          "f1": 0.923076923076923
+        },
+        "N_STAGE": {
+          "tp": 18,
+          "fp": 41,
+          "fn": 0,
+          "precision": 0.3050847457627119,
+          "recall": 1.0,
+          "f1": 0.4675324675324675
+        },
+        "PR_VALUE": {
+          "tp": 15,
+          "fp": 8,
+          "fn": 0,
+          "precision": 0.6521739130434783,
+          "recall": 1.0,
+          "f1": 0.7894736842105263
+        },
+        "TUMOR_SIZE_MM": {
+          "tp": 0,
+          "fp": 199,
+          "fn": 39,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "T_STAGE": {
+          "tp": 62,
+          "fp": 56,
+          "fn": 0,
+          "precision": 0.5254237288135594,
+          "recall": 1.0,
+          "f1": 0.688888888888889
+        }
+      }
+    },
+    "nsclc": {
+      "micro": {
+        "tp": 271,
+        "fp": 1001,
+        "fn": 1495,
+        "precision": 0.2130503144654088,
+        "recall": 0.15345413363533408,
+        "f1": 0.1784068466096116
+      },
+      "per_entity": {
+        "ALK": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 2,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "EGFR": {
+          "tp": 0,
+          "fp": 68,
+          "fn": 12,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "ER_VALUE": {
+          "tp": 0,
+          "fp": 6,
+          "fn": 3,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "GRADE": {
+          "tp": 1,
+          "fp": 102,
+          "fn": 283,
+          "precision": 0.009708737864077669,
+          "recall": 0.0035211267605633804,
+          "f1": 0.005167958656330749
+        },
+        "HER2_AMP": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 3,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "HER2_VALUE": {
+          "tp": 0,
+          "fp": 4,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "KI67_PCT": {
+          "tp": 0,
+          "fp": 5,
+          "fn": 3,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "KRAS": {
+          "tp": 0,
+          "fp": 26,
+          "fn": 3,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "LVI": {
+          "tp": 0,
+          "fp": 46,
+          "fn": 183,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "MARGIN": {
+          "tp": 1,
+          "fp": 230,
+          "fn": 248,
+          "precision": 0.004329004329004329,
+          "recall": 0.004016064257028112,
+          "f1": 0.004166666666666666
+        },
+        "M_STAGE": {
+          "tp": 70,
+          "fp": 15,
+          "fn": 18,
+          "precision": 0.8235294117647058,
+          "recall": 0.7954545454545454,
+          "f1": 0.8092485549132947
+        },
+        "N_STAGE": {
+          "tp": 60,
+          "fp": 82,
+          "fn": 72,
+          "precision": 0.4225352112676056,
+          "recall": 0.45454545454545453,
+          "f1": 0.43795620437956206
+        },
+        "PR_VALUE": {
+          "tp": 0,
+          "fp": 2,
+          "fn": 1,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "TUMOR_SIZE_MM": {
+          "tp": 2,
+          "fp": 339,
+          "fn": 633,
+          "precision": 0.005865102639296188,
+          "recall": 0.0031496062992125984,
+          "f1": 0.004098360655737705
+        },
+        "T_STAGE": {
+          "tp": 137,
+          "fp": 76,
+          "fn": 31,
+          "precision": 0.6431924882629108,
+          "recall": 0.8154761904761905,
+          "f1": 0.7191601049868767
+        }
+      }
+    }
+  },
+  "seconds": 850.3385553359985,
+  "comparison_only": {
+    "prior_audit_configuration_f1": 0.25724104074619536,
+    "prior_configuration": "256-token budget, approximately 50% word-window overlap, highest-confidence overlap merge; same 296 reports",
+    "same_estimator": false,
+    "warning": "A numerical difference is expected because the mandated 192/32/mean-logit deployment estimator is not the prior 256/50%-overlap/max-confidence audit estimator."
+  }
+}

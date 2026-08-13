@@ -39,6 +39,7 @@ Env vars at deploy time (optional)
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -49,6 +50,9 @@ from typing import Any, Dict, List
 import modal
 
 APP_VERSION = "clinicalbert-modal-v0.5.2-sliding-window"
+WINDOW_TOKENS_CONTRACT = 192
+OVERLAP_TOKENS_CONTRACT = 32
+WINDOW_AGGREGATION_CONTRACT = "mean_logits_per_word_across_overlapping_windows"
 
 _MODAL_MODE = (os.environ.get("CLINICALBERT_MODAL_MODE") or "staging").lower()
 _MIN_CONTAINERS = 1 if _MODAL_MODE == "prod" else 0
@@ -248,7 +252,12 @@ class ClinicalBertModal:
         self.model = AutoModelForTokenClassification.from_pretrained(model_path)
         self.model.eval()
 
+        model_artifact_path = Path(model_path) / "model.safetensors"
         metrics_path = Path(model_path) / "metrics.json"
+        if not model_artifact_path.exists() or not metrics_path.exists():
+            raise RuntimeError("model.safetensors and metrics.json are required for provenance")
+        self.model_sha256 = hashlib.sha256(model_artifact_path.read_bytes()).hexdigest()
+        self.metrics_sha256 = hashlib.sha256(metrics_path.read_bytes()).hexdigest()
         if metrics_path.exists():
             metrics = json.loads(metrics_path.read_text())
             self.metrics = metrics
@@ -304,6 +313,11 @@ class ClinicalBertModal:
             "device": self.device,
             "load_seconds": self.load_seconds,
             "warmed_at": self.warmed_at,
+            "model_sha256": self.model_sha256,
+            "metrics_sha256": self.metrics_sha256,
+            "window_tokens": WINDOW_TOKENS_CONTRACT,
+            "overlap_tokens": OVERLAP_TOKENS_CONTRACT,
+            "window_aggregation": WINDOW_AGGREGATION_CONTRACT,
             # v0.5.1 additions
             "real_text_micro_f1_breast_crc": self.per_cancer_micro_f1.get("breast_crc"),
             "real_text_micro_f1_nsclc": self.per_cancer_micro_f1.get("nsclc"),
@@ -350,6 +364,8 @@ class ClinicalBertModal:
             "training_seed": self.training_seed,
             "test_micro_f1": self.test_micro_f1,
             "app_version": APP_VERSION,
+            "model_sha256": self.model_sha256,
+            "metrics_sha256": self.metrics_sha256,
             "disclaimer": (
                 "Research Use Only. Not FDA-cleared. Not CE-marked. "
                 "Not intended for clinical use."

@@ -121,3 +121,78 @@ Rollback rule: **If v0.5.1 breast/CRC F1 drops >5 relative points vs v0.5.0 (0.0
 - v0.5.0 baseline docs: this repo, prior model card v1
 - Snorkel weak supervision: Ratner et al., VLDB 2018
 - ClinicalBERT base model: Alsentzer et al., ClinicalBERT (2019)
+
+## Measured performance on real clinical pathology text (v0.5.2 sliding-window)
+
+The SYNTHETIC-v0.3.0 corpus is **withdrawn** and is not the basis of any number
+below. This evaluation runs the deployed v0.5.2 sliding-window inference path
+over **296 real de-identified pathology reports** (237,141 words,
+2,084 windows at 192 padded tokens with
+32-token overlap, aggregation `mean_logits_per_word_across_overlapping_windows`).
+
+| metric | value |
+| --- | --- |
+| micro precision | **0.2563976378** |
+| micro recall | **0.2506012506** |
+| micro F1 | **0.2534663099** |
+| TP / FP / FN | 521 / 1511 / 1558 |
+| reports / windows | 296 / 2084 |
+| windows per report (min–max) | 1–28 |
+
+### What this number is NOT
+
+The evaluation receipt records `status = IN_CORPUS_REPRODUCIBILITY_NOT_HELD_OUT_VALIDATION`. This is decisive and
+must travel with the F1 figure:
+
+- It is **in-corpus reproducibility**, not held-out validation. The reports are
+  drawn from the same corpus whose labels were produced by Snorkel weak
+  supervision, so the reference spans are themselves noisy estimates rather
+  than clean adjudicated gold.
+- Consequently micro-F1 0.2535 is **not** a generalisation estimate and
+  must not be quoted as accuracy on unseen institutional reports. The earlier
+  in-repo figure 0.25724104074619536 was computed under a different window
+  contract and is not comparable; do not mix them.
+- No confidence interval is reported because the receipt does not carry the
+  per-report resampling needed to compute one.
+
+### Per-entity breakdown
+
+| entity | TP | FP | FN | precision | recall | F1 |
+| --- | --- | --- | --- | --- | --- | --- |
+| `M_STAGE` | 118 | 22 | 19 | 0.8429 | 0.8613 | 0.8520 |
+| `PR_VALUE` | 15 | 10 | 1 | 0.6000 | 0.9375 | 0.7317 |
+| `T_STAGE` | 199 | 132 | 31 | 0.6012 | 0.8652 | 0.7094 |
+| `ER_VALUE` | 16 | 20 | 4 | 0.4444 | 0.8000 | 0.5714 |
+| `N_STAGE` | 78 | 123 | 72 | 0.3881 | 0.5200 | 0.4444 |
+| `MARGIN` | 66 | 342 | 249 | 0.1618 | 0.2095 | 0.1826 |
+| `LVI` | 12 | 48 | 183 | 0.2000 | 0.0615 | 0.0941 |
+| `GRADE` | 15 | 136 | 303 | 0.0993 | 0.0472 | 0.0640 |
+| `TUMOR_SIZE_MM` | 2 | 538 | 672 | 0.0037 | 0.0030 | 0.0033 |
+| `ALK` | 0 | 0 | 2 | 0.0000 | 0.0000 | 0.0000 |
+| `EGFR` | 0 | 68 | 12 | 0.0000 | 0.0000 | 0.0000 |
+| `HER2_AMP` | 0 | 0 | 3 | 0.0000 | 0.0000 | 0.0000 |
+| `HER2_VALUE` | 0 | 41 | 1 | 0.0000 | 0.0000 | 0.0000 |
+| `KI67_PCT` | 0 | 5 | 3 | 0.0000 | 0.0000 | 0.0000 |
+| `KRAS` | 0 | 26 | 3 | 0.0000 | 0.0000 | 0.0000 |
+
+### Entities that are unusable in production
+
+6 of 15 entities score **F1 = 0.0000**: `ALK`, `EGFR`, `HER2_AMP`, `HER2_VALUE`, `KI67_PCT`, `KRAS`.
+`EGFR` produces 68 false positives and zero true positives, and
+`HER2_VALUE` produces 41 false positives and zero true
+positives — these emit confident spans that are always wrong. `GRADE` recovers
+15 of 318 references
+(recall 0.0472). No downstream stage may consume these
+entities as evidence, and no molecular marker may be routed from this parser
+into therapy triage or the synthetic-lethality bridge.
+
+## Disclaimer
+
+RESEARCH USE ONLY — not validated for clinical decision-making. Not
+FDA-cleared. Not CE-marked. Investigational / IRB context only. See
+`oncology_arbiter.RUO_DISCLAIMER`.
+
+AUROC is not reported for this model: it is a token-level span extractor
+evaluated by precision/recall/F1, not a binary discriminator, so an AUROC
+figure would be meaningless here. The F1 caveat above is the operative
+performance caveat.

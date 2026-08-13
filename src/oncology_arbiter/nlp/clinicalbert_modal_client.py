@@ -29,6 +29,12 @@ from urllib import request as urllib_request
 logger = logging.getLogger(__name__)
 
 DEFAULT_TIMEOUT_SECONDS: int = int(os.environ.get("CLINICALBERT_MODAL_TIMEOUT", "30"))
+EXPECTED_APP_VERSION = "clinicalbert-modal-v0.5.2-sliding-window"
+EXPECTED_WINDOW_TOKENS = 192
+EXPECTED_OVERLAP_TOKENS = 32
+EXPECTED_WINDOW_AGGREGATION = "mean_logits_per_word_across_overlapping_windows"
+EXPECTED_MODEL_SHA256 = "7f83e9afebd249dbf8dc391bf20cf36e9127b75c698b1495906b3f69c37f1d03"
+EXPECTED_METRICS_SHA256 = "06e2ac8433dfc4dc727150e44542cc5a07fb0b3666403eb9f04828fa65058def"
 
 
 @dataclass(frozen=True)
@@ -68,7 +74,29 @@ class ClinicalBertModalEndpointConfig:
 
 
 class ClinicalBertModalError(RuntimeError):
-    """Raised when a Modal request fails (HTTP error, network, or Modal-returned {'error': ...})."""
+    """Raised for transport, inference, or production-contract failures."""
+
+
+def validate_clinicalbert_contract(response: dict) -> None:
+    expected = {
+        "app_version": EXPECTED_APP_VERSION,
+        "window_tokens": EXPECTED_WINDOW_TOKENS,
+        "overlap_tokens": EXPECTED_OVERLAP_TOKENS,
+        "window_aggregation": EXPECTED_WINDOW_AGGREGATION,
+        "model_sha256": EXPECTED_MODEL_SHA256,
+        "metrics_sha256": EXPECTED_METRICS_SHA256,
+    }
+    mismatches = {
+        key: {"expected": value, "observed": response.get(key)}
+        for key, value in expected.items()
+        if response.get(key) != value
+    }
+    if mismatches:
+        raise ClinicalBertModalError(
+            "clinicalbert_contract_mismatch:" + json.dumps(mismatches, sort_keys=True)
+        )
+    if not isinstance(response.get("n_windows"), int) or response["n_windows"] < 1:
+        raise ClinicalBertModalError("clinicalbert_contract_mismatch:n_windows")
 
 
 def _post_json(url: str, payload: dict, *, timeout: int) -> dict:
@@ -168,6 +196,7 @@ class ClinicalBertModalClient:
         d = _post_json(self.endpoints.parse, payload, timeout=self.timeout)
         if isinstance(d, dict) and "error" in d:
             raise ClinicalBertModalError(f"parse: {d['error']}")
+        validate_clinicalbert_contract(d)
         return d
 
 
