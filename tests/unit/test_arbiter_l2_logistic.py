@@ -29,6 +29,12 @@ import json
 import math
 from pathlib import Path
 
+from oncology_arbiter.arbiter.logistic import (
+    MISSINGNESS_DECLARED_INDICATOR,
+    MISSINGNESS_REFERENCE_LEVEL,
+    MISSING_BOOL_ENCODING,
+)
+
 import numpy as np
 import pytest
 
@@ -178,17 +184,28 @@ def test_unrecognised_feature_raises() -> None:
         arb.score({"birads": "BI_RADS_4", "not_a_real_feature": 1})
 
 
-def test_bool_unknown_encodes_as_half() -> None:
-    """Match ProgressionArbiter: True→1.0, False→0.0, None→0.5 (unknown)."""
+def test_bool_unknown_contributes_exactly_zero_log_odds() -> None:
+    """An unobserved boolean must not move the logit at all.
+
+    The previous midpoint encoding (None -> 0.5) put an unknown value halfway
+    between True and False in logit space, which manufactured risk out of
+    absent data. Absence is now encoded at the reference level, so its
+    contribution is identically zero and equal to an observed False.
+    """
     arb = screening_arbiter()
     r_true  = arb.score({"birads": "BI_RADS_1", "family_history_first_degree": True})
     r_false = arb.score({"birads": "BI_RADS_1", "family_history_first_degree": False})
     r_unk   = arb.score({"birads": "BI_RADS_1", "family_history_first_degree": None})
     coef = arb.coefficients["family_history_first_degree"]
-    # Unknown should sit exactly halfway between true and false in logit space.
     assert math.isclose(r_true.term_contributions["family_history_first_degree"], coef * 1.0)
     assert math.isclose(r_false.term_contributions["family_history_first_degree"], coef * 0.0)
-    assert math.isclose(r_unk.term_contributions["family_history_first_degree"], coef * 0.5)
+    assert r_unk.term_contributions["family_history_first_degree"] == 0.0
+    # Never the midpoint.
+    assert not math.isclose(r_unk.term_contributions["family_history_first_degree"], coef * 0.5)
+    # Missingness is reported out of band instead of folded into the score.
+    assert "family_history_first_degree" in r_unk.missing_features
+    assert r_unk.missingness_policy == MISSINGNESS_REFERENCE_LEVEL
+    assert r_unk.logit == r_false.logit
 
 
 def test_continuous_feature_normalised_by_divisor() -> None:
@@ -387,7 +404,7 @@ def test_sklearn_round_trip_matches_our_scorer(tmp_path: Path) -> None:
         "feature_encodings": {
             "x1": "x1 / 1.0",
             "x2": "x2 / 1.0",
-            "x3_bool": {"true": 1.0, "false": 0.0, "unknown": 0.5},
+            "x3_bool": {"true": 1.0, "false": 0.0, "unknown": None},
         },
         "recommendations": {"LOW": "L", "MID": "M", "HIGH": "H"},
         "performance": {

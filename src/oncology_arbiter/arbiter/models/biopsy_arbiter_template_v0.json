@@ -34,22 +34,49 @@
     },
     "size_norm": "size_mm / 30.0",
     "growth_delta_norm": "delta_mm_per_6mo / 5.0",
-    "prior_biopsy_benign_at_site": {"true": 1.0, "false": 0.0, "unknown": 0.5},
-    "family_history_first_degree": {"true": 1.0, "false": 0.0, "unknown": 0.5},
-    "brca_status_known_pathogenic": {"true": 1.0, "false": 0.0, "unknown": 0.5},
-    "us_correlate_hypoechoic_mass": {"true": 1.0, "false": 0.0, "unknown": 0.5},
-    "us_correlate_simple_cyst": {"true": 1.0, "false": 0.0, "unknown": 0.5}
+    "prior_biopsy_benign_at_site": {
+      "true": 1.0,
+      "false": 0.0,
+      "unknown": null
+    },
+    "family_history_first_degree": {
+      "true": 1.0,
+      "false": 0.0,
+      "unknown": null
+    },
+    "brca_status_known_pathogenic": {
+      "true": 1.0,
+      "false": 0.0,
+      "unknown": null
+    },
+    "us_correlate_hypoechoic_mass": {
+      "true": 1.0,
+      "false": 0.0,
+      "unknown": null
+    },
+    "us_correlate_simple_cyst": {
+      "true": 1.0,
+      "false": 0.0,
+      "unknown": null
+    }
   },
   "recommendations": {
-    "LOW":  "SHORT_INTERVAL_6MO_FOLLOWUP",
-    "MID":  "ADDITIONAL_IMAGING_WORKUP",
+    "LOW": "SHORT_INTERVAL_6MO_FOLLOWUP",
+    "MID": "ADDITIONAL_IMAGING_WORKUP",
     "HIGH": "PROCEED_TO_CORE_NEEDLE_BIOPSY"
   },
   "performance": {
     "cv_auroc_mean": null,
     "cv_auroc_std": null,
     "brier_score": null,
-    "AUROC_CAVEAT": "TEMPLATE — coefficients illustrative, not fit on real biopsy outcomes. n_training=0. Do not report AUROC; there is nothing to average over. Prospective AUROC will be established only after Phase 3 EMBED / CBIS-DDSM biopsy-outcome training runs land with an independent test split. This artefact locks the schema and honesty gates; it does not encode a validated model."
+    "AUROC_CAVEAT": "TEMPLATE \u2014 coefficients illustrative, not fit on real biopsy outcomes. n_training=0. Do not report AUROC; there is nothing to average over. Prospective AUROC will be established only after Phase 3 EMBED / CBIS-DDSM biopsy-outcome training runs land with an independent test split. This artefact locks the schema and honesty gates; it does not encode a validated model."
   },
-  "disclaimer": "RESEARCH USE ONLY — not validated for clinical decision-making. Not FDA-cleared. Not CE-marked."
+  "disclaimer": "RESEARCH USE ONLY \u2014 not validated for clinical decision-making. Not FDA-cleared. Not CE-marked.",
+  "missingness": {
+    "policy": "reference_level_zero_logit_contribution",
+    "unobserved_boolean_encoding": 0.0,
+    "rationale": "The midpoint 0.5 injected -0.300000 log-odds on this artefact purely from absent data. Encoding at the reference level is the unique constant that leaves an all-unknown panel at the intercept-only base rate 0.18242552.",
+    "fitted_missingness_indicator_available": false,
+    "indicator_coefficient_convention": "<feature>__missing in coefficients (absent here: n_training=0)"
+  }
 }

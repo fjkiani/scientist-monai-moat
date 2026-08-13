@@ -60,6 +60,53 @@ _LOGIT_CLIP = 30.0
 # ``tests/unit/test_arbiter_l2_logistic.py``.
 SUM_OF_TERMS_TOL = 1e-9
 
+# ── Missingness handling ───────────────────────────────────────────────
+#
+# A previous revision encoded an unsupplied boolean as the midpoint 0.5.
+# That is not a neutral choice: for a linear logit the midpoint injects
+# ``0.5 * sum(coef)`` of unearned log-odds. On the shipped screening
+# template (coefficients +0.6 prior_biopsy_history, +0.5
+# family_history_first_degree, +1.2 brca_status_known_pathogenic) an
+# all-unknown history therefore added exactly +1.15 to the logit and moved
+# the intercept-only probability from sigmoid(-2.0) = 0.11920292 to
+# sigmoid(-0.85) = 0.29938558 — a 2.51x inflation produced entirely by
+# absent data. The therapy template was worse at +1.35.
+#
+# Two admissible repairs exist, and they are NOT interchangeable:
+#
+#   REFERENCE_LEVEL      Encode a missing boolean at the reference level 0.0
+#                        so it contributes exactly 0.0 log-odds. This is the
+#                        unique constant encoding under which an all-unknown
+#                        patient scores the artefact's own intercept-only
+#                        base rate, because sigmoid(intercept + 0) ==
+#                        sigmoid(intercept). Encoding the *feature* at a
+#                        prevalence value p instead still injects
+#                        ``p * sum(coef)``; e.g. p = 0.1192 on the screening
+#                        template yields logit -1.72584 -> 0.15111, which
+#                        overshoots the 0.11920292 base rate by +0.0319
+#                        absolute (+26.8% relative). Feature-space mean
+#                        imputation and probability-space base rates are
+#                        different objects, and sigmoid(E[x]) != E[sigmoid(x)]
+#                        by Jensen's inequality.
+#
+#   DECLARED_INDICATOR   Use a dedicated missingness indicator, but ONLY when
+#                        the frozen artefact declares a fitted coefficient
+#                        for it. An indicator coefficient cannot be invented:
+#                        these templates carry n_training = 0, so there is no
+#                        data from which to estimate one.
+#
+# Whichever repair applies, ``score()`` also returns assumption-free bounds
+# obtained by driving every missing boolean to both admissible extremes, so
+# the caller can see how much of the probability is unconstrained by data.
+MISSINGNESS_REFERENCE_LEVEL = "reference_level_zero_logit_contribution"
+MISSINGNESS_DECLARED_INDICATOR = "declared_missingness_indicator"
+
+# Encoding value for an unsupplied boolean. Immutable: 0.5 is prohibited.
+MISSING_BOOL_ENCODING = 0.0
+
+# Suffix used for a declared missingness-indicator coefficient.
+MISSING_INDICATOR_SUFFIX = "__missing"
+
 
 # ── Result dataclass ───────────────────────────────────────────────────
 
@@ -79,6 +126,17 @@ class ArbiterResult:
     term_contributions: Dict[str, float]
     driving_feature: str
     driving_feature_contribution: float
+    # ── missingness accounting (see MISSINGNESS_POLICY) ───────────────
+    # Boolean features the caller did not supply. These contribute exactly
+    # 0.0 to the logit unless the frozen artefact declares a fitted
+    # missingness-indicator coefficient.
+    missing_features: List[str] = field(default_factory=list)
+    missingness_policy: str = ""
+    # Assumption-free (Manski) bounds on p_positive obtained by setting every
+    # missing boolean to its two admissible extremes (False=0.0 / True=1.0).
+    # When nothing is missing, both equal p_positive.
+    p_lower_bound: float = 0.0
+    p_upper_bound: float = 1.0
     disclaimer: str = RUO_DISCLAIMER
     caveat: str = AUROC_CAVEAT
     metadata: Dict[str, Any] = field(default_factory=dict)
@@ -155,6 +213,27 @@ class L2LogisticArbiter:
                 "honesty gate requires every arbiter to declare its AUROC caveat."
             )
 
+        # Missingness invariant: an artefact may not declare a non-zero
+        # encoding for an unobserved boolean. A non-zero "unknown" level
+        # multiplies straight into the logit, so it manufactures risk from the
+        # absence of data. Reject it at load time rather than silently
+        # overriding it, so the artefact and the code cannot disagree.
+        for name, spec in self.feature_encodings.items():
+            if not (isinstance(spec, Mapping) and set(spec.keys()) <= {"true", "false", "unknown"}):
+                continue
+            unknown_level = spec.get("unknown")
+            if unknown_level is None:
+                continue
+            if float(unknown_level) != 0.0:
+                raise ValueError(
+                    f"Frozen model at {model_path} declares feature {name!r} with "
+                    f"unknown={unknown_level!r}. A missing boolean must encode to 0.0 so it "
+                    f"contributes exactly zero log-odds; unknown={unknown_level!r} would inject "
+                    f"{float(unknown_level) * self.coefficients.get(name, 0.0):+.6f} of unearned "
+                    "log-odds. Declare unknown=null (or 0.0), and supply a fitted "
+                    f"'{name}{MISSING_INDICATOR_SUFFIX}' coefficient if missingness is to be modelled."
+                )
+
     # -- feature-value encoding ----------------------------------------
 
     def _encode_one_hot(self, feature: str, value: Optional[str]) -> Dict[str, float]:
@@ -188,14 +267,46 @@ class L2LogisticArbiter:
         return terms
 
     def _encode_bool(self, feature: str, value: Optional[bool]) -> float:
-        """True → 1.0, False → 0.0, None → 0.5 (unknown)."""
+        """Encode a boolean feature. ``True`` → 1.0, ``False`` → 0.0.
+
+        A missing value (``None``) encodes to :data:`MISSING_BOOL_ENCODING`
+        (0.0, the reference level) so that absent data contributes *exactly*
+        zero log-odds. The former midpoint 0.5 is prohibited: it fabricated
+        risk from missingness (see :data:`MISSINGNESS_REFERENCE_LEVEL`).
+
+        Callers that need to know a value was absent must read
+        ``ArbiterResult.missing_features`` — the encoding itself is
+        indistinguishable from an observed ``False`` by construction, which is
+        precisely why the missingness is reported out of band rather than
+        smuggled into the logit.
+        """
         if value is True:
             return 1.0
         if value is False:
             return 0.0
         if value is None:
-            return 0.5
+            return MISSING_BOOL_ENCODING
         raise ValueError(f"Feature {feature!r} expected bool|None, got {value!r}")
+
+    def _bool_features(self) -> List[str]:
+        """Names of every feature declared with a boolean encoding."""
+        out: List[str] = []
+        for name, spec in self.feature_encodings.items():
+            if isinstance(spec, Mapping) and set(spec.keys()) <= {"true", "false", "unknown"}:
+                out.append(name)
+        return out
+
+    def _missing_indicator_coef(self, feature: str) -> Optional[float]:
+        """Return a declared missingness-indicator coefficient, or ``None``.
+
+        We never synthesise this value. If the frozen artefact does not
+        declare ``"<feature>__missing"`` in ``coefficients``, the reference
+        level applies instead.
+        """
+        key = f"{feature}{MISSING_INDICATOR_SUFFIX}"
+        if key in self.coefficients:
+            return float(self.coefficients[key])
+        return None
 
     def _encode_continuous(self, feature: str, value: float) -> float:
         """Divide by the divisor declared in feature_encodings for this feature.
@@ -251,6 +362,8 @@ class L2LogisticArbiter:
                 )
 
         terms: Dict[str, float] = {"intercept": self.intercept}
+        missing_bools: List[str] = []
+        used_declared_indicator = False
 
         for feat_name, spec in self.feature_encodings.items():
             value = features.get(feat_name)
@@ -260,6 +373,14 @@ class L2LogisticArbiter:
             elif isinstance(spec, Mapping) and set(spec.keys()) <= {"true", "false", "unknown"}:
                 coef = self.coefficients.get(feat_name, 0.0)
                 terms[feat_name] = coef * self._encode_bool(feat_name, value)
+                if value is None:
+                    missing_bools.append(feat_name)
+                    # Option (a): a dedicated indicator, used only when the
+                    # artefact declares a fitted coefficient for it.
+                    indicator_coef = self._missing_indicator_coef(feat_name)
+                    if indicator_coef is not None:
+                        terms[f"{feat_name}{MISSING_INDICATOR_SUFFIX}"] = indicator_coef
+                        used_declared_indicator = True
             elif isinstance(spec, (str, Mapping)):
                 # Treat as continuous
                 if value is None:
@@ -277,6 +398,16 @@ class L2LogisticArbiter:
         logit_raw = sum(terms.values())
         logit_clipped = max(-_LOGIT_CLIP, min(_LOGIT_CLIP, logit_raw))
         p = 1.0 / (1.0 + math.exp(-logit_clipped))
+
+        # Assumption-free bounds over the missing booleans. Each missing
+        # feature can only have been True or False, so driving the negative
+        # coefficients to their worst case and the positive ones to theirs
+        # brackets the probability without assuming any prevalence. The
+        # reference-level point estimate always lies inside this interval.
+        delta_down = sum(min(0.0, self.coefficients.get(f, 0.0)) for f in missing_bools)
+        delta_up = sum(max(0.0, self.coefficients.get(f, 0.0)) for f in missing_bools)
+        p_lo = 1.0 / (1.0 + math.exp(-max(-_LOGIT_CLIP, min(_LOGIT_CLIP, logit_raw + delta_down))))
+        p_hi = 1.0 / (1.0 + math.exp(-max(-_LOGIT_CLIP, min(_LOGIT_CLIP, logit_raw + delta_up))))
 
         # Risk bucket
         bucket = "MID"
@@ -307,6 +438,13 @@ class L2LogisticArbiter:
             term_contributions=full_terms,
             driving_feature=driving,
             driving_feature_contribution=round(driving_val, 6),
+            missing_features=sorted(missing_bools),
+            missingness_policy=(
+                MISSINGNESS_DECLARED_INDICATOR if used_declared_indicator
+                else MISSINGNESS_REFERENCE_LEVEL
+            ),
+            p_lower_bound=round(p_lo, 6),
+            p_upper_bound=round(p_hi, 6),
             disclaimer=self.disclaimer,
             caveat=self.performance.get("AUROC_CAVEAT", AUROC_CAVEAT),
             metadata={

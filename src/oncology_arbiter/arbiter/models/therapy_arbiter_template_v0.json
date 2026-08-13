@@ -42,25 +42,52 @@
       ],
       "REFERENCE": "UNKNOWN"
     },
-    "er_status_positive": {"true": 1.0, "false": 0.0, "unknown": 0.5},
-    "pr_status_positive": {"true": 1.0, "false": 0.0, "unknown": 0.5},
-    "her2_status_positive": {"true": 1.0, "false": 0.0, "unknown": 0.5},
-    "node_status_positive": {"true": 1.0, "false": 0.0, "unknown": 0.5},
-    "brca_status_known_pathogenic": {"true": 1.0, "false": 0.0, "unknown": 0.5},
+    "er_status_positive": {
+      "true": 1.0,
+      "false": 0.0,
+      "unknown": null
+    },
+    "pr_status_positive": {
+      "true": 1.0,
+      "false": 0.0,
+      "unknown": null
+    },
+    "her2_status_positive": {
+      "true": 1.0,
+      "false": 0.0,
+      "unknown": null
+    },
+    "node_status_positive": {
+      "true": 1.0,
+      "false": 0.0,
+      "unknown": null
+    },
+    "brca_status_known_pathogenic": {
+      "true": 1.0,
+      "false": 0.0,
+      "unknown": null
+    },
     "ki67_norm": "ki67_pct / 100.0",
     "tumor_size_norm": "size_mm / 50.0",
     "age_at_diagnosis_norm": "age_years / 100.0"
   },
   "recommendations": {
-    "LOW":  "SURGERY_FIRST",
-    "MID":  "MULTIDISCIPLINARY_REVIEW",
+    "LOW": "SURGERY_FIRST",
+    "MID": "MULTIDISCIPLINARY_REVIEW",
     "HIGH": "ESCALATE_TO_NEOADJUVANT_CHEMOTHERAPY"
   },
   "performance": {
     "cv_auroc_mean": null,
     "cv_auroc_std": null,
     "brier_score": null,
-    "AUROC_CAVEAT": "TEMPLATE — coefficients illustrative, not fit on real therapy-selection outcomes. n_training=0. Do not report AUROC; there is nothing to average over. Prospective AUROC will be established only after Phase 3 training runs with tumour-registry outcomes and an independent test split. This artefact locks the schema and honesty gates; it does not encode a validated model."
+    "AUROC_CAVEAT": "TEMPLATE \u2014 coefficients illustrative, not fit on real therapy-selection outcomes. n_training=0. Do not report AUROC; there is nothing to average over. Prospective AUROC will be established only after Phase 3 training runs with tumour-registry outcomes and an independent test split. This artefact locks the schema and honesty gates; it does not encode a validated model."
   },
-  "disclaimer": "RESEARCH USE ONLY — not validated for clinical decision-making. Not FDA-cleared. Not CE-marked."
+  "disclaimer": "RESEARCH USE ONLY \u2014 not validated for clinical decision-making. Not FDA-cleared. Not CE-marked.",
+  "missingness": {
+    "policy": "reference_level_zero_logit_contribution",
+    "unobserved_boolean_encoding": 0.0,
+    "rationale": "The midpoint 0.5 injected +1.350000 log-odds on this artefact purely from absent data. Encoding at the reference level is the unique constant that leaves an all-unknown panel at the intercept-only base rate 0.14185106.",
+    "fitted_missingness_indicator_available": false,
+    "indicator_coefficient_convention": "<feature>__missing in coefficients (absent here: n_training=0)"
+  }
 }
