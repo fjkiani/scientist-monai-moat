@@ -498,3 +498,176 @@ def test_full_case_source_contains_no_local_ct_or_nccn_substitution() -> None:
         "LungNoduleDetector",
     }
     assert not (prohibited & (names | attributes))
+
+
+# --------------------------------------------------------------------------- #
+# Retirement: the L2 template arbiter scored from free text / inferred inputs.
+#
+# Before this retirement, /v1/screening/analyze and /v1/biopsy/analyze both
+# emitted an `arbiter_score` block sourced from an L2 logistic template whose
+# feature dict was either empty or filled from a regex parse of free text. The
+# templates carry n_training = 0, so with an empty feature dict the returned
+# p_positive was nothing but sigma(intercept) -- a constant dressed as a
+# patient-specific probability. The deleted test
+# `test_medsiglip_score_present_alongside_arbiter_block` pinned exactly that
+# behaviour ("the screening arbiter is a template with n_training=0 and empty
+# features so its p_positive falls back to the intercept").
+#
+# The replacement invariant is that the single surviving arbiter call site is
+# reachable only from an explicit, caller-supplied, complete feature vector,
+# and is gated by Manski before release.
+# --------------------------------------------------------------------------- #
+
+
+def _app_tree() -> ast.Module:
+    app_path = Path(importlib.import_module("oncology_arbiter.api.app").__file__)
+    return ast.parse(app_path.read_text(encoding="utf-8"))
+
+
+def _function_named(tree: ast.Module, name: str) -> ast.FunctionDef | ast.AsyncFunctionDef:
+    return next(
+        node for node in ast.walk(tree)
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == name
+    )
+
+
+def test_only_arbiter_call_site_requires_the_complete_explicit_vector() -> None:
+    """There is exactly one `_score_arbiter` call, and free text cannot reach it."""
+    tree = _app_tree()
+
+    # Map every function node to its enclosing function so a call site can be
+    # attributed. ast.walk() loses parentage, so build the link explicitly.
+    parent: dict[ast.AST, ast.AST] = {}
+    for node in ast.walk(tree):
+        for child in ast.iter_child_nodes(node):
+            parent[child] = node
+
+    call_sites: list[str] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        func = node.func
+        if isinstance(func, ast.Name) and func.id == "_score_arbiter":
+            enclosing: ast.AST | None = node
+            while enclosing is not None and not isinstance(
+                enclosing, (ast.FunctionDef, ast.AsyncFunctionDef)
+            ):
+                enclosing = parent.get(enclosing)
+            call_sites.append(
+                enclosing.name if enclosing is not None else "<module>"
+            )
+
+    assert call_sites == ["_score_explicit_therapy_triage"], call_sites
+
+    # ... and that one call site validates against the explicit wire schema and
+    # keys off the declared required-field set rather than a parsed report.
+    triage = _function_named(tree, "_score_explicit_therapy_triage")
+    names = {n.id for n in ast.walk(triage) if isinstance(n, ast.Name)}
+    attributes = {n.attr for n in ast.walk(triage) if isinstance(n, ast.Attribute)}
+    assert "_TRIAGE_REQUIRED_FIELDS" in names
+    assert "TherapyTriageFeatures" in names
+    assert "model_validate" in attributes
+    # No free-text-derived symbol may appear inside the only arbiter call site.
+    free_text_symbols = {
+        "report_text", "report_parse", "parse_report", "parse_biopsy_report",
+        "_clinicalbert_biopsy_parse", "receptor_panel", "fuse_report_parse",
+    }
+    assert not (free_text_symbols & (names | attributes))
+
+
+def test_screening_emits_no_template_arbiter_block() -> None:
+    """`/v1/screening/analyze` hard-codes arbiter_score=None; no template escapes."""
+    tree = _app_tree()
+    screening = _function_named(tree, "screening_analyze")
+
+    assigned: list[ast.expr] = [
+        kw.value for node in ast.walk(screening) if isinstance(node, ast.Call)
+        for kw in node.keywords if kw.arg == "arbiter_score"
+    ]
+    assert assigned, "screening_analyze no longer sets arbiter_score at all"
+    for value in assigned:
+        assert isinstance(value, ast.Constant) and value.value is None, ast.dump(value)
+
+    names = {n.id for n in ast.walk(screening) if isinstance(n, ast.Name)}
+    assert "_score_arbiter" not in names
+    assert "load_arbiter" not in names
+
+
+def test_biopsy_endpoint_emits_no_template_arbiter_score() -> None:
+    """Both the failing and the succeeding biopsy paths return arbiter_score=None."""
+    client = TestClient(create_app())
+
+    # (a) free-text path: ClinicalBERT is not configured in unit context, so the
+    #     required stage fails. The old behaviour attached a template arbiter
+    #     score anyway; the new behaviour attaches nothing.
+    free_text = client.post(
+        "/v1/biopsy/analyze",
+        json={"report_text": "Invasive ductal carcinoma, grade 2. ER positive."},
+    )
+    assert free_text.status_code == 200, free_text.text
+    free_text_body = free_text.json()
+    assert free_text_body["pipeline_status"] == "failed_required_stage"
+    assert free_text_body["arbiter_score"] is None
+
+    # (b) structured path: even when the DSS prognosis succeeds on a complete
+    #     explicit vector, no L2 template arbiter rides along with it.
+    structured = client.post("/v1/biopsy/analyze", json={"dss_features": _dss_features()})
+    assert structured.status_code == 200, structured.text
+    structured_body = structured.json()
+    assert structured_body["dss_prognosis"] is not None
+    assert structured_body["arbiter_score"] is None
+
+    for body in (free_text_body, structured_body):
+        assert "template" not in {
+            receipt.get("model_state") for receipt in body["stage_receipts"]
+        }
+        assert not [
+            receipt for receipt in body["stage_receipts"]
+            if str(receipt.get("model_name") or "").endswith("_arbiter_template_v0")
+        ]
+
+
+def test_case_full_emits_no_template_arbiters_from_free_text() -> None:
+    """A free-text case yields no template arbiter anywhere in the envelope."""
+    response = TestClient(create_app()).post(
+        "/v1/case/full?cancer=breast",
+        json={
+            "biopsy_input": {
+                "report_text": "Invasive ductal carcinoma, grade 2. ER positive, HER2 negative."
+            },
+            "run_co_scientist": False,
+        },
+    )
+    assert response.status_code == 200, response.text
+    body = response.json()
+
+    # Walk the whole envelope: no nested block may carry a template arbiter.
+    def _walk(node: object) -> list[tuple[str, object]]:
+        found: list[tuple[str, object]] = []
+        if isinstance(node, dict):
+            for key, value in node.items():
+                found.append((key, value))
+                found.extend(_walk(value))
+        elif isinstance(node, list):
+            for item in node:
+                found.extend(_walk(item))
+        return found
+
+    pairs = _walk(body)
+    template_states = [
+        (key, value) for key, value in pairs
+        if key == "model_state" and value == "template"
+    ]
+    assert template_states == [], template_states
+    template_models = [
+        (key, value) for key, value in pairs
+        if key == "model_name" and str(value or "").endswith("_arbiter_template_v0")
+    ]
+    assert template_models == [], template_models
+
+    # The therapy stage is the only arbiter surface, and free text does not
+    # supply the explicit triage vector, so it must stay unscored.
+    therapy = body.get("therapy")
+    if therapy is not None:
+        assert therapy.get("arbiter_score") is None
+        assert therapy.get("therapy_triage") is None

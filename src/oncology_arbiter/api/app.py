@@ -350,17 +350,20 @@ def _score_explicit_therapy_triage(
 
 
 # --------------------------------------------------------------------------- #
-# MedSigLIP / SigLIP proxy singletons + runners
+# MedSigLIP singleton + runner
 #
-# Precedence rules (Phase 2 wiring, 2026-07-02):
-#   1. If ONCOLOGY_ARBITER_ENABLE_MEDSIGLIP=1, try MedSigLIP first.
-#      - Preflight HAI-DEF gate → on ALLOWED, run and return the honest
+# Precedence rules (current, post proxy-surface removal):
+#   1. If ONCOLOGY_ARBITER_ENABLE_MEDSIGLIP=1, run MedSigLIP.
+#      - Preflight HAI-DEF gate -> on ALLOWED, run and return the honest
 #        MedSigLipResult carrying ModelState.LOADED_MEDSIGLIP.
-#      - On GatedAccessError → NEVER silently fall back; the endpoint
-#        decides based on ONCOLOGY_ARBITER_ENABLE_SIGLIP_PROXY.
-#   2. If ONCOLOGY_ARBITER_ENABLE_SIGLIP_PROXY=1 (opt-in, NOT default),
-#      run the proxy and return a warned proxy_siglip response.
-#   3. Otherwise, return the placeholder envelope (overall_score=None).
+#      - On GatedAccessError -> the stage fails. There is no second choice.
+#   2. Otherwise, return the placeholder envelope (overall_score=None).
+#
+# There is no step 3. The open-domain SigLIP substitute, its opt-in switch and
+# its wire state were deleted (not disabled): the backend module is gone, the
+# enum member is gone, and the string survives only in
+# schemas.RETIRED_MODEL_STATE_VALUES so archived receipts stay readable. A
+# gated MedSigLIP is a failed required stage, never a warned success.
 
 
 import os
@@ -1277,6 +1280,16 @@ def create_app() -> FastAPI:
             ))
 
         pipeline_status = _pipeline_status(receipts)
+        # PLACEHOLDER means "no model wired yet, stub response". It is the wrong
+        # label for a route that required a specialist, called it, and got a
+        # failure: the caller reading `placeholder` would conclude nothing had
+        # been attempted. /v1/therapy/reason already reports UNAVAILABLE in the
+        # identical situation; make the two routes agree. Only a request where
+        # every stage was *skipped* (nothing was asked for) stays PLACEHOLDER.
+        if model_state == ModelState.PLACEHOLDER and any(
+            r["status"] == "failed_required" for r in receipts
+        ):
+            model_state = ModelState.UNAVAILABLE
         log_event(
             request_id, "/v1/biopsy/analyze", model_state=model_state.value,
             patient_id_hash=req.patient_id_hash,

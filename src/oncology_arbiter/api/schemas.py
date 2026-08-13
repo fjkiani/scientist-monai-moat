@@ -64,11 +64,7 @@ class ModelState(str, Enum):
     # NOTE: the six substitute states (proxy_siglip, proxy_monai_heuristic,
     # proxy_lung_heuristic, proxy_rules_lite, proxy_regex_v0,
     # fused_regex_clinicalbert) were removed from this enum. See
-    # RETIRED_MODEL_STATE_VALUES below.
-    # NOTE: the six substitute states (proxy_siglip, proxy_monai_heuristic,
-    # proxy_lung_heuristic, proxy_rules_lite, proxy_regex_v0,
-    # fused_regex_clinicalbert) were removed from this enum. See
-    # RETIRED_MODEL_STATE_VALUES below.
+    # RETIRED_MODEL_STATE_VALUES, defined above this class.
 
     # v0.4.0-alpha additions (PLAN §2A):
     LOADED_LUNA16_REFINED = "loaded_luna16_refined"        # fjkiani-luna16-refine-v1 (LUNA16+LIDC-IDRI fine-tune, target ΔFROC@2 ≥ +5% over 0.6.9)
@@ -287,8 +283,11 @@ class ApiEnvelope(BaseModel):
         default_factory=list,
         description=(
             "Non-fatal honesty warnings for this response — e.g. "
-            "`medsiglip_gated:<level>:<reason>`, out-of-distribution warnings, "
-            "or proxy_siglip fallback notes. Callers MUST surface these."
+            "`medsiglip_gated:<level>:<reason>` or out-of-distribution "
+            "warnings. Callers MUST surface these. A warning never "
+            "accompanies a substituted result: the substitute surface was "
+            "retired, so a gated or failed specialist yields a failed "
+            "required stage, not a warned fallback."
         ),
     )
 

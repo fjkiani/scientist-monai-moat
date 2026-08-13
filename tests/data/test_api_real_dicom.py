@@ -68,27 +68,30 @@ def test_health_lists_all_endpoints(client):
     for path in ["POST /v1/screening/analyze", "POST /v1/biopsy/analyze",
                  "POST /v1/therapy/reason", "POST /v1/case/full"]:
         assert path in body["endpoints"], f"missing {path}"
-    # v0.2.2: models_loaded is env-driven at request time. Every slot must
-    # report a value from a small allow-list; the specific state depends on
-    # what the current test env has toggled on.
-    allowed_states = {
-        "monai_screening": {
-            "placeholder", "loaded_medsiglip", "proxy_siglip",
-            "proxy_monai_heuristic",
-        },
-        "medsiglip_biopsy": {"placeholder", "loaded_biopsy_probe"},
-        "biopsy_report_parser": {"proxy_regex_v0"},  # stateless code, always on
-        "txgemma_therapy": {"placeholder", "loaded_txgemma", "proxy_rules_lite"},
-        "co_scientist": {"placeholder", "proxy_co_scientist"},
-        "l3_arbiter": {"template"},                  # templates always loaded
-        "nsclc_pipeline": {"placeholder", "proxy_lung_heuristic"},
-    }
-    assert set(body["models_loaded"].keys()) == set(allowed_states.keys())
-    for m, state in body["models_loaded"].items():
-        assert state in allowed_states[m], (
-            f"{m} reports unexpected state {state!r}; "
-            f"allowed: {sorted(allowed_states[m])}"
+
+    # MIGRATED. The old assertion froze a seven-slot map whose allow-lists
+    # admitted proxy_siglip / proxy_monai_heuristic / proxy_rules_lite /
+    # proxy_regex_v0 / proxy_lung_heuristic as legitimate reported states. Those
+    # six wire values are retired, so an allow-list containing them can no
+    # longer be satisfied honestly, and the slot map itself has grown as real
+    # specialists were wired.
+    #
+    # The invariant that survives is the one that matters: whatever slots
+    # /health reports, none of them may report a retired substitute, and the
+    # reported strings must all be constructible ModelState values.
+    from oncology_arbiter.api.schemas import RETIRED_MODEL_STATE_VALUES, ModelState
+
+    loaded = body["models_loaded"]
+    assert loaded, "/health reported no model slots at all"
+    constructible = {m.value for m in ModelState}
+    for slot, state in loaded.items():
+        assert state not in RETIRED_MODEL_STATE_VALUES, (
+            f"/health reports slot {slot!r} as retired substitute {state!r}"
         )
+        assert state in constructible, (
+            f"/health reports slot {slot!r} as {state!r}, which is not a ModelState"
+        )
+    assert not (set(loaded.values()) & RETIRED_MODEL_STATE_VALUES)
 
 
 # --------------------------------------------------------------------------- #
@@ -109,14 +112,23 @@ def test_screening_rejects_both_url_and_bytes(client):
     assert r.status_code == 400
 
 
-def test_screening_url_not_yet_wired(client):
+def test_screening_url_is_refused_not_deferred(client):
+    """MIGRATED from test_screening_url_not_yet_wired.
+
+    The old test asserted 501 "not yet wired" -- a promise that the capability
+    was coming. Direct URL ingestion is refused outright (400) because pulling
+    an arbitrary remote DICOM is an unbounded-input path, not a missing feature.
+    The important half of the assertion is that no substitute runs.
+    """
     r = client.post(
         "/v1/screening/analyze",
         json={"dicom_url": "https://example.com/x.dcm"},
     )
-    # Placeholder responds 501 with an honest "not yet wired" message.
-    assert r.status_code == 501
-    assert "not yet wired" in r.text or "Phase 2" in r.text
+    assert r.status_code == 400, r.text
+    assert "not yet wired" not in r.text
+    body = r.json()
+    assert "overall_score" not in body
+    assert "medsiglip" not in body
 
 
 @pytest.mark.parametrize("filename,expected_lat,expected_view,needs_hint", [
@@ -242,14 +254,13 @@ def test_biopsy_requires_input(client):
     assert r.status_code == 400
 
 
-def test_biopsy_placeholder_returns_shape(client):
-    """v0.2.1 contract: placeholder path still runs the report parser.
+def test_biopsy_free_text_yields_no_regex_parse(client):
+    """MIGRATED from test_biopsy_placeholder_returns_shape.
 
-    The parser (proxy_regex_v0) deliberately does NOT match bare "ER+" / "PR+"
-    tokens — they're too ambiguous for a proxy to safely coerce to a bool.
-    Grade 2 and HER2 equivocal ARE extracted; equivocal is flagged
-    ``ambiguous`` in parse_state so the UI can force the pathologist to
-    confirm before therapy is called.
+    The old test asserted the regex proxy extracted grade 2 and HER2 equivocal
+    from free text and reported model_state "placeholder". Both halves are
+    retired: proxy_regex_v0 is gone, and a report the required parser cannot
+    reach is a failed required stage, not a placeholder with values in it.
     """
     r = client.post(
         "/v1/biopsy/analyze",
@@ -259,30 +270,34 @@ def test_biopsy_placeholder_returns_shape(client):
     assert r.status_code == 200
     body = r.json()
     assert body["disclaimer"] == RUO_DISCLAIMER
-    assert body["provenance"]["model_state"] == "placeholder"
+    assert body["provenance"]["model_state"] != "placeholder"
     assert body["subtype_prediction"] is None
-    # Grade IS extracted now (was None pre-v0.2.1)
-    assert body["grade"] == 2
     assert body["confidence"] is None
-    panel = body["receptor_panel"]
-    # Bare "+" is not matched — ER/PR stay None with no_match state.
-    assert panel["er_positive"] is None
-    assert panel["pr_positive"] is None
-    # HER2 equivocal IS extracted, flagged ambiguous.
-    assert panel["her2_status"] == "equivocal"
-    assert panel["ki67_percent"] is None
-    assert panel["parse_state"] == {
-        "er": "no_match",
-        "pr": "no_match",
-        "her2": "ambiguous",
-        "grade": "matched",
-    }
+    assert body["pipeline_status"] == "failed_required_stage"
+    assert body["report_parse"] is None
+    # Nothing may be extracted from the free text by any residual parser.
+    assert body["grade"] is None
+    panel = body.get("receptor_panel")
+    if panel is not None:
+        assert panel["er_positive"] is None
+        assert panel["pr_positive"] is None
+        assert panel["her2_status"] is None
+        assert panel["ki67_percent"] is None
+    # And no L2 template arbiter rides along with the failure.
+    assert body["arbiter_score"] is None
 
 
 # --------------------------------------------------------------------------- #
-# /v1/therapy/reason — placeholder
+# /v1/therapy/reason
 
-def test_therapy_placeholder_returns_empty_options(client):
+def test_therapy_without_bridge_is_unavailable_not_placeholder(client):
+    """MIGRATED from test_therapy_placeholder_returns_empty_options.
+
+    "placeholder" said "no model wired yet". The SL bridge IS the wired model;
+    when it cannot run, the honest state is "unavailable" -- a failed required
+    stage -- not a placeholder that happens to return an empty list. The empty
+    recommendation lists still matter: no NCCN-lite static array may fill them.
+    """
     r = client.post(
         "/v1/therapy/reason",
         json={"patient_context": {"age": 55, "menopausal_status": "post"}},
@@ -290,9 +305,12 @@ def test_therapy_placeholder_returns_empty_options(client):
     assert r.status_code == 200
     body = r.json()
     assert body["disclaimer"] == RUO_DISCLAIMER
-    assert body["provenance"]["model_state"] == "placeholder"
+    assert body["provenance"]["model_state"] == "unavailable"
     assert body["recommended_options"] == []
     assert body["not_recommended"] == []
+    assert body["therapy_bridge"] is None
+    assert body["prognostic_model_executed"] is False
+    assert body["prognostic_score"] is None
 
 
 # --------------------------------------------------------------------------- #
