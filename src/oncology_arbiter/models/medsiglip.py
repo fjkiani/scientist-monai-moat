@@ -131,6 +131,11 @@ class MedSigLipResult:
     input_resolution: int = MEDSIGLIP_INPUT_RES
     logits_shape: tuple[int, ...] = ()
     warnings: list[str] = field(default_factory=list)
+    app_version: str | None = None
+    inference_seconds: float | None = None
+    prompts: list[str] = field(default_factory=list)
+    embedding_dim: int | None = None
+    embedding_sha256: str | None = None
     # HAI-DEF preflight record — the GateReport that justified this run.
     # Endpoint code copies this onto the response envelope for audit.
     gate_report: GateReport | None = None

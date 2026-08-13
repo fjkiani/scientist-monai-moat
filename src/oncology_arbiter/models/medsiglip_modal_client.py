@@ -17,8 +17,10 @@ loading, GPU work, and DICOM preprocessing all live on the Modal side.
 from __future__ import annotations
 
 import base64
+import hashlib
 import json
 import logging
+import math
 import os
 import time
 from dataclasses import dataclass
@@ -42,6 +44,8 @@ logger = logging.getLogger(__name__)
 # Server-side embed_batch caps at 32; keep a client-side margin for HTTP body size.
 DEFAULT_BATCH_CHUNK: int = 16
 DEFAULT_TIMEOUT_SECONDS: int = int(os.environ.get("MEDSIGLIP_MODAL_TIMEOUT", "300"))
+EXPECTED_APP_VERSION = "medsiglip-modal-v0.4.0-alpha"
+EXPECTED_EMBEDDING_DIM = 1152
 
 
 @dataclass(frozen=True)
@@ -225,11 +229,28 @@ class MedSigLipModalClient:
             return gr
 
         dim = int(info.get("embedding_dim", 0) or 0)
+        app_version = str(info.get("app_version", ""))
+        if dim != EXPECTED_EMBEDDING_DIM or app_version != EXPECTED_APP_VERSION:
+            gr = GateReport(
+                repo_id=MEDSIGLIP_REPO,
+                access_level=AccessLevel.UNKNOWN,
+                status_code=200,
+                reason=(
+                    "medsiglip_contract_mismatch:"
+                    f"embedding_dim={dim},app_version={app_version!r}"
+                ),
+                has_token=True,
+            )
+            self._gate_report = gr
+            return gr
         gr = GateReport(
             repo_id=MEDSIGLIP_REPO,
             access_level=AccessLevel.ALLOWED,
             status_code=200,
-            reason=f"modal-remote model_repo={model_repo} dim={dim}",
+            reason=(
+                f"modal-remote model_repo={model_repo} dim={dim} "
+                f"app_version={app_version}"
+            ),
             has_token=True,
         )
         self._gate_report = gr
@@ -326,7 +347,37 @@ class MedSigLipModalClient:
         probs = resp.get("probs")
         if not isinstance(probs, list) or len(probs) != len(labels_list):
             raise RuntimeError(f"malformed zero_shot response: {resp!r}")
+        if resp.get("prompts") != labels_list:
+            raise RuntimeError("medsiglip_contract_mismatch:prompts")
+        if resp.get("app_version") != EXPECTED_APP_VERSION:
+            raise RuntimeError("medsiglip_contract_mismatch:app_version")
+        seconds = resp.get("seconds")
+        if not isinstance(seconds, (int, float)) or float(seconds) < 0:
+            raise RuntimeError("medsiglip_contract_mismatch:seconds")
+
+        embed_resp = _post_json(
+            self.endpoints.embed,
+            self._payload_for_path(dicom_path),
+            timeout=self.timeout,
+        )
+        embedding = embed_resp.get("embedding")
+        if (
+            not isinstance(embedding, list)
+            or embed_resp.get("dim") != EXPECTED_EMBEDDING_DIM
+            or len(embedding) != EXPECTED_EMBEDDING_DIM
+            or embed_resp.get("app_version") != EXPECTED_APP_VERSION
+        ):
+            raise RuntimeError("medsiglip_contract_mismatch:embedding")
+        embedding_values = [float(value) for value in embedding]
+        if not all(math.isfinite(value) for value in embedding_values):
+            raise RuntimeError("medsiglip_contract_mismatch:non_finite_embedding")
+        embedding_sha256 = hashlib.sha256(
+            json.dumps(embedding_values, separators=(",", ":")).encode("utf-8")
+        ).hexdigest()
+
         probs_f = [float(x) for x in probs]
+        if not all(math.isfinite(value) for value in probs_f) or not all(0.0 <= value <= 1.0 for value in probs_f):
+            raise RuntimeError("medsiglip_contract_mismatch:probabilities")
         top_idx = max(range(len(probs_f)), key=lambda i: probs_f[i])
         return MedSigLipResult(
             source_path=str(dicom_path),
@@ -339,6 +390,11 @@ class MedSigLipModalClient:
             input_resolution=MEDSIGLIP_INPUT_RES,
             logits_shape=(1, len(labels_list)),
             warnings=[MEDSIGLIP_MAMMOGRAPHY_WARNING],
+            app_version=EXPECTED_APP_VERSION,
+            inference_seconds=float(seconds) + float(embed_resp.get("seconds", 0.0)),
+            prompts=labels_list,
+            embedding_dim=EXPECTED_EMBEDDING_DIM,
+            embedding_sha256=embedding_sha256,
             gate_report=gate,
         )
 

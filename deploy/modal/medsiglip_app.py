@@ -6,7 +6,9 @@ Endpoints
 - `GET  /info`       → warm the model, return metadata (dim, device, resolution)
 - `POST /embed`      → single DICOM (raw octet-stream) → 1152-dim vision embedding
 - `POST /embed_batch`→ JSON `{dicoms_b64: [...]}` → list of embeddings
-- `POST /zero_shot`  → JSON `{dicom_b64, prompts: [...]}` → SigLIP softmax scores
+- `POST /zero_shot`  → JSON `{dicom_b64|pixels_b64, prompts: [...]}` → per-prompt
+  independent SigLIP *sigmoid* scores. These are NOT a softmax and do NOT sum
+  to 1; each is an uncalibrated image-text agreement score in [0, 1].
 
 Design notes
 ------------
@@ -76,7 +78,11 @@ HEALTH_IMAGE = modal.Image.debian_slim(python_version="3.11").pip_install(
 @app.function(image=HEALTH_IMAGE)
 @modal.fastapi_endpoint(method="GET", label="medsiglip-healthz")
 def healthz() -> Dict[str, str]:
-    return {"status": "ok", "app": "medsiglip-448", "version": "v0.3.0"}
+    # Report APP_VERSION verbatim. A hard-coded literal here previously
+    # advertised "v0.3.0" while /embed and /zero_shot echoed
+    # "medsiglip-modal-v0.4.0-alpha", so health checks disagreed with the
+    # provenance recorded on every inference receipt.
+    return {"status": "ok", "app": "medsiglip-448", "version": APP_VERSION}
 
 
 # ── GPU-backed class ─────────────────────────────────────────────────
