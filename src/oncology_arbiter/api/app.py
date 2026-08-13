@@ -230,11 +230,70 @@ def _clinicalbert_biopsy_parse(report_text: str, *, request_id: str) -> tuple[Re
     """Run only pinned production ClinicalBERT; never regex/fuse/fallback."""
     from oncology_arbiter.nlp.clinicalbert_modal_client import ClinicalBertModalClient, ClinicalBertModalError
 
+    from oncology_arbiter.nlp.parser_acceptance_gate import (
+        DEPLOYED_PARSER_METRICS,
+        declared_deployment_info,
+        evaluate_parser_acceptance,
+    )
+
     input_sha = hashlib.sha256(report_text.encode("utf-8")).hexdigest()
     started = time.perf_counter()
+
+    # ---- Directive 3, layer 1: PRE-FLIGHT refusal -----------------------------
+    # Refuse before the wire call, not after. Two reasons this ordering matters:
+    #   (a) a transport error would otherwise pre-empt the gate, so the refusal
+    #       reason would depend on network weather rather than on model fitness;
+    #   (b) an ineligible parser must never receive patient report text at all.
+    preflight = evaluate_parser_acceptance(declared_deployment_info())
+    if not preflight.accepted:
+        return None, BiopsyReceptorPanel(), None, _failed_stage_receipt(
+            "clinicalbert_pathology_parse",
+            True,
+            request_id,
+            preflight.error_code,
+            preflight.detail,
+            service_name="clinicalbert",
+            input_reference=f"sha256:{input_sha}",
+        )
+
     try:
         client = ClinicalBertModalClient()
         response = client.parse(report_text)
+
+        # ---- Directive 3, layer 2: post-parse re-validation ------------------
+        # Defence in depth: the pre-flight trusts an operator-declared version.
+        # This layer trusts only what the deployment actually said on the wire,
+        # so a mis-declared env var cannot open the gate.
+        # The parse call may have succeeded at the transport layer. That is not
+        # evidence of clinical fitness. Refuse HERE -- after the wire call but
+        # strictly before `parsed` is read into any receptor, grade, DSS,
+        # subtype or therapy field -- so no parser-derived value can reach
+        # downstream clinical logic. Measured motivation: the live v0.5.1
+        # deployment returned HER2_VALUE="positive" for a documented HER2 1+
+        # NEGATIVE report and KI67_PCT=67 for a documented 20%.
+        observed_version = response.get("app_version")
+        acceptance = evaluate_parser_acceptance(
+            {
+                "app_version": observed_version,
+                **DEPLOYED_PARSER_METRICS.get(str(observed_version), {}),
+                **{
+                    k: response[k]
+                    for k in ("test_micro_f1", "micro_f1")
+                    if k in response
+                },
+            }
+        )
+        if not acceptance.accepted:
+            return None, BiopsyReceptorPanel(), None, _failed_stage_receipt(
+                "clinicalbert_pathology_parse",
+                True,
+                request_id,
+                acceptance.error_code,
+                acceptance.detail,
+                service_name="clinicalbert",
+                input_reference=f"sha256:{input_sha}",
+            )
+
         parsed = response.get("parsed") or {}
         if not isinstance(parsed, dict):
             raise ClinicalBertModalError("clinicalbert_contract_mismatch:parsed")
@@ -285,7 +344,11 @@ def _clinicalbert_biopsy_parse(report_text: str, *, request_id: str) -> tuple[Re
             "stage": "clinicalbert_pathology_parse", "required": True, "status": "succeeded",
             "request_id": request_id, "service_name": "clinicalbert",
             "endpoint_label": client.endpoints.parse, "app_version": response.get("app_version"),
-            "model_name": response.get("base_model"), "model_version": "v0.5.2-sliding-window",
+            # Report the OBSERVED version, never a hardcoded expectation: a
+            # receipt that asserts v0.5.2 while v0.5.1 served the request is a
+            # falsified provenance record.
+            "model_name": response.get("base_model"),
+            "model_version": response.get("app_version"),
             "artifact_sha256": response.get("model_sha256"), "input_reference": f"sha256:{input_sha}",
             "latency_ms": round((time.perf_counter() - started) * 1000.0, 3),
             "warnings": [str(response.get("disclaimer") or "")], "error": None,

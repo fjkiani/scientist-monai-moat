@@ -1,0 +1,435 @@
+{
+  "directive": "5_medsiglip_population_validation",
+  "generated_utc": "2026-08-13T07:44:29Z",
+  "cohort": {
+    "archive": "CBIS-DDSM_full_1024.zip",
+    "archive_sha256_16": "eaabbf98ddd0228c_first4MiB",
+    "split_logic": "OFFICIAL CBIS-DDSM TCIA train/test division as packaged. The TCIA release splits on PATIENT, so train and test share no patient. The probe is fit on train only and never sees test.",
+    "patient_ids_recoverable": false,
+    "view_CC_vs_MLO_recoverable": false,
+    "mass_vs_calcification_recoverable": false,
+    "unobtainable_strata_reason": "filenames are SOP Instance UIDs; the CBIS-DDSM lesion metadata CSVs are not present in this session, so view and lesion-type stratification cannot be computed without fabricating a join. Reported as unobtainable.",
+    "n_test_images": 641,
+    "n_test_cancer": 260,
+    "n_train_images": 2445,
+    "n_train_cancer": 1098
+  },
+  "endpoints": {
+    "embed_batch": "https://crispro--medsiglip-embed-batch.modal.run",
+    "zero_shot": "https://crispro--medsiglip-zero-shot.modal.run"
+  },
+  "prompt_sets": {
+    "clinical_v1": [
+      "a mammogram showing a malignant breast tumor",
+      "a mammogram showing a benign breast finding",
+      "a mammogram showing no abnormality"
+    ],
+    "terse_v2": [
+      "breast cancer",
+      "benign breast lesion",
+      "normal breast tissue"
+    ],
+    "radiology_v3": [
+      "screening mammography with biopsy-proven malignancy",
+      "screening mammography with biopsy-proven benign pathology",
+      "negative screening mammography"
+    ]
+  },
+  "malignant_prompt_index": 0,
+  "errors": [],
+  "embedding_availability": {
+    "test_ok": 641,
+    "test_total": 641,
+    "train_ok": 2445,
+    "train_total": 2445,
+    "dim": 1152,
+    "all_finite_test": true
+  },
+  "embedding_probe": {
+    "estimand": "linear decodability of malignancy from the 1152-dim embedding",
+    "fit_on": "train split only (patient-disjoint from test)",
+    "l2": 10.0,
+    "auroc": {
+      "point": 0.7452352109832425,
+      "ci95_lo": 0.7074605940420489,
+      "ci95_hi": 0.7864099353527445,
+      "n_boot": 2000,
+      "bootstrap_unit": "image",
+      "bootstrap_unit_caveat": "patient_id is not recoverable from SOP-UID filenames in this packaging; image-level bootstrap is ANTI-CONSERVATIVE because images from one patient are correlated. See design_effect_sensitivity."
+    },
+    "auprc": {
+      "point": 0.6795921253490875,
+      "ci95_lo": 0.6191570785811819,
+      "ci95_hi": 0.7437472969966638,
+      "n_boot": 2000,
+      "bootstrap_unit": "image",
+      "bootstrap_unit_caveat": "patient_id is not recoverable from SOP-UID filenames in this packaging; image-level bootstrap is ANTI-CONSERVATIVE because images from one patient are correlated. See design_effect_sensitivity."
+    },
+    "brier": 0.21603496150225238,
+    "prevalence_test": 0.40561622464898595,
+    "calibration_intercept": -0.2662012860256793,
+    "calibration_slope": 0.41895542699148014,
+    "design_effect_sensitivity_auroc": {
+      "icc_0.25": {
+        "design_effect": 1.175,
+        "ci95_lo": 0.7024456876459335,
+        "ci95_hi": 0.7880247343205515
+      },
+      "icc_0.5": {
+        "design_effect": 1.35,
+        "ci95_lo": 0.6993697883696871,
+        "ci95_hi": 0.7911006335967979
+      },
+      "icc_1.0": {
+        "design_effect": 1.7,
+        "ci95_lo": 0.6937665374070573,
+        "ci95_hi": 0.7967038845594278
+      }
+    },
+    "prespecified_thresholds": {
+      "derivation": "chosen on TRAIN split only, then applied unchanged to test",
+      "youden_J_train": {
+        "threshold": 0.44178922017122124,
+        "tp": 173,
+        "fp": 118,
+        "tn": 263,
+        "fn": 87,
+        "sensitivity": 0.6653846153846154,
+        "specificity": 0.6902887139107612,
+        "ppv": 0.5945017182130584
+      },
+      "sens85_train": {
+        "threshold": 0.473277385225031,
+        "tp": 168,
+        "fp": 107,
+        "tn": 274,
+        "fn": 92,
+        "sensitivity": 0.6461538461538462,
+        "specificity": 0.7191601049868767,
+        "ppv": 0.610909090909091
+      }
+    }
+  },
+  "zero_shot": {
+    "clinical_v1": {
+      "n_scored": 641,
+      "n_failed": 0,
+      "sigmoid_semantics": "SigLIP emits INDEPENDENT sigmoid scores per prompt; they are UNCALIBRATED and are not required to sum to 1.",
+      "score_range": [
+        0.0002876688668038696,
+        0.0020259087905287743
+      ],
+      "auroc": {
+        "point": 0.48577629719362003,
+        "ci95_lo": 0.44079660484686745,
+        "ci95_hi": 0.5335668313709778,
+        "n_boot": 2000,
+        "bootstrap_unit": "image",
+        "bootstrap_unit_caveat": "patient_id is not recoverable from SOP-UID filenames in this packaging; image-level bootstrap is ANTI-CONSERVATIVE because images from one patient are correlated. See design_effect_sensitivity."
+      },
+      "auprc": {
+        "point": 0.4120266214150715,
+        "ci95_lo": 0.3602911561357965,
+        "ci95_hi": 0.4679554748527114,
+        "n_boot": 2000,
+        "bootstrap_unit": "image",
+        "bootstrap_unit_caveat": "patient_id is not recoverable from SOP-UID filenames in this packaging; image-level bootstrap is ANTI-CONSERVATIVE because images from one patient are correlated. See design_effect_sensitivity."
+      },
+      "prevalence_test": 0.40561622464898595,
+      "argmax_is_malignant_rate_in_cancer_cases": 1.0,
+      "sample_raw": [
+        {
+          "image": "test/cancer/1.3.6.1.4.1.9590.100.1.2.100742355113831624803390319643765691480_1-1.png",
+          "label": 1,
+          "probs": [
+            0.0007511380827054381,
+            0.001257100491784513,
+            0.0011402147356420755
+          ]
+        },
+        {
+          "image": "test/cancer/1.3.6.1.4.1.9590.100.1.2.100748083311966269017559056723646926469_1-1.png",
+          "label": 1,
+          "probs": [
+            0.000635721196886152,
+            0.0011756103485822678,
+            0.001009215135127306
+          ]
+        },
+        {
+          "image": "test/cancer/1.3.6.1.4.1.9590.100.1.2.102984702812742722305823922360699156228_1-1.png",
+          "label": 1,
+          "probs": [
+            0.00045799012877978384,
+            0.0007318624411709607,
+            0.0006100539467297494
+          ]
+        },
+        {
+          "image": "test/cancer/1.3.6.1.4.1.9590.100.1.2.103171771112965440422966501473603760525_1-1.png",
+          "label": 1,
+          "probs": [
+            0.000658682722132653,
+            0.0008837655186653137,
+            0.0006815658998675644
+          ]
+        },
+        {
+          "image": "test/cancer/1.3.6.1.4.1.9590.100.1.2.103263415712637900541513993551878074559_1-1.png",
+          "label": 1,
+          "probs": [
+            0.0014735457953065634,
+            0.0014298196183517575,
+            0.0009026964544318616
+          ]
+        }
+      ],
+      "design_effect_sensitivity_auroc": {
+        "icc_0.25": {
+          "design_effect": 1.175,
+          "ci95_lo": 0.43549603257128455,
+          "ci95_hi": 0.5360565618159555
+        },
+        "icc_0.5": {
+          "design_effect": 1.35,
+          "ci95_lo": 0.4318816658408547,
+          "ci95_hi": 0.5396709285463854
+        },
+        "icc_1.0": {
+          "design_effect": 1.7,
+          "ci95_lo": 0.4252975088049025,
+          "ci95_hi": 0.5462550855823375
+        }
+      }
+    },
+    "terse_v2": {
+      "n_scored": 641,
+      "n_failed": 0,
+      "sigmoid_semantics": "SigLIP emits INDEPENDENT sigmoid scores per prompt; they are UNCALIBRATED and are not required to sum to 1.",
+      "score_range": [
+        5.949743353994563e-05,
+        0.0001348639780189842
+      ],
+      "auroc": {
+        "point": 0.5020492630728851,
+        "ci95_lo": 0.45813799114660986,
+        "ci95_hi": 0.5464978861644283,
+        "n_boot": 2000,
+        "bootstrap_unit": "image",
+        "bootstrap_unit_caveat": "patient_id is not recoverable from SOP-UID filenames in this packaging; image-level bootstrap is ANTI-CONSERVATIVE because images from one patient are correlated. See design_effect_sensitivity."
+      },
+      "auprc": {
+        "point": 0.3946870321774566,
+        "ci95_lo": 0.34760243000848084,
+        "ci95_hi": 0.4447831400788301,
+        "n_boot": 2000,
+        "bootstrap_unit": "image",
+        "bootstrap_unit_caveat": "patient_id is not recoverable from SOP-UID filenames in this packaging; image-level bootstrap is ANTI-CONSERVATIVE because images from one patient are correlated. See design_effect_sensitivity."
+      },
+      "prevalence_test": 0.40561622464898595,
+      "argmax_is_malignant_rate_in_cancer_cases": 1.0,
+      "sample_raw": [
+        {
+          "image": "test/cancer/1.3.6.1.4.1.9590.100.1.2.100742355113831624803390319643765691480_1-1.png",
+          "label": 1,
+          "probs": [
+            8.46054608700797e-05,
+            0.00016659700486343354,
+            1.1674283996399026e-05
+          ]
+        },
+        {
+          "image": "test/cancer/1.3.6.1.4.1.9590.100.1.2.100748083311966269017559056723646926469_1-1.png",
+          "label": 1,
+          "probs": [
+            7.650229963473976e-05,
+            0.00013279795530252159,
+            1.0049357115349267e-05
+          ]
+        },
+        {
+          "image": "test/cancer/1.3.6.1.4.1.9590.100.1.2.102984702812742722305823922360699156228_1-1.png",
+          "label": 1,
+          "probs": [
+            9.04836124391295e-05,
+            0.00013625937572214752,
+            1.29727513922262e-05
+          ]
+        },
+        {
+          "image": "test/cancer/1.3.6.1.4.1.9590.100.1.2.103171771112965440422966501473603760525_1-1.png",
+          "label": 1,
+          "probs": [
+            0.0001005053345579654,
+            0.0002447773586027324,
+            2.6763027562992647e-05
+          ]
+        },
+        {
+          "image": "test/cancer/1.3.6.1.4.1.9590.100.1.2.103263415712637900541513993551878074559_1-1.png",
+          "label": 1,
+          "probs": [
+            9.751462494023144e-05,
+            0.00021518647554330528,
+            1.6498364857397974e-05
+          ]
+        }
+      ],
+      "design_effect_sensitivity_auroc": {
+        "icc_0.25": {
+          "design_effect": 1.175,
+          "ci95_lo": 0.4541593411662802,
+          "ci95_hi": 0.54993918497949
+        },
+        "icc_0.5": {
+          "design_effect": 1.35,
+          "ci95_lo": 0.45071680279138815,
+          "ci95_hi": 0.5533817233543821
+        },
+        "icc_1.0": {
+          "design_effect": 1.7,
+          "ci95_lo": 0.4444456590605236,
+          "ci95_hi": 0.5596528670852466
+        }
+      }
+    },
+    "radiology_v3": {
+      "n_scored": 641,
+      "n_failed": 0,
+      "sigmoid_semantics": "SigLIP emits INDEPENDENT sigmoid scores per prompt; they are UNCALIBRATED and are not required to sum to 1.",
+      "score_range": [
+        0.0002509727783035487,
+        0.001483830506913364
+      ],
+      "auroc": {
+        "point": 0.48225317989097516,
+        "ci95_lo": 0.43698958008096056,
+        "ci95_hi": 0.5280904332230562,
+        "n_boot": 2000,
+        "bootstrap_unit": "image",
+        "bootstrap_unit_caveat": "patient_id is not recoverable from SOP-UID filenames in this packaging; image-level bootstrap is ANTI-CONSERVATIVE because images from one patient are correlated. See design_effect_sensitivity."
+      },
+      "auprc": {
+        "point": 0.4149546338405978,
+        "ci95_lo": 0.3614802303400318,
+        "ci95_hi": 0.4730187487888164,
+        "n_boot": 2000,
+        "bootstrap_unit": "image",
+        "bootstrap_unit_caveat": "patient_id is not recoverable from SOP-UID filenames in this packaging; image-level bootstrap is ANTI-CONSERVATIVE because images from one patient are correlated. See design_effect_sensitivity."
+      },
+      "prevalence_test": 0.40561622464898595,
+      "argmax_is_malignant_rate_in_cancer_cases": 1.0,
+      "sample_raw": [
+        {
+          "image": "test/cancer/1.3.6.1.4.1.9590.100.1.2.100742355113831624803390319643765691480_1-1.png",
+          "label": 1,
+          "probs": [
+            0.0007295151008293033,
+            0.0007312552188523114,
+            0.0008858175715431571
+          ]
+        },
+        {
+          "image": "test/cancer/1.3.6.1.4.1.9590.100.1.2.100748083311966269017559056723646926469_1-1.png",
+          "label": 1,
+          "probs": [
+            0.0006144576473161578,
+            0.0007031705463305116,
+            0.0006795701337978244
+          ]
+        },
+        {
+          "image": "test/cancer/1.3.6.1.4.1.9590.100.1.2.102984702812742722305823922360699156228_1-1.png",
+          "label": 1,
+          "probs": [
+            0.00042441621189936996,
+            0.0004570638411678374,
+            0.0005932324565947056
+          ]
+        },
+        {
+          "image": "test/cancer/1.3.6.1.4.1.9590.100.1.2.103171771112965440422966501473603760525_1-1.png",
+          "label": 1,
+          "probs": [
+            0.0004614780773408711,
+            0.0005431320169009268,
+            0.000742785632610321
+          ]
+        },
+        {
+          "image": "test/cancer/1.3.6.1.4.1.9590.100.1.2.103263415712637900541513993551878074559_1-1.png",
+          "label": 1,
+          "probs": [
+            0.0010646898299455643,
+            0.0008682791376486421,
+            0.0008961046696640551
+          ]
+        }
+      ],
+      "design_effect_sensitivity_auroc": {
+        "icc_0.25": {
+          "design_effect": 1.175,
+          "ci95_lo": 0.432877694081262,
+          "ci95_hi": 0.5316286657006883
+        },
+        "icc_0.5": {
+          "design_effect": 1.35,
+          "ci95_lo": 0.42932836683428155,
+          "ci95_hi": 0.5351779929476688
+        },
+        "icc_1.0": {
+          "design_effect": 1.7,
+          "ci95_lo": 0.4228626897989789,
+          "ci95_hi": 0.5416436699829714
+        }
+      }
+    }
+  },
+  "prompt_sensitivity": {
+    "auroc_by_prompt_set": {
+      "clinical_v1": 0.48577629719362003,
+      "terse_v2": 0.5020492630728851,
+      "radiology_v3": 0.48225317989097516
+    },
+    "auroc_spread": 0.01979608318190995
+  },
+  "prompt_order_invariance": {
+    "n_pairs": 60,
+    "max_abs_delta": 1.7462298274040222e-09,
+    "mean_abs_delta": 4.588703935345014e-10,
+    "invariant_at_1e_6": true
+  },
+  "failure_modes": {
+    "corrupted_bytes": {
+      "returned_200": true,
+      "error": null
+    },
+    "degenerate_4x4_black": {
+      "returned_200": true,
+      "error": null,
+      "probs": [
+        6.772750566597097e-06,
+        9.269438123737928e-06,
+        1.2674199751927517e-05
+      ]
+    },
+    "unsupported_modality_pdf": {
+      "returned_200": true,
+      "error": null
+    }
+  },
+  "prespecified_screening_gate": {
+    "gate_declared_before_results": true,
+    "criteria": {
+      "zero_shot_auroc_ci95_lo_must_exceed": 0.75,
+      "sensitivity_at_prespecified_threshold_must_exceed": 0.85
+    },
+    "best_zero_shot_auroc_point": 0.5020492630728851,
+    "best_zero_shot_auroc_ci95_lo": 0.45813799114660986,
+    "zero_shot_gate_passed": false,
+    "embedding_probe_auroc_ci95_lo": 0.7074605940420489,
+    "embedding_probe_gate_passed": false,
+    "verdict_zero_shot_may_gate_screening": false
+  },
+  "elapsed_seconds": 364.98
+}

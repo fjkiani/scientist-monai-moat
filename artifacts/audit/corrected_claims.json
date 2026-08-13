@@ -1,0 +1,43 @@
+{
+  "directive": "1_corrected_claim_language",
+  "generated_utc": "2026-08-13T07:57:21Z",
+  "purpose": "Durable retraction record. Each row is a claim I made, the evidence I actually had, and the corrected statement.",
+  "corrections": [
+    {
+      "claim_id": "C1_therapy_inversion",
+      "withdrawn_text": "that is the trastuzumab decision inverted",
+      "defect": "asserted a downstream CLINICAL consequence from a PARSER observation; no end-to-end trace was ever run",
+      "evidence_actually_held": "one live clinicalbert-parse response returning HER2_VALUE='positive' for a report documenting 'HER2/neu by immunohistochemistry scores 1+ (NEGATIVE)'",
+      "corrected_text": "ClinicalBERT committed two clinically consequential extraction errors on the tested report. Whether either value could reach treatment logic is now settled separately by the fail-closed gate tests, which prove it cannot.",
+      "status": "WITHDRAWN_AND_REPLACED"
+    },
+    {
+      "claim_id": "C2_regex_laundering",
+      "withdrawn_text": "data laundering / regex-laundered; the model learned where a regex fires and did not learn what the text means",
+      "defect": "causal claim from four scalar LF accuracies; additionally assumed without warrant that 0.5126 denotes binary chance",
+      "corrected_text": "Snorkel supervision is syntactically dominated and semantically weak on the published per-LF scalars. Causation is unproven and the requested ablation is not runnable on the persisted artifacts.",
+      "status": "WITHDRAWN_AS_UNPROVEN"
+    },
+    {
+      "claim_id": "C3_medsiglip_generalization",
+      "withdrawn_text": "zero-shot prompting is not a screening classifier (asserted from one mammogram)",
+      "defect": "n=1 generalization to population discrimination",
+      "corrected_text": "MedSigLIP zero-shot failed the tested case ranking. Population discrimination is now measured separately on 641 patient-disjoint held-out images; see medsiglip_population_validation.json.",
+      "status": "WITHDRAWN_AND_SUPERSEDED_BY_MEASUREMENT"
+    },
+    {
+      "claim_id": "C4_medgemma_one_line_fix",
+      "withdrawn_text": "That is a one-line fix on info and a container/keep-warm decision on chat",
+      "defect": "remediation-cost claim from two timeout observations with no startup-phase profile",
+      "corrected_text": "MedGemma-27B is operationally unavailable under current deployment budgets: info exceeded 300 s (303.098 s) and chat exceeded its declared 600 s (602.997 s). The phase distribution of that time is unprofiled, so the remediation is unscoped.",
+      "status": "WITHDRAWN_PENDING_PROFILING"
+    },
+    {
+      "claim_id": "C5_denominator",
+      "withdrawn_text": "informal '12/13 endpoints' style summaries",
+      "corrected_text": "Health and info responses are never counted as inference. Each app carries PASS / FAIL / NOT_APPLICABLE against a real-inference contract.",
+      "status": "POLICY_ADOPTED"
+    }
+  ],
+  "standing_rule": "Qwen/Qwen2.5-7B-Instruct served by gemma-fallback is a DIFFERENT MODEL and is never reported as MedGemma."
+}
