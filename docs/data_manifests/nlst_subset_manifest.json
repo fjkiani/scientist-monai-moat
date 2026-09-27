@@ -1,0 +1,218 @@
+{
+  "collection": "NLST",
+  "study_arm": "NLST-LSS",
+  "source": "https://nlst.cancerimagingarchive.net (live NBIA query + download, this session)",
+  "phantom_field_breakdown_all_26254_patients": {
+    "NO": 26254
+  },
+  "selection_criteria": {
+    "modality": "CT",
+    "study_desc": "NLST-LSS",
+    "min_image_count": 80,
+    "max_image_count": 400,
+    "one_series_per_distinct_patient": true
+  },
+  "scope_disclaimer": "Images only, no CDAS ground-truth labels (Wave-1 scope). Supports a qualitative cross-cohort domain-shift check against luna16-detect, NOT a FROC/sensitivity claim.",
+  "results": [
+    {
+      "series_uid": "1.2.840.113654.2.55.122344168497038128022524906545138736420",
+      "status": "downloaded",
+      "n_slices": 129,
+      "zip_bytes": 36483611,
+      "patient_id": "100002",
+      "declared_image_count": 129,
+      "manufacturer": "GE MEDICAL SYSTEMS",
+      "study_date": "2001-01-02 00:00:00.0"
+    },
+    {
+      "series_uid": "1.2.840.113654.2.55.191661316001774647835097522264785668378",
+      "status": "downloaded",
+      "n_slices": 150,
+      "zip_bytes": 42313562,
+      "patient_id": "100004",
+      "declared_image_count": 150,
+      "manufacturer": "TOSHIBA",
+      "study_date": "2001-01-02 00:00:00.0"
+    },
+    {
+      "series_uid": "1.2.840.113654.2.55.148981425884825940179466259981962976653",
+      "status": "downloaded",
+      "n_slices": 165,
+      "zip_bytes": 46044359,
+      "patient_id": "100005",
+      "declared_image_count": 165,
+      "manufacturer": "GE MEDICAL SYSTEMS",
+      "study_date": "2000-01-02 00:00:00.0"
+    },
+    {
+      "series_uid": "1.2.840.113654.2.55.163223012127623898074849186090277782896",
+      "status": "downloaded",
+      "n_slices": 175,
+      "zip_bytes": 50120255,
+      "patient_id": "100009",
+      "declared_image_count": 175,
+      "manufacturer": "GE MEDICAL SYSTEMS",
+      "study_date": "2000-01-02 00:00:00.0"
+    },
+    {
+      "series_uid": "1.2.840.113654.2.55.221455096941943157254333765563258594064",
+      "status": "downloaded",
+      "n_slices": 128,
+      "zip_bytes": 35393494,
+      "patient_id": "100010",
+      "declared_image_count": 128,
+      "manufacturer": "GE MEDICAL SYSTEMS",
+      "study_date": "1999-01-02 00:00:00.0"
+    },
+    {
+      "series_uid": "1.2.840.113654.2.55.135088253786049275791463451273034430925",
+      "status": "downloaded",
+      "n_slices": 157,
+      "zip_bytes": 51343101,
+      "patient_id": "100012",
+      "declared_image_count": 157,
+      "manufacturer": "SIEMENS",
+      "study_date": "2000-01-02 00:00:00.0"
+    },
+    {
+      "series_uid": "1.2.840.113654.2.55.105980594494095638345818398307575745148",
+      "status": "downloaded",
+      "n_slices": 153,
+      "zip_bytes": 49258534,
+      "patient_id": "100014",
+      "declared_image_count": 153,
+      "manufacturer": "SIEMENS",
+      "study_date": "1999-01-02 00:00:00.0"
+    },
+    {
+      "series_uid": "1.2.840.113654.2.55.208553970452942192452893829912218912493",
+      "status": "downloaded",
+      "n_slices": 150,
+      "zip_bytes": 47465204,
+      "patient_id": "100015",
+      "declared_image_count": 150,
+      "manufacturer": "Philips",
+      "study_date": "1999-01-02 00:00:00.0"
+    },
+    {
+      "series_uid": "1.2.840.113654.2.55.125678454609249687113295452275381538966",
+      "status": "downloaded",
+      "n_slices": 148,
+      "zip_bytes": 43674606,
+      "patient_id": "100019",
+      "declared_image_count": 148,
+      "manufacturer": "Philips",
+      "study_date": "2000-01-02 00:00:00.0"
+    },
+    {
+      "series_uid": "1.2.840.113654.2.55.18656159377196234615117488653064966494",
+      "status": "downloaded",
+      "n_slices": 155,
+      "zip_bytes": 43119968,
+      "patient_id": "100020",
+      "declared_image_count": 155,
+      "manufacturer": "GE MEDICAL SYSTEMS",
+      "study_date": "1999-01-02 00:00:00.0"
+    },
+    {
+      "series_uid": "1.2.840.113654.2.55.295675861813733478877045501545653659343",
+      "status": "downloaded",
+      "n_slices": 163,
+      "zip_bytes": 46340988,
+      "patient_id": "100023",
+      "declared_image_count": 163,
+      "manufacturer": "GE MEDICAL SYSTEMS",
+      "study_date": "2000-01-02 00:00:00.0"
+    },
+    {
+      "series_uid": "1.2.840.113654.2.55.182551180419613636559222728764901794393",
+      "status": "downloaded",
+      "n_slices": 151,
+      "zip_bytes": 48485086,
+      "patient_id": "100024",
+      "declared_image_count": 151,
+      "manufacturer": "TOSHIBA",
+      "study_date": "2000-01-02 00:00:00.0"
+    },
+    {
+      "series_uid": "1.2.840.113654.2.55.107374097052074215207791788228152468831",
+      "status": "downloaded",
+      "n_slices": 135,
+      "zip_bytes": 41029969,
+      "patient_id": "100026",
+      "declared_image_count": 135,
+      "manufacturer": "GE MEDICAL SYSTEMS",
+      "study_date": "2001-01-02 00:00:00.0"
+    },
+    {
+      "series_uid": "1.2.840.113654.2.55.138047260285118043786058328983293918520",
+      "status": "downloaded",
+      "n_slices": 162,
+      "zip_bytes": 51864505,
+      "patient_id": "100029",
+      "declared_image_count": 162,
+      "manufacturer": "SIEMENS",
+      "study_date": "2000-01-02 00:00:00.0"
+    },
+    {
+      "series_uid": "1.2.840.113654.2.55.127796752460531204841430544895804108567",
+      "status": "downloaded",
+      "n_slices": 111,
+      "zip_bytes": 31027011,
+      "patient_id": "100030",
+      "declared_image_count": 111,
+      "manufacturer": "GE MEDICAL SYSTEMS",
+      "study_date": "1999-01-02 00:00:00.0"
+    },
+    {
+      "series_uid": "1.2.840.113654.2.55.213014425849950577289792921720047688764",
+      "status": "downloaded",
+      "n_slices": 106,
+      "zip_bytes": 27699496,
+      "patient_id": "100031",
+      "declared_image_count": 106,
+      "manufacturer": "GE MEDICAL SYSTEMS",
+      "study_date": "2000-01-02 00:00:00.0"
+    },
+    {
+      "series_uid": "1.2.840.113654.2.55.180847376201814968135928364045219185070",
+      "status": "downloaded",
+      "n_slices": 181,
+      "zip_bytes": 48536266,
+      "patient_id": "100032",
+      "declared_image_count": 181,
+      "manufacturer": "GE MEDICAL SYSTEMS",
+      "study_date": "2000-01-02 00:00:00.0"
+    },
+    {
+      "series_uid": "1.2.840.113654.2.55.13155066459400369974192691763749278754",
+      "status": "downloaded",
+      "n_slices": 132,
+      "zip_bytes": 39144362,
+      "patient_id": "100035",
+      "declared_image_count": 132,
+      "manufacturer": "GE MEDICAL SYSTEMS",
+      "study_date": "1999-01-02 00:00:00.0"
+    },
+    {
+      "series_uid": "1.2.840.113654.2.55.197396872472207249768140921819205574042",
+      "status": "downloaded",
+      "n_slices": 127,
+      "zip_bytes": 34671300,
+      "patient_id": "100037",
+      "declared_image_count": 127,
+      "manufacturer": "GE MEDICAL SYSTEMS",
+      "study_date": "1999-01-02 00:00:00.0"
+    },
+    {
+      "series_uid": "1.2.840.113654.2.55.13087519151671351584835330999183249138",
+      "status": "downloaded",
+      "n_slices": 155,
+      "zip_bytes": 52451971,
+      "patient_id": "100040",
+      "declared_image_count": 155,
+      "manufacturer": "SIEMENS",
+      "study_date": "2001-01-02 00:00:00.0"
+    }
+  ]
+}

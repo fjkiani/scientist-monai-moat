@@ -1,0 +1,97 @@
+{
+  "description": "LUNA16 subset0 (89-series) luna16-infer population failure analysis, v2 full run",
+  "run_log_summary": {
+    "ok": 55,
+    "failed": 34,
+    "total_detections": 577,
+    "wall_seconds": 9019
+  },
+  "n_total": 89,
+  "n_ok": 55,
+  "n_failed": 34,
+  "overall_failure_rate": 0.38202247191011235,
+  "distinct_H_W_across_all_89_series": [
+    [
+      512,
+      512
+    ]
+  ],
+  "D_stratified": {
+    "D_gt_300": {
+      "n": 20,
+      "n_failed": 18,
+      "failure_rate": 0.9
+    },
+    "D_le_300": {
+      "n": 69,
+      "n_failed": 16,
+      "failure_rate": 0.2318840579710145
+    }
+  },
+  "D_distribution": {
+    "ok": {
+      "mean": 187.54545454545453,
+      "median": 157.0,
+      "min": 109,
+      "max": 325
+    },
+    "failed": {
+      "mean": 369.2647058823529,
+      "median": 380.5,
+      "min": 127,
+      "max": 733
+    },
+    "overlap_zone_D": [
+      127,
+      325
+    ]
+  },
+  "spacing_z_distribution_mm": {
+    "ok": {
+      "mean": 1.8736363584345037,
+      "median": 2.0
+    },
+    "failed": {
+      "mean": 1.1147058798986322,
+      "median": 0.7249999940395355
+    }
+  },
+  "logistic_regression_analysis": {
+    "note": "In-sample fit on all n=89 series (no held-out split; small-n caveat: only 34 events). Purpose is to test whether spacing_z carries information about failure beyond D, and to quantify joint discrimination -- not to build a deployable predictive model.",
+    "model_D_only": {
+      "coef_D_z": 1.8280425272272054,
+      "p_value_D_z": 1.3131110886014621e-05,
+      "pseudo_r2": 0.3070721731036664,
+      "auc": 0.8112299465240642,
+      "llf": -41.013742487546956
+    },
+    "model_spacing_z_only": {
+      "coef_sz_z": -1.205629019750978,
+      "p_value_sz_z": 2.7851484769486693e-05,
+      "pseudo_r2": 0.19606681869806142,
+      "auc": 0.7965240641711231,
+      "llf": -47.58404439145865
+    },
+    "model_D_plus_spacing_z": {
+      "coef_D_z": 3.027322038111129,
+      "p_value_D_z": 0.006818202103991647,
+      "coef_sz_z": 0.9457946093077937,
+      "p_value_sz_z": 0.19467533565287265,
+      "pseudo_r2": 0.3231768222628907,
+      "auc": 0.8077540106951872,
+      "llf": -40.06052354059373
+    },
+    "likelihood_ratio_test_joint_vs_D_only": {
+      "lr_statistic": 1.9064378939064568,
+      "df": 1,
+      "p_value": 0.16735948058085576,
+      "interpretation": "p<0.05 would indicate spacing_z adds significant discrimination beyond D alone; p>=0.05 indicates the joint model is not significantly better than D alone at this sample size."
+    }
+  },
+  "timing": {
+    "avg_wall_seconds_per_ok_case": 79.53090909090909,
+    "implied_avg_wall_seconds_per_failed_case": 136.61176470588236,
+    "note": "Failed cases consistently consume substantial real compute before erroring (comparable order of magnitude to OK cases), consistent with a server-side resource-exhaustion failure mode rather than instant input-validation rejection."
+  },
+  "conclusion": "The original Finding-G-v1 hypothesis (n=1 pilot: D>300 predicts failure) is directionally correct but materially incomplete at population scale. D>300 is a strong risk multiplier (90.0% failure vs 23.2% baseline) but NOT a deterministic threshold: there is a real, substantial baseline failure rate even for normal-sized series (D<=300), and the D distributions of ok vs failed series overlap across a wide zone. spacing_z separates the two groups slightly more cleanly in direction (coarser spacing associates with success) but is also not a clean cutoff. The true root cause remains an unhandled server-side exception whose trigger is not fully explained by slice count or spacing alone."
+}

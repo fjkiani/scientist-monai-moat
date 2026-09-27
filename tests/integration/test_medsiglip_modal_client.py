@@ -19,19 +19,21 @@ LIVE = pytest.mark.skipif(
     reason="MODAL_MEDSIGLIP_URL not set (skipping live Modal test)",
 )
 
-# The three files below are the mammography fixtures staged under
-# /mnt/shared-workspace/shared/ — the test skips gracefully if they are
-# not present on the current host.
-FIXTURE_ROOT = Path("/mnt/shared-workspace/shared")
-DEFAULT_DICOM = FIXTURE_ROOT / "smoke_test_dicom.dcm"
-DEFAULT_PNG_CANCER = Path(
-    "/workspace/cbis_ddsm_1024/train/cancer/"
-    "1.3.6.1.4.1.9590.100.1.2.100079897611795347840188527952364733954_1-1.png"
-)
-DEFAULT_PNG_NOTCANCER = Path(
-    "/workspace/cbis_ddsm_1024/train/not_cancer/"
-    "1.3.6.1.4.1.9590.100.1.2.100398235711369262725667293542266145456_1-1.png"
-)
+# Real CBIS-DDSM DICOM fixtures, fetched via
+# `tests/fixtures/download_cbis_ddsm_fixtures.py` (HF mirror
+# helloerikaaa/cbis-ddsm-r, CC-BY-NC 4.0, no auth). Git-ignored by design
+# (~120 MB); the test skips gracefully if the download step has not been run
+# on the current host. Previously this pointed at an undocumented,
+# session-local `/workspace/cbis_ddsm_1024/...` PNG mirror that does not
+# exist on a fresh clone -- that made these three tests silently skip on
+# every clean checkout, which is the same fake-green pattern being repaired
+# elsewhere in this suite. Using the two real .dcm fixtures also exercises
+# the DICOM ingestion path directly, which is closer to a real PACS handoff
+# than the pre-converted PNG mirror.
+FIXTURE_ROOT = Path(__file__).resolve().parents[1] / "fixtures" / "cbis_ddsm"
+DEFAULT_DICOM = FIXTURE_ROOT / "Calc-Test_P_00038_LEFT_CC.dcm"
+DEFAULT_PNG_CANCER = FIXTURE_ROOT / "Calc-Test_P_00038_LEFT_CC.dcm"
+DEFAULT_PNG_NOTCANCER = FIXTURE_ROOT / "Mass-Test_P_00016_LEFT_CC.dcm"
 
 
 def _skip_if_missing(*paths: Path) -> None:

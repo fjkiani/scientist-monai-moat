@@ -45,3 +45,10 @@ frontend/dist/
 
 # v0.3.0 corpora (synthetic pathology reports live outside the repo).
 data/
+
+# LUNA16 official evaluation kit's own demo/example submission files
+# (~87 MB: sampleSubmission.csv, froc_sampleSubmission*.{txt,csv,png}).
+# Not produced by, or needed by, this repo's own evaluation runs against
+# real subset0 results -- only the evaluator script + the ground-truth
+# annotations/seriesuids CSVs (kept, small) are needed to reproduce our FROC.
+vendor/luna16_evaluation/exampleFiles/

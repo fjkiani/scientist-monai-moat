@@ -1,0 +1,255 @@
+{
+  "DISCLAIMER": "This is a population-scale linear-probe validation of the Phikon pathology embedding endpoint on a public 9-tissue-type histology benchmark (NCT-CRC-HE-100K train / CRC-VAL-HE-7K held-out val, Kather et al.). It is NOT a product screening claim, NOT a cancer-detection validation, and is UNRELATED to the CBIS-DDSM/MedSigLIP >=0.85 ship-gate. Approved as a scope-expansion addendum for population validation only.",
+  "endpoint": {
+    "name": "phikon-pathology",
+    "modal_embed_url": "https://crispro--phikon-embed.modal.run",
+    "embedding_dim": 768,
+    "batch_cap_discovered_empirically": 64
+  },
+  "job": {
+    "name": "phikon_nct_crc_embed_full",
+    "n_images_embedded": 107180,
+    "wall_seconds": 4403,
+    "transient_retries": "1 batch (index ~106048) hit a write-timeout on first attempt and succeeded on retry after 127.05s (retry/backoff logic in embed_phikon_nct_crc.py). No data loss: done_mask and finite/nonzero checks below confirm full, valid coverage."
+  },
+  "data_integrity": {
+    "n_total": 107180,
+    "n_done_mask_true": 107180,
+    "n_all_finite_rows": 107180,
+    "n_nonzero_rows": 107180,
+    "status": "COMPLETE_NO_MISSING_NO_NONFINITE"
+  },
+  "cohort": {
+    "train_source": "NCT-CRC-HE-100K",
+    "val_source": "CRC-VAL-HE-7K (official held-out, patient-disjoint split per dataset creators)",
+    "classes": [
+      "ADI",
+      "BACK",
+      "DEB",
+      "LYM",
+      "MUC",
+      "MUS",
+      "NORM",
+      "STR",
+      "TUM"
+    ],
+    "n_train": 100000,
+    "n_val": 7180,
+    "train_class_counts": {
+      "ADI": 10407,
+      "BACK": 10566,
+      "DEB": 11512,
+      "LYM": 11557,
+      "MUC": 8896,
+      "MUS": 13536,
+      "NORM": 8763,
+      "STR": 10446,
+      "TUM": 14317
+    },
+    "val_class_counts": {
+      "ADI": 1338,
+      "BACK": 847,
+      "DEB": 339,
+      "LYM": 634,
+      "MUC": 1035,
+      "MUS": 592,
+      "NORM": 741,
+      "STR": 421,
+      "TUM": 1233
+    }
+  },
+  "probe": {
+    "type": "StandardScaler + multinomial LogisticRegression (lbfgs, C=1.0, max_iter=2000, random_state=42)",
+    "fit_seconds": 37.865225076675415,
+    "trained_this_run": true
+  },
+  "held_out_val_metrics": {
+    "accuracy": 0.9306406685236769,
+    "balanced_accuracy": 0.929172808398694,
+    "macro_f1": 0.9200741203663677,
+    "weighted_f1": 0.9326383360802609,
+    "per_class": {
+      "ADI": {
+        "f1": 0.8878737541528239,
+        "precision": 0.9990654205607477,
+        "recall": 0.7989536621823617,
+        "n_val": 1338
+      },
+      "BACK": {
+        "f1": 0.9964705882352941,
+        "precision": 0.9929660023446659,
+        "recall": 1.0,
+        "n_val": 847
+      },
+      "DEB": {
+        "f1": 0.9866666666666667,
+        "precision": 0.9910714285714286,
+        "recall": 0.9823008849557522,
+        "n_val": 339
+      },
+      "LYM": {
+        "f1": 0.9889589905362776,
+        "precision": 0.9889589905362776,
+        "recall": 0.9889589905362776,
+        "n_val": 634
+      },
+      "MUC": {
+        "f1": 0.9829018075232047,
+        "precision": 0.9940711462450593,
+        "recall": 0.9719806763285024,
+        "n_val": 1035
+      },
+      "MUS": {
+        "f1": 0.7595667870036101,
+        "precision": 0.6633039092055486,
+        "recall": 0.8885135135135135,
+        "n_val": 592
+      },
+      "NORM": {
+        "f1": 0.9879679144385026,
+        "precision": 0.9788079470198675,
+        "recall": 0.9973009446693657,
+        "n_val": 741
+      },
+      "STR": {
+        "f1": 0.7146118721461188,
+        "precision": 0.6879120879120879,
+        "recall": 0.7434679334916865,
+        "n_val": 421
+      },
+      "TUM": {
+        "f1": 0.9756487025948104,
+        "precision": 0.960691823899371,
+        "recall": 0.9910786699107867,
+        "n_val": 1233
+      }
+    },
+    "confusion_matrix": [
+      [
+        1069,
+        0,
+        0,
+        5,
+        3,
+        186,
+        1,
+        73,
+        1
+      ],
+      [
+        0,
+        847,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        5,
+        333,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        0,
+        0,
+        0,
+        627,
+        0,
+        0,
+        7,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        1006,
+        0,
+        3,
+        0,
+        25
+      ],
+      [
+        0,
+        1,
+        0,
+        0,
+        1,
+        526,
+        0,
+        64,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        739,
+        0,
+        2
+      ],
+      [
+        0,
+        0,
+        3,
+        1,
+        2,
+        81,
+        0,
+        313,
+        21
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        5,
+        5,
+        1222
+      ]
+    ],
+    "confusion_matrix_row_order": [
+      "ADI",
+      "BACK",
+      "DEB",
+      "LYM",
+      "MUC",
+      "MUS",
+      "NORM",
+      "STR",
+      "TUM"
+    ],
+    "classification_report_text": "              precision    recall  f1-score   support\n\n         ADI     0.9991    0.7990    0.8879      1338\n        BACK     0.9930    1.0000    0.9965       847\n         DEB     0.9911    0.9823    0.9867       339\n         LYM     0.9890    0.9890    0.9890       634\n         MUC     0.9941    0.9720    0.9829      1035\n         MUS     0.6633    0.8885    0.7596       592\n        NORM     0.9788    0.9973    0.9880       741\n         STR     0.6879    0.7435    0.7146       421\n         TUM     0.9607    0.9911    0.9756      1233\n\n    accuracy                         0.9306      7180\n   macro avg     0.9174    0.9292    0.9201      7180\nweighted avg     0.9417    0.9306    0.9326      7180\n",
+    "error_concentration_analysis": {
+      "method": "Mathematically interrogated the differential per-class precision (STR=0.688, MUS=0.663 vs 0.96-0.999 for the other 7 classes) rather than reporting only the aggregate 93.06% accuracy.",
+      "total_misclassifications": 498,
+      "adi_mus_str_triangle_misclassifications": 404,
+      "fraction_of_all_errors_in_triangle": 0.8112,
+      "top_confusion_pairs_true_to_predicted": {
+        "ADI->MUS": 186,
+        "STR->MUS": 81,
+        "ADI->STR": 73,
+        "MUS->STR": 64
+      },
+      "interpretation": "Over 80% of all held-out errors are concentrated in a single ADI(adipose)/MUS(muscle)/STR(stroma) confusion triangle. This is a real, quantified, biologically explainable pattern, not a Phikon-endpoint or embedding-pipeline defect: adipose, smooth muscle, and fibrous stroma are all low-cellularity mesenchymal/connective tissue types that share overlapping eosin-dominant H&E staining characteristics and lack the distinctive nuclear/glandular morphology that separates the other 6 classes (near-perfect 96-99.9% precision). This exact three-way ambiguity is a documented characteristic of the NCT-CRC-HE-100K benchmark. Every other class (BACK, DEB, LYM, MUC, NORM, TUM) achieves >=0.96 precision, showing the Phikon embedding + linear probe pipeline itself is not the limiting factor for well-separated tissue types."
+    }
+  },
+  "generated_utc": "2026-09-27T21:47:09.893599+00:00"
+}

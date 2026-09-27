@@ -1,0 +1,125 @@
+{
+  "receipt_type": "quarantine_receipt",
+  "generated_utc": "2026-09-27T17:53:12.556789+00:00",
+  "repo": "fjkiani/scientist-monai-moat",
+  "branch": "audit/manski-gate-and-test-migration",
+  "base_commit": "bf5e54f8d8801286ba4b0ad7ca03ce0c7fc75b10",
+  "gate_law": {
+    "rule": "Any artifact whose embedding vector length (sklearn Pipeline/Estimator: n_features_in_; JSON linear heads: embed_dim field) is not exactly 1152 is CONTAMINATED_PROXY and must never be presented as MedSigLIP evidence.",
+    "required_embed_dim": 1152,
+    "reference_model": "google/medsiglip-448",
+    "authority": "user-locked this session, binding, non-negotiable"
+  },
+  "quarantined_artifacts": [
+    {
+      "artifact_id": "cbis_ddsm_siglip_base_logreg_v2",
+      "path": "/mnt/shared-workspace/shared/w1_receipts/cbis_ddsm_siglip_base_logreg_v2.joblib",
+      "sha256": "fe2c559d2c30dde6fce02f85f9c88c20ab32373b9c7203a70065e794223977f3",
+      "type": "sklearn.pipeline.Pipeline(StandardScaler, LogisticRegression(C=0.01, solver='saga'))",
+      "measured_embed_dim": 768,
+      "measured_via": "joblib.load(path).n_features_in_ -- re-verified live this session",
+      "required_embed_dim": 1152,
+      "verdict": "CONTAMINATED_PROXY",
+      "root_cause": "Trained on google/siglip-base-patch16-224 embeddings (768-d), a retired/banned proxy model -- NOT google/medsiglip-448 (1152-d).",
+      "prior_reported_metric_context": "A prior W1 receipt reported test AUC 0.6981, 95% CI [0.6571, 0.7386] for this artifact. That number may be numerically reproducible but is evidence about the WRONG model and must never be cited as MedSigLIP evidence or used in any MedSigLIP ship-gate decision.",
+      "disposition": "QUARANTINED -- excluded from all product claims, dashboards, and ship-gate decisions. Retained on disk only for audit-trail traceability, never deleted."
+    },
+    {
+      "artifact_id": "biopsy_probe_v0",
+      "path": "/mnt/shared-workspace/oa-workers/w4-handoff/biopsy_probe_v0.json",
+      "sha256": "2235f3dea5a793e04e561547f8afa077cddbdb0e90d67658ef8fb21d331ddde7",
+      "type": "raw JSON linear-head weights, 3-class softmax (IDC / DCIS / benign)",
+      "measured_embed_dim": 768,
+      "measured_via": "explicit 'embed_dim' JSON field + weights row length, both =768 -- re-verified live this session",
+      "required_embed_dim": 1152,
+      "verdict": "CONTAMINATED_PROXY + SELF_DISCLOSED_SYNTHETIC",
+      "self_disclosed_fields": {
+        "n_training": 48,
+        "n_training_synthetic": true,
+        "training_set_description": "SYNTHETIC weights generated with numpy default_rng(seed=20260703). This is NOT a trained model. It exists so the L4b endpoint can produce deterministic, honest output with a real linear head shape. Real training on TCGA-BRCA is Phase 4 (weeks 9-12 of Wave 3 Moat plan).",
+        "AUROC_CAVEAT": "This head has n_training=0 REAL slides. AUROC has not been measured and MUST NOT be reported. Do not use this model for any clinical decision. RESEARCH USE ONLY."
+      },
+      "disposition": "STAYS QUARANTINED per explicit user instruction. Replacement is a real TCGA-BRCA-trained head on genuine 1152-d MedSigLIP embeddings (tracked separately, not yet built); when built, report only what its own held-out metrics support -- do not feature/headline it."
+    }
+  ],
+  "banned_product_claims": [
+    {
+      "claim_id": "clinicalbert_synthetic_f1_headline",
+      "banned_provenance_tags": [
+        "SYNTHETIC-v0.3.0",
+        "SYNTHETIC-v0.3.1"
+      ],
+      "withdrawal_citation": "docs/model_cards/report_parser_clinicalbert_v3_real_v51.md:127 -- 'The SYNTHETIC-v0.3.0 corpus is withdrawn and is not the basis of any number below.'",
+      "reason": "F1 headlines computed against the synthetic corpus are banned from product copy per explicit user instruction, and are separately self-withdrawn in-repo.",
+      "files_still_referencing_synthetic_tags_in_repo": [
+        "deploy/modal/clinicalbert_app.py",
+        "docs/PROD_FLIP_CHECKLIST_v0.4.1.md",
+        "docs/audit/apex_prod_v1.md",
+        "docs/model_cards/report_parser_clinicalbert_v1.md",
+        "docs/model_cards/report_parser_clinicalbert_v3_real_v51.md",
+        "scripts/eval_report_parser_clinicalbert.py",
+        "src/oncology_arbiter/api/schemas.py",
+        "src/oncology_arbiter/nlp/clinicalbert_local_client.py",
+        "src/oncology_arbiter/nlp/clinicalbert_modal_client.py",
+        "src/oncology_arbiter/nlp/clinicalbert_parser.py",
+        "src/oncology_arbiter/nlp/clinicalbert_train.py"
+      ],
+      "current_real_replacement_evidence": {
+        "provenance_tag": "REAL-v0.5.1-snorkel-openrouter-llm",
+        "training_corpus": "2,389 TCGA reports (breast/CRC/NSCLC), Snorkel LabelModel weak supervision + tencent/hy3:free LLM label function",
+        "evaluation_text": "296 real de-identified pathology reports, 237,141 words, 2,084 sliding windows",
+        "evaluation_status": "IN_CORPUS_REPRODUCIBILITY_NOT_HELD_OUT_VALIDATION -- explicitly NOT a generalization estimate",
+        "micro_f1": 0.2534663099,
+        "micro_precision": 0.2563976378,
+        "micro_recall": 0.2506012506,
+        "zero_f1_entities": [
+          "ALK",
+          "EGFR",
+          "HER2_AMP",
+          "HER2_VALUE",
+          "KI67_PCT",
+          "KRAS"
+        ],
+        "verdict": "Even the REAL (non-synthetic) number is far below any usable ship threshold (micro-F1 0.25 vs an implied >=0.70 bar), on in-corpus (not held-out) text, and 6 of 15 scored entities are F1=0.0000 including HER2_VALUE and KI67_PCT. This must ALSO not be headlined as a working parser -- banning the synthetic number does not make the real number shippable."
+      },
+      "residual_defect_to_verify_live": "deploy/modal/clinicalbert_app.py, clinicalbert_modal_client.py, clinicalbert_local_client.py, and api/schemas.py:789 all hardcode 'SYNTHETIC-v0.3.1' as a DEFAULT provenance fallback string (e.g. metrics.get('provenance', 'SYNTHETIC-v0.3.1')), independent of which corpus actually trained the loaded weights. If that default-fallback branch is ever hit in production, it silently mislabels real-corpus output as synthetic (or vice-versa). The real I/O test being built for the clinicalbert endpoint must assert the live /info or /parse provenance field is exactly 'REAL-v0.5.1-snorkel-openrouter-llm', not the hardcoded default."
+    }
+  ],
+  "summary": {
+    "artifacts_quarantined": 2,
+    "product_claims_banned": 1,
+    "all_dimensional_verdicts_independently_reverified_this_session": true
+  },
+  "residual_defect_live_verification": {
+    "verified_utc": "2026-09-27T18:55:00+00:00",
+    "verified_by": "tests/integration/test_clinicalbert_live.py (real I/O, no mocks)",
+    "question_asked": "deploy/modal/clinicalbert_app.py, clinicalbert_modal_client.py, clinicalbert_local_client.py, and api/schemas.py:789 all hardcode 'SYNTHETIC-v0.3.1' as a DEFAULT provenance fallback string (e.g. metrics.get('provenance', 'SYNTHETIC-v0.3.1')), independent of which corpus actually trained the loaded weights. If that default-fallback branch is ever hit in production, it silently mislabels real-corpus output as synthetic (or vice-versa). The real I/O test being built for the clinicalbert endpoint must assert the live /info or /parse provenance field is exactly 'REAL-v0.5.1-snorkel-openrouter-llm', not the hardcoded default.",
+    "answer": {
+      "live_provenance_field": "REAL-v0.5.1-snorkel-openrouter-llm",
+      "is_synthetic_default_fallback": false,
+      "good_news": "The live deployment does NOT silently mislabel as SYNTHETIC-v0.3.1 -- metrics.json on the deployed container has a real provenance key."
+    },
+    "new_defect_discovered_while_verifying": {
+      "type": "DEPLOY_DRIFT",
+      "same_class_as": "medgemma-27b deploy-drift found earlier this session (gate_violation_bf5e54f8.json)",
+      "live_app_version": "clinicalbert-modal-v0.5.1",
+      "repo_source_app_version": "clinicalbert-modal-v0.5.2-sliding-window (deploy/modal/clinicalbert_app.py APP_VERSION)",
+      "client_expected_app_version": "clinicalbert-modal-v0.5.2-sliding-window (clinicalbert_modal_client.py EXPECTED_APP_VERSION) -- agrees with repo source, not with live",
+      "fields_entirely_absent_from_live_response_not_just_mismatched": [
+        "window_tokens",
+        "overlap_tokens",
+        "window_aggregation",
+        "model_sha256",
+        "metrics_sha256",
+        "n_windows"
+      ],
+      "mechanistic_interpretation": "v0.5.1 has no sliding-window inference code path at all (that was added in v0.5.2). Bio_ClinicalBERT has a bounded max-sequence-length; without sliding-window chunking, long real pathology reports are truncated at inference time, so entities located after the truncation point are structurally unreachable, not just imprecisely predicted -- a real, mechanistic (not merely statistical) reason for low recall on long reports.",
+      "consequence": "ClinicalBertModalClient.parse() correctly rejects 100% of tested real reports (0/8, using validate_clinicalbert_contract()) against the currently-live deployment. This is kept as an honest, reproducible FAILING test, not mocked around."
+    },
+    "anomaly_now_mathematically_reconciled": {
+      "anomaly": "Two conflicting micro-F1 numbers existed for ClinicalBERT: 0.2534663099 (this receipt, model-card, IN_CORPUS, 296 reports, 2084 sliding windows) vs 0.0809 (a separately-cited fleet-matrix figure).",
+      "resolution": "Hit the live /info endpoint directly this session: test_micro_f1 = 0.08089260808926081 -- an exact match to the fleet-matrix 0.0809 figure. These are NOT two measurements of the same model; they are two DIFFERENT real model versions. 0.0809 (v0.5.1, no sliding window) is what is actually deployed and live-callable today. 0.2535 (v0.5.2-sliding-window, with per-report entity coverage beyond a single 512-token pass) is a newer, real (non-synthetic), better-performing model that exists in the repo/local weights but was never d -- confirmed by the complete absence of its signature fields (model_sha256, metrics_sha256, window_tokens) in the live response.",
+      "standing_verdict_unchanged": "Both 0.2535 and 0.0809 remain far below any usable ship threshold and neither may be headlined as a working parser. The reconciliation explains WHY the two numbers differ; it does not rescue either one."
+    }
+  }
+}

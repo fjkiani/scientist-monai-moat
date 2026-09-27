@@ -1,0 +1,25 @@
+{
+  "fixture": "real_reports_sample.json",
+  "n_records": 8,
+  "purpose": "Small, reproducible sample of REAL de-identified pathology reports for the clinicalbert Modal endpoint's live I/O test (tests/integration/test_clinicalbert_live.py). Deliberately separate from the full 296-report population-scale F1 reconciliation already recorded in /mnt/results/quarantine_receipt.json.",
+  "sampled_from": "/mnt/shared-workspace/shared/clinicalbert_corpus_v51/{test_breast_crc.jsonl,test_nsclc.jsonl}",
+  "sampling_rule": "Per cancer type: 1 short-report (10th percentile by char length), 1 median-length report, 2 richest-entity-count reports. 4 breast_crc + 4 nsclc = 8 total.",
+  "upstream_provenance": {
+    "corpus_tag": "REAL-v0.5.1-snorkel-openrouter-llm (manifest.json of clinicalbert_corpus_v51)",
+    "breast_crc_source": "TCGA-242 pathologist-adjudicated gold (Chow et al. 2026, Zenodo 20263861), reused from v0.5.0",
+    "nsclc_source": "tencent/hy3:free LLM self-consistency annotations (min_votes=2 of 3 runs) over TCGA-Reports (Kefeli & Tatonetti 2024, Mendeley DOI 10.17632/hyg5xkznpx.1, CC BY 4.0)",
+    "individual_record_provenance_tag_seen_in_source": "REAL-v0.5.0-tcga242-gold (breast_crc records) -- corpus-level manifest tag is v0.5.1; this is expected (test_breast_crc.jsonl is explicitly reused v0.5.0 gold per manifest.json 'test_breast_crc_source' field, not a discrepancy)"
+  },
+  "record_schema": {
+    "source_corpus": "which of the two source jsonl files this record came from",
+    "source_index": "0-indexed line number in that source file (for traceability back to the original)",
+    "cancer": "breast_crc | nsclc",
+    "text": "raw de-identified pathology report text, verbatim",
+    "entities": "gold BIO-span entities: list of {entity_type, value (raw surface-derived, NOT canonicalized), char_start, char_end, surface}",
+    "tcga242_file": "original TCGA-242 gold filename when available (breast_crc only)"
+  },
+  "important_caveat": "Gold 'entities[i].value' is the raw/near-surface text value (e.g. 'ER/PR IMMUNOSTAINS ARE STRONGLY POSITIVE'), NOT the canonicalized value the live endpoint returns in parsed[entity_type]['value'] (e.g. 'positive'). The live test therefore checks entity-TYPE presence/recall, not exact value-string equality, unless a canonicalization mapping is applied.",
+  "license": "CC BY 4.0 (TCGA-Reports, Kefeli & Tatonetti 2024); TCGA-242 gold annotations per Chow et al. 2026 (Zenodo 20263861)",
+  "not_a_screening_claim": "This fixture supports a ClinicalBERT NLP report-parsing endpoint test only. It is unrelated to, and makes no claim about, MedSigLIP mammography screening AUROC or any imaging ship-gate.",
+  "generated_utc": "2026-09-27"
+}

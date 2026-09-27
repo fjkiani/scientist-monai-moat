@@ -1,0 +1,852 @@
+{
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.105756658031515062000744821260": {
+    "case_id": "b636f549eb3792b8",
+    "n_detections": 4,
+    "n_real_annotations": 0,
+    "upload_seconds": 13.54,
+    "detect_seconds": 27.12
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.108197895896446896160048741492": {
+    "case_id": "61fdd98da7258fcd",
+    "n_detections": 3,
+    "n_real_annotations": 1,
+    "upload_seconds": 14.34,
+    "detect_seconds": 26.55
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.109002525524522225658609808059": {
+    "case_id": "be79a175a55f4cf3",
+    "n_detections": 19,
+    "n_real_annotations": 2,
+    "upload_seconds": 16.17,
+    "detect_seconds": 33.35
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.111172165674661221381920536987": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error"
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.122763913896761494371822656720": {
+    "case_id": "d398622806898bef",
+    "n_detections": 8,
+    "n_real_annotations": 0,
+    "upload_seconds": 18.26,
+    "detect_seconds": 41.73
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.124154461048929153767743874565": {
+    "case_id": "0d828f6f55799fc1",
+    "n_detections": 5,
+    "n_real_annotations": 1,
+    "upload_seconds": 11.4,
+    "detect_seconds": 65.58
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.126121460017257137098781143514": {
+    "case_id": "5af3811e4b6790fa",
+    "n_detections": 12,
+    "n_real_annotations": 0,
+    "upload_seconds": 23.38,
+    "detect_seconds": 43.09
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.126264578931778258890371755354": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      672,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.607421875,
+      0.607421875,
+      0.5
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.128023902651233986592378348912": {
+    "case_id": "6f40a64eef762308",
+    "n_detections": 10,
+    "n_real_annotations": 1,
+    "upload_seconds": 8.51,
+    "detect_seconds": 42.69
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.129055977637338639741695800950": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      483,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.6171875,
+      0.6171875,
+      0.699999988079071
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.130438550890816550994739120843": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      274,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.6152340173721313,
+      0.6152340173721313,
+      1.25
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.134996872583497382954024478441": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      197,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.859375,
+      0.859375,
+      1.25
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.137763212752154081977261297097": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      246,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.7421875,
+      0.7421875,
+      1.0
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.138080888843357047811238713686": {
+    "case_id": "291000ec03191c14",
+    "n_detections": 21,
+    "n_real_annotations": 1,
+    "upload_seconds": 25.89,
+    "detect_seconds": 94.66
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.139258777898746693365877042411": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      588,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.513671875,
+      0.513671875,
+      0.5
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.139713436241461669335487719526": {
+    "case_id": "d285bc9f4e070b66",
+    "n_detections": 6,
+    "n_real_annotations": 0,
+    "upload_seconds": 27.61,
+    "detect_seconds": 42.34
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.141069661700670042960678408762": {
+    "case_id": "592b213a26a70662",
+    "n_detections": 5,
+    "n_real_annotations": 1,
+    "upload_seconds": 36.34,
+    "detect_seconds": 86.94
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.144438612068946916340281098509": {
+    "case_id": "026d82a29d744c72",
+    "n_detections": 5,
+    "n_real_annotations": 0,
+    "upload_seconds": 14.37,
+    "detect_seconds": 45.37
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.146429221666426688999739595820": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      730,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.73046875,
+      0.73046875,
+      0.5
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.154677396354641150280013275227": {
+    "case_id": "13e03f3633688c67",
+    "n_detections": 6,
+    "n_real_annotations": 1,
+    "upload_seconds": 33.19,
+    "detect_seconds": 87.16
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.187451715205085403623595258748": {
+    "case_id": "f7ff6e2bd4438023",
+    "n_detections": 10,
+    "n_real_annotations": 2,
+    "upload_seconds": 159.71,
+    "detect_seconds": 38.6
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.188209889686363159853715266493": {
+    "case_id": "0968162ce6c68159",
+    "n_detections": 4,
+    "n_real_annotations": 2,
+    "upload_seconds": 12.86,
+    "detect_seconds": 46.24
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.188376349804761988217597754952": {
+    "case_id": "b0ac59858c883103",
+    "n_detections": 10,
+    "n_real_annotations": 4,
+    "upload_seconds": 15.44,
+    "detect_seconds": 79.25
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.194440094986948071643661798326": {
+    "case_id": "da2072096c2254a1",
+    "n_detections": 9,
+    "n_real_annotations": 1,
+    "upload_seconds": 21.24,
+    "detect_seconds": 62.04
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.194465340552956447447896167830": {
+    "case_id": "885daf91fdce862a",
+    "n_detections": 6,
+    "n_real_annotations": 0,
+    "upload_seconds": 10.06,
+    "detect_seconds": 41.77
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.202811684116768680758082619196": {
+    "case_id": "0b691aa7c36fec15",
+    "n_detections": 4,
+    "n_real_annotations": 1,
+    "upload_seconds": 12.2,
+    "detect_seconds": 41.19
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.210837812047373739447725050963": {
+    "case_id": "e576da5085037ce3",
+    "n_detections": 4,
+    "n_real_annotations": 0,
+    "upload_seconds": 19.8,
+    "detect_seconds": 59.04
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.213140617640021803112060161074": {
+    "case_id": "efcc231626c9cc91",
+    "n_detections": 30,
+    "n_real_annotations": 3,
+    "upload_seconds": 22.62,
+    "detect_seconds": 83.45
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.216882370221919561230873289517": {
+    "case_id": "d87197c6f5f5c126",
+    "n_detections": 34,
+    "n_real_annotations": 2,
+    "upload_seconds": 18.9,
+    "detect_seconds": 84.62
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.219087313261026510628926082729": {
+    "case_id": "3c2cdc84f1d9d327",
+    "n_detections": 21,
+    "n_real_annotations": 2,
+    "upload_seconds": 35.69,
+    "detect_seconds": 88.27
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.219909753224298157409438012179": {
+    "case_id": "996a76d11e7ca26e",
+    "n_detections": 11,
+    "n_real_annotations": 2,
+    "upload_seconds": 12.7,
+    "detect_seconds": 41.85
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.227962600322799211676960828223": {
+    "case_id": "db102f8bc6b868bf",
+    "n_detections": 5,
+    "n_real_annotations": 1,
+    "upload_seconds": 11.59,
+    "detect_seconds": 68.72
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.231645134739451754302647733304": {
+    "case_id": "a0bebbb9aaa34b13",
+    "n_detections": 15,
+    "n_real_annotations": 0,
+    "upload_seconds": 25.87,
+    "detect_seconds": 78.15
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.238522526736091851696274044574": {
+    "case_id": "d1c14ec3583afb6f",
+    "n_detections": 11,
+    "n_real_annotations": 0,
+    "upload_seconds": 13.35,
+    "detect_seconds": 58.93
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.241570579760883349458693655367": {
+    "case_id": "75b3b4cfa99291ea",
+    "n_detections": 11,
+    "n_real_annotations": 1,
+    "upload_seconds": 18.08,
+    "detect_seconds": 101.37
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.249530219848512542668813996730": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      481,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.6054689884185791,
+      0.6054689884185791,
+      0.625
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.250438451287314206124484591986": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      221,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.6210939884185791,
+      0.6210939884185791,
+      1.25
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.250863365157630276148828903732": {
+    "case_id": "87fadfcd83141928",
+    "n_detections": 35,
+    "n_real_annotations": 1,
+    "upload_seconds": 30.02,
+    "detect_seconds": 92.26
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.269689294231892620436462818860": {
+    "case_id": "9f6ffd650a5fc3f4",
+    "n_detections": 17,
+    "n_real_annotations": 0,
+    "upload_seconds": 23.33,
+    "detect_seconds": 38.2
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.272042302501586336192628818865": {
+    "case_id": "4f1cb5b8ff825e0b",
+    "n_detections": 12,
+    "n_real_annotations": 1,
+    "upload_seconds": 20.61,
+    "detect_seconds": 95.02
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.277445975068759205899107114231": {
+    "case_id": "14f6371758e86380",
+    "n_detections": 8,
+    "n_real_annotations": 2,
+    "upload_seconds": 13.19,
+    "detect_seconds": 52.57
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.278660284797073139172446973682": {
+    "case_id": "e08489447bb26421",
+    "n_detections": 14,
+    "n_real_annotations": 0,
+    "upload_seconds": 14.69,
+    "detect_seconds": 34.1
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.280972147860943609388015648430": {
+    "case_id": "e47fbc2892e95801",
+    "n_detections": 3,
+    "n_real_annotations": 0,
+    "upload_seconds": 12.38,
+    "detect_seconds": 42.02
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.281489753704424911132261151767": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      471,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.5859379768371582,
+      0.5859379768371582,
+      0.625
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.293757615532132808762625441831": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      477,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.78125,
+      0.78125,
+      0.625
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.294188507421106424248264912111": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      250,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.5859379768371582,
+      0.5859379768371582,
+      1.25
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.295298571102631191572192562523": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      232,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.703125,
+      0.703125,
+      1.25
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.295420274214095686326263147663": {
+    "case_id": "08be7cc68bb9ea6f",
+    "n_detections": 29,
+    "n_real_annotations": 5,
+    "upload_seconds": 28.16,
+    "detect_seconds": 76.17
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.302134342469412607966016057827": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      369,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.703125,
+      0.703125,
+      0.625
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.303421828981831854739626597495": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      300,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.744140625,
+      0.744140625,
+      1.0
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.305858704835252413616501469037": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      290,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.681640625,
+      0.681640625,
+      1.0
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.310548927038333190233889983845": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      127,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.703125,
+      0.703125,
+      2.5
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.310626494937915759224334597176": {
+    "case_id": "5bc6aa59e6b96c33",
+    "n_detections": 9,
+    "n_real_annotations": 0,
+    "upload_seconds": 17.44,
+    "detect_seconds": 40.91
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.311981398931043315779172047718": {
+    "case_id": "71ef3a68e2b5994b",
+    "n_detections": 8,
+    "n_real_annotations": 0,
+    "upload_seconds": 12.9,
+    "detect_seconds": 46.81
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.313334055029671473836954456733": {
+    "case_id": "10f89c4ebd4d5e1c",
+    "n_detections": 9,
+    "n_real_annotations": 1,
+    "upload_seconds": 11.7,
+    "detect_seconds": 39.23
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.313605260055394498989743099991": {
+    "case_id": "1c9c7858a8925449",
+    "n_detections": 5,
+    "n_real_annotations": 1,
+    "upload_seconds": 12.42,
+    "detect_seconds": 38.58
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.313835996725364342034830119490": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      465,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.703125,
+      0.703125,
+      0.625
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.317087518531899043292346860596": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      474,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.625,
+      0.625,
+      0.625
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.323302986710576400812869264321": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      157,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.703125,
+      0.703125,
+      2.0
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.323859712968543712594665815359": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      267,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.5957030057907104,
+      0.5957030057907104,
+      1.25
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.332453873575389860371315979768": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      204,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.64453125,
+      0.64453125,
+      1.7999999523162842
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.333145094436144085379032922488": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      139,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.78125,
+      0.78125,
+      2.5
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.334517907433161353885866806005": {
+    "case_id": "effe86e2df9c3337",
+    "n_detections": 13,
+    "n_real_annotations": 3,
+    "upload_seconds": 26.46,
+    "detect_seconds": 88.03
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.395623571499047043765181005112": {
+    "case_id": "6b350b0f587da677",
+    "n_detections": 4,
+    "n_real_annotations": 1,
+    "upload_seconds": 12.5,
+    "detect_seconds": 33.38
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.397062004302272014259317520874": {
+    "case_id": "46f998335c0c8dd2",
+    "n_detections": 5,
+    "n_real_annotations": 0,
+    "upload_seconds": 41.74,
+    "detect_seconds": 103.13
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.404364125369979066736354549484": {
+    "case_id": "062df38e32e584e0",
+    "n_detections": 16,
+    "n_real_annotations": 1,
+    "upload_seconds": 20.1,
+    "detect_seconds": 54.85
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.417815314896088956784723476543": {
+    "case_id": "35b01ba3736ec122",
+    "n_detections": 7,
+    "n_real_annotations": 1,
+    "upload_seconds": 17.65,
+    "detect_seconds": 84.15
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.430109407146633213496148200410": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      733,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.63671875,
+      0.63671875,
+      0.5
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.450501966058662668272378865145": {
+    "case_id": "d265d175c6560477",
+    "n_detections": 7,
+    "n_real_annotations": 2,
+    "upload_seconds": 8.47,
+    "detect_seconds": 42.14
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.511347030803753100045216493273": {
+    "case_id": "71079d8b544dadc2",
+    "n_detections": 7,
+    "n_real_annotations": 3,
+    "upload_seconds": 7.79,
+    "detect_seconds": 45.54
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.525937963993475482158828421281": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      516,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.8203120231628418,
+      0.8203120231628418,
+      0.625
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.534006575256943390479252771547": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      545,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.7226560115814209,
+      0.7226560115814209,
+      0.625
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.534083630500464995109143618896": {
+    "case_id": "e71d3a110978070b",
+    "n_detections": 13,
+    "n_real_annotations": 3,
+    "upload_seconds": 13.53,
+    "detect_seconds": 71.66
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.564534197011295112247542153557": {
+    "case_id": "bd9e98cf70d8dbb4",
+    "n_detections": 3,
+    "n_real_annotations": 0,
+    "upload_seconds": 11.74,
+    "detect_seconds": 122.57
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.566816709786169715745131047975": {
+    "case_id": "14805ec61f5f6cf3",
+    "n_detections": 4,
+    "n_real_annotations": 1,
+    "upload_seconds": 18.22,
+    "detect_seconds": 54.47
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.621916089407825046337959219998": {
+    "case_id": "d5a4756a8d7fa0bf",
+    "n_detections": 5,
+    "n_real_annotations": 1,
+    "upload_seconds": 9.28,
+    "detect_seconds": 57.26
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.640729228179368154416184318668": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      483,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.65234375,
+      0.65234375,
+      0.699999988079071
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.657775098760536289051744981056": {
+    "case_id": "b3b6cb4f2ec97457",
+    "n_detections": 4,
+    "n_real_annotations": 0,
+    "upload_seconds": 9.07,
+    "detect_seconds": 37.2
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.716498695101447665580610403574": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      429,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.537109375,
+      0.537109375,
+      0.699999988079071
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.724251104254976962355686318345": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      392,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.638671875,
+      0.638671875,
+      0.75
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.752756872840730509471096155114": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      127,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.703125,
+      0.703125,
+      2.5
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.805925269324902055566754756843": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      141,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.8203120231628418,
+      0.8203120231628418,
+      2.5
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.826812708000318290301835871780": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      404,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.703125,
+      0.703125,
+      0.625
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.832260670372728970918746541371": {
+    "error": "SpecialistServiceError: HTTP 500: Internal Server Error",
+    "failed_stage": "call_detect",
+    "shape_dhw": [
+      133,
+      512,
+      512
+    ],
+    "spacing_xyz": [
+      0.8203120231628418,
+      0.8203120231628418,
+      2.5
+    ]
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.868211851413924881662621747734": {
+    "case_id": "4a0d9f9373b37293",
+    "n_detections": 7,
+    "n_real_annotations": 3,
+    "upload_seconds": 10.95,
+    "detect_seconds": 72.17
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.898642529028521482602829374444": {
+    "case_id": "12bf750c0ba8bf6f",
+    "n_detections": 12,
+    "n_real_annotations": 2,
+    "upload_seconds": 10.94,
+    "detect_seconds": 60.35
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.905371958588660410240398317235": {
+    "case_id": "6c9c29709d1d7c8d",
+    "n_detections": 5,
+    "n_real_annotations": 1,
+    "upload_seconds": 8.18,
+    "detect_seconds": 62.31
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.975254950136384517744116790879": {
+    "case_id": "db130f868106adc4",
+    "n_detections": 9,
+    "n_real_annotations": 0,
+    "upload_seconds": 7.7,
+    "detect_seconds": 43.54
+  },
+  "1.3.6.1.4.1.14519.5.2.1.6279.6001.979083010707182900091062408058": {
+    "case_id": "3d68021c321371b4",
+    "n_detections": 18,
+    "n_real_annotations": 1,
+    "upload_seconds": 10.63,
+    "detect_seconds": 40.61
+  }
+}

@@ -1,0 +1,162 @@
+{
+  "finding": "G_v2",
+  "endpoint": "luna16-infer",
+  "cohort": "LUNA16 subset0, 89 CT series (all of subset0, not a further subsample)",
+  "run_id": "luna16_froc_subset0_run_v2",
+  "population_failure_analysis": {
+    "description": "LUNA16 subset0 (89-series) luna16-infer population failure analysis, v2 full run",
+    "run_log_summary": {
+      "ok": 55,
+      "failed": 34,
+      "total_detections": 577,
+      "wall_seconds": 9019
+    },
+    "n_total": 89,
+    "n_ok": 55,
+    "n_failed": 34,
+    "overall_failure_rate": 0.38202247191011235,
+    "distinct_H_W_across_all_89_series": [
+      [
+        512,
+        512
+      ]
+    ],
+    "D_stratified": {
+      "D_gt_300": {
+        "n": 20,
+        "n_failed": 18,
+        "failure_rate": 0.9
+      },
+      "D_le_300": {
+        "n": 69,
+        "n_failed": 16,
+        "failure_rate": 0.2318840579710145
+      }
+    },
+    "D_distribution": {
+      "ok": {
+        "mean": 187.54545454545453,
+        "median": 157.0,
+        "min": 109,
+        "max": 325
+      },
+      "failed": {
+        "mean": 369.2647058823529,
+        "median": 380.5,
+        "min": 127,
+        "max": 733
+      },
+      "overlap_zone_D": [
+        127,
+        325
+      ]
+    },
+    "spacing_z_distribution_mm": {
+      "ok": {
+        "mean": 1.8736363584345037,
+        "median": 2.0
+      },
+      "failed": {
+        "mean": 1.1147058798986322,
+        "median": 0.7249999940395355
+      }
+    },
+    "logistic_regression_analysis": {
+      "note": "In-sample fit on all n=89 series (no held-out split; small-n caveat: only 34 events). Purpose is to test whether spacing_z carries information about failure beyond D, and to quantify joint discrimination -- not to build a deployable predictive model.",
+      "model_D_only": {
+        "coef_D_z": 1.8280425272272054,
+        "p_value_D_z": 1.3131110886014621e-05,
+        "pseudo_r2": 0.3070721731036664,
+        "auc": 0.8112299465240642,
+        "llf": -41.013742487546956
+      },
+      "model_spacing_z_only": {
+        "coef_sz_z": -1.205629019750978,
+        "p_value_sz_z": 2.7851484769486693e-05,
+        "pseudo_r2": 0.19606681869806142,
+        "auc": 0.7965240641711231,
+        "llf": -47.58404439145865
+      },
+      "model_D_plus_spacing_z": {
+        "coef_D_z": 3.027322038111129,
+        "p_value_D_z": 0.006818202103991647,
+        "coef_sz_z": 0.9457946093077937,
+        "p_value_sz_z": 0.19467533565287265,
+        "pseudo_r2": 0.3231768222628907,
+        "auc": 0.8077540106951872,
+        "llf": -40.06052354059373
+      },
+      "likelihood_ratio_test_joint_vs_D_only": {
+        "lr_statistic": 1.9064378939064568,
+        "df": 1,
+        "p_value": 0.16735948058085576,
+        "interpretation": "p<0.05 would indicate spacing_z adds significant discrimination beyond D alone; p>=0.05 indicates the joint model is not significantly better than D alone at this sample size."
+      }
+    },
+    "timing": {
+      "avg_wall_seconds_per_ok_case": 79.53090909090909,
+      "implied_avg_wall_seconds_per_failed_case": 136.61176470588236,
+      "note": "Failed cases consistently consume substantial real compute before erroring (comparable order of magnitude to OK cases), consistent with a server-side resource-exhaustion failure mode rather than instant input-validation rejection."
+    },
+    "conclusion": "The original Finding-G-v1 hypothesis (n=1 pilot: D>300 predicts failure) is directionally correct but materially incomplete at population scale. D>300 is a strong risk multiplier (90.0% failure vs 23.2% baseline) but NOT a deterministic threshold: there is a real, substantial baseline failure rate even for normal-sized series (D<=300), and the D distributions of ok vs failed series overlap across a wide zone. spacing_z separates the two groups slightly more cleanly in direction (coarser spacing associates with success) but is also not a clean cutoff. The true root cause remains an unhandled server-side exception whose trigger is not fully explained by slice count or spacing alone."
+  },
+  "froc_evaluation": {
+    "evaluator_provenance": "Official LUNA16 grand-challenge evaluation script (evaluationScript.zip, MD5 02680d438a80dc26eeff0c12e1942642, Zenodo 10.5281/zenodo.3723295, CC-BY-4.0), mechanically ported Python2->3 with zero changes to matching/FROC logic (vendor/luna16_evaluation/py3_port/PORT_NOTES.md documents every diff). CPM (mean sensitivity at the 7 official FP/scan operating points [0.125,0.25,0.5,1,2,4,8]) is not printed by the vendored script itself; computed here via scripts/luna16_compute_cpm_with_ci.py, which drives the unmodified vendored evaluateCAD()/computeFROC_bootstrap() and only adds a side-channel capture of the per-replicate interpolated sensitivity matrix so the CPM's 95% CI can be computed as a proper joint statistic (all 7 points on a replicate share the same resampled cases and are correlated) rather than as the average of 7 independent marginal per-point CIs.",
+    "conditional_on_successful_processing__ok55": {
+      "description": "Scored on the 55/89 series the endpoint actually returned detections for. Isolates core detector quality from the pipeline-crash defect.",
+      "n_series": 55,
+      "n_nodules_official_annotations": 63,
+      "true_positives": 46,
+      "false_positives": 444,
+      "false_negatives": 17,
+      "avg_candidates_per_scan": 10.490909091,
+      "cpm_bootstrap_mean": 0.5690092052409843,
+      "cpm_95ci_joint": [
+        0.44940475480897085,
+        0.6948052048683167
+      ],
+      "sensitivity_at_official_fp_points": {
+        "0.125": 0.4447977865636349,
+        "0.25": 0.47010525184869767,
+        "0.5": 0.49706059649586676,
+        "1": 0.5745518811941147,
+        "2": 0.6136274812306677,
+        "4": 0.6559528601510181,
+        "8": 0.7269685792028904
+      }
+    },
+    "intent_to_treat__all89": {
+      "description": "Scored on all 89/89 subset0 series; the 34 series the endpoint 500'd on contribute zero detections (because that is literally what a caller received). This is the honest 'as-deployed today' number.",
+      "n_series": 89,
+      "n_nodules_official_annotations": 112,
+      "true_positives": 46,
+      "false_positives": 444,
+      "false_negatives": 66,
+      "avg_candidates_per_scan": 6.483146067,
+      "cpm_bootstrap_mean": 0.3359518293745968,
+      "cpm_95ci_joint": [
+        0.24344023636409215,
+        0.43842364634786335
+      ],
+      "sensitivity_at_official_fp_points": {
+        "0.125": 0.2616645971387625,
+        "0.25": 0.27593458666652443,
+        "0.5": 0.3087736051827669,
+        "1": 0.3412585678249598,
+        "2": 0.35686992295725006,
+        "4": 0.3946902279023613,
+        "8": 0.41247129794955256
+      }
+    }
+  },
+  "ship_gate_screening": "BELOW_SHIP_GATE_SCREENING",
+  "ship_gate_note": "CPM (LUNA16's own headline metric) is not an AUC and the >=0.85 AUC screening gate does not directly apply to it in the same units; regardless, CPM_ok55=0.569 and CPM_all89=0.336 are both far below any plausible screening-grade sensitivity/FP-rate trade-off, and the endpoint's 38.2% raw failure rate on normal clinical CT geometry alone is independently disqualifying for the word 'screening' regardless of detector CPM.",
+  "sha256_provenance": {
+    "results_csv": "f087557c7d35a0c3cfc00e3230dd7a65cd6c873de1156952abc96d6710ebfe49",
+    "processed_seriesuids_json": "bc0545faae337a5fb4367a7b0b394f58e2eacd36e172eb0a95e36edcde657c88",
+    "seriesuids_ok55_csv": "5b584c950a8330bf6cc650c279300780a12c1df9c6cbb5f137c9e34fc5203e6f",
+    "seriesuids_all89_csv": "99bc22974d0f789c7e128b52239f2e17ac84d25c4b95247f040b87a9c87f2552",
+    "luna16_annotations_csv": "db9adb75b381f3e95b1f601d9b63f2e42bd6536ab5a06dc539c5ec8a4005cec7",
+    "luna16_annotations_excluded_csv": "73a5c139257294fe45a68620ed1b2cf383ba8b22af1501d2f498abbd6b802c25"
+  }
+}
