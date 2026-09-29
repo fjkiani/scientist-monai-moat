@@ -26,9 +26,9 @@ from typing import Any
 
 import numpy as np
 import requests
-from scipy.stats import mannwhitneyu
+from scipy.stats import binomtest, mannwhitneyu
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import log_loss, roc_auc_score
+from sklearn.metrics import confusion_matrix, log_loss, roc_auc_score
 
 SEED = 20260928
 CAPABILITY = "biopsy-probe"
@@ -389,6 +389,52 @@ def grouped_bootstrap_auc(y: np.ndarray, score: np.ndarray, groups: np.ndarray, 
     return [float(np.quantile(values, 0.025)), float(np.quantile(values, 0.975))]
 
 
+def grouped_auc_diagnostic(
+    y: np.ndarray, score: np.ndarray, groups: np.ndarray, *, seed_offset: int
+) -> dict[str, Any]:
+    positive_groups = {group for group in set(groups.tolist()) if np.any(y[groups == group] == 1)}
+    negative_groups = {group for group in set(groups.tolist()) if np.any(y[groups == group] == 0)}
+    result: dict[str, Any] = {
+        "n": int(len(y)),
+        "n_positive": int(y.sum()),
+        "n_negative": int(len(y) - y.sum()),
+        "n_positive_patient_groups": len(positive_groups),
+        "n_negative_patient_groups": len(negative_groups),
+        "auroc": float(roc_auc_score(y, score)),
+    }
+    if len(positive_groups) < 2 or len(negative_groups) < 2:
+        result.update(
+            {
+                "patient_grouped_ci_status": "not_estimable",
+                "reason": "fewer than two positive or negative patient groups",
+                "null_signal_result": "not_proven_at_patient_level",
+            }
+        )
+        return result
+    # Use a class-specific deterministic seed while retaining group-block resampling.
+    unique = np.array(sorted(set(groups.tolist())), dtype=object)
+    lookup = {group: np.flatnonzero(groups == group) for group in unique}
+    rng = np.random.default_rng(SEED + seed_offset)
+    values: list[float] = []
+    for _ in range(10000):
+        selected = rng.choice(unique, size=len(unique), replace=True)
+        indices = np.concatenate([lookup[group] for group in selected])
+        if len(np.unique(y[indices])) == 2:
+            values.append(float(roc_auc_score(y[indices], score[indices])))
+    ci = [float(np.quantile(values, 0.025)), float(np.quantile(values, 0.975))]
+    result.update(
+        {
+            "patient_grouped_ci_status": "estimated",
+            "patient_grouped_auroc_ci": ci,
+            "n_valid_bootstrap_draws": len(values),
+            "null_signal_result": (
+                "signal_above_null" if ci[0] > 0.5 else "inconclusive_vs_null"
+            ),
+        }
+    )
+    return result
+
+
 def secondary_evaluation(
     *,
     X: np.ndarray,
@@ -442,10 +488,49 @@ def secondary_evaluation(
         float(selected["temperature"]),
     )
     mann_whitney = mannwhitneyu(test_score[test_y == 1], test_score[test_y == 0], alternative="greater")
+    test_y_class = y_class[test_indices]
+    test_predictions = probabilities[test_indices].argmax(axis=1)
+    matrix = confusion_matrix(test_y_class, test_predictions, labels=[0, 1, 2])
+    recalls = {
+        CLASSES[index]: float(matrix[index, index] / matrix[index].sum())
+        for index in range(3)
+    }
+    accuracy = float(np.mean(test_y_class == test_predictions))
+    majority_rate = float(np.bincount(test_y_class, minlength=3).max() / len(test_y_class))
+    per_class_grouped = {
+        class_name: grouped_auc_diagnostic(
+            (test_y_class == class_index).astype(int),
+            probabilities[test_indices, class_index],
+            test_groups,
+            seed_offset=100 + class_index,
+        )
+        for class_index, class_name in enumerate(CLASSES)
+    }
     return {
         "patient_grouped_bootstrap_auroc_ci": grouped_bootstrap_auc(test_y, test_score, test_groups),
         "mann_whitney_one_sided_p": float(mann_whitney.pvalue),
-        "test_per_class": multiclass_metrics(y_class[test_indices], probabilities[test_indices]),
+        "test_per_class": multiclass_metrics(test_y_class, probabilities[test_indices]),
+        "per_class_patient_grouped_null_evaluation": per_class_grouped,
+        "top1_anomaly_interrogation": {
+            "confusion_matrix_class_order": CLASSES,
+            "confusion_matrix": matrix.tolist(),
+            "per_class_recall": recalls,
+            "accuracy": accuracy,
+            "majority_class_baseline": majority_rate,
+            "exact_binomial_p_vs_majority": float(
+                binomtest(
+                    int(np.sum(test_y_class == test_predictions)),
+                    len(test_y_class),
+                    majority_rate,
+                    alternative="greater",
+                ).pvalue
+            ),
+            "interpretation": (
+                "ranking signal is strong for the prespecified invasive endpoint, but top-1 "
+                "accuracy is not significantly above the majority baseline; in-situ recall is "
+                "reported without threshold tuning on test"
+            ),
+        },
         "test_pairwise_invasive_auroc": pairwise,
         "leave_one_test_patient_out_auroc": {
             "n_estimable": len(leave_one_patient_out),
