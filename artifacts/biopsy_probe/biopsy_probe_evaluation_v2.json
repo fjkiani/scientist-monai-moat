@@ -1,0 +1,981 @@
+{
+  "artifact_sha256": "58f1699d88cced9f76b93ee7bc0d1df820ef48e0c30442585914d2412d5a9d8c",
+  "capability": "biopsy-probe",
+  "dataset_sha256": "0a7a2f0beab10329dec34bf6a04a61aaa6ea75f1c1179bdd40f1fdaebf0e7c58",
+  "metric": {
+    "n": 54,
+    "name": "auroc",
+    "value": 0.9704545454545455
+  },
+  "metric_definition": "held-out invasive_carcinoma one-vs-rest AUROC; positive class prespecified before test opening",
+  "rows": [
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.0003192959908724142,
+        "in_situ_carcinoma": 0.011753251722453404,
+        "invasive_carcinoma": 0.9879274522866742
+      },
+      "multiclass_y_pred": "invasive_carcinoma",
+      "multiclass_y_true": "benign_or_normal",
+      "patient_id": "BACH-P13",
+      "sample_id": "BACH-b039",
+      "source_label": "Benign",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.9879274522866742,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.3957205229142294,
+        "in_situ_carcinoma": 0.04965297307947238,
+        "invasive_carcinoma": 0.5546265040062982
+      },
+      "multiclass_y_pred": "invasive_carcinoma",
+      "multiclass_y_true": "benign_or_normal",
+      "patient_id": "BACH-P13",
+      "sample_id": "BACH-b040",
+      "source_label": "Benign",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.5546265040062982,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.6900291142400494,
+        "in_situ_carcinoma": 0.17348991746210488,
+        "invasive_carcinoma": 0.13648096829784567
+      },
+      "multiclass_y_pred": "benign_or_normal",
+      "multiclass_y_true": "benign_or_normal",
+      "patient_id": "BACH-P16",
+      "sample_id": "BACH-b042",
+      "source_label": "Benign",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.13648096829784567,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.1989248494632972,
+        "in_situ_carcinoma": 0.49275316046630263,
+        "invasive_carcinoma": 0.3083219900704003
+      },
+      "multiclass_y_pred": "in_situ_carcinoma",
+      "multiclass_y_true": "benign_or_normal",
+      "patient_id": "BACH-P16",
+      "sample_id": "BACH-b043",
+      "source_label": "Benign",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.3083219900704003,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.998095965610266,
+        "in_situ_carcinoma": 0.0008793759212885927,
+        "invasive_carcinoma": 0.0010246584684453256
+      },
+      "multiclass_y_pred": "benign_or_normal",
+      "multiclass_y_true": "benign_or_normal",
+      "patient_id": "BACH-P16",
+      "sample_id": "BACH-b044",
+      "source_label": "Benign",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0010246584684453256,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.9384231110697403,
+        "in_situ_carcinoma": 0.015975494678970352,
+        "invasive_carcinoma": 0.0456013942512895
+      },
+      "multiclass_y_pred": "benign_or_normal",
+      "multiclass_y_true": "benign_or_normal",
+      "patient_id": "BACH-P17",
+      "sample_id": "BACH-b045",
+      "source_label": "Benign",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0456013942512895,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.9881736966252687,
+        "in_situ_carcinoma": 0.003074464975127517,
+        "invasive_carcinoma": 0.008751838399603867
+      },
+      "multiclass_y_pred": "benign_or_normal",
+      "multiclass_y_true": "benign_or_normal",
+      "patient_id": "BACH-P17",
+      "sample_id": "BACH-b046",
+      "source_label": "Benign",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.008751838399603867,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.9473343048268047,
+        "in_situ_carcinoma": 0.016619595693228503,
+        "invasive_carcinoma": 0.03604609947996687
+      },
+      "multiclass_y_pred": "benign_or_normal",
+      "multiclass_y_true": "benign_or_normal",
+      "patient_id": "BACH-P17",
+      "sample_id": "BACH-b047",
+      "source_label": "Benign",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.03604609947996687,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.6636920424333962,
+        "in_situ_carcinoma": 0.3320504920853188,
+        "invasive_carcinoma": 0.004257465481285008
+      },
+      "multiclass_y_pred": "benign_or_normal",
+      "multiclass_y_true": "benign_or_normal",
+      "patient_id": "BACH-P17",
+      "sample_id": "BACH-b048",
+      "source_label": "Benign",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.004257465481285008,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.4538349057102511,
+        "in_situ_carcinoma": 0.07474010821493254,
+        "invasive_carcinoma": 0.47142498607481637
+      },
+      "multiclass_y_pred": "invasive_carcinoma",
+      "multiclass_y_true": "benign_or_normal",
+      "patient_id": "BACH-P17",
+      "sample_id": "BACH-b049",
+      "source_label": "Benign",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.47142498607481637,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.9875072336195571,
+        "in_situ_carcinoma": 0.002078455737890409,
+        "invasive_carcinoma": 0.01041431064255253
+      },
+      "multiclass_y_pred": "benign_or_normal",
+      "multiclass_y_true": "benign_or_normal",
+      "patient_id": "BACH-P17",
+      "sample_id": "BACH-b050",
+      "source_label": "Benign",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.01041431064255253,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.5397567567481562,
+        "in_situ_carcinoma": 0.03712953890552783,
+        "invasive_carcinoma": 0.42311370434631607
+      },
+      "multiclass_y_pred": "benign_or_normal",
+      "multiclass_y_true": "benign_or_normal",
+      "patient_id": "BACH-P17",
+      "sample_id": "BACH-b051",
+      "source_label": "Benign",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.42311370434631607,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.2074012354154089,
+        "in_situ_carcinoma": 0.1406987366054688,
+        "invasive_carcinoma": 0.6519000279791223
+      },
+      "multiclass_y_pred": "invasive_carcinoma",
+      "multiclass_y_true": "benign_or_normal",
+      "patient_id": "BACH-P17",
+      "sample_id": "BACH-b052",
+      "source_label": "Benign",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.6519000279791223,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.29265677161573855,
+        "in_situ_carcinoma": 0.009174150487720228,
+        "invasive_carcinoma": 0.6981690778965414
+      },
+      "multiclass_y_pred": "invasive_carcinoma",
+      "multiclass_y_true": "benign_or_normal",
+      "patient_id": "BACH-P17",
+      "sample_id": "BACH-b053",
+      "source_label": "Benign",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.6981690778965414,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.967496456489014,
+        "in_situ_carcinoma": 0.022167409019482102,
+        "invasive_carcinoma": 0.010336134491504083
+      },
+      "multiclass_y_pred": "benign_or_normal",
+      "multiclass_y_true": "benign_or_normal",
+      "patient_id": "BACH-P17",
+      "sample_id": "BACH-b054",
+      "source_label": "Benign",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.010336134491504083,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.0017798490428826916,
+        "in_situ_carcinoma": 0.03530516599670846,
+        "invasive_carcinoma": 0.9629149849604088
+      },
+      "multiclass_y_pred": "invasive_carcinoma",
+      "multiclass_y_true": "benign_or_normal",
+      "patient_id": "BACH-P17",
+      "sample_id": "BACH-b055",
+      "source_label": "Benign",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.9629149849604088,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.6873134144708842,
+        "in_situ_carcinoma": 0.12207137866192913,
+        "invasive_carcinoma": 0.1906152068671865
+      },
+      "multiclass_y_pred": "benign_or_normal",
+      "multiclass_y_true": "benign_or_normal",
+      "patient_id": "BACH-P17",
+      "sample_id": "BACH-b056",
+      "source_label": "Benign",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1906152068671865,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.9091290591478233,
+        "in_situ_carcinoma": 0.08847819619850467,
+        "invasive_carcinoma": 0.0023927446536720445
+      },
+      "multiclass_y_pred": "benign_or_normal",
+      "multiclass_y_true": "benign_or_normal",
+      "patient_id": "BACH-P17",
+      "sample_id": "BACH-b057",
+      "source_label": "Benign",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0023927446536720445,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.9268212927369077,
+        "in_situ_carcinoma": 0.06995673908684008,
+        "invasive_carcinoma": 0.0032219681762521075
+      },
+      "multiclass_y_pred": "benign_or_normal",
+      "multiclass_y_true": "benign_or_normal",
+      "patient_id": "BACH-P17",
+      "sample_id": "BACH-b058",
+      "source_label": "Benign",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0032219681762521075,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.02426544620133993,
+        "in_situ_carcinoma": 0.006651248730210102,
+        "invasive_carcinoma": 0.96908330506845
+      },
+      "multiclass_y_pred": "invasive_carcinoma",
+      "multiclass_y_true": "benign_or_normal",
+      "patient_id": "BACH-P19",
+      "sample_id": "BACH-b060",
+      "source_label": "Benign",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.96908330506845,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.03483640494739676,
+        "in_situ_carcinoma": 0.9618562012347747,
+        "invasive_carcinoma": 0.0033073938178285337
+      },
+      "multiclass_y_pred": "in_situ_carcinoma",
+      "multiclass_y_true": "in_situ_carcinoma",
+      "patient_id": "BACH-P23",
+      "sample_id": "BACH-is040",
+      "source_label": "InSitu",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0033073938178285337,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.32982110863556213,
+        "in_situ_carcinoma": 0.23162084012286815,
+        "invasive_carcinoma": 0.4385580512415697
+      },
+      "multiclass_y_pred": "invasive_carcinoma",
+      "multiclass_y_true": "in_situ_carcinoma",
+      "patient_id": "BACH-P23",
+      "sample_id": "BACH-is041",
+      "source_label": "InSitu",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4385580512415697,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.07266444182515627,
+        "in_situ_carcinoma": 0.1190552016917358,
+        "invasive_carcinoma": 0.8082803564831078
+      },
+      "multiclass_y_pred": "invasive_carcinoma",
+      "multiclass_y_true": "in_situ_carcinoma",
+      "patient_id": "BACH-P23",
+      "sample_id": "BACH-is042",
+      "source_label": "InSitu",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.8082803564831078,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.6575839870115908,
+        "in_situ_carcinoma": 0.05013818641031076,
+        "invasive_carcinoma": 0.29227782657809837
+      },
+      "multiclass_y_pred": "benign_or_normal",
+      "multiclass_y_true": "in_situ_carcinoma",
+      "patient_id": "BACH-P23",
+      "sample_id": "BACH-is043",
+      "source_label": "InSitu",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.29227782657809837,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.01748382021018755,
+        "in_situ_carcinoma": 0.9169425629184914,
+        "invasive_carcinoma": 0.06557361687132111
+      },
+      "multiclass_y_pred": "in_situ_carcinoma",
+      "multiclass_y_true": "in_situ_carcinoma",
+      "patient_id": "BACH-P23",
+      "sample_id": "BACH-is044",
+      "source_label": "InSitu",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.06557361687132111,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.9087346757713225,
+        "in_situ_carcinoma": 0.08748751198503224,
+        "invasive_carcinoma": 0.0037778122436453593
+      },
+      "multiclass_y_pred": "benign_or_normal",
+      "multiclass_y_true": "in_situ_carcinoma",
+      "patient_id": "BACH-P23",
+      "sample_id": "BACH-is045",
+      "source_label": "InSitu",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0037778122436453593,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.7579277038643608,
+        "in_situ_carcinoma": 0.24089009235094366,
+        "invasive_carcinoma": 0.0011822037846954707
+      },
+      "multiclass_y_pred": "benign_or_normal",
+      "multiclass_y_true": "in_situ_carcinoma",
+      "patient_id": "BACH-P23",
+      "sample_id": "BACH-is046",
+      "source_label": "InSitu",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0011822037846954707,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.8455763122670289,
+        "in_situ_carcinoma": 0.10280923505227377,
+        "invasive_carcinoma": 0.05161445268069723
+      },
+      "multiclass_y_pred": "benign_or_normal",
+      "multiclass_y_true": "in_situ_carcinoma",
+      "patient_id": "BACH-P23",
+      "sample_id": "BACH-is047",
+      "source_label": "InSitu",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.05161445268069723,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.04775334252318853,
+        "in_situ_carcinoma": 0.15193098369130273,
+        "invasive_carcinoma": 0.8003156737855088
+      },
+      "multiclass_y_pred": "invasive_carcinoma",
+      "multiclass_y_true": "in_situ_carcinoma",
+      "patient_id": "BACH-P23",
+      "sample_id": "BACH-is048",
+      "source_label": "InSitu",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.8003156737855088,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.06096485591126099,
+        "in_situ_carcinoma": 0.03755681496997622,
+        "invasive_carcinoma": 0.9014783291187628
+      },
+      "multiclass_y_pred": "invasive_carcinoma",
+      "multiclass_y_true": "in_situ_carcinoma",
+      "patient_id": "BACH-P23",
+      "sample_id": "BACH-is049",
+      "source_label": "InSitu",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.9014783291187628,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.9238274930877871,
+        "in_situ_carcinoma": 0.011302465745576903,
+        "invasive_carcinoma": 0.06487004116663593
+      },
+      "multiclass_y_pred": "benign_or_normal",
+      "multiclass_y_true": "in_situ_carcinoma",
+      "patient_id": "BACH-P23",
+      "sample_id": "BACH-is050",
+      "source_label": "InSitu",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.06487004116663593,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.8471599067806392,
+        "in_situ_carcinoma": 0.10209189207022422,
+        "invasive_carcinoma": 0.050748201149136495
+      },
+      "multiclass_y_pred": "benign_or_normal",
+      "multiclass_y_true": "in_situ_carcinoma",
+      "patient_id": "BACH-P23",
+      "sample_id": "BACH-is051",
+      "source_label": "InSitu",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.050748201149136495,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.010940474118191447,
+        "in_situ_carcinoma": 0.017110100113926146,
+        "invasive_carcinoma": 0.9719494257678823
+      },
+      "multiclass_y_pred": "invasive_carcinoma",
+      "multiclass_y_true": "in_situ_carcinoma",
+      "patient_id": "BACH-P23",
+      "sample_id": "BACH-is052",
+      "source_label": "InSitu",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.9719494257678823,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.13388378633901354,
+        "in_situ_carcinoma": 0.6455567217770956,
+        "invasive_carcinoma": 0.22055949188389087
+      },
+      "multiclass_y_pred": "in_situ_carcinoma",
+      "multiclass_y_true": "in_situ_carcinoma",
+      "patient_id": "BACH-P23",
+      "sample_id": "BACH-is053",
+      "source_label": "InSitu",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.22055949188389087,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.0001790932052789632,
+        "in_situ_carcinoma": 0.0018267852654046566,
+        "invasive_carcinoma": 0.9979941215293163
+      },
+      "multiclass_y_pred": "invasive_carcinoma",
+      "multiclass_y_true": "invasive_carcinoma",
+      "patient_id": "BACH-P27",
+      "sample_id": "BACH-iv041",
+      "source_label": "Invasive",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9979941215293163,
+      "y_true": 1
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 3.6075056537552434e-05,
+        "in_situ_carcinoma": 0.01022107848092645,
+        "invasive_carcinoma": 0.989742846462536
+      },
+      "multiclass_y_pred": "invasive_carcinoma",
+      "multiclass_y_true": "invasive_carcinoma",
+      "patient_id": "BACH-P27",
+      "sample_id": "BACH-iv042",
+      "source_label": "Invasive",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.989742846462536,
+      "y_true": 1
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 1.0541623734206793e-06,
+        "in_situ_carcinoma": 0.00012953423964797957,
+        "invasive_carcinoma": 0.9998694115979786
+      },
+      "multiclass_y_pred": "invasive_carcinoma",
+      "multiclass_y_true": "invasive_carcinoma",
+      "patient_id": "BACH-P28",
+      "sample_id": "BACH-iv043",
+      "source_label": "Invasive",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9998694115979786,
+      "y_true": 1
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 6.183757096011431e-06,
+        "in_situ_carcinoma": 0.002529776155837533,
+        "invasive_carcinoma": 0.9974640400870665
+      },
+      "multiclass_y_pred": "invasive_carcinoma",
+      "multiclass_y_true": "invasive_carcinoma",
+      "patient_id": "BACH-P28",
+      "sample_id": "BACH-iv044",
+      "source_label": "Invasive",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9974640400870665,
+      "y_true": 1
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 3.3430302512164485e-05,
+        "in_situ_carcinoma": 2.1749516669970518e-05,
+        "invasive_carcinoma": 0.9999448201808179
+      },
+      "multiclass_y_pred": "invasive_carcinoma",
+      "multiclass_y_true": "invasive_carcinoma",
+      "patient_id": "BACH-P29",
+      "sample_id": "BACH-iv045",
+      "source_label": "Invasive",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9999448201808179,
+      "y_true": 1
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 3.435375755671772e-07,
+        "in_situ_carcinoma": 3.030534675671193e-06,
+        "invasive_carcinoma": 0.9999966259277489
+      },
+      "multiclass_y_pred": "invasive_carcinoma",
+      "multiclass_y_true": "invasive_carcinoma",
+      "patient_id": "BACH-P19",
+      "sample_id": "BACH-iv059",
+      "source_label": "Invasive",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9999966259277489,
+      "y_true": 1
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 3.3464543044646856e-06,
+        "in_situ_carcinoma": 1.0963030898735964e-05,
+        "invasive_carcinoma": 0.9999856905147969
+      },
+      "multiclass_y_pred": "invasive_carcinoma",
+      "multiclass_y_true": "invasive_carcinoma",
+      "patient_id": "BACH-P19",
+      "sample_id": "BACH-iv060",
+      "source_label": "Invasive",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9999856905147969,
+      "y_true": 1
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 5.591682610514147e-05,
+        "in_situ_carcinoma": 0.5788286592398199,
+        "invasive_carcinoma": 0.4211154239340749
+      },
+      "multiclass_y_pred": "in_situ_carcinoma",
+      "multiclass_y_true": "invasive_carcinoma",
+      "patient_id": "BACH-P35",
+      "sample_id": "BACH-iv063",
+      "source_label": "Invasive",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4211154239340749,
+      "y_true": 1
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 3.508623088079118e-07,
+        "in_situ_carcinoma": 1.6331981756488913e-05,
+        "invasive_carcinoma": 0.9999833171559348
+      },
+      "multiclass_y_pred": "invasive_carcinoma",
+      "multiclass_y_true": "invasive_carcinoma",
+      "patient_id": "BACH-P39",
+      "sample_id": "BACH-iv069",
+      "source_label": "Invasive",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9999833171559348,
+      "y_true": 1
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 4.98500958837154e-06,
+        "in_situ_carcinoma": 0.0007154937471199339,
+        "invasive_carcinoma": 0.9992795212432918
+      },
+      "multiclass_y_pred": "invasive_carcinoma",
+      "multiclass_y_true": "invasive_carcinoma",
+      "patient_id": "BACH-P39",
+      "sample_id": "BACH-iv070",
+      "source_label": "Invasive",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9992795212432918,
+      "y_true": 1
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.9993930105341846,
+        "in_situ_carcinoma": 0.00033996440661702076,
+        "invasive_carcinoma": 0.0002670250591984257
+      },
+      "multiclass_y_pred": "benign_or_normal",
+      "multiclass_y_true": "benign_or_normal",
+      "patient_id": "BACH-P16",
+      "sample_id": "BACH-n046",
+      "source_label": "Normal",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0002670250591984257,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.9973699960449394,
+        "in_situ_carcinoma": 0.002274593291034823,
+        "invasive_carcinoma": 0.0003554106640259758
+      },
+      "multiclass_y_pred": "benign_or_normal",
+      "multiclass_y_true": "benign_or_normal",
+      "patient_id": "BACH-P16",
+      "sample_id": "BACH-n047",
+      "source_label": "Normal",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0003554106640259758,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.9966336377860657,
+        "in_situ_carcinoma": 0.001267530550914287,
+        "invasive_carcinoma": 0.0020988316630199716
+      },
+      "multiclass_y_pred": "benign_or_normal",
+      "multiclass_y_true": "benign_or_normal",
+      "patient_id": "BACH-P16",
+      "sample_id": "BACH-n048",
+      "source_label": "Normal",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0020988316630199716,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.9933155560838571,
+        "in_situ_carcinoma": 0.00260538433085075,
+        "invasive_carcinoma": 0.004079059585292171
+      },
+      "multiclass_y_pred": "benign_or_normal",
+      "multiclass_y_true": "benign_or_normal",
+      "patient_id": "BACH-P16",
+      "sample_id": "BACH-n049",
+      "source_label": "Normal",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.004079059585292171,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.9920199072276862,
+        "in_situ_carcinoma": 0.007632033839352578,
+        "invasive_carcinoma": 0.00034805893296123463
+      },
+      "multiclass_y_pred": "benign_or_normal",
+      "multiclass_y_true": "benign_or_normal",
+      "patient_id": "BACH-P16",
+      "sample_id": "BACH-n050",
+      "source_label": "Normal",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.00034805893296123463,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.9986498817582071,
+        "in_situ_carcinoma": 0.000887790263272013,
+        "invasive_carcinoma": 0.00046232797852071975
+      },
+      "multiclass_y_pred": "benign_or_normal",
+      "multiclass_y_true": "benign_or_normal",
+      "patient_id": "BACH-P16",
+      "sample_id": "BACH-n051",
+      "source_label": "Normal",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.00046232797852071975,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.9973751007684907,
+        "in_situ_carcinoma": 0.0023497149790134507,
+        "invasive_carcinoma": 0.0002751842524956437
+      },
+      "multiclass_y_pred": "benign_or_normal",
+      "multiclass_y_true": "benign_or_normal",
+      "patient_id": "BACH-P17",
+      "sample_id": "BACH-n052",
+      "source_label": "Normal",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0002751842524956437,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.9670381888328348,
+        "in_situ_carcinoma": 0.03188129053939255,
+        "invasive_carcinoma": 0.001080520627772681
+      },
+      "multiclass_y_pred": "benign_or_normal",
+      "multiclass_y_true": "benign_or_normal",
+      "patient_id": "BACH-P17",
+      "sample_id": "BACH-n053",
+      "source_label": "Normal",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.001080520627772681,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.997023008236302,
+        "in_situ_carcinoma": 0.0014925971173366177,
+        "invasive_carcinoma": 0.001484394646361361
+      },
+      "multiclass_y_pred": "benign_or_normal",
+      "multiclass_y_true": "benign_or_normal",
+      "patient_id": "BACH-P17",
+      "sample_id": "BACH-n054",
+      "source_label": "Normal",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.001484394646361361,
+      "y_true": 0
+    },
+    {
+      "class_probabilities": {
+        "benign_or_normal": 0.9984030418400508,
+        "in_situ_carcinoma": 0.0009798497973652702,
+        "invasive_carcinoma": 0.0006171083625840145
+      },
+      "multiclass_y_pred": "benign_or_normal",
+      "multiclass_y_true": "benign_or_normal",
+      "patient_id": "BACH-P17",
+      "sample_id": "BACH-n055",
+      "source_label": "Normal",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0006171083625840145,
+      "y_true": 0
+    }
+  ],
+  "schema_version": 2,
+  "secondary_evaluation": {
+    "cross_identity_status_validation": {
+      "accuracy": 0.7777777777777778,
+      "description": "fit on all unresolved-identity train-only images; evaluate on official-ID validation patients",
+      "invasive_ovr_auroc": 0.9861111111111112,
+      "log_loss": 0.6988720807967463,
+      "macro_ovr_auroc": 0.9390873015873016,
+      "n_train_unresolved": 255,
+      "n_validation_identified": 54,
+      "per_class_ovr_auroc": {
+        "benign_or_normal": 0.9263888888888889,
+        "in_situ_carcinoma": 0.9047619047619048,
+        "invasive_carcinoma": 0.9861111111111112
+      }
+    },
+    "leave_one_test_patient_out_auroc": {
+      "max": 1.0,
+      "mean": 0.9700723310926799,
+      "min": 0.9628571428571429,
+      "n_estimable": 10
+    },
+    "mann_whitney_one_sided_p": 2.1291456208712564e-06,
+    "patient_grouped_bootstrap_auroc_ci": [
+      0.8620564415128996,
+      1.0
+    ],
+    "per_class_patient_grouped_null_evaluation": {
+      "benign_or_normal": {
+        "auroc": 0.8680555555555556,
+        "n": 54,
+        "n_negative": 24,
+        "n_negative_patient_groups": 7,
+        "n_positive": 30,
+        "n_positive_patient_groups": 4,
+        "n_valid_bootstrap_draws": 9942,
+        "null_signal_result": "inconclusive_vs_null",
+        "patient_grouped_auroc_ci": [
+          0.45299145299145294,
+          1.0
+        ],
+        "patient_grouped_ci_status": "estimated"
+      },
+      "in_situ_carcinoma": {
+        "auroc": 0.8482142857142856,
+        "n": 54,
+        "n_negative": 40,
+        "n_negative_patient_groups": 9,
+        "n_positive": 14,
+        "n_positive_patient_groups": 1,
+        "null_signal_result": "not_proven_at_patient_level",
+        "patient_grouped_ci_status": "not_estimable",
+        "reason": "fewer than two positive or negative patient groups"
+      },
+      "invasive_carcinoma": {
+        "auroc": 0.9704545454545455,
+        "n": 54,
+        "n_negative": 44,
+        "n_negative_patient_groups": 5,
+        "n_positive": 10,
+        "n_positive_patient_groups": 6,
+        "n_valid_bootstrap_draws": 9984,
+        "null_signal_result": "signal_above_null",
+        "patient_grouped_auroc_ci": [
+          0.8636363636363636,
+          1.0
+        ],
+        "patient_grouped_ci_status": "estimated"
+      }
+    },
+    "propensity_or_synthetic_control": {
+      "reason": "no single-arm treatment-effect estimand is present",
+      "status": "not_applicable_supervised_prediction_cohort"
+    },
+    "source_shortcut_assessment": {
+      "evidence": "all 400 samples come from one immutable BACH revision, acquisition protocol, and preprocessing path",
+      "status": "not_applicable_single_source"
+    },
+    "test_pairwise_invasive_auroc": {
+      "invasive_vs_benign_or_normal": {
+        "auroc": 0.9733333333333334,
+        "n": 40,
+        "n_positive": 10
+      },
+      "invasive_vs_in_situ_carcinoma": {
+        "auroc": 0.9642857142857142,
+        "n": 24,
+        "n_positive": 10
+      }
+    },
+    "test_per_class": {
+      "accuracy": 0.6296296296296297,
+      "invasive_ovr_auroc": 0.9704545454545455,
+      "log_loss": 1.0477508819755705,
+      "macro_ovr_auroc": 0.8955747955747956,
+      "per_class_ovr_auroc": {
+        "benign_or_normal": 0.8680555555555556,
+        "in_situ_carcinoma": 0.8482142857142856,
+        "invasive_carcinoma": 0.9704545454545455
+      }
+    },
+    "top1_anomaly_interrogation": {
+      "accuracy": 0.6296296296296297,
+      "confusion_matrix": [
+        [
+          22,
+          1,
+          7
+        ],
+        [
+          6,
+          3,
+          5
+        ],
+        [
+          0,
+          1,
+          9
+        ]
+      ],
+      "confusion_matrix_class_order": [
+        "benign_or_normal",
+        "in_situ_carcinoma",
+        "invasive_carcinoma"
+      ],
+      "exact_binomial_p_vs_majority": 0.16904406179254353,
+      "interpretation": "ranking signal is strong for the prespecified invasive endpoint, but top-1 accuracy is not significantly above the majority baseline; in-situ recall is reported without threshold tuning on test",
+      "majority_class_baseline": 0.5555555555555556,
+      "per_class_recall": {
+        "benign_or_normal": 0.7333333333333333,
+        "in_situ_carcinoma": 0.21428571428571427,
+        "invasive_carcinoma": 0.9
+      }
+    }
+  },
+  "split_sha256": "6e598d655cdfa039e44eb38d1ac8f3478ac675295624c364b4edccac5b31b851",
+  "test_multiclass_metrics": {
+    "accuracy": 0.6296296296296297,
+    "invasive_ovr_auroc": 0.9704545454545455,
+    "log_loss": 1.0477508819755705,
+    "macro_ovr_auroc": 0.8955747955747956,
+    "per_class_ovr_auroc": {
+      "benign_or_normal": 0.8680555555555556,
+      "in_situ_carcinoma": 0.8482142857142856,
+      "invasive_carcinoma": 0.9704545454545455
+    }
+  },
+  "validation_metrics": {
+    "accuracy": 0.7592592592592593,
+    "invasive_ovr_auroc": 0.9861111111111112,
+    "log_loss": 0.6554411782985393,
+    "macro_ovr_auroc": 0.9480820105820106,
+    "per_class_ovr_auroc": {
+      "benign_or_normal": 0.9513888888888888,
+      "in_situ_carcinoma": 0.9067460317460317,
+      "invasive_carcinoma": 0.9861111111111112
+    }
+  }
+}

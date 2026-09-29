@@ -53,6 +53,24 @@
       "wiring_paths": [
         "src/oncology_arbiter/arbiter/stage_therapy_wiring.py"
       ]
+    },
+    {
+      "artifact_path": "src/oncology_arbiter/arbiter/models/biopsy_probe_v1.json",
+      "artifact_sha256": "58f1699d88cced9f76b93ee7bc0d1df820ef48e0c30442585914d2412d5a9d8c",
+      "evaluation_path": "artifacts/biopsy_probe/biopsy_probe_evaluation_v2.json",
+      "evaluation_sha256": "1787eabb01f9f8abe29a9a357827e1cf9974ca58fdd2b320c41e6b848118c66e",
+      "n_training": 292,
+      "n_training_synthetic": false,
+      "name": "biopsy-probe",
+      "status": "trained_wired_tested",
+      "test_paths": [
+        "tests/unit/test_biopsy_probe_v1_identity.py"
+      ],
+      "train_manifest_path": "artifacts/biopsy_probe/biopsy_probe_train_v2.json",
+      "train_manifest_sha256": "2d36fac12cc471801aa305d7edcdcc67b467553c3d016a81f2e1af7b9da62fd6",
+      "wiring_paths": [
+        "src/oncology_arbiter/models/biopsy_probe_v1_wiring.py"
+      ]
     }
   ],
   "schema_version": 2
