@@ -104,6 +104,7 @@ jobs:
           BOOTSTRAP: ${{ steps.range.outputs.bootstrap }}
         run: |
           set +e
+          mkdir -p artifacts/audit "$RUNNER_TEMP/oncology-audit"
           docker run --rm \
             --network none \
             --read-only \
@@ -116,7 +117,7 @@ jobs:
             --ulimit fsize=1048576:1048576 \
             --env ONCOLOGY_BOOTSTRAP="$BOOTSTRAP" \
             --tmpfs /tmp:rw,noexec,nosuid,size=512m \
-            --tmpfs /candidate/artifacts/audit:rw,noexec,nosuid,size=64m \
+            --volume "$RUNNER_TEMP/oncology-audit:/candidate/artifacts/audit:rw" \
             --volume "$GITHUB_WORKSPACE:/candidate:ro" \
             --volume "$GITHUB_WORKSPACE:/guardian:ro" \
             --workdir /candidate \
