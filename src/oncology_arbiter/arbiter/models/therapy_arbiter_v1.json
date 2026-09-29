@@ -1,0 +1,119 @@
+{
+  "coefficients": [
+    0.21290728765115022,
+    -0.032776259771598405,
+    0.0,
+    0.0,
+    -0.022152074631380685,
+    0.4081673910220593,
+    1.039778140750306,
+    -1.8585275673345225,
+    -0.22129912309200167,
+    0.18311044805094454,
+    1.3150770981684679,
+    2.666094278114223,
+    -9.054830129788268
+  ],
+  "disclaimer": "RESEARCH USE ONLY — not validated for clinical decision-making. Not FDA-cleared. Not CE-marked.",
+  "feature_encodings": {
+    "age_at_diagnosis_norm": "age_years / 100.0",
+    "brca_status_known_pathogenic": {
+      "false": 0.0,
+      "true": 1.0,
+      "unknown": 0.5
+    },
+    "er_status_positive": {
+      "false": 0.0,
+      "true": 1.0,
+      "unknown": 0.5
+    },
+    "grade": {
+      "ONE_HOT": [
+        "1",
+        "2",
+        "3"
+      ],
+      "REFERENCE": "UNKNOWN"
+    },
+    "her2_status_positive": {
+      "false": 0.0,
+      "true": 1.0,
+      "unknown": 0.5
+    },
+    "histology": {
+      "ONE_HOT": [
+        "invasive_ductal",
+        "invasive_lobular",
+        "ductal_carcinoma_in_situ",
+        "lobular_carcinoma_in_situ"
+      ],
+      "REFERENCE": "OTHER_OR_UNCLEAR"
+    },
+    "ki67_norm": "ki67_pct / 100.0",
+    "node_status_positive": {
+      "false": 0.0,
+      "true": 1.0,
+      "unknown": 0.5
+    },
+    "pr_status_positive": {
+      "false": 0.0,
+      "true": 1.0,
+      "unknown": 0.5
+    },
+    "tumor_size_norm": "size_mm / 50.0"
+  },
+  "features": [
+    "histology_invasive_ductal",
+    "histology_invasive_lobular",
+    "histology_ductal_carcinoma_in_situ",
+    "histology_lobular_carcinoma_in_situ",
+    "grade_1",
+    "grade_2",
+    "grade_3",
+    "er_status_positive",
+    "pr_status_positive",
+    "her2_status_positive",
+    "tumor_size_norm",
+    "node_status_positive",
+    "age_at_diagnosis_norm"
+  ],
+  "intercept": 1.9110286623444284,
+  "lambda": 0.1,
+  "model_name": "therapy_arbiter_v1",
+  "model_type": "L2_regularized_logistic_regression",
+  "n_negative": 1098,
+  "n_positive": 288,
+  "n_training": 1386,
+  "n_training_synthetic": false,
+  "oof_auroc": 0.9173655383525602,
+  "oof_auroc_ci": [
+    0.8985569325281048,
+    0.9344464312523956
+  ],
+  "performance": {
+    "AUROC_CAVEAT": "Real-patient retrospective grouped training and held-out evaluation; research use only. The score is not prospectively validated. The target is observed chemotherapy receipt in METABRIC, not treatment response, benefit, efficacy, or a causal recommendation.",
+    "held_out_test_auroc": 0.9597117364447495,
+    "held_out_test_auroc_ci": [
+      0.9312177447013141,
+      0.9830303680396644
+    ],
+    "oof_auroc": 0.9173655383525602,
+    "oof_auroc_ci": [
+      0.8985569325281048,
+      0.9344464312523956
+    ],
+    "validation_auroc": 0.908716540837337
+  },
+  "positive_class": "observed_chemotherapy_receipt",
+  "recommendations": {
+    "HIGH": "HIGH_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE",
+    "LOW": "LOW_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE",
+    "MID": "INTERMEDIATE_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE"
+  },
+  "schema_version": 1,
+  "seed": 20260930,
+  "selected_c": 10.0,
+  "target_definition": "METABRIC patient clinical attribute CHEMOTHERAPY equals YES; observed receipt, not benefit",
+  "trained_on_real_patient_data": true,
+  "training_dataset": "METABRIC patient clinical cohort (observed chemotherapy receipt)"
+}

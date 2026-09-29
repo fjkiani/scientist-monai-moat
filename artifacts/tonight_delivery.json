@@ -1,0 +1,59 @@
+{
+  "capabilities": [
+    {
+      "artifact_path": "src/oncology_arbiter/arbiter/models/screening_arbiter_v1.json",
+      "artifact_sha256": "4edab6f35cd09835656c0e2ad5407c221a7f737f06c921e069955682a2d6f65f",
+      "evaluation_path": "artifacts/stage_arbiters/stage_screening_evaluation_v2.json",
+      "evaluation_sha256": "f0ea40f40ae149e67162282754b9fc2941d0c8f97cc6116627bd1f46f2ed0b02",
+      "n_training": 2006,
+      "n_training_synthetic": false,
+      "name": "stage-screening",
+      "status": "trained_wired_tested",
+      "test_paths": [
+        "tests/unit/test_stage_screening_v1_identity.py"
+      ],
+      "train_manifest_path": "artifacts/stage_arbiters/stage_screening_train_v2.json",
+      "train_manifest_sha256": "41f0ae85b7ee69321a61c948b56a737ab9d666a523b1d5cbf8aee8dc5b5027bb",
+      "wiring_paths": [
+        "src/oncology_arbiter/arbiter/stage_screening_wiring.py"
+      ]
+    },
+    {
+      "artifact_path": "src/oncology_arbiter/arbiter/models/biopsy_arbiter_v1.json",
+      "artifact_sha256": "27c457ed4429d8431c86a7f29bba235ed8c8a799f4368c8c3a970b8b59324958",
+      "evaluation_path": "artifacts/stage_arbiters/stage_biopsy_evaluation_v2.json",
+      "evaluation_sha256": "4fd114668d21d8a3d81229b91a4ab6e0de0e431cb30d9111e70859e48aa31c67",
+      "n_training": 1977,
+      "n_training_synthetic": false,
+      "name": "stage-biopsy",
+      "status": "trained_wired_tested",
+      "test_paths": [
+        "tests/unit/test_stage_biopsy_v1_identity.py"
+      ],
+      "train_manifest_path": "artifacts/stage_arbiters/stage_biopsy_train_v2.json",
+      "train_manifest_sha256": "3fa11091fbcbf42494166f46ff518be62b38d3cfc21bfe84405fbdd9b9f44303",
+      "wiring_paths": [
+        "src/oncology_arbiter/arbiter/stage_biopsy_wiring.py"
+      ]
+    },
+    {
+      "artifact_path": "src/oncology_arbiter/arbiter/models/therapy_arbiter_v1.json",
+      "artifact_sha256": "768540638a4833f0b824ed2d0ca0e9054d3d37465af986711a8e71e125075487",
+      "evaluation_path": "artifacts/stage_arbiters/stage_therapy_evaluation_v2.json",
+      "evaluation_sha256": "8291e7ccd074268b6bd177149c8228654f4da96fa4cd0110bcfe1758802f83ca",
+      "n_training": 1386,
+      "n_training_synthetic": false,
+      "name": "stage-therapy",
+      "status": "trained_wired_tested",
+      "test_paths": [
+        "tests/unit/test_stage_therapy_v1_identity.py"
+      ],
+      "train_manifest_path": "artifacts/stage_arbiters/stage_therapy_train_v2.json",
+      "train_manifest_sha256": "22e46fb99d7cff38f2e25a8608ea01d0e1d795123b8ebf0455597fb2b5463e2d",
+      "wiring_paths": [
+        "src/oncology_arbiter/arbiter/stage_therapy_wiring.py"
+      ]
+    }
+  ],
+  "schema_version": 2
+}
