@@ -1,35 +1,14 @@
-"""L2-regularised logistic arbiter — screening / biopsy / therapy templates.
+"""L2-regularised screening, biopsy, and therapy-receipt arbiters.
 
-Design intent
--------------
-This module deliberately mirrors ``ProgressionArbiter`` from
-``fjkiani/org.backend/capabilities/progression_arbiter/arbiter.py`` almost
-line-for-line (the reference model has an exact ``AUROC_CAVEAT`` string and
-frozen JSON coefficient schema — we preserve that contract). Three concrete
-adaptations plug into the oncology-arbiter L3 layer:
+Production factories load identity-locked v1 JSON artifacts trained on
+patient-disjoint public CBIS-DDSM or METABRIC cohorts. The paired
+``features``/``coefficients`` representation matches the canonical delivery
+validator, while mapping-form coefficients remain readable for historical test
+fixtures. Any artifact with ``n_training == 0`` is rejected from production.
 
-    screening_arbiter → decides whether a mammogram warrants recall / diagnostic workup
-    biopsy_arbiter    → decides whether an equivocal lesion warrants core-needle biopsy
-    therapy_arbiter   → decides therapy intensity given a positive biopsy
-
-Frozen model artefacts live under ``models/``. They ship with:
-
-* ``n_training = 0`` and an ``AUROC_CAVEAT`` that flags them as a TEMPLATE,
-  not a trained model. Prospective AUROC is *not* claimed until real EMBED /
-  CBIS-DDSM training runs land in Phase 3.
-* Illustrative but coherent coefficient signs (e.g. BI-RADS ≥ 4 pushes
-  toward biopsy, PPV_baseline pushes toward recall). These are *not* fit
-  values; they exist so the sum-of-terms determinism, honesty wiring, and
-  API/plumbing can be locked in immediately.
-
-Honesty gates
--------------
-Every ``score()`` call returns ``AUROC_CAVEAT`` alongside the probability.
-The L5 API surface must not strip these fields — the ``ModelState.PLACEHOLDER``
-enum value is used at the response envelope layer while the arbiter itself
-returns ``model_state="template"`` in the ``metadata`` block.
-
-RESEARCH USE ONLY — see :data:`oncology_arbiter.RUO_DISCLAIMER`.
+The therapy target is observed METABRIC chemotherapy receipt—not response,
+benefit, efficacy, or a causal treatment recommendation. Every score carries
+its retrospective-validation caveat and research-use-only disclaimer.
 """
 from __future__ import annotations
 
@@ -104,7 +83,8 @@ class L2LogisticArbiter:
           "lambda":            float,
           "n_training":        int,
           "intercept":         float,
-          "coefficients":      {feature_name: float, ...},
+          "features":          [feature_name, ...],
+          "coefficients":      [float, ...],
           "feature_encodings": {
               "<feature>": {"ONE_HOT": [...], "REFERENCE": "..."} | dict[str,float] | str,
               ...
@@ -138,7 +118,30 @@ class L2LogisticArbiter:
 
         self.model_path: Path = model_path
         self.intercept: float = float(self._model["intercept"])
-        self.coefficients: Dict[str, float] = {k: float(v) for k, v in self._model["coefficients"].items()}
+        raw_coefficients = self._model["coefficients"]
+        if isinstance(raw_coefficients, Mapping):
+            # Backward-compatible reader for historical/template fixtures. The
+            # production v1 artifacts use the validator-bound paired-list form.
+            self.coefficients = {str(k): float(v) for k, v in raw_coefficients.items()}
+        elif isinstance(raw_coefficients, list):
+            features = self._model.get("features")
+            if (
+                not isinstance(features, list)
+                or not features
+                or len(features) != len(raw_coefficients)
+                or not all(isinstance(value, str) and value for value in features)
+            ):
+                raise ValueError(
+                    f"Frozen model at {model_path} has invalid paired features/coefficients"
+                )
+            self.coefficients = {
+                str(feature): float(coefficient)
+                for feature, coefficient in zip(features, raw_coefficients, strict=True)
+            }
+        else:
+            raise ValueError(
+                f"Frozen model at {model_path} coefficients must be a mapping or list"
+            )
         self.feature_encodings: Dict[str, Any] = dict(self._model["feature_encodings"])
         self.recommendations: Dict[str, str] = dict(self._model["recommendations"])
         self.model_name: str = str(self._model.get("model_name", "unknown"))
@@ -347,28 +350,34 @@ class L2LogisticArbiter:
 
 # ── Model factory ──────────────────────────────────────────────────────
 
-_MODELS_DIR = Path(__file__).parent / "models"
-
-
 def load_arbiter(name: str) -> L2LogisticArbiter:
-    """Load a frozen arbiter by short name.
+    """Load and identity-verify a trained v1 arbiter by short name.
 
-    ``name`` must be one of ``"screening"``, ``"biopsy"``, ``"therapy"``.
+    Production routing is fail-closed: every route passes through its unique
+    artifact-identity wiring module, and an ``n_training == 0`` template can
+    never enter the product path.
     """
-    slug_map = {
-        "screening": "screening_arbiter_template_v0.json",
-        "biopsy":    "biopsy_arbiter_template_v0.json",
-        "therapy":   "therapy_arbiter_template_v0.json",
-    }
-    if name not in slug_map:
-        raise ValueError(f"Unknown arbiter {name!r}; allowed = {sorted(slug_map)}")
-    model_path = _MODELS_DIR / slug_map[name]
-    if not model_path.exists():
-        raise FileNotFoundError(
-            f"Frozen arbiter model not found at {model_path}. "
-            "Did the templated JSON get shipped in this package?"
+    if name == "screening":
+        from .stage_screening_wiring import load_stage_screening_arbiter
+
+        model = load_stage_screening_arbiter()
+    elif name == "biopsy":
+        from .stage_biopsy_wiring import load_stage_biopsy_arbiter
+
+        model = load_stage_biopsy_arbiter()
+    elif name == "therapy":
+        from .stage_therapy_wiring import load_stage_therapy_arbiter
+
+        model = load_stage_therapy_arbiter()
+    else:
+        raise ValueError(
+            f"Unknown arbiter {name!r}; allowed = ['biopsy', 'screening', 'therapy']"
         )
-    return L2LogisticArbiter(model_path)
+    if model.n_training <= 0:
+        raise RuntimeError(
+            f"Refusing untrained production arbiter {model.model_name!r}: n_training={model.n_training}"
+        )
+    return model
 
 
 def screening_arbiter() -> L2LogisticArbiter:

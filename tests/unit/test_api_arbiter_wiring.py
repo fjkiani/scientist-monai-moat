@@ -47,10 +47,11 @@ def _arbiter_block_shape(body: dict) -> None:
         "caveat",
     ):
         assert k in ab, f"arbiter_score missing field: {k}"
-    # Template contract
-    assert ab["n_training"] == 0
-    assert ab["model_state"] == "template"
-    assert ab["caveat"].startswith("TEMPLATE")
+    # Trained v1 production contract.
+    assert ab["n_training"] > 0
+    assert ab["model_state"] == "frozen"
+    assert "Real-patient retrospective" in ab["caveat"]
+    assert "not prospectively validated" in ab["caveat"]
     # Bucket must be one of the three
     assert ab["risk_bucket"] in {"LOW", "MID", "HIGH"}
     # p_positive must be sigmoid-consistent
@@ -65,7 +66,7 @@ def test_biopsy_endpoint_returns_arbiter_score(client: TestClient) -> None:
     assert resp.status_code == 200
     body = resp.json()
     _arbiter_block_shape(body)
-    assert body["arbiter_score"]["model_name"] == "biopsy_arbiter_template_v0"
+    assert body["arbiter_score"]["model_name"] == "biopsy_arbiter_v1"
 
 
 def test_therapy_endpoint_returns_arbiter_score(client: TestClient) -> None:
@@ -73,7 +74,7 @@ def test_therapy_endpoint_returns_arbiter_score(client: TestClient) -> None:
     assert resp.status_code == 200
     body = resp.json()
     _arbiter_block_shape(body)
-    assert body["arbiter_score"]["model_name"] == "therapy_arbiter_template_v0"
+    assert body["arbiter_score"]["model_name"] == "therapy_arbiter_v1"
 
 
 # ── screening requires DICOM bytes ────────────────────────────────────
@@ -87,7 +88,7 @@ def test_screening_endpoint_returns_arbiter_score(client: TestClient) -> None:
     assert resp.status_code == 200, resp.text
     body = resp.json()
     _arbiter_block_shape(body)
-    assert body["arbiter_score"]["model_name"] == "screening_arbiter_template_v0"
+    assert body["arbiter_score"]["model_name"] == "screening_arbiter_v1"
 
 
 # ── invariant: sum(term_contributions) == logit ─────────────────────
@@ -113,9 +114,9 @@ def test_therapy_arbiter_bucket_matches_recommendation(client: TestClient) -> No
     resp = client.post("/v1/therapy/reason", json={"biopsy_output": None, "patient_context": {}})
     ab = resp.json()["arbiter_score"]
     bucket_to_rec = {
-        "LOW":  "SURGERY_FIRST",
-        "MID":  "MULTIDISCIPLINARY_REVIEW",
-        "HIGH": "ESCALATE_TO_NEOADJUVANT_CHEMOTHERAPY",
+        "LOW": "LOW_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE",
+        "MID": "INTERMEDIATE_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE",
+        "HIGH": "HIGH_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE",
     }
     assert ab["recommendation"] == bucket_to_rec[ab["risk_bucket"]]
 

@@ -111,25 +111,21 @@ def test_load_arbiter_returns_l2_logistic(name: str) -> None:
 
 
 @pytest.mark.parametrize("factory", [screening_arbiter, biopsy_arbiter, therapy_arbiter])
-def test_factory_functions_load_template_v0(factory) -> None:
+def test_factory_functions_load_real_v1(factory) -> None:
     arb = factory()
-    assert arb.n_training == 0, (
-        "Templates must ship with n_training=0 — real training runs replace them "
-        "in Phase 3, at which point this test flips to n_training > 0."
-    )
-    assert "template_v0" in arb.model_name
+    assert arb.n_training > 0
+    assert arb.model_name.endswith("_arbiter_v1")
+    assert arb._model["trained_on_real_patient_data"] is True
+    assert arb._model["n_training_synthetic"] is False
 
 
 @pytest.mark.parametrize("factory", [screening_arbiter, biopsy_arbiter, therapy_arbiter])
-def test_template_carries_auroc_caveat(factory) -> None:
+def test_trained_model_carries_retrospective_auroc_caveat(factory) -> None:
     arb = factory()
     caveat = arb.performance["AUROC_CAVEAT"]
-    # Honesty gate: template AUROC caveat must explicitly say TEMPLATE.
-    assert caveat.startswith("TEMPLATE"), (
-        f"Template model {arb.model_name} must declare TEMPLATE in AUROC_CAVEAT"
-    )
-    # And it must mention n_training=0.
-    assert "n_training=0" in caveat
+    assert "Real-patient retrospective" in caveat
+    assert "not prospectively validated" in caveat
+    assert not caveat.startswith("TEMPLATE")
 
 
 @pytest.mark.parametrize("factory", [screening_arbiter, biopsy_arbiter, therapy_arbiter])
@@ -184,7 +180,9 @@ def test_bool_unknown_encodes_as_half() -> None:
     r_true  = arb.score({"birads": "BI_RADS_1", "family_history_first_degree": True})
     r_false = arb.score({"birads": "BI_RADS_1", "family_history_first_degree": False})
     r_unk   = arb.score({"birads": "BI_RADS_1", "family_history_first_degree": None})
-    coef = arb.coefficients["family_history_first_degree"]
+    # This feature is unavailable in CBIS-DDSM and therefore has no fitted
+    # coefficient; production scoring treats absent fitted terms as zero.
+    coef = arb.coefficients.get("family_history_first_degree", 0.0)
     # Unknown should sit exactly halfway between true and false in logit space.
     assert math.isclose(r_true.term_contributions["family_history_first_degree"], coef * 1.0)
     assert math.isclose(r_false.term_contributions["family_history_first_degree"], coef * 0.0)
@@ -195,7 +193,9 @@ def test_continuous_feature_normalised_by_divisor() -> None:
     """age_norm divisor is 100.0 per the JSON: age_years=50 → 0.5 → coef * 0.5."""
     arb = screening_arbiter()
     r = arb.score({"birads": "BI_RADS_1", "age_norm": 50.0})
-    coef = arb.coefficients["age_norm"]
+    # Age is unavailable in the CBIS case table, so its fitted coefficient is
+    # intentionally absent/zero rather than hand-authored.
+    coef = arb.coefficients.get("age_norm", 0.0)
     expected = coef * (50.0 / 100.0)
     assert math.isclose(r.term_contributions["age_norm"], round(expected, 6))
 
@@ -306,12 +306,12 @@ def test_high_birads_pushes_to_high_bucket() -> None:
     assert r.recommendation == "RECALL_FOR_DIAGNOSTIC_WORKUP"
 
 
-def test_low_birads_pushes_to_low_bucket() -> None:
-    """BI-RADS 1 (negative) → LOW bucket → routine follow-up."""
+def test_higher_birads_increases_fitted_malignancy_score() -> None:
+    """The learned model must rank BI-RADS 5 above BI-RADS 1."""
     arb = screening_arbiter()
-    r = arb.score({"birads": "BI_RADS_1"})
-    assert r.risk_bucket == "LOW"
-    assert r.recommendation == "ROUTINE_1YR_FOLLOWUP"
+    low = arb.score({"birads": "BI_RADS_1"})
+    high = arb.score({"birads": "BI_RADS_5"})
+    assert high.p_positive > low.p_positive
 
 
 @pytest.mark.parametrize("factory", [screening_arbiter, biopsy_arbiter, therapy_arbiter])
@@ -319,30 +319,28 @@ def test_result_carries_disclaimer_and_caveat(factory) -> None:
     arb = factory()
     r = arb.score({})
     assert "RESEARCH USE ONLY" in r.disclaimer
-    assert r.caveat.startswith("TEMPLATE")  # honesty gate
+    assert "Real-patient retrospective" in r.caveat
+    assert "not prospectively validated" in r.caveat
 
 
 @pytest.mark.parametrize("factory", [screening_arbiter, biopsy_arbiter, therapy_arbiter])
-def test_template_result_metadata_flags_template_state(factory) -> None:
+def test_trained_result_metadata_flags_frozen_state(factory) -> None:
     arb = factory()
     r = arb.score({})
-    assert r.metadata["model_state"] == "template"
-    assert r.metadata["n_training"] == 0
+    assert r.metadata["model_state"] == "frozen"
+    assert r.metadata["n_training"] > 0
 
 
 def test_explain_produces_readable_string() -> None:
     arb = screening_arbiter()
     r = arb.score({"birads": "BI_RADS_4", "density": "D_extremely_dense"})
     txt = arb.explain(r)
-    assert "P(recall_for_diagnostic_workup)" in txt
+    assert "P(malignant_pathology)" in txt
     assert "Risk bucket:" in txt
     assert "Driving feature:" in txt
     assert "RESEARCH USE ONLY" in txt
-    # Template arbiters MUST prefix the probability line so a casual reader
-    # never sees an unqualified p=0.93 that looks like a validated risk score.
-    assert "[TEMPLATE — coefficients illustrative]" in txt
-    # AUROC_CAVEAT must be present in the explain string as well.
-    assert "TEMPLATE" in txt
+    assert "[TEMPLATE — coefficients illustrative]" not in txt
+    assert "Real-patient retrospective" in txt
 
 
 # ── Bonus: sklearn round-trip ─────────────────────────────────────────
