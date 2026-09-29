@@ -17,11 +17,13 @@ from fastapi.testclient import TestClient
 from oncology_arbiter.api.app import create_app
 from oncology_arbiter.api.schemas import ModelState
 from oncology_arbiter.models.biopsy_medsiglip_probe import (
+    BACH_BIOPSY_CLASSES,
     MEDSIGLIP_REPO,
     BiopsyMedSigLipProbe,
     BiopsyProbeResult,
     BiopsyProbeWeights,
 )
+from oncology_arbiter.models.biopsy_probe_v1_wiring import PRODUCTION_MODEL_NAME
 from oncology_arbiter.models.hai_def import (
     AccessLevel,
     GateReport,
@@ -45,7 +47,7 @@ class _FakeEncoder:
         image_url: str | None = None,
         preprocessed_image: np.ndarray | None = None,
     ) -> np.ndarray:
-        return self._rng.standard_normal(768).astype(np.float32)
+        return self._rng.standard_normal(1152).astype(np.float32)
 
 
 def _preflight_allowed(repo_id: str) -> GateReport:
@@ -158,11 +160,12 @@ def test_biopsy_wired_returns_subtype(monkeypatch, client: TestClient) -> None:
     )
     assert resp.status_code == 200, resp.text
     body = resp.json()
-    assert body["subtype_prediction"] in {"IDC", "DCIS", "benign"}
+    assert body["subtype_prediction"] in BACH_BIOPSY_CLASSES
     assert body["provenance"]["model_state"] == "loaded_biopsy_probe"
-    assert body["provenance"]["model_name"] == "google/medsiglip-448+biopsy_probe_v0"
+    assert body["provenance"]["model_name"] == PRODUCTION_MODEL_NAME
     assert 0.0 <= body["confidence"] <= 1.0
-    assert any("synthetic" in w.lower() for w in body["warnings"]), body["warnings"]
+    assert not any("synthetic" in w.lower() for w in body["warnings"])
+    assert any("not IDC" in w for w in body["warnings"]), body["warnings"]
 
 
 def test_biopsy_gated_state_when_forbidden(monkeypatch, client: TestClient) -> None:

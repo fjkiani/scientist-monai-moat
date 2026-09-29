@@ -41,15 +41,16 @@ def _skip_if_missing(*paths: Path) -> None:
 
 
 @LIVE
-def test_preflight_reports_allowed_and_dim_1152() -> None:
+def test_preflight_reports_allowed_pinned_revision_and_dim_1152() -> None:
+    from oncology_arbiter.models.medsiglip import MEDSIGLIP_REVISION
     from oncology_arbiter.models.medsiglip_modal_client import MedSigLipModalClient
 
     c = MedSigLipModalClient()
     gr = c.preflight()
     assert gr.access_level.value == "allowed", gr.reason
     assert gr.repo_id == "google/medsiglip-448"
-    # The reason string embeds "dim=1152" — regression fence against silent
-    # model swaps that would change the embedding width.
+    assert f"revision={MEDSIGLIP_REVISION}" in gr.reason, gr.reason
+    # Regression fence against silent representation/model swaps.
     assert "dim=1152" in gr.reason, gr.reason
 
 

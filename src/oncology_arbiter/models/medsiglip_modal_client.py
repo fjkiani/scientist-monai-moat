@@ -33,6 +33,7 @@ from .medsiglip import (
     MEDSIGLIP_INPUT_RES,
     MEDSIGLIP_MAMMOGRAPHY_WARNING,
     MEDSIGLIP_REPO,
+    MEDSIGLIP_REVISION,
     MedSigLipResult,
 )
 from ..api.schemas import ModelState
@@ -153,10 +154,15 @@ class MedSigLipModalClient:
         endpoints: ModalEndpointConfig | None = None,
         batch_chunk: int = DEFAULT_BATCH_CHUNK,
         timeout: int = DEFAULT_TIMEOUT_SECONDS,
+        expected_model_revision: str = MEDSIGLIP_REVISION,
     ) -> None:
         self.endpoints = endpoints or ModalEndpointConfig.from_env()
         self.batch_chunk = max(1, min(int(batch_chunk), 32))
         self.timeout = int(timeout)
+        self.expected_model_revision = expected_model_revision
+        # Production builders use this common identity attribute before
+        # accepting the client; preflight then proves /info serves it.
+        self.model_revision = expected_model_revision
         self._info_cache: dict | None = None
         self._gate_report: GateReport | None = None
         # Compat property so callers written against the local class don't crash.
@@ -213,23 +219,37 @@ class MedSigLipModalClient:
             return gr
 
         model_repo = str(info.get("model_repo", ""))
+        model_revision = str(info.get("model_revision", ""))
+        dim = int(info.get("embedding_dim", 0) or 0)
+        identity_errors: list[str] = []
         if model_repo != MEDSIGLIP_REPO:
+            identity_errors.append(f"model_repo={model_repo!r}")
+        if model_revision != self.expected_model_revision:
+            identity_errors.append(
+                f"model_revision={model_revision!r} "
+                f"(expected {self.expected_model_revision!r})"
+            )
+        if dim != 1152:
+            identity_errors.append(f"embedding_dim={dim} (expected 1152)")
+        if identity_errors:
             gr = GateReport(
                 repo_id=MEDSIGLIP_REPO,
                 access_level=AccessLevel.UNKNOWN,
                 status_code=200,
-                reason=f"unexpected model_repo={model_repo!r}",
+                reason="modal identity mismatch: " + "; ".join(identity_errors),
                 has_token=True,
             )
             self._gate_report = gr
             return gr
 
-        dim = int(info.get("embedding_dim", 0) or 0)
         gr = GateReport(
             repo_id=MEDSIGLIP_REPO,
             access_level=AccessLevel.ALLOWED,
             status_code=200,
-            reason=f"modal-remote model_repo={model_repo} dim={dim}",
+            reason=(
+                f"modal-remote model_repo={model_repo} "
+                f"revision={model_revision} dim={dim}"
+            ),
             has_token=True,
         )
         self._gate_report = gr
@@ -252,6 +272,74 @@ class MedSigLipModalClient:
         if not isinstance(emb, list):
             raise RuntimeError(f"malformed embed response: {resp!r}")
         return [float(x) for x in emb]
+
+    def embed_image(
+        self,
+        image_bytes: bytes | None = None,
+        image_url: str | None = None,
+        preprocessed_image=None,
+    ):
+        """Return the pinned 1,152-d pooled vision embedding for one image.
+
+        This mirrors :meth:`MedSigLip.embed_image` so the biopsy API can use
+        the backend factory instead of accidentally constructing an unpinned
+        local model.  The remote ``/embed`` implementation uses
+        ``vision_model(...).pooler_output``, exactly matching training.
+        """
+        import numpy as np
+
+        provided = sum(
+            value is not None
+            for value in (image_bytes, image_url, preprocessed_image)
+        )
+        if provided != 1:
+            raise ValueError(
+                "embed_image requires exactly one of image_bytes / image_url / "
+                f"preprocessed_image (got {provided})"
+            )
+
+        gate = self.preflight()
+        if gate.access_level is not AccessLevel.ALLOWED:
+            from .hai_def import GatedAccessError
+
+            raise GatedAccessError(
+                repo_id=MEDSIGLIP_REPO,
+                access_level=gate.access_level,
+                status_code=gate.status_code,
+                reason=gate.reason,
+            )
+
+        if image_bytes is not None:
+            raw = image_bytes
+        elif image_url is not None:
+            try:
+                with urllib_request.urlopen(image_url, timeout=self.timeout) as resp:
+                    raw = resp.read()
+            except (urllib_error.HTTPError, urllib_error.URLError) as exc:
+                raise RuntimeError(f"unable to retrieve biopsy image URL: {exc}") from exc
+        else:
+            from io import BytesIO
+            from PIL import Image
+
+            array = np.asarray(preprocessed_image)
+            if array.dtype != np.uint8:
+                array = np.clip(array * 255.0, 0, 255).astype(np.uint8)
+            image = Image.fromarray(array).convert("RGB")
+            buffer = BytesIO()
+            image.save(buffer, format="PNG")
+            raw = buffer.getvalue()
+
+        payload = {"pixels_b64": base64.b64encode(raw).decode("ascii")}
+        response = _post_json(self.endpoints.embed, payload, timeout=self.timeout)
+        embedding = response.get("embedding")
+        if not isinstance(embedding, list):
+            raise RuntimeError(f"malformed embed response: {response!r}")
+        vector = np.asarray(embedding, dtype=np.float32)
+        if vector.shape != (1152,) or not np.isfinite(vector).all():
+            raise RuntimeError(
+                f"Modal pooled embedding failed 1152-d finite contract: {vector.shape}"
+            )
+        return vector
 
     def embed_dicoms(
         self,

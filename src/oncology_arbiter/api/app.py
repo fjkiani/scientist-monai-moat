@@ -1189,19 +1189,20 @@ def create_app() -> FastAPI:
         req: BiopsyRequest,
         tenant: APIKey = Depends(require_api_key),
     ) -> BiopsyResponse:
-        """L4b: MedSigLIP-448 embed → synthetic 3-class linear probe.
+        """L4b: pinned MedSigLIP pooled embedding → real BACH v1 probe.
 
         Opt-in via ``ONCOLOGY_ARBITER_ENABLE_BIOPSY_MEDSIGLIP=1``.
 
         Contract:
         * NO WSI parser (no OpenSlide) — treats ``wsi_bytes_b64`` / ``wsi_url``
-          as an image the MedSigLIP vision encoder can consume. This is a
-          research proxy for a real WSI patcher.
-        * Preflight HAI-DEF gate first; on FORBIDDEN/UNAUTHENTICATED emits
-          ``ModelState.GATED`` with a ``biopsy_medsiglip_gated:<level>``
-          warning — NEVER silently fabricates a subtype.
-        * Weights are synthetic (n_training=48 synthetic=True) → the
-          response's ``warnings`` list surfaces this on every call.
+          as one microscopy image the MedSigLIP vision encoder can consume.
+        * The backend factory must serve the exact pinned 1,152-dimensional
+          ``vision_model(...).pooler_output`` representation used in training.
+        * Preflight HAI-DEF gate first; on identity drift, forbidden, or
+          unauthenticated access, emit ``ModelState.GATED`` and never fabricate
+          a subtype.
+        * Source-grounded labels remain broad BACH categories; invasive is not
+          relabelled IDC and in-situ is not relabelled DCIS.
         """
         request_id = new_request_id()
         if not req.wsi_url and not req.wsi_bytes_b64 and not req.report_text:
@@ -1222,8 +1223,8 @@ def create_app() -> FastAPI:
                 )
             else:
                 try:
-                    from oncology_arbiter.models.biopsy_medsiglip_probe import (
-                        BiopsyMedSigLipProbe,
+                    from oncology_arbiter.models.biopsy_probe_v1_wiring import (
+                        build_biopsy_probe,
                     )
                     from oncology_arbiter.models.hai_def import (
                         GatedAccessError,
@@ -1231,7 +1232,7 @@ def create_app() -> FastAPI:
                         _discover_hf_token,
                     )
 
-                    probe = BiopsyMedSigLipProbe()
+                    probe = build_biopsy_probe(embedding_client=_get_medsiglip())
                     image_bytes = _decode_bytes_arg(req.wsi_bytes_b64)
                     image_url = str(req.wsi_url) if req.wsi_url else None
                     result = probe.run(
@@ -1241,7 +1242,7 @@ def create_app() -> FastAPI:
                     subtype_prediction = result.subtype
                     confidence = float(result.subtype_probs[result.subtype])
                     model_state = ModelState.LOADED_BIOPSY_PROBE
-                    model_name = "google/medsiglip-448+biopsy_probe_v0"
+                    model_name = result.model_name
                     warnings.extend(result.warnings)
                     # If the probe surfaced a runtime GateReport (allowed
                     # preflight), thread it through.

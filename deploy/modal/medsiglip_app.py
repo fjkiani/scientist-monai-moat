@@ -30,6 +30,9 @@ from typing import Any, Dict, List, Optional
 import modal
 
 APP_VERSION = "medsiglip-modal-v0.4.0-alpha"
+MODEL_REPO = "google/medsiglip-448"
+# Immutable base revision used for every biopsy-probe training embedding.
+MODEL_REVISION = "9cea28a1a1195f665105faa6e8544c112fd960a4"
 
 # ── Prod flip knob ───────────────────────────────────────────────────
 # ``MEDSIGLIP_MODAL_MODE=prod`` deploys with min_containers=1 (keeps one
@@ -76,7 +79,7 @@ HEALTH_IMAGE = modal.Image.debian_slim(python_version="3.11").pip_install(
 @app.function(image=HEALTH_IMAGE)
 @modal.fastapi_endpoint(method="GET", label="medsiglip-healthz")
 def healthz() -> Dict[str, str]:
-    return {"status": "ok", "app": "medsiglip-448", "version": "v0.3.0"}
+    return {"status": "ok", "app": "medsiglip-448", "version": APP_VERSION}
 
 
 # ── GPU-backed class ─────────────────────────────────────────────────
@@ -101,17 +104,24 @@ class MedSigLipModal:
         token = os.environ.get("HF_TOKEN")
         assert token, "HF_TOKEN missing from Modal secret medsiglip-hf-token"
         api = HfApi(token=token)
-        info = api.model_info("google/medsiglip-448")
-        assert info is not None, "model_info returned None for google/medsiglip-448"
+        info = api.model_info(MODEL_REPO, revision=MODEL_REVISION)
+        assert info is not None, f"model_info returned None for {MODEL_REPO}"
+        resolved_revision = str(getattr(info, "sha", ""))
+        assert resolved_revision == MODEL_REVISION, (
+            f"resolved revision drift: expected {MODEL_REVISION}, "
+            f"got {resolved_revision}"
+        )
+        self.model_revision = resolved_revision
 
         # Load processor + model. AutoModel loads the full SigLIP two-tower
         # model; the text tower is only touched by /zero_shot.
         self.processor = AutoProcessor.from_pretrained(
-            "google/medsiglip-448", token=token
+            MODEL_REPO, token=token, revision=MODEL_REVISION
         )
         self.model = AutoModel.from_pretrained(
-            "google/medsiglip-448",
+            MODEL_REPO,
             token=token,
+            revision=MODEL_REVISION,
             torch_dtype=torch.float32,
         )
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -193,7 +203,8 @@ class MedSigLipModal:
     @modal.fastapi_endpoint(method="GET", label="medsiglip-info")
     def info(self) -> Dict[str, Any]:
         return {
-            "model_repo": "google/medsiglip-448",
+            "model_repo": MODEL_REPO,
+            "model_revision": self.model_revision,
             "input_resolution": self.input_resolution,
             "embedding_dim": self.embedding_dim,
             "device": self.device,

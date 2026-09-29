@@ -78,6 +78,9 @@ from oncology_arbiter.models.siglip_baseline import (
 
 
 MEDSIGLIP_REPO: str = "google/medsiglip-448"
+# Immutable Hugging Face commit used to generate the biopsy-probe embeddings.
+# Production loaders pin this revision rather than following repository main.
+MEDSIGLIP_REVISION: str = "9cea28a1a1195f665105faa6e8544c112fd960a4"
 MEDSIGLIP_INPUT_RES: int = 448
 MEDSIGLIP_ARCH: str = "SigLIP-400M vision + 400M text"
 MEDSIGLIP_LICENSE: str = "health-ai-developer-foundations"
@@ -164,6 +167,7 @@ class MedSigLip:
         self,
         *,
         repo_id: str = MEDSIGLIP_REPO,
+        revision: str = MEDSIGLIP_REVISION,
         device: str = "cpu",
         preflight_fn: PreflightFn | None = None,
         processor_cls: Any = None,
@@ -171,6 +175,9 @@ class MedSigLip:
         preprocess_fn: Any = None,
     ) -> None:
         self.repo_id = repo_id
+        self.revision = revision
+        # Shared identity name used by the Modal client and production builders.
+        self.model_revision = revision
         self.device = device
         self._preflight_fn: PreflightFn = preflight_fn or check_hai_def_access
         self._processor_cls = processor_cls
@@ -209,7 +216,7 @@ class MedSigLip:
         # gating is respected end-to-end (config.json probe succeeded → the
         # same token must be attached when transformers pulls model.safetensors).
         token = _discover_hf_token()
-        kwargs: dict[str, Any] = {}
+        kwargs: dict[str, Any] = {"revision": self.revision}
         if token:
             kwargs["token"] = token
         self._processor = processor_cls.from_pretrained(self.repo_id, **kwargs)
@@ -339,8 +346,9 @@ class MedSigLip:
         must be provided. Used by L4b (biopsy probe) which needs the raw
         image embedding rather than a zero-shot text-image comparison.
 
-        Returns a 1-D float32 numpy array of length equal to the model's
-        pooled projection dimension (768 for medsiglip-448).
+        Returns the exact unprojected 1,152-dimensional
+        ``vision_model(...).pooler_output`` vector used to train the BACH v1
+        biopsy head. Projected ``get_image_features()`` output is forbidden.
 
         Raises
         ------
@@ -383,18 +391,24 @@ class MedSigLip:
         except Exception:
             pass
 
+        pixel_values = inputs.get("pixel_values")
+        if pixel_values is None:
+            raise RuntimeError("MedSigLIP processor returned no pixel_values")
+
         with torch.no_grad():
-            # SigLIP-family models expose get_image_features() on the base
-            # SiglipModel and its subclasses.
-            if hasattr(self._model, "get_image_features"):
-                feats = self._model.get_image_features(**inputs)
-            else:
-                # Fallback: run the full model and pull pooled_output from the
-                # vision-tower branch.
-                outputs = self._model.vision_model(**inputs)  # type: ignore[attr-defined]
-                feats = getattr(outputs, "pooler_output", None)
-                if feats is None:
-                    feats = outputs.last_hidden_state.mean(dim=1)
+            # Identity-critical contract: the BACH head was trained on the
+            # unprojected 1,152-d vision-tower pooler output.  Do not replace
+            # this with get_image_features(), whose projected representation
+            # is a different feature space even when dimensions happen to fit.
+            outputs = self._model.vision_model(  # type: ignore[attr-defined]
+                pixel_values=pixel_values
+            )
+            feats = getattr(outputs, "pooler_output", None)
+            if feats is None:
+                raise RuntimeError(
+                    "MedSigLIP vision_model returned no pooler_output; refusing "
+                    "a representation fallback incompatible with biopsy_probe_v1"
+                )
 
         emb = feats.squeeze(0).cpu().float().numpy()
         if emb.ndim != 1:
@@ -406,6 +420,7 @@ class MedSigLip:
 
 __all__ = [
     "MEDSIGLIP_REPO",
+    "MEDSIGLIP_REVISION",
     "MEDSIGLIP_INPUT_RES",
     "MEDSIGLIP_ARCH",
     "MEDSIGLIP_LICENSE",
