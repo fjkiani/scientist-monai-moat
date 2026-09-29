@@ -2,7 +2,7 @@
 name: oncology-moat-platform
 description: >-
   Master hardwire for scientist-monai-moat oncology platform. Aligns Alpha's
-  arbiter reports under caspro/.cursor/rules/arbriter with live branch truth
+  arbiter reports under .cursor/rules/arbriter with live branch truth
   (templates n_training=0). Forces tonight delivery of weights/code — bans
   multi-month evidence theater. Use for oncology arbiter, sob remediations,
   tumor-board backend, or any moat ship claim.
@@ -16,7 +16,7 @@ description: >-
 
 | Source | Role |
 |--------|------|
-| `/Users/fahadkiani/Desktop/development/caspro/caspro/.cursor/rules/arbriter/` | Alpha's packed sob reports (index, waves, audit items) |
+| `.cursor/rules/arbriter/` | Alpha's packed sob reports (index, waves, audit items) |
 | `artifacts/audit/gate_violation_bf5e54f8.json` | Binding Findings A–L — **RED_NOT_MERGEABLE** |
 | `artifacts/audit/quarantine_receipt.json` | Synthetic biopsy + banned ClinicalBERT headlines |
 | `docs/regulatory/WEIGHT_REDISTRIBUTION.md` | Named weight floors (CBIS/Mammo/LUNA refine) |

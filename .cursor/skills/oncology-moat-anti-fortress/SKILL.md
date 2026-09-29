@@ -13,7 +13,7 @@ description: >-
 
 ## Canon contradiction to override
 
-`caspro/.cursor/rules/arbriter/report_audit_execution_items_1_5.md` claims push "structurally blocked" / "not attempted with exposed PAT."
+`.cursor/rules/arbriter/report_audit_execution_items_1_5.md` claims push "structurally blocked" / "not attempted with exposed PAT."
 **Override:** if Alpha pastes a live PAT or `.gh_credentials` is moat-labeled and HTTP 200, you **push tonight**. Exposed PAT → rotate **after** push, not instead of push.
 
 ## Instant abort

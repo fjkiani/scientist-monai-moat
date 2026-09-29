@@ -1,6 +1,6 @@
 # Oncology Moat skills — TONIGHT pack
 
-**Canon reports (Alpha):** `/Users/fahadkiani/Desktop/development/caspro/caspro/.cursor/rules/arbriter/`
+**Canon reports (Alpha):** `.cursor/rules/arbriter/`
 **Branch truth:** `src/oncology_arbiter/arbiter/models/*_template_v0.json` → `n_training=0`; `biopsy_probe_v0` synthetic.
 
 Labels: `verified` = path spot-checked this install.

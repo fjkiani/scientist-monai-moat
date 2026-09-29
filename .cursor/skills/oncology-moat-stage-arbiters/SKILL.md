@@ -13,7 +13,7 @@ description: >-
 
 ## Canon alignment
 
-- Alpha reports: `caspro/.cursor/rules/arbriter/report_end_to_end_audit.md` §3 (v2 arbiters), `report_wave_reports_index.md` (Wave-3 closure headlines).
+- Alpha reports: `.cursor/rules/arbriter/report_end_to_end_audit.md` §3 (v2 arbiters), `report_wave_reports_index.md` (Wave-3 closure headlines).
 - **Live HEAD check beats reports:** if file missing on branch, report claim is **not delivered**.
 
 ## Current defects (re-verify)
