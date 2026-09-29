@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "files": {
+    ".github/CODEOWNERS": "8fabe5b033b6ee601411c412e3561805ad5c2936b17dad44e4408bce9ef4cbef",
+    ".github/oncology-gauntlet/Dockerfile": "08ab00ae278eb85d182dfc12014494633ef57868e00257f7c60563d75c2ae8a2",
+    ".github/oncology-gauntlet/requirements.lock": "78f32dcae19525feeabf8433428f962fadf2ee284a78531161988e03ef49ffbd",
+    ".github/workflows/oncology-gauntlet.yml": "efd62103ad50b2a3d27575f19602dfdf75228eb2f5948518bdf378eaab19accb",
+    ".github/workflows/oncology-guardian.yml": "a6dfe47882b57aeff99ceed4ddb325b710edb8e7eddceb74e523a86df0e6e001",
+    "scripts/oncology_gauntlet.py": "abaca08743e868ee54c30088a6fb813211184cf12b1213bf2a0bca23fa8949dd",
+    "scripts/oncology_llm_review.py": "d409f0fe79c014b51c2e97c4732a50898e8c1fb312672c3181c512f8f36a8ae1",
+    "scripts/oncology_runtime_verifier.py": "1bf1f9cf47f03fb4f84f2aaf455496596bafb366aa483b9a91b0469e70897e9f",
+    "scripts/oncology_trusted_test_runner.py": "a4d4a5cbb0104a4f6da02fc96ae3c17e163aac4953e799afc8abaaa0f679f2c3",
+    ".cursor/skills/INDEX.md": "9e0450857f43bd1b53f00de55464a60faf165fe55e406473d010bc6862809c24",
+    ".cursor/skills/oncology-moat-platform/validate_tonight_delivery.py": "772d38ec766c7946561b82e9b0d0b31bb0dbd40bb4c59c7c2c27a8132a902152",
+    "tests/conftest.py": "077cf65ff10f0a1355852a983fb14bc51fa1e30ec896f084cb58511978c89e89",
+    "tests/unit/test_luna16_finetune.py": "8de2b972916685dc3ba7fedf4725b17ddb34dc254c89d751282dc4b451add143",
+    "tests/unit/test_medsiglip_modal_prod_flip.py": "0079555b99c1a09e101e419770e1ecfd4240426f0d82956626b9f292444a62a4",
+    "tests/unit/test_oncology_gauntlet.py": "86fdcf4ed9b3473488f0cf369e31a014cdb61bd81b72b5c0703a7be36d79ca9f",
+    ".cursor/skills/oncology-moat-anti-fortress/SKILL.md": "bf5a223612fd48eb293e4fca270524ca64f97a775fb5ca47b777f8b11d14eb44",
+    ".cursor/skills/oncology-moat-biopsy/SKILL.md": "6561e80ca3b2e21e40e827bf9f8a1d3cfa6ec9757231cdf82d200939ffc87c17",
+    ".cursor/skills/oncology-moat-cbis-medsiglip/SKILL.md": "cc2049820f0a5a41abbba24adc2088e652cebb1c6fd41c0cf93d1241f076e82c",
+    ".cursor/skills/oncology-moat-clinicalbert/SKILL.md": "4fa2c2bd96e9138a11bd4195d2f9f5c084aff131076bcd8664adb367fbe7c022",
+    ".cursor/skills/oncology-moat-luna16/SKILL.md": "4de424f8fe8d1ac06b41f4de0331ff51aaec3b778058d05ad181a4419eb91c51",
+    ".cursor/skills/oncology-moat-medgemma/SKILL.md": "af19c2c470264da3f2d7e1adaa62a486f276da9fe4be9b9026a133d5b300f927",
+    ".cursor/skills/oncology-moat-phikon/SKILL.md": "e805940751c1d161ea9dc99d767dd47b77c95d4f1207e9808e6853d4330b4c2f",
+    ".cursor/skills/oncology-moat-platform/SKILL.md": "d0d0ccacb5d111f3c5e67e91b55735dbeca55d109e6edbea13204a832eda3392",
+    ".cursor/skills/oncology-moat-stage-arbiters/SKILL.md": "9ecf20e9c11a7508d658365ecca614790e7e2030207b700b14da8798d5f04c40",
+    ".cursor/skills/oncology-moat-weight-floors/SKILL.md": "b44ef572edc75d923f694784e06ae31b8cba30cd86f32cc4b660d4422e2d8c4b"
+  }
+}

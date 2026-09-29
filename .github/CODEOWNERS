@@ -1,0 +1,7 @@
+# Alpha owns the enforcement plane. Capability agents may not weaken it.
+/.github/ @fjkiani
+/.cursor/skills/ @fjkiani
+/scripts/oncology_gauntlet.py @fjkiani
+/scripts/oncology_llm_review.py @fjkiani
+/scripts/oncology_runtime_verifier.py @fjkiani
+/scripts/oncology_trusted_test_runner.py @fjkiani
