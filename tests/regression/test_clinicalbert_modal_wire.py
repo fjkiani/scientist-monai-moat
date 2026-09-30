@@ -1,6 +1,6 @@
-"""Regression: enforce v0.4.1 prod wiring for the ClinicalBERT report parser.
+"""Regression: enforce production wiring for the ClinicalBERT report parser.
 
-The v0.4.1 production plan requires:
+The production contract requires:
 
   1. ``render.yaml`` publishes the environment variables the app.py NSCLC
      branch needs to route to the Modal deployment.
@@ -19,8 +19,8 @@ which is deliberately kept out of the ``regression`` marker's scope.
 from __future__ import annotations
 
 import ast
-from pathlib import Path
 import re
+from pathlib import Path
 
 import pytest
 
@@ -46,10 +46,10 @@ def test_render_yaml_declares_modal_env() -> None:
     ), "render.yaml does not set CLINICALBERT_BACKEND=modal"
     assert re.search(
         r"^\s*-\s*key:\s*CLINICALBERT_MODAL_URL\s*\n\s*value:\s*"
-        r"https://crispro-test--clinicalbert\s*$",
+        r"https://crispro--clinicalbert\s*$",
         text,
         re.MULTILINE,
-    ), "render.yaml does not set CLINICALBERT_MODAL_URL to the crispro-test URL"
+    ), "render.yaml does not set CLINICALBERT_MODAL_URL to the deployed real-data URL"
     # Co-Scientist MUST stay ON — otherwise elo_ranked_hypotheses is empty
     # even after the ClinicalBERT parse succeeds.
     assert re.search(

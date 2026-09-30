@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 import threading
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 from oncology_arbiter.nlp.clinicalbert_runtime_v2 import (
     DISCLAIMER,
@@ -14,6 +14,9 @@ from oncology_arbiter.nlp.clinicalbert_runtime_v2 import (
 )
 
 APP_VERSION = "clinicalbert-local-v2.0.0-real-tcga"
+EXPECTED_LOCAL_ARTIFACT_SHA256 = "429f804d7f348d7c4eeb27821f766cc2de65c4072f20db0c3b3afaefa9068e50"
+if EXPECTED_LOCAL_ARTIFACT_SHA256 != EXPECTED_ARTIFACT_SHA256:
+    raise RuntimeError("ClinicalBERT local/runtime artifact contract drift")
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 _DEFAULT_BUNDLE_DIR = os.environ.get(
     "CLINICALBERT_LOCAL_WEIGHT_DIR",
@@ -46,8 +49,8 @@ class ClinicalBertLocalClient:
     def __init__(
         self,
         *,
-        weight_dir: Optional[str] = None,
-        base_model_dir: Optional[str] = None,
+        weight_dir: str | None = None,
+        base_model_dir: str | None = None,
     ) -> None:
         self.weight_dir = weight_dir or _DEFAULT_BUNDLE_DIR
         self.base_model_dir = base_model_dir if base_model_dir is not None else _DEFAULT_BASE_DIR
@@ -58,24 +61,24 @@ class ClinicalBertLocalClient:
         except Exception as exc:
             raise ClinicalBertLocalError(f"ClinicalBERT v2 load failed: {type(exc).__name__}: {exc}") from exc
 
-    def healthz(self) -> Dict[str, Any]:
+    def healthz(self) -> dict[str, Any]:
         return {
             "status": "ok",
             "app": "clinicalbert-local",
             "app_version": APP_VERSION,
-            "expected_artifact_sha256": EXPECTED_ARTIFACT_SHA256,
+            "expected_artifact_sha256": EXPECTED_LOCAL_ARTIFACT_SHA256,
             "disclaimer": DISCLAIMER,
         }
 
-    def info(self) -> Dict[str, Any]:
+    def info(self) -> dict[str, Any]:
         identity = self._get().identity()
         return {"app": "clinicalbert-local", "app_version": APP_VERSION, **identity, "disclaimer": DISCLAIMER}
 
-    def parse(self, report_text: str) -> Dict[str, Any]:
+    def parse(self, report_text: str) -> dict[str, Any]:
         try:
             result = self._get().parse(report_text)
         except Exception as exc:
             raise ClinicalBertLocalError(f"ClinicalBERT v2 parse failed: {type(exc).__name__}: {exc}") from exc
-        if result.get("artifact_sha256") != EXPECTED_ARTIFACT_SHA256:
+        if result.get("artifact_sha256") != EXPECTED_LOCAL_ARTIFACT_SHA256:
             raise ClinicalBertLocalError("ClinicalBERT v2 response artifact identity mismatch")
         return {"app_version": APP_VERSION, **result}

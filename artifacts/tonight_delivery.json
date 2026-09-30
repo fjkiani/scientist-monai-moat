@@ -71,6 +71,27 @@
       "wiring_paths": [
         "src/oncology_arbiter/models/biopsy_probe_v1_wiring.py"
       ]
+    },
+    {
+      "artifact_path": "artifacts/clinicalbert/clinicalbert_head_v2.safetensors",
+      "artifact_sha256": "429f804d7f348d7c4eeb27821f766cc2de65c4072f20db0c3b3afaefa9068e50",
+      "evaluation_path": "artifacts/clinicalbert/clinicalbert_evaluation_v2.json",
+      "evaluation_sha256": "55f16a059c9bd96ff1a5e7c4a5bf681d64a781f833da3fd3c578b9b80b1f4fd4",
+      "n_training": 2187,
+      "n_training_synthetic": false,
+      "name": "clinicalbert",
+      "status": "trained_wired_tested",
+      "test_paths": [
+        "tests/nlp/test_clinicalbert_v2_artifact_identity.py"
+      ],
+      "train_manifest_path": "artifacts/clinicalbert/clinicalbert_train_manifest_v2.json",
+      "train_manifest_sha256": "a1146cfcef7d09b4201eb093b3bf5660e4bd1daa789c844fdeb7fb3c4dd6fe72",
+      "wiring_paths": [
+        "src/oncology_arbiter/nlp/clinicalbert_runtime_v2.py",
+        "src/oncology_arbiter/nlp/clinicalbert_local_client.py",
+        "src/oncology_arbiter/nlp/clinicalbert_modal_client.py",
+        "deploy/modal/clinicalbert_app.py"
+      ]
     }
   ],
   "schema_version": 2
