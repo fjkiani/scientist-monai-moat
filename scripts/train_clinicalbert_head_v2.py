@@ -183,6 +183,7 @@ def predict_report(
     max_length: int,
     stride: int,
     inference_batch_size: int,
+    non_o_margin_threshold: float,
 ) -> tuple[list[dict[str, Any]], int]:
     encoding = tokenizer(
         row["tokens"],
@@ -218,7 +219,13 @@ def predict_report(
     if np.any(counts == 0):
         missing = np.flatnonzero(counts == 0)[:10].tolist()
         raise RuntimeError(f"sliding windows did not cover source words: {missing}")
-    predicted_ids = np.argmax(sums / counts[:, None], axis=1)
+    averaged_logits = sums / counts[:, None]
+    if id2label.get(0) != "O" or averaged_logits.shape[1] < 2:
+        raise RuntimeError("label map must place O at index zero and include entity labels")
+    best_non_o_ids = np.argmax(averaged_logits[:, 1:], axis=1) + 1
+    best_non_o_logits = averaged_logits[np.arange(len(best_non_o_ids)), best_non_o_ids]
+    non_o_margins = best_non_o_logits - averaged_logits[:, 0]
+    predicted_ids = np.where(non_o_margins >= non_o_margin_threshold, best_non_o_ids, 0)
     predicted_labels = [id2label[int(value)] for value in predicted_ids]
     return decode_entities(row["text"], row["tokens"], predicted_labels), len(word_ids_by_window)
 
@@ -264,12 +271,14 @@ def evaluate_rows(
     stride: int,
     inference_batch_size: int,
     base_revision: str,
+    non_o_margin_threshold: float,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     predictions: list[dict[str, Any]] = []
     started = time.perf_counter()
     for index, row in enumerate(rows, 1):
         predicted_entities, window_count = predict_report(
-            model, tokenizer, row, id2label, device, max_length, stride, inference_batch_size
+            model, tokenizer, row, id2label, device, max_length, stride,
+            inference_batch_size, non_o_margin_threshold,
         )
         predicted_target, predicted_structured_sha = strict_target(predicted_entities)
         predictions.append({
@@ -293,6 +302,7 @@ def evaluate_rows(
             "uncertainty_term_count": row["uncertainty_term_count"],
             "base_model": BASE_MODEL,
             "base_revision": base_revision,
+            "non_o_margin_threshold": non_o_margin_threshold,
         })
         if index % 25 == 0:
             print(f"[evaluate] {index}/{len(rows)}", flush=True)
@@ -304,6 +314,7 @@ def evaluate_rows(
     metrics["n_reports"] = len(predictions)
     metrics["n_windows"] = sum(int(row["window_count"]) for row in predictions)
     metrics["seconds"] = elapsed
+    metrics["non_o_margin_threshold"] = non_o_margin_threshold
     return predictions, metrics
 
 
@@ -423,7 +434,7 @@ def main() -> None:
                 print(f"[train] epoch={epoch} step={step}/{len(loader)} loss={float(loss):.5f}", flush=True)
         validation_predictions, validation_metrics = evaluate_rows(
             model, tokenizer, validation_rows, id2label, device,
-            args.max_length, args.stride, args.inference_batch_size, args.base_revision,
+            args.max_length, args.stride, args.inference_batch_size, args.base_revision, 0.0,
         )
         validation_f1 = float(validation_metrics["micro"]["f1"])
         epoch_seconds = time.perf_counter() - epoch_started
@@ -451,19 +462,72 @@ def main() -> None:
             })
     train_seconds = time.perf_counter() - train_started
     load_head(model, artifact_path)
+
+    # Calibrate one global non-O logit margin using validation rows only. This
+    # controls the false-positive inflation induced by class weighting without
+    # consulting the pathologist-gold test or independent external cohort.
+    threshold_candidates = [
+        0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75,
+        2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0, 8.0, 10.0,
+    ]
+    threshold_search: list[dict[str, Any]] = []
+    best_threshold_key: tuple[float, float, float] | None = None
+    selected_threshold = 0.0
+    validation_predictions: list[dict[str, Any]] = []
+    validation_metrics: dict[str, Any] = {}
+    for threshold in threshold_candidates:
+        candidate_predictions, candidate_metrics = evaluate_rows(
+            model, tokenizer, validation_rows, id2label, device,
+            args.max_length, args.stride, args.inference_batch_size,
+            args.base_revision, threshold,
+        )
+        micro = candidate_metrics["micro"]
+        threshold_record = {
+            "non_o_margin_threshold": threshold,
+            "micro_f1": float(micro["f1"]),
+            "precision": float(micro["precision"]),
+            "recall": float(micro["recall"]),
+            "tp": int(micro["tp"]),
+            "fp": int(micro["fp"]),
+            "fn": int(micro["fn"]),
+        }
+        threshold_search.append(threshold_record)
+        print(f"[threshold] {json.dumps(threshold_record, sort_keys=True)}", flush=True)
+        candidate_key = (
+            threshold_record["micro_f1"],
+            threshold_record["precision"],
+            -threshold,
+        )
+        if best_threshold_key is None or candidate_key > best_threshold_key:
+            best_threshold_key = candidate_key
+            selected_threshold = threshold
+            validation_predictions = candidate_predictions
+            validation_metrics = candidate_metrics
+    if best_threshold_key is None:
+        raise RuntimeError("validation threshold search produced no candidates")
+
+    save_head(model, artifact_path, {
+        "artifact_type": "clinicalbert-token-classification-head",
+        "base_model": args.base_model,
+        "base_revision": args.base_revision,
+        "dataset_sha256": args.dataset_sha256,
+        "split_sha256": args.split_sha256,
+        "training_seed": str(args.seed),
+        "best_epoch": str(best_epoch),
+        "non_o_margin_threshold": str(selected_threshold),
+        "threshold_selection": "validation_span_micro_f1",
+    })
     artifact_sha = sha_file(artifact_path)
 
-    validation_predictions, validation_metrics = evaluate_rows(
-        model, tokenizer, validation_rows, id2label, device,
-        args.max_length, args.stride, args.inference_batch_size, args.base_revision,
-    )
     test_predictions, test_metrics = evaluate_rows(
         model, tokenizer, test_rows, id2label, device,
-        args.max_length, args.stride, args.inference_batch_size, args.base_revision,
+        args.max_length, args.stride, args.inference_batch_size,
+        args.base_revision, selected_threshold,
     )
     external_predictions, external_metrics = evaluate_rows(
         model, tokenizer, external_rows, id2label, device,
-        args.max_length, args.stride, args.inference_batch_size, args.base_revision,
+        args.max_length, args.stride, args.inference_batch_size,
+        args.base_revision, selected_threshold,
     )
     for collection in (validation_predictions, test_predictions, external_predictions):
         for row in collection:
@@ -490,6 +554,8 @@ def main() -> None:
         "num_labels": len(labels),
         "max_length": args.max_length,
         "stride": args.stride,
+        "non_o_margin_threshold": selected_threshold,
+        "threshold_selection": "validation_span_micro_f1",
         "label_map": label_map,
         "dataset_sha256": args.dataset_sha256,
         "split_sha256": args.split_sha256,
@@ -505,6 +571,9 @@ def main() -> None:
         "dataset_sha256": args.dataset_sha256,
         "split_sha256": args.split_sha256,
         "best_epoch": best_epoch,
+        "selected_non_o_margin_threshold": selected_threshold,
+        "threshold_selection_split": "validation",
+        "threshold_search": threshold_search,
         "history": history,
         "validation": validation_metrics,
         "test": test_metrics,
@@ -541,6 +610,8 @@ def main() -> None:
         "stride": args.stride,
         "seed": args.seed,
         "best_epoch": best_epoch,
+        "selected_non_o_margin_threshold": selected_threshold,
+        "threshold_selection_split": "validation",
         "train_seconds": train_seconds,
         "train_windows_per_second": (len(train_dataset) * args.epochs) / max(train_seconds, 1e-12),
         "total_seconds": time.perf_counter() - wall_start,
