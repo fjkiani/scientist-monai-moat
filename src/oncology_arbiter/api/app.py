@@ -1247,7 +1247,7 @@ def create_app() -> FastAPI:
             })
             model_state = ModelState.LOADED_MEDSIGLIP
 
-            # CBIS-DDSM LogReg v1 (joblib sha256 e5f5b67c…) — trained probe over
+            # CBIS-DDSM LogReg v2 (joblib sha256 e5f5b67c…) — trained probe over
             # the same 1152-d embedding. Opt-out only: set
             # ONCOLOGY_ARBITER_ENABLE_CBIS_DDSM_PROBE=0 to skip.
             cbis_disabled = os.environ.get(
