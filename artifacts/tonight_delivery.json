@@ -92,6 +92,47 @@
         "src/oncology_arbiter/nlp/clinicalbert_modal_client.py",
         "deploy/modal/clinicalbert_app.py"
       ]
+    },
+    {
+      "artifact_path": "models/cbis_ddsm_logreg_v1.joblib",
+      "artifact_sha256": "80cd01d8724ab4fac4b6ca8ec9b755afa6db2ec3d96ba086d8fb7a83eddbd3ea",
+      "evaluation_path": "artifacts/cbis_medsiglip/cbis_medsiglip_evaluation_v2.json",
+      "evaluation_sha256": "7a1affc9ade7774ee967f9386c8c3a33dd3a1a2b597c15893f46648fc3130726",
+      "metrics_sidecar": "docs/proofs/cbis_ddsm_logreg_v1_metrics.json",
+      "n_training": 451,
+      "n_training_synthetic": false,
+      "name": "cbis-medsiglip",
+      "status": "trained_wired_tested",
+      "test_paths": [
+        "tests/unit/test_cbis_medsiglip_v1_identity.py"
+      ],
+      "train_manifest_path": "artifacts/cbis_medsiglip/cbis_medsiglip_train_v2.json",
+      "train_manifest_sha256": "561acb014463fe3dd42988e5c809c079f43a3dc33757728b5335278e41fda683",
+      "wiring_paths": [
+        "src/oncology_arbiter/models/cbis_ddsm_probe.py",
+        "src/oncology_arbiter/api/app.py"
+      ]
+    },
+    {
+      "artifact_path": "models/luna16/luna16_candidate_90e733f34c6a.safetensors",
+      "artifact_sha256": "a1cf3fadf3bebcf14d405c75799acf9e045f13e41370f1d83368900662d4ed24",
+      "baseline_rollback_sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01",
+      "delivery_status": "retained_research_artifact",
+      "evaluation_path": "artifacts/luna16/luna16_delivery_evaluation_v2.json",
+      "evaluation_sha256": "8e16b2f958b452852e7be175acfaff12ac4fa9bd280384bef38e0363ee9416d1",
+      "froc_receipt_path": "models/luna16/luna16_candidate_90e733f34c6a_froc_result.json",
+      "n_training": 10,
+      "n_training_synthetic": false,
+      "name": "luna16",
+      "status": "trained_wired_tested",
+      "test_paths": [
+        "tests/unit/test_luna16_candidate_delivery_identity.py"
+      ],
+      "train_manifest_path": "artifacts/luna16/luna16_delivery_train_v2.json",
+      "train_manifest_sha256": "489ea61e39cb5f29b29f87e050df5db11fa9f868b09cf41429f8c5c0e200566d",
+      "wiring_paths": [
+        "src/oncology_arbiter/nsclc/luna16_retinanet.py"
+      ]
     }
   ],
   "schema_version": 2

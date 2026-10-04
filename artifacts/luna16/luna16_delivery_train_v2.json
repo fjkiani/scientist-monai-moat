@@ -1,0 +1,20 @@
+{
+  "capability": "luna16",
+  "command": "MODAL_PROFILE=fjkiani modal run deploy/modal/luna16_fullfit_app.py --request-id gateD-fjkiani-20261003T0435Z-zo",
+  "completed_at": "2026-10-04T08:35:48Z",
+  "dataset": "LUNA16 held-out Gate-D FROC evaluation cohort (88 scans)",
+  "dataset_manifest_path": "artifacts/luna16/luna16_delivery_dataset_v2.json",
+  "dataset_sha256": "8de45f5201c740aaf65128e78300289815db4aceb75b13770f623ea3afa4290b",
+  "n_test": 88,
+  "n_training": 10,
+  "n_training_synthetic": false,
+  "n_validation": 10,
+  "notes": "Candidate 90e733f3 collapsed (flat ~0.138). Baseline b5e79231 remains production. Floor fail recorded.",
+  "patient_disjoint": true,
+  "schema_version": 2,
+  "seed": 20261003,
+  "source_commit": "397bea33cd973abf477b53556e5909b09b3b3657",
+  "split_manifest_path": "artifacts/luna16/luna16_delivery_split_v2.json",
+  "split_sha256": "5260203f4c1f13f863ecebc19058db5308a860215da2a31132817c9a623b813a",
+  "started_at": "2026-10-04T08:30:48Z"
+}

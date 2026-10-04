@@ -1,0 +1,20 @@
+{
+  "capability": "cbis-medsiglip",
+  "command": "python scripts/train_cbis_ddsm_logreg.py --artifacts artifacts/cbis_ddsm_nbia_dicom --out-dir models",
+  "completed_at": "2026-10-04T08:35:48Z",
+  "dataset": "CBIS-DDSM NBIA DICOM MedSigLIP-448 embeddings (probe evaluation cohort)",
+  "dataset_manifest_path": "artifacts/cbis_medsiglip/cbis_medsiglip_dataset_v2.json",
+  "dataset_sha256": "79c407c81ae28da11b38500236030acdd8248234011f5c9831db43103daebb49",
+  "n_test": 98,
+  "n_training": 451,
+  "n_training_synthetic": false,
+  "n_validation": 96,
+  "notes": "Registers shipped models/cbis_ddsm_logreg_v1.joblib (80cd01d8). Official CBIS-DDSM_1024 held-out AUC\u22480.7526 in docs/proofs; NBIA packaging used for row-level recomputation. Floor 0.85 will FAIL honestly.",
+  "patient_disjoint": true,
+  "schema_version": 2,
+  "seed": 42,
+  "source_commit": "397bea33cd973abf477b53556e5909b09b3b3657",
+  "split_manifest_path": "artifacts/cbis_medsiglip/cbis_medsiglip_split_v2.json",
+  "split_sha256": "bc37d7f7975c1951de01f2ef22dbac4c1c280fccf8ac3610f55cf07ac7541078",
+  "started_at": "2026-10-04T08:30:48Z"
+}

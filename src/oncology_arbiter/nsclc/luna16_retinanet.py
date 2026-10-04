@@ -349,3 +349,5 @@ class LungNoduleDetector:
             },
             inference_seconds=dt,
         )
+
+# Delivery identity: luna16_candidate_90e733f34c6a.safetensors a1cf3fad… (research artifact; not promoted)

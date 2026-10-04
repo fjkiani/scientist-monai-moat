@@ -1,0 +1,701 @@
+{
+  "artifact_sha256": "80cd01d8724ab4fac4b6ca8ec9b755afa6db2ec3d96ba086d8fb7a83eddbd3ea",
+  "capability": "cbis-medsiglip",
+  "dataset_sha256": "79c407c81ae28da11b38500236030acdd8248234011f5c9831db43103daebb49",
+  "metric": {
+    "n": 98,
+    "name": "auroc",
+    "value": 0.711864406779661
+  },
+  "metrics_sidecar": "docs/proofs/cbis_ddsm_logreg_v1_metrics.json",
+  "rows": [
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.85952214611170506017891429690540035518",
+      "sample_id": "cbis-nbia-0001",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.5840054154396057,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.59887648512379053809277845872128232362",
+      "sample_id": "cbis-nbia-0007",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.24794994294643402,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.53981029411515416635208605883563819654",
+      "sample_id": "cbis-nbia-0019",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.09490761160850525,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.53164963713539945704420389270899642316",
+      "sample_id": "cbis-nbia-0029",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.526989221572876,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.95930514311143196521379851620797527375",
+      "sample_id": "cbis-nbia-0034",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.006457808893173933,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.81893494413544881216885610760867316033",
+      "sample_id": "cbis-nbia-0038",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.7429178357124329,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.69686622212106490038029293173339040059",
+      "sample_id": "cbis-nbia-0045",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.07493460178375244,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.47772150812629014000458732812506911221",
+      "sample_id": "cbis-nbia-0050",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.321960985660553,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.71398149011079150828226233641279923807",
+      "sample_id": "cbis-nbia-0058",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.6366214156150818,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.99008179012572848208364353570880638263",
+      "sample_id": "cbis-nbia-0062",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.7807191014289856,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.74504296312163760305056065661669925702",
+      "sample_id": "cbis-nbia-0073",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.326057493686676,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.81471011312650121631650241400160900958",
+      "sample_id": "cbis-nbia-0088",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.28002598881721497,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.96513597513029391720964120841854212659",
+      "sample_id": "cbis-nbia-0090",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.7048220038414001,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.83882081811707961806397341681542038535",
+      "sample_id": "cbis-nbia-0094",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1929633617401123,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.79352214011910536602988061690782315986",
+      "sample_id": "cbis-nbia-0097",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.548149585723877,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.96055546212612146511521525081909597765",
+      "sample_id": "cbis-nbia-0115",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4357658624649048,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.65600667311336576717304559970374263647",
+      "sample_id": "cbis-nbia-0118",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.8280231952667236,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.65603312513435703008593993544017526418",
+      "sample_id": "cbis-nbia-0123",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.8313822746276855,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.57356823611525636036904521060745035167",
+      "sample_id": "cbis-nbia-0131",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.5427127480506897,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.48473032313233605538418748780882019557",
+      "sample_id": "cbis-nbia-0132",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.7317122220993042,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.63254124010382412106140886080421874346",
+      "sample_id": "cbis-nbia-0135",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.3697529435157776,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.51274773610140560532925725820714319150",
+      "sample_id": "cbis-nbia-0138",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.22496837377548218,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.52961829611670829303289191680479351305",
+      "sample_id": "cbis-nbia-0140",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.39788609743118286,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.68570444110011189929790796053164855558",
+      "sample_id": "cbis-nbia-0141",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.8124415874481201,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.91499954013996703516414818583573199018",
+      "sample_id": "cbis-nbia-0159",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.08008024096488953,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.71997710712252113428035035082879692119",
+      "sample_id": "cbis-nbia-0160",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2338293194770813,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.91058729212200153403438754930629868603",
+      "sample_id": "cbis-nbia-0166",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4260048568248749,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.61602306212554287925778904670142684861",
+      "sample_id": "cbis-nbia-0175",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4917237162590027,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.49242335311260400338112751602458001814",
+      "sample_id": "cbis-nbia-0177",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.5138802528381348,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.85686461910787171020983218554121150052",
+      "sample_id": "cbis-nbia-0182",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.051205459982156754,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.80498641111280800807291969642715338491",
+      "sample_id": "cbis-nbia-0185",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1404656618833542,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.95066275112816836637397827910274893726",
+      "sample_id": "cbis-nbia-0187",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1475704312324524,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.79040702411772004907422243033911584465",
+      "sample_id": "cbis-nbia-0193",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.07061870396137238,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.87340566612403392138506082870553990204",
+      "sample_id": "cbis-nbia-0199",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.742956817150116,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.82451256810567773234664593024013708203",
+      "sample_id": "cbis-nbia-0201",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.5102882385253906,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.56397010612184979228325845912252762401",
+      "sample_id": "cbis-nbia-0224",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.5367511510848999,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.67072533512190470842884944993776071739",
+      "sample_id": "cbis-nbia-0226",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.17480042576789856,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.8846141612920489319812758360158257270",
+      "sample_id": "cbis-nbia-0227",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.8541173934936523,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.55935511011140411233514241600281387403",
+      "sample_id": "cbis-nbia-0239",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.7955251932144165,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.99017291911272763110515301683654595331",
+      "sample_id": "cbis-nbia-0241",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2151123732328415,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.43214406912972958709223686422311649479",
+      "sample_id": "cbis-nbia-0243",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.7164941430091858,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.55129276511942380138161752772183127043",
+      "sample_id": "cbis-nbia-0245",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.1172943189740181,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.71672783912077369939347398821490159819",
+      "sample_id": "cbis-nbia-0256",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.5245848894119263,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.4698136811233263002514303042348259208",
+      "sample_id": "cbis-nbia-0263",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.8845667243003845,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.98372511711217371421923452494072543418",
+      "sample_id": "cbis-nbia-0265",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.6691511869430542,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.57854390411125252714525874340062956276",
+      "sample_id": "cbis-nbia-0274",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.33861130475997925,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.76260080812556604832726304252499236727",
+      "sample_id": "cbis-nbia-0278",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.48165154457092285,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.61088132613876322320822040393863367878",
+      "sample_id": "cbis-nbia-0280",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.19603125751018524,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.53420229812571377029026689350115737667",
+      "sample_id": "cbis-nbia-0286",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.33587002754211426,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.48221420313119036139751607390207032498",
+      "sample_id": "cbis-nbia-0295",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4257722795009613,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.75697896410754715020619424620636529667",
+      "sample_id": "cbis-nbia-0307",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.28912553191185,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.46282940310410044707024149930022040952",
+      "sample_id": "cbis-nbia-0312",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.8493030667304993,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.54848434312309044100463325442088001375",
+      "sample_id": "cbis-nbia-0316",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.25341102480888367,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.79536363311227704713470770493125367867",
+      "sample_id": "cbis-nbia-0319",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.3880029320716858,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.65540269010165110931482682003293808218",
+      "sample_id": "cbis-nbia-0320",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.24804599583148956,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.61868143512631284119171316942543072666",
+      "sample_id": "cbis-nbia-0321",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.7031118273735046,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.73177796512527999200075488553552540625",
+      "sample_id": "cbis-nbia-0325",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.09629526734352112,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.56016612512680807111132916894160907274",
+      "sample_id": "cbis-nbia-0334",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.815886914730072,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.67485975211107868724664050372638329953",
+      "sample_id": "cbis-nbia-0336",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.8493379950523376,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.78754053711446722005583538543225913052",
+      "sample_id": "cbis-nbia-0345",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.15946733951568604,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.59648715111529087907981992282682505266",
+      "sample_id": "cbis-nbia-0352",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.41265973448753357,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.44262460211112930513355519060642708846",
+      "sample_id": "cbis-nbia-0364",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.6492551565170288,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.69721320913248429509817283852233561951",
+      "sample_id": "cbis-nbia-0368",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1590825766324997,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.61347581410432668240174563181885281950",
+      "sample_id": "cbis-nbia-0373",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.15954700112342834,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.90066757213729410240080160501989256297",
+      "sample_id": "cbis-nbia-0374",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4331330955028534,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.97077337711594266526257744642271450347",
+      "sample_id": "cbis-nbia-0375",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.5633387565612793,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.59895013913203402813556087471326658669",
+      "sample_id": "cbis-nbia-0381",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.3536386787891388,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.9496122213546378401249829543613048892",
+      "sample_id": "cbis-nbia-0393",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.08886757493019104,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.98676857111695015331891250542758735052",
+      "sample_id": "cbis-nbia-0399",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.9131927490234375,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.88375747311155347030258851071324528043",
+      "sample_id": "cbis-nbia-0402",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4497449994087219,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.78531327313921996726031305053323628358",
+      "sample_id": "cbis-nbia-0406",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.519499659538269,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.6401091112997259908805705101363925774",
+      "sample_id": "cbis-nbia-0414",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4271378815174103,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.56446728211851974029244450883139880921",
+      "sample_id": "cbis-nbia-0416",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.5421484112739563,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.67473123611959273037195362662027403888",
+      "sample_id": "cbis-nbia-0417",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.8936676383018494,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.90140760812082371129875283483750515253",
+      "sample_id": "cbis-nbia-0424",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0498877577483654,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.46022236911789431731325175472242267906",
+      "sample_id": "cbis-nbia-0430",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.04861452803015709,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.70985143510653524008930802050422673389",
+      "sample_id": "cbis-nbia-0432",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.39556944370269775,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.6780922211318864702805126890910221307",
+      "sample_id": "cbis-nbia-0461",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4193809926509857,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.98523535211426976240022345172310159164",
+      "sample_id": "cbis-nbia-0476",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.25384795665740967,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.88284694012167036205087761142037678527",
+      "sample_id": "cbis-nbia-0484",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.06422331184148788,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.81537844011110021425740468903397729169",
+      "sample_id": "cbis-nbia-0492",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2941910922527313,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.48235869613388680639353952591204777460",
+      "sample_id": "cbis-nbia-0506",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.6446205377578735,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.72383022911471764215831884112935668418",
+      "sample_id": "cbis-nbia-0511",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.41180530190467834,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.97643302712039521233823044200445393404",
+      "sample_id": "cbis-nbia-0545",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.10544660687446594,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.53369310911532021538141815322001901553",
+      "sample_id": "cbis-nbia-0548",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.5607701539993286,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.89271230010580301015144152951110163368",
+      "sample_id": "cbis-nbia-0554",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.3326284885406494,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.54258620812889531338798870374133469254",
+      "sample_id": "cbis-nbia-0557",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.505829393863678,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.47831419111818740112903755573238586561",
+      "sample_id": "cbis-nbia-0564",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.29344019293785095,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.79165353012414309502472705890215554740",
+      "sample_id": "cbis-nbia-0572",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.7814545035362244,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.43403648313396026338770630771140875718",
+      "sample_id": "cbis-nbia-0578",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.32351431250572205,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.51628737812130114138993448211289081234",
+      "sample_id": "cbis-nbia-0579",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.6529021263122559,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.54696595011707725238625115130577259932",
+      "sample_id": "cbis-nbia-0584",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2970028817653656,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.6860571612629209739046762663550661960",
+      "sample_id": "cbis-nbia-0585",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.20906692743301392,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.68805569811200186830775538132892321888",
+      "sample_id": "cbis-nbia-0587",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.09263261407613754,
+      "y_true": 0
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.86045443713025653826957804903976346265",
+      "sample_id": "cbis-nbia-0588",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.7849737405776978,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.57829969412909494223644975563841998404",
+      "sample_id": "cbis-nbia-0595",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9407690167427063,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.69322895211081570509392375383600982696",
+      "sample_id": "cbis-nbia-0628",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.8703963160514832,
+      "y_true": 1
+    },
+    {
+      "patient_id": "1.3.6.1.4.1.9590.100.1.2.70338313312400398235888974672070546441",
+      "sample_id": "cbis-nbia-0634",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.3897779583930969,
+      "y_true": 1
+    }
+  ],
+  "schema_version": 2,
+  "split_sha256": "bc37d7f7975c1951de01f2ef22dbac4c1c280fccf8ac3610f55cf07ac7541078"
+}
