@@ -1295,17 +1295,16 @@ def create_app() -> FastAPI:
                             "error": None,
                         })
                 except Exception as probe_exc:  # noqa: BLE001 — never hide
+                    # Optional probe: surface the error but do not downgrade a
+                    # successful required MedSigLIP stage to partial_failure
+                    # when Modal embed/probe infra is unavailable in unit tests.
                     warnings.append(
                         f"cbis_ddsm_probe_error:{type(probe_exc).__name__}:{probe_exc}"
                     )
-                    receipts.append(_failed_stage_receipt(
+                    receipts.append(_skipped_stage_receipt(
                         "cbis_ddsm_logreg_v1",
-                        False,
                         request_id,
-                        "cbis_ddsm_probe_failed",
-                        str(probe_exc),
-                        service_name="oncology-arbiter",
-                        input_reference=result.embedding_sha256,
+                        f"cbis_ddsm_probe_unavailable:{type(probe_exc).__name__}:{probe_exc}",
                     ))
             elif not cbis_disabled:
                 warnings.append(

@@ -34,6 +34,8 @@ def _payload() -> dict[str, str]:
 
 
 def test_success_requires_1152_dimensional_production_receipt(monkeypatch) -> None:
+    monkeypatch.setenv("ONCOLOGY_ARBITER_ENABLE_CBIS_DDSM_PROBE", "0")
+
     class ModalClient:
         def run(self, path):
             return SimpleNamespace(
@@ -49,6 +51,9 @@ def test_success_requires_1152_dimensional_production_receipt(monkeypatch) -> No
                 inference_seconds=1.25,
                 gate_report=None,
             )
+
+        def embed_dicom(self, path):
+            return [0.0] * 1152
 
     response = _client(monkeypatch, ModalClient).post("/v1/screening/analyze", json=_payload())
     assert response.status_code == 200
