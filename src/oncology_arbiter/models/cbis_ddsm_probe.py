@@ -1,9 +1,9 @@
 """Trained LogReg probe on top of Modal-served MedSigLIP-448 embeddings.
 
-Loads ``models/cbis_ddsm_logreg_v2.joblib`` (sha256 ``e5f5b67caf8ba18006e3d582e91becf95fbb20b8b34417366c7ef07b906a211b``; a scikit-learn Pipeline of
+Loads ``models/cbis_ddsm_logreg_v3.joblib`` (sha256 ``f40f33c1cd3adfa48d1d10cc4d136795ad0642c3d1f94a543872ae1dc283aaf7``; a scikit-learn Pipeline of
 ``StandardScaler + LogisticRegression`` fit on 2445 CBIS-DDSM_1024 training
 images, held-out test AUC = 0.7476 on n=641). See
-``docs/proofs/cbis_ddsm_logreg_v2_metrics.json`` for the full metrics
+``docs/proofs/cbis_ddsm_logreg_v3_metrics.json`` for the full metrics
 dossier including the CV per-fold breakdown, threshold sweep, and honesty
 caveats.
 
@@ -24,9 +24,9 @@ from typing import Any, Sequence
 logger = logging.getLogger(__name__)
 
 
-DEFAULT_MODEL_PATH = Path(__file__).resolve().parents[3] / "models" / "cbis_ddsm_logreg_v2.joblib"
+DEFAULT_MODEL_PATH = Path(__file__).resolve().parents[3] / "models" / "cbis_ddsm_logreg_v3.joblib"
 DEFAULT_METRICS_PATH = (
-    Path(__file__).resolve().parents[3] / "docs" / "proofs" / "cbis_ddsm_logreg_v2_metrics.json"
+    Path(__file__).resolve().parents[3] / "docs" / "proofs" / "cbis_ddsm_logreg_v3_metrics.json"
 )
 
 # Threshold selected from the metrics dossier for the "high-sensitivity" op
@@ -55,7 +55,7 @@ class CbisDdsmProbeResult:
     predicted_label: str                # "cancer" / "not_cancer"
     embedding_dim: int                  # 1152 (SigLIP-So400m/14)
     model_repo: str = "google/medsiglip-448"
-    probe_version: str = "cbis_ddsm_logreg_v2"
+    probe_version: str = "cbis_ddsm_logreg_v3"
     warnings: list[str] = field(default_factory=lambda: [CBIS_DDSM_PROBE_WARNING])
 
 

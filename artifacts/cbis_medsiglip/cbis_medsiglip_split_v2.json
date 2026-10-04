@@ -1,10 +1,10 @@
 {
   "capability": "cbis-medsiglip",
   "dataset_manifest_path": "artifacts/cbis_medsiglip/cbis_medsiglip_dataset_v2.json",
-  "dataset_manifest_sha256": "f1e72f95430ad50491ad02097bde8a5bd8dd726dbaf27479a533165db8e07a22",
+  "dataset_manifest_sha256": "6a8a4afbb161a24f1e2307b4592018d9adef3297b4dbde357e4f2f8b310aef2f",
   "schema_version": 2,
   "seed": 42,
-  "strategy": "dataset_train_folder_with_10pct_val_holdout; official test folder held-out",
+  "strategy": "official_test_folder; train folder with val carve for manifest",
   "test_patient_ids": [
     "1.3.6.1.4.1.9590.100.1.2.100210975711214204106582816201933983420",
     "1.3.6.1.4.1.9590.100.1.2.100742355113831624803390319643765691480",

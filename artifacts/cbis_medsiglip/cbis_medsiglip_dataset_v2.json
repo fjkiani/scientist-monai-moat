@@ -1,6 +1,7 @@
 {
   "capability": "cbis-medsiglip",
-  "dataset": "CBIS-DDSM_1024 HuggingFace dbaek111/CBIS-DDSM_1024 MedSigLIP-448 embeddings",
+  "clinical_labels_uri": "data/cbis_ddsm/labels/*.csv",
+  "dataset": "CBIS-DDSM_1024 + case_description clinical fusion MedSigLIP-448",
   "samples": [
     {
       "patient_id": "1.3.6.1.4.1.9590.100.1.2.100079897611795347840188527952364733954",
@@ -21606,6 +21607,5 @@
     }
   ],
   "schema_version": 2,
-  "source_uri": "https://huggingface.co/datasets/dbaek111/CBIS-DDSM_1024",
-  "source_zip_sha256": "123239b7f68c3a309b33784aff0a7f91ff9200edc5a2f76c4507ce96cc7c0e53"
+  "source_uri": "https://huggingface.co/datasets/dbaek111/CBIS-DDSM_1024"
 }
