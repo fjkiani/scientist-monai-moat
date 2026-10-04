@@ -1491,10 +1491,35 @@ def create_app() -> FastAPI:
         if req.wsi_bytes_b64:
             try:
                 from oncology_arbiter.models.specialist_clients import PhikonClient
+                from oncology_arbiter.models.phikon_probe import PhikonProbe  # binds models/phikon_probe_v1.joblib
                 image_bytes = _decode_bytes_arg(req.wsi_bytes_b64)
                 call = PhikonClient().embed(image_bytes or b"", request_id=request_id, required=True)
                 phikon_embedding = call.output
                 receipts.append(call.receipt)
+                # Linear probe on 768-d Phikon embedding (NCT-CRC tissue-class head)
+                try:
+                    emb_vec = None
+                    if isinstance(phikon_embedding, dict):
+                        emb_vec = phikon_embedding.get("embedding") or (
+                            (phikon_embedding.get("embeddings") or [None])[0]
+                        )
+                    if emb_vec is not None:
+                        probe_out = PhikonProbe.get().predict(emb_vec)
+                        if isinstance(phikon_embedding, dict):
+                            phikon_embedding = {**phikon_embedding, "probe": probe_out}
+                        receipts.append({
+                            "stage": "phikon_probe_v1",
+                            "ok": True,
+                            "request_id": request_id,
+                            "pred_label": probe_out.get("pred_label"),
+                            "artifact_sha256": probe_out.get("artifact_sha256"),
+                        })
+                except Exception as probe_exc:
+                    receipts.append(_failed_stage_receipt(
+                        "phikon_probe_v1", False, request_id,
+                        "phikon_probe_failed", f"{type(probe_exc).__name__}: {probe_exc}",
+                        service_name="oncology-arbiter",
+                    ))
                 if model_state == ModelState.PLACEHOLDER:
                     model_state = ModelState.LOADED_PHIKON
                     model_name = "Phikon"

@@ -280,6 +280,57 @@ def finetune(
     # Seed with baseline weights so bundle finds them
     shutil.copy(bundle_dir / "models" / "model.pt", ckpt_dir / "model.pt")
 
+    # Stage a patched train.json: force 1:1 pos/neg crops (num_samples=2).
+    # Stock already has pos=1/neg=1 but num_samples=@batch_size — pin to 2 so
+    # each image yields exactly one positive + one empty-background crop.
+    staged_bundle = run_dir / "bundle_stage"
+    if staged_bundle.exists():
+        shutil.rmtree(staged_bundle)
+    shutil.copytree(
+        bundle_dir,
+        staged_bundle,
+        ignore=shutil.ignore_patterns(".cache", "__pycache__", "*.pyc"),
+    )
+    train_json = staged_bundle / "configs" / "train.json"
+    cfg = json.loads(train_json.read_text())
+    sampler_patch = None
+    for t in (cfg.get("train") or {}).get("random_transforms") or []:
+        if isinstance(t, dict) and "RandCropBoxByPosNegLabeld" in str(t.get("_target_", "")):
+            sampler_patch = {
+                "before": {
+                    "pos": t.get("pos"),
+                    "neg": t.get("neg"),
+                    "num_samples": t.get("num_samples"),
+                }
+            }
+            t["pos"] = 1
+            t["neg"] = 1
+            t["num_samples"] = 2
+            sampler_patch["after"] = {
+                "pos": t["pos"],
+                "neg": t["neg"],
+                "num_samples": t["num_samples"],
+            }
+            break
+    if sampler_patch is None:
+        raise RuntimeError("RandCropBoxByPosNegLabeld missing from train.json")
+    train_json.write_text(json.dumps(cfg, indent=2))
+    (run_dir / "pos_neg_sampler_patch.json").write_text(
+        json.dumps(
+            {
+                "pos": 1,
+                "neg": 1,
+                "num_samples": 2,
+                "learning_rate": learning_rate,
+                "note": "1:1 pos/neg crops for A100 retrain; LR default 1e-5 + bundle warmup",
+                "patch": sampler_patch,
+            },
+            indent=2,
+        )
+    )
+    resolved["pos_neg_sampler"] = sampler_patch
+    resolved["staged_train_json"] = str(train_json)
+
     # Invoke bundle training loop
     cmd = [
         # Official lung_nodule_ct_detection train.json:
@@ -288,8 +339,8 @@ def finetune(
         #   run_id can resolve without executing trainer.run()
         # - "run" is the executable expression: ["$@train#trainer.run()"]
         "python", "-m", "monai.bundle", "run", "run",
-        "--config_file", str(bundle_dir / "configs" / "train.json"),
-        "--bundle_root", str(bundle_dir),
+        "--config_file", str(train_json),
+        "--bundle_root", str(staged_bundle),
         "--dataset_dir", dataset_dir,
         "--data_list_file_path", str(fold_json),
         "--ckpt_dir", str(ckpt_dir),

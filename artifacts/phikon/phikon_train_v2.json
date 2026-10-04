@@ -1,0 +1,20 @@
+{
+  "schema_version": 2,
+  "capability": "phikon",
+  "dataset": "NCT-CRC-HE-100K + CRC-VAL-HE-7K (Phikon 768-d embeddings)",
+  "dataset_manifest_path": "artifacts/phikon/phikon_dataset_v2.json",
+  "dataset_sha256": "365808a56b8ab1a6761008af086445f5497950e23a8d1019004e484bfd7e7765",
+  "split_manifest_path": "artifacts/phikon/phikon_split_v2.json",
+  "split_sha256": "65b71e0e3ea5b62aacb3042e83992fd029b7655140d24686f7bac82abfe42ffe",
+  "patient_disjoint": true,
+  "n_training": 62000,
+  "n_validation": 718,
+  "n_test": 6462,
+  "n_training_synthetic": false,
+  "seed": 42,
+  "command": "modal run deploy/modal/phikon_probe_train_app.py && python scripts/rebuild_phikon_compact_delivery.py",
+  "started_at": "2026-10-04T18:01:44Z",
+  "completed_at": "2026-10-04T18:36:40Z",
+  "source_commit": "f00e5513d7a0d80517d15107c77523edab335517",
+  "notes": "owkin/phikon 768-d + LR multinomial; stratified train n=62000 (size-capped delivery surface); delivery_test_macro_f1=0.913751043562661; full_crcval_macro_f1=0.913202806751474; full_fit_n=100000_macro_f1=0.9209630652747516"
+}

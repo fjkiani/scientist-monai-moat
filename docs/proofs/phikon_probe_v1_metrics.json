@@ -1,0 +1,14 @@
+{
+  "probe": "phikon_probe_v1",
+  "artifact": "models/phikon_probe_v1.joblib",
+  "artifact_sha256": "7c77d0759dbcc00440dac6c9b6d99255523ff9706041ce275e8c56724ff8a713",
+  "embeddings_sha256": "643a861d166a76e5582e81a142c5eb8421ef3d841aa35968b8b12c9cc49da62c",
+  "macro_f1_delivery_test": 0.913751043562661,
+  "macro_f1_full_crcval": 0.913202806751474,
+  "accuracy_full_crcval": 0.9250696378830083,
+  "balanced_accuracy_full_crcval": 0.9221708642406511,
+  "n_training": 62000,
+  "n_training_full_embed_run": 100000,
+  "n_test": 6462,
+  "disclaimer": "Population validation on NCT-CRC / CRC-VAL histology tiles. NOT a product screening claim."
+}

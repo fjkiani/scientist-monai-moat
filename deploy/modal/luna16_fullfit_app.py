@@ -24,7 +24,7 @@ from typing import Any, Dict, List
 
 import modal
 
-APP_VERSION = "luna16-fullfit-v0.1.2-empty-box-patch"
+APP_VERSION = "luna16-fullfit-v0.1.3-posneg-1to1"
 EXPECTED_DATASET = "d20b94a15315b830b99d29e429b0daf5380b7fa5bf157fecf733c2af354944ff"
 EXPECTED_SPLIT = "3602f34c4b3e65024e6a7ef3fc7185577ee1f39e54d2c9f5c35baffc2d0cd1d9"
 EXPECTED_BASELINE = "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01"
@@ -79,6 +79,38 @@ def _sha256_bytes(b: bytes) -> str:
     return hashlib.sha256(b).hexdigest()
 
 
+def _patch_pos_neg_sampler(bundle: Path, pos: int = 1, neg: int = 1, num_samples: int = 2) -> Dict[str, Any]:
+    """Force 1:1 positive/negative crop sampling for A100 retrain.
+
+    Stock train.json already has pos=1/neg=1 but ``num_samples=@batch_size``.
+    Pin ``num_samples=2`` so each image yields exactly one pos + one neg crop
+    regardless of dataloader batch size (eliminates positive-only crop bias).
+    """
+    train_json = bundle / "configs" / "train.json"
+    cfg = json.loads(train_json.read_text())
+    patched = []
+    train_block = cfg.get("train") or {}
+    for key in ("random_transforms", "preprocessing_transforms", "transforms"):
+        transforms = train_block.get(key)
+        if not isinstance(transforms, list):
+            continue
+        for t in transforms:
+            if not isinstance(t, dict):
+                continue
+            target = str(t.get("_target_", ""))
+            if "RandCropBoxByPosNegLabeld" not in target:
+                continue
+            before = {"pos": t.get("pos"), "neg": t.get("neg"), "num_samples": t.get("num_samples")}
+            t["pos"] = pos
+            t["neg"] = neg
+            t["num_samples"] = num_samples
+            patched.append({"before": before, "after": {"pos": pos, "neg": neg, "num_samples": num_samples}})
+    if not patched:
+        raise ValueError("RandCropBoxByPosNegLabeld not found in train.json")
+    train_json.write_text(json.dumps(cfg, indent=2))
+    return {"patched_transforms": patched, "train_json": str(train_json)}
+
+
 def _prepare_bundle(work: Path) -> Path:
     src = Path("/vol/baseline/lung_nodule_ct_detection")
     if not src.is_dir():
@@ -96,6 +128,7 @@ def _prepare_bundle(work: Path) -> Path:
         raise FileNotFoundError(f"missing baseline weights {model}")
     if _sha256_file(model) != EXPECTED_BASELINE:
         raise ValueError("baseline model SHA mismatch")
+    _patch_pos_neg_sampler(bundle, pos=1, neg=1, num_samples=2)
     return bundle
 
 
