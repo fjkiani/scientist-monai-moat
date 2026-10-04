@@ -1,0 +1,2615 @@
+{
+  "artifact_sha256": "768540638a4833f0b824ed2d0ca0e9054d3d37465af986711a8e71e125075487",
+  "bootstrap_patient_auroc_ci": [
+    0.9312177447013141,
+    0.9830303680396644
+  ],
+  "capability": "stage-therapy",
+  "dataset_sha256": "02d4bec415b8ed342daaba2b08d316423c86674e8f8801605e1110df342756bf",
+  "metric": {
+    "n": 297,
+    "name": "auroc",
+    "value": 0.9597117364447495
+  },
+  "rows": [
+    {
+      "patient_id": "MB-0006",
+      "sample_id": "metabric-MB-0006",
+      "stratum": "1",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.3198761953747778,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-0010",
+      "sample_id": "metabric-MB-0010",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.005307807463983155,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0028",
+      "sample_id": "metabric-MB-0028",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.03130496159203349,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0045",
+      "sample_id": "metabric-MB-0045",
+      "stratum": "1",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.881750980269691,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-0056",
+      "sample_id": "metabric-MB-0056",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.009303472443918069,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0100",
+      "sample_id": "metabric-MB-0100",
+      "stratum": "1",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.1161522379830663,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-0113",
+      "sample_id": "metabric-MB-0113",
+      "stratum": "1",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9574412877790278,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-0115",
+      "sample_id": "metabric-MB-0115",
+      "stratum": "1",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.5532493799214014,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-0122",
+      "sample_id": "metabric-MB-0122",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.10681073554016146,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0123",
+      "sample_id": "metabric-MB-0123",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0053737933590276175,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0130",
+      "sample_id": "metabric-MB-0130",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.013855465850431587,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0147",
+      "sample_id": "metabric-MB-0147",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.03534807671753276,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0149",
+      "sample_id": "metabric-MB-0149",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.05762122766955724,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0153",
+      "sample_id": "metabric-MB-0153",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.03136697777554507,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0157",
+      "sample_id": "metabric-MB-0157",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.07436853779468444,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0174",
+      "sample_id": "metabric-MB-0174",
+      "stratum": "1",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.1731167380937522,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-0176",
+      "sample_id": "metabric-MB-0176",
+      "stratum": "1",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.7659126987289411,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-0193",
+      "sample_id": "metabric-MB-0193",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.3971992964111046,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0199",
+      "sample_id": "metabric-MB-0199",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2359241814853694,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0202",
+      "sample_id": "metabric-MB-0202",
+      "stratum": "1",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.5923783398334403,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-0222",
+      "sample_id": "metabric-MB-0222",
+      "stratum": "1",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.014329122663335797,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-0234",
+      "sample_id": "metabric-MB-0234",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.010149687141324278,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0241",
+      "sample_id": "metabric-MB-0241",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.05115551149601588,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0242",
+      "sample_id": "metabric-MB-0242",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.023778770683344747,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0243",
+      "sample_id": "metabric-MB-0243",
+      "stratum": "1",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.23735243857467309,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-0287",
+      "sample_id": "metabric-MB-0287",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0398596118877028,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0291",
+      "sample_id": "metabric-MB-0291",
+      "stratum": "1",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4954412948471002,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-0293",
+      "sample_id": "metabric-MB-0293",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.016481029091103258,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0306",
+      "sample_id": "metabric-MB-0306",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.05719377774779929,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0308",
+      "sample_id": "metabric-MB-0308",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.016192211408777815,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0312",
+      "sample_id": "metabric-MB-0312",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.004926411939427508,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0321",
+      "sample_id": "metabric-MB-0321",
+      "stratum": "1",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.5734483814619727,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-0336",
+      "sample_id": "metabric-MB-0336",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.08011574849285426,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0349",
+      "sample_id": "metabric-MB-0349",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.14397089799256424,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0356",
+      "sample_id": "metabric-MB-0356",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.012210325105612006,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0370",
+      "sample_id": "metabric-MB-0370",
+      "stratum": "1",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.3569691145495936,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-0371",
+      "sample_id": "metabric-MB-0371",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.08573438767462714,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0372",
+      "sample_id": "metabric-MB-0372",
+      "stratum": "1",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.5069711873262783,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-0373",
+      "sample_id": "metabric-MB-0373",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.23716533167066106,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0381",
+      "sample_id": "metabric-MB-0381",
+      "stratum": "1",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.26770045667953085,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-0384",
+      "sample_id": "metabric-MB-0384",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.13329380084023018,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0391",
+      "sample_id": "metabric-MB-0391",
+      "stratum": "1",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.856156025011733,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-0403",
+      "sample_id": "metabric-MB-0403",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.03144092216629744,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0414",
+      "sample_id": "metabric-MB-0414",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.05636351557670315,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0418",
+      "sample_id": "metabric-MB-0418",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.3704311436314022,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0420",
+      "sample_id": "metabric-MB-0420",
+      "stratum": "1",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.6041033453632223,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-0422",
+      "sample_id": "metabric-MB-0422",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.07570500096712113,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0428",
+      "sample_id": "metabric-MB-0428",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.03848250223080892,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0440",
+      "sample_id": "metabric-MB-0440",
+      "stratum": "1",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.3818544954177483,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-0442",
+      "sample_id": "metabric-MB-0442",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.06328971872110216,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0460",
+      "sample_id": "metabric-MB-0460",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0013734889955562188,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0466",
+      "sample_id": "metabric-MB-0466",
+      "stratum": "1",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.8913738926374596,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-0471",
+      "sample_id": "metabric-MB-0471",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0019469468826450985,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0480",
+      "sample_id": "metabric-MB-0480",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.04527240659293561,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0506",
+      "sample_id": "metabric-MB-0506",
+      "stratum": "1",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.6594710221231311,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-0521",
+      "sample_id": "metabric-MB-0521",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2563765197538695,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0540",
+      "sample_id": "metabric-MB-0540",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.022277403714320743,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0543",
+      "sample_id": "metabric-MB-0543",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1051904041109826,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0549",
+      "sample_id": "metabric-MB-0549",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.00919016948016876,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0550",
+      "sample_id": "metabric-MB-0550",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.15321940717432264,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0551",
+      "sample_id": "metabric-MB-0551",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0036233715705726,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0552",
+      "sample_id": "metabric-MB-0552",
+      "stratum": "1",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.342020969594866,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-0554",
+      "sample_id": "metabric-MB-0554",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0009186202670360495,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0583",
+      "sample_id": "metabric-MB-0583",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.002390673368288801,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0585",
+      "sample_id": "metabric-MB-0585",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.09629020380908222,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0591",
+      "sample_id": "metabric-MB-0591",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0028609269466145916,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0609",
+      "sample_id": "metabric-MB-0609",
+      "stratum": "1",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.28421395767894503,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-0611",
+      "sample_id": "metabric-MB-0611",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.005853443096406214,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0619",
+      "sample_id": "metabric-MB-0619",
+      "stratum": "1",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.7514742403292759,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-0627",
+      "sample_id": "metabric-MB-0627",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.22989252424289341,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0634",
+      "sample_id": "metabric-MB-0634",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.06587373048092791,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0637",
+      "sample_id": "metabric-MB-0637",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0069905795268748365,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0639",
+      "sample_id": "metabric-MB-0639",
+      "stratum": "1",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.28382086211247237,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-0652",
+      "sample_id": "metabric-MB-0652",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.03834443650411712,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0658",
+      "sample_id": "metabric-MB-0658",
+      "stratum": "1",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.72588837824215,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-0667",
+      "sample_id": "metabric-MB-0667",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.008644480308149238,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0869",
+      "sample_id": "metabric-MB-0869",
+      "stratum": "1",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.19773713669700843,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-0872",
+      "sample_id": "metabric-MB-0872",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.01853920094824105,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-0874",
+      "sample_id": "metabric-MB-0874",
+      "stratum": "1",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.23634993434434168,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-0895",
+      "sample_id": "metabric-MB-0895",
+      "stratum": "1",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.05864992256972518,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-2513",
+      "sample_id": "metabric-MB-2513",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11847672110184872,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-2564",
+      "sample_id": "metabric-MB-2564",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.008791115487723152,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-2634",
+      "sample_id": "metabric-MB-2634",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0063435271551251305,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-2669",
+      "sample_id": "metabric-MB-2669",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.01261854423159869,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-2718",
+      "sample_id": "metabric-MB-2718",
+      "stratum": "2",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.7632237446286174,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-2747",
+      "sample_id": "metabric-MB-2747",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0034828198405937177,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-2750",
+      "sample_id": "metabric-MB-2750",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.029891375179053225,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-2767",
+      "sample_id": "metabric-MB-2767",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.37596598076832477,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-2778",
+      "sample_id": "metabric-MB-2778",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1074253228163092,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-2821",
+      "sample_id": "metabric-MB-2821",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.04368791451831075,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-2835",
+      "sample_id": "metabric-MB-2835",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.021700254768581208,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-2843",
+      "sample_id": "metabric-MB-2843",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.010823057393040268,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-2846",
+      "sample_id": "metabric-MB-2846",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.010732544606412882,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-2849",
+      "sample_id": "metabric-MB-2849",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1618943381423372,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-2850",
+      "sample_id": "metabric-MB-2850",
+      "stratum": "2",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9780049143243413,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-2895",
+      "sample_id": "metabric-MB-2895",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.09022417711988272,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-2901",
+      "sample_id": "metabric-MB-2901",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.03222657244477795,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-2912",
+      "sample_id": "metabric-MB-2912",
+      "stratum": "2",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.7229536818990665,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-2944",
+      "sample_id": "metabric-MB-2944",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.011174339628971144,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-2951",
+      "sample_id": "metabric-MB-2951",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.06351113709802236,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-2957",
+      "sample_id": "metabric-MB-2957",
+      "stratum": "2",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9783327156193171,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-2999",
+      "sample_id": "metabric-MB-2999",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.019064632825134254,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-3021",
+      "sample_id": "metabric-MB-3021",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1639873036865165,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-3032",
+      "sample_id": "metabric-MB-3032",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.016113704221081774,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-3033",
+      "sample_id": "metabric-MB-3033",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.004956112293907139,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-3058",
+      "sample_id": "metabric-MB-3058",
+      "stratum": "2",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9281820966706041,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-3079",
+      "sample_id": "metabric-MB-3079",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.019031989004480058,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-3104",
+      "sample_id": "metabric-MB-3104",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.22451227964179038,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-3167",
+      "sample_id": "metabric-MB-3167",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0754519499427205,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-3218",
+      "sample_id": "metabric-MB-3218",
+      "stratum": "2",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9009383030740297,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-3222",
+      "sample_id": "metabric-MB-3222",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.004273313359637115,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-3254",
+      "sample_id": "metabric-MB-3254",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.017106449496882562,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-3328",
+      "sample_id": "metabric-MB-3328",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11441004427254056,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-3371",
+      "sample_id": "metabric-MB-3371",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0074255911311725915,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-3388",
+      "sample_id": "metabric-MB-3388",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2509594498767592,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-3402",
+      "sample_id": "metabric-MB-3402",
+      "stratum": "2",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.6810391203424537,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-3436",
+      "sample_id": "metabric-MB-3436",
+      "stratum": "2",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9761128378009587,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-3453",
+      "sample_id": "metabric-MB-3453",
+      "stratum": "2",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.8908838922189103,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-3466",
+      "sample_id": "metabric-MB-3466",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.028500737875069324,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-3487",
+      "sample_id": "metabric-MB-3487",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.12666572968782727,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-3497",
+      "sample_id": "metabric-MB-3497",
+      "stratum": "2",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.8790997448247111,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-3510",
+      "sample_id": "metabric-MB-3510",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.04229422101440948,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-3525",
+      "sample_id": "metabric-MB-3525",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.22184890055227122,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-3528",
+      "sample_id": "metabric-MB-3528",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.08111576953155962,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-3530",
+      "sample_id": "metabric-MB-3530",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.05550418870796261,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-3706",
+      "sample_id": "metabric-MB-3706",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.19665963157436184,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-3823",
+      "sample_id": "metabric-MB-3823",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.07025724359797565,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-3838",
+      "sample_id": "metabric-MB-3838",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.022208487202366494,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-3854",
+      "sample_id": "metabric-MB-3854",
+      "stratum": "2",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.003490811297278746,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4005",
+      "sample_id": "metabric-MB-4005",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.004822302029391021,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4091",
+      "sample_id": "metabric-MB-4091",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.007627129345463743,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4189",
+      "sample_id": "metabric-MB-4189",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0566611179740892,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4213",
+      "sample_id": "metabric-MB-4213",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.009893592244298229,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4222",
+      "sample_id": "metabric-MB-4222",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.014060559516223146,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4233",
+      "sample_id": "metabric-MB-4233",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.31825614928430845,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4236",
+      "sample_id": "metabric-MB-4236",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.09554662632983964,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4266",
+      "sample_id": "metabric-MB-4266",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.48744802362723666,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4274",
+      "sample_id": "metabric-MB-4274",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.04372406018437393,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4310",
+      "sample_id": "metabric-MB-4310",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0037181045020087265,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4328",
+      "sample_id": "metabric-MB-4328",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1302738190789795,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4331",
+      "sample_id": "metabric-MB-4331",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.22478121116003774,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4333",
+      "sample_id": "metabric-MB-4333",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.007106803221986981,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4339",
+      "sample_id": "metabric-MB-4339",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0029854819471309075,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4368",
+      "sample_id": "metabric-MB-4368",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.048383936114712575,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4434",
+      "sample_id": "metabric-MB-4434",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.10453553116199081,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4484",
+      "sample_id": "metabric-MB-4484",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.024615652511855265,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4557",
+      "sample_id": "metabric-MB-4557",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.017250649892122306,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4578",
+      "sample_id": "metabric-MB-4578",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.09241120921052548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4622",
+      "sample_id": "metabric-MB-4622",
+      "stratum": "3",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.969165414116055,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-4688",
+      "sample_id": "metabric-MB-4688",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.12354587297477566,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4712",
+      "sample_id": "metabric-MB-4712",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.16820791113275846,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4714",
+      "sample_id": "metabric-MB-4714",
+      "stratum": "3",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.44683634111537873,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-4721",
+      "sample_id": "metabric-MB-4721",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.14557439596165864,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4722",
+      "sample_id": "metabric-MB-4722",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.006088451480342314,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4724",
+      "sample_id": "metabric-MB-4724",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.16799783474645055,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4725",
+      "sample_id": "metabric-MB-4725",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.20687559649372708,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4733",
+      "sample_id": "metabric-MB-4733",
+      "stratum": "3",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.7699596194660723,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-4742",
+      "sample_id": "metabric-MB-4742",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.029259611017974647,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4743",
+      "sample_id": "metabric-MB-4743",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.019674630432631398,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4749",
+      "sample_id": "metabric-MB-4749",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.007101096882329649,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4782",
+      "sample_id": "metabric-MB-4782",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.028796942187732676,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4796",
+      "sample_id": "metabric-MB-4796",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.03553231058120741,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4825",
+      "sample_id": "metabric-MB-4825",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.005196512788456724,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4851",
+      "sample_id": "metabric-MB-4851",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.05116702972310435,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4860",
+      "sample_id": "metabric-MB-4860",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.026583078341598763,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4872",
+      "sample_id": "metabric-MB-4872",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1283573255291757,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4876",
+      "sample_id": "metabric-MB-4876",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.06419751153170854,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4898",
+      "sample_id": "metabric-MB-4898",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.006391995000720262,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4899",
+      "sample_id": "metabric-MB-4899",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.06499377825485277,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4933",
+      "sample_id": "metabric-MB-4933",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.041669602005071284,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4952",
+      "sample_id": "metabric-MB-4952",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.10145499324464095,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4957",
+      "sample_id": "metabric-MB-4957",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.004558965662950055,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4977",
+      "sample_id": "metabric-MB-4977",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0962365724510753,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4986",
+      "sample_id": "metabric-MB-4986",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.15137881652548069,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-4991",
+      "sample_id": "metabric-MB-4991",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1233969363152946,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5020",
+      "sample_id": "metabric-MB-5020",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1555961612617642,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5044",
+      "sample_id": "metabric-MB-5044",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.019643657011679305,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5058",
+      "sample_id": "metabric-MB-5058",
+      "stratum": "3",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.618775928078676,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-5059",
+      "sample_id": "metabric-MB-5059",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.015141737662083595,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5060",
+      "sample_id": "metabric-MB-5060",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.05760476430501576,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5061",
+      "sample_id": "metabric-MB-5061",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.06552535487582435,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5063",
+      "sample_id": "metabric-MB-5063",
+      "stratum": "3",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9414518228746953,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-5066",
+      "sample_id": "metabric-MB-5066",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.25432658656523477,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5079",
+      "sample_id": "metabric-MB-5079",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.005687411210140813,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5084",
+      "sample_id": "metabric-MB-5084",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.03778738399455345,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5092",
+      "sample_id": "metabric-MB-5092",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.06666020065011131,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5100",
+      "sample_id": "metabric-MB-5100",
+      "stratum": "3",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.967431146034778,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-5113",
+      "sample_id": "metabric-MB-5113",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.054924068844453916,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5131",
+      "sample_id": "metabric-MB-5131",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.005111418109249623,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5137",
+      "sample_id": "metabric-MB-5137",
+      "stratum": "3",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.6359646174320525,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-5148",
+      "sample_id": "metabric-MB-5148",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.03707185468926325,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5160",
+      "sample_id": "metabric-MB-5160",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.006092689125822803,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5167",
+      "sample_id": "metabric-MB-5167",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.009552113826589837,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5176",
+      "sample_id": "metabric-MB-5176",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0174502891068867,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5183",
+      "sample_id": "metabric-MB-5183",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0027743490299293864,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5186",
+      "sample_id": "metabric-MB-5186",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.032645623314418566,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5190",
+      "sample_id": "metabric-MB-5190",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.21806848941146292,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5191",
+      "sample_id": "metabric-MB-5191",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.026771401059311983,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5205",
+      "sample_id": "metabric-MB-5205",
+      "stratum": "3",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.5848433495942936,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-5222",
+      "sample_id": "metabric-MB-5222",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.03417318258062096,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5228",
+      "sample_id": "metabric-MB-5228",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.009037885311045447,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5251",
+      "sample_id": "metabric-MB-5251",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.023772673809741844,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5258",
+      "sample_id": "metabric-MB-5258",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.06682973650477587,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5266",
+      "sample_id": "metabric-MB-5266",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.009198418211472199,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5284",
+      "sample_id": "metabric-MB-5284",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.17016658410192959,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5287",
+      "sample_id": "metabric-MB-5287",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.00491186542073176,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5288",
+      "sample_id": "metabric-MB-5288",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11034598418305616,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5294",
+      "sample_id": "metabric-MB-5294",
+      "stratum": "3",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9952321248934934,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-5302",
+      "sample_id": "metabric-MB-5302",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.04017854047810611,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5310",
+      "sample_id": "metabric-MB-5310",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.005402727594499789,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5326",
+      "sample_id": "metabric-MB-5326",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0026865384390233928,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5347",
+      "sample_id": "metabric-MB-5347",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.32217972420317076,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5361",
+      "sample_id": "metabric-MB-5361",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.06226057132522055,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5383",
+      "sample_id": "metabric-MB-5383",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.07543751749668179,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5386",
+      "sample_id": "metabric-MB-5386",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.006791939461121222,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5388",
+      "sample_id": "metabric-MB-5388",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0033803870922474773,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5395",
+      "sample_id": "metabric-MB-5395",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.006541667373971829,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5398",
+      "sample_id": "metabric-MB-5398",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.058116438147588316,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5403",
+      "sample_id": "metabric-MB-5403",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.017883849537729157,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5408",
+      "sample_id": "metabric-MB-5408",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.04851389846482728,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5418",
+      "sample_id": "metabric-MB-5418",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.22828105552710073,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5425",
+      "sample_id": "metabric-MB-5425",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.12458312065873892,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5446",
+      "sample_id": "metabric-MB-5446",
+      "stratum": "3",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.8637446493073386,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-5450",
+      "sample_id": "metabric-MB-5450",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4888000507242016,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5453",
+      "sample_id": "metabric-MB-5453",
+      "stratum": "3",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9547036204537552,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-5454",
+      "sample_id": "metabric-MB-5454",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.43255310996455426,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5485",
+      "sample_id": "metabric-MB-5485",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0765070051103286,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5486",
+      "sample_id": "metabric-MB-5486",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.006008502855772717,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5497",
+      "sample_id": "metabric-MB-5497",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.004867805592935374,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5498",
+      "sample_id": "metabric-MB-5498",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.01623150552678793,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5505",
+      "sample_id": "metabric-MB-5505",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0022597825171702035,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5525",
+      "sample_id": "metabric-MB-5525",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.019958687165292685,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5527",
+      "sample_id": "metabric-MB-5527",
+      "stratum": "3",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.6959534318316384,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-5529",
+      "sample_id": "metabric-MB-5529",
+      "stratum": "3",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.957279444127162,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-5530",
+      "sample_id": "metabric-MB-5530",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.45632923388470853,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5576",
+      "sample_id": "metabric-MB-5576",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.008652143513873924,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5622",
+      "sample_id": "metabric-MB-5622",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.017884758192742784,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-5656",
+      "sample_id": "metabric-MB-5656",
+      "stratum": "3",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.002742088184746681,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-6006",
+      "sample_id": "metabric-MB-6006",
+      "stratum": "5",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0004780629002305899,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-6023",
+      "sample_id": "metabric-MB-6023",
+      "stratum": "5",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.01573346201930759,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-6024",
+      "sample_id": "metabric-MB-6024",
+      "stratum": "5",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.09126524165829791,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-6029",
+      "sample_id": "metabric-MB-6029",
+      "stratum": "5",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.12607197171458473,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-6049",
+      "sample_id": "metabric-MB-6049",
+      "stratum": "5",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.01883904555399926,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-6063",
+      "sample_id": "metabric-MB-6063",
+      "stratum": "5",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9788721487569387,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-6075",
+      "sample_id": "metabric-MB-6075",
+      "stratum": "5",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0015013860628003213,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-6077",
+      "sample_id": "metabric-MB-6077",
+      "stratum": "5",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0038778685733949604,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-6083",
+      "sample_id": "metabric-MB-6083",
+      "stratum": "5",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0036545050542122976,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-6085",
+      "sample_id": "metabric-MB-6085",
+      "stratum": "5",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.6854512543202163,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-6092",
+      "sample_id": "metabric-MB-6092",
+      "stratum": "5",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.001861913822034381,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-6116",
+      "sample_id": "metabric-MB-6116",
+      "stratum": "5",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.010317672513937661,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-6152",
+      "sample_id": "metabric-MB-6152",
+      "stratum": "5",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0751734240005721,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-6187",
+      "sample_id": "metabric-MB-6187",
+      "stratum": "5",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.03885218921259128,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-6188",
+      "sample_id": "metabric-MB-6188",
+      "stratum": "5",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.9410588813074395,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-6200",
+      "sample_id": "metabric-MB-6200",
+      "stratum": "5",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.23642187293139327,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-6208",
+      "sample_id": "metabric-MB-6208",
+      "stratum": "5",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2159858958145438,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-6218",
+      "sample_id": "metabric-MB-6218",
+      "stratum": "5",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.06826102928516273,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-6254",
+      "sample_id": "metabric-MB-6254",
+      "stratum": "5",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.006571193097174875,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-6256",
+      "sample_id": "metabric-MB-6256",
+      "stratum": "5",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0033134765213945518,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-6257",
+      "sample_id": "metabric-MB-6257",
+      "stratum": "5",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.04895950820894449,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-6305",
+      "sample_id": "metabric-MB-6305",
+      "stratum": "5",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.8348598854838589,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-6327",
+      "sample_id": "metabric-MB-6327",
+      "stratum": "5",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.06550730595738963,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-6334",
+      "sample_id": "metabric-MB-6334",
+      "stratum": "5",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.025971680535243454,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-6359",
+      "sample_id": "metabric-MB-6359",
+      "stratum": "5",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.004514902397359193,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-7000",
+      "sample_id": "metabric-MB-7000",
+      "stratum": "4",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.044006838761709556,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-7007",
+      "sample_id": "metabric-MB-7007",
+      "stratum": "4",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.7937181620665623,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-7011",
+      "sample_id": "metabric-MB-7011",
+      "stratum": "4",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.013180662747737108,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-7012",
+      "sample_id": "metabric-MB-7012",
+      "stratum": "4",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.1382288006952025,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-7017",
+      "sample_id": "metabric-MB-7017",
+      "stratum": "4",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9530354230637528,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-7045",
+      "sample_id": "metabric-MB-7045",
+      "stratum": "4",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.07581430419517511,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-7053",
+      "sample_id": "metabric-MB-7053",
+      "stratum": "4",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.06492677699560286,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-7062",
+      "sample_id": "metabric-MB-7062",
+      "stratum": "4",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.06504682581261874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-7063",
+      "sample_id": "metabric-MB-7063",
+      "stratum": "4",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.004765979393601569,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-7071",
+      "sample_id": "metabric-MB-7071",
+      "stratum": "4",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.23435535537716923,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-7077",
+      "sample_id": "metabric-MB-7077",
+      "stratum": "4",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.533604764966659,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-7082",
+      "sample_id": "metabric-MB-7082",
+      "stratum": "4",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.7975994866182831,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-7087",
+      "sample_id": "metabric-MB-7087",
+      "stratum": "4",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.5415558202994568,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-7090",
+      "sample_id": "metabric-MB-7090",
+      "stratum": "4",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.8680161785725633,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-7112",
+      "sample_id": "metabric-MB-7112",
+      "stratum": "4",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.17465502381204476,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-7113",
+      "sample_id": "metabric-MB-7113",
+      "stratum": "4",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0033520108664661344,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-7118",
+      "sample_id": "metabric-MB-7118",
+      "stratum": "4",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0046157437011709775,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-7132",
+      "sample_id": "metabric-MB-7132",
+      "stratum": "4",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.004960579730216208,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-7142",
+      "sample_id": "metabric-MB-7142",
+      "stratum": "4",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.014300669826511426,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-7144",
+      "sample_id": "metabric-MB-7144",
+      "stratum": "4",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.02418680095182469,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-7151",
+      "sample_id": "metabric-MB-7151",
+      "stratum": "4",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1635926576613792,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-7154",
+      "sample_id": "metabric-MB-7154",
+      "stratum": "4",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.047427186756556224,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-7165",
+      "sample_id": "metabric-MB-7165",
+      "stratum": "4",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9996682207530859,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-7193",
+      "sample_id": "metabric-MB-7193",
+      "stratum": "4",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.004248818533831577,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-7196",
+      "sample_id": "metabric-MB-7196",
+      "stratum": "4",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.39322366389496,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-7215",
+      "sample_id": "metabric-MB-7215",
+      "stratum": "4",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.12875143179321386,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-7218",
+      "sample_id": "metabric-MB-7218",
+      "stratum": "4",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.0782573829401385,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-7226",
+      "sample_id": "metabric-MB-7226",
+      "stratum": "4",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.15287460079450121,
+      "y_true": 1
+    },
+    {
+      "patient_id": "MB-7244",
+      "sample_id": "metabric-MB-7244",
+      "stratum": "4",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.12354472634978207,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-7252",
+      "sample_id": "metabric-MB-7252",
+      "stratum": "4",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4943375922133974,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-7288",
+      "sample_id": "metabric-MB-7288",
+      "stratum": "4",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.28601369818586003,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-7293",
+      "sample_id": "metabric-MB-7293",
+      "stratum": "4",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4455549111332675,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-7294",
+      "sample_id": "metabric-MB-7294",
+      "stratum": "4",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.13615900293049998,
+      "y_true": 0
+    },
+    {
+      "patient_id": "MB-7296",
+      "sample_id": "metabric-MB-7296",
+      "stratum": "4",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.6894846138732427,
+      "y_true": 0
+    }
+  ],
+  "schema_version": 2,
+  "secondary_evaluation": {
+    "purpose": "Mathematically interrogate weak/null signals using test-stratified AUROC, within-stratum regressions, and leave-stratum-out cross-cohort validation.",
+    "selected_c_fixed_before_test": 10.0,
+    "strata": {
+      "1": {
+        "final_model_test": {
+          "auroc": 0.9461914744933613,
+          "auroc_ci": [
+            0.8767569444444444,
+            0.9895194575471699
+          ],
+          "n": 80,
+          "n_negative": 53,
+          "n_patients": 80,
+          "n_positive": 27,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        },
+        "leave_stratum_out_validation": {
+          "auroc": 0.9371069182389937,
+          "auroc_ci": [
+            0.8666300940438871,
+            0.9847313436563437
+          ],
+          "n": 80,
+          "n_negative": 53,
+          "n_patients": 80,
+          "n_positive": 27,
+          "n_training": 1027,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        },
+        "within_stratum_regression": {
+          "auroc": 0.9385045422781272,
+          "auroc_ci": [
+            0.8639257019576168,
+            0.9893163615560641
+          ],
+          "n": 80,
+          "n_negative": 53,
+          "n_patients": 80,
+          "n_positive": 27,
+          "n_training": 359,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        }
+      },
+      "2": {
+        "final_model_test": {
+          "auroc": 1.0,
+          "auroc_ci": [
+            0.9999999999999999,
+            1.0
+          ],
+          "n": 49,
+          "n_negative": 39,
+          "n_patients": 49,
+          "n_positive": 10,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        },
+        "leave_stratum_out_validation": {
+          "auroc": 1.0,
+          "auroc_ci": [
+            0.9999999999999999,
+            1.0
+          ],
+          "n": 49,
+          "n_negative": 39,
+          "n_patients": 49,
+          "n_positive": 10,
+          "n_training": 1197,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        },
+        "within_stratum_regression": {
+          "auroc": 1.0,
+          "auroc_ci": [
+            0.9999999999999999,
+            1.0
+          ],
+          "n": 49,
+          "n_negative": 39,
+          "n_patients": 49,
+          "n_positive": 10,
+          "n_training": 189,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        }
+      },
+      "3": {
+        "final_model_test": {
+          "auroc": 0.9975961538461539,
+          "auroc_ci": [
+            0.9887113617376776,
+            1.0
+          ],
+          "n": 109,
+          "n_negative": 96,
+          "n_patients": 109,
+          "n_positive": 13,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        },
+        "leave_stratum_out_validation": {
+          "auroc": 0.9935897435897436,
+          "auroc_ci": [
+            0.9796925825201301,
+            1.0
+          ],
+          "n": 109,
+          "n_negative": 96,
+          "n_patients": 109,
+          "n_positive": 13,
+          "n_training": 859,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        },
+        "within_stratum_regression": {
+          "auroc": 1.0,
+          "auroc_ci": [
+            0.9999999999999999,
+            1.0
+          ],
+          "n": 109,
+          "n_negative": 96,
+          "n_patients": 109,
+          "n_positive": 13,
+          "n_training": 527,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        }
+      },
+      "4": {
+        "final_model_test": {
+          "auroc": 0.8933333333333333,
+          "auroc_ci": [
+            0.7691699604743082,
+            1.0
+          ],
+          "n": 34,
+          "n_negative": 25,
+          "n_patients": 34,
+          "n_positive": 9,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        },
+        "leave_stratum_out_validation": {
+          "auroc": 0.8800000000000001,
+          "auroc_ci": [
+            0.7331818181818182,
+            0.9807692307692308
+          ],
+          "n": 34,
+          "n_negative": 25,
+          "n_patients": 34,
+          "n_positive": 9,
+          "n_training": 1207,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        },
+        "within_stratum_regression": {
+          "auroc": 0.8711111111111112,
+          "auroc_ci": [
+            0.6977612179487179,
+            0.9881741849133153
+          ],
+          "n": 34,
+          "n_negative": 25,
+          "n_patients": 34,
+          "n_positive": 9,
+          "n_training": 179,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        }
+      },
+      "5": {
+        "final_model_test": {
+          "auroc": 0.9696969696969697,
+          "auroc_ci": [
+            0.8695652173913043,
+            1.0
+          ],
+          "n": 25,
+          "n_negative": 22,
+          "n_patients": 25,
+          "n_positive": 3,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        },
+        "leave_stratum_out_validation": {
+          "auroc": 0.9696969696969697,
+          "auroc_ci": [
+            0.8695652173913043,
+            1.0
+          ],
+          "n": 25,
+          "n_negative": 22,
+          "n_patients": 25,
+          "n_positive": 3,
+          "n_training": 1254,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        },
+        "within_stratum_regression": {
+          "auroc": 1.0,
+          "auroc_ci": [
+            0.9999999999999999,
+            1.0
+          ],
+          "n": 25,
+          "n_negative": 22,
+          "n_patients": 25,
+          "n_positive": 3,
+          "n_training": 132,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        }
+      }
+    }
+  },
+  "split_sha256": "e40a29af7d29a9b94b4c94de2e435d2a9ffa90414dd11ea7f37984a977fa282b"
+}
