@@ -140,8 +140,18 @@ def generate_hypotheses(
             ))
         # Add a "wrong-subtype" alternate hypothesis so the tournament has
         # something to argue about. Its confidence is 1-p (residual mass).
-        if subtype in ("IDC", "DCIS", "benign") and conf is not None:
-            alternates = {"IDC": "DCIS", "DCIS": "IDC", "benign": "IDC"}[subtype]
+        alternate_map = {
+            "benign_or_normal": "invasive_carcinoma",
+            "in_situ_carcinoma": "invasive_carcinoma",
+            "invasive_carcinoma": "in_situ_carcinoma",
+            # Preserve legacy caller-provided pathology subtypes without
+            # equating the broader BACH labels above to IDC/DCIS.
+            "IDC": "DCIS",
+            "DCIS": "IDC",
+            "benign": "IDC",
+        }
+        if subtype in alternate_map and conf is not None:
+            alternates = alternate_map[subtype]
             hyps.append(Hypothesis(
                 hyp_id=f"biopsy:{alternates}:alternate",
                 stage="biopsy",
@@ -305,7 +315,7 @@ def evolve_hypotheses(
     changed. Perturbation catalog is small and stage-specific:
 
       screening:  bump confidence by ±0.1 (bounded [0,1])
-      biopsy:     swap subtype to the alternate (IDC↔DCIS, benign→IDC)
+      biopsy:     swap within the source label ontology (BACH broad labels or legacy subtype labels)
       therapy:    bump line_of_therapy by +1 (escalation) or -1 (de-escalation)
 
     Variants inherit `derived_from = parent.hyp_id` so the caller can trace
@@ -328,7 +338,13 @@ def evolve_hypotheses(
                 ))
         elif parent.stage == "biopsy":
             # Only spawn a swap variant if the hyp_id encodes a known subtype.
-            if "IDC" in parent.hyp_id:
+            if "invasive_carcinoma" in parent.hyp_id:
+                new_subtype = "in_situ_carcinoma"
+            elif "in_situ_carcinoma" in parent.hyp_id:
+                new_subtype = "invasive_carcinoma"
+            elif "benign_or_normal" in parent.hyp_id:
+                new_subtype = "invasive_carcinoma"
+            elif "IDC" in parent.hyp_id:
                 new_subtype = "DCIS"
             elif "DCIS" in parent.hyp_id:
                 new_subtype = "IDC"

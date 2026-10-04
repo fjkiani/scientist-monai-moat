@@ -17,10 +17,8 @@ loading, GPU work, and DICOM preprocessing all live on the Modal side.
 from __future__ import annotations
 
 import base64
-import hashlib
 import json
 import logging
-import math
 import os
 import time
 from dataclasses import dataclass
@@ -35,6 +33,7 @@ from .medsiglip import (
     MEDSIGLIP_INPUT_RES,
     MEDSIGLIP_MAMMOGRAPHY_WARNING,
     MEDSIGLIP_REPO,
+    MEDSIGLIP_REVISION,
     MedSigLipResult,
 )
 from ..api.schemas import ModelState
@@ -44,8 +43,6 @@ logger = logging.getLogger(__name__)
 # Server-side embed_batch caps at 32; keep a client-side margin for HTTP body size.
 DEFAULT_BATCH_CHUNK: int = 16
 DEFAULT_TIMEOUT_SECONDS: int = int(os.environ.get("MEDSIGLIP_MODAL_TIMEOUT", "300"))
-EXPECTED_APP_VERSION = "medsiglip-modal-v0.4.0-alpha"
-EXPECTED_EMBEDDING_DIM = 1152
 
 
 @dataclass(frozen=True)
@@ -157,10 +154,15 @@ class MedSigLipModalClient:
         endpoints: ModalEndpointConfig | None = None,
         batch_chunk: int = DEFAULT_BATCH_CHUNK,
         timeout: int = DEFAULT_TIMEOUT_SECONDS,
+        expected_model_revision: str = MEDSIGLIP_REVISION,
     ) -> None:
         self.endpoints = endpoints or ModalEndpointConfig.from_env()
         self.batch_chunk = max(1, min(int(batch_chunk), 32))
         self.timeout = int(timeout)
+        self.expected_model_revision = expected_model_revision
+        # Production builders use this common identity attribute before
+        # accepting the client; preflight then proves /info serves it.
+        self.model_revision = expected_model_revision
         self._info_cache: dict | None = None
         self._gate_report: GateReport | None = None
         # Compat property so callers written against the local class don't crash.
@@ -217,39 +219,36 @@ class MedSigLipModalClient:
             return gr
 
         model_repo = str(info.get("model_repo", ""))
+        model_revision = str(info.get("model_revision", ""))
+        dim = int(info.get("embedding_dim", 0) or 0)
+        identity_errors: list[str] = []
         if model_repo != MEDSIGLIP_REPO:
+            identity_errors.append(f"model_repo={model_repo!r}")
+        if model_revision != self.expected_model_revision:
+            identity_errors.append(
+                f"model_revision={model_revision!r} "
+                f"(expected {self.expected_model_revision!r})"
+            )
+        if dim != 1152:
+            identity_errors.append(f"embedding_dim={dim} (expected 1152)")
+        if identity_errors:
             gr = GateReport(
                 repo_id=MEDSIGLIP_REPO,
                 access_level=AccessLevel.UNKNOWN,
                 status_code=200,
-                reason=f"unexpected model_repo={model_repo!r}",
+                reason="modal identity mismatch: " + "; ".join(identity_errors),
                 has_token=True,
             )
             self._gate_report = gr
             return gr
 
-        dim = int(info.get("embedding_dim", 0) or 0)
-        app_version = str(info.get("app_version", ""))
-        if dim != EXPECTED_EMBEDDING_DIM or app_version != EXPECTED_APP_VERSION:
-            gr = GateReport(
-                repo_id=MEDSIGLIP_REPO,
-                access_level=AccessLevel.UNKNOWN,
-                status_code=200,
-                reason=(
-                    "medsiglip_contract_mismatch:"
-                    f"embedding_dim={dim},app_version={app_version!r}"
-                ),
-                has_token=True,
-            )
-            self._gate_report = gr
-            return gr
         gr = GateReport(
             repo_id=MEDSIGLIP_REPO,
             access_level=AccessLevel.ALLOWED,
             status_code=200,
             reason=(
-                f"modal-remote model_repo={model_repo} dim={dim} "
-                f"app_version={app_version}"
+                f"modal-remote model_repo={model_repo} "
+                f"revision={model_revision} dim={dim}"
             ),
             has_token=True,
         )
@@ -273,6 +272,74 @@ class MedSigLipModalClient:
         if not isinstance(emb, list):
             raise RuntimeError(f"malformed embed response: {resp!r}")
         return [float(x) for x in emb]
+
+    def embed_image(
+        self,
+        image_bytes: bytes | None = None,
+        image_url: str | None = None,
+        preprocessed_image=None,
+    ):
+        """Return the pinned 1,152-d pooled vision embedding for one image.
+
+        This mirrors :meth:`MedSigLip.embed_image` so the biopsy API can use
+        the backend factory instead of accidentally constructing an unpinned
+        local model.  The remote ``/embed`` implementation uses
+        ``vision_model(...).pooler_output``, exactly matching training.
+        """
+        import numpy as np
+
+        provided = sum(
+            value is not None
+            for value in (image_bytes, image_url, preprocessed_image)
+        )
+        if provided != 1:
+            raise ValueError(
+                "embed_image requires exactly one of image_bytes / image_url / "
+                f"preprocessed_image (got {provided})"
+            )
+
+        gate = self.preflight()
+        if gate.access_level is not AccessLevel.ALLOWED:
+            from .hai_def import GatedAccessError
+
+            raise GatedAccessError(
+                repo_id=MEDSIGLIP_REPO,
+                access_level=gate.access_level,
+                status_code=gate.status_code,
+                reason=gate.reason,
+            )
+
+        if image_bytes is not None:
+            raw = image_bytes
+        elif image_url is not None:
+            try:
+                with urllib_request.urlopen(image_url, timeout=self.timeout) as resp:
+                    raw = resp.read()
+            except (urllib_error.HTTPError, urllib_error.URLError) as exc:
+                raise RuntimeError(f"unable to retrieve biopsy image URL: {exc}") from exc
+        else:
+            from io import BytesIO
+            from PIL import Image
+
+            array = np.asarray(preprocessed_image)
+            if array.dtype != np.uint8:
+                array = np.clip(array * 255.0, 0, 255).astype(np.uint8)
+            image = Image.fromarray(array).convert("RGB")
+            buffer = BytesIO()
+            image.save(buffer, format="PNG")
+            raw = buffer.getvalue()
+
+        payload = {"pixels_b64": base64.b64encode(raw).decode("ascii")}
+        response = _post_json(self.endpoints.embed, payload, timeout=self.timeout)
+        embedding = response.get("embedding")
+        if not isinstance(embedding, list):
+            raise RuntimeError(f"malformed embed response: {response!r}")
+        vector = np.asarray(embedding, dtype=np.float32)
+        if vector.shape != (1152,) or not np.isfinite(vector).all():
+            raise RuntimeError(
+                f"Modal pooled embedding failed 1152-d finite contract: {vector.shape}"
+            )
+        return vector
 
     def embed_dicoms(
         self,
@@ -347,37 +414,7 @@ class MedSigLipModalClient:
         probs = resp.get("probs")
         if not isinstance(probs, list) or len(probs) != len(labels_list):
             raise RuntimeError(f"malformed zero_shot response: {resp!r}")
-        if resp.get("prompts") != labels_list:
-            raise RuntimeError("medsiglip_contract_mismatch:prompts")
-        if resp.get("app_version") != EXPECTED_APP_VERSION:
-            raise RuntimeError("medsiglip_contract_mismatch:app_version")
-        seconds = resp.get("seconds")
-        if not isinstance(seconds, (int, float)) or float(seconds) < 0:
-            raise RuntimeError("medsiglip_contract_mismatch:seconds")
-
-        embed_resp = _post_json(
-            self.endpoints.embed,
-            self._payload_for_path(dicom_path),
-            timeout=self.timeout,
-        )
-        embedding = embed_resp.get("embedding")
-        if (
-            not isinstance(embedding, list)
-            or embed_resp.get("dim") != EXPECTED_EMBEDDING_DIM
-            or len(embedding) != EXPECTED_EMBEDDING_DIM
-            or embed_resp.get("app_version") != EXPECTED_APP_VERSION
-        ):
-            raise RuntimeError("medsiglip_contract_mismatch:embedding")
-        embedding_values = [float(value) for value in embedding]
-        if not all(math.isfinite(value) for value in embedding_values):
-            raise RuntimeError("medsiglip_contract_mismatch:non_finite_embedding")
-        embedding_sha256 = hashlib.sha256(
-            json.dumps(embedding_values, separators=(",", ":")).encode("utf-8")
-        ).hexdigest()
-
         probs_f = [float(x) for x in probs]
-        if not all(math.isfinite(value) for value in probs_f) or not all(0.0 <= value <= 1.0 for value in probs_f):
-            raise RuntimeError("medsiglip_contract_mismatch:probabilities")
         top_idx = max(range(len(probs_f)), key=lambda i: probs_f[i])
         return MedSigLipResult(
             source_path=str(dicom_path),
@@ -390,11 +427,6 @@ class MedSigLipModalClient:
             input_resolution=MEDSIGLIP_INPUT_RES,
             logits_shape=(1, len(labels_list)),
             warnings=[MEDSIGLIP_MAMMOGRAPHY_WARNING],
-            app_version=EXPECTED_APP_VERSION,
-            inference_seconds=float(seconds) + float(embed_resp.get("seconds", 0.0)),
-            prompts=labels_list,
-            embedding_dim=EXPECTED_EMBEDDING_DIM,
-            embedding_sha256=embedding_sha256,
             gate_report=gate,
         )
 

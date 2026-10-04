@@ -37,6 +37,7 @@ from oncology_arbiter.models.medsiglip import (
     MEDSIGLIP_INPUT_RES,
     MEDSIGLIP_MAMMOGRAPHY_WARNING,
     MEDSIGLIP_REPO,
+    MEDSIGLIP_REVISION,
     MedSigLip,
     MedSigLipResult,
 )
@@ -54,6 +55,10 @@ def test_repo_id_is_medsiglip_448_exact() -> None:
 
 def test_input_resolution_is_448() -> None:
     assert MEDSIGLIP_INPUT_RES == 448
+
+
+def test_model_revision_is_immutable_training_revision() -> None:
+    assert MEDSIGLIP_REVISION == "9cea28a1a1195f665105faa6e8544c112fd960a4"
 
 
 def test_image_mean_and_std_are_half() -> None:
@@ -315,6 +320,62 @@ def test_load_is_idempotent() -> None:
     model_loads = [c for c in load_calls if c[0] == "model"]
     assert len(proc_loads) == 1, f"processor should load once, loaded {len(proc_loads)}x"
     assert len(model_loads) == 1, f"model should load once, loaded {len(model_loads)}x"
+
+
+# --------------------------------------------------------------------------- #
+# Identity-critical pooled embedding contract
+
+
+def test_embed_image_uses_unprojected_vision_pooler_output() -> None:
+    """The BACH head must never receive projected get_image_features output."""
+    import torch
+
+    class _EmbedProcessor:
+        @classmethod
+        def from_pretrained(cls, repo_id: str, **kwargs: Any):
+            assert kwargs["revision"] == MEDSIGLIP_REVISION
+            return cls()
+
+        def __call__(self, *, images, return_tensors):
+            assert return_tensors == "pt"
+            return {"pixel_values": torch.ones((1, 3, 448, 448))}
+
+    class _EmbedModel:
+        def __init__(self):
+            self.vision_calls = 0
+
+        @classmethod
+        def from_pretrained(cls, repo_id: str, **kwargs: Any):
+            assert kwargs["revision"] == MEDSIGLIP_REVISION
+            return cls()
+
+        def to(self, *_args, **_kwargs):
+            return self
+
+        def eval(self):
+            return self
+
+        def get_image_features(self, **_kwargs):
+            raise AssertionError("projected representation must not be called")
+
+        def vision_model(self, *, pixel_values):
+            self.vision_calls += 1
+            pooled = torch.linspace(-1.0, 1.0, 1152).reshape(1, 1152)
+            return types.SimpleNamespace(pooler_output=pooled)
+
+    ms = MedSigLip(
+        preflight_fn=_allowed_gate_report,
+        processor_cls=_EmbedProcessor,
+        model_cls=_EmbedModel,
+    )
+    embedding = ms.embed_image(
+        preprocessed_image=np.ones((32, 32), dtype=np.float32) * 0.5
+    )
+    assert embedding.shape == (1152,)
+    assert np.isfinite(embedding).all()
+    assert ms._model.vision_calls == 1
+    assert embedding[0] == pytest.approx(-1.0)
+    assert embedding[-1] == pytest.approx(1.0)
 
 
 # --------------------------------------------------------------------------- #

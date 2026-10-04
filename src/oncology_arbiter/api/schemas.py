@@ -49,7 +49,7 @@ class ModelState(str, Enum):
     CACHED = "cached"                 # result served from cache
     GATED = "gated"                   # HAI-DEF access denied (401/403)
     LOADED_MEDSIGLIP = "loaded_medsiglip"  # HAI-DEF MedSigLIP-448 inference (medical but off-label for mammography)
-    LOADED_BIOPSY_PROBE = "loaded_biopsy_probe"  # L4b MedSigLIP embed + synthetic linear probe (RUO, off-label)
+    LOADED_BIOPSY_PROBE = "loaded_biopsy_probe"  # L4b pinned MedSigLIP pooled embed + real BACH v1 head (RUO)
     LOADED_MONAI_DETECTOR = "loaded_monai_detector"  # L4a MONAI detector with trained weights (unreachable until weights ship)
     LOADED_LUNA16_RETINANET = "loaded_luna16_retinanet"  # v0.3.0 MONAI Model Zoo lung_nodule_ct_detection@0.6.9 (LUNA16-trained)
     LOADED_TXGEMMA = "loaded_txgemma"  # L4c HAI-DEF TxGemma inference (never reachable under current token)
@@ -486,7 +486,11 @@ class BiopsyResponse(ApiEnvelope):
     phikon_embedding: dict[str, Any] | None = None
     subtype_prediction: str | None = Field(
         default=None,
-        description="One of: DCIS, IDC, ILC, mucinous, tubular, other. None if model not wired.",
+        description=(
+            "BACH probe labels: benign_or_normal, in_situ_carcinoma, or "
+            "invasive_carcinoma. Legacy caller-provided pathology subtypes may "
+            "still appear; broad BACH classes must not be interpreted as DCIS/IDC."
+        ),
     )
     receptor_panel: BiopsyReceptorPanel = Field(default_factory=BiopsyReceptorPanel)
     grade: int | None = Field(default=None, ge=1, le=3, description="Nottingham grade 1-3")

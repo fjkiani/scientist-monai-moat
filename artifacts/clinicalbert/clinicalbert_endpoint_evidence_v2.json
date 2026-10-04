@@ -1,0 +1,111 @@
+{
+  "capability": "clinicalbert",
+  "endpoint_base": "https://crispro--clinicalbert",
+  "functional_calls": [
+    {
+      "app_version": "clinicalbert-modal-v2.0.0-real-tcga",
+      "artifact_sha256": "429f804d7f348d7c4eeb27821f766cc2de65c4072f20db0c3b3afaefa9068e50",
+      "base_revision": "d5892b39a4adaed74b92212a44081509db72f87b",
+      "entity_types": [
+        "ER_VALUE",
+        "GRADE",
+        "HER2_VALUE",
+        "LVI",
+        "MARGIN",
+        "PR_VALUE",
+        "TUMOR_SIZE_MM",
+        "T_STAGE"
+      ],
+      "functional_output_sha256": "b5d7ec799fea5ccab071d2091f258e2b8d0eeb2e110f3191fe7731b00a92ce98",
+      "http_status": 200,
+      "patient_id_hash": "1c86d6cd451a939eefe2b7081f7170e12c109d6a2302d2bbf9c6931df1b1150e",
+      "report_length_tokens": 1882,
+      "report_sha256": "a2d8ada4ee18fac878f76c16aa0f9ab469d781d722a181911b713248eb50c776",
+      "reported_latency_seconds": 1.173564,
+      "sample_id": "TCGA242-C1-tcga1_96",
+      "span_count": 63,
+      "tumor_source": "breast",
+      "wall_latency_seconds": 1.6376215210002556,
+      "window_count": 7
+    },
+    {
+      "app_version": "clinicalbert-modal-v2.0.0-real-tcga",
+      "artifact_sha256": "429f804d7f348d7c4eeb27821f766cc2de65c4072f20db0c3b3afaefa9068e50",
+      "base_revision": "d5892b39a4adaed74b92212a44081509db72f87b",
+      "entity_types": [
+        "GRADE",
+        "LVI",
+        "MARGIN",
+        "M_STAGE",
+        "N_STAGE",
+        "TUMOR_SIZE_MM",
+        "T_STAGE"
+      ],
+      "functional_output_sha256": "9332a85f7824d4cb4e73b7db8f96d2dfef5a359f8d3af73ef8c6977fa4fbe76e",
+      "http_status": 200,
+      "patient_id_hash": "485a8075f11d96fe4690fa5341c9556a96ec5398c23c7d72b1a1c98a261decbe",
+      "report_length_tokens": 1144,
+      "report_sha256": "24c3c639fae5a191f6e80c38438fdbb1c4e72b08fee617ce676e8ef758021417",
+      "reported_latency_seconds": 0.70522,
+      "sample_id": "TCGA242-C2-tcga2_29",
+      "span_count": 39,
+      "tumor_source": "colorectal",
+      "wall_latency_seconds": 1.1118485980005062,
+      "window_count": 4
+    },
+    {
+      "app_version": "clinicalbert-modal-v2.0.0-real-tcga",
+      "artifact_sha256": "429f804d7f348d7c4eeb27821f766cc2de65c4072f20db0c3b3afaefa9068e50",
+      "base_revision": "d5892b39a4adaed74b92212a44081509db72f87b",
+      "entity_types": [
+        "GRADE",
+        "LVI",
+        "MARGIN",
+        "N_STAGE",
+        "TUMOR_SIZE_MM",
+        "T_STAGE"
+      ],
+      "functional_output_sha256": "ed601f2eb1ec87df0f2dcece8c293998438f45e816af2db6254c9ebbb4470aa2",
+      "http_status": 200,
+      "patient_id_hash": "c5a124eac8204df3b6ed29df1722c33c89ec8f650ffff6129e07e96afc757bd2",
+      "report_length_tokens": 1805,
+      "report_sha256": "760d1f6f8ac40dda705d0d0b365e494a0d0bb09af538df803d1ab283a59b87c1",
+      "reported_latency_seconds": 0.999913,
+      "sample_id": "TCGA242-C1-tcga1_71",
+      "span_count": 42,
+      "tumor_source": "breast",
+      "wall_latency_seconds": 1.4105315249998966,
+      "window_count": 6
+    }
+  ],
+  "info": {
+    "app": "clinicalbert",
+    "app_version": "clinicalbert-modal-v2.0.0-real-tcga",
+    "artifact_filename": "clinicalbert_head_v2.safetensors",
+    "artifact_sha256": "429f804d7f348d7c4eeb27821f766cc2de65c4072f20db0c3b3afaefa9068e50",
+    "base_model": "emilyalsentzer/Bio_ClinicalBERT",
+    "base_revision": "d5892b39a4adaed74b92212a44081509db72f87b",
+    "container_load_seconds": 10.269,
+    "device": "cpu",
+    "disclaimer": "Research Use Only. Not FDA-cleared. Not CE-marked. Not intended for clinical use.",
+    "load_seconds": 2.528,
+    "max_length": 512,
+    "n_training": 2187,
+    "n_training_synthetic": false,
+    "non_o_margin_threshold": 0.25,
+    "num_labels": 39,
+    "provenance": "REAL-TCGA-PATHOLOGY-v2",
+    "stride": 128,
+    "test_span_micro_f1": 0.19162710401381094
+  },
+  "info_http_status": 200,
+  "product_endpoint_agreement": {
+    "artifact_sha256_equal": true,
+    "parsed_equal": true,
+    "report_sha256_equal": true,
+    "sample_id": "TCGA242-C1-tcga1_96",
+    "spans_equal": true,
+    "window_count_equal": true
+  },
+  "schema_version": 2
+}

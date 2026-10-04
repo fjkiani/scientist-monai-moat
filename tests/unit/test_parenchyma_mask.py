@@ -255,3 +255,62 @@ def test_tcga_24_1423_top_detection_flips_out_of_parenchyma():
         f"Regression: TCGA-24-1423 anchor should be out-of-parenchyma; "
         f"got {check.reason}"
     )
+
+
+@pytest.mark.skipif(
+    not TCGA_24_1423_DIR.exists() or not any(TCGA_24_1423_DIR.iterdir()),
+    reason="TCGA-24-1423 CT not on disk; skipping z-resample regression",
+)
+def test_tcga_24_1423_z_resampled_anchor_still_out_of_parenchyma():
+    """After z-resample from 5 mm -> 1.25 mm the anchor stays out-of-parenchyma.
+
+    This mirrors the production inference wire in
+    `api/app.py::/v1/case/full` when
+    ``ONCOLOGY_ARBITER_ENABLE_LUNA16_RETINANET`` is on:
+
+        read_ct_series(...)               # native dz=5.0 mm
+        resample_for_luna16(...)          # -> dz=1.25 mm
+        LungNoduleDetector.detect(...)    # runs on resampled volume
+        apply_parenchyma_filter(...)      # queries the resampled volume
+
+    We assert the anchor voxel, expressed in the RESAMPLED volume frame,
+    lands on a non-parenchyma voxel (HU >> aerated-lung window).
+    """
+    from oncology_arbiter.lung.ct_reader import read_ct_series
+    from oncology_arbiter.lung.resample import resample_for_luna16
+
+    ct = read_ct_series(TCGA_24_1423_DIR)
+    src_spacing = (
+        float(ct.slice_thickness_mm),
+        float(ct.pixel_spacing_mm[0]),
+        float(ct.pixel_spacing_mm[1]),
+    )
+    resamp = resample_for_luna16(ct.volume, src_spacing, z_only=True)
+    assert resamp.was_resampled is True, (
+        f"expected resample from {src_spacing} to LUNA16 target; "
+        f"got was_resampled=False"
+    )
+    assert resamp.spacing_mm[0] == pytest.approx(1.25, rel=1e-6)
+    assert resamp.z_scale_factor == pytest.approx(4.0, rel=1e-6)
+
+    # Anchor volume-frame z is invariant across resample (same mm origin).
+    scanner_z = -238.74
+    y_mm = 313.94
+    x_mm = 188.31
+    volume_z_mm = scanner_z - min(ct.z_positions_mm)
+
+    pm = build_parenchyma_mask(resamp.volume, resamp.spacing_mm)
+    check = is_detection_in_parenchyma(
+        (volume_z_mm, y_mm, x_mm), pm.mask, resamp.spacing_mm,
+    )
+
+    iz, iy, ix = check.center_vox
+    hu_here = float(resamp.volume[iz, iy, ix])
+    assert hu_here > 100.0, (
+        f"expected non-lung HU on resampled volume; got HU={hu_here} at "
+        f"voxel {check.center_vox}"
+    )
+    assert check.in_parenchyma is False, (
+        f"Regression: TCGA-24-1423 anchor should stay out-of-parenchyma "
+        f"after z-resample; got {check.reason}"
+    )
