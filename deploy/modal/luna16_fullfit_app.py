@@ -250,7 +250,7 @@ def cpu_preflight_full(request_id: str = "") -> Dict[str, Any]:
 def run_fullfit(
     request_id: str = "",
     epochs: int = 5,
-    learning_rate: float = 0.001,
+    learning_rate: float = 1e-5,  # linear GradualWarmupScheduler already in train.json
     batch_size: int = 2,
     gate_c_request_id: str = "",
     resume: bool = False,

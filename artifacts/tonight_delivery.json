@@ -107,7 +107,7 @@
         "tests/unit/test_cbis_medsiglip_v1_identity.py"
       ],
       "train_manifest_path": "artifacts/cbis_medsiglip/cbis_medsiglip_train_v2.json",
-      "train_manifest_sha256": "88785f140b667e49acd6919ab8f02bf9a41e5e3358ce259f2437f93982c0ae98",
+      "train_manifest_sha256": "c55ab2088d3b871f450d6c79601b498ac4938a5a065567a4d1d3825f02d23855",
       "wiring_paths": [
         "src/oncology_arbiter/models/cbis_ddsm_probe.py",
         "src/oncology_arbiter/api/app.py"

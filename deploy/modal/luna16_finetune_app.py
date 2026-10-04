@@ -184,7 +184,7 @@ def _unpack_and_resample(
 def finetune(
     fold: int = 0,
     epochs: int = 20,
-    learning_rate: float = 1e-3,
+    learning_rate: float = 1e-5,
     batch_size: int = 4,
     val_interval: int = 5,
     dry_run: bool = False,
@@ -282,7 +282,12 @@ def finetune(
 
     # Invoke bundle training loop
     cmd = [
-        "python", "-m", "monai.bundle", "run", "training",
+        # Official lung_nodule_ct_detection train.json:
+        # - "training" does NOT exist (pilot fc-01M3Z20… failed here)
+        # - "train" is a config OBJECT (dataloader/trainer) — invoking it as
+        #   run_id can resolve without executing trainer.run()
+        # - "run" is the executable expression: ["$@train#trainer.run()"]
+        "python", "-m", "monai.bundle", "run", "run",
         "--config_file", str(bundle_dir / "configs" / "train.json"),
         "--bundle_root", str(bundle_dir),
         "--dataset_dir", dataset_dir,
@@ -340,7 +345,8 @@ def _run_validate(
     import subprocess
 
     cmd = [
-        "python", "-m", "monai.bundle", "run", "validate",
+        # evaluate.json executable key is "run" -> $@validate#evaluator.run()
+        "python", "-m", "monai.bundle", "run", "run",
         "--config_file", str(bundle_dir / "configs" / "evaluate.json"),
         "--bundle_root", str(bundle_dir),
         "--dataset_dir", dataset_dir,
@@ -375,7 +381,7 @@ def trigger(payload: Dict[str, Any]) -> Dict[str, Any]:
     """Kick off a fine-tune run asynchronously; return function call id."""
     fold = int(payload.get("fold", 0))
     epochs = int(payload.get("epochs", 20))
-    lr = float(payload.get("learning_rate", 1e-3))
+    lr = float(payload.get("learning_rate", 1e-5))
     dry_run = bool(payload.get("dry_run", False))
     call = finetune.spawn(fold=fold, epochs=epochs, learning_rate=lr, dry_run=dry_run)
     return {"call_id": call.object_id, "params": {"fold": fold, "epochs": epochs, "lr": lr, "dry_run": dry_run}}
@@ -386,7 +392,7 @@ def trigger(payload: Dict[str, Any]) -> Dict[str, Any]:
 def main(
     fold: int = 0,
     epochs: int = 20,
-    learning_rate: float = 1e-3,
+    learning_rate: float = 1e-5,
     dry_run: bool = False,
 ) -> None:
     """Local trigger: ``modal run deploy/modal/luna16_finetune_app.py --dry-run``."""

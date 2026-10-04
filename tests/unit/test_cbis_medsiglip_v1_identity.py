@@ -1,12 +1,12 @@
-"""Identity lock for CBIS-DDSM LogReg v1 joblib delivery."""
+"""Identity lock for CBIS-DDSM LogReg v2 joblib delivery."""
 from pathlib import Path
 import hashlib
 
-ARTIFACT = Path(__file__).resolve().parents[2] / "models" / "cbis_ddsm_logreg_v1.joblib"
-EXPECTED = "80cd01d8724ab4fac4b6ca8ec9b755afa6db2ec3d96ba086d8fb7a83eddbd3ea"
+ARTIFACT = Path(__file__).resolve().parents[2] / "models" / "cbis_ddsm_logreg_v2.joblib"
+EXPECTED = "e5f5b67caf8ba18006e3d582e91becf95fbb20b8b34417366c7ef07b906a211b"
 
 
 def test_cbis_joblib_sha256_identity():
     h = hashlib.sha256(ARTIFACT.read_bytes()).hexdigest()
     assert h == EXPECTED
-    assert ARTIFACT.name == "cbis_ddsm_logreg_v1.joblib"
+    assert ARTIFACT.name == "cbis_ddsm_logreg_v2.joblib"

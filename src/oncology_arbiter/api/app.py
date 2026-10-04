@@ -506,7 +506,7 @@ def _compute_models_loaded() -> dict[str, ModelState]:
         "luna16": configured("LUNA16_MODAL_URL"),
         "clinicalbert": configured("CLINICALBERT_MODAL_URL"),
         "medgemma_27b": configured("MEDGEMMA_MODAL_URL"),
-        "cbis_ddsm_logreg_v1": cbis_state,
+        "cbis_ddsm_logreg_v2": cbis_state,
         "biopsy_probe_v0": biopsy_probe_state,
         "breast_dss_v3": ModelState.LOADED,
         "ovarian_arbiter": ModelState.RETIRED,
@@ -617,7 +617,7 @@ def _run_cbis_ddsm_probe_on_bytes(
 ) -> Any | None:
     """Run the trained CBIS-DDSM supervised probe on a mammogram.
 
-    Scores ``models/cbis_ddsm_logreg_v1.joblib`` (sha256 ``80cd01d8…``) over a
+    Scores ``models/cbis_ddsm_logreg_v2.joblib`` (sha256 ``e5f5b67caf8ba18006e3d582e91becf95fbb20b8b34417366c7ef07b906a211b``) over a
     1152-d MedSigLIP-448 embedding. Embedding sources (first hit wins):
 
       1. explicit ``embedding`` list (preferred — reuse the screening receipt)
@@ -1247,7 +1247,7 @@ def create_app() -> FastAPI:
             })
             model_state = ModelState.LOADED_MEDSIGLIP
 
-            # CBIS-DDSM LogReg v1 (joblib sha256 80cd01d8…) — trained probe over
+            # CBIS-DDSM LogReg v1 (joblib sha256 e5f5b67c…) — trained probe over
             # the same 1152-d embedding. Opt-out only: set
             # ONCOLOGY_ARBITER_ENABLE_CBIS_DDSM_PROBE=0 to skip.
             cbis_disabled = os.environ.get(
@@ -1263,7 +1263,7 @@ def create_app() -> FastAPI:
                     )
                     if probe_result is not None:
                         findings.append({
-                            "label": f"cbis_ddsm_logreg_v1:{probe_result.predicted_label}",
+                            "label": f"cbis_ddsm_logreg_v2:{probe_result.predicted_label}",
                             "score": float(probe_result.proba_cancer),
                             "location_bbox_normalized": None,
                         })
@@ -1280,10 +1280,10 @@ def create_app() -> FastAPI:
                                 "threshold_label": probe_result.threshold_label,
                                 "predicted_label": probe_result.predicted_label,
                                 "joblib_path": str(CBIS_JOBLIB_PATH),
-                                "joblib_sha256_prefix": "80cd01d8",
+                                "joblib_sha256_prefix": "e5f5b67c",
                             }
                         receipts.append({
-                            "stage": "cbis_ddsm_logreg_v1",
+                            "stage": "cbis_ddsm_logreg_v2",
                             "required": False,
                             "status": "succeeded",
                             "request_id": request_id,
@@ -1302,7 +1302,7 @@ def create_app() -> FastAPI:
                         f"cbis_ddsm_probe_error:{type(probe_exc).__name__}:{probe_exc}"
                     )
                     receipts.append(_skipped_stage_receipt(
-                        "cbis_ddsm_logreg_v1",
+                        "cbis_ddsm_logreg_v2",
                         request_id,
                         f"cbis_ddsm_probe_unavailable:{type(probe_exc).__name__}:{probe_exc}",
                     ))
@@ -1311,7 +1311,7 @@ def create_app() -> FastAPI:
                     f"cbis_ddsm_probe_skipped:joblib_missing:{CBIS_JOBLIB_PATH}"
                 )
                 receipts.append(_skipped_stage_receipt(
-                    "cbis_ddsm_logreg_v1",
+                    "cbis_ddsm_logreg_v2",
                     request_id,
                     f"trained probe missing at {CBIS_JOBLIB_PATH}",
                 ))

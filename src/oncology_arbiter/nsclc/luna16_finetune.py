@@ -18,7 +18,7 @@ splits the ~888 annotated LUNA16 series 534/67 (training/validation).
 
 Fine-tuning entry point
 -----------------------
-`run_finetune()` invokes `python -m monai.bundle run training` against a
+`run_finetune()` invokes `python -m monai.bundle run run` against a
 config dict that layers the following overrides on top of `train.json`:
 
 - `dataset_dir`: resampled `.nii.gz` corpus
@@ -30,7 +30,7 @@ config dict that layers the following overrides on top of `train.json`:
 
 Evaluation entry point
 ----------------------
-`run_evaluate()` runs `python -m monai.bundle run validate` with
+`run_evaluate()` runs `python -m monai.bundle run run` with
 `evaluate.json` overlaid on the fold's validation split, producing a
 COCO metric at `IoU=0.1` on 3D boxes (per bundle metadata).
 
@@ -97,7 +97,7 @@ class FinetuneConfig:
     epochs: int = 20
     """Number of fine-tune epochs. Bundle default was 300 for scratch training."""
 
-    learning_rate: float = 1e-3
+    learning_rate: float = 1e-5
     """LR for fine-tune (bundle default was 1e-2 for scratch). 10x lower is the
     common fine-tuning convention."""
 
@@ -218,7 +218,7 @@ def build_resampled_dataset(
 
 
 def run_finetune(cfg: FinetuneConfig, dry_run: bool = False) -> Dict[str, object]:
-    """Invoke `monai.bundle run training` with fine-tune overrides.
+    """Invoke `monai.bundle run run` with fine-tune overrides.
 
     Returns a dict:
         {
@@ -234,7 +234,7 @@ def run_finetune(cfg: FinetuneConfig, dry_run: bool = False) -> Dict[str, object
         raise FileNotFoundError(f"initial_weights not found: {initial_weights}")
 
     cmd = [
-        sys.executable, "-m", "monai.bundle", "run", "training",
+        sys.executable, "-m", "monai.bundle", "run", "run",
         "--config_file", str(cfg.bundle_root / "configs" / "train.json"),
         "--bundle_root", str(cfg.bundle_root),
         "--dataset_dir", str(cfg.dataset_dir),
@@ -275,10 +275,10 @@ def run_evaluate(
     ckpt_path: Path,
     output_dir: Path,
 ) -> Dict[str, object]:
-    """Invoke `monai.bundle run validate` and return the eval summary path."""
+    """Invoke `monai.bundle run run` on evaluate.json and return the eval summary path."""
     output_dir.mkdir(parents=True, exist_ok=True)
     cmd = [
-        sys.executable, "-m", "monai.bundle", "run", "validate",
+        sys.executable, "-m", "monai.bundle", "run", "run",
         "--config_file", str(bundle_root / "configs" / "evaluate.json"),
         "--bundle_root", str(bundle_root),
         "--dataset_dir", str(dataset_dir),

@@ -13,7 +13,7 @@
   "patient_disjoint": true,
   "schema_version": 2,
   "seed": 42,
-  "source_commit": "737fa4f66c2484de996139d8acc100d3e3a9b219",
+  "source_commit": "b95116a319fc7261d7177e33b173e4fbb7b51b2c",
   "split_manifest_path": "artifacts/cbis_medsiglip/cbis_medsiglip_split_v2.json",
   "split_sha256": "1393e136e3babf12db2e0a652929be549890515a62355bd6ed0371c817ce53fe",
   "started_at": "2026-10-04T08:42:33Z"
