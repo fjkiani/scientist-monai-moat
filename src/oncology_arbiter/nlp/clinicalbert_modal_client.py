@@ -176,6 +176,7 @@ class ClinicalBertModalClient:
               "provenance": "SYNTHETIC-v0.3.1",
               "base_model": "emilyalsentzer/Bio_ClinicalBERT",
               "training_seed": 42,
+              "test_span_micro_f1": 0.94,
               "test_micro_f1": 0.94,
               "parsed": { "KRAS": {"surface": "...", "value": "mutated"}, ... },
               "spans": [...],  # raw BIO spans for auditability

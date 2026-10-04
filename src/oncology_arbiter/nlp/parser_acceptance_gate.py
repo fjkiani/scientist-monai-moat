@@ -153,7 +153,13 @@ def declared_deployment_info() -> dict[str, Any]:
 
 
 def _coerce_f1(info: Mapping[str, Any]) -> float | None:
-    for key in ("test_micro_f1", "micro_f1", "held_out_micro_f1"):
+    # Prefer span-level key (deployed ClinicalBERT /info) then legacy aliases.
+    for key in (
+        "test_span_micro_f1",
+        "test_micro_f1",
+        "micro_f1",
+        "held_out_micro_f1",
+    ):
         v = info.get(key)
         if isinstance(v, (int, float)):
             return float(v)

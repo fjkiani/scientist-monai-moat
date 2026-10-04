@@ -307,6 +307,8 @@ class ClinicalBertModal:
             "app_version": APP_VERSION,
             "base_model": self.base_model,
             "training_seed": self.training_seed,
+            # Canonical span-level key (consumers prefer this); legacy alias kept.
+            "test_span_micro_f1": self.test_micro_f1,
             "test_micro_f1": self.test_micro_f1,
             "provenance": self.provenance,
             "num_labels": len(self.id2label),
@@ -362,6 +364,7 @@ class ClinicalBertModal:
             "provenance": self.provenance,
             "base_model": self.base_model,
             "training_seed": self.training_seed,
+            "test_span_micro_f1": self.test_micro_f1,
             "test_micro_f1": self.test_micro_f1,
             "app_version": APP_VERSION,
             "model_sha256": self.model_sha256,

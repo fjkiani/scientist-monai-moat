@@ -173,9 +173,27 @@ def _score_arbiter(
     consults no environment variable that could release an unidentified point
     estimate on a public route. The research override is a separate route with
     its own privileged scope; see ``/v1/research/arbiter/identified_set``.
+
+    Empty ``features={}`` is refused at this choke point: scoring an empty
+    panel against ``n_training=0`` templates returns only the intercept
+    constant (static sigmoid), which is not a clinical stage readout.
     """
     from oncology_arbiter.arbiter import load_arbiter
     from oncology_arbiter.arbiter.manski import ManskiBounds, enforce_manski_gate
+
+    if not features:
+        raise HTTPException(
+            422,
+            detail={
+                "error": "empty_arbiter_features",
+                "stage": stage or name,
+                "detail": (
+                    f"refusing to score {name!r} with features={{}}: empty panels "
+                    "collapse to the intercept-only constant and are not a "
+                    "clinical stage readout"
+                ),
+            },
+        )
 
     arb = load_arbiter(name)
     r = arb.score(features)
@@ -278,7 +296,11 @@ def _clinicalbert_biopsy_parse(report_text: str, *, request_id: str) -> tuple[Re
                 **DEPLOYED_PARSER_METRICS.get(str(observed_version), {}),
                 **{
                     k: response[k]
-                    for k in ("test_micro_f1", "micro_f1")
+                    for k in (
+                        "test_span_micro_f1",
+                        "test_micro_f1",
+                        "micro_f1",
+                    )
                     if k in response
                 },
             }
@@ -458,6 +480,25 @@ def _compute_models_loaded() -> dict[str, ModelState]:
             else ModelState.UNAVAILABLE
         )
 
+    from oncology_arbiter.models.cbis_ddsm_probe import DEFAULT_MODEL_PATH as _CBIS_JOBLIB
+
+    cbis_state = (
+        ModelState.LOADED
+        if Path(_CBIS_JOBLIB).exists()
+        else ModelState.UNAVAILABLE
+    )
+    biopsy_probe_path = (
+        Path(__file__).resolve().parents[1]
+        / "arbiter"
+        / "models"
+        / "biopsy_probe_v0.json"
+    )
+    biopsy_probe_state = (
+        ModelState.LOADED_BIOPSY_PROBE
+        if biopsy_probe_path.exists()
+        else ModelState.UNAVAILABLE
+    )
+
     return {
         "case_storage": configured("CASE_STORAGE_MODAL_URL"),
         "medsiglip_448": configured("MODAL_MEDSIGLIP_URL"),
@@ -465,6 +506,8 @@ def _compute_models_loaded() -> dict[str, ModelState]:
         "luna16": configured("LUNA16_MODAL_URL"),
         "clinicalbert": configured("CLINICALBERT_MODAL_URL"),
         "medgemma_27b": configured("MEDGEMMA_MODAL_URL"),
+        "cbis_ddsm_logreg_v1": cbis_state,
+        "biopsy_probe_v0": biopsy_probe_state,
         "breast_dss_v3": ModelState.LOADED,
         "ovarian_arbiter": ModelState.RETIRED,
         "offline_deterministic_ranker": ModelState.PROXY_CO_SCIENTIST,
@@ -566,44 +609,53 @@ def _run_medsiglip_on_preprocessed(
 
 def _run_cbis_ddsm_probe_on_bytes(
     dicom_bytes: bytes,
-    preprocess_result: Any,
+    preprocess_result: Any = None,
+    *,
+    embedding: list[float] | None = None,
+    dicom_path: str | Path | None = None,
+    modal_client: Any | None = None,
 ) -> Any | None:
     """Run the trained CBIS-DDSM supervised probe on a mammogram.
 
-    Requires the Modal backend (only backend that returns 1152-d embeddings
-    today). For the local backend this returns ``None`` and callers should
-    skip the probe finding.
+    Scores ``models/cbis_ddsm_logreg_v1.joblib`` (sha256 ``80cd01d8…``) over a
+    1152-d MedSigLIP-448 embedding. Embedding sources (first hit wins):
 
-    On Modal:
-      1. Get the 1152-d MedSigLIP-448 embedding (one POST to /embed).
-      2. Score it with the trained sklearn LogReg probe (in-process).
-      3. Return a :class:`CbisDdsmProbeResult`.
+      1. explicit ``embedding`` list (preferred — reuse the screening receipt)
+      2. ``modal_client.embed_dicom(dicom_path)`` when both are supplied
+      3. a fresh Modal embed of ``dicom_bytes`` via ``MedSigLipModalClient``
 
-    Any failure is caught and logged upstream; this returns ``None`` so a
-    probe failure does NOT poison the whole /v1/screening/analyze response.
-    The MedSigLIP zero-shot findings above still ship.
+    Returns ``None`` when no Modal embedding path is available so callers can
+    keep the zero-shot findings without poisoning the response.
     """
-    ms = _get_medsiglip()
+    from oncology_arbiter.models.cbis_ddsm_probe import CbisDdsmProbe
     from oncology_arbiter.models.medsiglip_modal_client import MedSigLipModalClient
 
-    if not isinstance(ms, MedSigLipModalClient):
-        # Local backend does not expose the raw embedding today — the
-        # supervised probe is Modal-only for now.
-        return None
+    emb = embedding
+    if emb is None and dicom_path is not None:
+        client = modal_client if isinstance(modal_client, MedSigLipModalClient) else MedSigLipModalClient()
+        emb = client.embed_dicom(dicom_path)
+    if emb is None:
+        client = modal_client if isinstance(modal_client, MedSigLipModalClient) else None
+        if client is None:
+            ms = _get_medsiglip()
+            if isinstance(ms, MedSigLipModalClient):
+                client = ms
+            else:
+                # Prefer an explicit Modal client over a local encoder that
+                # may not expose 1152-d embeddings on this process.
+                try:
+                    client = MedSigLipModalClient()
+                except Exception:
+                    return None
+        with tempfile.NamedTemporaryFile(suffix=".dcm", delete=False) as tf:
+            tf.write(dicom_bytes)
+            tmp_path = tf.name
+        try:
+            emb = client.embed_dicom(tmp_path)
+        finally:
+            Path(tmp_path).unlink(missing_ok=True)
 
-    # Write DICOM to a temp file, embed via Modal, discard.
-    with tempfile.NamedTemporaryFile(suffix=".dcm", delete=False) as tf:
-        tf.write(dicom_bytes)
-        tmp_path = tf.name
-    try:
-        embedding = ms.embed_dicom(tmp_path)
-    finally:
-        Path(tmp_path).unlink(missing_ok=True)
-
-    from oncology_arbiter.models.cbis_ddsm_probe import CbisDdsmProbe
-
-    probe = CbisDdsmProbe.get()
-    return probe.predict(embedding)
+    return CbisDdsmProbe.get().predict(emb)
 
 
 # --------------------------------------------------------------------------- #
@@ -758,6 +810,7 @@ def _run_clinicalbert_parse(
                 "provenance": resp.get("provenance"),
                 "base_model": resp.get("base_model"),
                 "training_seed": resp.get("training_seed"),
+                "test_span_micro_f1": resp.get("test_span_micro_f1"),
                 "test_micro_f1": resp.get("test_micro_f1"),
                 "app_version": resp.get("app_version"),
                 "n_tokens": resp.get("n_tokens"),
@@ -794,6 +847,7 @@ def _run_clinicalbert_parse(
                 "provenance": resp.get("provenance"),
                 "base_model": resp.get("base_model"),
                 "training_seed": resp.get("training_seed"),
+                "test_span_micro_f1": resp.get("test_span_micro_f1"),
                 "test_micro_f1": resp.get("test_micro_f1"),
                 "app_version": resp.get("app_version"),
                 "n_tokens": resp.get("n_tokens"),
@@ -1130,7 +1184,7 @@ def create_app() -> FastAPI:
             raise HTTPException(422, f"preprocessing failed: {exc}") from exc
 
         started = time.perf_counter()
-        receipt: dict[str, Any]
+        receipts: list[dict[str, Any]] = []
         medsiglip_block: dict[str, Any] | None = None
         findings: list[dict[str, Any]] = []
         overall_score: float | None = None
@@ -1139,9 +1193,14 @@ def create_app() -> FastAPI:
         model_name: str | None = "google/medsiglip-448"
         gate_report: Any = None
         try:
+            from oncology_arbiter.models.cbis_ddsm_probe import (
+                CBIS_DDSM_PROBE_WARNING,
+                DEFAULT_MODEL_PATH as CBIS_JOBLIB_PATH,
+            )
             from oncology_arbiter.models.medsiglip_modal_client import MedSigLipModalClient
 
-            result = MedSigLipModalClient().run(temp_path)
+            ms_client = MedSigLipModalClient()
+            result = ms_client.run(temp_path)
             if result.embedding_dim != 1152 or not result.embedding_sha256:
                 raise RuntimeError("medsiglip_contract_mismatch:embedding_receipt")
             gate_report = result.gate_report
@@ -1172,7 +1231,7 @@ def create_app() -> FastAPI:
                 "probs_sum": float(sum(float(p) for p in result.probs)),
                 "probs_are_normalised_distribution": False,
             }
-            receipt = {
+            receipts.append({
                 "stage": "medsiglip_screening",
                 "required": True,
                 "status": "succeeded",
@@ -1183,14 +1242,84 @@ def create_app() -> FastAPI:
                 "model_name": result.model_repo,
                 "input_reference": input_sha,
                 "latency_ms": latency_ms,
-                "warnings": warnings,
+                "warnings": list(warnings),
                 "error": None,
-            }
+            })
             model_state = ModelState.LOADED_MEDSIGLIP
+
+            # CBIS-DDSM LogReg v1 (joblib sha256 80cd01d8…) — trained probe over
+            # the same 1152-d embedding. Opt-out only: set
+            # ONCOLOGY_ARBITER_ENABLE_CBIS_DDSM_PROBE=0 to skip.
+            cbis_disabled = os.environ.get(
+                "ONCOLOGY_ARBITER_ENABLE_CBIS_DDSM_PROBE", "1"
+            ).strip().lower() in {"0", "false", "no", "off"}
+            if not cbis_disabled and Path(CBIS_JOBLIB_PATH).exists():
+                try:
+                    probe_t0 = time.perf_counter()
+                    probe_result = _run_cbis_ddsm_probe_on_bytes(
+                        raw_bytes,
+                        dicom_path=temp_path,
+                        modal_client=ms_client,
+                    )
+                    if probe_result is not None:
+                        findings.append({
+                            "label": f"cbis_ddsm_logreg_v1:{probe_result.predicted_label}",
+                            "score": float(probe_result.proba_cancer),
+                            "location_bbox_normalized": None,
+                        })
+                        # Trained probe supersedes off-label zero-shot as overall.
+                        overall_score = float(probe_result.proba_cancer)
+                        if CBIS_DDSM_PROBE_WARNING not in warnings:
+                            warnings.append(CBIS_DDSM_PROBE_WARNING)
+                        model_name = f"{result.model_repo}+{probe_result.probe_version}"
+                        if medsiglip_block is not None:
+                            medsiglip_block["cbis_probe"] = {
+                                "probe_version": probe_result.probe_version,
+                                "proba_cancer": float(probe_result.proba_cancer),
+                                "threshold": float(probe_result.threshold),
+                                "threshold_label": probe_result.threshold_label,
+                                "predicted_label": probe_result.predicted_label,
+                                "joblib_path": str(CBIS_JOBLIB_PATH),
+                                "joblib_sha256_prefix": "80cd01d8",
+                            }
+                        receipts.append({
+                            "stage": "cbis_ddsm_logreg_v1",
+                            "required": False,
+                            "status": "succeeded",
+                            "request_id": request_id,
+                            "service_name": "oncology-arbiter",
+                            "model_name": probe_result.probe_version,
+                            "input_reference": result.embedding_sha256,
+                            "latency_ms": (time.perf_counter() - probe_t0) * 1000.0,
+                            "warnings": [CBIS_DDSM_PROBE_WARNING],
+                            "error": None,
+                        })
+                except Exception as probe_exc:  # noqa: BLE001 — never hide
+                    warnings.append(
+                        f"cbis_ddsm_probe_error:{type(probe_exc).__name__}:{probe_exc}"
+                    )
+                    receipts.append(_failed_stage_receipt(
+                        "cbis_ddsm_logreg_v1",
+                        False,
+                        request_id,
+                        "cbis_ddsm_probe_failed",
+                        str(probe_exc),
+                        service_name="oncology-arbiter",
+                        input_reference=result.embedding_sha256,
+                    ))
+            elif not cbis_disabled:
+                warnings.append(
+                    f"cbis_ddsm_probe_skipped:joblib_missing:{CBIS_JOBLIB_PATH}"
+                )
+                receipts.append(_skipped_stage_receipt(
+                    "cbis_ddsm_logreg_v1",
+                    request_id,
+                    f"trained probe missing at {CBIS_JOBLIB_PATH}",
+                ))
         except Exception as exc:  # required failure remains a failure
             latency_ms = (time.perf_counter() - started) * 1000.0
             warnings = [f"medsiglip_required_stage_failed:{type(exc).__name__}"]
-            receipt = _failed_stage_receipt(
+            receipts.append(_failed_stage_receipt(
                 "medsiglip_screening",
                 True,
                 request_id,
@@ -1198,8 +1327,8 @@ def create_app() -> FastAPI:
                 str(exc),
                 service_name="crispro--medsiglip",
                 input_reference=input_sha,
-            )
-            receipt["latency_ms"] = latency_ms
+            ))
+            receipts[-1]["latency_ms"] = latency_ms
         finally:
             Path(temp_path).unlink(missing_ok=True)
 
@@ -1212,8 +1341,8 @@ def create_app() -> FastAPI:
         )
         response = ScreeningResponse(
             **envelope,
-            pipeline_status=_pipeline_status([receipt]),
-            stage_receipts=[receipt],
+            pipeline_status=_pipeline_status(receipts),
+            stage_receipts=receipts,
             laterality=preprocessed.metadata.laterality.value,
             view=preprocessed.metadata.view.value,
             orientation_flipped=preprocessed.metadata.orientation_flipped,
@@ -1221,6 +1350,7 @@ def create_app() -> FastAPI:
             findings=findings,
             overall_score=overall_score,
             medsiglip=medsiglip_block,
+            # Empty features={} collapse to intercept-only constants — refused.
             arbiter_score=None,
             warnings=warnings,
         )
@@ -1274,6 +1404,89 @@ def create_app() -> FastAPI:
         else:
             receipts.append(_skipped_stage_receipt(
                 "clinicalbert_pathology_parse", request_id, "no report_text supplied"
+            ))
+
+        subtype_prediction: str | None = None
+        confidence: float | None = None
+
+        # MedSigLIP + biopsy_probe_v0 (synthetic 768-d head on disk).
+        # Honest bind: sha256 of committed biopsy_probe_v0.json is
+        # 2235f3de… — NOT 58f1699d… (1152-d v1 weights are not on this tree).
+        biopsy_probe_disabled = os.environ.get(
+            "ONCOLOGY_ARBITER_ENABLE_BIOPSY_MEDSIGLIP", "1"
+        ).strip().lower() in {"0", "false", "no", "off"}
+        if not biopsy_probe_disabled and (req.wsi_bytes_b64 or req.wsi_url):
+            try:
+                from oncology_arbiter.models.biopsy_medsiglip_probe import (
+                    BiopsyMedSigLipProbe,
+                )
+                from oncology_arbiter.models.hai_def import GatedAccessError
+
+                probe_t0 = time.perf_counter()
+                probe = BiopsyMedSigLipProbe()
+                image_bytes = _decode_bytes_arg(req.wsi_bytes_b64)
+                image_url = str(req.wsi_url) if req.wsi_url else None
+                probe_result = probe.run(
+                    image_bytes=image_bytes,
+                    image_url=image_url,
+                )
+                subtype_prediction = probe_result.subtype
+                confidence = float(probe_result.subtype_probs[probe_result.subtype])
+                if model_state in (ModelState.PLACEHOLDER, ModelState.LOADED_CLINICALBERT_PARSER):
+                    model_state = ModelState.LOADED_BIOPSY_PROBE
+                    model_name = "google/medsiglip-448+biopsy_probe_v0"
+                warnings.extend(probe_result.warnings)
+                warnings.append(
+                    "biopsy_probe_artifact:biopsy_probe_v0.json:"
+                    "sha256_prefix=2235f3de:synthetic=True:"
+                    "58f1699d_v1_1152d_UNCLEAR_not_on_disk"
+                )
+                receipts.append({
+                    "stage": "biopsy_medsiglip_probe_v0",
+                    "required": False,
+                    "status": "succeeded",
+                    "request_id": request_id,
+                    "service_name": "oncology-arbiter",
+                    "model_name": probe_result.model_name,
+                    "input_reference": (
+                        hashlib.sha256(image_bytes).hexdigest()
+                        if image_bytes is not None else image_url
+                    ),
+                    "latency_ms": (time.perf_counter() - probe_t0) * 1000.0,
+                    "warnings": list(probe_result.warnings),
+                    "error": None,
+                })
+            except GatedAccessError as gate_err:
+                model_state = ModelState.GATED
+                model_name = gate_err.repo_id
+                warnings.append(
+                    f"biopsy_medsiglip_gated:{gate_err.access_level.value}:{gate_err.reason}"
+                )
+                receipts.append(_failed_stage_receipt(
+                    "biopsy_medsiglip_probe_v0",
+                    False,
+                    request_id,
+                    "hai_def_gated",
+                    f"{gate_err.access_level.value}:{gate_err.reason}",
+                    service_name="medsiglip",
+                ))
+            except Exception as probe_exc:  # noqa: BLE001
+                warnings.append(
+                    f"biopsy_medsiglip_error:{type(probe_exc).__name__}:{probe_exc}"
+                )
+                receipts.append(_failed_stage_receipt(
+                    "biopsy_medsiglip_probe_v0",
+                    False,
+                    request_id,
+                    "biopsy_probe_failed",
+                    f"{type(probe_exc).__name__}: {probe_exc}",
+                    service_name="oncology-arbiter",
+                ))
+        elif not biopsy_probe_disabled:
+            receipts.append(_skipped_stage_receipt(
+                "biopsy_medsiglip_probe_v0",
+                request_id,
+                "no pathology image supplied for biopsy probe",
             ))
 
         if req.wsi_bytes_b64:
@@ -1366,10 +1579,11 @@ def create_app() -> FastAPI:
             pipeline_status=pipeline_status,
             stage_receipts=receipts,
             phikon_embedding=phikon_embedding,
-            subtype_prediction=None,
+            subtype_prediction=subtype_prediction,
             receptor_panel=receptor_panel,
             grade=parsed_grade,
-            confidence=None,
+            confidence=confidence,
+            # Empty features={} collapse to intercept-only constants — refused.
             arbiter_score=None,
             report_parse=report_parse_block,
             dss_prognosis=dss_prognosis,

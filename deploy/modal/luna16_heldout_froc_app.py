@@ -29,7 +29,11 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import modal
 
-APP_VERSION = "luna16-heldout-froc-v0.2.0"
+# Never resolve repo via Path(__file__).parents[N] — Modal mounts this file at
+# /root/<name>.py (only parents[0]=/root, parents[1]=/), which raises IndexError(2).
+# Bake annotations + vendor eval into the image under /opt/; use with_name() for
+# client-side add_local only (skipped on the worker when siblings are absent).
+APP_VERSION = "luna16-heldout-froc-v0.2.1"
 EXPECTED_BASELINE = "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01"
 EXPECTED_DATALIST = "c5f6adf3fe79b787e8b038862220c8aed16964f36cd8b642dbaa4ccfc10a73c3"
 NIFTI_PREFIX = "/vol/luna16/nifti_v3"

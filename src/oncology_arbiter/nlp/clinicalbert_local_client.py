@@ -238,16 +238,22 @@ def _load_model_once(weight_dir: str) -> Tuple[Any, Any, Dict[int, str], Dict[st
         else:
             id2label = {int(k): v for k, v in model.config.id2label.items()}
 
+        micro_f1 = (metrics.get("test") or {}).get("micro", {}).get("f1")
         meta = {
             "provenance": metrics.get("provenance", "SYNTHETIC-v0.3.1"),
             "base_model": metrics.get("base_model", "emilyalsentzer/Bio_ClinicalBERT"),
             "training_seed": metrics.get("training_seed"),
-            "test_micro_f1": (metrics.get("test") or {}).get("micro", {}).get("f1"),
+            # Prefer span-level key (deployed Modal /info); keep legacy alias.
+            "test_span_micro_f1": metrics.get("test_span_micro_f1", micro_f1),
+            "test_micro_f1": metrics.get("test_micro_f1", micro_f1),
             "load_seconds": round(time.time() - t0, 3),
         }
         logger.info(
             "clinicalbert_local: loaded %s in %.2fs (seed=%s, f1=%s)",
-            weight_dir, meta["load_seconds"], meta["training_seed"], meta["test_micro_f1"],
+            weight_dir,
+            meta["load_seconds"],
+            meta["training_seed"],
+            meta.get("test_span_micro_f1") or meta["test_micro_f1"],
         )
         _MODEL_CACHE[weight_dir] = (tokenizer, model, id2label, meta)
         return _MODEL_CACHE[weight_dir]
@@ -297,6 +303,7 @@ class ClinicalBertLocalClient:
             "app_version": APP_VERSION,
             "base_model": meta["base_model"],
             "training_seed": meta["training_seed"],
+            "test_span_micro_f1": meta.get("test_span_micro_f1"),
             "test_micro_f1": meta["test_micro_f1"],
             "provenance": meta["provenance"],
             "num_labels": len(_id2label),
@@ -318,6 +325,7 @@ class ClinicalBertLocalClient:
             "provenance": meta["provenance"],
             "base_model": meta["base_model"],
             "training_seed": meta["training_seed"],
+            "test_span_micro_f1": meta.get("test_span_micro_f1"),
             "test_micro_f1": meta["test_micro_f1"],
             "app_version": APP_VERSION,
             "disclaimer": _DISCLAIMER,
