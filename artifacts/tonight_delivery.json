@@ -151,7 +151,7 @@
       ],
       "wiring_paths": [
         "src/oncology_arbiter/models/phikon_probe.py",
-        "src/oncology_arbiter/api/app.py"
+        "src/oncology_arbiter/models/phikon_probe_wiring.py"
       ]
     }
   ],

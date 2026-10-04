@@ -1491,7 +1491,9 @@ def create_app() -> FastAPI:
         if req.wsi_bytes_b64:
             try:
                 from oncology_arbiter.models.specialist_clients import PhikonClient
-                from oncology_arbiter.models.phikon_probe import PhikonProbe  # binds models/phikon_probe_v1.joblib
+                from oncology_arbiter.models.phikon_probe_wiring import (
+                    predict_tissue_class as phikon_predict_tissue_class,
+                )
                 image_bytes = _decode_bytes_arg(req.wsi_bytes_b64)
                 call = PhikonClient().embed(image_bytes or b"", request_id=request_id, required=True)
                 phikon_embedding = call.output
@@ -1504,7 +1506,7 @@ def create_app() -> FastAPI:
                             (phikon_embedding.get("embeddings") or [None])[0]
                         )
                     if emb_vec is not None:
-                        probe_out = PhikonProbe.get().predict(emb_vec)
+                        probe_out = phikon_predict_tissue_class(emb_vec)
                         if isinstance(phikon_embedding, dict):
                             phikon_embedding = {**phikon_embedding, "probe": probe_out}
                         receipts.append({
