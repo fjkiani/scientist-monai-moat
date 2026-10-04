@@ -94,12 +94,12 @@
       ]
     },
     {
-      "artifact_path": "models/cbis_ddsm_logreg_v1.joblib",
-      "artifact_sha256": "80cd01d8724ab4fac4b6ca8ec9b755afa6db2ec3d96ba086d8fb7a83eddbd3ea",
+      "artifact_path": "models/cbis_ddsm_logreg_v2.joblib",
+      "artifact_sha256": "e5f5b67caf8ba18006e3d582e91becf95fbb20b8b34417366c7ef07b906a211b",
       "evaluation_path": "artifacts/cbis_medsiglip/cbis_medsiglip_evaluation_v2.json",
-      "evaluation_sha256": "7a1affc9ade7774ee967f9386c8c3a33dd3a1a2b597c15893f46648fc3130726",
-      "metrics_sidecar": "docs/proofs/cbis_ddsm_logreg_v1_metrics.json",
-      "n_training": 451,
+      "evaluation_sha256": "6f26107df70bd10ff616fa8f1a69a864ca2db7dc7c68e1118f42fba50f8decce",
+      "metrics_sidecar": "docs/proofs/cbis_ddsm_logreg_v2_metrics.json",
+      "n_training": 2201,
       "n_training_synthetic": false,
       "name": "cbis-medsiglip",
       "status": "trained_wired_tested",
@@ -107,7 +107,7 @@
         "tests/unit/test_cbis_medsiglip_v1_identity.py"
       ],
       "train_manifest_path": "artifacts/cbis_medsiglip/cbis_medsiglip_train_v2.json",
-      "train_manifest_sha256": "561acb014463fe3dd42988e5c809c079f43a3dc33757728b5335278e41fda683",
+      "train_manifest_sha256": "88785f140b667e49acd6919ab8f02bf9a41e5e3358ce259f2437f93982c0ae98",
       "wiring_paths": [
         "src/oncology_arbiter/models/cbis_ddsm_probe.py",
         "src/oncology_arbiter/api/app.py"
