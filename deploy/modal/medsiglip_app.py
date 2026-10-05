@@ -90,7 +90,9 @@ def healthz() -> Dict[str, str]:
     gpu="A10G",
     secrets=[HF_SECRET],
     scaledown_window=_SCALEDOWN_S,
-    timeout=180,
+    # Cold start pulls ~3.3GB gated weights; 180s was killing enter() mid-download
+    # (healthz 200 + hung /info). Keep headroom for first-pull + inference.
+    timeout=900,
     min_containers=_MIN_CONTAINERS,
 )
 class MedSigLipModal:

@@ -55,6 +55,11 @@ def main() -> int:
     ap.add_argument("--chunk", type=int, default=16)
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--dataset-id", type=str, default="mammo_png_tree")
+    ap.add_argument(
+        "--allow-empty-revision",
+        action="store_true",
+        help="Accept Modal /info without model_revision (v0.3.0 crispro-test)",
+    )
     args = ap.parse_args()
 
     if not os.environ.get("MODAL_MEDSIGLIP_URL"):
@@ -87,11 +92,11 @@ def main() -> int:
             done_mask[:] = prev_mask
             print(f"[resume] {int(done_mask.sum())}/{n}")
 
-    client = MedSigLipModalClient(batch_chunk=args.chunk)
+    rev_kw = {"expected_model_revision": ""} if args.allow_empty_revision else {}
+    client = MedSigLipModalClient(batch_chunk=args.chunk, **rev_kw)
     gate = client.preflight()
     if gate.access_level.value != "allowed":
         raise SystemExit(f"preflight not allowed: {gate.reason}")
-
     remaining = np.where(~done_mask)[0].tolist()
     t_start = time.time()
     for chunk_i, i in enumerate(range(0, len(remaining), args.chunk)):

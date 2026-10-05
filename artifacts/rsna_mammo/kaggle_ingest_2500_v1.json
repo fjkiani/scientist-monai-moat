@@ -1,0 +1,14 @@
+{
+  "status": "ok",
+  "max_patients": 2500,
+  "selected": 2500,
+  "written": 826,
+  "errors": 1674,
+  "png_root": "/vol/mammo/png_tree",
+  "band": "24-48",
+  "ts": "2026-10-05T12:09:26.720625+00:00",
+  "profile": "testing-123",
+  "volume": "rsna-mammo-png",
+  "honesty": "826/2500 written; 1674 kaggle download failures (rate/path). Official probe on written subset. Band4 \u226510k still theoviel probe_v2_12k.",
+  "followup": "retry failed patient dcm downloads"
+}
