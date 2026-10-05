@@ -1,0 +1,10 @@
+{
+  "status": "partial_ok",
+  "workspace": "testing-123",
+  "max_patients": 30,
+  "written": 15,
+  "errors": 15,
+  "note": "unzip(1) path live; half succeeded; scale next",
+  "modal_run": "https://modal.com/apps/testing-123/main/ap-OBCKTPPHmNXA4CIhl9pQle",
+  "ts": "2026-10-05T11:10:13Z"
+}
