@@ -63,7 +63,7 @@ def _extract_json_object(text: str) -> dict[str, Any]:
 def extract_pathology(
     report_text: str,
     *,
-    max_tokens: int = 384,
+    max_tokens: int = 1024,
     temperature: float = 0.0,
     timeout_s: float = 180.0,
 ) -> dict[str, Any]:
@@ -78,45 +78,75 @@ def extract_pathology(
     if len(body_text) > 12000:
         body_text = body_text[:8000] + "\n...\n" + body_text[-4000:]
 
-    user_content = (
-        EXTRACTION_SYSTEM_PROMPT
-        + "\n\nPATHOLOGY REPORT:\n"
-        + body_text
-        + "\n\nJSON:"
-    )
-    req_body = json.dumps(
-        {
-            "messages": [{"role": "user", "content": user_content}],
-            "max_tokens": max_tokens,
-            "temperature": temperature,
-        }
-    ).encode()
-    request = urllib.request.Request(
-        chat_url,
-        data=req_body,
-        headers={"Content-Type": "application/json"},
-        method="POST",
-    )
-    try:
-        with urllib.request.urlopen(request, timeout=timeout_s) as resp:
-            data = json.loads(resp.read().decode())
-    except urllib.error.HTTPError as exc:
-        detail = exc.read().decode(errors="replace")[:500]
-        raise MedGemmaPathologyError(
-            f"medgemma_pathology HTTP {exc.code}: {detail}"
-        ) from exc
-    except Exception as exc:  # noqa: BLE001
-        raise MedGemmaPathologyError(
-            f"medgemma_pathology request failed: {type(exc).__name__}: {exc}"
-        ) from exc
+    attempts = [
+        (
+            EXTRACTION_SYSTEM_PROMPT
+            + "\n\nPATHOLOGY REPORT:\n"
+            + body_text
+            + "\n\nJSON:"
+        ),
+        (
+            "Return ONLY one JSON object with keys "
+            "er_status, er_percent, pr_status, her2_status, nottingham_grade, tumor_size_mm. "
+            "Use null when unknown. First character must be '{'.\n\nREPORT:\n"
+            + body_text[:6000]
+            + "\n\n{"
+        ),
+    ]
 
-    if data.get("error"):
-        raise MedGemmaPathologyError(f"medgemma_pathology chat error: {data['error']}")
-    if data.get("revision_sha256") != identity["revision_sha256"]:
-        raise MedGemmaPathologyError("medgemma_pathology: revision_sha256 drift vs identity")
+    last_err: Exception | None = None
+    raw_text = ""
+    data: dict[str, Any] = {}
+    for user_content in attempts:
+        req_body = json.dumps(
+            {
+                "messages": [{"role": "user", "content": user_content}],
+                "max_tokens": max_tokens,
+                "temperature": temperature,
+            }
+        ).encode()
+        request = urllib.request.Request(
+            chat_url,
+            data=req_body,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=timeout_s) as resp:
+                data = json.loads(resp.read().decode())
+        except urllib.error.HTTPError as exc:
+            detail = exc.read().decode(errors="replace")[:500]
+            last_err = MedGemmaPathologyError(
+                f"medgemma_pathology HTTP {exc.code}: {detail}"
+            )
+            continue
+        except Exception as exc:  # noqa: BLE001
+            last_err = MedGemmaPathologyError(
+                f"medgemma_pathology request failed: {type(exc).__name__}: {exc}"
+            )
+            continue
 
-    raw_text = str(data.get("text") or "")
-    parsed = _extract_json_object(raw_text)
+        if data.get("error"):
+            last_err = MedGemmaPathologyError(
+                f"medgemma_pathology chat error: {data['error']}"
+            )
+            continue
+        if data.get("revision_sha256") != identity["revision_sha256"]:
+            raise MedGemmaPathologyError(
+                "medgemma_pathology: revision_sha256 drift vs identity"
+            )
+
+        raw_text = str(data.get("text") or "")
+        try:
+            parsed = _extract_json_object(raw_text)
+            break
+        except MedGemmaPathologyError as exc:
+            last_err = exc
+            continue
+    else:
+        raise last_err or MedGemmaPathologyError(
+            "medgemma_pathology: no JSON object in model text"
+        )
     # Drop unknown keys before pydantic; keep honesty on disclaimer.
     allowed = {
         "er_status",

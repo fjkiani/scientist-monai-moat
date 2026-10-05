@@ -285,13 +285,26 @@ class MedGemma:
             max_tokens = int(payload.get("max_tokens", 512))
             temperature = float(payload.get("temperature", 0.2))
 
-            encoded = self.tokenizer.apply_chat_template(
-                norm,
-                add_generation_prompt=True,
-                tokenize=True,
-                return_dict=True,
-                return_tensors="pt",
-            )
+            encoded = None
+            for kwargs in (
+                {"enable_thinking": False},
+                {"thinking": False},
+                {},
+            ):
+                try:
+                    encoded = self.tokenizer.apply_chat_template(
+                        norm,
+                        add_generation_prompt=True,
+                        tokenize=True,
+                        return_dict=True,
+                        return_tensors="pt",
+                        **kwargs,
+                    )
+                    break
+                except TypeError:
+                    continue
+            if encoded is None:
+                return {"error": "apply_chat_template failed"}
             inputs = {k: v.to("cuda:0") for k, v in encoded.items()}
             prompt_tokens = int(inputs["input_ids"].shape[1])
 
@@ -316,9 +329,16 @@ class MedGemma:
             latency_s = round(time.time() - t0, 3)
 
             completion_ids = gen[0, prompt_tokens:]
+            # Keep special tokens so callers can strip <unused*>thinking channels.
             completion_text = self.tokenizer.decode(
+                completion_ids, skip_special_tokens=False
+            ).strip()
+            # Prefer a cleaned view without specials when it already contains JSON.
+            cleaned = self.tokenizer.decode(
                 completion_ids, skip_special_tokens=True
             ).strip()
+            if "{" in cleaned:
+                completion_text = cleaned
 
             return {
                 "text": completion_text,
