@@ -26,16 +26,26 @@ def _extract_json_object(text: str) -> dict[str, Any]:
     if text.startswith("```"):
         text = re.sub(r"^```(?:json)?\s*", "", text)
         text = re.sub(r"\s*```$", "", text)
-    try:
-        payload = json.loads(text)
+    # Prefer first JSON object (tolerates trailing prose / second blobs).
+    decoder = json.JSONDecoder()
+    for idx, ch in enumerate(text):
+        if ch != "{":
+            continue
+        try:
+            payload, _end = decoder.raw_decode(text[idx:])
+        except json.JSONDecodeError:
+            continue
         if isinstance(payload, dict):
             return payload
-    except json.JSONDecodeError:
-        pass
     match = _JSON_RE.search(text)
     if not match:
         raise MedGemmaPathologyError("medgemma_pathology: no JSON object in model text")
-    payload = json.loads(match.group(0))
+    try:
+        payload = json.loads(match.group(0))
+    except json.JSONDecodeError as exc:
+        raise MedGemmaPathologyError(
+            f"medgemma_pathology: JSON parse failed: {exc}"
+        ) from exc
     if not isinstance(payload, dict):
         raise MedGemmaPathologyError("medgemma_pathology: JSON payload is not an object")
     return payload

@@ -4,7 +4,7 @@ import hashlib
 import json
 
 ARTIFACT = Path(__file__).resolve().parents[2] / "models" / "medgemma_1_5_4b_identity.json"
-EXPECTED = "266e6d7d844f67e882c0978f4fa115dccaec04b3a4e19bb6199837a19329b492"
+EXPECTED = "300a3307995c12466de80ed911c634374095e0c556e39efdfcedf583feee6c6a"
 REVISION = "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
 
 
