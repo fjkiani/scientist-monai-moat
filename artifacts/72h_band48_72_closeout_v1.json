@@ -1,42 +1,12 @@
 {
-  "status": "closed_band24_48",
-  "band": "24-48\u219248-72",
-  "clock": "72h clinical hardening",
+  "status": "ok",
+  "band": "48-72",
+  "directive": "KILL_429_LOCK_12K_GHOST_DOCKER",
   "git": {
     "branch": "feat/ten-capability-delivery-20260928",
     "head": "56ff5c919fba9c574673a02a299395ebf0c0ebc1"
   },
-  "matrix": {
-    "1_medgemma_pathology": "DONE (smoke ok after redeploy)",
-    "2_phikon": "DONE",
-    "3_stratum_422": "DONE",
-    "4_mammo_rsna_vindr": "DONE \u2014 locked theoviel 12k meets_10k_floor=true; official Kaggle n=826 probe kept as secondary (honest AUC 0.607); 429 per-file loop TERMINATED",
-    "5_luna_froc": "DONE baseline lock (no promote)",
-    "6_ghost_500": "DONE",
-    "7_docker": "DONE"
-  },
-  "official_probe": {
-    "n": 826,
-    "test_auc": 0.6074137931034482,
-    "cv_auc_mean": 0.6145624303232999,
-    "joblib_sha256": "f3c7ed59a264f6abc952425cf73a093db8d319e232f861f072945dcebbd1175d"
-  },
-  "ingest_last": {
-    "written": 826,
-    "errors": 1674,
-    "selected": 2500,
-    "status": "ok"
-  },
-  "medsiglip": "https://testing-123--medsiglip (HF secret repaired, timeout 900s)",
-  "medgemma": "https://testing-123--medgemma-1-5-4b (redeployed)",
-  "ts": "2026-10-05T23:51:34.165176+00:00",
-  "official_kaggle_scale": {
-    "status": "TERMINATED_NO_BRUTE_FORCE",
-    "written_locked": 826,
-    "retry5": "killed per Alpha directive \u2014 no more per-file 429 burn",
-    "band4_10k_authority": "artifacts/rsna_mammo/probe_v2_12k (theoviel) meets_10k_floor=true",
-    "official_probe": "artifacts/rsna_mammo/probe_official_v1_resplit test_auc\u22480.607 n=826"
-  },
+  "kaggle_loop": "terminated",
   "mammo_scale_lock": {
     "dataset_id": "rsna_theoviel_256_png_tree_12k",
     "n_total": 12000,
@@ -45,7 +15,12 @@
     "joblib_sha256": "9aa35cc30c22b2dbf58d91e039c91e36c897d7364ccc5efc9d792f69ee3688b6",
     "evaluation": "artifacts/rsna_mammo/probe_v2_12k/evaluation_v2.json"
   },
-  "ghost_trial_summary": {
+  "official_probe_secondary": {
+    "n": 826,
+    "test_auc": 0.6074137931034482,
+    "joblib_sha256": "f3c7ed59a264f6abc952425cf73a093db8d319e232f861f072945dcebbd1175d"
+  },
+  "ghost_trial": {
     "source_ledger": "artifacts/ghost_trial/ledger_v5_n500_retried.json",
     "source_summary": "artifacts/ghost_trial/ledger_v5_n500_summary.json",
     "n_cases": 500,
@@ -81,6 +56,25 @@
       "mammo_label_concordance_n": 499,
       "mammo_label_concordance_correct": 446,
       "honesty": "Ledger has no historical treatment concordance field. Reported mammo p_cancer vs folder label_true agreement as available proxy. RUO \u2014 not clinical validation."
+    }
+  },
+  "docker_smoke_prior": "artifacts/sovereign_docker/smoke_72h_v1.json",
+  "ts": "2026-10-05T23:52:19.240022+00:00",
+  "disclaimer": "RUO. Ghost trial is harness execution receipt, not FDA clinical concordance vs historical tumor boards.",
+  "docker_smoke": {
+    "status": "ok",
+    "image": "crispro-oncology-ruo:72h",
+    "healthz": 200,
+    "ts": "2026-10-05T23:52:19.237206+00:00",
+    "script": "deploy/docker/smoke_sovereign.sh",
+    "log": "/tmp/sovereign_smoke_48_72.txt",
+    "dockerfile": "deploy/docker/Dockerfile.sovereign",
+    "mounts_tonight_delivery": true,
+    "note": "Band 48-72 re-smoke; mounts artifacts/tonight_delivery.json (10-cap delivery manifest)",
+    "raw": {
+      "status": "ok",
+      "image": "crispro-oncology-ruo:72h",
+      "healthz": 200
     }
   }
 }
