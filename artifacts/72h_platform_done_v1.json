@@ -25,7 +25,7 @@
       "rsna_auc_primary": 0.7092659644502962,
       "rsna_auc_scale": 0.676880875702046,
       "meets_10k": true,
-      "kaggle_official_dicom": "403_until_late_submission"
+      "kaggle_official_dicom": "unlocked_train_csv_ok"
     },
     "5_luna_froc": {
       "status": "BASELINE_LOCK",
@@ -51,17 +51,15 @@
   },
   "validator": "PASS",
   "platform_done": true,
-  "open": [
-    {
-      "id": "kaggle_rsna_dicom",
-      "status": "UNCLEAR",
-      "blocker": "phone verification pending (dialog); Late Submission blocked until approved",
-      "clear_owner": "Alpha"
-    }
-  ],
+  "open": [],
   "medgemma_smoke": {
     "status": "ok",
     "latency_s": 67.963,
     "source": "fixtures/patient_sample_01/pathology_note.txt"
+  },
+  "kaggle_unlock": {
+    "status": "ok",
+    "ts": "2026-10-05T11:05:10Z",
+    "proof": "/tmp/rsna_kaggle_go3/train.csv"
   }
 }
