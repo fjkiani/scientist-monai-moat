@@ -150,11 +150,25 @@ def ingest(max_patients: int = 2500) -> dict:
                     env=env,
                     capture_output=True,
                 )
-                # kaggle may write basename into -p dir
+                # Kaggle often delivers a zip (*.dcm.zip) or basename .dcm
+                zip_cand = dest.parent / f"{image_id}.dcm.zip"
+                zip_alt = dest.parent / f"{Path(rel).name}.zip"
+                for zpath in (zip_cand, zip_alt, dest.with_suffix(dest.suffix + ".zip")):
+                    if zpath.is_file():
+                        with zipfile.ZipFile(zpath) as zf:
+                            zf.extractall(dest.parent)
+                        break
                 maybe = dest.parent / f"{image_id}.dcm"
                 if maybe.is_file() and not dest.is_file():
                     maybe.rename(dest)
-            ds = pydicom.dcmread(str(dest))
+                # flatten if extracted into nested folder
+                if not dest.is_file():
+                    hits = list(dest.parent.rglob(f"{image_id}.dcm"))
+                    if hits:
+                        hits[0].replace(dest)
+            if not dest.is_file():
+                raise FileNotFoundError(f"missing dicom after download: {dest}")
+            ds = pydicom.dcmread(str(dest), force=True)
             arr = ds.pixel_array.astype(np.float32)
             arr = arr - arr.min()
             if arr.max() > 0:
