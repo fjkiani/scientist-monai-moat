@@ -147,6 +147,12 @@ def ingest(max_patients: int = 2500) -> dict:
         out_png = png / "train" / label / f"{pid}_{image_id}.png"
         if out_png.is_file():
             written += 1
+            if written % 50 == 0 or (i + 1) % 100 == 0:
+                VOL.commit()
+                print(
+                    f"progress written={written} errors={errors} seen={i+1}/{len(selected)}",
+                    flush=True,
+                )
             continue
         rel = f"train_images/{pid}/{image_id}.dcm"
         dest = raw / rel
