@@ -1,10 +1,9 @@
 {
-  "status": "blocked_local_kaggle",
-  "reason": "missing ~/.kaggle/kaggle.json on host",
-  "clear_paths": [
-    "Modal volume rsna-mammo-png via VinDr HF ingest (deploy/modal/vindr_mammo_ingest_app.py)",
-    "Optional: place Kaggle API token then scripts/demo/prepare_rsna_mammo_layout.py"
-  ],
-  "local_disk_free_gb_approx": 19,
-  "vindr_zip_gb_approx": 54
+  "status": "cleared",
+  "kaggle_json_present": true,
+  "api_token_present": true,
+  "modal_secret": "testing-123/kaggle-api",
+  "local_rsna_png_src_n": 54706,
+  "local_train_csv": "data/rsna_mammo/raw/train.csv",
+  "next": "modal run rsna_kaggle_ingest_app --max-patients 2500"
 }

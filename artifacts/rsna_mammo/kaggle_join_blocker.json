@@ -1,0 +1,15 @@
+{
+  "status": "blocked_phone_verify",
+  "kaggle_api": "KGAT_ok_list_403_download_until_join",
+  "modal_secret": "testing-123/kaggle-api",
+  "volume": "rsna-mammo-png (seeded rsna_raw/train.csv)",
+  "browser": "Late Submission intercepted by 'verify your account' phone dialog",
+  "alpha_action": "Complete Kaggle phone verify + Late Submission on rsna-breast-cancer-detection, then re-run ingest",
+  "local_proxy_data": {
+    "png_src_n": 54706,
+    "path": "data/rsna_mammo/png_src",
+    "embeddings_v2_12k": true,
+    "probe_v2_12k_auc": 0.676880875702046,
+    "note": "72h >=10k floor already met via local theoviel PNG tree"
+  }
+}

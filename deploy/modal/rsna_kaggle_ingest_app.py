@@ -32,7 +32,7 @@ IMAGE = (
     timeout=6 * 60 * 60,
     memory=16384,
     ephemeral_disk=512 * 1024,
-    secrets=[modal.Secret.from_name("kaggle-api", required=False)],
+    secrets=[modal.Secret.from_name("kaggle-api")],
 )
 def ingest(max_patients: int = 2500) -> dict:
     import csv
@@ -46,8 +46,22 @@ def ingest(max_patients: int = 2500) -> dict:
     from PIL import Image
 
     token = os.environ.get("KAGGLE_API_TOKEN") or ""
-    if not token:
-        return {"status": "failed", "error": "KAGGLE_API_TOKEN missing on Modal"}
+    username = os.environ.get("KAGGLE_USERNAME") or ""
+    key = os.environ.get("KAGGLE_KEY") or ""
+    if not token and not (username and key):
+        return {"status": "failed", "error": "KAGGLE_API_TOKEN or KAGGLE_USERNAME/KEY missing on Modal"}
+
+    # Materialize classic kaggle.json for CLI auth (username/key) when present.
+    kaggle_dir = Path.home() / ".kaggle"
+    kaggle_dir.mkdir(parents=True, exist_ok=True)
+    if username and key:
+        (kaggle_dir / "kaggle.json").write_text(
+            '{"username":"%s","key":"%s"}\n' % (username, key)
+        )
+        (kaggle_dir / "kaggle.json").chmod(0o600)
+    elif token:
+        (kaggle_dir / "api_token").write_text(token + "\n")
+        (kaggle_dir / "api_token").chmod(0o600)
 
     raw = Path("/vol/mammo/rsna_raw")
     png = Path("/vol/mammo/png_tree")
@@ -56,10 +70,14 @@ def ingest(max_patients: int = 2500) -> dict:
         for cls in ("cancer", "not_cancer"):
             (png / split / cls).mkdir(parents=True, exist_ok=True)
 
+    env = {**os.environ}
+    if token:
+        env["KAGGLE_API_TOKEN"] = token
+
     # train.csv
     csv_path = raw / "train.csv"
     if not csv_path.is_file():
-        subprocess.run(
+        proc = subprocess.run(
             [
                 "kaggle",
                 "competitions",
@@ -71,9 +89,18 @@ def ingest(max_patients: int = 2500) -> dict:
                 "-p",
                 str(raw),
             ],
-            check=True,
-            env={**os.environ, "KAGGLE_API_TOKEN": token},
+            capture_output=True,
+            text=True,
+            env=env,
         )
+        if proc.returncode != 0:
+            return {
+                "status": "failed",
+                "error": "kaggle_train_csv_download",
+                "stderr": (proc.stderr or "")[-2000:],
+                "stdout": (proc.stdout or "")[-1000:],
+                "hint": "Accept competition rules + ensure KAGGLE_API_TOKEN=KGAT_… works with kaggle.json present",
+            }
         z = raw / "train.csv.zip"
         if z.is_file():
             with zipfile.ZipFile(z) as zf:
@@ -120,7 +147,7 @@ def ingest(max_patients: int = 2500) -> dict:
                         str(dest.parent),
                     ],
                     check=True,
-                    env={**os.environ, "KAGGLE_API_TOKEN": token},
+                    env=env,
                     capture_output=True,
                 )
                 # kaggle may write basename into -p dir
