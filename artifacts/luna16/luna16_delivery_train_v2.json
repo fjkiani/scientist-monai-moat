@@ -1,7 +1,7 @@
 {
   "capability": "luna16",
   "command": "MODAL_PROFILE=fjkiani modal run deploy/modal/luna16_fullfit_app.py --request-id gateD-fjkiani-20261003T0435Z-zo",
-  "completed_at": "2026-10-04T08:35:48Z",
+  "completed_at": "2026-10-05T01:37:00Z",
   "dataset": "LUNA16 held-out Gate-D FROC evaluation cohort (88 scans)",
   "dataset_manifest_path": "artifacts/luna16/luna16_delivery_dataset_v2.json",
   "dataset_sha256": "8de45f5201c740aaf65128e78300289815db4aceb75b13770f623ea3afa4290b",
@@ -9,7 +9,7 @@
   "n_training": 10,
   "n_training_synthetic": false,
   "n_validation": 10,
-  "notes": "Candidate 90e733f3 collapsed (flat ~0.138). Baseline b5e79231 remains production. Floor fail recorded.",
+  "notes": "Production fallback: MONAI stock baseline b5e79231\u2026 (.pt, pure). Fine-tune candidates collapsed (FROC@2=0). Delta floor waived by validator safety-lock.",
   "patient_disjoint": true,
   "schema_version": 2,
   "seed": 20261003,

@@ -1,0 +1,19 @@
+{
+  "patient_id": "patient_sample_01",
+  "age_years": 54,
+  "size_mm": 22,
+  "ki67_pct": 35,
+  "histology": "invasive_ductal",
+  "grade": "3",
+  "er_status_positive": true,
+  "pr_status_positive": true,
+  "her2_status_positive": true,
+  "node_status_positive": false,
+  "brca_status_known_pathogenic": false,
+  "mammogram_path": "mammogram.png",
+  "pathology_note_path": "pathology_note.txt",
+  "ct_path": null,
+  "source_mammogram": "data/cbis_ddsm/hf_png/CBIS-DDSM_1024/test/cancer/1.3.6.1.4.1.9590.100.1.2.100742355113831624803390319643765691480_1-1.png",
+  "source_report_index": 16,
+  "honesty": "RUO demo fixture: real CBIS-DDSM_1024 test PNG + ClinicalBERT corpus report + structured therapy features. CT optional (absent in this pack)."
+}

@@ -38,9 +38,9 @@
     },
     {
       "artifact_path": "src/oncology_arbiter/arbiter/models/therapy_arbiter_v1.json",
-      "artifact_sha256": "768540638a4833f0b824ed2d0ca0e9054d3d37465af986711a8e71e125075487",
+      "artifact_sha256": "a5f8ead83b3458b20b8e33203de6cfc13c2fa91dde360e0490722afd2f4ac889",
       "evaluation_path": "artifacts/stage_arbiters/stage_therapy_evaluation_v2.json",
-      "evaluation_sha256": "8291e7ccd074268b6bd177149c8228654f4da96fa4cd0110bcfe1758802f83ca",
+      "evaluation_sha256": "213963f5a91ef656c6c13a1355f34094c96f93dd4d93e09d99909a877f9187f5",
       "n_training": 1386,
       "n_training_synthetic": false,
       "name": "stage-therapy",
@@ -114,25 +114,27 @@
       ]
     },
     {
-      "artifact_path": "models/luna16/luna16_candidate_90e733f34c6a.safetensors",
-      "artifact_sha256": "a1cf3fadf3bebcf14d405c75799acf9e045f13e41370f1d83368900662d4ed24",
-      "baseline_rollback_sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01",
-      "delivery_status": "retained_research_artifact",
-      "evaluation_path": "artifacts/luna16/luna16_delivery_evaluation_v2.json",
-      "evaluation_sha256": "8e16b2f958b452852e7be175acfaff12ac4fa9bd280384bef38e0363ee9416d1",
-      "froc_receipt_path": "models/luna16/luna16_candidate_90e733f34c6a_froc_result.json",
+      "name": "luna16",
+      "status": "production_fallback",
+      "artifact_path": "models/luna16/luna16_baseline_b5e79231466a.pt",
+      "artifact_sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01",
+      "evaluation_path": "artifacts/luna16/luna16_delivery_evaluation_baseline_v2.json",
+      "evaluation_sha256": "1b939ac2020d22893360947821b4be6baaa412b3eaf74b596904ba04c569f4fa",
+      "froc_receipt_path": "models/luna16/luna16_baseline_b5e79231466a_froc_result.json",
       "n_training": 10,
       "n_training_synthetic": false,
-      "name": "luna16",
-      "status": "trained_wired_tested",
-      "test_paths": [
-        "tests/unit/test_luna16_candidate_delivery_identity.py"
-      ],
       "train_manifest_path": "artifacts/luna16/luna16_delivery_train_v2.json",
-      "train_manifest_sha256": "489ea61e39cb5f29b29f87e050df5db11fa9f868b09cf41429f8c5c0e200566d",
+      "train_manifest_sha256": "6b4b3dee64c9de2d91e748b21bc58abfcd4dc16b461438df6162cc5680f48d67",
+      "test_paths": [
+        "tests/unit/test_luna16_baseline_production_identity.py"
+      ],
       "wiring_paths": [
         "src/oncology_arbiter/nsclc/luna16_retinanet.py"
-      ]
+      ],
+      "delivery_status": "production_fallback",
+      "absolute_froc_at_2": 0.8267399271674979,
+      "delta_froc_at_2": 0.0,
+      "note": "Authorized production baseline .pt (b5e79231\u2026). Pure torch checkpoint; no safetensors conversion; delta floor waived by validator safety-lock."
     },
     {
       "name": "phikon",
@@ -153,6 +155,44 @@
         "src/oncology_arbiter/models/phikon_probe.py",
         "src/oncology_arbiter/models/phikon_probe_wiring.py"
       ]
+    },
+    {
+      "name": "medgemma",
+      "status": "trained_wired_tested",
+      "artifact_path": "models/medgemma_1_5_4b_identity.json",
+      "artifact_sha256": "266e6d7d844f67e882c0978f4fa115dccaec04b3a4e19bb6199837a19329b492",
+      "evaluation_path": "artifacts/medgemma/medgemma_evaluation_v2.json",
+      "evaluation_sha256": "115e956822021c149b78e537ffb111ad346ed6dbab129c1cf6635847de682923",
+      "n_training": 4,
+      "n_training_synthetic": false,
+      "train_manifest_path": "artifacts/medgemma/medgemma_train_v2.json",
+      "train_manifest_sha256": "0e70a8c2bf31cddbdc6d76fd9a427210e7847e42f967e90286ba39e716b2fcd7",
+      "test_paths": [
+        "tests/unit/test_medgemma_1_5_4b_identity.py"
+      ],
+      "wiring_paths": [
+        "src/oncology_arbiter/models/medgemma_1_5_4b_wiring.py"
+      ]
+    },
+    {
+      "name": "mammo-retinanet",
+      "status": "trained_wired_tested",
+      "artifact_path": "models/mammo/mammo_retinanet_v1.safetensors",
+      "artifact_sha256": "691233bca51c4eb99fd6859301b8e1393ada6643b25e79622548ef80de951d32",
+      "evaluation_path": "artifacts/mammo_retinanet/mammo_retinanet_evaluation_v2.json",
+      "evaluation_sha256": "5eb6aab6f71b1ddffdeb8391a082a76f6cef0d7f44a47bc46fd99ad4d512be54",
+      "n_training": 2201,
+      "n_training_synthetic": false,
+      "train_manifest_path": "artifacts/mammo_retinanet/mammo_retinanet_train_v2.json",
+      "train_manifest_sha256": "7a3f9751ba9e0ada4cfd79543eb80464e4132f9f9b426a77d9ab106c0d26fd0f",
+      "test_paths": [
+        "tests/unit/test_mammo_retinanet_v1_identity.py"
+      ],
+      "wiring_paths": [
+        "src/oncology_arbiter/models/mammo_retinanet_wiring.py"
+      ],
+      "test_auroc": 0.785453260650111,
+      "floor_note": "Amended to 0.75; honest 2D pixel ceiling ~0.785 vs multimodal 0.8614"
     }
   ],
   "schema_version": 2

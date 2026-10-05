@@ -1,5 +1,5 @@
 {
-  "artifact_sha256": "768540638a4833f0b824ed2d0ca0e9054d3d37465af986711a8e71e125075487",
+  "artifact_sha256": "a5f8ead83b3458b20b8e33203de6cfc13c2fa91dde360e0490722afd2f4ac889",
   "bootstrap_patient_auroc_ci": [
     0.9312177447013141,
     0.9830303680396644
@@ -2611,5 +2611,6 @@
       }
     }
   },
-  "split_sha256": "e40a29af7d29a9b94b4c94de2e435d2a9ffa90414dd11ea7f37984a977fa282b"
+  "split_sha256": "e40a29af7d29a9b94b4c94de2e435d2a9ffa90414dd11ea7f37984a977fa282b",
+  "artifact_amendment": "2026-10-04: boolean unknown levels 0.5\u21920.0 for load-time honesty; AUROC receipt unchanged (fully-observed)."
 }

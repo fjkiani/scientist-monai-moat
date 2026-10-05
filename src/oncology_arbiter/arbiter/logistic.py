@@ -192,9 +192,10 @@ class L2LogisticArbiter:
                 raise ValueError(
                     f"Frozen model at {model_path} has invalid paired features/coefficients"
                 )
+            # Length already validated above; avoid zip(..., strict=True) for Py3.9 hosts.
             self.coefficients = {
                 str(feature): float(coefficient)
-                for feature, coefficient in zip(features, raw_coefficients, strict=True)
+                for feature, coefficient in zip(features, raw_coefficients)
             }
         else:
             raise ValueError(
@@ -227,12 +228,15 @@ class L2LogisticArbiter:
             unknown_level = spec.get("unknown")
             if unknown_level is None:
                 continue
-            if float(unknown_level) != 0.0:
+            injected = float(unknown_level) * float(self.coefficients.get(name, 0.0))
+            # Allow non-zero unknown encodings only when the paired coefficient is
+            # exactly 0 (zero log-odds contribution). Otherwise fail closed.
+            if abs(injected) > 0.0:
                 raise ValueError(
                     f"Frozen model at {model_path} declares feature {name!r} with "
                     f"unknown={unknown_level!r}. A missing boolean must encode to 0.0 so it "
                     f"contributes exactly zero log-odds; unknown={unknown_level!r} would inject "
-                    f"{float(unknown_level) * self.coefficients.get(name, 0.0):+.6f} of unearned "
+                    f"{injected:+.6f} of unearned "
                     "log-odds. Declare unknown=null (or 0.0), and supply a fitted "
                     f"'{name}{MISSING_INDICATOR_SUFFIX}' coefficient if missingness is to be modelled."
                 )

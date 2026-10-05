@@ -65,9 +65,11 @@ _CANDIDATE_DIR = _REPO_ROOT / "models" / "luna16"
 
 
 def _resolve_weights_path(bundle_dir: Path) -> Path:
-    """Resolve RetinaNet ckpt: env override → Gate-D candidate → bundle stock.
+    """Resolve RetinaNet ckpt: env override → production baseline .pt → bundle stock.
 
     Env: ``ONCOLOGY_ARBITER_LUNA16_WEIGHTS`` (``.pt`` or ``.safetensors``).
+    Production lock: MONAI stock baseline ``luna16_baseline_b5e79231466a.pt`` only.
+    Collapsed fine-tune candidates are never auto-selected.
     Does **not** rewrite luna16-infer production volumes — local/API only.
     """
     env = (os.environ.get("ONCOLOGY_ARBITER_LUNA16_WEIGHTS") or "").strip()
@@ -79,13 +81,9 @@ def _resolve_weights_path(bundle_dir: Path) -> Path:
             )
         return p
     if _CANDIDATE_DIR.is_dir():
-        # Prefer sha12-named candidate from fjkiani Gate D (model.pt export).
-        pts = sorted(_CANDIDATE_DIR.glob("luna16_candidate_*.pt"))
-        if pts:
-            return pts[-1]
-        sfts = sorted(_CANDIDATE_DIR.glob("luna16_candidate_*.safetensors"))
-        if sfts:
-            return sfts[-1]
+        baseline = _CANDIDATE_DIR / "luna16_baseline_b5e79231466a.pt"
+        if baseline.is_file():
+            return baseline
     return bundle_dir / "models" / "model.pt"
 
 
@@ -350,4 +348,4 @@ class LungNoduleDetector:
             inference_seconds=dt,
         )
 
-# Delivery identity: luna16_candidate_90e733f34c6a.safetensors a1cf3fad… (research artifact; not promoted)
+# Delivery identity: luna16_baseline_b5e79231466a.pt b5e79231… (production_fallback; pure .pt)

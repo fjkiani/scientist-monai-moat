@@ -1,0 +1,15 @@
+{
+  "app_version": "luna16-heldout-froc-v0.2.0",
+  "request_id": "froc-fjkiani-20261004T0745Z-zo",
+  "label": "production_fallback_baseline",
+  "ckpt_path": "models/luna16/luna16_baseline_b5e79231466a.pt",
+  "ckpt_sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01",
+  "n_test": 88,
+  "froc_at_2": 0.8267399271674979,
+  "delta_froc_at_2_vs_self": 0.0,
+  "meets_floor_ref_0.05": false,
+  "status": "production_fallback",
+  "verdict": "PRODUCTION_BASELINE_LOCKED",
+  "verdict_note": "MONAI stock baseline retained as production. Fine-tune candidates not promoted. SHA pure .pt \u2014 no conversion.",
+  "source_receipt": "models/luna16/luna16_candidate_90e733f34c6a_froc_result.json"
+}

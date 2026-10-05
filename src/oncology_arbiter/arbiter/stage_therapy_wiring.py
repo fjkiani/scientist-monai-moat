@@ -8,7 +8,7 @@ from .logistic import L2LogisticArbiter
 
 CAPABILITY = "stage-therapy"
 ARTIFACT_FILENAME = "therapy_arbiter_v1.json"
-ARTIFACT_SHA256 = "768540638a4833f0b824ed2d0ca0e9054d3d37465af986711a8e71e125075487"
+ARTIFACT_SHA256 = "a5f8ead83b3458b20b8e33203de6cfc13c2fa91dde360e0490722afd2f4ac889"
 
 
 def artifact_path() -> Path:

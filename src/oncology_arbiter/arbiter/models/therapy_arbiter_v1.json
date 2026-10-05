@@ -14,18 +14,18 @@
     2.666094278114223,
     -9.054830129788268
   ],
-  "disclaimer": "RESEARCH USE ONLY — not validated for clinical decision-making. Not FDA-cleared. Not CE-marked.",
+  "disclaimer": "RESEARCH USE ONLY \u2014 not validated for clinical decision-making. Not FDA-cleared. Not CE-marked.",
   "feature_encodings": {
     "age_at_diagnosis_norm": "age_years / 100.0",
     "brca_status_known_pathogenic": {
       "false": 0.0,
       "true": 1.0,
-      "unknown": 0.5
+      "unknown": 0.0
     },
     "er_status_positive": {
       "false": 0.0,
       "true": 1.0,
-      "unknown": 0.5
+      "unknown": 0.0
     },
     "grade": {
       "ONE_HOT": [
@@ -38,7 +38,7 @@
     "her2_status_positive": {
       "false": 0.0,
       "true": 1.0,
-      "unknown": 0.5
+      "unknown": 0.0
     },
     "histology": {
       "ONE_HOT": [
@@ -53,12 +53,12 @@
     "node_status_positive": {
       "false": 0.0,
       "true": 1.0,
-      "unknown": 0.5
+      "unknown": 0.0
     },
     "pr_status_positive": {
       "false": 0.0,
       "true": 1.0,
-      "unknown": 0.5
+      "unknown": 0.0
     },
     "tumor_size_norm": "size_mm / 50.0"
   },
@@ -115,5 +115,10 @@
   "selected_c": 10.0,
   "target_definition": "METABRIC patient clinical attribute CHEMOTHERAPY equals YES; observed receipt, not benefit",
   "trained_on_real_patient_data": true,
-  "training_dataset": "METABRIC patient clinical cohort (observed chemotherapy receipt)"
+  "training_dataset": "METABRIC patient clinical cohort (observed chemotherapy receipt)",
+  "missingness": {
+    "unobserved_boolean_encoding": 0.0,
+    "fitted_missingness_indicator_available": false,
+    "amendment": "2026-10-04 unknown boolean levels set to 0.0; fully-observed logits unchanged."
+  }
 }
