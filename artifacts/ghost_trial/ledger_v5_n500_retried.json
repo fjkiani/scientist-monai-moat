@@ -14,7 +14,7 @@
     "luna16_ct"
   ],
   "workers": 4,
-  "partial": true,
+  "partial": false,
   "retry_workspace": "testing-123",
   "rows": [
     {

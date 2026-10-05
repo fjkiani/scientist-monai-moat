@@ -16,5 +16,5 @@
     "mammo_rsna",
     "phikon_wsi"
   ],
-  "partial": true
+  "partial": false
 }
