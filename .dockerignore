@@ -45,6 +45,8 @@ frontend/tsconfig.tsbuildinfo
 tests/
 tests/**
 scripts/
+!scripts/demo/
+!scripts/demo/**
 notebooks/
 examples/
 

@@ -1,0 +1,10 @@
+{
+  "status": "blocked_local_kaggle",
+  "reason": "missing ~/.kaggle/kaggle.json on host",
+  "clear_paths": [
+    "Modal volume rsna-mammo-png via VinDr HF ingest (deploy/modal/vindr_mammo_ingest_app.py)",
+    "Optional: place Kaggle API token then scripts/demo/prepare_rsna_mammo_layout.py"
+  ],
+  "local_disk_free_gb_approx": 19,
+  "vindr_zip_gb_approx": 54
+}

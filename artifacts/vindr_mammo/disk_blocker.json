@@ -1,0 +1,6 @@
+{
+  "status": "redirected_to_modal",
+  "local_download_aborted": true,
+  "reason": "VinDr zip ~54GB; host free disk ~19GB",
+  "clear": "deploy/modal/vindr_mammo_ingest_app.py → volume rsna-mammo-png:/vol/mammo/vindr_raw"
+}

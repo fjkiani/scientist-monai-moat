@@ -84,33 +84,32 @@ def _gold_from_entities(entities: list[dict[str, Any]]) -> dict[str, Any]:
     return gold
 
 
-def _load_report_text(report_id: str, csv_path: Path) -> str | None:
-    # TCGA_Reports.csv: patient_filename,text (Mendeley/Zenodo dump).
+def _build_report_index(csv_path: Path) -> dict[str, str]:
+    """One-pass index: patient_filename / barcode prefix → report text."""
+    index: dict[str, str] = {}
     with csv_path.open(newline="", encoding="utf-8", errors="replace") as handle:
         reader = csv.DictReader(handle)
-        fields = reader.fieldnames or []
-        text_key = next(
-            (k for k in fields if k and k.lower() in {"text", "report", "report_text", "patient_reports"}),
-            None,
-        )
-        id_keys = [
-            k
-            for k in fields
-            if k
-            and (
-                "id" in k.lower()
-                or "patient" in k.lower()
-                or "barcode" in k.lower()
-                or "filename" in k.lower()
-            )
-        ]
-        if not text_key:
-            return None
-        needle = report_id.split(".")[0]
         for row in reader:
-            blob = " ".join(str(row.get(k) or "") for k in id_keys)
-            if needle in blob or report_id in blob:
-                return str(row.get(text_key) or "")
+            fn = str(row.get("patient_filename") or "").strip()
+            text = str(row.get("text") or "")
+            if not fn or not text:
+                continue
+            index[fn] = text
+            index[fn.split(".")[0]] = text
+            # Also index first 12-char TCGA barcode when present.
+            if fn.startswith("TCGA-") and len(fn) >= 12:
+                index[fn[:12]] = text
+    return index
+
+
+def _load_report_text(report_id: str, index: dict[str, str]) -> str | None:
+    if report_id in index:
+        return index[report_id]
+    needle = report_id.split(".")[0]
+    if needle in index:
+        return index[needle]
+    if needle.startswith("TCGA-") and len(needle) >= 12 and needle[:12] in index:
+        return index[needle[:12]]
     return None
 
 
@@ -148,6 +147,9 @@ def run_eval(n: int, out: Path) -> dict[str, Any]:
     # TCGA-242 pathologist gold lives in test_sample_ids (not external_validation).
     test_ids = set(split.get("test_sample_ids") or [])
     csv_path = ROOT / "data/pathology_text/TCGA_Reports.csv"
+    print(f"[index] building report index from {csv_path}", flush=True)
+    report_index = _build_report_index(csv_path)
+    print(f"[index] {len(report_index)} keys", flush=True)
     candidates = []
     for sample in dataset["samples"]:
         if sample["sample_id"] not in test_ids:
@@ -168,7 +170,7 @@ def run_eval(n: int, out: Path) -> dict[str, Any]:
             sample.get("sample_id"),
         ):
             if key:
-                report = _load_report_text(str(key), csv_path)
+                report = _load_report_text(str(key), report_index)
                 if report:
                     break
         if not report:

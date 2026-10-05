@@ -33,7 +33,7 @@ import modal
 # /root/<name>.py (only parents[0]=/root, parents[1]=/), which raises IndexError(2).
 # Bake annotations + vendor eval into the image under /opt/; use with_name() for
 # client-side add_local only (skipped on the worker when siblings are absent).
-APP_VERSION = "luna16-heldout-froc-v0.2.1"
+APP_VERSION = "luna16-heldout-froc-v0.2.2-score-thresh"
 EXPECTED_BASELINE = "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01"
 EXPECTED_DATALIST = "c5f6adf3fe79b787e8b038862220c8aed16964f36cd8b642dbaa4ccfc10a73c3"
 NIFTI_PREFIX = "/vol/luna16/nifti_v3"
@@ -97,7 +97,7 @@ def _sha256_file(p: Path) -> str:
     return h.hexdigest()
 
 
-def _build_detector(ckpt_path: Path, device: str):
+def _build_detector(ckpt_path: Path, device: str, score_thresh: float = 0.02):
     import torch
     from monai.apps.detection.networks.retinanet_detector import RetinaNetDetector
     from monai.apps.detection.networks.retinanet_network import (
@@ -143,7 +143,7 @@ def _build_detector(ckpt_path: Path, device: str):
     )
     det.set_target_keys(box_key="box", label_key="label")
     det.set_box_selector_parameters(
-        score_thresh=0.02,
+        score_thresh=score_thresh,
         topk_candidates_per_level=1000,
         nms_thresh=0.22,
         detections_per_img=300,
@@ -291,11 +291,12 @@ def _arm(
     series_uids: List[str],
     out_root: Path,
     device: str,
+    score_thresh: float = 0.02,
 ) -> Dict[str, Any]:
     arm_dir = out_root / label
     arm_dir.mkdir(parents=True, exist_ok=True)
     t0 = time.time()
-    det = _build_detector(ckpt, device)
+    det = _build_detector(ckpt, device, score_thresh=score_thresh)
     all_rows: List[Dict[str, Any]] = []
     per_series: Dict[str, Any] = {}
     for i, uid in enumerate(series_uids):
@@ -349,6 +350,8 @@ def _arm(
 def run_paired_froc(
     request_id: str = "",
     ckpt_request_id: str = "",
+    baseline_score_thresh: float = 0.02,
+    refined_score_thresh: float = 0.02,
 ) -> Dict[str, Any]:
     """Infer 88 held-out with baseline + refined; score official FROC@2."""
     import torch
@@ -382,10 +385,28 @@ def run_paired_froc(
         return {"status": "failed", "error": "baseline missing/hash mismatch", "verdict": "FAILED"}
 
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
-    print(f"device={device} n_test={len(series_uids)}", flush=True)
+    print(
+        f"device={device} n_test={len(series_uids)} "
+        f"baseline_thresh={baseline_score_thresh} refined_thresh={refined_score_thresh}",
+        flush=True,
+    )
 
-    baseline = _arm("baseline", baseline_ckpt, series_uids, out_root, device)
-    refined = _arm("refined", refined_ckpt, series_uids, out_root, device)
+    baseline = _arm(
+        "baseline",
+        baseline_ckpt,
+        series_uids,
+        out_root,
+        device,
+        score_thresh=baseline_score_thresh,
+    )
+    refined = _arm(
+        "refined",
+        refined_ckpt,
+        series_uids,
+        out_root,
+        device,
+        score_thresh=refined_score_thresh,
+    )
 
     b2 = baseline.get("froc_at_2")
     r2 = refined.get("froc_at_2")
@@ -410,6 +431,8 @@ def run_paired_froc(
         "n_test": len(series_uids),
         "device": device,
         "gpu_name": torch.cuda.get_device_name(0) if torch.cuda.is_available() else None,
+        "baseline_score_thresh": baseline_score_thresh,
+        "refined_score_thresh": refined_score_thresh,
         "baseline": baseline,
         "refined": refined,
         "froc_at_2_baseline": b2,
@@ -434,9 +457,16 @@ def run_paired_froc(
 def main(
     ckpt_request_id: str = "gateD-fjkiani-20261003T0435Z-zo",
     request_id: str = "",
+    baseline_score_thresh: float = 0.02,
+    refined_score_thresh: float = 0.02,
 ):
     rid = request_id or f"froc-fjkiani-{time.strftime('%Y%m%dT%H%M%SZ')}-zo"
-    r = run_paired_froc.remote(request_id=rid, ckpt_request_id=ckpt_request_id)
+    r = run_paired_froc.remote(
+        request_id=rid,
+        ckpt_request_id=ckpt_request_id,
+        baseline_score_thresh=baseline_score_thresh,
+        refined_score_thresh=refined_score_thresh,
+    )
     local = Path("/tmp/luna-xfer") / "froc_gateE"
     local.mkdir(parents=True, exist_ok=True)
     (local / "froc_attempt.json").write_text(json.dumps(r, indent=2))

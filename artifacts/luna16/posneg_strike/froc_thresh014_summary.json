@@ -1,0 +1,15 @@
+{
+  "request_id": "froc-fjkiani-posneg-thresh014-20261005T032416Z-zo",
+  "ckpt_request_id": "gateD-fjkiani-posneg-20261004T203623Z-zo",
+  "baseline_score_thresh": 0.02,
+  "refined_score_thresh": 0.14,
+  "froc_at_2_baseline": 0.8267399271674979,
+  "froc_at_2_refined": null,
+  "delta_froc_at_2": null,
+  "baseline_n_candidates": 1181,
+  "refined_n_candidates": 8800,
+  "status": "ok",
+  "verdict": "PROVEN_BUT_REFINED_NAN",
+  "promote": false,
+  "note": "score_thresh=0.14 did not clear 8800-cand collapse; production remains baseline b5e79231 FROC@2=0.8267"
+}

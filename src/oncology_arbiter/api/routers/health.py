@@ -12,6 +12,7 @@ router = APIRouter()
 
 
 @router.get("/health", response_model=HealthResponse)
+@router.get("/healthz", response_model=HealthResponse, include_in_schema=False)
 def health() -> HealthResponse:
     """/health endpoint - reports API status and available endpoints."""
     # `cancers` mirrors the surface `/v1/case/full?cancer=…` accepts.

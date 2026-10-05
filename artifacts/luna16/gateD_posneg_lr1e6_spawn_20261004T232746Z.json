@@ -1,0 +1,10 @@
+{
+  "status": "spawned_deployed",
+  "request_id": "gateD-fjkiani-posneg-lr1e6-20261004T232746Z-zo",
+  "call_id": "fc-01M451MVJ08E11Z59KM8VNHMB5",
+  "learning_rate": 1e-06,
+  "epochs": 5,
+  "app": "luna16-fullfit",
+  "clinical_meter": "FROC@2 held-out 88",
+  "baseline_sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01"
+}

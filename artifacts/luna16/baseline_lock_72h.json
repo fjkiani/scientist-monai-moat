@@ -1,0 +1,28 @@
+{
+  "status": "honest_baseline_lock",
+  "band": "24-48",
+  "production_ckpt_sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01",
+  "froc_at_2": 0.8267399271674979,
+  "froc_receipt_path": "models/luna16/luna16_baseline_b5e79231466a_froc_result.json",
+  "evaluation_path": "artifacts/luna16/luna16_delivery_evaluation_baseline_v2.json",
+  "promote_candidate": false,
+  "active_strikes": [
+    {
+      "request_id": "gateD-fjkiani-posneg-lr1e6-20261005T032417Z-zo",
+      "learning_rate": 1e-06,
+      "call_id": "fc-01M451EGQCSZZHQTPDNDDSCBEN"
+    },
+    {
+      "experiment": "refined_score_thresh_0.14_rescue",
+      "ckpt_request_id": "gateD-fjkiani-posneg-20261004T203623Z-zo",
+      "note": "noise-floor filter diagnostic showed true nodule at thresh 0.14"
+    }
+  ],
+  "prior_failed_strikes": [
+    {
+      "request_id": "gateD-fjkiani-posneg-20261004T203623Z-zo",
+      "verdict": "PROVEN_BUT_REFINED_NAN",
+      "receipt": "artifacts/luna16/posneg_strike/froc_v021_result_summary.json"
+    }
+  ]
+}

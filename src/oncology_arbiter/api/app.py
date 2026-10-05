@@ -2872,3 +2872,7 @@ def create_app() -> FastAPI:
                 return RedirectResponse(url="/ui/", status_code=307)
 
     return app
+
+
+# Module-level ASGI app for uvicorn / Docker: oncology_arbiter.api.app:app
+app = create_app()

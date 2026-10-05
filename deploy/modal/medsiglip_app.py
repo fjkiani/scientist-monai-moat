@@ -67,7 +67,9 @@ MEDSIGLIP_IMAGE = (
 )
 
 app = modal.App("medsiglip-448")
-HF_SECRET = modal.Secret.from_name("medsiglip-hf-token")
+import os as _os
+_HF_SECRET_NAME = _os.environ.get("MEDSIGLIP_HF_SECRET", "medsiglip-hf-token")
+HF_SECRET = modal.Secret.from_name(_HF_SECRET_NAME)
 
 
 # ── Standalone healthz (no GPU, no model) ─────────────────────────────

@@ -1,0 +1,14 @@
+{
+  "status": "spawned",
+  "request_id": "gateD-fjkiani-posneg-20261004T203623Z-zo",
+  "call_id": "fc-01M44QV46MFM18TGAD5MTMNM85",
+  "gate_c_request_id": "gateC-fjkiani-20261003T0435Z-zo",
+  "app_version": "luna16-fullfit-v0.1.3-posneg-1to1",
+  "learning_rate": 1e-05,
+  "epochs": 5,
+  "sampler": {
+    "pos": 1,
+    "neg": 1,
+    "num_samples": 2
+  }
+}

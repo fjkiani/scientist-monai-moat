@@ -26,13 +26,19 @@ def _load_reports(n: int) -> list[dict[str, Any]]:
     split = json.loads((ROOT / "artifacts/clinicalbert/clinicalbert_split_v2.json").read_text())
     test_ids = set(split.get("test_sample_ids") or [])
     csv_path = ROOT / "data/pathology_text/TCGA_Reports.csv"
+    print(f"[ghost] indexing {csv_path}", flush=True)
     index: dict[str, str] = {}
     with csv_path.open(newline="", encoding="utf-8", errors="replace") as handle:
         for row in csv.DictReader(handle):
-            fn = str(row.get("patient_filename") or "")
-            index[fn] = str(row.get("text") or "")
-            if "." in fn:
-                index[fn.split(".")[0]] = index[fn]
+            fn = str(row.get("patient_filename") or "").strip()
+            text = str(row.get("text") or "")
+            if not fn or not text:
+                continue
+            index[fn] = text
+            index[fn.split(".")[0]] = text
+            if fn.startswith("TCGA-") and len(fn) >= 12:
+                index[fn[:12]] = text
+    print(f"[ghost] index_keys={len(index)}", flush=True)
 
     cases = []
     for sample in dataset["samples"]:
@@ -40,17 +46,18 @@ def _load_reports(n: int) -> list[dict[str, Any]]:
             continue
         text = None
         for key in (sample.get("report_id"), sample.get("patient_id")):
-            if key and str(key) in index:
-                text = index[str(key)]
-                break
-            if key and str(key).split(".")[0] in index:
-                text = index[str(key).split(".")[0]]
+            if not key:
+                continue
+            key_s = str(key)
+            text = index.get(key_s) or index.get(key_s.split(".")[0])
+            if text:
                 break
         if not text:
             continue
         cases.append({"sample_id": sample["sample_id"], "patient_id": sample["patient_id"], "report_text": text})
         if len(cases) >= n:
             break
+    print(f"[ghost] loaded_cases={len(cases)}", flush=True)
     return cases
 
 

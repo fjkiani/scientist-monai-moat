@@ -1,0 +1,23 @@
+{
+  "status": "ok",
+  "source_dataset": "theoviel/rsna-breast-cancer-256-pngs",
+  "labels_source": "andradaolteanu/rsna-breast-cancer-helper-data/train_path.csv",
+  "layout": {
+    "status": "ok",
+    "png_src": "/Users/fahadkiani/Desktop/development/scientist-monai-moat/data/rsna_mammo/png_src",
+    "train_csv": "data/rsna_mammo/raw/train.csv",
+    "out": "/Users/fahadkiani/Desktop/development/scientist-monai-moat/data/rsna_mammo/png_tree",
+    "limit": 12000,
+    "n_cancer": 247,
+    "n_not_cancer": 11753,
+    "n_skip_unlabeled": 0,
+    "source_dataset": "theoviel/rsna-breast-cancer-256-pngs"
+  },
+  "embeddings_dir": "artifacts/rsna_mammo/embeddings_v1",
+  "medsiglip_url": "https://fjkiani--medsiglip",
+  "vindr_zip_on_volume": {
+    "path": "/vol/mammo/vindr_raw/...zip",
+    "bytes": 54411087734
+  },
+  "ts": "2026-10-04T23:51:33Z"
+}
