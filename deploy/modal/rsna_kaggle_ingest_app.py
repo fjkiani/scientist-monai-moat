@@ -15,7 +15,7 @@ VOL = modal.Volume.from_name("rsna-mammo-png", create_if_missing=True)
 
 IMAGE = (
     modal.Image.debian_slim(python_version="3.11")
-    .apt_install("libgl1", "libglib2.0-0")
+    .apt_install("libgl1", "libglib2.0-0", "unzip")
     .pip_install(
         "kaggle==1.7.4.5",
         "pydicom==3.0.1",
@@ -153,20 +153,37 @@ def ingest(max_patients: int = 2500) -> dict:
                     env=env,
                     capture_output=True,
                 )
-                # Kaggle delivers ZIP bytes under a .dcm filename (PK header).
+                # Kaggle delivers ZIP64 bytes under a .dcm filename (PK header).
                 maybe = dest.parent / f"{image_id}.dcm"
                 if maybe.is_file() and not dest.is_file():
                     maybe.rename(dest)
                 if dest.is_file() and dest.read_bytes()[:2] == b"PK":
-                    tmp_zip = dest.with_suffix(dest.suffix + ".zip")
+                    tmp_zip = dest.parent / f"{image_id}.kaggle.zip"
+                    if tmp_zip.exists():
+                        tmp_zip.unlink()
                     dest.rename(tmp_zip)
-                    with zipfile.ZipFile(tmp_zip) as zf:
-                        zf.extractall(dest.parent)
-                    # Prefer exact image_id.dcm after extract
-                    hits = [p for p in dest.parent.rglob(f"{image_id}.dcm") if p.is_file()]
+                    # stdlib zipfile mishandles these zip64 payloads; use unzip(1).
+                    subprocess.run(
+                        ["unzip", "-o", "-q", str(tmp_zip), "-d", str(dest.parent)],
+                        check=True,
+                        capture_output=True,
+                    )
+                    hits = [
+                        p
+                        for p in dest.parent.rglob(f"{image_id}.dcm")
+                        if p.is_file() and p.read_bytes()[:2] != b"PK"
+                    ]
                     if not hits:
-                        hits = [p for p in dest.parent.rglob("*.dcm") if p.is_file() and p.read_bytes()[:2] != b"PK"]
-                    if hits:
+                        hits = [
+                            p
+                            for p in dest.parent.rglob("*.dcm")
+                            if p.is_file() and p.read_bytes()[:2] != b"PK"
+                        ]
+                    if not hits:
+                        raise RuntimeError(f"unzip produced no dicom for {image_id}")
+                    if hits[0] != dest:
+                        if dest.exists():
+                            dest.unlink()
                         hits[0].replace(dest)
             if not dest.is_file():
                 raise FileNotFoundError(f"missing dicom after download: {dest}")
