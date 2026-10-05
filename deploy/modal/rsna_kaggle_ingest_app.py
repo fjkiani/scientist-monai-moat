@@ -74,6 +74,9 @@ def ingest(max_patients: int = 2500) -> dict:
         for cls in ("cancer", "not_cancer"):
             (png / split / cls).mkdir(parents=True, exist_ok=True)
 
+    # Ensure we see PNGs committed by prior ingest runs.
+    VOL.reload()
+
     env = {**os.environ}
     if token:
         env["KAGGLE_API_TOKEN"] = token
@@ -122,16 +125,21 @@ def ingest(max_patients: int = 2500) -> dict:
     n_pos = min(len(cancer_pids), max_patients // 2)
     n_neg = min(len(neg_pids), max_patients - n_pos)
     selected = cancer_pids[:n_pos] + neg_pids[:n_neg]
-    # Prefer already-materialized PNGs first so progress counters move and
-    # rate-limit spend goes to true missing downloads only.
-    selected.sort(
-        key=lambda pid: 0
-        if (png / "train" / ("cancer" if any(int(x.get("cancer") or 0) == 1 for x in by_patient[pid]) else "not_cancer") / f"{pid}_{by_patient[pid][0]['image_id']}.png").is_file()
-        else 1
+    existing_stems = {p.stem for p in png.rglob("*.png")}
+    def _stem_for(pid: str) -> str:
+        cand = by_patient[pid][0]
+        return f"{pid}_{cand['image_id']}"
+
+    selected.sort(key=lambda pid: 0 if _stem_for(pid) in existing_stems else 1)
+    print(
+        f"plan selected={len(selected)} existing_stems={len(existing_stems)} "
+        f"already={sum(1 for p in selected if _stem_for(p) in existing_stems)}",
+        flush=True,
     )
 
     written = 0
     errors = 0
+    consecutive_429 = 0
     for i, pid in enumerate(selected):
         cand = by_patient[pid][0]
         image_id = cand["image_id"]
@@ -196,9 +204,19 @@ def ingest(max_patients: int = 2500) -> dict:
                             )
                         raise
                 if last_err is not None:
+                    consecutive_429 += 1
+                    # Workspace-level cool-down if Kaggle is still hot.
+                    if consecutive_429 >= 3:
+                        print(
+                            f"workspace_cool consecutive_429={consecutive_429} sleep=600s",
+                            flush=True,
+                        )
+                        time.sleep(600)
+                        consecutive_429 = 0
                     raise last_err
+                consecutive_429 = 0
                 # Soft throttle even on success to avoid another 429 storm.
-                time.sleep(0.35)
+                time.sleep(0.75)
                 # Kaggle delivers ZIP64 bytes under a .dcm filename (PK header).
                 maybe = dest.parent / f"{image_id}.dcm"
                 if maybe.is_file() and not dest.is_file():
