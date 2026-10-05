@@ -28,6 +28,9 @@ from oncology_arbiter.models.medsiglip_modal_client import (
     ModalEndpointConfig,
 )
 
+from oncology_arbiter.models.specialist_clients import SpecialistCall
+from oncology_arbiter.models.tissue_microscopy_product import product_tissue_model_name
+
 
 class _PinnedFakeEncoder:
     repo_id = BASE_MODEL_REPO
@@ -108,9 +111,34 @@ def test_modal_preflight_requires_revision_and_pooler_dimension() -> None:
     assert "model_revision" in denied.reason
 
 
+class _FakePhikonClient:
+    def embed(self, _image_bytes: bytes, *, request_id: str, required: bool = True):
+        vec = np.linspace(0.0, 1.0, 768, dtype=np.float32).tolist()
+        return SpecialistCall(
+            output={"embeddings": [vec]},
+            receipt={
+                "stage": "phikon_embedding",
+                "required": True,
+                "status": "succeeded",
+                "request_id": request_id,
+                "service_name": "phikon",
+                "error": None,
+            },
+        )
+
+
 def test_api_production_route_exposes_v1_identity(monkeypatch) -> None:
     monkeypatch.setenv("ONCOLOGY_ARBITER_ENABLE_BIOPSY_MEDSIGLIP", "1")
     monkeypatch.setattr(app_module, "_get_medsiglip", lambda: _PinnedFakeEncoder())
+    monkeypatch.setattr(
+        app_module,
+        "PhikonClient",
+        _FakePhikonClient,
+        raising=False,
+    )
+    import oncology_arbiter.models.specialist_clients as sc
+
+    monkeypatch.setattr(sc, "PhikonClient", _FakePhikonClient)
 
     with TestClient(create_app()) as client:
         response = client.post(
@@ -120,8 +148,9 @@ def test_api_production_route_exposes_v1_identity(monkeypatch) -> None:
 
     assert response.status_code == 200, response.text
     body = response.json()
-    assert body["provenance"]["model_state"] == "loaded_biopsy_probe"
-    assert body["provenance"]["model_name"] == PRODUCTION_MODEL_NAME
+    assert body["provenance"]["model_state"] == "loaded_phikon"
+    assert body["provenance"]["model_name"] == product_tissue_model_name()
     assert body["subtype_prediction"] in CLASSES
     assert not any("synthetic" in warning.lower() for warning in body["warnings"])
     assert any("not IDC" in warning for warning in body["warnings"])
+    assert any("primary=phikon" in warning for warning in body["warnings"])

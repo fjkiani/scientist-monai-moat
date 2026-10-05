@@ -1,4 +1,7 @@
-"""Identity-locked production wiring for the real BACH biopsy probe v1."""
+"""Secondary research wiring for the BACH biopsy probe v1 (MedSigLIP head).
+
+Not the primary product tissue path — use ``phikon_probe_wiring`` / ``tissue_microscopy_product``.
+"""
 from __future__ import annotations
 
 import hashlib
@@ -76,7 +79,7 @@ def build_biopsy_probe(
     embedding_client: Any | None = None,
     preflight_fn: Any = None,
 ) -> BiopsyMedSigLipProbe:
-    """Build the only production biopsy route: pinned backbone plus exact head."""
+    """Build the research biopsy route: pinned backbone plus exact v1 head."""
     path = verify_artifact_identity()
     if embedding_client is None:
         from oncology_arbiter.models.medsiglip_modal_client import get_medsiglip_client

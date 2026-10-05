@@ -1,0 +1,8 @@
+{
+  "competition": "rsna-breast-cancer-detection",
+  "png_tree": "/Users/fahadkiani/Desktop/development/scientist-monai-moat/data/rsna_mammo/png_tree",
+  "raw_dir": "/Users/fahadkiani/Desktop/development/scientist-monai-moat/data/rsna_mammo/raw",
+  "kaggle_ready": false,
+  "kaggle_reason": "missing /Users/fahadkiani/.kaggle/kaggle.json",
+  "status": "scaffolded"
+}

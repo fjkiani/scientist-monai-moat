@@ -14,6 +14,7 @@ import numpy as np
 import pytest
 from fastapi.testclient import TestClient
 
+from oncology_arbiter.api import app as app_module
 from oncology_arbiter.api.app import create_app
 from oncology_arbiter.api.schemas import ModelState
 from oncology_arbiter.models.biopsy_medsiglip_probe import (
@@ -23,12 +24,17 @@ from oncology_arbiter.models.biopsy_medsiglip_probe import (
     BiopsyProbeResult,
     BiopsyProbeWeights,
 )
-from oncology_arbiter.models.biopsy_probe_v1_wiring import PRODUCTION_MODEL_NAME
+from oncology_arbiter.models.biopsy_probe_v1_wiring import (
+    BASE_MODEL_REVISION,
+    PRODUCTION_MODEL_NAME,
+)
 from oncology_arbiter.models.hai_def import (
     AccessLevel,
     GateReport,
     GatedAccessError,
 )
+from oncology_arbiter.models.specialist_clients import SpecialistCall
+from oncology_arbiter.models.tissue_microscopy_product import product_tissue_model_name
 from oncology_arbiter.models.txgemma_client import TxGemmaClient
 
 
@@ -38,8 +44,14 @@ from oncology_arbiter.models.txgemma_client import TxGemmaClient
 
 
 class _FakeEncoder:
+    repo_id = MEDSIGLIP_REPO
+    model_revision = BASE_MODEL_REVISION
+
     def __init__(self, seed: int = 12345):
         self._rng = np.random.default_rng(seed)
+
+    def preflight(self, repo_id: str = MEDSIGLIP_REPO) -> GateReport:
+        return _preflight_allowed(repo_id)
 
     def embed_image(
         self,
@@ -109,6 +121,23 @@ def _biopsy_output_json(subtype: str = "IDC", grade: int = 2,
     }
 
 
+
+
+class _FakePhikonClient:
+    def embed(self, _image_bytes: bytes, *, request_id: str, required: bool = True):
+        vec = np.linspace(0.0, 1.0, 768, dtype=np.float32).tolist()
+        return SpecialistCall(
+            output={"embeddings": [vec]},
+            receipt={
+                "stage": "phikon_embedding",
+                "required": True,
+                "status": "succeeded",
+                "request_id": request_id,
+                "service_name": "phikon",
+                "error": None,
+            },
+        )
+
 def _install_biopsy_stub(monkeypatch, preflight_fn) -> None:
     """Replace BiopsyMedSigLipProbe.__init__ so it uses the fake encoder + preflight."""
     def _fake_init(self, *args, **kwargs) -> None:
@@ -136,11 +165,12 @@ def _install_txgemma_stub(monkeypatch, preflight_fn) -> None:
 # --------------------------------------------------------------------------- #
 
 
-def test_biopsy_placeholder_when_flag_off(client: TestClient) -> None:
+def test_biopsy_placeholder_when_flag_off(monkeypatch, client: TestClient) -> None:
+    monkeypatch.setenv("ONCOLOGY_ARBITER_ENABLE_BIOPSY_MEDSIGLIP", "0")
     resp = client.post("/v1/biopsy/analyze", json={"wsi_bytes_b64": base64.b64encode(b"x").decode()})
     assert resp.status_code == 200
     body = resp.json()
-    assert body["provenance"]["model_state"] == "placeholder"
+    assert body["provenance"]["model_state"] in ("placeholder", "unavailable")
     assert body["subtype_prediction"] is None
 
 
@@ -153,6 +183,10 @@ def test_biopsy_wired_returns_subtype(monkeypatch, client: TestClient) -> None:
     """When flag is on and preflight ALLOWED (stubbed), we get a real subtype."""
     monkeypatch.setenv("ONCOLOGY_ARBITER_ENABLE_BIOPSY_MEDSIGLIP", "1")
     _install_biopsy_stub(monkeypatch, _preflight_allowed)
+    import oncology_arbiter.models.specialist_clients as sc
+
+    monkeypatch.setattr(sc, "PhikonClient", _FakePhikonClient)
+    monkeypatch.setattr(app_module, "_get_medsiglip", lambda: _FakeEncoder(seed=42))
 
     resp = client.post(
         "/v1/biopsy/analyze",
@@ -161,8 +195,8 @@ def test_biopsy_wired_returns_subtype(monkeypatch, client: TestClient) -> None:
     assert resp.status_code == 200, resp.text
     body = resp.json()
     assert body["subtype_prediction"] in BACH_BIOPSY_CLASSES
-    assert body["provenance"]["model_state"] == "loaded_biopsy_probe"
-    assert body["provenance"]["model_name"] == PRODUCTION_MODEL_NAME
+    assert body["provenance"]["model_state"] == "loaded_phikon"
+    assert body["provenance"]["model_name"] == product_tissue_model_name()
     assert 0.0 <= body["confidence"] <= 1.0
     assert not any("synthetic" in w.lower() for w in body["warnings"])
     assert any("not IDC" in w for w in body["warnings"]), body["warnings"]

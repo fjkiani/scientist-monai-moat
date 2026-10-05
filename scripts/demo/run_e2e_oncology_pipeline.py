@@ -140,18 +140,20 @@ def run_mammo(case_dir: Path, case: dict[str, Any]) -> dict[str, Any]:
 
 
 def run_clinicalbert(case_dir: Path, case: dict[str, Any]) -> dict[str, Any]:
-    from oncology_arbiter.nlp.clinicalbert_local_client import ClinicalBertLocalClient
+    """72h primary: MedGemma structured JSON (ClinicalBERT NER retired as primary)."""
+    from oncology_arbiter.nlp.medgemma_pathology_client import extract_pathology
 
     note_path = case_dir / case["pathology_note_path"]
     text = note_path.read_text()
-    client = ClinicalBertLocalClient()
-    parsed = client.parse(text)
+    parsed = extract_pathology(text)
     return {
-        "capability": "clinicalbert",
-        "artifact_sha256": ARTIFACTS["clinicalbert"]["sha256"],
+        "capability": "medgemma_pathology",
+        "artifact_sha256": ARTIFACTS["medgemma"]["sha256"],
+        "revision_sha256": parsed.get("revision_sha256"),
         "status": "ok",
-        "source": "clinicalbert_local",
-        "parse": parsed,
+        "source": "medgemma_pathology",
+        "parse": parsed.get("extraction"),
+        "honesty": "ClinicalBERT NER is not primary; MedGemma PathologyExtraction is.",
     }
 
 

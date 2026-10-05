@@ -1614,6 +1614,29 @@ class CoScientistRunResponse(ApiEnvelope):
 
 
 # --------------------------------------------------------------------------- #
+# /v1/stage/biopsy/score — explicit L2 biopsy arbiter (stage-biopsy capability)
+
+
+class StageBiopsyScoreRequest(BaseModel):
+    """Caller-supplied feature panel for biopsy_arbiter_v1 (RUO)."""
+
+    model_config = ConfigDict(extra="forbid")
+    features: dict[str, Any] = Field(
+        default_factory=dict,
+        description=(
+            "Explicit lesion morphology and covariates for biopsy_arbiter_v1. "
+            "Calcification-only morphology without mass descriptors is rejected "
+            "with HTTP 422 (unvalidated lesion stratum)."
+        ),
+    )
+    patient_id_hash: str | None = Field(default=None, min_length=64, max_length=64)
+
+
+class StageBiopsyScoreResponse(ApiEnvelope):
+    arbiter_score: ArbiterScore
+
+
+# --------------------------------------------------------------------------- #
 # Research-only blind inference (authenticated, privileged scope)
 #
 # These models back `/v1/research/arbiter/identified_set`, the ONLY route in

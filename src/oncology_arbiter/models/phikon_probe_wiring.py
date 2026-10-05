@@ -1,6 +1,7 @@
-"""Identity-locked production wiring for Phikon NCT-CRC linear probe v1.
+"""Identity-locked primary product wiring for Phikon NCT-CRC linear probe v1.
 
-Binds ``models/phikon_probe_v1.joblib`` (sha256 below) into the pathology path.
+Binds ``models/phikon_probe_v1.joblib`` (sha256 below) into the product tissue
+microscopy path. See ``tissue_microscopy_product`` for secondary biopsy-probe routing.
 """
 from __future__ import annotations
 

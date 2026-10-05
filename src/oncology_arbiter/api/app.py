@@ -63,7 +63,7 @@ from .schemas import (
     EvidenceRecord,
     FullCaseRequest,
     FullCaseResponse,
-    GateReport as SchemaGateReport,
+    GateReport,
     HealthResponse,
     HonestyGateReport,
     ModelCardsIndex,
@@ -79,6 +79,8 @@ from .schemas import (
     EloRankResponse,
     ScreeningRequest,
     ScreeningResponse,
+    StageBiopsyScoreRequest,
+    StageBiopsyScoreResponse,
     TherapyOption,
     TherapyRequest,
     TherapyResponse,
@@ -95,294 +97,26 @@ from .schemas import (
 # Helpers
 
 
-def _to_schema_gate_report(runtime_gr: Any) -> SchemaGateReport | None:
-    """Convert the runtime hai_def.GateReport dataclass into the pydantic
-    schema GateReport, or None if the input is None.
-
-    We do NOT rely on pydantic's model_validate over the dataclass because
-    the runtime access_level is an Enum (`AccessLevel`) — we serialize its
-    `.value` string so the schema's Literal validator accepts it, and so
-    JSON output matches the wire contract.
-    """
-    if runtime_gr is None:
-        return None
-    return SchemaGateReport(
-        repo_id=runtime_gr.repo_id,
-        access_level=runtime_gr.access_level.value,
-        status_code=runtime_gr.status_code,
-        reason=runtime_gr.reason,
-        has_token=runtime_gr.has_token,
-        allowed=bool(runtime_gr.allowed),
-    )
+from .orchestrator.pathology_parse import PathologyParseOrchestrator
+from .services.helpers import failed_stage_receipt as _failed_stage_receipt
+from .services.helpers import skipped_stage_receipt as _skipped_stage_receipt
+from .services.helpers import pipeline_status as _pipeline_status
+from . import deps
 
 
-def _envelope(request_id: str, model_state: ModelState = ModelState.PLACEHOLDER,
-              model_name: str | None = None,
-              gate_report: SchemaGateReport | None = None) -> dict[str, Any]:
-    """Common envelope fields that must appear on every response body.
-
-    `gate_report` is populated on `provenance.gate_report` when the endpoint
-    ran a HAI-DEF preflight (either successfully or hit a gate). Callers on
-    placeholder / pure-proxy paths pass None and it stays None on the wire.
-    """
-    return {
-        "disclaimer": RUO_DISCLAIMER,
-        "caveat": AUROC_CAVEAT,
-        "provenance": Provenance(
-            model_state=model_state,
-            model_name=model_name,
-            request_id=request_id,
-            gate_report=gate_report,
-        ),
-        "honesty_gate": HonestyGateReport(
-            seen_urls_count=0, evidence_kept=0, evidence_dropped=0,
-        ),
-        "evidence": [],
-    }
+# Shared dependencies moved to deps.py
+_to_schema_gate_report = deps.to_schema_gate_report
+_envelope = deps.envelope
+_decode_bytes_arg = deps.decode_bytes_arg
+_score_arbiter = deps.score_arbiter
 
 
-def _decode_bytes_arg(bytes_b64: str | None) -> bytes | None:
-    if bytes_b64 is None:
-        return None
-    try:
-        return base64.b64decode(bytes_b64, validate=True)
-    except Exception as e:
-        raise HTTPException(400, f"invalid base64 dicom_bytes: {e}")
+# Helper functions moved to services/helpers.py and imported at top of file
 
 
-def _score_arbiter(
-    name: str,
-    features: dict[str, Any],
-    *,
-    stage: str | None = None,
-) -> ArbiterScore:
-    """Load the named L2 arbiter, score `features`, and apply the Manski gate.
-
-    Wraps :func:`oncology_arbiter.arbiter.load_arbiter` and marshals the
-    :class:`ArbiterResult` into the wire-level :class:`ArbiterScore` pydantic.
-
-    This is the single choke point through which every stage's L2 point
-    estimate reaches the wire, so it is where partial identification is
-    enforced. When the assumption-free interval implied by the *unobserved*
-    part of the declared feature schema is wider than
-    :data:`MANSKI_MAX_WIDTH`, no point estimate is marshalled at all:
-    :class:`ManskiGateError` propagates to the app-level handler and the caller
-    receives 422 plus the raw interval.
-
-    There is no bypass. This function takes no argument, reads no header and
-    consults no environment variable that could release an unidentified point
-    estimate on a public route. The research override is a separate route with
-    its own privileged scope; see ``/v1/research/arbiter/identified_set``.
-
-    Empty ``features={}`` is refused at this choke point: scoring an empty
-    panel against ``n_training=0`` templates returns only the intercept
-    constant (static sigmoid), which is not a clinical stage readout.
-    """
-    from oncology_arbiter.arbiter import load_arbiter
-    from oncology_arbiter.arbiter.manski import ManskiBounds, enforce_manski_gate
-
-    if not features:
-        raise HTTPException(
-            422,
-            detail={
-                "error": "empty_arbiter_features",
-                "stage": stage or name,
-                "detail": (
-                    f"refusing to score {name!r} with features={{}}: empty panels "
-                    "collapse to the intercept-only constant and are not a "
-                    "clinical stage readout"
-                ),
-            },
-        )
-
-    arb = load_arbiter(name)
-    r = arb.score(features)
-    bounds = ManskiBounds.from_arbiter(
-        stage=stage or name, arbiter=arb, features=features, result=r,
-    )
-    provenance_warnings = enforce_manski_gate(bounds)
-    return ArbiterScore(
-        model_name=arb.model_name,
-        p_positive=r.p_positive,
-        logit=r.logit,
-        risk_bucket=r.risk_bucket,  # type: ignore[arg-type]
-        recommendation=r.recommendation,
-        term_contributions=r.term_contributions,
-        driving_feature=r.driving_feature,
-        driving_feature_contribution=r.driving_feature_contribution,
-        positive_class=arb.positive_class,
-        n_training=arb.n_training,
-        model_state=r.metadata["model_state"],  # type: ignore[arg-type]
-        caveat=r.caveat,
-        manski=ManskiBoundsBlock(**bounds.as_dict()),
-        provenance_warnings=list(provenance_warnings),
-    )
-
-
-def _failed_stage_receipt(stage: str, required: bool, request_id: str, code: str, message: str, *, service_name: str | None = None, input_reference: str | None = None) -> dict[str, Any]:
-    return {
-        "stage": stage, "required": required,
-        "status": "failed_required" if required else "failed_optional",
-        "request_id": request_id, "service_name": service_name,
-        "input_reference": input_reference, "warnings": [],
-        "error": {"code": code, "message": message[:500]},
-    }
-
-
-def _skipped_stage_receipt(stage: str, request_id: str, message: str, *, required: bool = False) -> dict[str, Any]:
-    return {
-        "stage": stage, "required": required, "status": "skipped_not_applicable",
-        "request_id": request_id, "warnings": [message], "error": None,
-    }
-
-
-def _pipeline_status(receipts: list[dict[str, Any]]) -> str:
-    if any(receipt.get("status") == "failed_required" for receipt in receipts):
-        return "failed_required_stage"
-    if any(receipt.get("status") == "failed_optional" for receipt in receipts):
-        return "partial_failure"
-    return "complete"
-
-
-def _clinicalbert_biopsy_parse(report_text: str, *, request_id: str) -> tuple[ReportParseBlock | None, BiopsyReceptorPanel, int | None, dict[str, Any]]:
-    """Run only pinned production ClinicalBERT; never regex/fuse/fallback."""
-    from oncology_arbiter.nlp.clinicalbert_modal_client import ClinicalBertModalClient, ClinicalBertModalError
-
-    from oncology_arbiter.nlp.parser_acceptance_gate import (
-        DEPLOYED_PARSER_METRICS,
-        declared_deployment_info,
-        evaluate_parser_acceptance,
-    )
-
-    input_sha = hashlib.sha256(report_text.encode("utf-8")).hexdigest()
-    started = time.perf_counter()
-
-    # ---- Directive 3, layer 1: PRE-FLIGHT refusal -----------------------------
-    # Refuse before the wire call, not after. Two reasons this ordering matters:
-    #   (a) a transport error would otherwise pre-empt the gate, so the refusal
-    #       reason would depend on network weather rather than on model fitness;
-    #   (b) an ineligible parser must never receive patient report text at all.
-    preflight = evaluate_parser_acceptance(declared_deployment_info())
-    if not preflight.accepted:
-        return None, BiopsyReceptorPanel(), None, _failed_stage_receipt(
-            "clinicalbert_pathology_parse",
-            True,
-            request_id,
-            preflight.error_code,
-            preflight.detail,
-            service_name="clinicalbert",
-            input_reference=f"sha256:{input_sha}",
-        )
-
-    try:
-        client = ClinicalBertModalClient()
-        response = client.parse(report_text)
-
-        # ---- Directive 3, layer 2: post-parse re-validation ------------------
-        # Defence in depth: the pre-flight trusts an operator-declared version.
-        # This layer trusts only what the deployment actually said on the wire,
-        # so a mis-declared env var cannot open the gate.
-        # The parse call may have succeeded at the transport layer. That is not
-        # evidence of clinical fitness. Refuse HERE -- after the wire call but
-        # strictly before `parsed` is read into any receptor, grade, DSS,
-        # subtype or therapy field -- so no parser-derived value can reach
-        # downstream clinical logic. Measured motivation: the live v0.5.1
-        # deployment returned HER2_VALUE="positive" for a documented HER2 1+
-        # NEGATIVE report and KI67_PCT=67 for a documented 20%.
-        observed_version = response.get("app_version")
-        acceptance = evaluate_parser_acceptance(
-            {
-                "app_version": observed_version,
-                **DEPLOYED_PARSER_METRICS.get(str(observed_version), {}),
-                **{
-                    k: response[k]
-                    for k in (
-                        "test_span_micro_f1",
-                        "test_micro_f1",
-                        "micro_f1",
-                    )
-                    if k in response
-                },
-            }
-        )
-        if not acceptance.accepted:
-            return None, BiopsyReceptorPanel(), None, _failed_stage_receipt(
-                "clinicalbert_pathology_parse",
-                True,
-                request_id,
-                acceptance.error_code,
-                acceptance.detail,
-                service_name="clinicalbert",
-                input_reference=f"sha256:{input_sha}",
-            )
-
-        parsed = response.get("parsed") or {}
-        if not isinstance(parsed, dict):
-            raise ClinicalBertModalError("clinicalbert_contract_mismatch:parsed")
-
-        def value(entity: str) -> Any:
-            item = parsed.get(entity)
-            return item.get("value") if isinstance(item, dict) else None
-
-        er_value, pr_value = value("ER_VALUE"), value("PR_VALUE")
-        her2_value, grade_value, ki67_value = value("HER2_VALUE"), value("GRADE"), value("KI67_PCT")
-        panel = BiopsyReceptorPanel(
-            er_positive=True if er_value == "positive" else False if er_value == "negative" else None,
-            pr_positive=True if pr_value == "positive" else False if pr_value == "negative" else None,
-            her2_status=her2_value if her2_value in {"positive", "negative", "equivocal"} else None,
-            ki67_percent=float(ki67_value) if isinstance(ki67_value, (int, float)) and 0 <= float(ki67_value) <= 100 else None,
-            parse_state={
-                "er": "matched" if "ER_VALUE" in parsed else "no_match",
-                "pr": "matched" if "PR_VALUE" in parsed else "no_match",
-                "her2": "matched" if "HER2_VALUE" in parsed else "no_match",
-                "grade": "matched" if "GRADE" in parsed else "no_match",
-            },
-        )
-        extended: dict[str, ExtendedReceptorField] = {}
-        for entity, output_name in {
-            "KI67_PCT": "ki67_pct", "TUMOR_SIZE_MM": "tumor_size_mm",
-            "T_STAGE": "t_stage", "N_STAGE": "n_stage", "M_STAGE": "m_stage",
-            "MARGIN": "margin", "LVI": "lvi",
-        }.items():
-            item = parsed.get(entity)
-            if isinstance(item, dict):
-                extended[output_name] = ExtendedReceptorField(
-                    value=item.get("value"), match_state="matched",
-                    matched_text=item.get("surface"), confidence=0.0, source="clinicalbert",
-                )
-        block = ReportParseBlock(
-            parser_id="clinicalbert_v0.5.2_sliding_window", fusion_mode="clinicalbert",
-            per_field_confidence={},
-            per_field_source={key: "clinicalbert" if entity in parsed else "none" for key, entity in {
-                "er": "ER_VALUE", "pr": "PR_VALUE", "her2": "HER2_VALUE", "grade": "GRADE",
-            }.items()},
-            extended_fields=extended, parsed_entities=parsed,
-            n_tokens=response.get("n_tokens"), n_windows=response.get("n_windows"),
-            window_tokens=response.get("window_tokens"), overlap_tokens=response.get("overlap_tokens"),
-            window_aggregation=response.get("window_aggregation"), app_version=response.get("app_version"),
-            model_sha256=response.get("model_sha256"), metrics_sha256=response.get("metrics_sha256"),
-        )
-        receipt = {
-            "stage": "clinicalbert_pathology_parse", "required": True, "status": "succeeded",
-            "request_id": request_id, "service_name": "clinicalbert",
-            "endpoint_label": client.endpoints.parse, "app_version": response.get("app_version"),
-            # Report the OBSERVED version, never a hardcoded expectation: a
-            # receipt that asserts v0.5.2 while v0.5.1 served the request is a
-            # falsified provenance record.
-            "model_name": response.get("base_model"),
-            "model_version": response.get("app_version"),
-            "artifact_sha256": response.get("model_sha256"), "input_reference": f"sha256:{input_sha}",
-            "latency_ms": round((time.perf_counter() - started) * 1000.0, 3),
-            "warnings": [str(response.get("disclaimer") or "")], "error": None,
-        }
-        grade = int(grade_value) if grade_value in {1, 2, 3} else None
-        return block, panel, grade, receipt
-    except Exception as exc:
-        return None, BiopsyReceptorPanel(), None, _failed_stage_receipt(
-            "clinicalbert_pathology_parse", True, request_id,
-            getattr(exc, "code", "clinicalbert_failed"), f"{type(exc).__name__}: {exc}",
-            service_name="clinicalbert", input_reference=f"sha256:{input_sha}",
-        )
+# Pathology parse functions moved to orchestrator/pathology_parse.py
+_medgemma_biopsy_parse = PathologyParseOrchestrator._parse_medgemma
+_clinicalbert_biopsy_parse = PathologyParseOrchestrator.parse_biopsy_report
 
 
 _TRIAGE_REQUIRED_FIELDS = {
@@ -456,22 +190,12 @@ import os
 _MEDSIGLIP_SINGLETON: Any = None
 
 
-def _is_env_true(name: str) -> bool:
-    val = os.environ.get(name, "")
-    return val.strip().lower() in ("1", "true", "yes", "on")
+_is_env_true = deps.is_env_true
+_demo_samples_dir = deps.demo_samples_dir
+_compute_models_loaded = deps.compute_models_loaded
 
 
-def _demo_samples_dir() -> Path | None:
-    """Locate the demo-samples directory on disk. Returns None if it does
-    not exist. Points to `src/oncology_arbiter/api/static/demo_samples`
-    which ships with the package.
-    """
-    here = Path(__file__).resolve().parent
-    candidate = here / "static" / "demo_samples"
-    return candidate if candidate.exists() else None
-
-
-def _compute_models_loaded() -> dict[str, ModelState]:
+def _OLD_compute_models_loaded_ORIGINAL() -> dict[str, ModelState]:
     """Report configuration state without claiming successful inference readiness."""
     def configured(*names: str) -> ModelState:
         return (
@@ -1079,9 +803,20 @@ def create_app() -> FastAPI:
     except Exception as _boot_exc:  # pragma: no cover
         _logger.warning("auth_bootstrap raised: %s", _boot_exc)
 
+    # ===================================================================== #
+    # ROUTERS: Modularized endpoints
+    # ===================================================================== #
+    from .routers import health, stage
 
-    @app.get("/health", response_model=HealthResponse)
-    def health() -> HealthResponse:
+    app.include_router(health.router, tags=["health"])
+    app.include_router(stage.router, tags=["stage"])
+
+    # ===================================================================== #
+    # INLINE ROUTES (remaining - to be extracted in future iterations)
+    # ===================================================================== #
+
+    @app.get("/health_OLD_MIGRATED_TO_ROUTER", response_model=HealthResponse, include_in_schema=False)
+    def health_old() -> HealthResponse:
         # `cancers` mirrors the surface `/v1/case/full?cancer=…` accepts.
         # `breast` is the flagship path (real preprocessing, arbiter, etc.);
         # `nsclc` is the LIDC-IDRI expansion track that worker-2 is wiring —
@@ -1407,22 +1142,28 @@ def create_app() -> FastAPI:
 
         subtype_prediction: str | None = None
         confidence: float | None = None
+        phikon_product_ok = False
 
-        # MedSigLIP + biopsy_probe_v0 (synthetic 768-d head on disk).
-        # Honest bind: sha256 of committed biopsy_probe_v0.json is
-        # 2235f3de… — NOT 58f1699d… (1152-d v1 weights are not on this tree).
+        from oncology_arbiter.models.tissue_microscopy_product import (
+            PRODUCT_TISSUE_HONESTY_NOTE,
+            product_tissue_model_name,
+        )
+
+        if req.wsi_bytes_b64 or req.wsi_url:
+            warnings.append(PRODUCT_TISSUE_HONESTY_NOTE)
+
+        # Secondary research: MedSigLIP + biopsy_probe_v1 (BACH). Primary tissue
+        # product provenance is Phikon + phikon_probe_wiring (see below).
         biopsy_probe_disabled = os.environ.get(
             "ONCOLOGY_ARBITER_ENABLE_BIOPSY_MEDSIGLIP", "1"
         ).strip().lower() in {"0", "false", "no", "off"}
         if not biopsy_probe_disabled and (req.wsi_bytes_b64 or req.wsi_url):
             try:
-                from oncology_arbiter.models.biopsy_medsiglip_probe import (
-                    BiopsyMedSigLipProbe,
-                )
+                from oncology_arbiter.models.biopsy_probe_v1_wiring import build_biopsy_probe
                 from oncology_arbiter.models.hai_def import GatedAccessError
 
                 probe_t0 = time.perf_counter()
-                probe = BiopsyMedSigLipProbe()
+                probe = build_biopsy_probe(embedding_client=_get_medsiglip())
                 image_bytes = _decode_bytes_arg(req.wsi_bytes_b64)
                 image_url = str(req.wsi_url) if req.wsi_url else None
                 probe_result = probe.run(
@@ -1431,17 +1172,15 @@ def create_app() -> FastAPI:
                 )
                 subtype_prediction = probe_result.subtype
                 confidence = float(probe_result.subtype_probs[probe_result.subtype])
-                if model_state in (ModelState.PLACEHOLDER, ModelState.LOADED_CLINICALBERT_PARSER):
+                if not phikon_product_ok and model_state in (
+                    ModelState.PLACEHOLDER,
+                    ModelState.LOADED_CLINICALBERT_PARSER,
+                ):
                     model_state = ModelState.LOADED_BIOPSY_PROBE
-                    model_name = "google/medsiglip-448+biopsy_probe_v0"
+                    model_name = probe_result.model_name
                 warnings.extend(probe_result.warnings)
-                warnings.append(
-                    "biopsy_probe_artifact:biopsy_probe_v0.json:"
-                    "sha256_prefix=2235f3de:synthetic=True:"
-                    "58f1699d_v1_1152d_UNCLEAR_not_on_disk"
-                )
                 receipts.append({
-                    "stage": "biopsy_medsiglip_probe_v0",
+                    "stage": "biopsy_medsiglip_probe_v1_research",
                     "required": False,
                     "status": "succeeded",
                     "request_id": request_id,
@@ -1456,13 +1195,14 @@ def create_app() -> FastAPI:
                     "error": None,
                 })
             except GatedAccessError as gate_err:
-                model_state = ModelState.GATED
-                model_name = gate_err.repo_id
+                if not phikon_product_ok:
+                    model_state = ModelState.GATED
+                    model_name = gate_err.repo_id
                 warnings.append(
                     f"biopsy_medsiglip_gated:{gate_err.access_level.value}:{gate_err.reason}"
                 )
                 receipts.append(_failed_stage_receipt(
-                    "biopsy_medsiglip_probe_v0",
+                    "biopsy_medsiglip_probe_v1_research",
                     False,
                     request_id,
                     "hai_def_gated",
@@ -1474,7 +1214,7 @@ def create_app() -> FastAPI:
                     f"biopsy_medsiglip_error:{type(probe_exc).__name__}:{probe_exc}"
                 )
                 receipts.append(_failed_stage_receipt(
-                    "biopsy_medsiglip_probe_v0",
+                    "biopsy_medsiglip_probe_v1_research",
                     False,
                     request_id,
                     "biopsy_probe_failed",
@@ -1483,7 +1223,7 @@ def create_app() -> FastAPI:
                 ))
         elif not biopsy_probe_disabled:
             receipts.append(_skipped_stage_receipt(
-                "biopsy_medsiglip_probe_v0",
+                "biopsy_medsiglip_probe_v1_research",
                 request_id,
                 "no pathology image supplied for biopsy probe",
             ))
@@ -1498,7 +1238,7 @@ def create_app() -> FastAPI:
                 call = PhikonClient().embed(image_bytes or b"", request_id=request_id, required=True)
                 phikon_embedding = call.output
                 receipts.append(call.receipt)
-                # Linear probe on 768-d Phikon embedding (NCT-CRC tissue-class head)
+                # Product tissue head: 768-d Phikon embedding + NCT-CRC probe v1 joblib
                 try:
                     emb_vec = None
                     if isinstance(phikon_embedding, dict):
@@ -1509,12 +1249,16 @@ def create_app() -> FastAPI:
                         probe_out = phikon_predict_tissue_class(emb_vec)
                         if isinstance(phikon_embedding, dict):
                             phikon_embedding = {**phikon_embedding, "probe": probe_out}
+                        phikon_product_ok = True
                         receipts.append({
                             "stage": "phikon_probe_v1",
-                            "ok": True,
+                            "required": False,
+                            "status": "succeeded",
                             "request_id": request_id,
+                            "service_name": "oncology-arbiter",
                             "pred_label": probe_out.get("pred_label"),
                             "artifact_sha256": probe_out.get("artifact_sha256"),
+                            "error": None,
                         })
                 except Exception as probe_exc:
                     receipts.append(_failed_stage_receipt(
@@ -1522,9 +1266,9 @@ def create_app() -> FastAPI:
                         "phikon_probe_failed", f"{type(probe_exc).__name__}: {probe_exc}",
                         service_name="oncology-arbiter",
                     ))
-                if model_state == ModelState.PLACEHOLDER:
+                if phikon_product_ok:
                     model_state = ModelState.LOADED_PHIKON
-                    model_name = "Phikon"
+                    model_name = product_tissue_model_name()
             except Exception as exc:
                 receipts.append(_failed_stage_receipt(
                     "phikon_embedding", True, request_id,
@@ -1614,6 +1358,12 @@ def create_app() -> FastAPI:
             report_parse=report_parse_block,
             dss_prognosis=dss_prognosis,
         )
+
+    # ----------------------------------------------------------------------- #
+    # /v1/stage/biopsy/score — explicit biopsy_arbiter_v1 (stage-biopsy)
+
+    # MOVED TO routers/stage.py
+    # @app.post("/v1/stage/biopsy/score", response_model=StageBiopsyScoreResponse)
 
     # ----------------------------------------------------------------------- #
     # /v1/therapy/reason — placeholder
