@@ -1,0 +1,9 @@
+{
+  "status": "unzip_in_progress_or_partial",
+  "volume": "rsna-mammo-png",
+  "extracted_root": "vindr_extracted/vindr-mammo-a-large-scale-benchmark-dataset-for-computer-aided-detection-and-diagnosis-in-full-field-digital-mammography-1.0.0",
+  "zip": "vindr_raw/vindr-mammo-a-large-scale-benchmark-dataset-for-computer-aided-detection-and-diagnosis-in-full-field-digital-mammography-1.0.0.zip",
+  "band": "24-48",
+  "ts": "2026-10-05T04:26:22Z",
+  "modal_app": "vindr-mammo-ingest::unzip_vindr"
+}

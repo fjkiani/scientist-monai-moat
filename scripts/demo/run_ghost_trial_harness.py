@@ -61,6 +61,42 @@ def _load_reports(n: int) -> list[dict[str, Any]]:
     return cases
 
 
+def _load_mammo_probe() -> tuple[Any, Any, Any] | tuple[None, None, None]:
+    """Load RSNA MedSigLIP probe + precomputed embeddings for ghost attach."""
+    try:
+        import joblib
+        import numpy as np
+
+        probe_path = ROOT / "artifacts/rsna_mammo/probe_v1_balanced/rsna_medsiglip_logreg_v1.joblib"
+        emb_dir = ROOT / "artifacts/rsna_mammo/embeddings_v1_balanced"
+        if not probe_path.is_file() or not (emb_dir / "embeddings.npy").is_file():
+            return None, None, None
+        pipe = joblib.load(probe_path)
+        X = np.load(emb_dir / "embeddings.npy")
+        y = np.load(emb_dir / "labels.npy")
+        paths = np.load(emb_dir / "paths.npy", allow_pickle=True)
+        return pipe, (X, y, paths), str(probe_path)
+    except Exception:  # noqa: BLE001
+        return None, None, None
+
+
+def _load_phikon_probe() -> tuple[Any, Any, str] | tuple[None, None, None]:
+    try:
+        import joblib
+        import numpy as np
+
+        probe_path = ROOT / "models/phikon_probe_v1.joblib"
+        emb_path = ROOT / "artifacts/phikon_staging/embeddings.npy"
+        if not probe_path.is_file():
+            return None, None, None
+        pipe = joblib.load(probe_path)
+        # mmap + cap — full staging matrix is ~100k×768 and kills local RAM/time
+        X = np.load(emb_path, mmap_mode="r")[:4096] if emb_path.is_file() else None
+        return pipe, X, str(probe_path)
+    except Exception:  # noqa: BLE001
+        return None, None, None
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--n", type=int, default=50)
@@ -72,9 +108,22 @@ def main() -> int:
 
     cases = _load_reports(args.n)
     arb = load_stage_therapy_arbiter()
+    mammo_pipe, mammo_pack, mammo_probe_path = _load_mammo_probe()
+    phikon_pipe, phikon_X, phikon_probe_path = _load_phikon_probe()
+    modalities = ["medgemma_pathology", "stage_therapy"]
+    absent = ["luna16_ct"]
+    if mammo_pipe is not None:
+        modalities.append("mammo_rsna")
+    else:
+        absent.append("mammo_rsna")
+    if phikon_pipe is not None and phikon_X is not None:
+        modalities.append("phikon_wsi")
+    else:
+        absent.append("phikon_wsi")
+
     rows = []
     t0 = time.time()
-    for case in cases:
+    for i, case in enumerate(cases):
         row: dict[str, Any] = {
             "sample_id": case["sample_id"],
             "patient_id": case["patient_id"],
@@ -113,8 +162,44 @@ def main() -> int:
             row["error"] = f"{type(exc).__name__}: {exc}"
         else:
             row["status"] = "ok"
+            # Soft-attach imaging modalities — never fail the row if probe load/score breaks.
+            if mammo_pipe is not None and mammo_pack is not None:
+                try:
+                    X, y, paths = mammo_pack
+                    idx = i % len(X)
+                    proba = float(mammo_pipe.predict_proba(X[idx : idx + 1])[0, 1])
+                    row["mammo_rsna"] = {
+                        "status": "ok",
+                        "p_cancer": proba,
+                        "label_true": int(y[idx]),
+                        "png": str(paths[idx]),
+                        "probe": mammo_probe_path,
+                        "note": "paired RSNA MedSigLIP embedding rotated across ghost cohort (RUO)",
+                    }
+                except Exception as exc:  # noqa: BLE001
+                    row["mammo_rsna"] = {"status": "failed", "error": f"{type(exc).__name__}: {exc}"}
+            if phikon_pipe is not None and phikon_X is not None:
+                try:
+                    idx = i % len(phikon_X)
+                    vec = phikon_X[idx : idx + 1]
+                    if hasattr(phikon_pipe, "predict_proba"):
+                        proba = phikon_pipe.predict_proba(vec)
+                        pred = int(proba.argmax(axis=1)[0])
+                        p_max = float(proba.max())
+                    else:
+                        pred = int(phikon_pipe.predict(vec)[0])
+                        p_max = None
+                    row["phikon_wsi"] = {
+                        "status": "ok",
+                        "pred_class": pred,
+                        "p_max": p_max,
+                        "probe": phikon_probe_path,
+                        "note": "phikon_staging embedding rotated (RUO product tissue path)",
+                    }
+                except Exception as exc:  # noqa: BLE001
+                    row["phikon_wsi"] = {"status": "failed", "error": f"{type(exc).__name__}: {exc}"}
         rows.append(row)
-        print(json.dumps({"progress": len(rows), "n": len(cases), "last": row["sample_id"], "status": row["status"]}))
+        print(json.dumps({"progress": len(rows), "n": len(cases), "last": row["sample_id"], "status": row["status"]}), flush=True)
 
     ok = sum(1 for r in rows if r.get("status") == "ok")
     ledger = {
@@ -123,8 +208,8 @@ def main() -> int:
         "n_cases": len(rows),
         "n_ok": ok,
         "elapsed_s": round(time.time() - t0, 3),
-        "modalities_exercised": ["medgemma_pathology", "stage_therapy"],
-        "modalities_absent": ["luna16_ct", "mammo_rsna", "phikon_wsi"],
+        "modalities_exercised": modalities,
+        "modalities_absent": absent,
         "rows": rows,
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)
