@@ -136,7 +136,14 @@ def ingest(max_patients: int = 2500) -> dict:
         dest = raw / rel
         dest.parent.mkdir(parents=True, exist_ok=True)
         try:
-            if not dest.is_file():
+            # Stale volume files may be ZIP-named-.dcm from prior failed runs.
+            needs_fetch = (not dest.is_file()) or (dest.is_file() and dest.read_bytes()[:2] == b"PK")
+            if needs_fetch:
+                if dest.is_file():
+                    dest.unlink()
+                for stale in dest.parent.glob(f"{image_id}*"):
+                    if stale.is_file() and stale.name.endswith((".zip", ".kaggle.zip")):
+                        stale.unlink(missing_ok=True)
                 subprocess.run(
                     [
                         "kaggle",
