@@ -2,23 +2,18 @@
   "disclaimer": "RUO ghost trial v5 n=500",
   "n_requested": 500,
   "n_cases": 500,
-  "n_ok": 228,
-  "ok_rate": 0.456,
-  "elapsed_s": 1646.949,
-  "workers": 4,
+  "n_ok": 499,
+  "ok_rate": 0.998,
+  "elapsed_s": 6059.639,
+  "retry_workspace": "testing-123",
+  "status_hist": {
+    "ok": 499,
+    "failed": 1
+  },
   "modalities_exercised": [
     "medgemma_pathology",
     "stage_therapy",
     "mammo_rsna",
     "phikon_wsi"
-  ],
-  "modalities_absent": [
-    "luna16_ct"
-  ],
-  "status_hist": {
-    "ok": 228,
-    "failed": 272
-  },
-  "luna_note": "luna16_ct absent in ghost harness; LUNA clinical path separately baseline-locked",
-  "ts": "2026-10-05T06:39:21Z"
+  ]
 }
