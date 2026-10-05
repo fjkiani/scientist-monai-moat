@@ -22,6 +22,9 @@ IMAGE = (
         "pillow==11.1.0",
         "numpy==2.2.3",
         "pandas==2.2.3",
+        "pylibjpeg==2.0.1",
+        "pylibjpeg-libjpeg==2.2.0",
+        "pylibjpeg-openjpeg==2.4.0",
     )
 )
 
@@ -150,24 +153,25 @@ def ingest(max_patients: int = 2500) -> dict:
                     env=env,
                     capture_output=True,
                 )
-                # Kaggle often delivers a zip (*.dcm.zip) or basename .dcm
-                zip_cand = dest.parent / f"{image_id}.dcm.zip"
-                zip_alt = dest.parent / f"{Path(rel).name}.zip"
-                for zpath in (zip_cand, zip_alt, dest.with_suffix(dest.suffix + ".zip")):
-                    if zpath.is_file():
-                        with zipfile.ZipFile(zpath) as zf:
-                            zf.extractall(dest.parent)
-                        break
+                # Kaggle delivers ZIP bytes under a .dcm filename (PK header).
                 maybe = dest.parent / f"{image_id}.dcm"
                 if maybe.is_file() and not dest.is_file():
                     maybe.rename(dest)
-                # flatten if extracted into nested folder
-                if not dest.is_file():
-                    hits = list(dest.parent.rglob(f"{image_id}.dcm"))
+                if dest.is_file() and dest.read_bytes()[:2] == b"PK":
+                    tmp_zip = dest.with_suffix(dest.suffix + ".zip")
+                    dest.rename(tmp_zip)
+                    with zipfile.ZipFile(tmp_zip) as zf:
+                        zf.extractall(dest.parent)
+                    # Prefer exact image_id.dcm after extract
+                    hits = [p for p in dest.parent.rglob(f"{image_id}.dcm") if p.is_file()]
+                    if not hits:
+                        hits = [p for p in dest.parent.rglob("*.dcm") if p.is_file() and p.read_bytes()[:2] != b"PK"]
                     if hits:
                         hits[0].replace(dest)
             if not dest.is_file():
                 raise FileNotFoundError(f"missing dicom after download: {dest}")
+            if dest.read_bytes()[:2] == b"PK":
+                raise RuntimeError(f"still zip after extract: {dest}")
             ds = pydicom.dcmread(str(dest), force=True)
             arr = ds.pixel_array.astype(np.float32)
             arr = arr - arr.min()
