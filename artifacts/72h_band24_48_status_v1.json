@@ -1,0 +1,33 @@
+{
+  "status": "in_progress",
+  "band": "24-48",
+  "clock": "72h clinical hardening",
+  "git": {
+    "branch": "feat/ten-capability-delivery-20260928",
+    "head": "082056892bdb5f0916565f47c503f61f4a9a04d8"
+  },
+  "matrix": {
+    "1_medgemma_pathology": "DONE (smoke ok after redeploy)",
+    "2_phikon": "DONE",
+    "3_stratum_422": "DONE",
+    "4_mammo_rsna_vindr": "PARTIAL \u2014 theoviel\u226510k + VinDr0.715 DONE; official Kaggle 826 written, retry3 throttled for 429 remainder",
+    "5_luna_froc": "DONE baseline lock (no promote)",
+    "6_ghost_500": "DONE",
+    "7_docker": "DONE"
+  },
+  "official_probe": {
+    "n": 826,
+    "test_auc": 0.6074137931034482,
+    "cv_auc_mean": 0.6145624303232999,
+    "joblib_sha256": "f3c7ed59a264f6abc952425cf73a093db8d319e232f861f072945dcebbd1175d"
+  },
+  "ingest_last": {
+    "written": 826,
+    "errors": 1674,
+    "selected": 2500,
+    "status": "ok"
+  },
+  "medsiglip": "https://testing-123--medsiglip (HF secret repaired, timeout 900s)",
+  "medgemma": "https://testing-123--medgemma-1-5-4b (redeployed)",
+  "ts": "2026-10-05T12:22:09.180242+00:00"
+}
