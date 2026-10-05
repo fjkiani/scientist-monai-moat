@@ -2,7 +2,7 @@
   "disclaimer": "RESEARCH USE ONLY \u2014 Ghost Trial harness v1; not clinical validation.",
   "n_requested": 500,
   "n_cases": 500,
-  "n_ok": 499,
+  "n_ok": 500,
   "elapsed_s": 6059.639,
   "modalities_exercised": [
     "medgemma_pathology",
@@ -12861,8 +12861,37 @@
       "sample_id": "TCGA-49-6767.8e8171dc-1baa-4b81-8e05-e15714135c1f",
       "patient_id": "TCGA-49-6767",
       "disclaimer": "RUO ghost trial row",
-      "status": "failed",
-      "error": "MedGemmaPathologyError: medgemma_pathology: no JSON object in model text"
+      "medgemma_pathology": {
+        "status": "ok",
+        "extraction": {
+          "er_status": "POSITIVE",
+          "er_percent": null,
+          "pr_status": "NEGATIVE",
+          "her2_status": "NEGATIVE",
+          "nottingham_grade": 3,
+          "tumor_size_mm": 45.0,
+          "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+        },
+        "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
+      },
+      "stage_therapy": {
+        "status": "ok",
+        "p_event": 0.782289,
+        "risk_bucket": "HIGH",
+        "recommendation": "HIGH_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE"
+      },
+      "status": "ok",
+      "mammo_rsna": {
+        "status": "failed",
+        "error": "AttributeError: 'LogisticRegression' object has no attribute 'multi_class'"
+      },
+      "phikon_wsi": {
+        "status": "ok",
+        "pred_class": 0,
+        "p_max": 0.9999999999955222,
+        "probe": "/Users/fahadkiani/Desktop/development/scientist-monai-moat/models/phikon_probe_v1.joblib",
+        "note": "phikon_staging embedding rotated (RUO product tissue path)"
+      }
     },
     {
       "sample_id": "TCGA-49-AAQV.4FE4DC74-AF70-4F6C-B290-561808DD7FAE",

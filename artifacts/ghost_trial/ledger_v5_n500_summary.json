@@ -2,13 +2,13 @@
   "disclaimer": "RUO ghost trial v5 n=500",
   "n_requested": 500,
   "n_cases": 500,
-  "n_ok": 499,
-  "ok_rate": 0.998,
+  "n_ok": 500,
+  "ok_rate": 1.0,
   "elapsed_s": 6059.639,
   "retry_workspace": "testing-123",
   "status_hist": {
-    "ok": 499,
-    "failed": 1
+    "ok": 500,
+    "failed": 0
   },
   "modalities_exercised": [
     "medgemma_pathology",

@@ -1,5 +1,13 @@
 {
-  "froc_at_2": NaN,
-  "floor_ref_0.05": 0.05,
-  "meets_floor_ref": false
+  "status": "PROVEN_BASELINE_ONLY",
+  "clinical_meter": "official_FROC@2_heldout_88",
+  "workspace": "testing-123",
+  "request_id": "gateE-froc-testing123-20261005T073100Z-zo",
+  "baseline_froc_at_2": 0.8267399271674979,
+  "refined_froc_at_2": null,
+  "delta_froc_at_2": null,
+  "promote": false,
+  "refined_note": "8800 candidates; sklearn no positive samples in y_true",
+  "baseline_ckpt_sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01",
+  "candidate_ckpt_sha256": "327306f1cc8d500e34cc7352d14bb1a4959fb1643123b4ce31ebc360cb51c2d5"
 }
