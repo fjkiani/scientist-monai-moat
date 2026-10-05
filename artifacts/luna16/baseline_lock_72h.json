@@ -8,15 +8,10 @@
   "promote_candidate": false,
   "active_strikes": [
     {
-      "request_id": "gateD-fjkiani-posneg-lr1e6-20261005T000114Z-zo",
+      "request_id": "gateD-fjkiani-posneg-lr1e6-20261005T002644Z-zo",
       "learning_rate": 1e-06,
-      "call_id": "fc-01M453J46P6Z9RJ8E2F1TM567Z",
-      "status": "PENDING_GPU_QUEUE"
-    },
-    {
-      "experiment": "refined_score_thresh_0.14_rescue",
-      "ckpt_request_id": "gateD-fjkiani-posneg-20261004T203623Z-zo",
-      "note": "noise-floor filter diagnostic showed true nodule at thresh 0.14"
+      "call_id": "fc-01M4550THFYYFPD1E8VD77V4YJ",
+      "status": "SPAWNED_POST_REDEPLOY"
     }
   ],
   "prior_failed_strikes": [
