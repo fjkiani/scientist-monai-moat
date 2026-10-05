@@ -57,6 +57,45 @@ def download_zip() -> dict:
     }
 
 
+@app.function(
+    image=IMAGE.apt_install("unzip"),
+    volumes={"/vol/mammo": VOL},
+    timeout=6 * 60 * 60,
+    memory=32768,
+    ephemeral_disk=512 * 1024,
+    cpu=4.0,
+)
+def unzip_vindr() -> dict:
+    """Unzip VinDr archive already on volume → /vol/mammo/vindr_extracted."""
+    from pathlib import Path
+    import subprocess
+    import shutil
+
+    zip_path = Path(
+        "/vol/mammo/vindr_raw/vindr-mammo-a-large-scale-benchmark-dataset-for-computer-aided-detection-"
+        "and-diagnosis-in-full-field-digital-mammography-1.0.0.zip"
+    )
+    out = Path("/vol/mammo/vindr_extracted")
+    out.mkdir(parents=True, exist_ok=True)
+    if not zip_path.exists():
+        return {"status": "missing_zip", "expected": str(zip_path)}
+    # Skip if already extracted with content
+    existing = list(out.rglob("*.dicom"))[:1] or list(out.rglob("*.dcm"))[:1] or list(out.iterdir())
+    if len(list(out.iterdir())) > 2:
+        n_files = sum(1 for _ in out.rglob("*") if _.is_file())
+        return {"status": "already_extracted", "out": str(out), "n_files": n_files, "bytes": zip_path.stat().st_size}
+    subprocess.check_call(["unzip", "-q", "-o", str(zip_path), "-d", str(out)])
+    VOL.commit()
+    n_files = sum(1 for _ in out.rglob("*") if _.is_file())
+    return {
+        "status": "ok",
+        "out": str(out),
+        "n_files": n_files,
+        "zip_bytes": zip_path.stat().st_size,
+        "root_free_bytes": shutil.disk_usage("/").free,
+    }
+
+
 @app.local_entrypoint()
 def main() -> None:
     print(download_zip.remote())

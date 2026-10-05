@@ -1,0 +1,12 @@
+{
+  "status": "spawned",
+  "mode": "spawn-fullfit",
+  "request_id": "gateD-fjkiani-posneg-lr1e6-20261005T000114Z-zo",
+  "call_id": "fc-01M453J46P6Z9RJ8E2F1TM567Z",
+  "gate_c_request_id": "gateC-fjkiani-20261003T0435Z-zo",
+  "app_version": "luna16-fullfit-v0.1.3-posneg-1to1",
+  "learning_rate": 1e-06,
+  "epochs": 5,
+  "clinical_meter": "FROC@2 held-out 88 \u2014 evaluate only after train completes",
+  "baseline_sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01"
+}
