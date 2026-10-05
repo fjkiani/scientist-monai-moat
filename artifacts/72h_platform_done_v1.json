@@ -1,0 +1,67 @@
+{
+  "disclaimer": "RUO \u2014 72h clinical hardening platform receipt; not FDA clearance.",
+  "skill": "oncology-72h-clinical-hardening",
+  "band": "48-72",
+  "ts": "2026-10-05T11:03:05Z",
+  "branch": "feat/ten-capability-delivery-20260928",
+  "head": "a34bbc667147f4db83d1c63094be58892ebf8e0d",
+  "matrix": {
+    "1_medgemma_pathology_primary": {
+      "status": "DONE",
+      "identity": "https://testing-123--medgemma-1-5-4b-info.modal.run",
+      "identity_file": "models/medgemma_1_5_4b_identity.json"
+    },
+    "2_phikon_tissue_primary": {
+      "status": "DONE",
+      "tests": "tests/unit/test_tissue_microscopy_product_routing.py"
+    },
+    "3_stage_biopsy_calc_422": {
+      "status": "DONE",
+      "tests": "tests/unit/test_stage_biopsy_stratum_guard.py"
+    },
+    "4_mammo_rsna_vindr": {
+      "status": "DONE",
+      "rsna_n": 12000,
+      "rsna_auc_primary": 0.7092659644502962,
+      "rsna_auc_scale": 0.676880875702046,
+      "meets_10k": true,
+      "kaggle_official_dicom": "403_until_late_submission"
+    },
+    "5_luna_froc": {
+      "status": "BASELINE_LOCK",
+      "promote": false,
+      "baseline_froc_at_2": 0.8267399271674979,
+      "refined_froc_at_2": null,
+      "receipt": "artifacts/luna16/gateE_froc_testing123_result.json",
+      "lock": "artifacts/luna16/gateD_crispro_ephemeral_baseline_lock.json"
+    },
+    "6_ghost_trial_n500": {
+      "status": "DONE",
+      "n_ok": 500,
+      "n_cases": 500,
+      "ok_rate": 1.0,
+      "ledger": "artifacts/ghost_trial/ledger_v5_n500.json"
+    },
+    "7_sovereign_docker": {
+      "status": "DONE",
+      "healthz": 200,
+      "image": "crispro-oncology-ruo:72h",
+      "receipt": "artifacts/sovereign_docker/smoke_72h_v1.json"
+    }
+  },
+  "validator": "PASS",
+  "platform_done": true,
+  "open": [
+    {
+      "id": "kaggle_rsna_dicom",
+      "status": "UNCLEAR",
+      "blocker": "phone verification pending (dialog); Late Submission blocked until approved",
+      "clear_owner": "Alpha"
+    }
+  ],
+  "medgemma_smoke": {
+    "status": "ok",
+    "latency_s": 67.963,
+    "source": "fixtures/patient_sample_01/pathology_note.txt"
+  }
+}
