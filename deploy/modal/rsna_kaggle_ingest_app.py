@@ -122,10 +122,17 @@ def ingest(max_patients: int = 2500) -> dict:
     n_pos = min(len(cancer_pids), max_patients // 2)
     n_neg = min(len(neg_pids), max_patients - n_pos)
     selected = cancer_pids[:n_pos] + neg_pids[:n_neg]
+    # Prefer already-materialized PNGs first so progress counters move and
+    # rate-limit spend goes to true missing downloads only.
+    selected.sort(
+        key=lambda pid: 0
+        if (png / "train" / ("cancer" if any(int(x.get("cancer") or 0) == 1 for x in by_patient[pid]) else "not_cancer") / f"{pid}_{by_patient[pid][0]['image_id']}.png").is_file()
+        else 1
+    )
 
     written = 0
     errors = 0
-    for pid in selected:
+    for i, pid in enumerate(selected):
         cand = by_patient[pid][0]
         image_id = cand["image_id"]
         label = "cancer" if int(cand.get("cancer") or 0) == 1 else "not_cancer"
@@ -169,15 +176,24 @@ def ingest(max_patients: int = 2500) -> dict:
                     except subprocess.CalledProcessError as exc:
                         last_err = exc
                         stderr = (exc.stderr or b"").decode("utf-8", errors="replace")
+                        stdout = (exc.stdout or b"").decode("utf-8", errors="replace")
+                        blob = (stderr + "\n" + stdout).lower()
                         # Kaggle 429 / rate-limit — exponential backoff
-                        if "429" in stderr or "Too Many Requests" in stderr:
-                            wait_s = min(120, 5 * (2**attempt))
+                        if "429" in blob or "too many requests" in blob:
+                            wait_s = min(180, 8 * (2**attempt))
                             print(
                                 f"rate_limit pid={pid} attempt={attempt+1} sleep={wait_s}s",
                                 flush=True,
                             )
                             time.sleep(wait_s)
                             continue
+                        # Log non-429 kaggle failure body once
+                        if attempt == 0:
+                            print(
+                                f"kaggle_fail pid={pid} code={exc.returncode} "
+                                f"stderr={stderr[-400:]!r} stdout={stdout[-200:]!r}",
+                                flush=True,
+                            )
                         raise
                 if last_err is not None:
                     raise last_err
@@ -230,11 +246,14 @@ def ingest(max_patients: int = 2500) -> dict:
             written += 1
         except Exception as exc:  # noqa: BLE001
             errors += 1
-            if errors <= 5:
+            if errors <= 20 or errors % 50 == 0:
                 print(f"err {pid}: {type(exc).__name__}: {exc}", flush=True)
-        if written % 50 == 0:
+        if written % 50 == 0 or (i + 1) % 100 == 0:
             VOL.commit()
-            print(f"progress written={written} errors={errors}", flush=True)
+            print(
+                f"progress written={written} errors={errors} seen={i+1}/{len(selected)}",
+                flush=True,
+            )
 
     VOL.commit()
     return {
