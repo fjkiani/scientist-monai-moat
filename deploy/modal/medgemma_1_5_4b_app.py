@@ -33,7 +33,7 @@ import modal
 APP_VERSION = "medgemma-1-5-4b-modal-v1.1.0-causal-clone"
 MODEL_REPO = "google/medgemma-1.5-4b-it"
 QUANTIZATION = "bf16"
-HF_SECRET_NAME = "hf_token"
+HF_SECRET_NAME = os.environ.get("MEDGEMMA_HF_SECRET", "hf_token")
 
 MEDGEMMA_HONESTY_WARNING = (
     "MedGemma 1.5 4B-IT is a Google research LLM (google/medgemma-1.5-4b-it, "
@@ -346,8 +346,8 @@ def main() -> None:
     import requests
 
     fp = deployment_fingerprint.remote()
-    info_url = "https://fjkiani--medgemma-1-5-4b-info.modal.run"
-    chat_url = "https://fjkiani--medgemma-1-5-4b-chat.modal.run"
+    info_url = "https://crispro--medgemma-1-5-4b-info.modal.run"
+    chat_url = "https://crispro--medgemma-1-5-4b-chat.modal.run"
     info = requests.get(info_url, timeout=180).json()
     chat = requests.post(
         chat_url,
