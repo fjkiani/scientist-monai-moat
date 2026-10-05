@@ -14,6 +14,7 @@ import csv
 import json
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
 
@@ -110,9 +111,100 @@ def _load_phikon_probe() -> tuple[Any, Any, str] | tuple[None, None, None]:
         return None, None, None
 
 
+def _score_case(
+    i: int,
+    case: dict[str, Any],
+    *,
+    extract_pathology: Any,
+    arb: Any,
+    mammo_pipe: Any,
+    mammo_pack: Any,
+    mammo_probe_path: str | None,
+    phikon_pipe: Any,
+    phikon_X: Any,
+    phikon_probe_path: str | None,
+) -> dict[str, Any]:
+    row: dict[str, Any] = {
+        "sample_id": case["sample_id"],
+        "patient_id": case["patient_id"],
+        "disclaimer": "RUO ghost trial row",
+    }
+    try:
+        ext = extract_pathology(case["report_text"])
+        extraction = ext["extraction"]
+        row["medgemma_pathology"] = {
+            "status": "ok",
+            "extraction": extraction,
+            "revision_sha256": ext.get("revision_sha256"),
+        }
+        features = {
+            "histology": "invasive_ductal",
+            "grade": str(extraction.get("nottingham_grade") or "3"),
+            "er_status_positive": extraction.get("er_status") == "POSITIVE",
+            "pr_status_positive": extraction.get("pr_status") == "POSITIVE",
+            "her2_status_positive": extraction.get("her2_status")
+            in {"POSITIVE", "3+", "AMPLIFIED"},
+            "node_status_positive": False,
+            "brca_status_known_pathogenic": False,
+            "tumor_size_norm": float(extraction.get("tumor_size_mm") or 20.0) / 50.0,
+            "age_at_diagnosis_norm": 0.55,
+            "ki67_norm": 0.2,
+        }
+        scored = arb.score(features)
+        row["stage_therapy"] = {
+            "status": "ok",
+            "p_event": float(scored.p_positive),
+            "risk_bucket": scored.risk_bucket,
+            "recommendation": scored.recommendation,
+        }
+    except Exception as exc:  # noqa: BLE001
+        row["status"] = "failed"
+        row["error"] = f"{type(exc).__name__}: {exc}"
+        return row
+
+    row["status"] = "ok"
+    if mammo_pipe is not None and mammo_pack is not None:
+        try:
+            X, y, paths = mammo_pack
+            idx = i % len(X)
+            proba = float(mammo_pipe.predict_proba(X[idx : idx + 1])[0, 1])
+            row["mammo_rsna"] = {
+                "status": "ok",
+                "p_cancer": proba,
+                "label_true": int(y[idx]),
+                "png": str(paths[idx]),
+                "probe": mammo_probe_path,
+                "note": "paired RSNA MedSigLIP embedding rotated across ghost cohort (RUO)",
+            }
+        except Exception as exc:  # noqa: BLE001
+            row["mammo_rsna"] = {"status": "failed", "error": f"{type(exc).__name__}: {exc}"}
+    if phikon_pipe is not None and phikon_X is not None:
+        try:
+            idx = i % len(phikon_X)
+            vec = phikon_X[idx : idx + 1]
+            if hasattr(phikon_pipe, "predict_proba"):
+                proba = phikon_pipe.predict_proba(vec)
+                pred = int(proba.argmax(axis=1)[0])
+                p_max = float(proba.max())
+            else:
+                pred = int(phikon_pipe.predict(vec)[0])
+                p_max = None
+            row["phikon_wsi"] = {
+                "status": "ok",
+                "pred_class": pred,
+                "p_max": p_max,
+                "probe": phikon_probe_path,
+                "note": "phikon_staging embedding rotated (RUO product tissue path)",
+            }
+        except Exception as exc:  # noqa: BLE001
+            row["phikon_wsi"] = {"status": "failed", "error": f"{type(exc).__name__}: {exc}"}
+    return row
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--n", type=int, default=50)
+    ap.add_argument("--workers", type=int, default=1)
     ap.add_argument("--out", type=Path, default=ROOT / "artifacts/ghost_trial/ledger_v1.json")
     args = ap.parse_args()
 
@@ -134,100 +226,82 @@ def main() -> int:
     else:
         absent.append("phikon_wsi")
 
-    rows = []
+    rows: list[dict[str, Any] | None] = [None] * len(cases)
     t0 = time.time()
-    for i, case in enumerate(cases):
-        row: dict[str, Any] = {
-            "sample_id": case["sample_id"],
-            "patient_id": case["patient_id"],
-            "disclaimer": "RUO ghost trial row",
-        }
-        try:
-            ext = extract_pathology(case["report_text"])
-            extraction = ext["extraction"]
-            row["medgemma_pathology"] = {
-                "status": "ok",
-                "extraction": extraction,
-                "revision_sha256": ext.get("revision_sha256"),
-            }
-            features = {
-                "histology": "invasive_ductal",
-                "grade": str(extraction.get("nottingham_grade") or "3"),
-                "er_status_positive": extraction.get("er_status") == "POSITIVE",
-                "pr_status_positive": extraction.get("pr_status") == "POSITIVE",
-                "her2_status_positive": extraction.get("her2_status")
-                in {"POSITIVE", "3+", "AMPLIFIED"},
-                "node_status_positive": False,
-                "brca_status_known_pathogenic": False,
-                "tumor_size_norm": float(extraction.get("tumor_size_mm") or 20.0) / 50.0,
-                "age_at_diagnosis_norm": 0.55,
-                "ki67_norm": 0.2,
-            }
-            scored = arb.score(features)
-            row["stage_therapy"] = {
-                "status": "ok",
-                "p_event": float(scored.p_positive),
-                "risk_bucket": scored.risk_bucket,
-                "recommendation": scored.recommendation,
-            }
-        except Exception as exc:  # noqa: BLE001
-            row["status"] = "failed"
-            row["error"] = f"{type(exc).__name__}: {exc}"
-        else:
-            row["status"] = "ok"
-            # Soft-attach imaging modalities — never fail the row if probe load/score breaks.
-            if mammo_pipe is not None and mammo_pack is not None:
-                try:
-                    X, y, paths = mammo_pack
-                    idx = i % len(X)
-                    proba = float(mammo_pipe.predict_proba(X[idx : idx + 1])[0, 1])
-                    row["mammo_rsna"] = {
-                        "status": "ok",
-                        "p_cancer": proba,
-                        "label_true": int(y[idx]),
-                        "png": str(paths[idx]),
-                        "probe": mammo_probe_path,
-                        "note": "paired RSNA MedSigLIP embedding rotated across ghost cohort (RUO)",
-                    }
-                except Exception as exc:  # noqa: BLE001
-                    row["mammo_rsna"] = {"status": "failed", "error": f"{type(exc).__name__}: {exc}"}
-            if phikon_pipe is not None and phikon_X is not None:
-                try:
-                    idx = i % len(phikon_X)
-                    vec = phikon_X[idx : idx + 1]
-                    if hasattr(phikon_pipe, "predict_proba"):
-                        proba = phikon_pipe.predict_proba(vec)
-                        pred = int(proba.argmax(axis=1)[0])
-                        p_max = float(proba.max())
-                    else:
-                        pred = int(phikon_pipe.predict(vec)[0])
-                        p_max = None
-                    row["phikon_wsi"] = {
-                        "status": "ok",
-                        "pred_class": pred,
-                        "p_max": p_max,
-                        "probe": phikon_probe_path,
-                        "note": "phikon_staging embedding rotated (RUO product tissue path)",
-                    }
-                except Exception as exc:  # noqa: BLE001
-                    row["phikon_wsi"] = {"status": "failed", "error": f"{type(exc).__name__}: {exc}"}
-        rows.append(row)
-        print(json.dumps({"progress": len(rows), "n": len(cases), "last": row["sample_id"], "status": row["status"]}), flush=True)
+    workers = max(1, int(args.workers))
+    done = 0
 
-    ok = sum(1 for r in rows if r.get("status") == "ok")
+    def _write_checkpoint() -> None:
+        partial = [r for r in rows if r is not None]
+        ok_partial = sum(1 for r in partial if r.get("status") == "ok")
+        ledger = {
+            "disclaimer": "RESEARCH USE ONLY — Ghost Trial harness v1; not clinical validation.",
+            "n_requested": args.n,
+            "n_cases": len(partial),
+            "n_ok": ok_partial,
+            "elapsed_s": round(time.time() - t0, 3),
+            "modalities_exercised": modalities,
+            "modalities_absent": absent,
+            "workers": workers,
+            "partial": len(partial) < len(cases),
+            "rows": partial,
+        }
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        args.out.write_text(json.dumps(ledger, indent=2) + "\n")
+
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        futs = {
+            pool.submit(
+                _score_case,
+                i,
+                case,
+                extract_pathology=extract_pathology,
+                arb=arb,
+                mammo_pipe=mammo_pipe,
+                mammo_pack=mammo_pack,
+                mammo_probe_path=mammo_probe_path,
+                phikon_pipe=phikon_pipe,
+                phikon_X=phikon_X,
+                phikon_probe_path=phikon_probe_path,
+            ): i
+            for i, case in enumerate(cases)
+        }
+        for fut in as_completed(futs):
+            i = futs[fut]
+            row = fut.result()
+            rows[i] = row
+            done += 1
+            print(
+                json.dumps(
+                    {
+                        "progress": done,
+                        "n": len(cases),
+                        "last": row["sample_id"],
+                        "status": row["status"],
+                    }
+                ),
+                flush=True,
+            )
+            if done % 10 == 0 or done == len(cases):
+                _write_checkpoint()
+
+    final_rows = [r for r in rows if r is not None]
+    ok = sum(1 for r in final_rows if r.get("status") == "ok")
     ledger = {
         "disclaimer": "RESEARCH USE ONLY — Ghost Trial harness v1; not clinical validation.",
         "n_requested": args.n,
-        "n_cases": len(rows),
+        "n_cases": len(final_rows),
         "n_ok": ok,
         "elapsed_s": round(time.time() - t0, 3),
         "modalities_exercised": modalities,
         "modalities_absent": absent,
-        "rows": rows,
+        "workers": workers,
+        "partial": False,
+        "rows": final_rows,
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(ledger, indent=2) + "\n")
-    print(json.dumps({"out": str(args.out), "n_ok": ok, "n_cases": len(rows)}, indent=2))
+    print(json.dumps({"out": str(args.out), "n_ok": ok, "n_cases": len(final_rows)}, indent=2))
     return 0 if ok > 0 else 1
 
 
