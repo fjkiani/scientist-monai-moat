@@ -4,7 +4,7 @@
   "clock": "72h clinical hardening",
   "git": {
     "branch": "feat/ten-capability-delivery-20260928",
-    "head": "082056892bdb5f0916565f47c503f61f4a9a04d8"
+    "head": "75a7901a34629da00046a8de021e85837f09c998"
   },
   "matrix": {
     "1_medgemma_pathology": "DONE (smoke ok after redeploy)",
@@ -29,5 +29,12 @@
   },
   "medsiglip": "https://testing-123--medsiglip (HF secret repaired, timeout 900s)",
   "medgemma": "https://testing-123--medgemma-1-5-4b (redeployed)",
-  "ts": "2026-10-05T12:22:09.180242+00:00"
+  "ts": "2026-10-05T12:49:49.697422+00:00",
+  "official_kaggle_scale": {
+    "status": "RATE_LIMITED_429",
+    "written_locked": 826,
+    "retry5": "workspace_cool 600s after 3 consecutive 429; ingest still running",
+    "band4_10k_authority": "artifacts/rsna_mammo/probe_v2_12k (theoviel) meets_10k_floor=true",
+    "official_probe": "artifacts/rsna_mammo/probe_official_v1_resplit test_auc\u22480.607 n=826"
+  }
 }
