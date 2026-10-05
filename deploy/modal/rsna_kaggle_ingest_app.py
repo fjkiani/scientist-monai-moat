@@ -41,6 +41,7 @@ def ingest(max_patients: int = 2500) -> dict:
     import csv
     import os
     import subprocess
+    import time
     import zipfile
     from pathlib import Path
 
@@ -144,22 +145,44 @@ def ingest(max_patients: int = 2500) -> dict:
                 for stale in dest.parent.glob(f"{image_id}*"):
                     if stale.is_file() and stale.name.endswith((".zip", ".kaggle.zip")):
                         stale.unlink(missing_ok=True)
-                subprocess.run(
-                    [
-                        "kaggle",
-                        "competitions",
-                        "download",
-                        "-c",
-                        "rsna-breast-cancer-detection",
-                        "-f",
-                        rel,
-                        "-p",
-                        str(dest.parent),
-                    ],
-                    check=True,
-                    env=env,
-                    capture_output=True,
-                )
+                last_err: Exception | None = None
+                for attempt in range(5):
+                    try:
+                        subprocess.run(
+                            [
+                                "kaggle",
+                                "competitions",
+                                "download",
+                                "-c",
+                                "rsna-breast-cancer-detection",
+                                "-f",
+                                rel,
+                                "-p",
+                                str(dest.parent),
+                            ],
+                            check=True,
+                            env=env,
+                            capture_output=True,
+                        )
+                        last_err = None
+                        break
+                    except subprocess.CalledProcessError as exc:
+                        last_err = exc
+                        stderr = (exc.stderr or b"").decode("utf-8", errors="replace")
+                        # Kaggle 429 / rate-limit — exponential backoff
+                        if "429" in stderr or "Too Many Requests" in stderr:
+                            wait_s = min(120, 5 * (2**attempt))
+                            print(
+                                f"rate_limit pid={pid} attempt={attempt+1} sleep={wait_s}s",
+                                flush=True,
+                            )
+                            time.sleep(wait_s)
+                            continue
+                        raise
+                if last_err is not None:
+                    raise last_err
+                # Soft throttle even on success to avoid another 429 storm.
+                time.sleep(0.35)
                 # Kaggle delivers ZIP64 bytes under a .dcm filename (PK header).
                 maybe = dest.parent / f"{image_id}.dcm"
                 if maybe.is_file() and not dest.is_file():
