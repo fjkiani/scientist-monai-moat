@@ -4,7 +4,7 @@
   "band": "48-72",
   "ts": "2026-10-05T11:03:05Z",
   "branch": "feat/ten-capability-delivery-20260928",
-  "head": "a34bbc667147f4db83d1c63094be58892ebf8e0d",
+  "head": "42b3e78e1158e5254a7c16925764f079ae3fee99",
   "matrix": {
     "1_medgemma_pathology_primary": {
       "status": "DONE",
@@ -25,7 +25,8 @@
       "rsna_auc_primary": 0.7092659644502962,
       "rsna_auc_scale": 0.676880875702046,
       "meets_10k": true,
-      "kaggle_official_dicom": "unlocked_train_csv_ok"
+      "kaggle_official_dicom": "ingest_100_ok",
+      "kaggle_ingest_100": "artifacts/rsna_mammo/kaggle_ingest_100_v1.json"
     },
     "5_luna_froc": {
       "status": "BASELINE_LOCK",
