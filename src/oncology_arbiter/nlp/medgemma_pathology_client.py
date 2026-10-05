@@ -23,6 +23,15 @@ class MedGemmaPathologyError(RuntimeError):
 
 def _extract_json_object(text: str) -> dict[str, Any]:
     text = text.strip()
+    # Strip MedGemma/Gemma3 thinking channel wrappers when present.
+    text = re.sub(
+        r"<unused\d+>thought[\s\S]*?(?:</?unused\d+>|</thought>|$)",
+        "",
+        text,
+        flags=re.IGNORECASE,
+    )
+    text = re.sub(r"<think>[\s\S]*?</think>", "", text, flags=re.IGNORECASE)
+    text = text.strip()
     if text.startswith("```"):
         text = re.sub(r"^```(?:json)?\s*", "", text)
         text = re.sub(r"\s*```$", "", text)

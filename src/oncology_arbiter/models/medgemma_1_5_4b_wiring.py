@@ -12,7 +12,7 @@ from typing import Any
 CAPABILITY = "medgemma"
 ARTIFACT_FILENAME = "medgemma_1_5_4b_identity.json"
 ARTIFACT_PATH = "models/medgemma_1_5_4b_identity.json"
-ARTIFACT_SHA256 = "300a3307995c12466de80ed911c634374095e0c556e39efdfcedf583feee6c6a"
+ARTIFACT_SHA256 = "e69dbed948f15ec0134c0315d6d6c8f648d58f63020b6b7a298838149bd2bcfb"
 EXPECTED_MODEL_ID = "google/medgemma-1.5-4b-it"
 EXPECTED_REVISION_SHA256 = "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
 

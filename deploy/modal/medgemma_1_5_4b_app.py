@@ -65,7 +65,31 @@ model_volume = modal.Volume.from_name("medgemma-1-5-4b-weights", create_if_missi
 
 
 def _revision_sha256_from_config(token: str) -> tuple[str, str]:
-    """Return (hf_commit_40, content_sha256_of_config.json) for identity bind."""
+    """Return (hf_commit_40, content_sha256_of_config.json) for identity bind.
+
+    Prefers local HF hub cache (offline / spend-failover) when present; falls back
+    to Hub API when token is a real HF credential.
+    """
+    from pathlib import Path
+
+    cache = Path("/root/.cache/huggingface/hub") / f"models--{MODEL_REPO.replace('/', '--')}"
+    refs = cache / "refs" / "main"
+    snaps = cache / "snapshots"
+    if snaps.is_dir():
+        # Prefer pinned ref, else sole snapshot dir.
+        commit = refs.read_text().strip() if refs.is_file() else ""
+        if not commit:
+            kids = [p.name for p in snaps.iterdir() if p.is_dir()]
+            commit = kids[0] if kids else ""
+        cfg = snaps / commit / "config.json" if commit else None
+        if cfg is not None and cfg.is_file():
+            return commit, hashlib.sha256(cfg.read_bytes()).hexdigest()
+
+    if not token or token in {"offline_cache_only", "offline", "none"}:
+        raise RuntimeError(
+            "MedGemma cache missing and HF_TOKEN not usable for Hub fetch"
+        )
+
     from huggingface_hub import HfApi
     import requests
 
@@ -108,23 +132,25 @@ class MedGemma:
         from transformers import AutoModelForCausalLM, AutoTokenizer
 
         t0 = time.time()
-        token = os.environ.get("HF_TOKEN") or os.environ.get("HUGGING_FACE_HUB_TOKEN")
-        if not token:
-            raise RuntimeError(f"HF_TOKEN not set in Modal secret {HF_SECRET_NAME}")
+        token = os.environ.get("HF_TOKEN") or os.environ.get("HUGGING_FACE_HUB_TOKEN") or ""
+        offline = token in {"", "offline_cache_only", "offline", "none"}
+        load_kw: Dict[str, Any] = {"local_files_only": offline}
+        if not offline:
+            load_kw["token"] = token
 
         self.hf_commit, self.revision_sha256 = _revision_sha256_from_config(token)
         self.device = "cuda:0"
 
         # 27b-clone path: tokenizer + CausalLM only (NO AutoProcessor).
-        self.tokenizer = AutoTokenizer.from_pretrained(MODEL_REPO, token=token)
+        self.tokenizer = AutoTokenizer.from_pretrained(MODEL_REPO, **load_kw)
         try:
             self.model = AutoModelForCausalLM.from_pretrained(
                 MODEL_REPO,
-                token=token,
                 torch_dtype=torch.bfloat16,
                 device_map={"": 0},
                 low_cpu_mem_usage=True,
                 attn_implementation="eager",
+                **load_kw,
             )
             self.model_class = "AutoModelForCausalLM"
         except Exception as causal_exc:
@@ -133,11 +159,11 @@ class MedGemma:
 
             self.model = AutoModelForImageTextToText.from_pretrained(
                 MODEL_REPO,
-                token=token,
                 torch_dtype=torch.bfloat16,
                 device_map={"": 0},
                 low_cpu_mem_usage=True,
                 attn_implementation="eager",
+                **load_kw,
             )
             self.model_class = f"AutoModelForImageTextToText(fallback:{type(causal_exc).__name__})"
 

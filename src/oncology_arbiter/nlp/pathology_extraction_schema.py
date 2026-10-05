@@ -46,5 +46,6 @@ Rules:
 - Use UNKNOWN or null when not stated. Do not invent values.
 - If ER is described as positive with a percent, set er_percent.
 - tumor_size_mm must be millimeters (convert cm × 10).
-- Output JSON only. No markdown fences. No commentary.
+- Output JSON only. No markdown fences. No commentary. No thinking tags.
+- Do not emit <unused*> / <think> wrappers. First character of the reply must be '{'.
 """
