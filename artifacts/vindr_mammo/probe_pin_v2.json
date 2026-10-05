@@ -1,0 +1,10 @@
+{
+  "probe": "artifacts/vindr_mammo/probe_v2/vindr_medsiglip_logreg_v2.joblib",
+  "joblib_sha256": "fa0a85fc2688bed4f188be31faad6d93e671b227097814333e25a0cc8c5568c1",
+  "test_auc": 0.7152234636871508,
+  "n_total": 2000,
+  "n_pos_test": 20,
+  "backbone": "MedSigLIP-1152",
+  "band": "24-48",
+  "dataset_id": "vindr_birads_png_sample_2k"
+}
