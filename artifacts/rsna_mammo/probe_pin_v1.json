@@ -1,0 +1,13 @@
+{
+  "primary_probe": "artifacts/rsna_mammo/probe_v1_balanced/rsna_medsiglip_logreg_v1.joblib",
+  "primary_test_auc": 0.7092659644502962,
+  "primary_sha256": "eb1a865ae071ec07029740aa3b8b930c81e7ae13549fec7a50871b55c11daaac",
+  "scale_probe": "artifacts/rsna_mammo/probe_v2_12k/rsna_medsiglip_logreg_v2_12k.joblib",
+  "scale_test_auc": 0.676880875702046,
+  "scale_n": 12000,
+  "scale_n_pos": 247,
+  "embeddings_v2": "artifacts/rsna_mammo/embeddings_v2_12k",
+  "meets_10k_floor": true,
+  "note": "scale set severely imbalanced (247/11753); primary remains balanced 1482 probe",
+  "band": "24-48"
+}
