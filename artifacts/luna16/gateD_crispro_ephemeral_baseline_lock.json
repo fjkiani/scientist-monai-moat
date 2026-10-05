@@ -1,15 +1,14 @@
 {
   "status": "BASELINE_LOCK",
   "clinical_meter": "official_FROC@2_heldout_88",
-  "baseline_froc_at_2": null,
+  "baseline_froc_at_2": 0.8267399271674979,
   "candidate_froc_at_2": null,
   "delta_froc_at_2": null,
   "promote": false,
-  "reason": "refined official FROC@2 null/NaN after 1:1 fullfit \u2014 refuse promote; production remains b5e79231",
+  "reason": "refined FROC@2 null with 8800-cand collapse after GateD 1:1 fullfit; keep b5e79231",
   "official_receipt": "artifacts/luna16/gateE_froc_testing123_result.json",
   "workspace": "testing-123",
   "ckpt_request_id": "gateD-crispro-ephemeral-20261005T014000Z-zo",
   "baseline_ckpt_sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01",
-  "candidate_ckpt_sha256": "327306f1cc8d500e34cc7352d14bb1a4959fb1643123b4ce31ebc360cb51c2d5",
-  "heldout_coco_proxy_note": "candidate AP collapsed to 0.0 vs baseline ~0.80 \u2014 consistent with FROC NaN"
+  "candidate_ckpt_sha256": "327306f1cc8d500e34cc7352d14bb1a4959fb1643123b4ce31ebc360cb51c2d5"
 }

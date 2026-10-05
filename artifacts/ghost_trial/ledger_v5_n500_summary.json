@@ -15,5 +15,6 @@
     "stage_therapy",
     "mammo_rsna",
     "phikon_wsi"
-  ]
+  ],
+  "partial": true
 }

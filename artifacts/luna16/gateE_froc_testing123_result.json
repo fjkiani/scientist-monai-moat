@@ -1,9 +1,37 @@
 {
-  "0.125": null,
-  "0.25": null,
-  "0.5": null,
-  "1.0": null,
-  "2.0": null,
-  "4.0": null,
-  "8.0": null
+  "app_version": "luna16-heldout-froc-v0.2.2-score-thresh",
+  "request_id": "gateE-froc-testing123-20261005T073100Z-zo",
+  "ckpt_request_id": "gateD-crispro-ephemeral-20261005T014000Z-zo",
+  "n_test": 88,
+  "device": "cuda:0",
+  "gpu_name": "NVIDIA A100-SXM4-40GB",
+  "baseline_score_thresh": 0.02,
+  "refined_score_thresh": 0.02,
+  "baseline": {
+    "ckpt_sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01",
+    "n_series_ok": 88,
+    "n_candidates": 1181,
+    "froc_at_2": 0.8267399271674979
+  },
+  "refined": {
+    "ckpt_sha256": "327306f1cc8d500e34cc7352d14bb1a4959fb1643123b4ce31ebc360cb51c2d5",
+    "n_series_ok": 88,
+    "n_candidates": 8800,
+    "froc_at_2": null,
+    "note": "8800-cand collapse; vendor FROC@2 NaN / no positive samples"
+  },
+  "froc_at_2_baseline": 0.8267399271674979,
+  "froc_at_2_refined": null,
+  "delta": {
+    "froc_at_2": null,
+    "floor_ref_0.05": 0.05,
+    "meets_floor_ref": false
+  },
+  "status": "ok",
+  "verdict": "PROVEN_BASELINE_ONLY",
+  "promote": false,
+  "verdict_note": "Official CAD FROC@2 baseline=0.8267; refined=null \u2014 refuse promote",
+  "elapsed_seconds": 554.296,
+  "workspace": "testing-123",
+  "source_log": "/tmp/luna_official_froc_t123.txt"
 }
