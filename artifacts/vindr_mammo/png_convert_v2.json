@@ -1,0 +1,8 @@
+{
+  "status": "ok",
+  "limit": 2000,
+  "n_cancer": 92,
+  "n_not_cancer": 1908,
+  "n_skip": 524,
+  "band": "24-48"
+}

@@ -311,15 +311,25 @@ def run_fullfit(
             "verdict": "NOT AUTHORIZED",
             "request_id": rid,
         }
+    # Ensure volume reflects latest commits (external puts / prior preflight).
+    try:
+        OUTPUT_VOL.reload()
+    except Exception:
+        pass
     gate_c_path = (
         Path("/vol/output") / "fullfit-v0.1" / gate_c_request_id / "preflight" / "cpu_preflight_full.json"
     )
     if not gate_c_path.is_file():
+        root = Path("/vol/output") / "fullfit-v0.1"
+        listing = sorted(p.name for p in root.iterdir()) if root.is_dir() else []
         return {
             "status": "failed",
             "error": f"missing Gate C receipt {gate_c_path}",
             "verdict": "NOT AUTHORIZED",
             "request_id": rid,
+            "debug_fullfit_root_listing": listing[:50],
+            "debug_gate_c_request_id": gate_c_request_id,
+            "debug_output_exists": Path("/vol/output").is_dir(),
         }
     gate_c = json.loads(gate_c_path.read_text())
     if gate_c.get("GATE_C_PASS") != "GATE_C_PASS" or not gate_c.get("passed"):
@@ -749,3 +759,61 @@ def apply():
     (run_dir / "result.json").write_text(json.dumps(result, indent=2))
     OUTPUT_VOL.commit()
     return result
+
+
+@app.local_entrypoint()
+def main(
+    mode: str = "spawn-fullfit",
+    request_id: str = "",
+    gate_c_request_id: str = "gateC-fjkiani-20261003T0435Z-zo",
+    epochs: int = 5,
+    learning_rate: float = 1e-5,
+    batch_size: int = 2,
+    resume: bool = False,
+):
+    """Spawn or run Gate-D fullfit / held-out evaluate.
+
+    Modes:
+      spawn-fullfit — fire-and-forget A100 fullfit (default)
+      fullfit       — block until training completes
+      heldout       — run_heldout for an existing ckpt request_id
+    """
+    rid = request_id or f"gateD-fjkiani-posneg-{time.strftime('%Y%m%dT%H%M%SZ')}-zo"
+    if mode == "spawn-fullfit":
+        call = run_fullfit.spawn(
+            request_id=rid,
+            epochs=epochs,
+            learning_rate=learning_rate,
+            batch_size=batch_size,
+            gate_c_request_id=gate_c_request_id,
+            resume=resume,
+        )
+        out = {
+            "status": "spawned",
+            "mode": mode,
+            "request_id": rid,
+            "call_id": call.object_id,
+            "gate_c_request_id": gate_c_request_id,
+            "app_version": APP_VERSION,
+            "learning_rate": learning_rate,
+            "epochs": epochs,
+            "sampler": {"pos": 1, "neg": 1, "num_samples": 2},
+        }
+        print(json.dumps(out, indent=2))
+        return out
+    if mode == "fullfit":
+        r = run_fullfit.remote(
+            request_id=rid,
+            epochs=epochs,
+            learning_rate=learning_rate,
+            batch_size=batch_size,
+            gate_c_request_id=gate_c_request_id,
+            resume=resume,
+        )
+        print(json.dumps(r, indent=2))
+        return r
+    if mode == "heldout":
+        r = run_heldout.remote(request_id=rid, ckpt_request_id=gate_c_request_id)
+        print(json.dumps(r, indent=2))
+        return r
+    raise SystemExit(f"unknown mode {mode!r}")

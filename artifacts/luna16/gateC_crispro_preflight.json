@@ -1,0 +1,104 @@
+{
+  "status": "ok",
+  "passed": true,
+  "request_id": "gateC-crispro-20261005T013729Z-zo",
+  "app_version": "luna16-fullfit-v0.1.3-posneg-1to1",
+  "checks": {
+    "dataset_hash": {
+      "ok": true,
+      "detail": "d20b94a15315b830b99d29e429b0daf5380b7fa5bf157fecf733c2af354944ff"
+    },
+    "split_hash": {
+      "ok": true,
+      "detail": "3602f34c4b3e65024e6a7ef3fc7185577ee1f39e54d2c9f5c35baffc2d0cd1d9"
+    },
+    "datalist": {
+      "ok": true,
+      "detail": "c5f6adf3fe79b787e8b038862220c8aed16964f36cd8b642dbaa4ccfc10a73c3"
+    },
+    "nifti_complete_542": {
+      "ok": true,
+      "detail": {
+        "n_missing": 0,
+        "sample": []
+      }
+    },
+    "nifti_v3_count": {
+      "ok": true,
+      "detail": {
+        "n_nifti_v3": 630
+      }
+    },
+    "nifti_v2_untouched_prefix": {
+      "ok": true,
+      "detail": "nifti_v2 present (read-only bind)"
+    },
+    "sample_nifti_spacing_check": {
+      "ok": true,
+      "detail": [
+        {
+          "uid": "1.3.6.1.4.1.14519.5.2.1.6279.6001.724251104254976962355686318345",
+          "zooms": [
+            0.703125,
+            0.703125,
+            1.25
+          ],
+          "ok": true
+        },
+        {
+          "uid": "1.3.6.1.4.1.14519.5.2.1.6279.6001.226889213794065160713547677129",
+          "zooms": [
+            0.703125,
+            0.703125,
+            1.25
+          ],
+          "ok": true
+        },
+        {
+          "uid": "1.3.6.1.4.1.14519.5.2.1.6279.6001.458525794434429386945463560826",
+          "zooms": [
+            0.703125,
+            0.703125,
+            1.25
+          ],
+          "ok": true
+        },
+        {
+          "uid": "1.3.6.1.4.1.14519.5.2.1.6279.6001.861997885565255340442123234170",
+          "zooms": [
+            0.703125,
+            0.703125,
+            1.25
+          ],
+          "ok": true
+        },
+        {
+          "uid": "1.3.6.1.4.1.14519.5.2.1.6279.6001.240969450540588211676803094518",
+          "zooms": [
+            0.703125,
+            0.703125,
+            1.25
+          ],
+          "ok": true
+        }
+      ]
+    },
+    "run_id_present": {
+      "ok": true,
+      "detail": [
+        "$@train#trainer.run()"
+      ]
+    },
+    "runtime": {
+      "ok": true,
+      "detail": {
+        "torch": "2.4.0",
+        "monai": "1.4.0",
+        "numpy": "1.24.4"
+      }
+    }
+  },
+  "monai_run_id": "run",
+  "nifti_prefix": "/vol/luna16/nifti_v3",
+  "GATE_C_PASS": "GATE_C_PASS"
+}

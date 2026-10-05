@@ -25,6 +25,7 @@ def _load_reports(n: int) -> list[dict[str, Any]]:
     dataset = json.loads((ROOT / "artifacts/clinicalbert/clinicalbert_dataset_v2.json").read_text())
     split = json.loads((ROOT / "artifacts/clinicalbert/clinicalbert_split_v2.json").read_text())
     test_ids = set(split.get("test_sample_ids") or [])
+    train_ids = set(split.get("train_sample_ids") or [])
     csv_path = ROOT / "data/pathology_text/TCGA_Reports.csv"
     print(f"[ghost] indexing {csv_path}", flush=True)
     index: dict[str, str] = {}
@@ -40,10 +41,7 @@ def _load_reports(n: int) -> list[dict[str, Any]]:
                 index[fn[:12]] = text
     print(f"[ghost] index_keys={len(index)}", flush=True)
 
-    cases = []
-    for sample in dataset["samples"]:
-        if sample["sample_id"] not in test_ids:
-            continue
+    def _resolve(sample: dict[str, Any]) -> dict[str, Any] | None:
         text = None
         for key in (sample.get("report_id"), sample.get("patient_id")):
             if not key:
@@ -53,8 +51,23 @@ def _load_reports(n: int) -> list[dict[str, Any]]:
             if text:
                 break
         if not text:
-            continue
-        cases.append({"sample_id": sample["sample_id"], "patient_id": sample["patient_id"], "report_text": text})
+            return None
+        return {"sample_id": sample["sample_id"], "patient_id": sample["patient_id"], "report_text": text}
+
+    cases: list[dict[str, Any]] = []
+    # Prefer held-out test, then train to scale toward 500-case ghost.
+    for pool in (test_ids, train_ids, None):
+        for sample in dataset["samples"]:
+            if pool is not None and sample["sample_id"] not in pool:
+                continue
+            if any(c["sample_id"] == sample["sample_id"] for c in cases):
+                continue
+            resolved = _resolve(sample)
+            if not resolved:
+                continue
+            cases.append(resolved)
+            if len(cases) >= n:
+                break
         if len(cases) >= n:
             break
     print(f"[ghost] loaded_cases={len(cases)}", flush=True)
