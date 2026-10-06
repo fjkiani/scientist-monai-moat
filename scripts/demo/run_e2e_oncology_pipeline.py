@@ -48,7 +48,7 @@ ARTIFACTS = {
     },
     "medgemma": {
         "path": ROOT / "models/medgemma_1_5_4b_identity.json",
-        "sha256": "e69dbed948f15ec0134c0315d6d6c8f648d58f63020b6b7a298838149bd2bcfb",
+        "sha256": "1013eee9b36bf4468d682e86b259bfc1cd9c89f442d50e50816bf3f2526d9b1e",
         "metric": {"name": "chat_success_rate", "value": 1.0},
     },
     "stage-therapy": {

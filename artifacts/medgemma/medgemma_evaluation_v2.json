@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "capability": "medgemma",
-  "artifact_sha256": "e69dbed948f15ec0134c0315d6d6c8f648d58f63020b6b7a298838149bd2bcfb",
+  "artifact_sha256": "1013eee9b36bf4468d682e86b259bfc1cd9c89f442d50e50816bf3f2526d9b1e",
   "dataset_sha256": "bbb4ab20debcdc3407b72d05f46f1c87655b90441284ed20915053d30b19b375",
   "split_sha256": "7686f9bf07af41ea86dc3f78f1ff0ec5a69a3d2bb58568c68a3f8da881b6fc61",
   "metric": {
