@@ -37,7 +37,6 @@ import io
 import json
 import os
 import time
-import zipfile
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -91,46 +90,25 @@ IMAGE = (
 # Weights loader: idempotently fetches the bundle into the Volume on cold start.
 # ---------------------------------------------------------------------------
 
-_BUNDLE_TAR_URL = (
-    "https://github.com/Project-MONAI/model-zoo/releases/download/"
-    "hosting_storage_v1/lung_nodule_ct_detection_v0.6.9.zip"
-)
-
-
 def _ensure_bundle_in_volume(mount_dir: str = "/vol/baseline") -> Path:
-    """Fetch the bundle zip into the Volume if not already present.
+    """Require the MONAI bundle already present on ``luna16-baseline-weights``.
 
-    Returns the local Path to the extracted bundle directory. Called from
-    each function body so cold start is deterministic.
+    GitHub ``hosting_storage_v1`` no longer ships ``v0.6.9`` (404). Seed the
+    volume from an existing workspace (crispro/fjkiani) via
+    ``modal volume get`` / ``modal volume put`` — do not auto-download.
+
+    Returns the local Path to the extracted bundle directory.
     """
-    import requests
-
     bundle_root = Path(mount_dir) / "lung_nodule_ct_detection"
     weight_path = bundle_root / "models" / "model.pt"
     if weight_path.exists():
         return bundle_root
 
-    print(f"[bundle] Fetching {_BUNDLE_TAR_URL} into Modal Volume...", flush=True)
-    zip_path = Path(mount_dir) / "lung_nodule_ct_detection_v0.6.9.zip"
-    zip_path.parent.mkdir(parents=True, exist_ok=True)
-    if not zip_path.exists():
-        r = requests.get(_BUNDLE_TAR_URL, timeout=600)
-        r.raise_for_status()
-        zip_path.write_bytes(r.content)
-        print(f"[bundle] Downloaded {len(r.content)/1e6:.1f} MB", flush=True)
-
-    print(f"[bundle] Extracting to {mount_dir}...", flush=True)
-    with zipfile.ZipFile(zip_path) as z:
-        z.extractall(mount_dir)
-
-    if not weight_path.exists():
-        raise RuntimeError(
-            f"After extraction, expected {weight_path} to exist. "
-            f"Contents: {list(Path(mount_dir).iterdir())}"
-        )
-    print(f"[bundle] Ready. weights={weight_path}", flush=True)
-    BASELINE_VOL.commit()
-    return bundle_root
+    raise RuntimeError(
+        f"LUNA16 baseline bundle missing at {weight_path}. "
+        "Seed volume luna16-baseline-weights with lung_nodule_ct_detection/ "
+        "(copy from crispro). Auto-download of v0.6.9 is unavailable (GitHub 404)."
+    )
 
 
 # ---------------------------------------------------------------------------

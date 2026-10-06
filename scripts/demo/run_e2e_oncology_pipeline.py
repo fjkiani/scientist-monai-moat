@@ -85,6 +85,28 @@ def verify_artifacts() -> dict[str, Any]:
     return out
 
 
+def _luna16_detect_url(case: dict[str, Any]) -> str:
+    """Resolve live Modal detect URL (env > case pin > identity JSON)."""
+    import os
+
+    env = (os.environ.get("LUNA16_MODAL_DETECT_URL") or "").strip()
+    if env:
+        return env.rstrip("/")
+    pinned = (case.get("luna16_detect_url") or "").strip()
+    if pinned:
+        return pinned.rstrip("/")
+    identity_path = ROOT / "models" / "luna16_infer_identity.json"
+    if identity_path.is_file():
+        identity = json.loads(identity_path.read_text())
+        url = (identity.get("detect_url") or "").strip()
+        if url:
+            return url.rstrip("/")
+    raise RuntimeError(
+        "LUNA16 detect URL unresolved — set LUNA16_MODAL_DETECT_URL or "
+        "models/luna16_infer_identity.json"
+    )
+
+
 def run_luna16(case: dict[str, Any], case_dir: Path) -> dict[str, Any]:
     art = ARTIFACTS["luna16"]
     # Prove baseline weights are present and byte-identical before any detect call.
@@ -97,12 +119,60 @@ def run_luna16(case: dict[str, Any], case_dir: Path) -> dict[str, Any]:
         "model_state": "loaded_luna16_baseline_b5e79231",
         "status": "artifact_verified",
     }
+
+    # Preferred path: live Modal luna16-detect via durable case_id (real DICOM series).
+    case_id = (case.get("luna16_case_id") or "").strip()
+    if case_id:
+        detect_url = _luna16_detect_url(case)
+        body = json.dumps({"case_id": case_id, "top_n": 20}).encode()
+        req = urllib.request.Request(
+            detect_url,
+            data=body,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        t0 = time.time()
+        with urllib.request.urlopen(req, timeout=600) as resp:
+            data = json.loads(resp.read().decode())
+        latency_s = round(time.time() - t0, 3)
+        if data.get("error"):
+            raise RuntimeError(f"luna16-detect error: {data['error']}")
+        if data.get("model_state") != "loaded_luna16_retinanet":
+            raise RuntimeError(
+                f"luna16-detect model_state mismatch: {data.get('model_state')}"
+            )
+        if data.get("case_id") != case_id:
+            raise RuntimeError("luna16-detect case_id mismatch")
+        detections = data.get("detections") or []
+        if not isinstance(detections, list):
+            raise RuntimeError("luna16-detect detections must be a list")
+        verify.update(
+            {
+                "status": "ok",
+                "backend": "modal_luna16_detect",
+                "detect_url": detect_url,
+                "case_id": case_id,
+                "series_uid": case.get("luna16_series_uid"),
+                "bundle_version": data.get("bundle_version"),
+                "n_detections": data.get("n_detections", len(detections)),
+                "top_score": data.get("top_score"),
+                "inference_seconds": data.get("inference_seconds"),
+                "total_seconds": data.get("total_seconds", latency_s),
+                "input_shape": data.get("input_shape"),
+                "device": data.get("device"),
+                "ingest_source": data.get("ingest_source"),
+                "detections": detections,
+                "model_state": data.get("model_state"),
+            }
+        )
+        return verify
+
     ct_rel = case.get("ct_path")
     if not ct_rel:
         verify.update(
             {
                 "status": "skipped_no_ct",
-                "error": "fixtures/patient_sample_01 has no CT volume; LUNA baseline identity verified only",
+                "error": "no luna16_case_id and no ct_path; LUNA baseline identity verified only",
                 "detections": [],
             }
         )
@@ -110,13 +180,13 @@ def run_luna16(case: dict[str, Any], case_dir: Path) -> dict[str, Any]:
     ct_path = case_dir / ct_rel
     if not ct_path.is_file():
         raise FileNotFoundError(f"ct_path missing: {ct_path}")
-    # Real detector path — fail closed if MONAI/CUDA unavailable (no mock boxes).
+    # Local detector path — fail closed if MONAI/CUDA unavailable (no mock boxes).
     try:
         from oncology_arbiter.nsclc.luna16_retinanet import detect_nodules  # type: ignore
     except Exception as exc:  # pragma: no cover
         raise RuntimeError(f"luna16 detector import failed: {type(exc).__name__}: {exc}") from exc
     result = detect_nodules(str(ct_path))
-    verify.update({"status": "ok", "detections": result})
+    verify.update({"status": "ok", "backend": "local_detect_nodules", "detections": result})
     return verify
 
 

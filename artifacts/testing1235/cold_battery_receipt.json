@@ -1,0 +1,79 @@
+{
+  "status": "PASS",
+  "ts": "2026-10-06T04:33:22.131991+00:00",
+  "workspace": "testing1235",
+  "git_head_pre_commit": null,
+  "strikes": {
+    "1_e2e_with_ct": {
+      "status": "ok",
+      "n_detections": 4,
+      "top_score": 0.7112138867378235,
+      "elapsed": 95.083
+    },
+    "2_medgemma_extract": {
+      "er_status": "POSITIVE",
+      "er_percent": null,
+      "pr_status": "POSITIVE",
+      "her2_status": "POSITIVE",
+      "nottingham_grade": 3,
+      "tumor_size_mm": 45.0,
+      "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+    },
+    "3_chat_sla": {
+      "status": "ok",
+      "latency_s": 0.814,
+      "sla_seconds": 120,
+      "sla_met": true,
+      "chat_url": "https://testing1235--medgemma-1-5-4b-chat.modal.run",
+      "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8",
+      "text": "<unused94>thought\nThe user wants me to reply with the word \"ok\". I"
+    },
+    "4_medsiglip_info": {
+      "device": "cuda",
+      "embedding_dim": 1152
+    },
+    "5_luna_detect": {
+      "n_detections": 4,
+      "top_score": 0.7112138867378235
+    },
+    "6_ghost": {
+      "disclaimer": "RUO ghost trial v5 n=500",
+      "n_requested": 500,
+      "n_cases": 500,
+      "n_ok": 500,
+      "ok_rate": 1.0,
+      "elapsed_s": 6059.639,
+      "retry_workspace": "testing-123",
+      "status_hist": {
+        "ok": 500,
+        "failed": 0
+      },
+      "modalities_exercised": [
+        "medgemma_pathology",
+        "stage_therapy",
+        "mammo_rsna",
+        "phikon_wsi"
+      ],
+      "partial": false
+    },
+    "7_docker": {
+      "status": "ok",
+      "image": "crispro-oncology-ruo:72h",
+      "healthz": 200
+    },
+    "8_validator": [
+      "TONIGHT DELIVERY GATE: PASS",
+      "- biopsy-probe: trained_wired_tested",
+      "- cbis-medsiglip: trained_wired_tested",
+      "- clinicalbert: trained_wired_tested",
+      "- luna16: trained_wired_tested",
+      "- mammo-retinanet: trained_wired_tested",
+      "- medgemma: trained_wired_tested",
+      "- phikon: trained_wired_tested",
+      "- stage-biopsy: trained_wired_tested",
+      "- stage-screening: trained_wired_tested",
+      "- stage-therapy: trained_wired_tested"
+    ]
+  },
+  "killed_skipped_no_ct": true
+}

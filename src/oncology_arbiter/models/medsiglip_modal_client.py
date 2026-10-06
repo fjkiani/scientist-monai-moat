@@ -45,17 +45,31 @@ DEFAULT_BATCH_CHUNK: int = 16
 DEFAULT_TIMEOUT_SECONDS: int = int(os.environ.get("MEDSIGLIP_MODAL_TIMEOUT", "300"))
 
 
+# Canon workspace pin (identity-locked). Env MODAL_MEDSIGLIP_URL overrides.
+DEFAULT_MEDSIGLIP_BASE = "https://testing1235--medsiglip"
+_IDENTITY_PATH = Path(__file__).resolve().parents[3] / "models" / "medsiglip_448_identity.json"
+
+
+def _identity_base_url() -> str | None:
+    try:
+        payload = json.loads(_IDENTITY_PATH.read_text())
+    except (OSError, json.JSONDecodeError):
+        return None
+    base = payload.get("base_url")
+    return str(base).rstrip("/") if base else None
+
+
 @dataclass(frozen=True)
 class ModalEndpointConfig:
     """URL layout for the deployed Modal app.
 
     Modal auto-generates URLs of the form
     ``https://<workspace>--<app>-<function>.modal.run``. We take a base
-    prefix (``https://crispro-test--medsiglip``) and derive the five
+    prefix (``https://testing1235--medsiglip``) and derive the five
     endpoints from it, so callers only need one env var.
     """
 
-    base: str  # e.g. "https://crispro-test--medsiglip"
+    base: str  # e.g. "https://testing1235--medsiglip"
 
     @property
     def healthz(self) -> str:
@@ -79,12 +93,11 @@ class ModalEndpointConfig:
 
     @classmethod
     def from_env(cls) -> "ModalEndpointConfig":
-        base = os.environ.get("MODAL_MEDSIGLIP_URL")
-        if not base:
-            raise RuntimeError(
-                "MODAL_MEDSIGLIP_URL is not set; expected the Modal base URL, "
-                "e.g. https://crispro-test--medsiglip"
-            )
+        base = (
+            os.environ.get("MODAL_MEDSIGLIP_URL")
+            or _identity_base_url()
+            or DEFAULT_MEDSIGLIP_BASE
+        )
         return cls(base=base.rstrip("/"))
 
 

@@ -240,6 +240,7 @@ def demo_samples_dir() -> Path | None:
 def compute_models_loaded() -> dict[str, ModelState]:
     """Report configuration state without claiming successful inference readiness."""
     import os
+    from pathlib import Path as _Path
 
     def configured(*names: str) -> ModelState:
         return (
@@ -247,6 +248,14 @@ def compute_models_loaded() -> dict[str, ModelState]:
             if any(os.environ.get(name) for name in names)
             else ModelState.UNAVAILABLE
         )
+
+    def configured_or_identity(*names: str, identity_file: str) -> ModelState:
+        if any(os.environ.get(name) for name in names):
+            return ModelState.CONFIGURED_UNVERIFIED
+        pin = _Path(__file__).resolve().parents[3] / "models" / identity_file
+        if pin.is_file():
+            return ModelState.CONFIGURED_UNVERIFIED
+        return ModelState.UNAVAILABLE
 
     from oncology_arbiter.models.cbis_ddsm_probe import DEFAULT_MODEL_PATH as _CBIS_JOBLIB
 
@@ -267,10 +276,19 @@ def compute_models_loaded() -> dict[str, ModelState]:
 
     return {
         "case_storage": configured("CASE_STORAGE_MODAL_URL"),
-        "medsiglip_448": configured("MODAL_MEDSIGLIP_URL"),
+        "medsiglip_448": configured_or_identity(
+            "MODAL_MEDSIGLIP_URL", identity_file="medsiglip_448_identity.json"
+        ),
         "phikon": configured("PHIKON_MODAL_URL"),
         "clinicalbert": configured("CLINICALBERT_MODAL_URL"),
-        "medgemma": configured("MEDGEMMA_MODAL_URL"),
+        "medgemma": configured_or_identity(
+            "MEDGEMMA_MODAL_URL", identity_file="medgemma_1_5_4b_identity.json"
+        ),
+        "luna16": configured_or_identity(
+            "LUNA16_MODAL_URL",
+            "LUNA16_MODAL_DETECT_URL",
+            identity_file="luna16_infer_identity.json",
+        ),
         "cbis_ddsm_probe": cbis_state,
         "biopsy_probe_v1": biopsy_probe_state,
         "sl_therapy_bridge": configured("SL_THERAPY_BRIDGE_MODAL_URL"),

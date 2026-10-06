@@ -12,6 +12,7 @@ import os
 import re
 import time
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 from urllib import error as urllib_error
 from urllib import parse as urllib_parse
@@ -22,6 +23,23 @@ class SpecialistServiceError(RuntimeError):
     def __init__(self, code: str, message: str):
         super().__init__(message)
         self.code = code
+
+
+# Canon Modal workspace pin (identity-locked). Env vars always win.
+DEFAULT_MEDSIGLIP_BASE = "https://testing1235--medsiglip"
+DEFAULT_LUNA16_BASE = "https://testing1235--luna16"
+DEFAULT_LUNA16_DETECT_URL = "https://testing1235--luna16-detect.modal.run"
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+
+
+def _identity_url(identity_filename: str, key: str) -> str | None:
+    path = _REPO_ROOT / "models" / identity_filename
+    try:
+        payload = json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError):
+        return None
+    value = payload.get(key)
+    return str(value).rstrip("/") if value else None
 
 
 @dataclass(frozen=True)
@@ -276,7 +294,12 @@ class PhikonClient:
 
 class Luna16Client:
     def __init__(self, detect_url: str | None = None, timeout: float = 600.0):
-        self.detect_url = (detect_url or os.getenv("LUNA16_MODAL_DETECT_URL") or "").rstrip("/")
+        self.detect_url = (
+            detect_url
+            or os.getenv("LUNA16_MODAL_DETECT_URL")
+            or _identity_url("luna16_infer_identity.json", "detect_url")
+            or DEFAULT_LUNA16_DETECT_URL
+        ).rstrip("/")
         if not self.detect_url:
             raise SpecialistServiceError("not_configured", "LUNA16_MODAL_DETECT_URL is not set")
         self.timeout = timeout

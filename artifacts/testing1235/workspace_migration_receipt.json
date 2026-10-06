@@ -1,0 +1,79 @@
+{
+  "status": "PASS",
+  "modal_workspace": "testing1235",
+  "ts": "2026-10-06T03:17:23.169631+00:00",
+  "apps": {
+    "medgemma-1-5-4b": {
+      "deploy_url": "https://modal.com/apps/testing1235/main/deployed/medgemma-1-5-4b",
+      "healthz": "ok",
+      "tip_commit": "21a49a47ec34eba1ef70ab52730c9115ebe13652"
+    },
+    "medsiglip-448": {
+      "deploy_url": "https://modal.com/apps/testing1235/main/deployed/medsiglip-448",
+      "healthz": "ok",
+      "info": {
+        "model_repo": "google/medsiglip-448",
+        "model_revision": "9cea28a1a1195f665105faa6e8544c112fd960a4",
+        "input_resolution": 448,
+        "embedding_dim": 1152,
+        "device": "cuda",
+        "load_seconds": 50.759,
+        "warmed_at": 1791256524.505851,
+        "app_version": "medsiglip-modal-v0.4.0-alpha"
+      },
+      "migrated_from": "testing-123",
+      "identity_sha256": "adac3b4a61b6c00ce8fc00419f376af6b6935153c80d690e955d68abeaf79e38"
+    },
+    "luna16-infer": {
+      "deploy_url": "https://modal.com/apps/testing1235/main/deployed/luna16-infer",
+      "healthz": "ok",
+      "info": {
+        "app": "luna16-infer",
+        "version": "luna16-infer-v0.5.0-alpha",
+        "bundle_version": "0.6.9",
+        "model_state": "loaded_luna16_retinanet",
+        "model_name": "monai/lung_nodule_ct_detection@0.6.9",
+        "device": "cpu",
+        "preprocessing": {
+          "hu_range": [
+            -1024.0,
+            300.0
+          ],
+          "target_spacing_mm": [
+            1.25,
+            0.703125,
+            0.703125
+          ],
+          "roi_size": [
+            192,
+            192,
+            80
+          ],
+          "sw_overlap": 0.25,
+          "score_thresh": 0.02,
+          "nms_thresh": 0.22
+        },
+        "disclaimer": "detector=monai/lung_nodule_ct_detection@0.6.9; trained on LUNA16 fold 0 (LIDC-IDRI subset, single-site chest CT). Not validated on screening CT, contrast CT, or pediatric CT. Nodule size range 3-30 mm. Detections are RESEARCH USE ONLY and require radiologist review.",
+        "metadata": {
+          "name": "Lung nodule CT detection",
+          "task": "CT lung nodule detection",
+          "version": "0.6.9",
+          "description": "A pre-trained model for volumetric (3D) detection of the lung lesion from CT image on LUNA16 dataset"
+        }
+      },
+      "migrated_from": "fjkiani",
+      "bundle_seed": "copied from crispro volume luna16-baseline-weights/lung_nodule_ct_detection",
+      "identity_sha256": "f71af8bf1537654d6298f11dc9e2d724e59e8d36d2dc89eafa83e398f94be7a9"
+    }
+  },
+  "identity_pins": [
+    "models/medgemma_1_5_4b_identity.json",
+    "models/medsiglip_448_identity.json",
+    "models/luna16_infer_identity.json"
+  ],
+  "client_defaults": {
+    "MODAL_MEDSIGLIP_URL": "https://testing1235--medsiglip",
+    "LUNA16_MODAL_URL": "https://testing1235--luna16",
+    "LUNA16_MODAL_DETECT_URL": "https://testing1235--luna16-detect.modal.run"
+  }
+}

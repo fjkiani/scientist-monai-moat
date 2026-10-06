@@ -1,0 +1,16 @@
+{
+  "model_id": "monai/lung_nodule_ct_detection@0.6.9",
+  "bundle_version": "0.6.9",
+  "model_state": "loaded_luna16_retinanet",
+  "app_version": "luna16-infer-v0.5.0-alpha",
+  "device": "cpu",
+  "base_url": "https://testing1235--luna16",
+  "healthz_url": "https://testing1235--luna16-healthz.modal.run",
+  "info_url": "https://testing1235--luna16-info.modal.run",
+  "detect_url": "https://testing1235--luna16-detect.modal.run",
+  "modal_workspace": "testing1235",
+  "deploy_url": "https://modal.com/apps/testing1235/main/deployed/luna16-infer",
+  "disclaimer": "detector=monai/lung_nodule_ct_detection@0.6.9; trained on LUNA16 fold 0 (LIDC-IDRI subset, single-site chest CT). Not validated on screening CT, contrast CT, or pediatric CT. Nodule size range 3-30 mm. Detections are RESEARCH USE ONLY and require radiologist review.",
+  "honesty_warning": "LUNA16 RetinaNet 0.6.9 is RESEARCH USE ONLY; not validated on screening CT.",
+  "retarget_ts": "2026-10-06T03:17:23.169631+00:00"
+}
