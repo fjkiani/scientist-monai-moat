@@ -1,0 +1,35 @@
+{
+  "clinical_meter": "FROC@2 held-out n=88 (official CAD)",
+  "production_infer": {
+    "app_version": "luna16-infer-v0.5.2-alpha-resample",
+    "weight_sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01",
+    "froc_at_2": 0.8267399271674979,
+    "resample_wired": true
+  },
+  "refine_candidate": {
+    "request_id": "clinical-fullfit-20261011T041944Z",
+    "ckpt_sha256": "f3cebb1702a8041b1cad2d7406eb5a3b2287160ff52d54843f3e68b9dd3e2c08",
+    "epochs": 5,
+    "n_training": 482,
+    "n_validation": 60,
+    "elapsed_seconds": 2020.111,
+    "promotion": "PENDING_OFFICIAL_CAD_FROC",
+    "bundle_evaluate_note": "COCO metrics only \u2014 PROXY \u2260 FROC@2 (anti-sandbag)"
+  },
+  "medgemma": {
+    "gate": "medgemma_chat_sla",
+    "status": "ok",
+    "model_id": "google/medgemma-1.5-4b-it",
+    "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8",
+    "latency_s": 35.237,
+    "sla_seconds": 120,
+    "sla_met": true,
+    "chat_url": "https://crispro-test--medgemma-1-5-4b-chat.modal.run",
+    "app_version": "medgemma-1-5-4b-modal-v1.1.0-causal-clone",
+    "ts": "2026-10-11T04:19:58Z",
+    "honesty": "RUO \u2014 generative suggestions not clinical decisions"
+  },
+  "e2e_p_event": 0.773762,
+  "tip": "8d65b81+",
+  "leakage_scan": "NONE"
+}
