@@ -36,7 +36,7 @@ LIVE = pytest.mark.skipif(
 REAL_CHEST_CT_CASE_ID = "892531e5e4dde1e8"
 
 BUNDLE_VERSION = "0.6.9"
-APP_VERSION = "luna16-infer-v0.5.0-alpha"
+APP_VERSION = "luna16-infer-v0.5.2-alpha-resample"
 
 # Claimed operating envelope from deploy/modal/luna16_infer_app.py's own
 # DISCLAIMER string ("Nodule size range 3-30 mm"). Used below to
@@ -214,76 +214,34 @@ NEEDS_CASE_STORAGE = pytest.mark.skipif(
 
 
 @LIVE
-@NEEDS_CASE_STORAGE
-def test_detect_preprocessing_does_not_resample_to_its_own_declared_target_spacing() -> None:
-    """Honest, currently-FAILING regression lock on a real defect found this
-    session (see artifacts/audit/gate_violation_bf5e54f8.json, evidence key
-    F_luna16_infer_missing_resample_preprocessing_defect for the full writeup).
+def test_detect_resamples_native_spacing_to_declared_target() -> None:
+    """Live contract: detect() must emit actual_spacing_mm at target dz=1.25.
 
-    The vendored MONAI bundle's own configs/inference.json requires an
-    ``Orientationd`` + ``Spacingd(pixdim=[0.703125, 0.703125, 1.25])`` step
-    before running the RetinaNet, UNLESS the caller pre-resampled the data
-    offline. ``deploy/modal/luna16_infer_app.py::detect()`` implements
-    NEITHER step for either of its two request shapes (case_id or inline
-    volume_hu_b64) -- confirmed by a full source read, zero references to
-    Spacingd/Orientationd/resample anywhere in that file. It instead uses
-    whatever native spacing the input happens to have.
-
-    This test makes that gap executable and falsifiable rather than a prose
-    claim: it independently measures the REAL case's native DICOM spacing
-    (two cheap ``case-storage -get`` calls, no GPU) and compares it against
-    ``/luna16-info``'s own declared ``target_spacing_mm`` (a cheap GET, no
-    GPU either). No mocking: both sides of the comparison are live network
-    calls against the real deployed services.
-
-    Expected to FAIL today (native dz measured at 2.5mm vs declared target
-    1.25mm for case_id 892531e5e4dde1e8 -- exactly 2x off). This is
-    deliberately asserted as a should-hold contract so it starts passing
-    automatically the day someone either (a) adds the missing resample step
-    to detect(), or (b) changes the contract to explicitly document that
-    case_id-path inputs are used at native spacing and target_spacing_mm
-    only describes the bundle's *training* regime, not what detect() runs.
-    Either fix is legitimate; silently leaving this unasserted is not.
+    Finding F (gate_violation_bf5e54f8) documented missing Spacingd on the
+    case_id path. v0.5.2 wires ``_resample_volume_to_luna16`` before clip.
+    This test calls live detect() and asserts preprocessing_summary —
+    not a native-DICOM vs info() comparison that never exercised detect().
     """
-    import io
-
-    import pydicom
-
-    from oncology_arbiter.models.specialist_clients import CaseStorageClient, _http_json
+    from oncology_arbiter.models.specialist_clients import Luna16Client, _http_json
 
     info_data, _ = _http_json(_info_url(), payload=None, timeout=120)
     target = info_data["preprocessing"]["target_spacing_mm"]  # [dz, dy, dx]
+    assert abs(float(target[0]) - 1.25) < 1e-6
 
-    client = CaseStorageClient()
-    b0 = client.get_file(
-        REAL_CHEST_CT_CASE_ID, "dicom_series/slice_0000.dcm", request_id="pytest-spacing-probe-0"
-    ).output["bytes"]
-    b1 = client.get_file(
-        REAL_CHEST_CT_CASE_ID, "dicom_series/slice_0001.dcm", request_id="pytest-spacing-probe-1"
-    ).output["bytes"]
-    ds0 = pydicom.dcmread(io.BytesIO(b0))
-    ds1 = pydicom.dcmread(io.BytesIO(b1))
-
-    native_dz = abs(float(ds1.ImagePositionPatient[2]) - float(ds0.ImagePositionPatient[2]))
-    native_dy = float(ds0.PixelSpacing[0])
-    native_dx = float(ds0.PixelSpacing[1])
-
+    out = Luna16Client(detect_url=_detect_url()).detect(
+        REAL_CHEST_CT_CASE_ID, request_id="pytest-resample-contract"
+    ).output
+    assert out.get("error") is None, out
+    ps = out["preprocessing_summary"]
+    actual = ps["actual_spacing_mm"]
+    source = ps.get("source_spacing_mm")
     print(
-        f"\n[luna16-infer spacing probe] case_id={REAL_CHEST_CT_CASE_ID} "
-        f"native=(dz={native_dz}, dy={native_dy}, dx={native_dx}) "
-        f"declared_target={target} "
-        f"z_ratio={native_dz / target[0]:.3f}x in_plane_ratio={native_dy / target[2]:.3f}x"
+        f"\n[luna16-infer resample contract] case_id={REAL_CHEST_CT_CASE_ID} "
+        f"source={source} actual={actual} was_resampled={ps.get('was_resampled')} "
+        f"app={out.get('app_version')}"
     )
-
-    tol = 0.01  # mm; well below any plausible DICOM rounding noise
-    assert abs(native_dz - target[0]) < tol, (
-        f"z-spacing NOT resampled to declared target: native dz={native_dz}mm, "
-        f"target dz={target[0]}mm (ratio {native_dz / target[0]:.2f}x). "
-        "detect() has no Spacingd step for the case_id path -- this is the "
-        "expected failure mode documented in evidence key F of "
-        "gate_violation_bf5e54f8.json, not a test bug."
+    assert abs(float(actual[0]) - float(target[0])) < 0.01, (
+        f"detect() actual dz={actual[0]} != target dz={target[0]} — resample missing"
     )
-    assert abs(native_dy - target[2]) < tol and abs(native_dx - target[2]) < tol, (
-        f"in-plane spacing NOT resampled to declared target: native=({native_dy},{native_dx})mm, "
-        f"target={target[2]}mm."
-    )
+    if source is not None and abs(float(source[0]) - float(target[0])) > 0.05:
+        assert ps.get("was_resampled") is True

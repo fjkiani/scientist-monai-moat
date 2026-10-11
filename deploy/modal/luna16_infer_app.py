@@ -238,16 +238,30 @@ def info() -> Dict[str, Any]:
         except Exception:
             metadata = {}
 
+    import hashlib
+
+    weight_path = bundle_dir / "models" / "model.pt"
+    h = hashlib.sha256()
+    with weight_path.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    weight_sha256 = h.hexdigest()
+
     return {
         "app": "luna16-infer",
         "version": APP_VERSION,
         "bundle_version": BUNDLE_VERSION,
         "model_state": "loaded_luna16_retinanet",
         "model_name": f"monai/lung_nodule_ct_detection@{BUNDLE_VERSION}",
+        "weight_sha256": weight_sha256,
+        "clinical_meter": "FROC@2 held-out n=88",
+        "clinical_meter_value": 0.8267399271674979,
         "device": "cuda" if torch.cuda.is_available() else "cpu",
         "preprocessing": {
             "hu_range": [-1024.0, 300.0],
-            "target_spacing_mm": [1.25, 0.703125, 0.703125],
+            "target_spacing_mm": list(LUNA16_TARGET_SPACING_MM),
+            "runtime_resample": True,
+            "resample_helper": "_resample_volume_to_luna16",
             "roi_size": [192, 192, 80],
             "sw_overlap": 0.25,
             "score_thresh": 0.02,
