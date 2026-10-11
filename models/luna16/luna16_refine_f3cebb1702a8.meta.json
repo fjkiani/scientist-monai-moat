@@ -8,7 +8,10 @@
   "n_validation": 60,
   "elapsed_seconds": 2020.111,
   "status": "trained",
-  "promotion": "PENDING_OFFICIAL_CAD_FROC",
+  "promotion": "REJECTED_COLLAPSE",
   "floor": "\u0394FROC@2 +0.05 vs baseline 0.8267",
-  "bundle_heldout_request_id": "clinical-heldout-20261011T045411Z"
+  "bundle_heldout_request_id": "clinical-heldout-20261011T045411Z",
+  "cad_froc_request_id": "clinical-froc-cad-20261011T050956Z",
+  "cad_froc_at_2": null,
+  "cad_n_candidates": 8800
 }

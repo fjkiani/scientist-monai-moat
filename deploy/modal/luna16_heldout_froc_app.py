@@ -418,11 +418,18 @@ def run_paired_froc(
             "meets_floor_ref": (r2 - b2) >= 0.05,
         }
 
+    def _finite(x):
+        try:
+            import math
+            return x is not None and isinstance(x, (int, float)) and math.isfinite(float(x))
+        except (TypeError, ValueError):
+            return False
+
     proven = (
         baseline.get("returncode") == 0
         and refined.get("returncode") == 0
-        and b2 is not None
-        and r2 is not None
+        and _finite(b2)
+        and _finite(r2)
     )
     receipt: Dict[str, Any] = {
         "app_version": APP_VERSION,
