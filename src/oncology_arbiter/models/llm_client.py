@@ -231,8 +231,8 @@ class GemmaClient:
         max_tokens: int,
         temperature: float,
     ) -> LlmResponse:
-        expected_model = "google/medgemma-27b-it"
-        expected_app = "medgemma-27b-modal-v0.5.0-production-ready"
+        expected_model = "google/medgemma-27b-text-it"
+        expected_app = "medgemma-27b-modal-v0.5.10-text-it-8bit"
         url = self.medgemma_url
         if not url.endswith(".modal.run"):
             url = f"{url}-chat.modal.run"

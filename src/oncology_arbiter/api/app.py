@@ -2263,8 +2263,8 @@ def create_app() -> FastAPI:
             if (
                 result.model_state != "executed"
                 or output.get("llm_provider") != "medgemma_modal"
-                or output.get("llm_model") != "google/medgemma-27b-it"
-                or output.get("llm_app_version") != "medgemma-27b-modal-v0.5.0-production-ready"
+                or output.get("llm_model") != "google/medgemma-27b-text-it"
+                or output.get("llm_app_version") != "medgemma-27b-modal-v0.5.10-text-it-8bit"
                 or not output.get("llm_request_ids")
             ):
                 raise RuntimeError(
@@ -2279,7 +2279,7 @@ def create_app() -> FastAPI:
                 "endpoint_label": os.environ.get("MEDGEMMA_MODAL_URL"),
                 "app_version": output["llm_app_version"],
                 "model_name": output["llm_model"],
-                "model_version": "27b-it",
+                "model_version": "27b-text-it",
                 "latency_ms": round(float(output.get("llm_latency_s") or 0.0) * 1000.0, 3),
                 "warnings": list(output.get("llm_honesty_warnings") or []),
                 "error": None,
