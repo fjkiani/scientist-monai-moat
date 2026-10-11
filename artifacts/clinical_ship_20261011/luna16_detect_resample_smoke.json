@@ -1,0 +1,63 @@
+{
+  "model_state": "loaded_luna16_retinanet",
+  "model_name": "monai/lung_nodule_ct_detection@0.6.9",
+  "bundle_version": "0.6.9",
+  "app_version": "luna16-infer-v0.5.2-alpha-resample",
+  "case_id": null,
+  "ingest_source": "inline_volume_hu_b64",
+  "n_detections": 1,
+  "top_score": 0.12088702619075775,
+  "detections": [
+    {
+      "center_z_mm": 109.93790626525879,
+      "center_y_mm": 52.424858808517456,
+      "center_x_mm": 0.6922193267382681,
+      "width_mm": 0.8770196093246341,
+      "height_mm": 4.067741632461548,
+      "depth_mm": 7.299232482910156,
+      "diameter_mm": 7.299232482910156,
+      "score": 0.12088702619075775
+    }
+  ],
+  "inference_seconds": 0.6037,
+  "total_seconds": 0.6679,
+  "input_shape": [
+    96,
+    192,
+    192
+  ],
+  "preprocessing_summary": {
+    "hu_range": [
+      -1024.0,
+      300.0
+    ],
+    "target_spacing_mm": [
+      1.25,
+      0.703125,
+      0.703125
+    ],
+    "source_spacing_mm": [
+      2.5,
+      0.703125,
+      0.703125
+    ],
+    "actual_spacing_mm": [
+      1.25,
+      0.703125,
+      0.703125
+    ],
+    "was_resampled": true,
+    "resample_method": "sitk_linear",
+    "z_only_resample": true,
+    "roi_size": [
+      192,
+      192,
+      80
+    ],
+    "sw_overlap": 0.25,
+    "score_thresh": 0.02,
+    "nms_thresh": 0.22
+  },
+  "device": "cuda:0",
+  "disclaimer": "detector=monai/lung_nodule_ct_detection@0.6.9; trained on LUNA16 fold 0 (LIDC-IDRI subset, single-site chest CT). Not validated on screening CT, contrast CT, or pediatric CT. Nodule size range 3-30 mm. Detections are RESEARCH USE ONLY and require radiologist review."
+}

@@ -26,9 +26,9 @@ class SpecialistServiceError(RuntimeError):
 
 
 # Canon Modal workspace pin (identity-locked). Env vars always win.
-DEFAULT_MEDSIGLIP_BASE = "https://testing1235--medsiglip"
-DEFAULT_LUNA16_BASE = "https://testing1235--luna16"
-DEFAULT_LUNA16_DETECT_URL = "https://testing1235--luna16-detect.modal.run"
+DEFAULT_MEDSIGLIP_BASE = "https://crispro-test--medsiglip"
+DEFAULT_LUNA16_BASE = "https://crispro-test--luna16"
+DEFAULT_LUNA16_DETECT_URL = "https://crispro-test--luna16-detect.modal.run"
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 
 

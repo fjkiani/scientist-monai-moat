@@ -42,8 +42,12 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import modal
 
-APP_VERSION = "luna16-infer-v0.5.0-alpha"
+APP_VERSION = "luna16-infer-v0.5.2-alpha-resample"
 BUNDLE_VERSION = "0.6.9"
+# MONAI lung_nodule_ct_detection@0.6.9 training geometry (dz, dy, dx) mm.
+LUNA16_TARGET_SPACING_MM = (1.25, 0.703125, 0.703125)
+DZ_PASSTHROUGH_TOL_MM = 0.05
+AIR_HU = -1024.0
 
 DISCLAIMER = (
     "detector=monai/lung_nodule_ct_detection@0.6.9; trained on LUNA16 fold 0 "
@@ -175,12 +179,15 @@ def _load_detector():
         nms_thresh=0.22,
         detections_per_img=300,
     )
+    # Full-volume CUDA tensor OOM'd A10G; ROI tiles run on GPU via sw_device.
+    # MONAI: sw_device = predictor device; device = stitch buffer (typically CPU).
     det.set_sliding_window_inferer(
         roi_size=[192, 192, 80],
         overlap=0.25,
         sw_batch_size=1,
         mode="constant",
-        device="cpu",
+        sw_device=device,
+        device=torch.device("cpu"),
     )
     det.to(device).eval()
     _DETECTOR = det
@@ -337,6 +344,67 @@ def _load_case_id_series(case_id: str) -> Tuple[Any, List[float], Tuple[float, f
     return stacked, zs, (row_mm, col_mm)
 
 
+def _resample_volume_to_luna16(
+    volume_hu: Any,
+    spacing_mm: Tuple[float, float, float],
+    *,
+    z_only: bool = True,
+) -> Tuple[Any, Tuple[float, float, float], Tuple[float, float, float], bool, str]:
+    """Runtime Spacingd-equivalent: resample HU volume to LUNA16 geometry.
+
+    Mirrors ``oncology_arbiter.lung.resample.resample_for_luna16`` so the
+    Modal image does not need the full package. Returns
+    ``(volume, out_spacing, source_spacing, was_resampled, method)``.
+    """
+    import numpy as np
+    import SimpleITK as sitk
+
+    v = np.asarray(volume_hu, dtype=np.float32)
+    if v.ndim != 3:
+        raise ValueError(f"expected 3D HU volume, got shape {v.shape}")
+
+    src_dz, src_dy, src_dx = (float(s) for s in spacing_mm)
+    if src_dz <= 0 or src_dy <= 0 or src_dx <= 0:
+        raise ValueError(f"spacing entries must be positive; got {spacing_mm}")
+
+    tgt_dz, tgt_dy, tgt_dx = LUNA16_TARGET_SPACING_MM
+    if z_only:
+        tgt_dy, tgt_dx = src_dy, src_dx
+
+    dz_ok = abs(src_dz - tgt_dz) <= DZ_PASSTHROUGH_TOL_MM
+    inplane_ok = (
+        abs(src_dy - tgt_dy) <= DZ_PASSTHROUGH_TOL_MM
+        and abs(src_dx - tgt_dx) <= DZ_PASSTHROUGH_TOL_MM
+    )
+    if dz_ok and inplane_ok:
+        return v, (src_dz, src_dy, src_dx), (src_dz, src_dy, src_dx), False, "passthrough"
+
+    img = sitk.GetImageFromArray(v)
+    img.SetSpacing((src_dx, src_dy, src_dz))
+    img.SetOrigin((0.0, 0.0, 0.0))
+    old_size = img.GetSize()
+    new_spacing = (tgt_dx, tgt_dy, tgt_dz)
+    new_size = [
+        int(round(old_size[i] * (src_dx, src_dy, src_dz)[i] / new_spacing[i]))
+        for i in range(3)
+    ]
+    if new_size[2] < 1:
+        raise ValueError(
+            f"z-resample would produce {new_size[2]} slices; "
+            f"source={src_dz}mm target={tgt_dz}mm"
+        )
+
+    resampler = sitk.ResampleImageFilter()
+    resampler.SetOutputSpacing(new_spacing)
+    resampler.SetSize(new_size)
+    resampler.SetOutputOrigin(img.GetOrigin())
+    resampler.SetOutputDirection(img.GetDirection())
+    resampler.SetInterpolator(sitk.sitkLinear)
+    resampler.SetDefaultPixelValue(AIR_HU)
+    out_np = sitk.GetArrayFromImage(resampler.Execute(img)).astype(np.float32)
+    return out_np, (tgt_dz, tgt_dy, tgt_dx), (src_dz, src_dy, src_dx), True, "sitk_linear"
+
+
 @app.function(
     image=IMAGE,
     gpu="A10G",
@@ -426,17 +494,38 @@ def detect(payload: Dict[str, Any]) -> Dict[str, Any]:
 
         volume = np.frombuffer(raw, dtype=np.float32).reshape(shape)
         ingest_source = "inline_volume_hu_b64"
+
+    # Spacingd-equivalent: match MONAI bundle training geometry before detect.
+    # Prefer full 3-axis when request asks; default z_only keeps memory sane.
+    z_only = bool(payload.get("z_only_resample", True))
+    source_spacing = (
+        float(spacing[0]), float(spacing[1]), float(spacing[2])
+    )
+    try:
+        volume, spacing_t, source_spacing, was_resampled, resample_method = (
+            _resample_volume_to_luna16(volume, source_spacing, z_only=z_only)
+        )
+    except ValueError as exc:
+        return {"error": f"resample failed: {exc}"}
+    spacing = list(spacing_t)
+    shape = [int(volume.shape[0]), int(volume.shape[1]), int(volume.shape[2])]
+
     v = np.clip(volume, -1024.0, 300.0)
     v = (v + 1024.0) / (1024.0 + 300.0)
     v = v[None, ...]  # add channel
 
     det = _load_detector()
     device = next(det.network.parameters()).device
-    x = [torch.from_numpy(v).to(device)]
+    # Keep full volume on CPU; MONAI sliding-window copies ROI tiles to GPU.
+    x = [torch.from_numpy(np.ascontiguousarray(v))]
+    if device.type == "cuda":
+        torch.cuda.empty_cache()
     t_pre = time.time()
     with torch.no_grad():
-        out = det(x)
+        out = det(x, use_inferer=True)
     t_infer = time.time()
+    if device.type == "cuda":
+        torch.cuda.empty_cache()
 
     raw_out = out[0] if out else {
         "box": torch.zeros(0, 6),
@@ -486,8 +575,12 @@ def detect(payload: Dict[str, Any]) -> Dict[str, Any]:
         "input_shape": list(shape),
         "preprocessing_summary": {
             "hu_range": [-1024.0, 300.0],
-            "target_spacing_mm": [1.25, 0.703125, 0.703125],
+            "target_spacing_mm": list(LUNA16_TARGET_SPACING_MM),
+            "source_spacing_mm": list(source_spacing),
             "actual_spacing_mm": [dz, dy, dx],
+            "was_resampled": was_resampled,
+            "resample_method": resample_method,
+            "z_only_resample": z_only,
             "roi_size": [192, 192, 80],
             "sw_overlap": 0.25,
             "score_thresh": 0.02,
