@@ -1,0 +1,15 @@
+{
+  "phase": "DONE",
+  "images_embedded": 54706,
+  "n_rows": 54706,
+  "dim": 1152,
+  "elapsed": 9363.4,
+  "cohort_csv": "/emb/cohort_full/cohort.csv",
+  "embeddings_npy": "/emb/cohort_full/embeddings_54706.npy",
+  "cancer_pos": 1158,
+  "n_train": 43744,
+  "n_test": 10962,
+  "model_repo": "google/medsiglip-448",
+  "model_sha": "9cea28a1a1195f665105faa6e8544c112fd960a4",
+  "DONE": true
+}
