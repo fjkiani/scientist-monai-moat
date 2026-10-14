@@ -14,8 +14,10 @@ This is **not** the Google MedSigLIP base model card. For the foundation model c
 ## Model artifact (frozen weights)
 
 - **Weights**: Modal volume `rsna-mammo-embeddings` path `cohort_full/fusion_weights.json`
+- **Local receipt (pulled from Modal)**: `artifacts/rsna_medsiglip_54k/fusion_weights.json`
 - **Modal scorer**: `deploy/modal/rsna_fusion_logreg_app.py`
 - **API route**: `POST /v1/screening/fusion` (RUO) → calls the Modal scorer
+- **Runtime env**: `RSNA_FUSION_SCORE_URL` must point to the deployed Modal `rsna-fusion-score` function URL (e.g. `https://<workspace>--rsna-fusion-score.<region>.modal.run`)
 
 We keep the fused head as a **remote Modal service** (`rsna-fusion-logreg`) so the API server
 does not ship or embed coefficients locally. This preserves a “real ML capability” boundary:
@@ -29,7 +31,10 @@ the score comes from a dedicated model service.
 
 ## Performance (retrospective; image-level; RUO)
 
-All numbers below are taken from the frozen artifact `models/rsna_medsiglip_fusion_logreg_v1.json` (`metrics` field).
+All numbers below are taken from the frozen receipts:
+
+- Modal volume `rsna-mammo-embeddings/cohort_full/fusion_clinical_proof.json`
+- Local copy: `artifacts/rsna_medsiglip_54k/fusion_clinical_proof.json`
 
 - **Metadata-only AUROC**: 0.6191
 - **MedSigLIP embedding-only AUROC**: 0.6650
