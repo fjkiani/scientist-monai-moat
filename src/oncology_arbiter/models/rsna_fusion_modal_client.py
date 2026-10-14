@@ -19,29 +19,27 @@ DEFAULT_TIMEOUT_SECONDS: int = int(os.environ.get("RSNA_FUSION_MODAL_TIMEOUT", "
 
 @dataclass(frozen=True)
 class RsnaFusionEndpointConfig:
-    base: str  # e.g. "https://crispro-test--rsna-fusion"
+    """Explicit endpoint URLs for the deployed Modal functions.
 
-    @property
-    def healthz(self) -> str:
-        return f"{self.base}-healthz.modal.run"
+    Modal deployments may be regional (e.g. `*.us-east.modal.run`), so we avoid
+    hardcoding URL concatenation rules in the client. Prefer explicit URLs.
+    """
 
-    @property
-    def info(self) -> str:
-        return f"{self.base}-info.modal.run"
-
-    @property
-    def score(self) -> str:
-        return f"{self.base}-score.modal.run"
+    score: str
+    info: str | None = None
+    healthz: str | None = None
 
     @classmethod
     def from_env(cls) -> "RsnaFusionEndpointConfig":
-        base = (os.environ.get("RSNA_FUSION_MODAL_URL") or "").rstrip("/")
-        if not base:
+        score = (os.environ.get("RSNA_FUSION_SCORE_URL") or "").strip()
+        info = (os.environ.get("RSNA_FUSION_INFO_URL") or "").strip() or None
+        healthz = (os.environ.get("RSNA_FUSION_HEALTHZ_URL") or "").strip() or None
+        if not score:
             raise RuntimeError(
-                "RSNA_FUSION_MODAL_URL not set. Deploy deploy/modal/rsna_fusion_logreg_app.py "
-                "and export RSNA_FUSION_MODAL_URL=<https://<workspace>--rsna-fusion>."
+                "RSNA_FUSION_SCORE_URL not set. Deploy deploy/modal/rsna_fusion_logreg_app.py "
+                "and export RSNA_FUSION_SCORE_URL=<https://<workspace>--rsna-fusion-score...modal.run>."
             )
-        return cls(base=base)
+        return cls(score=score, info=info, healthz=healthz)
 
 
 def _post_json(url: str, payload: dict, *, timeout: int) -> dict:
