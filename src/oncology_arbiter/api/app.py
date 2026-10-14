@@ -1145,11 +1145,7 @@ def create_app() -> FastAPI:
         model_name: str | None = None
         try:
             from oncology_arbiter.models.medsiglip_modal_client import MedSigLipModalClient
-            from oncology_arbiter.models.rsna_medsiglip_fusion_logreg import (
-                RSNA_FUSION_WARNING,
-                RsnaFusionInputs,
-                RsnaMedsiglipFusionLogReg,
-            )
+            from oncology_arbiter.models.rsna_fusion_modal_client import RsnaFusionModalClient
 
             ms_client = MedSigLipModalClient()
             emb = ms_client.embed_dicom(temp_path)
@@ -1160,22 +1156,25 @@ def create_app() -> FastAPI:
             # Default laterality/view from preprocessing when not supplied explicitly.
             laterality = meta.laterality or preprocessed.metadata.laterality.value
             view = meta.view or preprocessed.metadata.view.value
-            fusion = RsnaMedsiglipFusionLogReg.get()
-            fusion_score = fusion.predict_proba(
+            fusion_client = RsnaFusionModalClient()
+            fusion_score = fusion_client.score(
                 embedding=emb,
-                meta=RsnaFusionInputs(
-                    age=meta.age,
-                    density=meta.density,
-                    laterality=laterality if laterality in {"L", "R"} else None,
-                    view=view if view in {"CC", "MLO"} else None,
-                    implant=meta.implant,
-                    site_id=meta.site_id,
-                    machine_id=meta.machine_id,
-                ),
+                clinical_metadata={
+                    "age": meta.age,
+                    "density": meta.density,
+                    "laterality": laterality if laterality in {"L", "R"} else None,
+                    "view": view if view in {"CC", "MLO"} else None,
+                    "implant": meta.implant,
+                    "site_id": meta.site_id,
+                    "machine_id": meta.machine_id,
+                },
             )
             model_state = ModelState.LOADED_MEDSIGLIP
             model_name = "google/medsiglip-448+rsna_medsiglip_fusion_logreg_v1"
-            warnings = [RSNA_FUSION_WARNING]
+            warnings = [
+                "RUO: fusion_score is produced by a remote Modal scoring service (rsna-fusion-logreg) "
+                "using a frozen RSNA retrospective logistic head over MedSigLIP embeddings + limited metadata."
+            ]
 
             receipts.append(
                 {

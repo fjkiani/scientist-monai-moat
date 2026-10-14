@@ -13,11 +13,13 @@ This is **not** the Google MedSigLIP base model card. For the foundation model c
 
 ## Model artifact (frozen weights)
 
-- **Weights**: `models/rsna_medsiglip_fusion_logreg_v1.json`
-- **Scorer**: `src/oncology_arbiter/models/rsna_medsiglip_fusion_logreg.py`
-- **API route**: `POST /v1/screening/fusion` (RUO)
+- **Weights**: Modal volume `rsna-mammo-embeddings` path `cohort_full/fusion_weights.json`
+- **Modal scorer**: `deploy/modal/rsna_fusion_logreg_app.py`
+- **API route**: `POST /v1/screening/fusion` (RUO) → calls the Modal scorer
 
-The JSON artifact contains the exact `StandardScaler` parameters and `LogisticRegression` coefficients used to compute the fused probability without requiring scikit‑learn at runtime.
+We keep the fused head as a **remote Modal service** (`rsna-fusion-logreg`) so the API server
+does not ship or embed coefficients locally. This preserves a “real ML capability” boundary:
+the score comes from a dedicated model service.
 
 ## Data + split
 
