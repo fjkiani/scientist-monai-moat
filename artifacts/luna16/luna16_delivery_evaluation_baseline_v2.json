@@ -1,5 +1,5 @@
 {
-  "artifact_sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01",
+  "artifact_sha256": "94bc1635f55e9f7241643dc5b998a28b7f278379850f3fc38fc61a8350f9047e",
   "capability": "luna16",
   "dataset_sha256": "8de45f5201c740aaf65128e78300289815db4aceb75b13770f623ea3afa4290b",
   "froc_receipt_path": "models/luna16/luna16_baseline_b5e79231466a_froc_result.json",
@@ -9,7 +9,7 @@
     "delta_froc_at_2": 0.0,
     "meets_floor_ref_0.05": false,
     "status_intent": "production_fallback",
-    "note": "Production is MONAI stock baseline .pt (b5e79231\u2026). Fine-tune collapsed; delta floor waived by authorized validator safety-lock. No label invert; no .pt\u2192.safetensors mutation."
+    "note": "Production is MONAI stock baseline (production_fallback). Fine-tune collapsed; delta floor waived by authorized validator safety-lock. Artifact SHA binds a safetensors conversion of the baseline .pt weights."
   },
   "metric": {
     "n": 88,

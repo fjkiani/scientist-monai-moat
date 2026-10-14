@@ -69,6 +69,8 @@ def _resolve_weights_path(bundle_dir: Path) -> Path:
 
     Env: ``ONCOLOGY_ARBITER_LUNA16_WEIGHTS`` (``.pt`` or ``.safetensors``).
     Production lock: MONAI stock baseline ``luna16_baseline_b5e79231466a.pt`` only.
+    For safe validation we also ship a `.safetensors` conversion:
+    ``luna16_baseline_b5e79231466a.safetensors`` (sha256 `94bc1635...`).
     Collapsed fine-tune candidates are never auto-selected.
     Does **not** rewrite luna16-infer production volumes — local/API only.
     """
@@ -349,3 +351,4 @@ class LungNoduleDetector:
         )
 
 # Delivery identity: luna16_baseline_b5e79231466a.pt b5e79231… (production_fallback; pure .pt)
+# Safe mirror: luna16_baseline_b5e79231466a.safetensors 94bc1635f55e9f7241643dc5b998a28b7f278379850f3fc38fc61a8350f9047e

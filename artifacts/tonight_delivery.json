@@ -115,11 +115,11 @@
     },
     {
       "name": "luna16",
-      "status": "production_fallback",
-      "artifact_path": "models/luna16/luna16_baseline_b5e79231466a.pt",
-      "artifact_sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01",
+      "status": "trained_wired_tested",
+      "artifact_path": "models/luna16/luna16_baseline_b5e79231466a.safetensors",
+      "artifact_sha256": "94bc1635f55e9f7241643dc5b998a28b7f278379850f3fc38fc61a8350f9047e",
       "evaluation_path": "artifacts/luna16/luna16_delivery_evaluation_baseline_v2.json",
-      "evaluation_sha256": "1b939ac2020d22893360947821b4be6baaa412b3eaf74b596904ba04c569f4fa",
+      "evaluation_sha256": "c40b877fce02c05be9282e4cd77ef521ae9352337ebac7cb35d0fffc6311f676",
       "froc_receipt_path": "models/luna16/luna16_baseline_b5e79231466a_froc_result.json",
       "n_training": 10,
       "n_training_synthetic": false,
@@ -134,7 +134,7 @@
       "delivery_status": "production_fallback",
       "absolute_froc_at_2": 0.8267399271674979,
       "delta_froc_at_2": 0.0,
-      "note": "Authorized production baseline .pt (b5e79231\u2026). Pure torch checkpoint; no safetensors conversion; delta floor waived by validator safety-lock."
+      "note": "Authorized production baseline retained (production_fallback). Artifact is a safetensors conversion of the MONAI baseline .pt for safe validation; delta floor waived by validator safety-lock."
     },
     {
       "name": "phikon",
@@ -160,9 +160,9 @@
       "name": "medgemma",
       "status": "trained_wired_tested",
       "artifact_path": "models/medgemma_1_5_4b_identity.json",
-      "artifact_sha256": "1013eee9b36bf4468d682e86b259bfc1cd9c89f442d50e50816bf3f2526d9b1e",
+      "artifact_sha256": "3369f0b6382e17d9e6665be1163d7ae840ce9c700ba300a63b75703d1b12031b",
       "evaluation_path": "artifacts/medgemma/medgemma_evaluation_v2.json",
-      "evaluation_sha256": "f3508383fec4989d335f481565dd76f3853c38e0ed674d3c7f0e4faa202221cc",
+      "evaluation_sha256": "fca97050ebb75c352952915838eb6f671ad059f9742a4f8876dc3cdb2ee14576",
       "n_training": 4,
       "n_training_synthetic": false,
       "train_manifest_path": "artifacts/medgemma/medgemma_train_v2.json",

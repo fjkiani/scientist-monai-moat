@@ -4,12 +4,14 @@
   "label": "production_fallback_baseline",
   "ckpt_path": "models/luna16/luna16_baseline_b5e79231466a.pt",
   "ckpt_sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01",
+  "ckpt_safetensors_path": "models/luna16/luna16_baseline_b5e79231466a.safetensors",
+  "ckpt_safetensors_sha256": "94bc1635f55e9f7241643dc5b998a28b7f278379850f3fc38fc61a8350f9047e",
   "n_test": 88,
   "froc_at_2": 0.8267399271674979,
   "delta_froc_at_2_vs_self": 0.0,
   "meets_floor_ref_0.05": false,
   "status": "production_fallback",
   "verdict": "PRODUCTION_BASELINE_LOCKED",
-  "verdict_note": "MONAI stock baseline retained as production. Fine-tune candidates not promoted. SHA pure .pt \u2014 no conversion.",
+  "verdict_note": "MONAI stock baseline retained as production. Fine-tune candidates not promoted. `.safetensors` is a safety conversion of the same state_dict (source_pt_sha256 bound in metadata).",
   "source_receipt": "models/luna16/luna16_candidate_90e733f34c6a_froc_result.json"
 }
