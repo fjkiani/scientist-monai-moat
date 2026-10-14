@@ -101,6 +101,16 @@ If `oncology-arbiter` reports a mammography AUC with MedSigLIP, that number
 MUST come from our own evaluation on a specified dataset, and it MUST NOT
 be attributed to the model card.
 
+## Oncology-arbiter RSNA fusion head (our measurement)
+
+This repo ships an **RUO supervised fusion head** over MedSigLIP embeddings for
+RSNA screening triage. It has its own model card:
+
+- `docs/model_cards/rsna_medsiglip_fusion_logreg_v1.md`
+
+Do not confuse those retrospective RSNA results with the published MedSigLIP
+foundation model card numbers above.
+
 ## Access model and gating
 
 - HAI-DEF terms of use apply; users must accept the terms on HuggingFace

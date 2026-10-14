@@ -318,6 +318,43 @@ class ScreeningRequest(BaseModel):
     )
 
 
+class ScreeningFusionMetadata(BaseModel):
+    """Clinical metadata required for RSNA MedSigLIP fusion head (RUO).
+
+    This mirrors the fields used in the retrospective RSNA training run.
+    Callers must at minimum provide age and density.
+    """
+
+    age: float = Field(..., ge=18.0, le=120.0, description="Patient age in years.")
+    density: Literal["A", "B", "C", "D"] = Field(
+        ...,
+        description="BI-RADS breast density category (A..D).",
+    )
+    laterality: Literal["L", "R"] | None = Field(default=None)
+    view: Literal["CC", "MLO"] | None = Field(default=None)
+    implant: Literal["0", "1"] | None = Field(default=None, description="0/1; optional.")
+    site_id: str | None = Field(default=None, description="Optional site identifier (stringified).")
+    machine_id: str | None = Field(default=None, description="Optional machine identifier (stringified).")
+
+
+class ScreeningFusionRequest(BaseModel):
+    """Input for /v1/screening/fusion (RUO).
+
+    Strictly requires DICOM bytes + clinical metadata. URL ingestion is not accepted.
+    """
+
+    dicom_bytes_b64: str = Field(..., description="base64-encoded DICOM bytes")
+    laterality_hint: Literal["L", "R"] | None = None
+    view_hint: Literal["CC", "MLO"] | None = None
+    patient_id_hash: str | None = Field(
+        default=None,
+        description="SHA256 hex of patient MRN or study UID (never the raw id)",
+        min_length=64,
+        max_length=64,
+    )
+    clinical_metadata: ScreeningFusionMetadata
+
+
 class ScreeningFinding(BaseModel):
     label: str
     score: float = Field(..., ge=0.0, le=1.0)
@@ -346,6 +383,23 @@ class ScreeningResponse(ApiEnvelope):
     arbiter_score: ArbiterScore | None = Field(
         default=None,
         description="Optional downstream arbiter output; never calculated from a missing MedSigLIP stage.",
+    )
+    fusion_score: float | None = Field(
+        default=None,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "RUO: supervised fusion probability (MedSigLIP embedding + clinical metadata) "
+            "from rsna_medsiglip_fusion_logreg_v1; null when not computed."
+        ),
+    )
+    fusion_model_name: str | None = Field(
+        default=None,
+        description="RUO: name of the fused head used to compute fusion_score.",
+    )
+    fusion_warning: str | None = Field(
+        default=None,
+        description="RUO warning string for fusion_score; callers MUST surface this.",
     )
 
 

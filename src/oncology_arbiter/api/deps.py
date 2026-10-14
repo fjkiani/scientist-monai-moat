@@ -274,6 +274,14 @@ def compute_models_loaded() -> dict[str, ModelState]:
         else ModelState.UNAVAILABLE
     )
 
+    # Frozen in-repo DSS arbiter (not a Modal specialist).
+    breast_dss_artifact = (
+        Path(__file__).resolve().parents[2]
+        / "config"
+        / "breast_dss_arbiter_v3_metabric.json"
+    )
+    breast_dss_state = ModelState.LOADED if breast_dss_artifact.exists() else ModelState.UNAVAILABLE
+
     return {
         "case_storage": configured("CASE_STORAGE_MODAL_URL"),
         "medsiglip_448": configured_or_identity(
@@ -291,6 +299,7 @@ def compute_models_loaded() -> dict[str, ModelState]:
         ),
         "cbis_ddsm_probe": cbis_state,
         "biopsy_probe_v1": biopsy_probe_state,
+        "breast_dss_v3": breast_dss_state,
         "sl_therapy_bridge": configured("SL_THERAPY_BRIDGE_MODAL_URL"),
         "offline_ranker_r2_modal": configured("OFFLINE_RANKER_R2_MODAL_URL"),
         "luna16_case_storage": configured("LUNA16_CASE_STORAGE_MODAL_URL"),

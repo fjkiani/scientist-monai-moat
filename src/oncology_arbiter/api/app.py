@@ -79,6 +79,7 @@ from .schemas import (
     EloRankResponse,
     ScreeningRequest,
     ScreeningResponse,
+    ScreeningFusionRequest,
     StageBiopsyScoreRequest,
     StageBiopsyScoreResponse,
     TherapyOption,
@@ -1100,6 +1101,145 @@ def create_app() -> FastAPI:
                 "app_version": medsiglip_block.get("app_version") if medsiglip_block else None,
             },
             tenant_id=tenant.tenant_id,
+        )
+        return response
+
+    # ----------------------------------------------------------------------- #
+    # /v1/screening/fusion — RUO fused head over MedSigLIP embedding + metadata
+
+    @app.post("/v1/screening/fusion", response_model=ScreeningResponse)
+    def screening_fusion(
+        req: ScreeningFusionRequest,
+        tenant: APIKey = Depends(require_api_key),
+    ) -> ScreeningResponse:
+        """Run RUO RSNA fused logistic head (MedSigLIP embedding + clinical metadata).
+
+        This route is separate from /v1/screening/analyze so we do not alter the
+        production zero-shot contract or its downstream optional CBIS probe.
+        """
+        request_id = new_request_id()
+        raw_bytes = _decode_bytes_arg(req.dicom_bytes_b64)
+        assert raw_bytes is not None
+        input_sha = hashlib.sha256(raw_bytes).hexdigest()
+
+        from oncology_arbiter.mammography import preprocess_mammogram
+
+        with tempfile.NamedTemporaryFile(suffix=".dcm", delete=False) as temp_file:
+            temp_file.write(raw_bytes)
+            temp_path = temp_file.name
+        try:
+            preprocessed = preprocess_mammogram(
+                temp_path,
+                laterality_hint=req.laterality_hint,
+                view_hint=req.view_hint,
+            )
+        except Exception as exc:
+            Path(temp_path).unlink(missing_ok=True)
+            raise HTTPException(422, f"preprocessing failed: {exc}") from exc
+
+        started = time.perf_counter()
+        receipts: list[dict[str, Any]] = []
+        warnings: list[str] = []
+        model_state = ModelState.UNAVAILABLE
+        fusion_score: float | None = None
+        model_name: str | None = None
+        try:
+            from oncology_arbiter.models.medsiglip_modal_client import MedSigLipModalClient
+            from oncology_arbiter.models.rsna_medsiglip_fusion_logreg import (
+                RSNA_FUSION_WARNING,
+                RsnaFusionInputs,
+                RsnaMedsiglipFusionLogReg,
+            )
+
+            ms_client = MedSigLipModalClient()
+            emb = ms_client.embed_dicom(temp_path)
+            if len(emb) != 1152:
+                raise RuntimeError(f"medsiglip_contract_mismatch:expected_1152_got_{len(emb)}")
+
+            meta = req.clinical_metadata
+            # Default laterality/view from preprocessing when not supplied explicitly.
+            laterality = meta.laterality or preprocessed.metadata.laterality.value
+            view = meta.view or preprocessed.metadata.view.value
+            fusion = RsnaMedsiglipFusionLogReg.get()
+            fusion_score = fusion.predict_proba(
+                embedding=emb,
+                meta=RsnaFusionInputs(
+                    age=meta.age,
+                    density=meta.density,
+                    laterality=laterality if laterality in {"L", "R"} else None,
+                    view=view if view in {"CC", "MLO"} else None,
+                    implant=meta.implant,
+                    site_id=meta.site_id,
+                    machine_id=meta.machine_id,
+                ),
+            )
+            model_state = ModelState.LOADED_MEDSIGLIP
+            model_name = "google/medsiglip-448+rsna_medsiglip_fusion_logreg_v1"
+            warnings = [RSNA_FUSION_WARNING]
+
+            receipts.append(
+                {
+                    "stage": "rsna_medsiglip_fusion_logreg_v1",
+                    "required": True,
+                    "status": "succeeded",
+                    "request_id": request_id,
+                    "service_name": "oncology-arbiter",
+                    "model_name": "rsna_medsiglip_fusion_logreg_v1",
+                    "input_reference": input_sha,
+                    "latency_ms": (time.perf_counter() - started) * 1000.0,
+                    "warnings": list(warnings),
+                    "error": None,
+                }
+            )
+        except Exception as exc:  # required failure remains a failure
+            warnings = [f"fusion_required_stage_failed:{type(exc).__name__}"]
+            receipts.append(
+                _failed_stage_receipt(
+                    "rsna_medsiglip_fusion_logreg_v1",
+                    True,
+                    request_id,
+                    "fusion_inference_failed",
+                    str(exc),
+                    service_name="oncology-arbiter",
+                    input_reference=input_sha,
+                )
+            )
+        finally:
+            Path(temp_path).unlink(missing_ok=True)
+
+        envelope = _envelope(
+            request_id,
+            model_state=model_state,
+            model_name=model_name,
+            gate_report=None,
+        )
+        response = ScreeningResponse(
+            **envelope,
+            pipeline_status=_pipeline_status(receipts),
+            stage_receipts=receipts,
+            laterality=preprocessed.metadata.laterality.value,
+            view=preprocessed.metadata.view.value,
+            orientation_flipped=preprocessed.metadata.orientation_flipped,
+            breast_mask_coverage=float(preprocessed.breast_mask.mean()),
+            findings=[],
+            overall_score=None,
+            medsiglip=None,
+            arbiter_score=None,
+            fusion_score=fusion_score,
+            fusion_model_name="rsna_medsiglip_fusion_logreg_v1" if fusion_score is not None else None,
+            fusion_warning=(warnings[0] if warnings else None),
+            warnings=warnings,
+        )
+        log_event(
+            request_id,
+            "/v1/screening/fusion",
+            model_state=model_state.value,
+            patient_id_hash=req.patient_id_hash,
+            extra={
+                "pipeline_status": response.pipeline_status,
+                "input_sha256": input_sha,
+                "fusion_score": fusion_score,
+            },
         )
         return response
 

@@ -29,6 +29,7 @@ def health() -> HealthResponse:
             _sample_files = sorted(p.stem for p in _sd.glob("*.json"))
     endpoints = [
         "POST /v1/screening/analyze",
+        "POST /v1/screening/fusion",
         "POST /v1/biopsy/analyze",
         "POST /v1/therapy/reason",
         "POST /v1/case/full",
