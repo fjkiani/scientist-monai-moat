@@ -315,7 +315,11 @@ def case_full(
 #   2. HIPAA_MODE=true fails closed until a real redactor is wired. Returning
 #      the bundle verbatim while labelling it redacted is forbidden.
 
-@router.post("/v1/tumor_board/bundle", response_model=TumorBoardBundleResponse)
+@router.post(
+    "/v1/tumor_board/bundle",
+    response_model=TumorBoardBundleResponse,
+    response_model_exclude_unset=True,
+)
 def tumor_board_bundle(
     bundle: TumorBoardBundle,
     tenant: APIKey = Depends(require_api_key),
@@ -347,7 +351,7 @@ def tumor_board_bundle(
     # so an identical bundle round-tripped through v1 matches the
     # audit ledger entry emitted by crispro-backend-v2 side-by-side.
     canonical = _json.dumps(
-        bundle.model_dump(mode="json"),
+        bundle.model_dump(mode="json", exclude_unset=True),
         sort_keys=True,
         ensure_ascii=True,
         separators=(",", ":"),

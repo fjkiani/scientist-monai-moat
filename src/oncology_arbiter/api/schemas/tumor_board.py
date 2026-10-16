@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .biopsy import (
     BreastDssFeatures,
@@ -72,7 +72,7 @@ class ModalityEvidence(BaseModel):
     entries carry `stratifier` + `effect_size`; `expression_association`
     entries carry `pmids` + `summary` but no numeric p).
     """
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
     modality: Literal[
         "crispr_dependency",
         "expression_association",
@@ -84,6 +84,8 @@ class ModalityEvidence(BaseModel):
         "falsification_arm",
         "depmap_pool",
         "manuscript",
+        "in_vitro_functional",
+        "in_vivo_pdx",
     ]
     status: Literal["positive", "missing", "mixed", "negative"]
     delta_dep: float | None = None
@@ -119,7 +121,7 @@ class EvidenceMatrixRow(BaseModel):
       * auxiliary_evidence: [] for most rows; ATR row has 6 entries (4 stress + 1 axis_partner + 1 falsification_arm)
       * tier_fusion_rule_id / _detail: which branch of the fusion ladder produced the tier
     """
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
     axis: Literal[
         "cytidine_analogs",
         "atr_wee1",
@@ -137,6 +139,10 @@ class EvidenceMatrixRow(BaseModel):
     depmap_pool: ModalityEvidence | None = None
     manuscript: ModalityEvidence | None = None
     clinical: ModalityEvidence | None = None
+    in_vitro: ModalityEvidence | None = None
+    in_vivo: ModalityEvidence | None = None
+    crispr_pharmacologic_agreement: str | None = None
+    mechanistic_hypothesis_note: str | None = None
     recommendation_tier: str = Field(
         ...,
         description=(
@@ -200,10 +206,16 @@ class EvidenceMatrixRow(BaseModel):
 
 class EvidenceMatrix(BaseModel):
     """The 6-axis evidence matrix root."""
+    model_config = ConfigDict(extra="forbid")
     query_gene: str
     cancer_type: str
     depmap_release: str
     rows: list[EvidenceMatrixRow]
+    notes: list[str] = Field(default_factory=list)
+    calibration_axis: str | None = None
+    gold_standard_summary: str | None = None
+    combination_vulnerabilities: list[dict[str, Any]] = Field(default_factory=list)
+    rs_score: float | None = None
 
 
 
@@ -215,7 +227,7 @@ class RecommendedDrug(BaseModel):
     backend drug-bridge function. Drug names come from the canonical audit
     JSON, not invented.
     """
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
     drug_name: str
     target: str
     role: Literal[
@@ -247,7 +259,7 @@ class SlProvenance(BaseModel):
       * backend_head_sha == 'bfd6d11fc872c11a13365b0682cea776a136c7f3'
       * datasets_used == ['GDSC2', 'DepMap 24Q2']
     """
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
     evidence_matrix: EvidenceMatrix
     manuscript_repo_sha_at_audit: str
     backend_branch: str
@@ -261,7 +273,7 @@ class SlProvenance(BaseModel):
 
 class SyntheticLethalityBundle(BaseModel):
     """The synthetic_lethality sub-envelope of a TumorBoardBundle."""
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
     patient_id: str
     disease: str
     query_gene: str
@@ -276,9 +288,22 @@ class SyntheticLethalityBundle(BaseModel):
     provenance: SlProvenance
     recommended_drugs_provenance_note: str | None = None
 
+    @model_validator(mode="after")
+    def require_positive_recommendation(self) -> "SyntheticLethalityBundle":
+        if not any(
+            drug.surface_status == "RECOMMENDED"
+            for drug in self.recommended_drugs
+        ):
+            raise ValueError(
+                "recommended_drugs must contain at least one RECOMMENDED entry; "
+                "falsified-mechanism rows cannot satisfy the recommendation contract"
+            )
+        return self
+
 
 
 class PrimaryAlteration(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     gene: str
     alteration_type: str
     germline_or_somatic: str = "unspecified_in_demo"
@@ -288,6 +313,7 @@ class PrimaryAlteration(BaseModel):
 
 
 class Diagnosis(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     primary_site: str
     histology: str
     stage: str = "demo"
@@ -297,12 +323,14 @@ class Diagnosis(BaseModel):
 
 
 class LineagePriors(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     tp53_mutant_prevalence_in_hgsoc_pct_lit: int | None = None
     tp53_priors_source: str | None = None
 
 
 
 class PatientContext(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     primary_alteration: PrimaryAlteration
     diagnosis: Diagnosis
     lineage_priors: LineagePriors | None = None
@@ -322,7 +350,7 @@ class TumorBoardBundle(BaseModel):
       * crispro-backend-v2 `api/services/synthetic_lethality/v3/multimodal/`
         (matrix_builder + modality_fuser + literature_receipts).
     """
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
     contract_version: Literal[
         "tumor_board.v3.multimodal-with-manuscript-claims"
     ]

@@ -18,6 +18,7 @@ conftest.py; no key headers needed.
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 from pathlib import Path
 
@@ -48,6 +49,16 @@ def bundle() -> dict:
     return json.loads(AK_BUNDLE_PATH.read_text())
 
 
+def _canonical_sha(payload: dict) -> str:
+    canonical = json.dumps(
+        payload,
+        sort_keys=True,
+        ensure_ascii=True,
+        separators=(",", ":"),
+    )
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
 # ------------------------------------------------------------------- happy
 
 
@@ -70,8 +81,9 @@ def test_mbd4_lof_hgsoc_bundle_preserves_mechanism_and_falsification(
     assert isinstance(body["bundle_sha256"], str) and len(body["bundle_sha256"]) == 64
     assert body["persisted_path"] is None  # no disk persistence yet
 
-    # Bundle echoed back unchanged
-    assert body["bundle"]["patient_id"] == "MBD4-LOF-DEMO-01"
+    # Lossless contract: no nested clinical evidence may be silently dropped.
+    assert body["bundle"] == bundle
+    assert body["bundle_sha256"] == _canonical_sha(bundle)
     assert (
         body["bundle"]["contract_version"]
         == "tumor_board.v3.multimodal-with-manuscript-claims"
@@ -127,6 +139,23 @@ def test_zero_recommended_drugs_rejected(client: TestClient, bundle: dict) -> No
     assert r.status_code == 422, r.text
 
 
+def test_falsified_drugs_cannot_satisfy_recommendation_contract(
+    client: TestClient,
+    bundle: dict,
+) -> None:
+    bad = copy.deepcopy(bundle)
+    bad["synthetic_lethality"]["recommended_drugs"] = [
+        drug
+        for drug in bad["synthetic_lethality"]["recommended_drugs"]
+        if drug["surface_status"] == "NOT_RECOMMENDED_ON_THIS_MECHANISM"
+    ]
+
+    r = client.post("/v1/tumor_board/bundle", json=bad)
+
+    assert r.status_code == 422, r.text
+    assert "at least one RECOMMENDED entry" in r.text
+
+
 # ------------------------------------------------------------------- hipaa
 
 
@@ -160,6 +189,11 @@ def test_demo_sample_matches_post_body(client: TestClient, bundle: dict) -> None
     assert r.status_code == 200, r.text
     served = r.json()
     assert served == bundle, "GET demo sample differs from bundle on disk"
+
+    posted = client.post("/v1/tumor_board/bundle", json=served)
+    assert posted.status_code == 200, posted.text
+    assert posted.json()["bundle"] == served
+    assert posted.json()["bundle_sha256"] == _canonical_sha(served)
 
 
 def test_health_cancers_lists_hgsoc(client: TestClient) -> None:
