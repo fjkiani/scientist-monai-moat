@@ -1,6 +1,8 @@
 """Health check endpoint."""
 from __future__ import annotations
 
+import os
+
 from fastapi import APIRouter
 
 from oncology_arbiter import AUROC_CAVEAT, RUO_DISCLAIMER, __version__
@@ -16,12 +18,13 @@ router = APIRouter()
 def health() -> HealthResponse:
     """/health endpoint - reports API status and available endpoints."""
     # `cancers` mirrors the surface `/v1/case/full?cancer=…` accepts.
-    # `breast` is the flagship path (real preprocessing, arbiter, etc.);
-    # `nsclc` is the LIDC-IDRI expansion track that worker-2 is wiring —
-    # the endpoint currently returns a shape-only placeholder so the SPA
-    # can already render a working NSCLC panel end-to-end.
+    # `breast` is the flagship path. `nsclc` accepts only verified case-storage
+    # manifests and the LUNA16 specialist; the retired HU heuristic is not a
+    # fallback. Health reports configuration, never successful inference.
     _demo_active = deps.is_env_true("ONCOLOGY_ARBITER_DEMO_MODE")
-    _contact_url = deps.is_env_true("ONCOLOGY_ARBITER_CONTACT_URL") or "https://crispro.ai/contact"
+    _contact_url = os.environ.get(
+        "ONCOLOGY_ARBITER_CONTACT_URL", "https://crispro.ai/contact"
+    )
     _sample_files: list[str] = []
     if _demo_active:
         _sd = deps.demo_samples_dir()
@@ -34,7 +37,7 @@ def health() -> HealthResponse:
         "POST /v1/therapy/reason",
         "POST /v1/case/full",
         "POST /v1/elo/rank",
-        # v0.4.0-alpha: standalone Co-Scientist loop (PLAN §5 PR #5)
+        # Deterministic evidence/Elo transform; distinct from MedGemma synthesis.
         "POST /v1/offline_ranker/run",
         "POST /v1/tumor_board/dynamic",
         "GET  /v1/demo/case",

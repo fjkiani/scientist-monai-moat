@@ -6,15 +6,10 @@
 #   - Docker language: Render's BuildKit builds ./Dockerfile then runs the
 #     resulting image behind their proxy on port 8080 (via HEALTHCHECK).
 #
-# Backend enablement flags are intentionally lightweight:
-#   - MONAI heuristic and MedSigLIP would OOM the 512 MB dyno the moment a
-#     real DICOM lands (MONAI ~500 MB, MedSigLIP ~2 GB with torch loaded).
-#     They stay OFF by default; endpoints return placeholder envelopes
-#     with model_state="placeholder" + honest warnings.
-#   - Therapy rules-lite (~20 MB, pure Python) IS enabled — fits free tier
-#     and demonstrates the real NCCN-lite recommendation surface.
-#   - Co-Scientist (L5) IS enabled — it operates over stage envelopes, no
-#     ML runtime; free tier can handle it.
+# The Render process is orchestration-only. Model inference runs on
+# identity-locked Modal specialists; proxy heuristics are not enabled.
+# The deterministic offline evidence ranker remains a separate, explicitly
+# non-LLM endpoint.
 #   - Frontend (SPA) IS enabled — bundle is ~170 KB static assets, mounted
 #     under /ui/. Served from FastAPI's StaticFiles.
 #
@@ -37,34 +32,23 @@ services:
       # src/oncology_arbiter/api/static/dist/ via worker-3-frontend).
       - key: ONCOLOGY_ARBITER_SERVE_FRONTEND
         value: "1"
-      # Enable the deterministic NCCN-lite therapy rules engine as the
-      # therapy backend on free tier (TxGemma is gated + too large).
-      - key: ONCOLOGY_ARBITER_ENABLE_THERAPY_RULES_PROXY
-        value: "1"
-      # Enable the L5 Co-Scientist 4-phase ranker on /v1/case/full.
-      # Operates over envelopes, no ML runtime — fits 512 MB.
-      - key: ONCOLOGY_ARBITER_ENABLE_CO_SCIENTIST
-        value: "1"
-      # ClinicalBERT report parser — the free-tier Render dyno cannot host
-      # the fine-tuned model (~430 MB safetensors + torch runtime blows the
-      # 512 MB budget). Instead the parser is deployed to Modal and Render
-      # calls it over HTTP via a stdlib-only urllib client. The Modal app
-      # keeps 1 warm container (min_containers=1) for sub-second latency.
-      # Fine-tuned on 2,187 real TCGA pathology reports with patient-disjoint
-      # validation/test cohorts (held-out exact-span micro-F1 = 0.1916).
-      - key: CLINICALBERT_BACKEND
-        value: modal
-      - key: CLINICALBERT_MODAL_URL
-        value: https://crispro--clinicalbert
+      # Identity-locked specialists run remotely; Render never loads weights.
+      - key: MODAL_MEDSIGLIP_URL
+        value: https://fjkiani--medsiglip
+      - key: MEDGEMMA_MODAL_URL
+        value: https://fjkiani--medgemma-1-5-4b-chat.modal.run
+      - key: TXGEMMA_MODAL_URL
+        value: https://fjkiani--txgemma
+      # ClinicalBERT is not the product pathology path. The v2 artifact has
+      # test micro-F1 0.1916 and is available only behind the explicit
+      # ONCOLOGY_FORCE_CLINICALBERT_NER research override.
       # DELIBERATELY NOT SET (would OOM the free tier dyno):
       #   ONCOLOGY_ARBITER_ENABLE_MEDSIGLIP
       #   ONCOLOGY_ARBITER_ENABLE_MONAI_DETECTOR
       #   ONCOLOGY_ARBITER_ENABLE_BIOPSY_MEDSIGLIP
       #   ONCOLOGY_ARBITER_ENABLE_THERAPY_TXGEMMA
-      # These backends are exercised locally on worker-1/32GB via the
-      # generated capability proofs. Free tier ships the honest lightweight
-      # surface — gated / placeholder / rules-lite — which itself demonstrates
-      # the model_state contract to any client.
+      # Remote specialist failures fail closed; they do not fall through to
+      # Sobel/HU/rules-lite/regex substitutes.
     autoDeploy: true
 
   # ─────────────────────────────────────────────────────────────────────
@@ -76,13 +60,12 @@ services:
   #     case/full, nsclc/analyze) return HTTP 403 with contact_url and
   #     demo_endpoint pointing at /v1/demo/samples/{kind}.
   #   - New GET endpoints /v1/demo/samples and /v1/demo/samples/{kind}
-  #     serve four pre-computed JSON envelopes (screening, biopsy, nsclc,
-  #     case_full) that were generated on worker-nsclc against live weights:
-  #       * MedSigLIP-448 via Modal (crispro-test--medsiglip, cuda,
-  #         embedding_dim=1152)
-  #       * CBIS-DDSM logreg probe v1 (test AUC 0.7526, n_test=641)
-  #       * ClinicalBERT report parser v1 (micro F1 0.9546)
-  #       * MONAI lung_nodule_ct_detection 0.6.9 (LUNA16, mAP 0.852)
+  #     serve four archived RUO JSON envelopes (screening, biopsy, nsclc,
+  #     case_full). They are historical mixed-state snapshots, not current
+  #     inference-readiness claims: some specialist stages used real weights,
+  #     while included arbiter stages may report model_state=template and
+  #     n_training=0. Clients must inspect each model_state, caveat, and
+  #     demo_provenance block.
   #     The samples ship in the repo under
   #     src/oncology_arbiter/api/static/demo_samples/*.json (~44 KB total)
   #     so the demo container never needs to load any real weights.

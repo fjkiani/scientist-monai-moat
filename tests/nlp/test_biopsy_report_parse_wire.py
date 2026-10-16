@@ -3,13 +3,11 @@
 The three `TestReportParseBlockRegex` cases that lived here asserted
 `report_parse.parser_id == "proxy_regex_v0"` and `fusion_mode == "regex"` --
 i.e. they pinned the regex pathology parser as a *successful* parse source.
-That capability is retired: ClinicalBERT is the only report-parsing backend,
+That capability is retired: MedGemma structured JSON is the primary parser,
 and when it is unavailable the stage fails rather than degrading to regex.
 Those cases are migrated (not silently dropped) in
-artifacts/audit/retired_test_migration.json; their replacements are
-tests/unit/test_production_specialist_contracts.py::
-  test_biopsy_source_calls_only_clinicalbert_for_report_parsing
-  test_biopsy_clinicalbert_failure_has_no_regex_fallback
+artifacts/audit/retired_test_migration.json; their replacement contract lives
+in ``tests/unit/test_production_specialist_contracts.py``.
 
 What remains here is the one case that was never about the regex parser: an
 empty request must be rejected outright.
@@ -46,8 +44,23 @@ class TestBiopsyRequestShape:
         # report_parse block is surfaced downstream.
         assert r.status_code in (400, 422)
 
-    def test_unparseable_report_yields_no_parse_block_and_a_failed_stage(self, client):
-        """The retired path returned a regex block here; the live path fails."""
+    def test_unparseable_report_yields_no_parse_block_and_a_failed_stage(
+        self,
+        client,
+        monkeypatch,
+    ):
+        """A MedGemma failure must not resurrect regex or legacy NER."""
+        from oncology_arbiter.nlp.medgemma_pathology_client import (
+            MedGemmaPathologyError,
+        )
+
+        def fail_extract(_report_text: str):
+            raise MedGemmaPathologyError("deterministic unit-test failure")
+
+        monkeypatch.setattr(
+            "oncology_arbiter.nlp.medgemma_pathology_client.extract_pathology",
+            fail_extract,
+        )
         r = client.post(
             "/v1/biopsy/analyze",
             json={
@@ -64,7 +77,7 @@ class TestBiopsyRequestShape:
         assert body["pipeline_status"] == "failed_required_stage"
         receipt = next(
             x for x in body["stage_receipts"]
-            if x["stage"] == "clinicalbert_pathology_parse"
+            if x["stage"] == "medgemma_pathology_parse"
         )
         assert receipt["status"] == "failed_required"
         # No regex-sourced receptor values may appear despite the report text

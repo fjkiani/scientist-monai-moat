@@ -71,7 +71,11 @@ DEPLOYED_V051_INFO = {
 
 
 @pytest.fixture()
-def client():
+def client(monkeypatch):
+    # ClinicalBERT is a legacy-only route. Force it explicitly so this file
+    # tests its fail-closed acceptance gate without displacing MedGemma as the
+    # product parser.
+    monkeypatch.setenv("ONCOLOGY_FORCE_CLINICALBERT_NER", "1")
     return TestClient(create_app())
 
 

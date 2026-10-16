@@ -12,6 +12,7 @@ from urllib import request as urllib_request
 
 EXPECTED_ARTIFACT_SHA256 = "429f804d7f348d7c4eeb27821f766cc2de65c4072f20db0c3b3afaefa9068e50"
 EXPECTED_BASE_REVISION = "d5892b39a4adaed74b92212a44081509db72f87b"
+EXPECTED_APP_VERSION = "clinicalbert-modal-v0.5.2-sliding-window"
 DEFAULT_TIMEOUT_SECONDS = int(os.environ.get("CLINICALBERT_MODAL_TIMEOUT", "120"))
 
 

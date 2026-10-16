@@ -30,10 +30,9 @@ RESEARCH USE ONLY — see :data:`oncology_arbiter.RUO_DISCLAIMER`.
 """
 from __future__ import annotations
 
-import base64
 import os
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 import modal
 
@@ -52,7 +51,7 @@ TXGEMMA_HONESTY_WARNING = (
 # ── Image ────────────────────────────────────────────────────────────
 TXGEMMA_IMAGE = (
     modal.Image.debian_slim(python_version="3.11")
-    .apt_install("libgomp1")
+    .apt_install("libgomp1", "git")
     .pip_install(
         "torch==2.4.1",
         "torchvision==0.19.1",
@@ -62,13 +61,17 @@ TXGEMMA_IMAGE = (
         "sentencepiece==0.2.0",
         "protobuf==5.28.2",
         "huggingface_hub==0.24.7",
+        "hf-transfer==0.1.9",
         "fastapi==0.115.0",
         "pydantic==2.9.2",
     )
+    .env({"HF_HUB_ENABLE_HF_TRANSFER": "1"})
 )
 
 app = modal.App("txgemma-9b")
-HF_SECRET = modal.Secret.from_name("txgemma-hf-token")
+model_volume = modal.Volume.from_name("txgemma-9b-weights", create_if_missing=True)
+_HF_SECRET_NAME = os.environ.get("TXGEMMA_HF_SECRET", "txgemma-hf-token")
+HF_SECRET = modal.Secret.from_name(_HF_SECRET_NAME)
 
 
 # ── Healthz (no GPU, no model) ───────────────────────────────────────
@@ -88,8 +91,9 @@ def healthz() -> Dict[str, str]:
     image=TXGEMMA_IMAGE,
     gpu="A10G",
     secrets=[HF_SECRET],
-    scaledown_window=300,
-    timeout=180,
+    volumes={"/root/.cache/huggingface": model_volume},
+    scaledown_window=900,
+    timeout=1800,
     min_containers=0,
     memory=32 * 1024,
 )
@@ -119,7 +123,7 @@ class TxGemma:
         self.model.eval()
         self.device = "cuda"
 
-    @modal.fastapi_endpoint(method="GET", label="txgemma-info")
+    @modal.method()
     def info(self) -> Dict[str, Any]:
         import torch
 
@@ -133,7 +137,7 @@ class TxGemma:
             "honesty_warning": TXGEMMA_HONESTY_WARNING,
         }
 
-    @modal.fastapi_endpoint(method="POST", label="txgemma-reason")
+    @modal.method()
     def reason(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         """Run a therapy-planning prompt.
 
@@ -177,10 +181,23 @@ class TxGemma:
         }
 
 
+# HTTP wrappers (Modal workspace HTTP may be disabled; prefer modal run /.remote)
+@app.function(image=HEALTH_IMAGE)
+@modal.fastapi_endpoint(method="GET", label="txgemma-info")
+def info_http() -> Dict[str, Any]:
+    return TxGemma().info.remote()
+
+
+@app.function(image=HEALTH_IMAGE, timeout=1800)
+@modal.fastapi_endpoint(method="POST", label="txgemma-reason")
+def reason_http(payload: Dict[str, Any]) -> Dict[str, Any]:
+    return TxGemma().reason.remote(payload)
+
+
 @app.local_entrypoint()
 def main(prompt: str = "Recommend adjuvant therapy for a 62F ER+/HER2- pT2N1 breast cancer patient.") -> None:
     tx = TxGemma()
-    tx.load.remote()
+    info = tx.info.remote()
     result = tx.reason.remote({"prompt": prompt, "max_new_tokens": 200})
     import json
-    print(json.dumps(result, indent=2))
+    print(json.dumps({"info": info, "reason": result}, indent=2))

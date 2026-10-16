@@ -16,6 +16,9 @@ Environment
 -----------
 ``TXGEMMA_MODAL_URL`` — base URL like ``https://<workspace>--txgemma``.
                        We derive endpoint URLs by appending the label suffix.
+``TXGEMMA_MODAL_DNS_SUFFIX`` — optional DNS suffix for Modal deployments that
+                       include a region, e.g. ``.us-east.modal.run``. Defaults
+                       to ``.modal.run``.
 ``TXGEMMA_BACKEND``   — ``modal`` or ``local``. The public factory
                        :func:`get_txgemma_client` reads this to decide.
 
@@ -25,7 +28,7 @@ from __future__ import annotations
 
 import json
 import os
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Dict, Optional
 from urllib import error as urllib_error
 from urllib import request as urllib_request
@@ -52,18 +55,19 @@ class TxGemmaModalUrls:
     """Modal deployment URL derivation, one string per endpoint."""
 
     base: str
+    dns_suffix: str = ".modal.run"
 
     @property
     def healthz(self) -> str:
-        return f"{self.base}-healthz.modal.run"
+        return f"{self.base}-healthz{self.dns_suffix}"
 
     @property
     def info(self) -> str:
-        return f"{self.base}-info.modal.run"
+        return f"{self.base}-info{self.dns_suffix}"
 
     @property
     def reason(self) -> str:
-        return f"{self.base}-reason.modal.run"
+        return f"{self.base}-reason{self.dns_suffix}"
 
 
 def _post_json(url: str, payload: Dict[str, Any], *, timeout: int) -> Dict[str, Any]:
@@ -137,7 +141,10 @@ class TxGemmaModalClient:
                 "TXGEMMA_MODAL_URL not set. Deploy deploy/modal/txgemma_app.py "
                 "and export TXGEMMA_MODAL_URL=<https://.../txgemma>."
             )
-        self.urls = TxGemmaModalUrls(base=base)
+        dns_suffix = os.environ.get("TXGEMMA_MODAL_DNS_SUFFIX", ".modal.run").strip()
+        if not dns_suffix.startswith("."):
+            dns_suffix = "." + dns_suffix
+        self.urls = TxGemmaModalUrls(base=base, dns_suffix=dns_suffix)
         self.preflight_timeout = preflight_timeout
         self.reason_timeout = reason_timeout
         self.device = "modal:A10G"

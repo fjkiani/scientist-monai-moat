@@ -8,6 +8,7 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 
 from oncology_arbiter.api.app import create_app
+from oncology_arbiter.api.services.tumor_board import TumorBoardAssembler
 
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "scripts" / "validate_ovarian_retirement.py"
@@ -30,12 +31,9 @@ def test_corrected_cohort_excludes_unknown_horizon_outcomes() -> None:
 
 
 def test_retirement_source_cannot_emit_patient_probability() -> None:
-    source = inspect.getsource(create_app)
-    start = source.index("def _ovarian_retirement")
-    end = source.index("def _run_medgemma_co_scientist", start)
-    retirement_source = source[start:end]
+    source = inspect.getsource(TumorBoardAssembler.ovarian_retirement)
     prohibited_keys = ('"p_positive":', '"risk_bucket":', '"driving_feature":', '"probability":')
-    assert all(key not in retirement_source for key in prohibited_keys)
+    assert all(key not in source for key in prohibited_keys)
 
 
 def test_hgsoc_dynamic_response_has_no_patient_score(monkeypatch) -> None:

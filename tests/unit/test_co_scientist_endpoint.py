@@ -1,4 +1,4 @@
-"""Unit tests for POST /v1/offline_ranker/run (v0.4.0-alpha, PLAN §5 PR #5).
+"""Unit tests for the deterministic POST /v1/offline_ranker/run route.
 
 Contract under test:
 
@@ -28,9 +28,8 @@ generated from that envelope inherits the fake URLs. REFLECT must:
    them as trusted.
 
 Nothing in this test depends on live model weights, network I/O, or GPU.
-AUTH_MODE=off from conftest.py — no key headers needed. Route is public
-by design (matches /v1/elo/rank posture: read-only Co-Scientist has no
-patient PHI ingest).
+The deterministic ranker remains public for backward compatibility; callers
+must provide deidentified stage envelopes.
 """
 from __future__ import annotations
 
@@ -64,8 +63,8 @@ def _screening_envelope(evidence: list[dict]) -> dict:
         "disclaimer": "RUO",
         "caveat": "AUROC",
         "provenance": {
-            "model_name": "proxy_screening",
-            "model_state": "proxy_test",
+            "model_name": "google/medsiglip-448",
+            "model_state": "loaded_medsiglip",
             "request_id": "test-req-1",
         },
         "honesty_gate": {
@@ -80,9 +79,21 @@ def _screening_envelope(evidence: list[dict]) -> dict:
         "orientation_flipped": False,
         "breast_mask_coverage": 0.72,
         "findings": [
-            {"label": "mass", "score": 0.81, "bbox_xyxy": [0.1, 0.2, 0.3, 0.4]},
-            {"label": "calc", "score": 0.63, "bbox_xyxy": [0.5, 0.5, 0.6, 0.6]},
-            {"label": "asym", "score": 0.42, "bbox_xyxy": [0.1, 0.5, 0.2, 0.7]},
+            {
+                "label": "malignant imaging phenotype",
+                "score": 0.81,
+                "bbox_xyxy": [0.1, 0.2, 0.3, 0.4],
+            },
+            {
+                "label": "indeterminate calcification cluster",
+                "score": 0.63,
+                "bbox_xyxy": [0.5, 0.5, 0.6, 0.6],
+            },
+            {
+                "label": "focal asymmetry",
+                "score": 0.42,
+                "bbox_xyxy": [0.1, 0.5, 0.2, 0.7],
+            },
         ],
         "overall_score": 0.81,
     }
@@ -98,8 +109,8 @@ def _therapy_envelope(evidence: list[dict]) -> dict:
         "disclaimer": "RUO",
         "caveat": "AUROC",
         "provenance": {
-            "model_name": "proxy_therapy",
-            "model_state": "proxy_test",
+            "model_name": "SLTherapyBridge-v3.1",
+            "model_state": "loaded_sl_therapy_bridge",
             "request_id": "test-req-2",
         },
         "honesty_gate": {
@@ -112,12 +123,12 @@ def _therapy_envelope(evidence: list[dict]) -> dict:
         "cancer": "breast",
         "recommended_options": [
             {
-                "regimen": "TC",
+                "regimen": "osimertinib",
                 "line_of_therapy": 1,
                 "evidence": evidence,
             },
             {
-                "regimen": "AC-T",
+                "regimen": "platinum doublet",
                 "line_of_therapy": 1,
                 "evidence": evidence,
             },
@@ -165,8 +176,8 @@ def test_happy_path_envelope_shape(client):
     assert body.get("disclaimer"), "missing disclaimer"
     assert body.get("caveat"), "missing caveat"
     prov = body["provenance"]
-    assert prov["model_state"] == "proxy_co_scientist", prov
-    assert prov["model_name"] == "oa/co_scientist@v0.4.0-alpha"
+    assert prov["model_state"] == "deterministic_offline_ranker", prov
+    assert prov["model_name"] == "oa/offline_evidence_ranker"
     assert prov["request_id"], "missing request_id"
 
     # Phases must be the documented 5-phase order.
@@ -185,6 +196,19 @@ def test_happy_path_envelope_shape(client):
         "REFLECT should not delete hypotheses on honest input, only URLs"
     )
     assert len(body["hypotheses"]) >= 1
+    assert all(
+        h["honesty_markers"]["loaded"] is True
+        for h in body["hypotheses"]
+    )
+    assert all(
+        h["honesty_markers"]["proxy"] is False
+        for h in body["hypotheses"]
+    )
+    assert all(
+        e["url"] == HONEST_URL
+        for h in body["hypotheses"]
+        for e in h["evidence"]
+    )
     # honesty_gate.evidence_dropped == urls_dropped_hallucinated on the wire.
     assert body["honesty_gate"]["evidence_dropped"] == body["urls_dropped_hallucinated"]
 
@@ -203,7 +227,7 @@ def test_deterministic_same_input_same_output(client):
     # request_id differs; everything else must match.
     for b in (b1, b2):
         b["provenance"].pop("request_id", None)
-    assert b1["hypotheses"] == b2["hypotheses"], "Co-Scientist is not deterministic"
+    assert b1["hypotheses"] == b2["hypotheses"], "offline ranker is not deterministic"
     assert b1["urls_dropped_hallucinated"] == b2["urls_dropped_hallucinated"]
     assert b1["hypotheses_dropped"] == b2["hypotheses_dropped"]
 
@@ -411,23 +435,21 @@ def test_invalid_return_top_rejected(client):
     )
 
 
-def test_route_is_public_no_auth_required(client, monkeypatch):
-    """POST /v1/offline_ranker/run must remain callable with AUTH_MODE=on.
-
-    Matches /v1/elo/rank posture: standalone Co-Scientist has no PHI
-    ingest, so it stays public for demo callers.
-    """
-    # Rebuild app with AUTH_MODE=on to prove the route escapes the gate.
-    monkeypatch.setenv("AUTH_MODE", "on")
+def test_route_preserves_public_contract_when_auth_mode_is_on(client, monkeypatch):
+    """Schema extraction must not silently add authentication to this public route."""
+    monkeypatch.setenv("ONCOLOGY_ARBITER_AUTH_MODE", "on")
     monkeypatch.setenv("ONCOLOGY_ARBITER_API_KEY", "test-key")
     from oncology_arbiter.api.app import create_app as _create
     _client = TestClient(_create())
+    payload = {
+        "screening": _screening_envelope(
+            [_ev(HONEST_URL, "deidentified mammography evidence")]
+        ),
+        "seed_urls": [HONEST_URL],
+    }
     r = _client.post(
         "/v1/offline_ranker/run",
-        json={"seed_urls": []},  # no API key header
+        json=payload,
     )
-    # Endpoint answers even without a key.
-    assert r.status_code == 200, (
-        f"/v1/offline_ranker/run must be public under AUTH_MODE=on, got "
-        f"status {r.status_code}: {r.text[:400]}"
-    )
+    assert r.status_code == 200, r.text
+    assert r.json()["after_reflect"] > 0

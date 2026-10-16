@@ -14,17 +14,16 @@ from fastapi.testclient import TestClient
 
 from oncology_arbiter.agents.supervisor import StageResult, _record_llm
 from oncology_arbiter.api.app import _score_explicit_therapy_triage, create_app
+from oncology_arbiter.api.orchestrator.pathology_parse import (
+    PathologyParseOrchestrator,
+)
 from oncology_arbiter.models.llm_client import GemmaClient, LlmUnavailable
 from oncology_arbiter.models import specialist_clients as sc
 from oncology_arbiter.nlp.clinicalbert_modal_client import (
-    EXPECTED_APP_VERSION,
-    EXPECTED_METRICS_SHA256,
-    EXPECTED_MODEL_SHA256,
-    EXPECTED_OVERLAP_TOKENS,
-    EXPECTED_WINDOW_AGGREGATION,
-    EXPECTED_WINDOW_TOKENS,
+    EXPECTED_ARTIFACT_SHA256,
+    EXPECTED_BASE_REVISION,
     ClinicalBertModalError,
-    validate_clinicalbert_contract,
+    _assert_identity,
 )
 
 
@@ -34,58 +33,78 @@ CASE_SHA = "a" * 64
 
 def _clinicalbert_response() -> dict:
     return {
-        "app_version": EXPECTED_APP_VERSION,
-        "window_tokens": EXPECTED_WINDOW_TOKENS,
-        "overlap_tokens": EXPECTED_OVERLAP_TOKENS,
-        "window_aggregation": EXPECTED_WINDOW_AGGREGATION,
-        "model_sha256": EXPECTED_MODEL_SHA256,
-        "metrics_sha256": EXPECTED_METRICS_SHA256,
-        "n_windows": 2,
+        "artifact_sha256": EXPECTED_ARTIFACT_SHA256,
+        "base_revision": EXPECTED_BASE_REVISION,
+        "n_training_synthetic": False,
     }
 
 
-def test_clinicalbert_contract_accepts_only_exact_release() -> None:
-    validate_clinicalbert_contract(_clinicalbert_response())
+def test_clinicalbert_contract_accepts_only_identity_bound_real_training() -> None:
+    _assert_identity(_clinicalbert_response())
     for key, bad_value in {
-        "app_version": "clinicalbert-modal-v0.5.1",
-        "window_tokens": 512,
-        "overlap_tokens": 0,
-        "window_aggregation": "first_window_only",
-        "model_sha256": "0" * 64,
-        "metrics_sha256": "1" * 64,
-        "n_windows": 0,
+        "artifact_sha256": "0" * 64,
+        "base_revision": "1" * 40,
+        "n_training_synthetic": True,
     }.items():
         response = _clinicalbert_response()
         response[key] = bad_value
-        with pytest.raises(ClinicalBertModalError, match="clinicalbert_contract_mismatch"):
-            validate_clinicalbert_contract(response)
+        with pytest.raises(ClinicalBertModalError, match="ClinicalBERT"):
+            _assert_identity(response)
 
 
-def test_biopsy_source_calls_only_clinicalbert_for_report_parsing() -> None:
-    app_path = Path(importlib.import_module("oncology_arbiter.api.app").__file__)
-    tree = ast.parse(app_path.read_text(encoding="utf-8"))
-    biopsy = next(
-        node for node in ast.walk(tree)
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == "biopsy_analyze"
+def test_pathology_orchestrator_sends_clinical_report_to_medgemma_primary(
+    monkeypatch,
+) -> None:
+    """Default pathology parsing is MedGemma JSON; legacy NER cannot shadow it."""
+    report = (
+        "Invasive ductal carcinoma, Nottingham grade 3. "
+        "ER positive, PR positive, HER2 IHC 2+ equivocal. "
+        "Tumor size 45 mm."
     )
-    names = {node.id for node in ast.walk(biopsy) if isinstance(node, ast.Name)}
-    attributes = {node.attr for node in ast.walk(biopsy) if isinstance(node, ast.Attribute)}
-    assert "_clinicalbert_biopsy_parse" in names
-    assert not ({"parse_report", "parse_biopsy_report", "fuse_report_parse"} & (names | attributes))
+    calls: list[str] = []
+    expected = ("medgemma-block", "receptor-panel", 3, {"status": "succeeded"})
+
+    def primary(report_text: str, *, request_id: str):
+        assert report_text == report
+        assert request_id == "clinical-case-1"
+        calls.append("medgemma")
+        return expected
+
+    def forbidden_legacy(*args, **kwargs):
+        raise AssertionError("ClinicalBERT NER must not be the default parser")
+
+    monkeypatch.delenv("ONCOLOGY_FORCE_CLINICALBERT_NER", raising=False)
+    monkeypatch.setattr(
+        PathologyParseOrchestrator,
+        "_parse_medgemma",
+        staticmethod(primary),
+    )
+    monkeypatch.setattr(
+        PathologyParseOrchestrator,
+        "_parse_clinicalbert",
+        staticmethod(forbidden_legacy),
+    )
+    observed = PathologyParseOrchestrator.parse_biopsy_report(
+        report,
+        request_id="clinical-case-1",
+    )
+    assert observed == expected
+    assert calls == ["medgemma"]
 
 
-def test_biopsy_clinicalbert_failure_has_no_regex_fallback(monkeypatch) -> None:
+def test_biopsy_medgemma_failure_has_no_ner_or_regex_fallback(monkeypatch) -> None:
     cb = importlib.import_module("oncology_arbiter.nlp.clinicalbert_modal_client")
+    medgemma = importlib.import_module("oncology_arbiter.nlp.medgemma_pathology_client")
     old_parser = importlib.import_module("oncology_arbiter.nlp.report_parser_v2")
-    monkeypatch.setenv("CLINICALBERT_MODAL_URL", "https://unit--clinicalbert")
 
-    def fail_parse(self, report_text: str):
-        raise ClinicalBertModalError("unit contract failure")
+    def fail_parse(report_text: str, **kwargs):
+        raise medgemma.MedGemmaPathologyError("unit contract failure")
 
     def forbidden_fallback(*args, **kwargs):
-        raise AssertionError("legacy report parser must not be called")
+        raise AssertionError("ClinicalBERT/regex fallback must not be called")
 
-    monkeypatch.setattr(cb.ClinicalBertModalClient, "parse", fail_parse)
+    monkeypatch.setattr(medgemma, "extract_pathology", fail_parse)
+    monkeypatch.setattr(cb.ClinicalBertModalClient, "parse", forbidden_fallback)
     monkeypatch.setattr(old_parser, "parse_biopsy_report", forbidden_fallback, raising=False)
     monkeypatch.setattr(old_parser, "parse_report", forbidden_fallback, raising=False)
 
@@ -96,7 +115,7 @@ def test_biopsy_clinicalbert_failure_has_no_regex_fallback(monkeypatch) -> None:
     body = response.json()
     assert body["pipeline_status"] == "failed_required_stage"
     assert body["report_parse"] is None
-    receipt = next(r for r in body["stage_receipts"] if r["stage"] == "clinicalbert_pathology_parse")
+    receipt = next(r for r in body["stage_receipts"] if r["stage"] == "medgemma_pathology_parse")
     assert receipt["status"] == "failed_required"
     assert body["dss_prognosis"] is None
 
@@ -202,7 +221,12 @@ class _Response:
 
 
 def test_configured_medgemma_is_terminal_and_surfaces_provenance(monkeypatch) -> None:
-    monkeypatch.setenv("MEDGEMMA_MODAL_URL", "https://unit--medgemma-27b")
+    from oncology_arbiter.models.medgemma_1_5_4b_wiring import (
+        verify_artifact_identity,
+    )
+
+    identity = verify_artifact_identity()
+    monkeypatch.setenv("MEDGEMMA_MODAL_URL", "https://unit--medgemma-1-5-4b")
     client = GemmaClient(google_key="must-not-be-used", timeout_s=1)
     calls: list[str] = []
 
@@ -210,8 +234,9 @@ def test_configured_medgemma_is_terminal_and_surfaces_provenance(monkeypatch) ->
         calls.append(url)
         return _Response(200, {
             "text": "non-empty clinical research synthesis",
-            "model": "google/medgemma-27b-it",
-            "app_version": "medgemma-27b-modal-v0.5.0-production-ready",
+            "model": identity["model_id"],
+            "app_version": identity["app_version"],
+            "revision_sha256": identity["revision_sha256"],
             "request_id": "medgemma-request-1",
             "prompt_tokens": 12,
             "completion_tokens": 7,
@@ -225,12 +250,12 @@ def test_configured_medgemma_is_terminal_and_surfaces_provenance(monkeypatch) ->
     _record_llm(result, response)
     serialized = result.as_dict()
     assert serialized["llm_provider"] == "medgemma_modal"
-    assert serialized["llm_model"] == "google/medgemma-27b-it"
-    assert serialized["llm_app_version"] == "medgemma-27b-modal-v0.5.0-production-ready"
+    assert serialized["llm_model"] == identity["model_id"]
+    assert serialized["llm_app_version"] == identity["app_version"]
     assert serialized["llm_request_ids"] == ["medgemma-request-1"]
     assert serialized["llm_prompt_tokens"] == 12
     assert serialized["llm_completion_tokens"] == 7
-    assert calls == ["https://unit--medgemma-27b-chat.modal.run"]
+    assert calls == ["https://unit--medgemma-1-5-4b-chat.modal.run"]
 
     def fail(url, **kwargs):
         calls.append(url)
@@ -239,7 +264,7 @@ def test_configured_medgemma_is_terminal_and_surfaces_provenance(monkeypatch) ->
     monkeypatch.setattr(client._session, "post", fail)
     with pytest.raises(LlmUnavailable, match="MedGemma Modal unavailable"):
         client.chat([{"role": "user", "content": "retry"}])
-    assert calls[-1] == "https://unit--medgemma-27b-chat.modal.run"
+    assert calls[-1] == "https://unit--medgemma-1-5-4b-chat.modal.run"
 
 
 def _triage_features(**updates) -> dict:
@@ -260,20 +285,44 @@ def _triage_features(**updates) -> dict:
 
 
 def test_therapy_triage_contrasts_are_mathematically_exact() -> None:
+    from oncology_arbiter.arbiter import load_arbiter
+
+    arbiter = load_arbiter("therapy")
     zero = _score_explicit_therapy_triage(_triage_features(lymph_nodes_pos=0))
     one = _score_explicit_therapy_triage(_triage_features(lymph_nodes_pos=1))
     assert zero is not None and one is not None
     assert zero.term_contributions["node_status_positive"] == 0.0
-    assert one.term_contributions["node_status_positive"] == 2.1
-    assert math.isclose(one.logit - zero.logit, 2.1, rel_tol=0, abs_tol=1e-12)
+    node_coef = arbiter.coefficients["node_status_positive"]
+    assert math.isclose(
+        one.term_contributions["node_status_positive"],
+        node_coef,
+        rel_tol=0,
+        abs_tol=1e-6,
+    )
+    assert math.isclose(one.logit - zero.logit, node_coef, rel_tol=0, abs_tol=1e-6)
 
     grade3 = _score_explicit_therapy_triage(_triage_features(grade=3))
     larger = _score_explicit_therapy_triage(_triage_features(tumor_size_mm=70.0))
     older = _score_explicit_therapy_triage(_triage_features(age_years=60.0))
     assert grade3 is not None and larger is not None and older is not None
-    assert math.isclose(grade3.logit - zero.logit, 1.2, rel_tol=0, abs_tol=1e-12)
-    assert math.isclose(larger.logit - zero.logit, 1.4, rel_tol=0, abs_tol=1e-12)
-    assert math.isclose(older.logit - zero.logit, -0.05, rel_tol=0, abs_tol=1e-12)
+    assert math.isclose(
+        grade3.logit - zero.logit,
+        arbiter.coefficients["grade_3"] - arbiter.coefficients["grade_2"],
+        rel_tol=0,
+        abs_tol=1e-6,
+    )
+    assert math.isclose(
+        larger.logit - zero.logit,
+        arbiter.coefficients["tumor_size_norm"],
+        rel_tol=0,
+        abs_tol=1e-6,
+    )
+    assert math.isclose(
+        older.logit - zero.logit,
+        arbiter.coefficients["age_at_diagnosis_norm"] * 0.1,
+        rel_tol=0,
+        abs_tol=1e-6,
+    )
     # MIGRATED: an explicitly-null node status used to return None. It now
     # raises through the Manski gate, and the exception carries the interval
     # that the silent None concealed. The arithmetic contrasts above are
@@ -282,11 +331,14 @@ def test_therapy_triage_contrasts_are_mathematically_exact() -> None:
         _score_explicit_therapy_triage(_triage_features(lymph_nodes_pos=None))
     bounds = exc.value.bounds
     assert bounds.missing_features == ("node_status_positive",)
-    assert (round(bounds.lower, 6), round(bounds.upper, 6)) == (0.153164, 0.596283)
-    assert round(bounds.width, 6) == 0.443119
-    # The width is exactly the sigmoid span of the +2.1 node coefficient over
-    # the base logit, so the refusal is arithmetic, not a policy guess.
-    assert round(bounds.upper - bounds.lower, 6) == round(bounds.width, 6)
+    assert math.isclose(bounds.lower, zero.p_positive, rel_tol=0, abs_tol=1e-6)
+    assert math.isclose(bounds.upper, one.p_positive, rel_tol=0, abs_tol=1e-6)
+    assert math.isclose(
+        bounds.width,
+        one.p_positive - zero.p_positive,
+        rel_tol=0,
+        abs_tol=1e-6,
+    )
 
 
 def test_therapy_endpoint_uses_bridge_as_only_recommendation_source(monkeypatch) -> None:
@@ -485,8 +537,10 @@ def test_full_nsclc_uses_verified_case_manifest_then_luna16(monkeypatch) -> None
 
 
 def test_full_case_source_contains_no_local_ct_or_nccn_substitution() -> None:
-    app_path = Path(importlib.import_module("oncology_arbiter.api.app").__file__)
-    tree = ast.parse(app_path.read_text(encoding="utf-8"))
+    case_path = Path(
+        importlib.import_module("oncology_arbiter.api.routers.case").__file__
+    )
+    tree = ast.parse(case_path.read_text(encoding="utf-8"))
     full_case = next(
         node for node in ast.walk(tree)
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == "case_full"
@@ -519,9 +573,13 @@ def test_full_case_source_contains_no_local_ct_or_nccn_substitution() -> None:
 # --------------------------------------------------------------------------- #
 
 
+def _module_tree(module_name: str) -> ast.Module:
+    mod_path = Path(importlib.import_module(module_name).__file__)
+    return ast.parse(mod_path.read_text(encoding="utf-8"))
+
+
 def _app_tree() -> ast.Module:
-    app_path = Path(importlib.import_module("oncology_arbiter.api.app").__file__)
-    return ast.parse(app_path.read_text(encoding="utf-8"))
+    return _module_tree("oncology_arbiter.api.app")
 
 
 def _function_named(tree: ast.Module, name: str) -> ast.FunctionDef | ast.AsyncFunctionDef:
@@ -577,7 +635,7 @@ def test_only_arbiter_call_site_requires_the_complete_explicit_vector() -> None:
 
 def test_screening_emits_no_template_arbiter_block() -> None:
     """`/v1/screening/analyze` hard-codes arbiter_score=None; no template escapes."""
-    tree = _app_tree()
+    tree = _module_tree("oncology_arbiter.api.routers.screening")
     screening = _function_named(tree, "screening_analyze")
 
     assigned: list[ast.expr] = [

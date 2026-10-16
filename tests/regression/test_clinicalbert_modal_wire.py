@@ -1,20 +1,17 @@
-"""Regression: enforce production wiring for the ClinicalBERT report parser.
+"""Regression: enforce MedGemma-primary pathology parser wiring.
 
 The production contract requires:
 
-  1. ``render.yaml`` publishes the environment variables the app.py NSCLC
-     branch needs to route to the Modal deployment.
-  2. ``src/oncology_arbiter/api/app.py`` imports the Modal client and
-     actually instantiates it when ``CLINICALBERT_BACKEND=modal``.
-  3. The NSCLC branch reads ``CLINICALBERT_MODAL_URL`` and calls the
-     Modal client on the parsed report path.
-  4. The Modal client module exists and exposes ``ClinicalBertModalClient``
+  1. ``render.yaml`` configures the MedGemma specialist, not the retired
+     ClinicalBERT parser as a production backend.
+  2. The parser orchestrator routes to MedGemma by default and permits
+     ClinicalBERT only through an explicit research override.
+  3. The public schema package preserves the parsed-report wire fields.
+  4. The legacy Modal client remains import-light for explicit research use.
+
+The Modal client module exposes ``ClinicalBertModalClient``
      with a stdlib-only ``urllib`` import surface (Render free tier has no
      ``requests``; shipping a heavy dep would blow the 512 MB budget).
-
-We assert on the source text and AST rather than importing app.py at test
-time — importing app.py triggers full FastAPI + optional-backend wiring,
-which is deliberately kept out of the ``regression`` marker's scope.
 """
 from __future__ import annotations
 
@@ -26,37 +23,26 @@ import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 RENDER_YAML = REPO_ROOT / "render.yaml"
-APP_PY = REPO_ROOT / "src" / "oncology_arbiter" / "api" / "app.py"
 MODAL_CLIENT_PY = (
     REPO_ROOT / "src" / "oncology_arbiter" / "nlp" / "clinicalbert_modal_client.py"
 )
 
 
 @pytest.mark.regression
-def test_render_yaml_declares_modal_env() -> None:
-    """render.yaml must publish CLINICALBERT_BACKEND=modal + CLINICALBERT_MODAL_URL."""
+def test_render_yaml_declares_medgemma_primary_not_clinicalbert() -> None:
+    """Production must route pathology extraction to MedGemma."""
     assert RENDER_YAML.exists(), f"render.yaml missing at {RENDER_YAML}"
     text = RENDER_YAML.read_text()
-    # Order matters less than presence — the Render blueprint layout is
-    # 'key:' / 'value:' pairs, so we scan for both.
     assert re.search(
-        r"^\s*-\s*key:\s*CLINICALBERT_BACKEND\s*\n\s*value:\s*modal\s*$",
+        r"^\s*-\s*key:\s*MEDGEMMA_MODAL_URL\s*\n\s*value:\s*\S+\s*$",
         text,
         re.MULTILINE,
-    ), "render.yaml does not set CLINICALBERT_BACKEND=modal"
-    assert re.search(
-        r"^\s*-\s*key:\s*CLINICALBERT_MODAL_URL\s*\n\s*value:\s*"
-        r"https://crispro--clinicalbert\s*$",
+    ), "render.yaml does not configure MEDGEMMA_MODAL_URL"
+    assert not re.search(
+        r"^\s*-\s*key:\s*(?:CLINICALBERT_BACKEND|CLINICALBERT_MODAL_URL)\s*$",
         text,
         re.MULTILINE,
-    ), "render.yaml does not set CLINICALBERT_MODAL_URL to the deployed real-data URL"
-    # Co-Scientist MUST stay ON — otherwise elo_ranked_hypotheses is empty
-    # even after the ClinicalBERT parse succeeds.
-    assert re.search(
-        r"^\s*-\s*key:\s*ONCOLOGY_ARBITER_ENABLE_CO_SCIENTIST\s*\n\s*value:\s*\"?1\"?\s*$",
-        text,
-        re.MULTILINE,
-    ), "render.yaml must keep ONCOLOGY_ARBITER_ENABLE_CO_SCIENTIST=1"
+    ), "ClinicalBERT must not be configured as the production pathology backend"
 
 
 @pytest.mark.regression
@@ -93,66 +79,41 @@ def test_modal_client_module_exists_and_is_stdlib_only() -> None:
 
 
 @pytest.mark.regression
-def test_app_py_imports_and_uses_modal_client() -> None:
-    """app.py NSCLC branch must import ClinicalBertModalClient and route on backend=modal."""
-    assert APP_PY.exists(), f"missing {APP_PY}"
-    src = APP_PY.read_text()
-
-    # Must import the Modal client somewhere in app.py (top-level or inside
-    # the /v1/case/full handler).
-    assert "ClinicalBertModalClient" in src, (
-        "app.py does not reference ClinicalBertModalClient"
+def test_pathology_orchestrator_routes_to_medgemma_by_default(monkeypatch) -> None:
+    """A real pathology note must take the MedGemma branch by default."""
+    from oncology_arbiter.api.orchestrator.pathology_parse import (
+        PathologyParseOrchestrator,
     )
 
-    # Must dispatch on CLINICALBERT_BACKEND env var and honor 'modal'.
-    assert "CLINICALBERT_BACKEND" in src, (
-        "app.py does not read CLINICALBERT_BACKEND"
-    )
-    # CLINICALBERT_MODAL_URL must be read either directly in app.py OR
-    # inside the Modal client module app.py delegates to. Both count as
-    # "wired" — but at least one of the two must reference it, otherwise
-    # the env var in render.yaml is dead.
-    modal_client_src = MODAL_CLIENT_PY.read_text()
-    assert (
-        "CLINICALBERT_MODAL_URL" in src
-        or "CLINICALBERT_MODAL_URL" in modal_client_src
-    ), (
-        "Neither app.py nor clinicalbert_modal_client.py reads "
-        "CLINICALBERT_MODAL_URL; render.yaml env var would be dead"
-    )
-    # And a modal-branch string literal in app.py, so the routing is not
-    # just a shell of the env var check.
-    assert (
-        '"modal"' in src or "'modal'" in src
-    ), "app.py does not branch on the 'modal' backend value"
+    observed: list[tuple[str, str, str]] = []
 
-    # AST-level sanity: parse succeeds — no syntax errors were introduced
-    # by the ClinicalBERT wiring block.
-    ast.parse(src)
+    def medgemma(report_text: str, *, request_id: str):
+        observed.append(("medgemma", report_text, request_id))
+        return None, None, None, {"status": "sentinel"}
+
+    def clinicalbert(report_text: str, *, request_id: str):
+        observed.append(("clinicalbert", report_text, request_id))
+        return None, None, None, {"status": "sentinel"}
+
+    monkeypatch.delenv("ONCOLOGY_FORCE_CLINICALBERT_NER", raising=False)
+    monkeypatch.setattr(PathologyParseOrchestrator, "_parse_medgemma", medgemma)
+    monkeypatch.setattr(PathologyParseOrchestrator, "_parse_clinicalbert", clinicalbert)
+
+    note = (
+        "Invasive ductal carcinoma, Nottingham grade 3. "
+        "ER positive (95%), PR positive (70%), HER2 IHC 2+ equivocal."
+    )
+    PathologyParseOrchestrator.parse_biopsy_report(note, request_id="clinical-regression")
+
+    assert observed == [("medgemma", note, "clinical-regression")]
 
 
 @pytest.mark.regression
 def test_nsclc_response_schema_carries_parsed_report() -> None:
     """The NsclcResponse envelope must expose parsed_report + parsed_report_provenance."""
-    schemas_py = (
-        REPO_ROOT / "src" / "oncology_arbiter" / "api" / "schemas.py"
-    )
-    assert schemas_py.exists(), f"missing {schemas_py}"
-    src = schemas_py.read_text()
+    from oncology_arbiter.api.schemas import NsclcResponse
 
-    tree = ast.parse(src)
-    nsclc_cls = None
-    for node in ast.walk(tree):
-        if isinstance(node, ast.ClassDef) and node.name == "NsclcResponse":
-            nsclc_cls = node
-            break
-    assert nsclc_cls is not None, "NsclcResponse class missing from schemas.py"
-
-    field_names = {
-        stmt.target.id
-        for stmt in nsclc_cls.body
-        if isinstance(stmt, ast.AnnAssign) and isinstance(stmt.target, ast.Name)
-    }
+    field_names = set(NsclcResponse.model_fields)
     assert "parsed_report" in field_names, (
         f"NsclcResponse missing 'parsed_report' field; found {sorted(field_names)}"
     )
@@ -163,35 +124,31 @@ def test_nsclc_response_schema_carries_parsed_report() -> None:
 
 
 @pytest.mark.regression
-def test_modal_deployment_uses_release_locked_sliding_windows() -> None:
-    """Modal inference must package and call the shared 192/32 chunker."""
+def test_modal_deployment_packages_identity_locked_sliding_window_runtime() -> None:
+    """Legacy research deployment must package the measured v2 runtime."""
     modal_app_py = REPO_ROOT / "deploy" / "modal" / "clinicalbert_app.py"
-    helper_py = (
+    runtime_py = (
         REPO_ROOT
         / "src"
         / "oncology_arbiter"
         / "nlp"
-        / "clinicalbert_sliding_window.py"
+        / "clinicalbert_runtime_v2.py"
     )
     assert modal_app_py.exists(), f"missing {modal_app_py}"
-    assert helper_py.exists(), f"missing {helper_py}"
+    assert runtime_py.exists(), f"missing {runtime_py}"
 
     src = modal_app_py.read_text()
-    helper_src = helper_py.read_text()
+    runtime_src = runtime_py.read_text()
     ast.parse(src)
-    ast.parse(helper_src)
+    ast.parse(runtime_src)
 
     assert ".add_local_file(" in src
-    assert '"/root/clinicalbert_sliding_window.py"' in src
-    assert "from clinicalbert_sliding_window import" in src
-    assert "predict_words_sliding_window(" in src
-    assert "window_tokens=WINDOW_TOKENS" in src
-    assert "overlap_tokens=OVERLAP_TOKENS" in src
-    assert "max_length=512" not in src
-    assert "max_len=512" not in src
+    assert "clinicalbert_runtime_v2.py" in src
+    assert "ClinicalBertV2Runtime" in src
+    assert "ARTIFACT_SHA256" in src
+    assert "BASE_REVISION" in src
 
-    assert "WINDOW_TOKENS = 192" in helper_src
-    assert "OVERLAP_TOKENS = 32" in helper_src
-    assert "return_overflowing_tokens=True" in helper_src
-    assert 'padding="max_length"' in helper_src
-    assert "mean_logits = logit_sums / observations[:, None]" in helper_src
+    assert "return_overflowing_tokens=True" in runtime_src
+    assert "stride=self.stride" in runtime_src
+    assert "sliding windows did not cover every report token" in runtime_src
+    assert "averaged = sums / counts[:, None]" in runtime_src

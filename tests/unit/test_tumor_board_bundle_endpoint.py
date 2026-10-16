@@ -5,7 +5,7 @@ Contract under test:
 * Round-trip: post the shipped AK bundle → 200 + envelope + bundle_sha256.
 * Idempotent: identical bundle → identical sha256.
 * Wrong contract_version → 422 (pydantic Literal + explicit route check).
-* HIPAA_MODE=true flips provenance.model_state to LOADED_HIPAA_REDACTOR.
+* HIPAA_MODE=true fails closed until a real redaction transform is wired.
 * HIPAA_MODE=false (or unset) keeps provenance.model_state = LOADED_AK_BUNDLE.
 * The shipped demo sample /v1/demo/samples/ak_mbd4_lof_case is byte-for-byte
   equal to the payload accepted by /v1/tumor_board/bundle → the two paths
@@ -18,7 +18,6 @@ conftest.py; no key headers needed.
 from __future__ import annotations
 
 import copy
-import hashlib
 import json
 from pathlib import Path
 
@@ -52,7 +51,10 @@ def bundle() -> dict:
 # ------------------------------------------------------------------- happy
 
 
-def test_happy_round_trip(client: TestClient, bundle: dict) -> None:
+def test_mbd4_lof_hgsoc_bundle_preserves_mechanism_and_falsification(
+    client: TestClient,
+    bundle: dict,
+) -> None:
     r = client.post("/v1/tumor_board/bundle", json=bundle)
     assert r.status_code == 200, r.text
     body = r.json()
@@ -74,6 +76,22 @@ def test_happy_round_trip(client: TestClient, bundle: dict) -> None:
         body["bundle"]["contract_version"]
         == "tumor_board.v3.multimodal-with-manuscript-claims"
     )
+    context = body["bundle"]["patient_context"]
+    assert context["primary_alteration"]["gene"] == "MBD4"
+    assert context["primary_alteration"]["alteration_type"] == "LikelyLoF"
+    assert context["diagnosis"]["histology"] == "HGSOC"
+    drugs = {
+        item["drug_name"]: item
+        for item in body["bundle"]["synthetic_lethality"]["recommended_drugs"]
+    }
+    assert drugs["ceralasertib"]["surface_status"] == "RECOMMENDED"
+    assert drugs["ceralasertib"]["manuscript_claim_type"] == (
+        "primary_new_candidate_axis"
+    )
+    assert drugs["olaparib"]["surface_status"] == (
+        "NOT_RECOMMENDED_ON_THIS_MECHANISM"
+    )
+    assert drugs["olaparib"]["manuscript_claim_type"] == "falsified_mechanism"
 
 
 def test_bundle_sha256_is_deterministic(client: TestClient, bundle: dict) -> None:
@@ -112,13 +130,13 @@ def test_zero_recommended_drugs_rejected(client: TestClient, bundle: dict) -> No
 # ------------------------------------------------------------------- hipaa
 
 
-def test_hipaa_mode_flips_model_state(
+def test_hipaa_mode_fails_closed_without_redactor(
     client: TestClient, bundle: dict, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.setenv("HIPAA_MODE", "true")
     r = client.post("/v1/tumor_board/bundle", json=bundle)
-    assert r.status_code == 200, r.text
-    assert r.json()["provenance"]["model_state"] == "loaded_hipaa_redactor"
+    assert r.status_code == 503, r.text
+    assert r.json()["detail"]["error"] == "hipaa_redactor_unavailable"
 
 
 def test_no_hipaa_mode_uses_ak_bundle_state(

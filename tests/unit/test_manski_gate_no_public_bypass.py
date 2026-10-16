@@ -6,9 +6,11 @@ because ``L2LogisticArbiter.score`` tracked ``missing_bools`` and nothing else.
 An absent one-hot silently encodes to the reference level and an absent
 continuous silently encodes to ``0.0``; neither was recorded. On the therapy
 template that made the interval fail-OPEN on 5 of 10 declared inputs — dropping
-``grade`` reported a zero-width interval around 0.119834 when the assumption-free
-set is actually [0.039392, 0.378952], and dropping ``ki67`` reported a zero-width
-interval when the set is the whole of [0, 1].
+``grade`` and receptor omissions must be ranged over their declared levels,
+while an omitted continuous covariate with a non-zero fitted coefficient and
+no declared support must produce the whole [0, 1] interval. A declared input
+whose fitted coefficient is exactly zero (currently ``ki67_norm``) is named as
+missing but correctly contributes zero interval width.
 
 Three properties are pinned here:
 
@@ -20,9 +22,9 @@ Three properties are pinned here:
 * blind inference exists only behind the ``research:blind_inference`` scope,
   including when ``ONCOLOGY_ARBITER_AUTH_MODE=off``.
 
-Every expected width below was measured against the frozen artefact, not
-guessed. Dropping ``histology`` costs 0.147815 and is *released*: a test that
-demanded a 422 there would be pinning the wrong behaviour.
+Every expected width below was measured against the identity-locked
+``therapy_arbiter_v1`` artefact, not guessed. The target is observed
+chemotherapy receipt in METABRIC, not treatment benefit.
 """
 from __future__ import annotations
 
@@ -82,15 +84,16 @@ BASE_FEATURES: dict[str, Any] = {
 # (case, dropped wire fields, expected gate code or None, measured width)
 GATE_CASES: list[tuple[str, list[str], str | None, float]] = [
     ("complete", [], None, 0.000000),
-    ("drop_pr", ["pr_positive"], None, 0.095615),
-    ("drop_onehot_histology", ["histology"], None, 0.147815),
-    ("drop_onehot_grade", ["grade"], MANSKI_ERROR_CODE, 0.339560),
-    ("drop_er_her2", ["er_positive", "her2_positive"], MANSKI_ERROR_CODE, 0.468617),
+    ("drop_pr", ["pr_positive"], None, 0.003520),
+    ("drop_onehot_histology", ["histology"], None, 0.003117),
+    ("drop_onehot_grade", ["grade"], None, 0.017416),
+    ("drop_er_her2", ["er_positive", "her2_positive"], None, 0.087156),
     ("drop_all_bools",
      ["er_positive", "pr_positive", "her2_positive", "lymph_nodes_pos",
       "brca_pathogenic"],
-     MANSKI_ERROR_CODE, 0.826868),
-    ("drop_continuous_ki67", ["ki67_pct"], UNBOUNDED_ERROR_CODE, 1.000000),
+     MANSKI_ERROR_CODE, 0.655517),
+    # ki67_norm is declared but has a fitted coefficient of exactly zero.
+    ("drop_continuous_ki67", ["ki67_pct"], None, 0.000000),
     ("drop_continuous_size", ["tumor_size_mm"], UNBOUNDED_ERROR_CODE, 1.000000),
     ("drop_continuous_age", ["age_years"], UNBOUNDED_ERROR_CODE, 1.000000),
 ]
@@ -187,7 +190,7 @@ def test_public_route_gate(client, route, build, case, drop, expect, width):
 def test_gate_never_emits_zero_width_for_missing_continuous():
     """The specific fail-open the audit found: absent continuous read as 0.0."""
     arb = load_arbiter("therapy")
-    for feat in ("ki67_norm", "tumor_size_norm", "age_at_diagnosis_norm"):
+    for feat in ("tumor_size_norm", "age_at_diagnosis_norm"):
         f = {k: v for k, v in BASE_FEATURES.items() if k != feat}
         result = arb.score(f)
         # The arbiter's own interval is still degenerate — that is the bug.
@@ -202,6 +205,23 @@ def test_gate_never_emits_zero_width_for_missing_continuous():
         with pytest.raises(Exception) as exc:
             enforce_manski_gate(b)
         assert exc.value.error_code == UNBOUNDED_ERROR_CODE
+
+
+def test_omitted_zero_coefficient_ki67_is_named_but_does_not_widen_bounds():
+    """An unused feature must not be dressed up as patient-specific signal."""
+    arb = load_arbiter("therapy")
+    features = {k: v for k, v in BASE_FEATURES.items() if k != "ki67_norm"}
+    result = arb.score(features)
+    bounds = ManskiBounds.from_arbiter(
+        stage="therapy",
+        arbiter=arb,
+        features=features,
+        result=result,
+    )
+    assert "ki67_norm" in bounds.missing_features
+    assert arb.coefficients.get("ki67_norm", 0.0) == 0.0
+    assert bounds.width == 0.0
+    assert bounds.identified is True
 
 
 def test_unbounded_bounds_object_is_unconstructible_with_narrow_interval():
@@ -282,8 +302,16 @@ def test_bypass_symbols_absent_from_live_code(module):
     )
 
 
-GATED = {"patient_context": {"cancer_type": "breast"},
-         "therapy_features": _panel(["er_positive", "her2_positive"])}
+GATED = {
+    "patient_context": {"cancer_type": "breast"},
+    "therapy_features": _panel([
+        "er_positive",
+        "pr_positive",
+        "her2_positive",
+        "lymph_nodes_pos",
+        "brca_pathogenic",
+    ]),
+}
 
 
 @pytest.mark.parametrize("header", [
@@ -340,7 +368,13 @@ RR = "/v1/research/arbiter/identified_set"
 PROBE = {
     "arbiter": "therapy",
     "features": {k: v for k, v in BASE_FEATURES.items()
-                 if k not in ("er_status_positive", "her2_status_positive")},
+                 if k not in (
+                     "er_status_positive",
+                     "pr_status_positive",
+                     "her2_status_positive",
+                     "node_status_positive",
+                     "brca_status_known_pathogenic",
+                 )},
     "acknowledge_not_for_clinical_use": True,
 }
 
@@ -387,9 +421,9 @@ def test_research_route_releases_with_bounds_warnings_and_receipt(
     b = r.json()
 
     # The number the public route refuses.
-    assert b["point_estimate"] == pytest.approx(0.311310, abs=1e-6)
-    assert b["bounds"]["lower"] == pytest.approx(0.155251, abs=1e-6)
-    assert b["bounds"]["upper"] == pytest.approx(0.623868, abs=1e-6)
+    assert b["point_estimate"] == pytest.approx(0.105169, abs=1e-6)
+    assert b["bounds"]["lower"] == pytest.approx(0.014473, abs=1e-6)
+    assert b["bounds"]["upper"] == pytest.approx(0.669990, abs=1e-6)
     assert b["bounds"]["identified"] is False
     assert b["would_have_been_rejected"] is True
     assert b["public_route_error_code"] == MANSKI_ERROR_CODE
@@ -397,7 +431,12 @@ def test_research_route_releases_with_bounds_warnings_and_receipt(
 
     # It cannot be returned naked: raw bounds, missing features, warnings.
     assert set(b["missing_features"]) == {
-        "er_status_positive", "her2_status_positive"}
+        "brca_status_known_pathogenic",
+        "er_status_positive",
+        "her2_status_positive",
+        "node_status_positive",
+        "pr_status_positive",
+    }
     assert b["warnings"], "an unidentified release must carry warnings"
     assert any("NOT_FOR_CLINICAL_USE" in w for w in b["warnings"])
     assert any("identified_set" in w for w in b["warnings"])
@@ -426,7 +465,7 @@ def test_research_route_releases_with_bounds_warnings_and_receipt(
 def test_research_route_unbounded_case_says_so(tmp_path, monkeypatch):
     monkeypatch.setenv("ONCOLOGY_ARBITER_AUTH_MODE", "on")
     c, raw = _scoped_client(tmp_path, monkeypatch, [RESEARCH_BLIND_INFERENCE_SCOPE])
-    feats = {k: v for k, v in BASE_FEATURES.items() if k != "ki67_norm"}
+    feats = {k: v for k, v in BASE_FEATURES.items() if k != "tumor_size_norm"}
     r = c.post(RR, json={"arbiter": "therapy", "features": feats,
                          "acknowledge_not_for_clinical_use": True},
                headers={"X-API-Key": raw})
@@ -434,7 +473,7 @@ def test_research_route_unbounded_case_says_so(tmp_path, monkeypatch):
     b = r.json()
     assert b["public_route_error_code"] == UNBOUNDED_ERROR_CODE
     assert [b["bounds"]["lower"], b["bounds"]["upper"]] == [0.0, 1.0]
-    assert b["unobserved_unbounded"] == ["ki67_norm"]
+    assert b["unobserved_unbounded"] == ["tumor_size_norm"]
     assert any("zero_information" in w for w in b["warnings"])
 
 
@@ -445,12 +484,10 @@ def test_research_route_unbounded_case_says_so(tmp_path, monkeypatch):
 def test_continuous_features_take_raw_values_not_pre_normalised():
     """Pin the raw-input contract for `*_norm` keys.
 
-    The key is named ``ki67_norm`` but ``feature_encodings["ki67_norm"]`` is
-    the string ``"ki67_pct / 100.0"`` and ``_encode_continuous`` applies the
-    divisor, so the caller passes the RAW percentage. Passing an already
-    normalised 0.20 is silently accepted and attenuates the contribution
-    100-fold. No exception, no warning, no range validation — the probability
-    just moves 35% and stays plausible.
+    The keys are named ``tumor_size_norm`` and ``age_at_diagnosis_norm``, but
+    the encoder applies the /50 and /100 divisors. The API therefore supplies
+    raw millimetres and years. Pre-normalising a second time silently
+    attenuates both contributions.
 
     This test exists so that nobody "fixes" the confusing name by making the
     artefact accept pre-normalised values, which would silently re-scale every
@@ -458,13 +495,25 @@ def test_continuous_features_take_raw_values_not_pre_normalised():
     """
     arb = load_arbiter("therapy")
     raw = arb.score(BASE_FEATURES)
-    pre = arb.score(dict(BASE_FEATURES, ki67_norm=0.20, tumor_size_norm=0.44,
-                         age_at_diagnosis_norm=0.58))
-
-    assert raw.p_positive == pytest.approx(0.155251, abs=1e-6)
-    assert pre.p_positive == pytest.approx(0.100763, abs=1e-6)
-    # 0.9 * (20.0 / 100.0) == 0.18, not 0.9 * 0.20 == 0.18/100 * 100 ...
-    assert raw.term_contributions["ki67_norm"] == pytest.approx(0.18, abs=1e-9)
-    assert pre.term_contributions["ki67_norm"] == pytest.approx(0.0018, abs=1e-9)
+    pre = arb.score(dict(
+        BASE_FEATURES,
+        tumor_size_norm=22.0 / 50.0,
+        age_at_diagnosis_norm=58.0 / 100.0,
+    ))
+    assert raw.term_contributions["tumor_size_norm"] == pytest.approx(
+        arb.coefficients["tumor_size_norm"] * (22.0 / 50.0),
+        abs=1e-6,
+    )
+    assert raw.term_contributions["age_at_diagnosis_norm"] == pytest.approx(
+        arb.coefficients["age_at_diagnosis_norm"] * (58.0 / 100.0),
+        abs=1e-6,
+    )
+    assert abs(pre.term_contributions["tumor_size_norm"]) < abs(
+        raw.term_contributions["tumor_size_norm"]
+    )
+    assert abs(pre.term_contributions["age_at_diagnosis_norm"]) < abs(
+        raw.term_contributions["age_at_diagnosis_norm"]
+    )
+    assert raw.p_positive != pre.p_positive
     # Neither call raised or warned: the trap is silent.
     assert raw.missing_features == [] and pre.missing_features == []

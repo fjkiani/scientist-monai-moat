@@ -1,9 +1,9 @@
 """Shape tests for render.yaml — the Render.com deployment blueprint.
 
-These tests enforce the free-tier honesty posture:
-- The 512 MB free tier can NOT hold MONAI (~500 MB), MedSigLIP (~2 GB),
-  or TxGemma. Enabling those flags in render.yaml would silently thrash
-  the dyno at first request.
+These tests enforce the free-tier orchestration posture:
+- The 512 MB process never loads MONAI, MedSigLIP, or TxGemma weights.
+- Identity-locked specialists are addressed remotely.
+- Proxy/rules-lite substitutes are not silently enabled.
 - Every env var must be a static value; no secrets (HuggingFace tokens,
   API keys) get committed.
 - The healthCheckPath MUST match the Dockerfile HEALTHCHECK target, or
@@ -67,17 +67,31 @@ def test_render_yaml_enables_frontend_mount(render_yaml_text: str) -> None:
     assert "ONCOLOGY_ARBITER_SERVE_FRONTEND" in render_yaml_text
 
 
-def test_render_yaml_enables_therapy_rules_proxy(render_yaml_text: str) -> None:
-    """NCCN-lite rules engine is the only therapy backend that fits
-    the 512 MB free tier — must be on so /v1/therapy/reason returns
-    non-placeholder recommendations."""
-    assert "ONCOLOGY_ARBITER_ENABLE_THERAPY_RULES_PROXY" in render_yaml_text
+def test_render_yaml_configures_remote_identity_locked_specialists(
+    render_yaml_text: str,
+) -> None:
+    for key in (
+        "MODAL_MEDSIGLIP_URL",
+        "MEDGEMMA_MODAL_URL",
+        "TXGEMMA_MODAL_URL",
+    ):
+        assert re.search(rf"^\s*-\s*key:\s*{key}\s*$", render_yaml_text, re.MULTILINE)
 
 
-def test_render_yaml_enables_co_scientist(render_yaml_text: str) -> None:
-    """L5 Co-Scientist runs over envelopes with no ML runtime — safe
-    for free tier."""
-    assert "ONCOLOGY_ARBITER_ENABLE_CO_SCIENTIST" in render_yaml_text
+def test_render_yaml_does_not_enable_proxy_or_legacy_parser_paths(
+    render_yaml_text: str,
+) -> None:
+    for key in (
+        "ONCOLOGY_ARBITER_ENABLE_THERAPY_RULES_PROXY",
+        "ONCOLOGY_ARBITER_ENABLE_CO_SCIENTIST",
+        "CLINICALBERT_BACKEND",
+        "CLINICALBERT_MODAL_URL",
+    ):
+        assert not re.search(
+            rf"^\s*-\s*key:\s*{key}\s*$",
+            render_yaml_text,
+            re.MULTILINE,
+        )
 
 
 def test_render_yaml_does_not_enable_heavy_backends(render_yaml_text: str) -> None:

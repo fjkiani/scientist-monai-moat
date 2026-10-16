@@ -61,7 +61,9 @@ class TestModuleShape:
 
     def test_hf_secret_wired(self):
         text = TXGEMMA_APP.read_text()
-        assert 'from_name("txgemma-hf-token")' in text
+        assert 'TXGEMMA_HF_SECRET' in text
+        assert '"txgemma-hf-token"' in text
+        assert "modal.Secret.from_name(_HF_SECRET_NAME)" in text
 
 
 class TestClassAndEndpoints:

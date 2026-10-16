@@ -79,6 +79,7 @@ minversion = "8.0"
 addopts = "-ra --strict-markers"
 testpaths = ["tests"]
 markers = [
+    "asyncio: runs an async test under pytest-asyncio",
     "integration: hits live external APIs (PubMed / arXiv / Europe PMC)",
     "models: downloads and runs HuggingFace models (multi-GB)",
     "data: requires real mammography data on disk (CBIS-DDSM / EMBED)",

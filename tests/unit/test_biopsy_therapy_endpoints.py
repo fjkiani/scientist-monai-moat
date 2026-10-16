@@ -7,7 +7,7 @@ offline, and fast.
 from __future__ import annotations
 
 import base64
-import os
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -18,23 +18,17 @@ from oncology_arbiter.api import app as app_module
 from oncology_arbiter.api.app import create_app
 from oncology_arbiter.api.schemas import ModelState
 from oncology_arbiter.models.biopsy_medsiglip_probe import (
-    BACH_BIOPSY_CLASSES,
     MEDSIGLIP_REPO,
     BiopsyMedSigLipProbe,
-    BiopsyProbeResult,
     BiopsyProbeWeights,
 )
 from oncology_arbiter.models.biopsy_probe_v1_wiring import (
     BASE_MODEL_REVISION,
-    PRODUCTION_MODEL_NAME,
 )
 from oncology_arbiter.models.hai_def import (
     AccessLevel,
     GateReport,
-    GatedAccessError,
 )
-from oncology_arbiter.models.specialist_clients import SpecialistCall
-from oncology_arbiter.models.tissue_microscopy_product import product_tissue_model_name
 from oncology_arbiter.models.txgemma_client import TxGemmaClient
 
 
@@ -94,6 +88,7 @@ def client(monkeypatch) -> TestClient:
         "ONCOLOGY_ARBITER_ENABLE_BIOPSY_MEDSIGLIP",
         "ONCOLOGY_ARBITER_ENABLE_THERAPY_TXGEMMA",
         "ONCOLOGY_ARBITER_ENABLE_THERAPY_RULES_PROXY",
+        "ONCOLOGY_ARBITER_ENABLE_L2_EVIDENCE",
         "ONCOLOGY_ARBITER_ENABLE_MEDSIGLIP",
         "ONCOLOGY_ARBITER_ENABLE_SIGLIP_PROXY",
     ):
@@ -119,24 +114,6 @@ def _biopsy_output_json(subtype: str = "IDC", grade: int = 2,
         "grade": grade,
         "confidence": 0.7,
     }
-
-
-
-
-class _FakePhikonClient:
-    def embed(self, _image_bytes: bytes, *, request_id: str, required: bool = True):
-        vec = np.linspace(0.0, 1.0, 768, dtype=np.float32).tolist()
-        return SpecialistCall(
-            output={"embeddings": [vec]},
-            receipt={
-                "stage": "phikon_embedding",
-                "required": True,
-                "status": "succeeded",
-                "request_id": request_id,
-                "service_name": "phikon",
-                "error": None,
-            },
-        )
 
 def _install_biopsy_stub(monkeypatch, preflight_fn) -> None:
     """Replace BiopsyMedSigLipProbe.__init__ so it uses the fake encoder + preflight."""
@@ -179,32 +156,85 @@ def test_biopsy_needs_wsi_or_report(client: TestClient) -> None:
     assert resp.status_code == 400
 
 
-def test_biopsy_wired_returns_subtype(monkeypatch, client: TestClient) -> None:
-    """When flag is on and preflight ALLOWED (stubbed), we get a real subtype."""
-    monkeypatch.setenv("ONCOLOGY_ARBITER_ENABLE_BIOPSY_MEDSIGLIP", "1")
-    _install_biopsy_stub(monkeypatch, _preflight_allowed)
-    import oncology_arbiter.models.specialist_clients as sc
+def test_biopsy_report_maps_medgemma_clinical_fields(
+    monkeypatch,
+    client: TestClient,
+) -> None:
+    """A de-identified mastectomy report maps to exact structured biomarkers."""
+    report_path = (
+        Path(__file__).resolve().parents[2]
+        / "fixtures"
+        / "patient_sample_01"
+        / "pathology_note.txt"
+    )
+    report_text = report_path.read_text(encoding="utf-8")
+    revision = "a" * 64
 
-    monkeypatch.setattr(sc, "PhikonClient", _FakePhikonClient)
-    monkeypatch.setattr(app_module, "_get_medsiglip", lambda: _FakeEncoder(seed=42))
+    def _extract_pathology(observed_report: str) -> dict[str, Any]:
+        assert observed_report == report_text
+        return {
+            "model_id": "google/medgemma-1.5-4b-it",
+            "revision_sha256": revision,
+            "disclaimer": "Research Use Only",
+            "extraction": {
+                "er_status": "POSITIVE",
+                "er_percent": None,
+                "pr_status": "POSITIVE",
+                "her2_status": "EQUIVOCAL",
+                "nottingham_grade": 3,
+                "tumor_size_mm": 45.0,
+            },
+        }
 
+    monkeypatch.setattr(
+        "oncology_arbiter.nlp.medgemma_pathology_client.extract_pathology",
+        _extract_pathology,
+    )
     resp = client.post(
         "/v1/biopsy/analyze",
-        json={"wsi_bytes_b64": base64.b64encode(b"fake-image").decode()},
+        json={"report_text": report_text},
     )
     assert resp.status_code == 200, resp.text
     body = resp.json()
-    assert body["subtype_prediction"] in BACH_BIOPSY_CLASSES
-    assert body["provenance"]["model_state"] == "loaded_phikon"
-    assert body["provenance"]["model_name"] == product_tissue_model_name()
-    assert 0.0 <= body["confidence"] <= 1.0
-    assert not any("synthetic" in w.lower() for w in body["warnings"])
-    assert any("not IDC" in w for w in body["warnings"]), body["warnings"]
+    assert body["pipeline_status"] == "complete"
+    assert body["provenance"]["model_state"] == "loaded_medgemma_1p5_4b"
+    assert body["receptor_panel"] == {
+        "er_positive": True,
+        "pr_positive": True,
+        "her2_status": "equivocal",
+        "ki67_percent": None,
+        "parse_state": {
+            "er": "matched",
+            "pr": "matched",
+            "her2": "matched",
+            "grade": "matched",
+        },
+    }
+    assert body["grade"] == 3
+    assert body["report_parse"]["fusion_mode"] == "medgemma_pathology"
+    assert (
+        body["report_parse"]["extended_fields"]["tumor_size_mm"]["value"]
+        == 45.0
+    )
+    receipt = next(
+        row
+        for row in body["stage_receipts"]
+        if row["stage"] == "medgemma_pathology_parse"
+    )
+    assert receipt["status"] == "succeeded"
+    assert receipt["artifact_sha256"] == revision
+    assert body["dss_prognosis"] is None
 
 
 def test_biopsy_gated_state_when_forbidden(monkeypatch, client: TestClient) -> None:
     """Preflight FORBIDDEN → gated envelope, NO fabricated subtype."""
     monkeypatch.setenv("ONCOLOGY_ARBITER_ENABLE_BIOPSY_MEDSIGLIP", "1")
+    # Pin embedding client identity so a leftover MEDSIGLIP_BACKEND=modal
+    # singleton from other tests cannot trip repo-mismatch before the gate.
+    import oncology_arbiter.api.services.medsiglip as medsiglip_svc
+
+    medsiglip_svc._MEDSIGLIP_SINGLETON = None
+    monkeypatch.setattr(app_module, "_get_medsiglip", lambda: _FakeEncoder(seed=42))
     _install_biopsy_stub(monkeypatch, _preflight_forbidden)
 
     resp = client.post(
@@ -225,10 +255,7 @@ def test_biopsy_gated_state_when_forbidden(monkeypatch, client: TestClient) -> N
 
 def test_therapy_placeholder_when_flags_off(client: TestClient) -> None:
     resp = client.post("/v1/therapy/reason", json={})
-    assert resp.status_code == 200
-    body = resp.json()
-    assert body["provenance"]["model_state"] == "placeholder"
-    assert body["recommended_options"] == []
+    assert resp.status_code == 400
 
 
 def test_therapy_rules_lite_hr_positive(monkeypatch, client: TestClient) -> None:
@@ -237,18 +264,22 @@ def test_therapy_rules_lite_hr_positive(monkeypatch, client: TestClient) -> None
     payload = {
         "biopsy_output": _biopsy_output_json(subtype="IDC", grade=2,
                                              er=True, pr=True, her2="negative"),
-        "patient_context": {"age": 65, "menopausal_status": "post"},
+        "patient_context": {
+            "age": 65,
+            "menopausal_status": "post",
+            "genomic_markers": {"tnm_stage": "T1N0M0"},
+        },
     }
     resp = client.post("/v1/therapy/reason", json=payload)
     assert resp.status_code == 200, resp.text
     body = resp.json()
-    assert body["provenance"]["model_state"] == "proxy_rules_lite"
+    assert body["provenance"]["model_state"] == ModelState.LOADED_RULES_LITE.value
     regimens = [o["regimen"].lower() for o in body["recommended_options"]]
     assert any("aromatase" in r for r in regimens), regimens
-    # every recommendation carries NCCN evidence
-    for opt in body["recommended_options"]:
-        assert len(opt["evidence"]) >= 1
-        assert "nccn.org" in opt["evidence"][0]["url"]
+    assert not any("trastuzumab" in r for r in regimens)
+    assert body["branch_id"] == "hr_positive_her2_negative"
+    assert body["rules_model_id"] == "nccn-lite-v0"
+    assert len(body["rules_sha256"]) == 64
 
 
 def test_therapy_txgemma_gated_falls_through_to_rules(monkeypatch, client: TestClient) -> None:
@@ -260,23 +291,33 @@ def test_therapy_txgemma_gated_falls_through_to_rules(monkeypatch, client: TestC
     payload = {
         "biopsy_output": _biopsy_output_json(subtype="IDC", grade=3,
                                              er=False, pr=False, her2="negative"),
-        "patient_context": {"age": 45},
+        "patient_context": {"age": 45, "genomic_markers": {"tnm_stage": "T2N1M0"}},
     }
     resp = client.post("/v1/therapy/reason", json=payload)
     assert resp.status_code == 200, resp.text
     body = resp.json()
-    assert body["provenance"]["model_state"] == "proxy_rules_lite"
+    assert body["provenance"]["model_state"] == ModelState.LOADED_RULES_LITE.value
     assert any("txgemma_gated:forbidden" in w for w in body["warnings"]), body["warnings"]
+    assert body["branch_id"] == "triple_negative"
+    recommended = [o["regimen"].lower() for o in body["recommended_options"]]
+    not_recommended = [o["regimen"].lower() for o in body["not_recommended"]]
+    assert any("chemotherapy" in regimen for regimen in recommended)
+    assert any("endocrine therapy" in regimen for regimen in not_recommended)
 
 
 def test_therapy_txgemma_gated_no_rules_stays_placeholder(monkeypatch, client: TestClient) -> None:
-    """TxGemma FORBIDDEN + rules-lite OFF → placeholder, no silent fabrication."""
+    """TxGemma FORBIDDEN + rules-lite OFF → unavailable, no silent fabrication."""
     monkeypatch.setenv("ONCOLOGY_ARBITER_ENABLE_THERAPY_TXGEMMA", "1")
     _install_txgemma_stub(monkeypatch, _preflight_forbidden)
 
-    resp = client.post("/v1/therapy/reason", json={})
-    assert resp.status_code == 200
+    payload = {
+        "biopsy_output": _biopsy_output_json(subtype="IDC", grade=2,
+                                             er=True, pr=True, her2="negative"),
+        "patient_context": {"age": 55, "genomic_markers": {"tnm_stage": "T1N0M0"}},
+    }
+    resp = client.post("/v1/therapy/reason", json=payload)
+    assert resp.status_code == 200, resp.text
     body = resp.json()
-    assert body["provenance"]["model_state"] == "placeholder"
+    assert body["provenance"]["model_state"] == ModelState.UNAVAILABLE.value
     assert body["recommended_options"] == []
     assert any("txgemma_gated:forbidden" in w for w in body["warnings"])

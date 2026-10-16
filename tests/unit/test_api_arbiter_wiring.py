@@ -1,12 +1,12 @@
-"""Verify the L3 arbiter is wired into every stage endpoint.
+"""Verify the current explicit-feature L3 arbiter and L5 contracts.
 
 PLAN.md §4a: 'Every response body carries: stage_output, arbiter_score,
 term_contributions, driving_feature, evidence[]'.
 
-We use FastAPI TestClient so this is an in-process test with no network.
-Screening is exercised through real CBIS-DDSM DICOM bytes when a fixture
-is present (parametrized), and through the placeholder-refusal path when
-no bytes are sent.
+The imaging/text endpoints do not fabricate an intercept-only arbiter score
+from missing clinical features. Biopsy has a dedicated explicit feature route;
+therapy accepts a complete ``therapy_features`` panel; and the current breast
+L5 response exposes ``report_parse`` / ``therapy_triage`` at top level.
 """
 from __future__ import annotations
 
@@ -58,37 +58,123 @@ def _arbiter_block_shape(body: dict) -> None:
     assert 0.0 <= ab["p_positive"] <= 1.0
 
 
-# ── biopsy + therapy don't need real fixtures ────────────────────────
+SPICULATED_MASS = {
+    "lesion_type": "mass_spiculated",
+    "size_norm": 22.0,
+    "growth_delta_norm": 3.2,
+    "prior_biopsy_benign_at_site": False,
+    "family_history_first_degree": True,
+    "brca_status_known_pathogenic": False,
+    "us_correlate_hypoechoic_mass": True,
+    "us_correlate_simple_cyst": False,
+}
+
+CIRCUMSCRIBED_MASS = {
+    **SPICULATED_MASS,
+    "lesion_type": "mass_circumscribed",
+}
+
+LOW_CHEMO_RECEIPT_PROFILE = {
+    "histology": "invasive_ductal",
+    "grade": 1,
+    "er_positive": True,
+    "pr_positive": True,
+    "her2_positive": False,
+    "ki67_pct": 10.0,
+    "tumor_size_mm": 10.0,
+    "lymph_nodes_pos": 0,
+    "brca_pathogenic": False,
+    "age_years": 54.0,
+}
+
+HIGH_CHEMO_RECEIPT_PROFILE = {
+    "histology": "invasive_ductal",
+    "grade": 3,
+    "er_positive": False,
+    "pr_positive": False,
+    "her2_positive": False,
+    "ki67_pct": 70.0,
+    "tumor_size_mm": 70.0,
+    "lymph_nodes_pos": 4,
+    "brca_pathogenic": False,
+    "age_years": 54.0,
+}
 
 
-def test_biopsy_endpoint_returns_arbiter_score(client: TestClient) -> None:
-    resp = client.post("/v1/biopsy/analyze", json={"report_text": "invasive ductal carcinoma"})
-    assert resp.status_code == 200
-    body = resp.json()
-    _arbiter_block_shape(body)
-    assert body["arbiter_score"]["model_name"] == "biopsy_arbiter_v1"
+# ── explicit biopsy + therapy feature contracts ─────────────────────
 
 
-def test_therapy_endpoint_returns_arbiter_score(client: TestClient) -> None:
-    resp = client.post("/v1/therapy/reason", json={"biopsy_output": None, "patient_context": {}})
-    assert resp.status_code == 200
-    body = resp.json()
-    _arbiter_block_shape(body)
-    assert body["arbiter_score"]["model_name"] == "therapy_arbiter_v1"
+def test_spiculated_mass_scores_above_circumscribed_mass(
+    client: TestClient,
+) -> None:
+    """The validated morphology contrast must survive the API boundary."""
+    spiculated = client.post(
+        "/v1/stage/biopsy/score",
+        json={"features": SPICULATED_MASS},
+    )
+    circumscribed = client.post(
+        "/v1/stage/biopsy/score",
+        json={"features": CIRCUMSCRIBED_MASS},
+    )
+    assert spiculated.status_code == circumscribed.status_code == 200
+    spiculated_score = spiculated.json()["arbiter_score"]
+    circumscribed_score = circumscribed.json()["arbiter_score"]
+    _arbiter_block_shape(spiculated.json())
+    _arbiter_block_shape(circumscribed.json())
+    assert spiculated_score["model_name"] == "biopsy_arbiter_v1"
+    assert (
+        spiculated_score["p_positive"]
+        > circumscribed_score["p_positive"]
+    )
+    assert (
+        spiculated_score["recommendation"]
+        == "PROCEED_TO_CORE_NEEDLE_BIOPSY"
+    )
+
+
+def test_high_risk_breast_profile_has_higher_observed_chemo_receipt_score(
+    client: TestClient,
+) -> None:
+    """The score is receipt propensity—not efficacy—and must preserve contrast."""
+    low = client.post(
+        "/v1/therapy/reason",
+        json={
+            "therapy_features": LOW_CHEMO_RECEIPT_PROFILE,
+            "patient_context": {},
+        },
+    )
+    high = client.post(
+        "/v1/therapy/reason",
+        json={
+            "therapy_features": HIGH_CHEMO_RECEIPT_PROFILE,
+            "patient_context": {},
+        },
+    )
+    assert low.status_code == high.status_code == 200
+    low_score = low.json()["arbiter_score"]
+    high_score = high.json()["arbiter_score"]
+    _arbiter_block_shape(low.json())
+    _arbiter_block_shape(high.json())
+    assert high_score["p_positive"] > low_score["p_positive"]
+    assert high_score["positive_class"] == "observed_chemotherapy_receipt"
+    assert "not treatment response" in high_score["caveat"]
+    assert high_score["manski"]["identified"] is True
+    assert high_score["manski"]["width"] == pytest.approx(0.0)
 
 
 # ── screening requires DICOM bytes ────────────────────────────────────
 
 
 @pytest.mark.skipif(not DICOM_FIXTURES, reason="No CBIS fixtures available for this test")
-def test_screening_endpoint_returns_arbiter_score(client: TestClient) -> None:
+def test_screening_endpoint_refuses_intercept_only_arbiter(client: TestClient) -> None:
     dcm = DICOM_FIXTURES[0]
     b64 = base64.b64encode(dcm.read_bytes()).decode("ascii")
     resp = client.post("/v1/screening/analyze", json={"dicom_bytes_b64": b64})
     assert resp.status_code == 200, resp.text
     body = resp.json()
-    _arbiter_block_shape(body)
-    assert body["arbiter_score"]["model_name"] == "screening_arbiter_v1"
+    # Whether MedSigLIP is enabled or fail-closed is environment-dependent;
+    # neither branch may invent a clinical arbiter from imaging alone.
+    assert body["arbiter_score"] is None
 
 
 # ── invariant: sum(term_contributions) == logit ─────────────────────
@@ -100,7 +186,10 @@ def test_biopsy_arbiter_sum_of_terms_matches_logit(client: TestClient) -> None:
     If serialization drops or rounds terms differently from the logit, our
     'why did the model say that?' UI would be dishonest.
     """
-    resp = client.post("/v1/biopsy/analyze", json={"report_text": "test"})
+    resp = client.post(
+        "/v1/stage/biopsy/score",
+        json={"features": SPICULATED_MASS},
+    )
     body = resp.json()
     ab = body["arbiter_score"]
     terms_sum = sum(ab["term_contributions"].values())
@@ -111,7 +200,13 @@ def test_biopsy_arbiter_sum_of_terms_matches_logit(client: TestClient) -> None:
 
 def test_therapy_arbiter_bucket_matches_recommendation(client: TestClient) -> None:
     """PLAN.md invariant: recommendation string must match the LOW/MID/HIGH bucket."""
-    resp = client.post("/v1/therapy/reason", json={"biopsy_output": None, "patient_context": {}})
+    resp = client.post(
+        "/v1/therapy/reason",
+        json={
+            "therapy_features": HIGH_CHEMO_RECEIPT_PROFILE,
+            "patient_context": {},
+        },
+    )
     ab = resp.json()["arbiter_score"]
     bucket_to_rec = {
         "LOW": "LOW_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE",
@@ -124,17 +219,23 @@ def test_therapy_arbiter_bucket_matches_recommendation(client: TestClient) -> No
 # ── /v1/case/full chains through all three arbiters ─────────────────
 
 
-def test_case_full_returns_biopsy_and_therapy_arbiters(client: TestClient) -> None:
-    """/v1/case/full should carry arbiter scores from every stage it exercises.
-
-    We deliberately omit screening_input here because screening requires
-    DICOM bytes; the case orchestrator should still fill therapy from an
-    empty biopsy path.
-    """
-    resp = client.post("/v1/case/full", json={"biopsy_input": {"report_text": "test"}})
+def test_case_full_returns_top_level_therapy_triage(client: TestClient) -> None:
+    """Current breast L5 returns top-level specialist blocks, not legacy nesting."""
+    resp = client.post(
+        "/v1/case/full",
+        json={
+            "therapy_features": HIGH_CHEMO_RECEIPT_PROFILE,
+            "run_co_scientist": False,
+        },
+    )
     assert resp.status_code == 200
     body = resp.json()
-    assert body["biopsy"] is not None
-    assert body["biopsy"]["arbiter_score"] is not None
-    assert body["therapy"] is not None
-    assert body["therapy"]["arbiter_score"] is not None
+    assert body["therapy_triage"] is not None
+    assert body["therapy_triage"]["model_name"] == "therapy_arbiter_v1"
+    assert (
+        body["therapy_triage"]["positive_class"]
+        == "observed_chemotherapy_receipt"
+    )
+    assert "not treatment response" in body["therapy_triage"]["caveat"]
+    assert body["biopsy"] is None
+    assert body["therapy"] is None

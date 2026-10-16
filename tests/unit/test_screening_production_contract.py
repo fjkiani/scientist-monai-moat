@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import base64
+from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
@@ -12,31 +13,53 @@ from oncology_arbiter.api.app import create_app
 from oncology_arbiter.api.schemas import ModelState
 
 
-class _Preprocessed:
-    image = np.zeros((8, 8), dtype=np.float32)
-    breast_mask = np.ones((8, 8), dtype=bool)
-    metadata = SimpleNamespace(
-        laterality=SimpleNamespace(value="L"),
-        view=SimpleNamespace(value="CC"),
-        orientation_flipped=False,
-    )
+CBIS_DICOM = (
+    Path(__file__).resolve().parents[1]
+    / "fixtures"
+    / "cbis_ddsm"
+    / "Calc-Test_P_00038_LEFT_CC.dcm"
+)
 
 
 def _client(monkeypatch, modal_client) -> TestClient:
     monkeypatch.setenv("ONCOLOGY_ARBITER_AUTH_MODE", "off")
-    monkeypatch.setattr("oncology_arbiter.mammography.preprocess_mammogram", lambda *args, **kwargs: _Preprocessed())
+    monkeypatch.setenv("MEDSIGLIP_BACKEND", "modal")
     monkeypatch.setattr("oncology_arbiter.models.medsiglip_modal_client.MedSigLipModalClient", modal_client)
+    # Clear process-wide singleton so the patched Modal client is constructed.
+    import oncology_arbiter.api.services.medsiglip as medsiglip_svc
+
+    medsiglip_svc._MEDSIGLIP_SINGLETON = None
     return TestClient(create_app())
 
 
 def _payload() -> dict[str, str]:
-    return {"dicom_bytes_b64": base64.b64encode(b"deidentified-dicom").decode("ascii")}
+    if not CBIS_DICOM.is_file():
+        pytest.skip(f"clinical CBIS-DDSM fixture missing: {CBIS_DICOM}")
+    return {
+        "dicom_bytes_b64": base64.b64encode(CBIS_DICOM.read_bytes()).decode(
+            "ascii"
+        )
+    }
 
 
 def test_success_requires_1152_dimensional_production_receipt(monkeypatch) -> None:
     monkeypatch.setenv("ONCOLOGY_ARBITER_ENABLE_CBIS_DDSM_PROBE", "0")
 
     class ModalClient:
+        def preflight(self):
+            return None
+
+        def zero_shot_raw(self, path, *, labels=None):
+            return {
+                "prompts": ["malignant", "without malignancy"],
+                "probs": [0.2, 0.8],
+                "app_version": "medsiglip-modal-v0.4.0-alpha",
+                "seconds": 1.25,
+            }
+
+        def embed_dicom(self, path):
+            return [0.0] * 1152
+
         def run(self, path):
             return SimpleNamespace(
                 labels=["malignant", "without malignancy"],
@@ -52,22 +75,34 @@ def test_success_requires_1152_dimensional_production_receipt(monkeypatch) -> No
                 gate_report=None,
             )
 
-        def embed_dicom(self, path):
-            return [0.0] * 1152
-
     response = _client(monkeypatch, ModalClient).post("/v1/screening/analyze", json=_payload())
     assert response.status_code == 200
     body = response.json()
     assert body["pipeline_status"] == "complete"
     assert body["provenance"]["model_state"] == ModelState.LOADED_MEDSIGLIP.value
+    assert body["laterality"] == "L"
+    assert body["view"] == "CC"
+    assert 0.0 < body["breast_mask_coverage"] <= 1.0
     assert body["medsiglip"]["embedding_dim"] == 1152
-    assert body["medsiglip"]["embedding_sha256"] == "a" * 64
+    expected_sha = __import__("hashlib").sha256(
+        np.asarray([0.0] * 1152, dtype=np.float32).tobytes()
+    ).hexdigest()
+    assert body["medsiglip"]["embedding_sha256"] == expected_sha
     assert body["stage_receipts"][0]["status"] == "succeeded"
     assert body["arbiter_score"] is None
 
 
 def test_failure_is_terminal_without_proxy_or_heuristic(monkeypatch) -> None:
     class ModalClient:
+        def preflight(self):
+            return None
+
+        def zero_shot_raw(self, path, *, labels=None):
+            raise TimeoutError("remote inference timed out")
+
+        def embed_dicom(self, path):
+            raise TimeoutError("remote inference timed out")
+
         def run(self, path):
             raise TimeoutError("remote inference timed out")
 
@@ -147,7 +182,26 @@ def test_zero_shot_probs_are_reported_as_independent_sigmoid_scores(monkeypatch)
     calibrated malignancy probability -- would be a false claim, so the receipt
     must carry the sum and the explicit non-normalisation flag.
     """
+    monkeypatch.setenv("ONCOLOGY_ARBITER_ENABLE_CBIS_DDSM_PROBE", "0")
+
     class ModalClient:
+        def preflight(self):
+            return None
+
+        def zero_shot_raw(self, path, *, labels=None):
+            return {
+                "prompts": [
+                    "a mammogram showing malignancy",
+                    "a mammogram without malignancy",
+                ],
+                "probs": [9.475328624830581e-06, 8.806667210592423e-06],
+                "app_version": "medsiglip-modal-v0.4.0-alpha",
+                "seconds": 0.25,
+            }
+
+        def embed_dicom(self, path):
+            return [0.0] * 1152
+
         def run(self, path):
             return SimpleNamespace(
                 labels=["malignant", "without malignancy"],

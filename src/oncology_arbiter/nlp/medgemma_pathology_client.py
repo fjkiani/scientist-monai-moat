@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import urllib.error
 import urllib.request
@@ -19,6 +20,23 @@ _JSON_RE = re.compile(r"\{[\s\S]*\}")
 
 class MedGemmaPathologyError(RuntimeError):
     pass
+
+
+def _resolve_chat_url(identity: dict[str, Any]) -> str:
+    """Resolve chat URL at runtime (env override > identity file).
+
+    The identity file is SHA-locked to bind model + revision, but Modal workspace
+    routing may move (e.g. `crispro-test` disabled, `fjkiani` active). We keep the
+    revision lock by validating `revision_sha256` in the response.
+    """
+    env = (os.environ.get("MEDGEMMA_MODAL_URL") or "").strip().rstrip("/")
+    if env:
+        # Accept either a full `https://...modal.run` chat endpoint or a base name
+        # (Modal will conventionally suffix with `-chat.modal.run`).
+        if env.endswith(".modal.run"):
+            return env
+        return f"{env}-chat.modal.run"
+    return str(identity["chat_url"]).strip()
 
 
 def _extract_json_object(text: str) -> dict[str, Any]:
@@ -72,7 +90,7 @@ def extract_pathology(
         raise MedGemmaPathologyError("medgemma_pathology: empty report_text")
 
     identity = verify_artifact_identity()
-    chat_url = str(identity["chat_url"])
+    chat_url = _resolve_chat_url(identity)
     # Keep prompt bounded — long TCGA reports; head+tail preserves receptor blocks.
     body_text = str(report_text)
     if len(body_text) > 12000:

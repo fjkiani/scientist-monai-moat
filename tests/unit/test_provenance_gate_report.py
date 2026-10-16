@@ -111,17 +111,14 @@ def test_schema_gate_report_rejects_unknown_access_level():
 # End-to-end: placeholder response has gate_report=None
 
 def test_placeholder_response_has_no_gate_report(monkeypatch):
-    # No HAI-DEF preflight is triggered on the therapy placeholder path.
+    # No placeholders: empty therapy input fails closed (HTTP 400) and therefore
+    # never produces a provenance envelope (and never triggers a HAI-DEF preflight).
     monkeypatch.delenv("ONCOLOGY_ARBITER_ENABLE_MEDSIGLIP", raising=False)
     monkeypatch.delenv("ONCOLOGY_ARBITER_ENABLE_SIGLIP_PROXY", raising=False)
     with TestClient(create_app()) as client:
-        # /v1/therapy/reason is a pure placeholder today — no preflight, so
-        # provenance.gate_report MUST be None.
         resp = client.post("/v1/therapy/reason", json={})
-        assert resp.status_code == 200
-        body = resp.json()
-        assert body["provenance"]["model_state"] == "unavailable"
-        assert body["provenance"]["gate_report"] is None
+        assert resp.status_code == 400
+        assert "therapy requires" in (resp.json().get("detail") or "").lower()
 
 
 # --------------------------------------------------------------------------- #
@@ -138,7 +135,7 @@ def test_gated_screening_response_has_structured_gate_report(monkeypatch):
     monkeypatch.setenv("ONCOLOGY_ARBITER_ENABLE_MEDSIGLIP", "1")
     monkeypatch.delenv("ONCOLOGY_ARBITER_ENABLE_SIGLIP_PROXY", raising=False)
 
-    def _raise_gate(_preprocess_result):
+    def _raise_gate(_preprocess_result, **_kwargs):
         raise GatedAccessError(
             repo_id="google/medsiglip-448",
             access_level=AccessLevel.FORBIDDEN,
@@ -180,6 +177,12 @@ def test_allowed_screening_response_has_allowed_gate_report(monkeypatch):
     fake_result = SimpleNamespace(
         model_repo="google/medsiglip-448",
         warnings=[],
+        app_version="medsiglip-modal-test",
+        input_resolution=448,
+        prompts=["malignant lesion", "no lesion"],
+        inference_seconds=0.01,
+        embedding_dim=1152,
+        embedding_sha256="0" * 64,
         gate_report=RuntimeGateReport(
             repo_id="google/medsiglip-448",
             access_level=AccessLevel.ALLOWED,
@@ -191,7 +194,7 @@ def test_allowed_screening_response_has_allowed_gate_report(monkeypatch):
         labels=["malignant lesion", "no lesion"],
     )
 
-    def _return_ok(_preprocess_result):
+    def _return_ok(_preprocess_result, **_kwargs):
         return fake_result
 
     import oncology_arbiter.api.app as app_module

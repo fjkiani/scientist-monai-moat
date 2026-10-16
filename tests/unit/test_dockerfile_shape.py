@@ -233,14 +233,17 @@ def test_frontend_static_bundle_present_in_source_tree():
 
 
 def test_healthcheck_endpoint_exists_in_app():
-    """Ensure the /health endpoint referenced by HEALTHCHECK actually exists."""
+    """Exercise the /health endpoint referenced by Docker HEALTHCHECK."""
+    from fastapi.testclient import TestClient
     from oncology_arbiter.api.app import create_app
-    app = create_app()
-    paths = {r.path for r in app.routes if hasattr(r, "path")}
-    assert "/health" in paths, (
-        f"/health must exist in the FastAPI app for the Dockerfile HEALTHCHECK "
-        f"to be meaningful. Existing paths: {sorted(paths)[:10]}..."
-    )
+
+    response = TestClient(create_app()).get("/health")
+
+    assert response.status_code == 200, response.text
+    payload = response.json()
+    assert payload["status"] == "ok"
+    assert payload["version"]
+    assert "RESEARCH USE ONLY" in payload["disclaimer"]
 
 
 # --------------------------------------------------------------------------- #

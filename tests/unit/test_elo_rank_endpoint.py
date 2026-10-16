@@ -115,7 +115,9 @@ def test_elo_rank_endpoint_listed_in_health(client):
     )
 
 
-def test_elo_rank_happy_path_envelope_shape(client):
+def test_explicit_hgsoc_modifiers_are_applied_without_becoming_efficacy_claims(
+    client,
+):
     payload = {
         "drugs": _mini_hgsoc_bundle(),
         "modifiers": {
@@ -133,12 +135,11 @@ def test_elo_rank_happy_path_envelope_shape(client):
 
     # ApiEnvelope guarantees these
     assert body["contract_version"] == "v0.3.0-alpha"
-    assert "provenance" in body and body["provenance"]["model_name"].startswith(
-        "oa/co_scientist_elo"
-    )
-    assert body["provenance"]["model_state"] in ("proxy_co_scientist", "PROXY_CO_SCIENTIST")
+    assert body["provenance"]["model_name"] == "oa/offline_evidence_elo_ranker"
+    assert body["provenance"]["model_state"] == "deterministic_offline_ranker"
 
-    # Elo-specific shape
+    # The caller supplied these candidates and modifiers. The endpoint ranks
+    # them; it does not infer treatment benefit from the HGSOC context.
     assert body["n_candidates"] == 4
     assert len(body["baseline_ranking"]) == 4
     assert len(body["enriched_ranking"]) == 4
@@ -147,11 +148,43 @@ def test_elo_rank_happy_path_envelope_shape(client):
     # disease_context + applied_modifiers echoed back for the SPA
     assert body["disease_context"]["cancer"] == "hgsoc"
     assert body["applied_modifiers"]["olaparib_maintenance"] == 0.30
+    matches = {row["drug_id"]: row for row in body["matches"]}
+    assert matches["olaparib_maintenance"]["applied_modifier"] == 0.30
+    assert "HRD+PARP boost" in matches["olaparib_maintenance"]["reason"]
+    assert all(
+        "efficacy" not in row["reason"].lower()
+        and "benefit" not in row["reason"].lower()
+        for row in body["matches"]
+    )
 
     # Every ranked entry has the expected fields
     for entry in body["enriched_ranking"]:
         for key in ("rank", "drug_id", "regimen", "line", "rating", "confidence", "wins", "losses", "draws"):
             assert key in entry, entry
+
+
+def test_hrd_context_does_not_invent_a_parp_modifier(client):
+    """Clinical context alone cannot silently become a treatment recommendation."""
+    response = client.post(
+        "/v1/elo/rank",
+        json={
+            "drugs": _mini_hgsoc_bundle(),
+            "modifiers": {},
+            "disease_context": HGSOC_DISEASE_CONTEXT,
+            "seed": 20260703,
+        },
+    )
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["applied_modifiers"] == {}
+    matches = {row["drug_id"]: row for row in body["matches"]}
+    assert matches["olaparib_maintenance"]["applied_modifier"] == 0.0
+    assert matches["olaparib_maintenance"]["reason"] == "no modifier"
+    assert [
+        row["drug_id"] for row in body["enriched_ranking"]
+    ] == [
+        row["drug_id"] for row in body["baseline_ranking"]
+    ]
 
 
 def test_elo_rank_is_deterministic(client):

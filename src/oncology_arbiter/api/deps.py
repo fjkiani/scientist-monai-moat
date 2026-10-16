@@ -227,14 +227,19 @@ def is_env_true(name: str) -> bool:
 
 
 def demo_samples_dir() -> Path | None:
-    """Return demo samples directory if it exists."""
+    """Locate the demo-samples directory on disk.
+
+    Prefer ``ONCOLOGY_ARBITER_DEMO_SAMPLES_DIR`` when set; otherwise fall
+    back to the package-shipped ``api/static/demo_samples`` tree.
+    """
     import os
 
     demo_root = os.environ.get("ONCOLOGY_ARBITER_DEMO_SAMPLES_DIR")
     if demo_root:
         path = Path(demo_root)
         return path if path.exists() else None
-    return None
+    candidate = Path(__file__).resolve().parent / "static" / "demo_samples"
+    return candidate if candidate.exists() else None
 
 
 def compute_models_loaded() -> dict[str, ModelState]:
@@ -260,19 +265,19 @@ def compute_models_loaded() -> dict[str, ModelState]:
     from oncology_arbiter.models.cbis_ddsm_probe import DEFAULT_MODEL_PATH as _CBIS_JOBLIB
 
     cbis_state = (
-        ModelState.LOADED if Path(_CBIS_JOBLIB).exists() else ModelState.UNAVAILABLE
-    )
-    biopsy_probe_path = (
-        Path(__file__).resolve().parents[2]
-        / "arbiter"
-        / "models"
-        / "biopsy_probe_v0.json"
-    )
-    biopsy_probe_state = (
-        ModelState.LOADED_BIOPSY_PROBE
-        if biopsy_probe_path.exists()
+        ModelState.CONFIGURED_UNVERIFIED
+        if Path(_CBIS_JOBLIB).exists()
         else ModelState.UNAVAILABLE
     )
+    try:
+        from oncology_arbiter.models.biopsy_probe_v1_wiring import (
+            verify_artifact_identity as _verify_biopsy_probe_v1,
+        )
+
+        _verify_biopsy_probe_v1()
+        biopsy_probe_state = ModelState.CONFIGURED_UNVERIFIED
+    except (FileNotFoundError, RuntimeError, ValueError):
+        biopsy_probe_state = ModelState.UNAVAILABLE
 
     # Frozen in-repo DSS arbiter (not a Modal specialist).
     breast_dss_artifact = (
@@ -280,7 +285,11 @@ def compute_models_loaded() -> dict[str, ModelState]:
         / "config"
         / "breast_dss_arbiter_v3_metabric.json"
     )
-    breast_dss_state = ModelState.LOADED if breast_dss_artifact.exists() else ModelState.UNAVAILABLE
+    breast_dss_state = (
+        ModelState.CONFIGURED_UNVERIFIED
+        if breast_dss_artifact.exists()
+        else ModelState.UNAVAILABLE
+    )
 
     return {
         "case_storage": configured("CASE_STORAGE_MODAL_URL"),

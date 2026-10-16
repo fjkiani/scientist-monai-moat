@@ -1,11 +1,18 @@
-"""Trained LogReg probe on top of Modal-served MedSigLIP-448 embeddings.
+"""Trained CBIS-DDSM probe on top of Modal-served MedSigLIP-448 embeddings.
 
-Loads ``models/cbis_ddsm_logreg_v3.joblib`` (sha256 ``f40f33c1cd3adfa48d1d10cc4d136795ad0642c3d1f94a543872ae1dc283aaf7``; a scikit-learn Pipeline of
-``StandardScaler + LogisticRegression`` fit on 2445 CBIS-DDSM_1024 training
-images, held-out test AUC = 0.7476 on n=641). See
-``docs/proofs/cbis_ddsm_logreg_v3_metrics.json`` for the full metrics
-dossier including the CV per-fold breakdown, threshold sweep, and honesty
-caveats.
+This module is for the **embedding-only** probe used by `/v1/screening/analyze`:
+
+- Input: 1152-d MedSigLIP embedding (from the Modal embed endpoint)
+- Model: scikit-learn Pipeline (StandardScaler + LogisticRegression)
+- Artifact: ``models/cbis_ddsm_logreg_v2.joblib``
+
+See ``docs/proofs/cbis_ddsm_logreg_v2_metrics.json`` for the metrics dossier:
+held-out test AUROC = 0.7521 on n=641 (CBIS-DDSM_1024).
+
+Note: ``cbis_ddsm_logreg_v3.joblib`` is a **1309-d feature-fusion** model
+(embedding + CBIS metadata one-hots + PNG intensity). It is *not* applicable
+to arbitrary DICOM-only screening requests and must not be called by the
+production screening endpoint unless those extra features are supplied.
 
 **Off-label for mammography.** MedSigLIP-448 was not pretrained on
 mammography; this probe is a supervised head that recovers useful signal
@@ -24,9 +31,9 @@ from typing import Any, Sequence
 logger = logging.getLogger(__name__)
 
 
-DEFAULT_MODEL_PATH = Path(__file__).resolve().parents[3] / "models" / "cbis_ddsm_logreg_v3.joblib"
+DEFAULT_MODEL_PATH = Path(__file__).resolve().parents[3] / "models" / "cbis_ddsm_logreg_v2.joblib"
 DEFAULT_METRICS_PATH = (
-    Path(__file__).resolve().parents[3] / "docs" / "proofs" / "cbis_ddsm_logreg_v3_metrics.json"
+    Path(__file__).resolve().parents[3] / "docs" / "proofs" / "cbis_ddsm_logreg_v2_metrics.json"
 )
 
 # Threshold selected from the metrics dossier for the "high-sensitivity" op
@@ -37,7 +44,7 @@ DEFAULT_THRESHOLD_LABEL: str = "recall_0.85"
 # Honesty text surfaced to the API caller.
 CBIS_DDSM_PROBE_WARNING: str = (
     "This probe is a supervised classifier trained on 2445 CBIS-DDSM images "
-    "using MedSigLIP-448 embeddings (held-out test AUC = 0.7476 on n=641). "
+    "using MedSigLIP-448 embeddings (held-out test AUROC = 0.7521 on n=641). "
     "MedSigLIP-448 was NOT pretrained on mammography — the backbone is used "
     "off-label. Fine-tuned mammography CNNs on CBIS-DDSM typically reach "
     "AUC 0.85-0.90, so this probe is a research prototype, not a clinical tool."
@@ -55,7 +62,7 @@ class CbisDdsmProbeResult:
     predicted_label: str                # "cancer" / "not_cancer"
     embedding_dim: int                  # 1152 (SigLIP-So400m/14)
     model_repo: str = "google/medsiglip-448"
-    probe_version: str = "cbis_ddsm_logreg_v3"
+    probe_version: str = "cbis_ddsm_logreg_v2"
     warnings: list[str] = field(default_factory=lambda: [CBIS_DDSM_PROBE_WARNING])
 
 
@@ -87,6 +94,14 @@ class CbisDdsmProbe:
         from joblib import load as joblib_load
 
         self._pipe = joblib_load(self.model_path)
+        # Guard against accidentally pointing at a fused-feature artifact (e.g. v3).
+        nfi = getattr(self._pipe, "n_features_in_", None)
+        if nfi is not None and int(nfi) != 1152:
+            raise ValueError(
+                f"cbis probe artifact expects n_features_in_={nfi}, but this route only supplies "
+                "the 1152-d MedSigLIP embedding. Use cbis_ddsm_logreg_v2.joblib for embedding-only "
+                "or wire the v3 fusion features explicitly."
+            )
         logger.info("Loaded CBIS-DDSM probe: %s", self.model_path)
 
     def predict_proba(self, embedding: Sequence[float]) -> float:
