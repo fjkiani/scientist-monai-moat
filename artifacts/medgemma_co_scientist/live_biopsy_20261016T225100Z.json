@@ -1,0 +1,179 @@
+{
+  "clinical_context_sha256": "966504e8df0e8653fa3c09dc814038cc5f82caed9fea240429d3b2e0bf7fe0b5",
+  "created_at": "2026-10-16T22:51:00.694911+00:00",
+  "endpoint": "https://testing1235--medgemma-1-5-4b-chat.modal.run",
+  "evidence": [
+    {
+      "hypothesis_id": "abba0e2ad82141ea951c01c3a3ff13d3",
+      "query": "Invasive ductal carcinoma tumor grade Ki-67",
+      "snippet": "Of all markers associated with cellular proliferation in breast carcinoma, Ki-67 has more often been correlated with prognosis in patients with these tumors than others. To investigate the relevance of Ki-67 determination at each phase of the cell cycle in the biological assessment of mammary carcinoma we applied bivariate Ki-67/DNA content analysis on samples from 154 resected primary lesions. Th",
+      "source": "pubmed_search",
+      "title": "Flow cytometric analysis of Ki-67 in invasive ductal carcinoma of the breast: correlation with tumor and patient characteristics.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/10373666/"
+    },
+    {
+      "hypothesis_id": "abba0e2ad82141ea951c01c3a3ff13d3",
+      "query": "Invasive ductal carcinoma tumor grade Ki-67",
+      "snippet": "BACKGROUND: Invasive ductal carcinoma (IDC), the most common breast cancer subtype, exhibits significant heterogeneity, limiting traditional prognostic markers. Molecular profiles improve precision, but imaging features may also reflect tumor biology.\n\nAIMS: This study evaluates the predictive potential and clinical applicability of ultrasound features for determining tumor grade and molecular pro",
+      "source": "pubmed_search",
+      "title": "Sonographic Correlations With Histological Grade and Biomarker Profiles in Breast Invasive Ductal Carcinoma.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/40744681/"
+    },
+    {
+      "hypothesis_id": "abba0e2ad82141ea951c01c3a3ff13d3",
+      "query": "Invasive ductal carcinoma tumor grade Ki-67",
+      "snippet": "OBJECTIVE: Numerous studies have been conducted to predict the prognosis of breast cancers. The effect of glucose transporter protein 1 (GLUT-1), the main carrier protein responsible for glucose transport, was investigated in breast cancer patients.\n\nMATERIAL AND METHOD: 170 patients operated for breast carcinoma were included in this study. We analysed the prognostic significance of GLUT-1 immune",
+      "source": "pubmed_search",
+      "title": "GLUT-1 Expression in Breast Cancer.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/34580846/"
+    },
+    {
+      "hypothesis_id": "13a5f6dac0434bf7b974fe22d40aaf8f",
+      "query": "Invasive ductal carcinoma presence macrometastasis sentinel",
+      "snippet": "BACKGROUND: Sentinel lymph node biopsy (SLNB) is recommended when mastectomy is performed for ductal carcinoma in situ (DCIS). The role of SLNB for women with DCIS who undergo mastectomy following one or more attempts at breast-conserving surgery (BCS) is uncertain. We examined the upgrade rate and SLNB yield in women who converted to mastectomy after one or more attempts at BCS for DCIS.\n\nMETHODS",
+      "source": "pubmed_search",
+      "title": "Is Sentinel Lymph Node Biopsy Indicated at Completion Mastectomy for Ductal Carcinoma In Situ?",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/26960927/"
+    },
+    {
+      "hypothesis_id": "13a5f6dac0434bf7b974fe22d40aaf8f",
+      "query": "Invasive ductal carcinoma presence macrometastasis sentinel",
+      "snippet": "BACKGROUND: A positive sentinel lymph node (SLN) has been reported in 6% to 13% of patients with ductal carcinoma in situ (DCIS). Although it is well established that nodal status for invasive disease is prognostically important, the clinical relevance of a positive SLN in patients with DCIS remains undetermined.\n\nMETHODS: SLN biopsy was performed on 470 high-risk patients with DCIS (22% of all pa",
+      "source": "pubmed_search",
+      "title": "Outcomes for women with ductal carcinoma-in-situ and a positive sentinel node: a multi-institutional audit.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/17597346/"
+    }
+  ],
+  "fetched_urls": [
+    "https://pubmed.ncbi.nlm.nih.gov/10373666/",
+    "https://pubmed.ncbi.nlm.nih.gov/40744681/",
+    "https://pubmed.ncbi.nlm.nih.gov/34580846/",
+    "https://pubmed.ncbi.nlm.nih.gov/26960927/",
+    "https://pubmed.ncbi.nlm.nih.gov/17597346/"
+  ],
+  "gates": {
+    "all_hypotheses_reflected": true,
+    "app_identity": true,
+    "endpoint_pinned": true,
+    "evidence_retained": true,
+    "executed": true,
+    "medgemma_provider": true,
+    "meta_review_present": true,
+    "meta_review_receipt": true,
+    "model_identity": true,
+    "pair_count_complete": true,
+    "pair_reason_present": true,
+    "pair_receipts_complete": true,
+    "reflections_complete": true,
+    "request_receipts": true,
+    "revision_identity": true,
+    "verdict_pass": true
+  },
+  "hypotheses": [
+    {
+      "claim": "The patient's tumor grade (3) and high Ki-67 (35%) suggest a high risk of recurrence.",
+      "elo": 1516.0,
+      "evidence_alignment": "supports",
+      "evidence_urls": [
+        "https://pubmed.ncbi.nlm.nih.gov/10373666/",
+        "https://pubmed.ncbi.nlm.nih.gov/40744681/",
+        "https://pubmed.ncbi.nlm.nih.gov/34580846/"
+      ],
+      "hypothesis_id": "abba0e2ad82141ea951c01c3a3ff13d3",
+      "initial_confidence": 0.85,
+      "rationale": "High tumor grade and high Ki-67 proliferation index are known predictors of increased risk for recurrence in invasive ductal carcinoma. These factors indicate a more aggressive tumor biology.",
+      "reflection": "The hypothesis correctly identifies that high tumor grade and high Ki-67 proliferation index are associated with increased risk of recurrence in invasive ductal carcinoma. The provided evidence excerpts confirm this relationship, linking Ki-67 to prognosis and mentioning tumor grade and biomarkers in the context of breast cancer heterogeneity and tumor biology.",
+      "source_scope": "molecular",
+      "tournament_losses": 0,
+      "tournament_ties": 0,
+      "tournament_wins": 1
+    },
+    {
+      "claim": "The presence of macrometastasis in the sentinel lymph node indicates a high risk of systemic recurrence.",
+      "elo": 1484.0,
+      "evidence_alignment": "contradicts",
+      "evidence_urls": [
+        "https://pubmed.ncbi.nlm.nih.gov/26960927/",
+        "https://pubmed.ncbi.nlm.nih.gov/17597346/"
+      ],
+      "hypothesis_id": "13a5f6dac0434bf7b974fe22d40aaf8f",
+      "initial_confidence": 0.5,
+      "rationale": "Sentinel lymph node metastasis, particularly macrometastasis (\u2265250 cells/mm2), is a strong indicator of increased risk for distant metastasis and recurrence in breast cancer patients.",
+      "reflection": "The hypothesis links macrometastasis in the sentinel lymph node to high systemic recurrence risk, primarily in the context of invasive breast cancer. However, the provided evidence focuses on ductal carcinoma in situ (DCIS) and explicitly states that the clinical relevance of a positive SLN in DCIS is uncertain. Therefore, the evidence does not support the hypothesis.",
+      "source_scope": "clinical_history",
+      "tournament_losses": 1,
+      "tournament_ties": 0,
+      "tournament_wins": 0
+    }
+  ],
+  "identity": {
+    "app_version": "medgemma-1-5-4b-modal-v1.1.0-causal-clone",
+    "model_id": "google/medgemma-1.5-4b-it",
+    "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
+  },
+  "live": true,
+  "meta_review": "The patient's tumor grade of 3 and high Ki-67 proliferation index of 35% are associated with a higher risk of cancer recurrence. Evidence confirms that high Ki-67 levels correlate with increased risk in invasive ductal carcinoma. Additionally, the presence of macrometastasis in the sentinel lymph node is linked to a higher risk of systemic recurrence, particularly in invasive breast cancer. However, the clinical significance of a positive sentinel lymph node biopsy in ductal carcinoma in situ (DCIS) is less established compared to invasive cancer.",
+  "meta_review_request_id": "8c8004f0-a25e-4465-9bd3-3fbbda70b9ba",
+  "meta_review_response_sha256": "3de55d5dd72df18c9d7692de920fde1d667511f3cd03531b7496d1b497c772fa",
+  "meta_review_sha256": "f6f24e71278e687c7aee7f8f9f482993d1224846bbc2175c737acb8b3881e70e",
+  "model_request_ids": [
+    "a88261c6-4d6a-463a-a4c9-f8e43d28ff2b",
+    "060a90dc-9cf3-46c6-a7a6-8c8bfcef196d",
+    "bfee502e-6a90-4585-943b-470aeeb2f2f6",
+    "e111872c-27af-445e-acdf-b4f45a49510e",
+    "8c8004f0-a25e-4465-9bd3-3fbbda70b9ba"
+  ],
+  "model_state": "executed",
+  "notes": "",
+  "reflection_calls_completed": 2,
+  "reflection_calls_expected": 2,
+  "reflection_receipts": [
+    {
+      "completed": true,
+      "evidence_alignment": "supports",
+      "hypothesis_id": "abba0e2ad82141ea951c01c3a3ff13d3",
+      "model_request_id": "060a90dc-9cf3-46c6-a7a6-8c8bfcef196d",
+      "model_response_chars": 2646,
+      "model_response_sha256": "505b2b99ed19f676bbe6f79d14d476c977a1929fbf9f8a24f6340bd8bb708984"
+    },
+    {
+      "completed": true,
+      "evidence_alignment": "contradicts",
+      "hypothesis_id": "13a5f6dac0434bf7b974fe22d40aaf8f",
+      "model_request_id": "bfee502e-6a90-4585-943b-470aeeb2f2f6",
+      "model_response_chars": 9236,
+      "model_response_sha256": "812b8684f143d74578593334c4c2a906d4c52bc00f8cc42b0208483c42e84e18"
+    }
+  ],
+  "stage": "biopsy",
+  "tournament_matches": [
+    {
+      "completed": true,
+      "elo_a_after": 1484.0,
+      "elo_a_before": 1500.0,
+      "elo_b_after": 1516.0,
+      "elo_b_before": 1500.0,
+      "hypothesis_a_claim": "The presence of macrometastasis in the sentinel lymph node indicates a high risk of systemic recurrence.",
+      "hypothesis_a_id": "13a5f6dac0434bf7b974fe22d40aaf8f",
+      "hypothesis_b_claim": "The patient's tumor grade (3) and high Ki-67 (35%) suggest a high risk of recurrence.",
+      "hypothesis_b_id": "abba0e2ad82141ea951c01c3a3ff13d3",
+      "margin": "clear",
+      "model_request_id": "e111872c-27af-445e-acdf-b4f45a49510e",
+      "model_response_chars": 2978,
+      "model_response_sha256": "ac324504c26f93f800f02a8ee5e0d05bdd575b39469bc0422abea5efc4cf2e6a",
+      "reason": "The evidence contradicts the clinical relevance of macrometastasis in the sentinel lymph node in ductal carcinoma in situ, supporting the link between tumor grade and Ki-67 proliferation index and recurrence risk.",
+      "winner": "B"
+    }
+  ],
+  "tournament_pairs_completed": 1,
+  "tournament_pairs_expected": 1,
+  "usage": {
+    "calls": 5,
+    "completion_tokens": 8696,
+    "cost_usd": 0.0,
+    "llm_latency_s": 431.141,
+    "prompt_tokens": 2021,
+    "wall_latency_s": 435.94
+  },
+  "verdict": "PASS"
+}

@@ -13,13 +13,13 @@ from urllib.parse import urlparse
 CAPABILITY = "medgemma"
 ARTIFACT_FILENAME = "medgemma_1_5_4b_identity.json"
 ARTIFACT_PATH = "models/medgemma_1_5_4b_identity.json"
-ARTIFACT_SHA256 = "17c89032837d1ad671334dfce0547b83923099313f6e44a9f92493161ee3570e"
+ARTIFACT_SHA256 = "9aa2d9c60d688a10ecb4edff8db203688f7212057ebf24ceb9597a1a249bb6fb"
 EXPECTED_MODEL_ID = "google/medgemma-1.5-4b-it"
 EXPECTED_REVISION_SHA256 = "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
 PINNED_CHAT_HOSTS = frozenset({
+    "testing1235--medgemma-1-5-4b-chat.modal.run",
     "fjkiani--medgemma-1-5-4b-chat.modal.run",
     "crispro-test--medgemma-1-5-4b-chat.modal.run",
-    "testing1235--medgemma-1-5-4b-chat.modal.run",
 })
 
 
