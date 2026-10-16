@@ -303,7 +303,7 @@ def test_real_endpoint_runs_all_model_phases_and_emits_elo_receipts(
     headers = _enable_verified_auth(monkeypatch, tmp_path)
     monkeypatch.setenv(
         "MEDGEMMA_MODAL_URL",
-        "https://crispro-test--medgemma-1-5-4b-chat.modal.run",
+        "https://testing1235--medgemma-1-5-4b-chat.modal.run",
     )
     script = _success_script()
     _install_model_and_evidence(monkeypatch, script)
@@ -378,7 +378,7 @@ def test_real_endpoint_refuses_incomplete_pairwise_judgments(
     headers = _enable_verified_auth(monkeypatch, tmp_path)
     monkeypatch.setenv(
         "MEDGEMMA_MODAL_URL",
-        "https://crispro-test--medgemma-1-5-4b-chat.modal.run",
+        "https://testing1235--medgemma-1-5-4b-chat.modal.run",
     )
     script = _success_script(malformed_pair=True)
     _install_model_and_evidence(monkeypatch, script)
@@ -396,7 +396,7 @@ def test_real_endpoint_refuses_incomplete_reflection(
     headers = _enable_verified_auth(monkeypatch, tmp_path)
     monkeypatch.setenv(
         "MEDGEMMA_MODAL_URL",
-        "https://crispro-test--medgemma-1-5-4b-chat.modal.run",
+        "https://testing1235--medgemma-1-5-4b-chat.modal.run",
     )
     script = _success_script(malformed_reflection=True)
     _install_model_and_evidence(monkeypatch, script)
@@ -414,7 +414,7 @@ def test_real_endpoint_refuses_empty_evidence_without_running_elo(
     headers = _enable_verified_auth(monkeypatch, tmp_path)
     monkeypatch.setenv(
         "MEDGEMMA_MODAL_URL",
-        "https://crispro-test--medgemma-1-5-4b-chat.modal.run",
+        "https://testing1235--medgemma-1-5-4b-chat.modal.run",
     )
     script = _success_script()
 
@@ -509,7 +509,7 @@ def test_real_endpoint_rejects_anonymous_when_auth_mode_off(
     monkeypatch.setenv("ONCOLOGY_ARBITER_AUTH_MODE", "off")
     monkeypatch.setenv(
         "MEDGEMMA_MODAL_URL",
-        "https://crispro-test--medgemma-1-5-4b-chat.modal.run",
+        "https://testing1235--medgemma-1-5-4b-chat.modal.run",
     )
     response = _post(TestClient(create_app()))
     assert response.status_code == 401
@@ -536,7 +536,7 @@ def test_real_endpoint_refuses_winner_only_pairwise_json(
     headers = _enable_verified_auth(monkeypatch, tmp_path)
     monkeypatch.setenv(
         "MEDGEMMA_MODAL_URL",
-        "https://crispro-test--medgemma-1-5-4b-chat.modal.run",
+        "https://testing1235--medgemma-1-5-4b-chat.modal.run",
     )
     script = _success_script(winner_only_pair=True)
     _install_model_and_evidence(monkeypatch, script)
@@ -553,7 +553,7 @@ def test_real_endpoint_refuses_unreflected_hypothesis_in_tournament(
     headers = _enable_verified_auth(monkeypatch, tmp_path)
     monkeypatch.setenv(
         "MEDGEMMA_MODAL_URL",
-        "https://crispro-test--medgemma-1-5-4b-chat.modal.run",
+        "https://testing1235--medgemma-1-5-4b-chat.modal.run",
     )
     script = _success_script()
     evidence_calls = 0

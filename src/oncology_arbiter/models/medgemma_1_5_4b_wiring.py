@@ -17,9 +17,10 @@ ARTIFACT_SHA256 = "9aa2d9c60d688a10ecb4edff8db203688f7212057ebf24ceb9597a1a249bb
 EXPECTED_MODEL_ID = "google/medgemma-1.5-4b-it"
 EXPECTED_REVISION_SHA256 = "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
 PINNED_CHAT_HOSTS = frozenset({
+    # Identity primary + live fallbacks only. Disabled workspaces stay out —
+    # allowing them lets MEDGEMMA_MODAL_URL point at a dead host and fail late.
     "testing1235--medgemma-1-5-4b-chat.modal.run",
     "fjkiani--medgemma-1-5-4b-chat.modal.run",
-    "crispro-test--medgemma-1-5-4b-chat.modal.run",
 })
 
 
