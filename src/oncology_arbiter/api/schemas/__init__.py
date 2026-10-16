@@ -104,8 +104,13 @@ from .elo import (
 )
 
 from .co_scientist import (
+    CoScientistHypothesis,
     CoScientistRunRequest,
     CoScientistRunResponse,
+    EloTournamentMatch,
+    RealCoScientistRequest,
+    RealCoScientistResponse,
+    ReflectionReceipt,
 )
 
 from .research import (
@@ -184,6 +189,11 @@ __all__ = [
     "EloRankResponse",
     "CoScientistRunRequest",
     "CoScientistRunResponse",
+    "CoScientistHypothesis",
+    "EloTournamentMatch",
+    "RealCoScientistRequest",
+    "RealCoScientistResponse",
+    "ReflectionReceipt",
     "ResearchIdentifiedSetRequest",
     "ResearchIdentifiedSetResponse",
 ]

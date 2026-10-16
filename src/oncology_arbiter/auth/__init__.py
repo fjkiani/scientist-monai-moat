@@ -19,7 +19,7 @@ from .api_key import (
     verify_api_key,
 )
 from .bootstrap import bootstrap_from_env
-from .middleware import ApiKeyDep, require_api_key, require_scope
+from .middleware import ApiKeyDep, require_api_key, require_scope, require_verified_api_key
 
 __all__ = [
     "APIKey",
@@ -29,6 +29,7 @@ __all__ = [
     "hash_key",
     "make_key",
     "require_api_key",
+    "require_verified_api_key",
     "require_scope",
     "verify_api_key",
 ]

@@ -36,9 +36,9 @@ def health() -> HealthResponse:
         "POST /v1/biopsy/analyze",
         "POST /v1/therapy/reason",
         "POST /v1/case/full",
-        "POST /v1/elo/rank",
-        # Deterministic evidence/Elo transform; distinct from MedGemma synthesis.
-        "POST /v1/offline_ranker/run",
+        "POST /v1/elo/rank",  # deterministic offline candidate reorder, not MedGemma Elo
+        "POST /v1/co-scientist/run",  # identity-locked MedGemma GENERATE→EVIDENCE→REFLECT→pairwise Elo
+        "POST /v1/offline_ranker/run",  # deterministic evidence transform; not Co-Scientist
         "POST /v1/tumor_board/dynamic",
         "GET  /v1/demo/case",
         "GET  /v1/model-cards",

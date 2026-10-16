@@ -233,6 +233,7 @@ class GemmaClient:
         temperature: float,
     ) -> LlmResponse:
         from oncology_arbiter.models.medgemma_1_5_4b_wiring import (
+            assert_pinned_chat_url,
             verify_artifact_identity,
         )
 
@@ -240,9 +241,7 @@ class GemmaClient:
         expected_model = str(identity["model_id"])
         expected_app = str(identity["app_version"])
         expected_revision = str(identity["revision_sha256"])
-        url = self.medgemma_url
-        if not url.endswith(".modal.run"):
-            url = f"{url}-chat.modal.run"
+        url = assert_pinned_chat_url(self.medgemma_url)
         started = time.time()
         try:
             response = self._session.post(

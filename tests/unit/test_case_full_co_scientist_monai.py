@@ -42,12 +42,16 @@ def _dicom_b64() -> str | None:
     not FIXTURE_DCM.is_file(),
     reason=f"CBIS-DDSM fixture missing at {FIXTURE_DCM}",
 )
-def test_case_full_with_monai_heuristic_feeds_co_scientist(monkeypatch):
-    """MONAI heuristic ON + Co-Scientist ON → screening hypotheses land in
-    the ranked list."""
+def test_case_full_with_monai_heuristic_does_not_fake_offline_elo(monkeypatch):
+    """MONAI heuristic findings are real. Offline Co-Scientist is not a substitute.
+
+    Without MEDGEMMA_MODAL_URL the ranked list stays empty and the stage
+    receipt names the missing specialist. Filling elo_ranked_hypotheses from
+    orchestrator.co_scientist or /v1/elo/rank is the retreat this test forbids.
+    """
     monkeypatch.setenv("ONCOLOGY_ARBITER_ENABLE_MONAI_DETECTOR", "1")
     monkeypatch.setenv("ONCOLOGY_ARBITER_ENABLE_CO_SCIENTIST", "1")
-    # No HAI-DEF backends — keep this test hermetic.
+    monkeypatch.delenv("MEDGEMMA_MODAL_URL", raising=False)
     monkeypatch.delenv("ONCOLOGY_ARBITER_ENABLE_MEDSIGLIP", raising=False)
     monkeypatch.delenv("ONCOLOGY_ARBITER_ENABLE_BIOPSY_MEDSIGLIP", raising=False)
     monkeypatch.delenv("ONCOLOGY_ARBITER_ENABLE_THERAPY_TXGEMMA", raising=False)
@@ -70,32 +74,19 @@ def test_case_full_with_monai_heuristic_feeds_co_scientist(monkeypatch):
     assert r.status_code == 200, r.text
     body = r.json()
 
-    # Screening ran and returned at least one finding (heuristic detector
-    # is deterministic on a real DICOM — see w2 model card).
-    screening = body["screening"]
-    assert screening is not None
-    findings = screening.get("findings") or []
-    assert len(findings) > 0, "MONAI heuristic should surface at least one finding"
+    assert body.get("screening") is not None
 
-    # Co-Scientist ran → ranked hypotheses list non-empty
     ranked = body["elo_ranked_hypotheses"]
-    assert isinstance(ranked, list)
-    assert len(ranked) > 0, "Co-Scientist should have produced hypotheses"
-
-    # At least one hypothesis MUST be derived from a screening stage output.
-    screening_hyps = [h for h in ranked if h.get("stage") == "screening"]
-    assert len(screening_hyps) > 0, (
-        "elo_ranked_hypotheses must include at least one screening-stage "
-        "hypothesis when MONAI heuristic surfaced findings"
+    assert ranked == [], (
+        "elo_ranked_hypotheses must stay empty unless MedGemma pairwise Elo ran; "
+        f"got {ranked!r}"
     )
-
-    # Elo ratings must be numeric and each hypothesis must carry the
-    # standard hypothesis shape (hyp_id, statement, confidence).
-    for h in ranked:
-        assert isinstance(h.get("statement"), str)
-        assert isinstance(h.get("confidence"), (int, float))
-        assert isinstance(h.get("hyp_id"), str)
-        assert isinstance(h.get("rating"), (int, float))
+    receipts = body.get("stage_receipts") or []
+    medgemma = [item for item in receipts if item.get("stage") == "medgemma_co_scientist"]
+    assert medgemma, "case_full must record the MedGemma Co-Scientist stage"
+    assert medgemma[0].get("status") != "succeeded"
+    error = (medgemma[0].get("error") or {})
+    assert "MEDGEMMA_MODAL_URL" in str(error.get("message") or "")
 
 
 @pytest.mark.skipif(

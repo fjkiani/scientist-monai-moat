@@ -63,7 +63,14 @@ def _row_to_key(row) -> "APIKey":
     )
 
 
-DEFAULT_DB = Path(os.environ.get("ONCOLOGY_ARBITER_AUTH_DB_PATH", "/tmp/oa-audit/tenants.sqlite"))
+def _default_db_path() -> Path:
+    env = os.environ.get("ONCOLOGY_ARBITER_AUTH_DB_PATH")
+    if env:
+        return Path(env)
+    return Path(DEFAULT_DB)
+
+
+DEFAULT_DB = Path("/tmp/oa-audit/tenants.sqlite")
 KEY_PREFIX = "oa_live_"
 
 
@@ -107,7 +114,7 @@ class APIKeyDB:
     """
 
     def __init__(self, db_path: Path | None = None) -> None:
-        self.db_path = Path(db_path or DEFAULT_DB)
+        self.db_path = Path(db_path or _default_db_path())
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._init_schema()
 

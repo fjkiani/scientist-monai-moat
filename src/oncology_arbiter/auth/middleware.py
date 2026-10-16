@@ -73,6 +73,33 @@ def require_api_key(
     return tenant
 
 
+def require_verified_api_key(
+    request: Request,
+    header_key: Optional[str] = Depends(_api_key_scheme),
+) -> APIKey:
+    """Reject anonymous access even when ``ONCOLOGY_ARBITER_AUTH_MODE=off``.
+
+    MedGemma Co-Scientist spends identity-locked specialist compute. The
+    local-dev anon principal is not a substitute for a minted key.
+    """
+    if not header_key:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="X-API-Key header is required",
+            headers={"WWW-Authenticate": 'ApiKey realm="oncology-arbiter"'},
+        )
+    tenant = verify_api_key(header_key)
+    if tenant is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="API key is invalid or has been revoked",
+            headers={"WWW-Authenticate": 'ApiKey realm="oncology-arbiter"'},
+        )
+    request.state.tenant_id = tenant.tenant_id
+    request.state.tenant_name = tenant.tenant_name
+    return tenant
+
+
 # Re-export as `ApiKeyDep` for terse annotations
 ApiKeyDep = Depends(require_api_key)
 
@@ -119,4 +146,10 @@ def require_scope(scope: str) -> Callable[..., APIKey]:
     return _dep
 
 
-__all__ = ["require_api_key", "require_scope", "ApiKeyDep", "APIKeyDB"]
+__all__ = [
+    "require_api_key",
+    "require_verified_api_key",
+    "require_scope",
+    "ApiKeyDep",
+    "APIKeyDB",
+]

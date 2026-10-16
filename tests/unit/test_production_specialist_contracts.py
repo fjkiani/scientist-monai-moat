@@ -226,7 +226,10 @@ def test_configured_medgemma_is_terminal_and_surfaces_provenance(monkeypatch) ->
     )
 
     identity = verify_artifact_identity()
-    monkeypatch.setenv("MEDGEMMA_MODAL_URL", "https://unit--medgemma-1-5-4b")
+    monkeypatch.setenv(
+        "MEDGEMMA_MODAL_URL",
+        "https://crispro-test--medgemma-1-5-4b-chat.modal.run",
+    )
     client = GemmaClient(google_key="must-not-be-used", timeout_s=1)
     calls: list[str] = []
 
@@ -255,7 +258,7 @@ def test_configured_medgemma_is_terminal_and_surfaces_provenance(monkeypatch) ->
     assert serialized["llm_request_ids"] == ["medgemma-request-1"]
     assert serialized["llm_prompt_tokens"] == 12
     assert serialized["llm_completion_tokens"] == 7
-    assert calls == ["https://unit--medgemma-1-5-4b-chat.modal.run"]
+    assert calls == ["https://crispro-test--medgemma-1-5-4b-chat.modal.run"]
 
     def fail(url, **kwargs):
         calls.append(url)
@@ -264,7 +267,7 @@ def test_configured_medgemma_is_terminal_and_surfaces_provenance(monkeypatch) ->
     monkeypatch.setattr(client._session, "post", fail)
     with pytest.raises(LlmUnavailable, match="MedGemma Modal unavailable"):
         client.chat([{"role": "user", "content": "retry"}])
-    assert calls[-1] == "https://unit--medgemma-1-5-4b-chat.modal.run"
+    assert calls[-1] == "https://crispro-test--medgemma-1-5-4b-chat.modal.run"
 
 
 def _triage_features(**updates) -> dict:

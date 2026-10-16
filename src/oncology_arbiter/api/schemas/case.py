@@ -216,5 +216,9 @@ class FullCaseResponse(ApiEnvelope):
     nsclc: "NsclcResponse | None" = None
     elo_ranked_hypotheses: list[dict[str, Any]] = Field(
         default_factory=list,
-        description="Offline deterministic Elo output, never labelled as an LLM result.",
+        description=(
+            "MedGemma pairwise Elo ranking from execute_stage when Co-Scientist "
+            "completed. Empty when synthesis was not requested or did not "
+            "complete. Never filled from /v1/elo/rank caller modifiers."
+        ),
     )

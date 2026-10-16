@@ -130,14 +130,16 @@ class TumorBoardAssembler:
         try:
             from oncology_arbiter.agents.supervisor import execute_stage
             from oncology_arbiter.models.medgemma_1_5_4b_wiring import (
+                assert_pinned_chat_url,
                 verify_artifact_identity,
             )
 
             identity = verify_artifact_identity()
+            assert_pinned_chat_url(os.environ["MEDGEMMA_MODAL_URL"])
             result = execute_stage(
                 "case_full",
                 context,
-                n_hypotheses=6,
+                n_hypotheses=3,
                 n_evidence_top_k=3,
             )
             output = result.as_dict()
@@ -146,10 +148,34 @@ class TumorBoardAssembler:
                 or output.get("llm_provider") != "medgemma_modal"
                 or output.get("llm_model") != identity["model_id"]
                 or output.get("llm_app_version") != identity["app_version"]
+                or output.get("llm_revision") != identity["revision_sha256"]
                 or not output.get("llm_request_ids")
+                or int(output.get("reflection_calls_expected") or 0) < 1
+                or output.get("reflection_calls_completed")
+                != output.get("reflection_calls_expected")
+                or len(output.get("reflection_receipts") or [])
+                != int(output.get("reflection_calls_expected") or 0)
+                or any(
+                    not item.get("completed") or not item.get("model_request_id")
+                    for item in output.get("reflection_receipts") or []
+                )
+                or int(output.get("tournament_pairs_expected") or 0) < 1
+                or output.get("tournament_pairs_completed") != output.get("tournament_pairs_expected")
+                or len(output.get("tournament_matches") or [])
+                != int(output.get("tournament_pairs_expected") or 0)
+                or any(
+                    not match.get("completed") or not match.get("model_request_id")
+                    for match in output.get("tournament_matches") or []
+                )
+                or not output.get("evidence")
+                or not str(output.get("meta_review") or "").strip()
+                or not output.get("meta_review_request_id")
+                or not output.get("meta_review_response_sha256")
+                or len(output.get("hypotheses") or []) < 2
             ):
                 raise RuntimeError(
-                    "MedGemma Co-Scientist did not complete with required provider provenance"
+                    "MedGemma Co-Scientist did not complete the identity, "
+                    "evidence, pairwise Elo, and meta-review gates"
                 )
             receipts.append({
                 "stage": "medgemma_co_scientist",
@@ -174,6 +200,39 @@ class TumorBoardAssembler:
                 service_name="medgemma-1.5-4b",
             ))
             return None
+
+    @staticmethod
+    def elo_ranked_from_medgemma(
+        output: dict[str, Any] | None,
+    ) -> list[dict[str, Any]]:
+        """Map MedGemma pairwise Elo hypotheses onto the case_full ranked field.
+
+        Empty when Co-Scientist did not execute. Never filled from
+        ``/v1/elo/rank`` or ``orchestrator.co_scientist``.
+        """
+        if not output:
+            return []
+        ranked: list[dict[str, Any]] = []
+        for item in output.get("hypotheses") or []:
+            if not isinstance(item, dict):
+                continue
+            ranked.append({
+                "hyp_id": item.get("hypothesis_id"),
+                "statement": item.get("claim"),
+                "confidence": item.get("initial_confidence"),
+                "rating": item.get("elo"),
+                "elo": item.get("elo"),
+                "stage": item.get("source_scope") or output.get("stage") or "case_full",
+                "evidence": [
+                    {"url": url} for url in (item.get("evidence_urls") or []) if url
+                ],
+                "ranking_kind": "medgemma_pairwise_elo",
+                "provider": output.get("llm_provider"),
+                "tournament_wins": item.get("tournament_wins"),
+                "tournament_losses": item.get("tournament_losses"),
+                "evidence_alignment": item.get("evidence_alignment"),
+            })
+        return ranked
 
     @classmethod
     def assemble_dynamic(

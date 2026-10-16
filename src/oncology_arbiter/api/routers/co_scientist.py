@@ -1,32 +1,236 @@
-"""Deterministic offline evidence-ranker endpoint.
-
-This module does not run the MedGemma Co-Scientist synthesis stage. It
-transforms existing stage envelopes through generate/reflect/Elo/evolve.
-"""
+"""Co-Scientist and offline ranker routes."""
 from __future__ import annotations
 
-from fastapi import APIRouter
+import os
 
-from oncology_arbiter.api.audit import log_event, new_request_id
+from fastapi import APIRouter, Depends, HTTPException
+
 from oncology_arbiter import AUROC_CAVEAT, RUO_DISCLAIMER
+from oncology_arbiter.api.audit import log_event, new_request_id
 from oncology_arbiter.api.schemas import (
     CoScientistRunRequest,
     CoScientistRunResponse,
+    EvidenceRecord,
     HonestyGateReport,
     ModelState,
     Provenance,
+    RealCoScientistRequest,
+    RealCoScientistResponse,
 )
-
+from oncology_arbiter.auth import APIKey, require_verified_api_key
 
 router = APIRouter()
 
+
+@router.post("/v1/co-scientist/run", response_model=RealCoScientistResponse)
+def real_co_scientist_run(
+    req: RealCoScientistRequest,
+    tenant: APIKey = Depends(require_verified_api_key),
+) -> RealCoScientistResponse:
+    """Run the evidence-grounded MedGemma Co-Scientist and pairwise Elo loop.
+
+    This endpoint never falls back to the deterministic offline ranker or an
+    alternate LLM. Every tournament pair must carry a MedGemma request receipt.
+    """
+    endpoint_url = (os.environ.get("MEDGEMMA_MODAL_URL") or "").strip()
+    if not endpoint_url:
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "MEDGEMMA_MODAL_URL is required; alternate LLMs and "
+                "deterministic Elo are not substitutes"
+            ),
+        )
+
+    request_id = new_request_id()
+    try:
+        from oncology_arbiter.agents.supervisor import execute_stage
+        from oncology_arbiter.models.medgemma_1_5_4b_wiring import (
+            assert_pinned_chat_url,
+            verify_artifact_identity,
+        )
+
+        identity = verify_artifact_identity()
+        assert_pinned_chat_url(endpoint_url)
+        result = execute_stage(
+            req.stage,
+            req.context,
+            n_hypotheses=req.n_hypotheses,
+            n_evidence_top_k=req.n_evidence_top_k,
+            seed_urls=[str(url) for url in req.seed_urls],
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=f"MedGemma Co-Scientist execution failed: {type(exc).__name__}: {exc}",
+        ) from exc
+
+    output = result.as_dict()
+    if result.model_state != "executed":
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "MedGemma Co-Scientist did not complete: "
+                f"model_state={result.model_state}; notes={result.notes}"
+            ),
+        )
+    if output.get("llm_provider") != "medgemma_modal":
+        raise HTTPException(status_code=502, detail="Unexpected Co-Scientist LLM provider")
+    if (
+        output.get("llm_model") != identity["model_id"]
+        or output.get("llm_app_version") != identity["app_version"]
+        or output.get("llm_revision") != identity["revision_sha256"]
+    ):
+        raise HTTPException(status_code=502, detail="MedGemma response identity mismatch")
+    if not output.get("llm_request_ids"):
+        raise HTTPException(status_code=502, detail="MedGemma request receipts are missing")
+
+    reflections_expected = int(output.get("reflection_calls_expected") or 0)
+    reflections_completed = int(output.get("reflection_calls_completed") or 0)
+    reflection_receipts = list(output.get("reflection_receipts") or [])
+    if (
+        reflections_expected < 1
+        or reflections_completed != reflections_expected
+        or len(reflection_receipts) != reflections_expected
+        or any(
+            not item.get("completed") or not item.get("model_request_id")
+            for item in reflection_receipts
+        )
+    ):
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "MedGemma REFLECT incomplete: "
+                f"{reflections_completed}/{reflections_expected}"
+            ),
+        )
+
+    expected = int(output.get("tournament_pairs_expected") or 0)
+    completed = int(output.get("tournament_pairs_completed") or 0)
+    matches = list(output.get("tournament_matches") or [])
+    if (
+        expected < 1
+        or completed != expected
+        or len(matches) != expected
+        or any(not match.get("completed") or not match.get("model_request_id") for match in matches)
+    ):
+        raise HTTPException(
+            status_code=503,
+            detail=f"MedGemma Elo tournament incomplete: {completed}/{expected}",
+        )
+
+    hypotheses = list(output.get("hypotheses") or [])
+    if len(hypotheses) < 2:
+        raise HTTPException(status_code=503, detail="Fewer than two ranked hypotheses survived")
+    completed_reflect_ids = {
+        str(item.get("hypothesis_id"))
+        for item in reflection_receipts
+        if item.get("completed") and item.get("model_request_id")
+    }
+    hypothesis_ids = {str(item.get("hypothesis_id") or "") for item in hypotheses}
+    if (
+        reflections_expected != len(hypotheses)
+        or completed_reflect_ids != hypothesis_ids
+    ):
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "Every ranked hypothesis must complete evidence-backed MedGemma "
+                "REFLECT before pairwise Elo"
+            ),
+        )
+    if (
+        not str(output.get("meta_review") or "").strip()
+        or not output.get("meta_review_request_id")
+        or not output.get("meta_review_response_sha256")
+    ):
+        raise HTTPException(
+            status_code=503,
+            detail="MedGemma META_REVIEW text or model receipt is missing",
+        )
+
+    evidence = [
+        EvidenceRecord(
+            url=str(item.get("url") or ""),
+            quoted_text=str(item.get("snippet") or item.get("title") or "").strip(),
+            source=str(item.get("source") or "unknown"),
+        )
+        for item in output.get("evidence") or []
+        if item.get("url") and (item.get("snippet") or item.get("title"))
+    ]
+    if not evidence:
+        raise HTTPException(status_code=503, detail="No fetched evidence survived the honesty gate")
+
+    provenance = Provenance(
+        model_state=ModelState.LOADED_MEDGEMMA_1P5_4B,
+        model_name=identity["model_id"],
+        model_version=identity["revision_sha256"],
+        request_id=request_id,
+        model_endpoint_url=endpoint_url,
+    )
+    honesty_gate = HonestyGateReport(
+        seen_urls_count=int(output.get("seen_urls_count") or 0),
+        evidence_kept=int(output.get("evidence_kept") or 0),
+        evidence_dropped=int(output.get("evidence_dropped") or 0),
+    )
+    log_event(
+        request_id,
+        "/v1/co-scientist/run",
+        model_state=ModelState.LOADED_MEDGEMMA_1P5_4B.value,
+        patient_id_hash=None,
+        extra={
+            "stage": req.stage,
+            "hypotheses": len(hypotheses),
+            "evidence_kept": len(evidence),
+            "reflection_calls_expected": reflections_expected,
+            "reflection_calls_completed": reflections_completed,
+            "tournament_pairs_expected": expected,
+            "tournament_pairs_completed": completed,
+            "model_request_ids": len(output["llm_request_ids"]),
+        },
+        tenant_id=tenant.tenant_id,
+    )
+    return RealCoScientistResponse(
+        disclaimer=RUO_DISCLAIMER,
+        caveat=AUROC_CAVEAT,
+        provenance=provenance,
+        honesty_gate=honesty_gate,
+        evidence=evidence,
+        warnings=list(output.get("llm_honesty_warnings") or []),
+        stage=req.stage,
+        supervisor_version=str(output.get("supervisor_version") or ""),
+        hypotheses=hypotheses,
+        meta_review=str(output["meta_review"]),
+        seen_urls=list(output.get("seen_urls") or []),
+        reflection_calls_expected=reflections_expected,
+        reflection_calls_completed=reflections_completed,
+        reflection_receipts=reflection_receipts,
+        tournament_pairs_expected=expected,
+        tournament_pairs_completed=completed,
+        tournament_matches=matches,
+        llm_calls=int(output.get("llm_calls") or 0),
+        tokens_in=int(output.get("llm_prompt_tokens") or 0),
+        tokens_out=int(output.get("llm_completion_tokens") or 0),
+        cost_usd=float(output.get("llm_cost_usd") or 0.0),
+        provider=str(output["llm_provider"]),
+        provider_chain=list(output.get("llm_provider_chain") or []),
+        model_id=str(output["llm_model"]),
+        app_name=str(output["llm_app_version"]),
+        model_revision=str(output["llm_revision"]),
+        model_request_ids=list(output["llm_request_ids"]),
+        meta_review_request_id=str(output["meta_review_request_id"]),
+        meta_review_response_sha256=str(output["meta_review_response_sha256"]),
+        latency_s=float(output.get("latency_s") or 0.0),
+    )
+
 @router.post("/v1/offline_ranker/run", response_model=CoScientistRunResponse)
-def offline_ranker_run(
+def co_scientist_run(
     req: CoScientistRunRequest,
 ) -> CoScientistRunResponse:
-    """Run the deterministic offline ranker over caller-supplied envelopes.
+    """Run the deterministic offline evidence ranker over caller-supplied envelopes.
 
-    Phases: generate → reflect → rank → evolve → rank.
+    This is not the MedGemma Co-Scientist. Phases: generate → reflect → rank →
+    evolve → rank over caller envelopes only.
 
     Honesty contract
     ----------------
@@ -99,11 +303,10 @@ def offline_ranker_run(
     # evidence field is left empty because run_co_scientist doesn't
     # produce a merged evidence list of its own (each hypothesis
     # carries its own `evidence[]`).
-    state = ModelState.DETERMINISTIC_OFFLINE_RANKER
     prov = Provenance(
         model_name="oa/offline_evidence_ranker",
-        model_version="v1.0.0",
-        model_state=state,
+        model_version="v0.4.0-alpha",
+        model_state=ModelState.DETERMINISTIC_OFFLINE_RANKER,
         request_id=request_id,
     )
     gate = HonestyGateReport(
@@ -114,7 +317,7 @@ def offline_ranker_run(
 
     log_event(
         request_id, "/v1/offline_ranker/run",
-        model_state=state.value,
+        model_state=ModelState.DETERMINISTIC_OFFLINE_RANKER.value,
         patient_id_hash=None,
         extra={
             "has_screening": req.screening is not None,
@@ -130,6 +333,7 @@ def offline_ranker_run(
             "n_variants": req.n_variants,
             "return_top": req.return_top,
         },
+        tenant_id=None,  # public route, matches /v1/elo/rank
     )
 
     return CoScientistRunResponse(
@@ -148,5 +352,3 @@ def offline_ranker_run(
         hypotheses_dropped=hyps_dropped,
     )
 
-# ----------------------------------------------------------------------- #
-# Production dynamic tumor board and full-case specialist assembly

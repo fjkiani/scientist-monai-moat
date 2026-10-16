@@ -131,7 +131,9 @@ def case_full(
             biopsy=None,
             therapy=None,
             nsclc=None,
-            elo_ranked_hypotheses=[],
+            elo_ranked_hypotheses=TumorBoardAssembler.elo_ranked_from_medgemma(
+                dynamic.co_scientist,
+            ),
         )
 
     receipts: list[dict[str, Any]] = []
@@ -293,7 +295,9 @@ def case_full(
         biopsy=None,
         therapy=None,
         nsclc=nsclc,
-        elo_ranked_hypotheses=[],
+        elo_ranked_hypotheses=TumorBoardAssembler.elo_ranked_from_medgemma(
+            co_scientist,
+        ),
     )
 
 # ----------------------------------------------------------------------- #
