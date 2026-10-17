@@ -71,15 +71,15 @@ def health() -> HealthResponse:
             },
             "hgsoc": {
                 "state": ModelState.RETIRED.value,
-                # case_full is True because /v1/case/full genuinely accepts
-                # cancer=hgsoc. It is NOT a claim that a scorer runs: the
-                # two keys below carry that, so route reachability can no
-                # longer be misread as scoring availability.
-                "case_full": True,
+                "case_full": False,
                 "patient_probability_emitted": False,
                 "retired_scope": "ovarian_prognostic_arbiter_patient_level_scoring",
-                "endpoints": ["tumor_board/dynamic", "tumor_board/bundle", "case/full"],
-                "notes": "Route reachable; the ovarian prognostic arbiter is retired and emits no patient probability or risk bucket. Therapy and MedGemma stages remain independently receipt-gated.",
+                "endpoints": ["tumor_board/dynamic", "tumor_board/bundle"],
+                "notes": (
+                    "POST /v1/case/full?cancer=hgsoc returns HTTP 501. "
+                    "Ovarian requests are not executed on the breast screening, "
+                    "breast DSS, or breast therapy path."
+                ),
             },
         },
         models_loaded=deps.compute_models_loaded(),

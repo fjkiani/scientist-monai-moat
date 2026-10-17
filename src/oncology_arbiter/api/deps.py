@@ -85,6 +85,7 @@ def score_arbiter(
     features: dict[str, Any],
     *,
     stage: str | None = None,
+    require_complete: bool = False,
 ) -> ArbiterScore:
     """Load the named L2 arbiter, score `features`, and apply the Manski gate.
 
@@ -137,6 +138,25 @@ def score_arbiter(
             raise HTTPException(422, detail=exc.detail()) from exc
 
     arb = load_arbiter(name)
+    if require_complete:
+        missing = sorted(
+            key
+            for key in arb.feature_encodings
+            if key not in features or features[key] is None
+        )
+        if missing:
+            raise HTTPException(
+                422,
+                detail={
+                    "error": "missing_required_features",
+                    "stage": stage or name,
+                    "missing": missing,
+                    "detail": (
+                        "refusing to coerce missing clinical inputs to false, "
+                        "zero, or the reference class"
+                    ),
+                },
+            )
     r = arb.score(features)
     bounds = ManskiBounds.from_arbiter(
         stage=stage or name,

@@ -386,15 +386,23 @@ def test_dynamic_hgsoc_exposes_retirement_without_patient_score() -> None:
 def test_full_hgsoc_never_falls_through_to_breast() -> None:
     response = TestClient(create_app()).post(
         "/v1/case/full?cancer=hgsoc",
-        json={"run_co_scientist": False},
+        json={
+            "run_co_scientist": False,
+            "therapy_features": {
+                "histology": "invasive_ductal",
+                "er_positive": True,
+                "pr_positive": True,
+                "her2_positive": False,
+            },
+        },
     )
-    assert response.status_code == 200, response.text
+    assert response.status_code == 501, response.text
     body = response.json()
-    assert body["cancer"] == "hgsoc"
-    assert body["ovarian_arbiter"]["model_state"] == "retired"
-    assert body["dss_prognosis"] is None
-    assert body["biopsy"] is None
-    assert body["therapy"] is None
+    assert body["detail"]["error"] == "hgsoc_case_full_not_implemented"
+    assert "dss_prognosis" not in body
+    assert "therapy_bridge" not in body
+    assert "therapy_triage" not in body
+    assert "p_positive" not in response.text
 
 
 def test_full_nsclc_requires_case_id_and_never_substitutes_heuristic() -> None:

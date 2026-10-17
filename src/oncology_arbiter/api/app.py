@@ -872,15 +872,15 @@ def create_app() -> FastAPI:
                 },
                 "hgsoc": {
                     "state": ModelState.RETIRED.value,
-                    # case_full is True because /v1/case/full genuinely accepts
-                    # cancer=hgsoc. It is NOT a claim that a scorer runs: the
-                    # two keys below carry that, so route reachability can no
-                    # longer be misread as scoring availability.
-                    "case_full": True,
+                    "case_full": False,
                     "patient_probability_emitted": False,
                     "retired_scope": "ovarian_prognostic_arbiter_patient_level_scoring",
-                    "endpoints": ["tumor_board/dynamic", "tumor_board/bundle", "case/full"],
-                    "notes": "Route reachable; the ovarian prognostic arbiter is retired and emits no patient probability or risk bucket. Therapy and MedGemma stages remain independently receipt-gated.",
+                    "endpoints": ["tumor_board/dynamic", "tumor_board/bundle"],
+                    "notes": (
+                        "POST /v1/case/full?cancer=hgsoc returns HTTP 501. "
+                        "Ovarian requests are not executed on the breast screening, "
+                        "breast DSS, or breast therapy path."
+                    ),
                 },
             },
             models_loaded=_compute_models_loaded(),
@@ -1016,7 +1016,7 @@ def create_app() -> FastAPI:
                                 "threshold_label": probe_result.threshold_label,
                                 "predicted_label": probe_result.predicted_label,
                                 "joblib_path": str(CBIS_JOBLIB_PATH),
-                                "joblib_sha256_prefix": "f40f33c1",
+                                "joblib_sha256": "f40f33c1cd3adfa48d1d10cc4d136795ad0642c3d1f94a543872ae1dc283aaf7",
                             }
                         receipts.append({
                             "stage": "cbis_ddsm_logreg_v3",
@@ -1025,6 +1025,7 @@ def create_app() -> FastAPI:
                             "request_id": request_id,
                             "service_name": "oncology-arbiter",
                             "model_name": probe_result.probe_version,
+                            "artifact_sha256": "f40f33c1cd3adfa48d1d10cc4d136795ad0642c3d1f94a543872ae1dc283aaf7",
                             "input_reference": result.embedding_sha256,
                             "latency_ms": (time.perf_counter() - probe_t0) * 1000.0,
                             "warnings": [CBIS_DDSM_PROBE_WARNING],
@@ -2660,9 +2661,22 @@ def create_app() -> FastAPI:
         cancer_norm = cancer.lower().strip()
         if cancer_norm not in _SUPPORTED_CANCERS:
             raise HTTPException(400, f"Unsupported cancer={cancer!r}; supported={sorted(_SUPPORTED_CANCERS)}")
+        if cancer_norm == "hgsoc":
+            raise HTTPException(
+                status_code=501,
+                detail={
+                    "error": "hgsoc_case_full_not_implemented",
+                    "cancer": "hgsoc",
+                    "detail": (
+                        "HGSOC is not implemented on /v1/case/full. "
+                        "Ovarian requests are not scored by breast screening, "
+                        "breast DSS, or breast therapy."
+                    ),
+                },
+            )
         request_id = new_request_id()
 
-        if cancer_norm in {"breast", "hgsoc"}:
+        if cancer_norm == "breast":
             biopsy_input = req.biopsy_input
             dynamic_request = DynamicTumorBoardRequest(
                 cancer=cancer_norm,
@@ -2891,12 +2905,9 @@ def create_app() -> FastAPI:
     #      without the SPA needing to shove multi-megabyte JSON through
     #      /v1/case/full.
     #
-    #   2. If HIPAA_MODE=true is set on the deploy env, the response
-    #      surface is redacted via the same HIPAAPIIMiddleware pattern
-    #      described in the AK integration doc. The current stub returns
-    #      the bundle verbatim under model_state=LOADED_HIPAA_REDACTOR so
-    #      the SPA can trip its own PHI-check assertions; live redaction
-    #      wiring lands in PR #6 alongside the audit ledger tests.
+    #   2. If HIPAA_MODE=true, patient_id and name fields are redacted
+    #      before the bundle is echoed. model_state=LOADED_HIPAA_REDACTOR
+    #      is set only after that redaction runs.
 
     @app.post("/v1/tumor_board/bundle", response_model=TumorBoardBundleResponse)
     def tumor_board_bundle(
@@ -2931,25 +2942,34 @@ def create_app() -> FastAPI:
         # Canonical bundle hash: pydantic dumps with sort_keys+ensure_ascii
         # so an identical bundle round-tripped through v1 matches the
         # audit ledger entry emitted by crispro-backend-v2 side-by-side.
+        request_id = new_request_id()
+        hipaa_mode = os.environ.get("HIPAA_MODE", "").lower() in {"1", "true", "yes"}
+        payload = bundle.model_dump(mode="json")
+        if hipaa_mode:
+            from oncology_arbiter.api.hipaa_redact import redact_phi
+
+            try:
+                payload = redact_phi(payload)
+                bundle = TumorBoardBundle.model_validate(payload)
+            except Exception as exc:
+                raise HTTPException(
+                    status_code=501,
+                    detail={
+                        "error": "hipaa_redactor_failed",
+                        "detail": f"{type(exc).__name__}: {exc}",
+                    },
+                ) from exc
+            state = ModelState.LOADED_HIPAA_REDACTOR
+        else:
+            state = ModelState.LOADED_AK_BUNDLE
+
         canonical = _json.dumps(
-            bundle.model_dump(mode="json"),
+            payload,
             sort_keys=True,
             ensure_ascii=True,
             separators=(",", ":"),
         )
         bundle_sha = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
-
-        request_id = new_request_id()
-        hipaa_mode = os.environ.get("HIPAA_MODE", "").lower() in {"1", "true", "yes"}
-
-        # Model state depends on whether HIPAA redaction was applied. The
-        # actual redaction stub lives in a follow-up PR; today this route
-        # just tags the state so the frontend surface (SlEvidenceMoat) can
-        # render the PHI-safety banner.
-        state = (
-            ModelState.LOADED_HIPAA_REDACTOR if hipaa_mode
-            else ModelState.LOADED_AK_BUNDLE
-        )
 
         log_event(
             request_id,

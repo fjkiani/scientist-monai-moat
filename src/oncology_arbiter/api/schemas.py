@@ -495,7 +495,9 @@ class ExtendedReceptorField(BaseModel):
     matched_text: str | None = None
     span: tuple[int, int] | None = None
     confidence: float = Field(default=0.0, ge=0.0, le=1.0)
-    source: Literal["regex", "clinicalbert", "fused", "disagreement", "none"] = "none"
+    source: Literal[
+        "regex", "clinicalbert", "fused", "disagreement", "none", "medgemma_pathology"
+    ] = "none"
 
 
 class ReportParseBlock(BaseModel):
@@ -510,22 +512,34 @@ class ReportParseBlock(BaseModel):
         description="Always clinicalbert_v0.5.2_sliding_window; no regex or "
                     "fused parser is wired on any route.",
     )
-    fusion_mode: Literal["clinicalbert"] = "clinicalbert"
+    fusion_mode: Literal["clinicalbert", "medgemma_pathology"] = "clinicalbert"
     per_field_confidence: dict[str, float] = Field(
         default_factory=dict,
         description="Confidence per field (0..1) as reported by the parser.",
     )
     per_field_source: dict[
         str,
-        Literal["regex", "clinicalbert", "fused", "disagreement", "none"],
+        Literal[
+            "regex", "clinicalbert", "fused", "disagreement", "none", "medgemma_pathology"
+        ],
     ] = Field(default_factory=dict)
     extended_fields: dict[str, ExtendedReceptorField] = Field(default_factory=dict)
     parsed_entities: dict[str, Any] = Field(
         default_factory=dict,
         description="Canonical ClinicalBERT entity output, without regex fusion.",
     )
+    spans: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description="Raw ClinicalBERT spans. Runtime key is spans, not a fused view.",
+    )
+    report_sha256: str | None = Field(default=None, min_length=64, max_length=64)
     n_tokens: int | None = Field(default=None, ge=0)
     n_windows: int | None = Field(default=None, ge=0)
+    window_count: int | None = Field(
+        default=None,
+        ge=0,
+        description="Sliding-window count from the ClinicalBERT runtime (window_count).",
+    )
     window_tokens: int | None = Field(default=None, ge=1)
     overlap_tokens: int | None = Field(default=None, ge=0)
     window_aggregation: str | None = None
@@ -1241,6 +1255,7 @@ class TumorBoardBundle(BaseModel):
         "tumor_board.v3.multimodal-with-manuscript-claims"
     ]
     patient_id: str
+    name: str | None = None
     generated_at: str
     demo_disclaimer: str | None = None
     patient_context: PatientContext
@@ -1676,11 +1691,13 @@ class StageBiopsyScoreRequest(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
     features: dict[str, Any] = Field(
-        default_factory=dict,
+        ...,
         description=(
-            "Explicit lesion morphology and covariates for biopsy_arbiter_v1. "
-            "Calcification-only morphology without mass descriptors is rejected "
-            "with HTTP 422 (unvalidated lesion stratum)."
+            "Observed feature panel for the stage route. An empty object and "
+            "any omitted declared input are HTTP 422. Missing values are not "
+            "filled with false, zero, or the reference class. "
+            "Calcification-only biopsy morphology is HTTP 422 "
+            "(unvalidated lesion stratum)."
         ),
     )
     patient_id_hash: str | None = Field(default=None, min_length=64, max_length=64)
