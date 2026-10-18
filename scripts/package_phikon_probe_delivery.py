@@ -37,7 +37,23 @@ def main() -> int:
     staging = args.staging.resolve()
 
     joblib_src = staging / "phikon_probe_v1.joblib"
-    receipt = json.loads((staging / "train_receipt.json").read_text())
+    # Production truth is the 62k compact receipt. The 100k train_receipt.json
+    # named joblib sha 09cc7d9e and is not the committed probe.
+    compact = staging / "train_receipt_compact.json"
+    legacy = staging / "train_receipt.json"
+    if not compact.is_file():
+        raise SystemExit(
+            "missing train_receipt_compact.json; refusing to package Phikon "
+            "from any other receipt"
+        )
+    if legacy.is_file():
+        raise SystemExit(
+            "refusing to package while train_receipt.json is present; "
+            "that file is the 100k fit, not the 62k production probe"
+        )
+    receipt = json.loads(compact.read_text())
+    if str(receipt.get("joblib_sha256", "")).startswith("09cc7d9e"):
+        raise SystemExit("compact receipt still points at the 100k joblib 09cc7d9e")
     samples_blob = json.loads((staging / "samples.json").read_text())
     split_ids = json.loads((staging / "split_ids.json").read_text())
     test_blob = json.loads((staging / "test_rows.json").read_text())
@@ -130,14 +146,18 @@ def main() -> int:
     eval_path.write_text(json.dumps(evaluation, indent=2))
     eval_sha = sha256(eval_path)
 
+    prior_metrics = {}
+    prior_path = proofs / "phikon_probe_v1_metrics.json"
+    if prior_path.is_file():
+        prior_metrics = json.loads(prior_path.read_text())
     metrics_sidecar = {
         "probe": "phikon_probe_v1",
         "artifact": "models/phikon_probe_v1.joblib",
         "artifact_sha256": joblib_sha,
-        "embeddings_sha256": receipt.get("embeddings_sha256"),
+        "embeddings_sha256": receipt.get("embeddings_sha256") or prior_metrics.get("embeddings_sha256"),
         "macro_f1_delivery_test": test_blob["macro_f1"],
-        "macro_f1_full_crcval": receipt.get("full_crcval_macro_f1"),
-        "accuracy_full_crcval": receipt.get("full_crcval_accuracy"),
+        "macro_f1_full_crcval": receipt.get("full_crcval_macro_f1") or prior_metrics.get("macro_f1_full_crcval"),
+        "accuracy_full_crcval": receipt.get("full_crcval_accuracy") or prior_metrics.get("accuracy_full_crcval"),
         "n_training": train["n_training"],
         "n_test": train["n_test"],
         "disclaimer": (

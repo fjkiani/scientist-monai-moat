@@ -6,13 +6,10 @@ see tests/fixtures/pathology/PROVENANCE.json) across 5 distinct real
 tissue classes -- not a synthetic image, not a degenerate solid-color PNG.
 
 This file tests the *deployed endpoint's I/O contract* with a handful of
-real images (dimension, determinism, non-degeneracy). It is deliberately
-separate from the large-scale population validation
-(phikon_nct_crc_population_validation.json), which embeds the full
-107,180-image dataset locally and fits/evaluates a real classifier -- that
-is a different artifact answering a different question (does the backbone
-carry population-level signal) from this one (is the live endpoint healthy
-and contract-correct).
+real images (dimension, determinism, non-degeneracy), then classifies one
+live 768-d vector with the production 62k probe
+``models/phikon_probe_v1.joblib``
+(sha256 7c77d0759dbcc00440dac6c9b6d99255523ff9706041ce275e8c56724ff8a713).
 """
 from __future__ import annotations
 
@@ -151,3 +148,37 @@ def test_receipt_carries_verifiable_link_to_exact_input_bytes() -> None:
         f"receipt input_reference does not embed the real sha256 of the bytes sent "
         f"({expected_sha}); receipt={call.receipt['input_reference']!r}"
     )
+
+
+@LIVE
+def test_live_tumor_embedding_is_classified_by_62k_probe() -> None:
+    """Embed one real tumor tile, then score it with the locked 62k joblib."""
+    import base64
+
+    from oncology_arbiter.models.phikon_probe_wiring import (
+        ARTIFACT_SHA256,
+        predict_tissue_class,
+    )
+    from oncology_arbiter.models.specialist_clients import _http_json
+
+    _skip_if_missing(TUM_TILE)
+    embed_url = os.environ["PHIKON_MODAL_EMBED_URL"].rstrip("/")
+    raw = TUM_TILE.read_bytes()
+    data, _ = _http_json(
+        embed_url,
+        payload={"inputs": [{"image_b64": base64.b64encode(raw).decode("ascii")}]},
+        timeout=120.0,
+    )
+    vec = data.get("embedding")
+    if vec is None and isinstance(data.get("embeddings"), list):
+        vec = data["embeddings"][0]
+    assert isinstance(vec, list) and len(vec) == 768
+    scored = predict_tissue_class(vec)
+    assert scored["artifact_sha256"] == ARTIFACT_SHA256
+    assert scored["artifact_sha256"] == (
+        "7c77d0759dbcc00440dac6c9b6d99255523ff9706041ce275e8c56724ff8a713"
+    )
+    assert scored["probe_version"] == "phikon_probe_v1"
+    assert scored["pred_label"] in {
+        "ADI", "BACK", "DEB", "LYM", "MUC", "MUS", "NORM", "STR", "TUM",
+    }
