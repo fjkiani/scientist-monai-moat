@@ -41,7 +41,7 @@ HONESTY / SCOPE (do not let downstream readers over-claim this):
 
 Usage::
 
-    PHIKON_MODAL_EMBED_URL=https://crispro--phikon-embed.modal.run \\
+    PHIKON_MODAL_EMBED_URL=https://testing1235--phikon-embed.modal.run \\
         python3 scripts/embed_phikon_nct_crc.py \\
         --nct-root /workspace/pathology_crc/NCT-CRC-HE-100K/NCT-CRC-HE-100K \\
         --val-root /workspace/pathology_crc/CRC-VAL-HE-7K/CRC-VAL-HE-7K \\

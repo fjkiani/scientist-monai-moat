@@ -29,6 +29,7 @@ class SpecialistServiceError(RuntimeError):
 DEFAULT_MEDSIGLIP_BASE = "https://crispro-test--medsiglip"
 DEFAULT_LUNA16_BASE = "https://crispro-test--luna16"
 DEFAULT_LUNA16_DETECT_URL = "https://crispro-test--luna16-detect.modal.run"
+DEFAULT_PHIKON_EMBED_URL = "https://testing1235--phikon-embed.modal.run"
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 
 
@@ -249,9 +250,12 @@ class CaseStorageClient:
 
 class PhikonClient:
     def __init__(self, embed_url: str | None = None, timeout: float = 300.0):
-        self.embed_url = (embed_url or os.getenv("PHIKON_MODAL_EMBED_URL") or "").rstrip("/")
-        if not self.embed_url:
-            raise SpecialistServiceError("not_configured", "PHIKON_MODAL_EMBED_URL is not set")
+        chosen = (
+            embed_url
+            or os.getenv("PHIKON_MODAL_EMBED_URL")
+            or DEFAULT_PHIKON_EMBED_URL
+        ).strip()
+        self.embed_url = chosen.rstrip("/")
         self.timeout = timeout
 
     def embed(self, image_bytes: bytes, *, request_id: str, required: bool = False) -> SpecialistCall:
