@@ -254,13 +254,16 @@ def demo_samples_dir() -> Path | None:
     if demo_root:
         path = Path(demo_root)
         return path if path.exists() else None
-    return None
+    packaged = Path(__file__).resolve().parent / "static" / "demo_samples"
+    return packaged if packaged.is_dir() else None
 
 
 def compute_models_loaded() -> dict[str, ModelState]:
     """Report configuration state without claiming successful inference readiness."""
     import os
     from pathlib import Path as _Path
+
+    from oncology_arbiter.models.specialist_clients import DEFAULT_PHIKON_EMBED_URL
 
     def configured(*names: str) -> ModelState:
         return (
@@ -277,22 +280,25 @@ def compute_models_loaded() -> dict[str, ModelState]:
             return ModelState.CONFIGURED_UNVERIFIED
         return ModelState.UNAVAILABLE
 
+    import json
+
+    from oncology_arbiter.models.biopsy_medsiglip_probe import BIOPSY_PROBE_EMBED_DIM
     from oncology_arbiter.models.cbis_ddsm_probe import DEFAULT_MODEL_PATH as _CBIS_JOBLIB
 
     cbis_state = (
         ModelState.LOADED if Path(_CBIS_JOBLIB).exists() else ModelState.UNAVAILABLE
     )
     biopsy_probe_path = (
-        Path(__file__).resolve().parents[2]
+        Path(__file__).resolve().parents[1]
         / "arbiter"
         / "models"
-        / "biopsy_probe_v0.json"
+        / "biopsy_probe_v1.json"
     )
-    biopsy_probe_state = (
-        ModelState.LOADED_BIOPSY_PROBE
-        if biopsy_probe_path.exists()
-        else ModelState.UNAVAILABLE
-    )
+    biopsy_probe_state = ModelState.UNAVAILABLE
+    if biopsy_probe_path.is_file():
+        blob = json.loads(biopsy_probe_path.read_text())
+        if int(blob.get("embed_dim") or 0) == BIOPSY_PROBE_EMBED_DIM == 1152:
+            biopsy_probe_state = ModelState.LOADED_BIOPSY_PROBE
 
     # Frozen in-repo DSS arbiter (not a Modal specialist).
     breast_dss_artifact = (
@@ -307,7 +313,15 @@ def compute_models_loaded() -> dict[str, ModelState]:
         "medsiglip_448": configured_or_identity(
             "MODAL_MEDSIGLIP_URL", identity_file="medsiglip_448_identity.json"
         ),
-        "phikon": configured("PHIKON_MODAL_URL"),
+        "phikon": (
+            ModelState.CONFIGURED_UNVERIFIED
+            if (
+                os.environ.get("PHIKON_MODAL_URL")
+                or os.environ.get("PHIKON_MODAL_EMBED_URL")
+                or DEFAULT_PHIKON_EMBED_URL
+            )
+            else ModelState.UNAVAILABLE
+        ),
         "clinicalbert": configured("CLINICALBERT_MODAL_URL"),
         "medgemma": configured_or_identity(
             "MEDGEMMA_MODAL_URL", identity_file="medgemma_1_5_4b_identity.json"

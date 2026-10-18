@@ -49,6 +49,17 @@ class _PinnedFakeEncoder:
         return np.linspace(-1.0, 1.0, EMBED_DIM, dtype=np.float32)
 
 
+def test_deps_badges_v1_1152_probe_not_v0() -> None:
+    from oncology_arbiter.api.deps import compute_models_loaded
+    from oncology_arbiter.api.schemas import ModelState
+
+    source = Path(compute_models_loaded.__code__.co_filename).read_text()
+    assert "biopsy_probe_v1.json" in source
+    assert "biopsy_probe_v0.json" not in source
+    loaded = compute_models_loaded()
+    assert loaded["biopsy_probe_v1"] == ModelState.LOADED_BIOPSY_PROBE
+
+
 def test_biopsy_probe_v1_artifact_identity_and_lineage() -> None:
     path = artifact_path()
     assert path.name == ARTIFACT_FILENAME == "biopsy_probe_v1.json"

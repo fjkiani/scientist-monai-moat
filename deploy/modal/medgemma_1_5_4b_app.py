@@ -392,8 +392,8 @@ def main() -> None:
     import requests
 
     fp = deployment_fingerprint.remote()
-    info_url = "https://crispro--medgemma-1-5-4b-info.modal.run"
-    chat_url = "https://crispro--medgemma-1-5-4b-chat.modal.run"
+    info_url = "https://testing1235--medgemma-1-5-4b-info.modal.run"
+    chat_url = "https://testing1235--medgemma-1-5-4b-chat.modal.run"
     info = requests.get(info_url, timeout=180).json()
     chat = requests.post(
         chat_url,
