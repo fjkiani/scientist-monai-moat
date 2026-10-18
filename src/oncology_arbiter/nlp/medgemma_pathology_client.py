@@ -97,7 +97,9 @@ def extract_pathology(
         (
             "Return ONLY one JSON object with keys "
             "er_status, er_percent, pr_status, her2_status, nottingham_grade, tumor_size_mm. "
-            "Use null when unknown. First character must be '{'.\n\nREPORT:\n"
+            "Use null when unknown. First character must be '{'. "
+            "UNIT CONVERSION RULE: tumor_size_mm is millimeters. "
+            "1.3 cm = 13 mm. Multiply cm by 10, never by 100.\n\nREPORT:\n"
             + body_text[:6000]
             + "\n\n{"
         ),
@@ -274,11 +276,12 @@ def extract_pathology(
         slim["nottingham_grade"] = _norm_grade(slim.get("nottingham_grade"))
     if "er_percent" in slim:
         slim["er_percent"] = _norm_float(slim.get("er_percent"))
-    # Models often emit tumor size in cm despite the mm contract. Values in
-    # (0, 15] are almost always centimeters for breast pathology; convert.
+    # A fractional value <= 15 is an unconverted centimeter (1.3 cm).
+    # An integer in that range is already millimeters (13 mm). Multiplying
+    # those integers by 10 turns 1.3 cm → 13 mm into 130 mm.
     size = _norm_float(slim.get("tumor_size_mm")) if "tumor_size_mm" in slim else None
     if size is not None:
-        if 0 < float(size) <= 15.0:
+        if 0 < float(size) <= 15.0 and abs(float(size) - round(float(size))) > 1e-6:
             size = float(size) * 10.0
         slim["tumor_size_mm"] = size
     try:

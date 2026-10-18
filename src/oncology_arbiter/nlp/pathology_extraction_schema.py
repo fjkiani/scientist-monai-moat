@@ -46,6 +46,7 @@ Rules:
 - Use UNKNOWN or null when not stated. Do not invent values.
 - If ER is described as positive with a percent, set er_percent.
 - tumor_size_mm must be millimeters (convert cm × 10).
+- UNIT CONVERSION RULE: Tumor size MUST be reported in millimeters (mm). If the report states the size in centimeters (cm), you MUST multiply by exactly 10. Example: "1.3 cm" = 13 mm. Do NOT multiply by 100. Do NOT output 130 mm for 1.3 cm.
 - Output JSON only. No markdown fences. No commentary. No thinking tags.
 - Do not emit <unused*> / <think> wrappers. First character of the reply must be '{'.
 """
