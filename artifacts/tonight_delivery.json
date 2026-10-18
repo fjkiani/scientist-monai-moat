@@ -73,6 +73,27 @@
       ]
     },
     {
+      "artifact_path": "artifacts/clinicalbert/clinicalbert_head_v2.safetensors",
+      "artifact_sha256": "429f804d7f348d7c4eeb27821f766cc2de65c4072f20db0c3b3afaefa9068e50",
+      "evaluation_path": "artifacts/clinicalbert/clinicalbert_evaluation_v2.json",
+      "evaluation_sha256": "55f16a059c9bd96ff1a5e7c4a5bf681d64a781f833da3fd3c578b9b80b1f4fd4",
+      "n_training": 2187,
+      "n_training_synthetic": false,
+      "name": "clinicalbert",
+      "status": "trained_wired_tested",
+      "test_paths": [
+        "tests/nlp/test_clinicalbert_v2_artifact_identity.py"
+      ],
+      "train_manifest_path": "artifacts/clinicalbert/clinicalbert_train_manifest_v2.json",
+      "train_manifest_sha256": "a1146cfcef7d09b4201eb093b3bf5660e4bd1daa789c844fdeb7fb3c4dd6fe72",
+      "wiring_paths": [
+        "src/oncology_arbiter/nlp/clinicalbert_runtime_v2.py",
+        "src/oncology_arbiter/nlp/clinicalbert_local_client.py",
+        "src/oncology_arbiter/nlp/clinicalbert_modal_client.py",
+        "deploy/modal/clinicalbert_app.py"
+      ]
+    },
+    {
       "artifact_path": "models/cbis_ddsm_logreg_v3.joblib",
       "artifact_sha256": "f40f33c1cd3adfa48d1d10cc4d136795ad0642c3d1f94a543872ae1dc283aaf7",
       "evaluation_path": "artifacts/cbis_medsiglip/cbis_medsiglip_evaluation_v2.json",
@@ -88,7 +109,8 @@
       "train_manifest_path": "artifacts/cbis_medsiglip/cbis_medsiglip_train_v2.json",
       "train_manifest_sha256": "d6c51e882058ff0ff3a700f7899f031c44eafbe9f6c775e09371d3d235d94fb0",
       "wiring_paths": [
-        "src/oncology_arbiter/models/cbis_ddsm_probe.py"
+        "src/oncology_arbiter/models/cbis_ddsm_probe.py",
+        "src/oncology_arbiter/api/app.py"
       ]
     },
     {
@@ -122,9 +144,6 @@
       "evaluation_path": "artifacts/phikon/phikon_evaluation_v2.json",
       "evaluation_sha256": "5a054a04f187402b1e09310d762610c31488edd468e5487ae32c2b11f77de756",
       "metrics_sidecar": "docs/proofs/phikon_probe_v1_metrics.json",
-      "production_fit": "62k_stratified_subsample",
-      "macro_f1_delivery_test": 0.913751043562661,
-      "accuracy_full_crcval": 0.9250696378830083,
       "n_training": 62000,
       "n_training_synthetic": false,
       "train_manifest_path": "artifacts/phikon/phikon_train_v2.json",
@@ -135,15 +154,18 @@
       "wiring_paths": [
         "src/oncology_arbiter/models/phikon_probe.py",
         "src/oncology_arbiter/models/phikon_probe_wiring.py"
-      ]
+      ],
+      "production_fit": "62k_stratified_subsample",
+      "macro_f1_delivery_test": 0.913751043562661,
+      "accuracy_full_crcval": 0.9250696378830083
     },
     {
       "name": "medgemma",
       "status": "trained_wired_tested",
       "artifact_path": "models/medgemma_1_5_4b_identity.json",
-      "artifact_sha256": "63fe0ba5469e726e2d0a615a6c5117058f314cf9e9b6644d974b48f1d92e367f",
+      "artifact_sha256": "3369f0b6382e17d9e6665be1163d7ae840ce9c700ba300a63b75703d1b12031b",
       "evaluation_path": "artifacts/medgemma/medgemma_evaluation_v2.json",
-      "evaluation_sha256": "b8ac5924ce637492f807cd1d8bcaefeefb206917028fe8ae218c25059ccb1e66",
+      "evaluation_sha256": "fca97050ebb75c352952915838eb6f671ad059f9742a4f8876dc3cdb2ee14576",
       "n_training": 4,
       "n_training_synthetic": false,
       "train_manifest_path": "artifacts/medgemma/medgemma_train_v2.json",
