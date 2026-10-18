@@ -54,7 +54,9 @@ class ModelState(str, Enum):
     LOADED_LUNA16_RETINANET = "loaded_luna16_retinanet"  # v0.3.0 MONAI Model Zoo lung_nodule_ct_detection@0.6.9 (LUNA16-trained)
     LOADED_TXGEMMA = "loaded_txgemma"  # L4c HAI-DEF TxGemma inference (never reachable under current token)
     TEMPLATE = "template"             # L3 arbiter JSON templates loaded from disk (n_training=0)
-    LOADED_CLINICALBERT_PARSER = "loaded_clinicalbert_parser"  # v0.3.0 Bio_ClinicalBERT fine-tuned on synthetic corpus
+    LOADED_CLINICALBERT_PARSER = "loaded_clinicalbert_parser"  # retired wire value; new parses use LOADED_MEDGEMMA_PATHOLOGY
+    LOADED_MEDGEMMA_PATHOLOGY = "loaded_medgemma_1_5_4b_pathology"
+    LOADED_MEDGEMMA_THERAPY = "loaded_medgemma_1_5_4b_therapy"
     PROXY_CO_SCIENTIST = "proxy_co_scientist"  # offline deterministic ranker; never an LLM result
     LOADED_CASE_STORAGE = "loaded_case_storage"
     LOADED_PHIKON = "loaded_phikon"
@@ -445,7 +447,17 @@ class BiopsyRequest(BaseModel):
     wsi_bytes_b64: str | None = None
     report_text: str | None = Field(
         default=None,
-        description="Free-text pathology report; TxGemma will read this alongside the WSI.",
+        description=(
+            "Free-text pathology report; MedGemma 1.5 4B extracts receptor panel "
+            "(PathologyExtraction). Optional Phikon image/embedding for tissue class."
+        ),
+    )
+    phikon_embedding: list[float] | None = Field(
+        default=None,
+        description=(
+            "Precomputed 768-d Phikon tissue embedding. When provided, "
+            "models/phikon_probe_v1.joblib runs without requiring image bytes."
+        ),
     )
     dss_features: BreastDssFeatures | None = Field(
         default=None,

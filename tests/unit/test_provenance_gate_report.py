@@ -138,7 +138,7 @@ def test_gated_screening_response_has_structured_gate_report(monkeypatch):
     monkeypatch.setenv("ONCOLOGY_ARBITER_ENABLE_MEDSIGLIP", "1")
     monkeypatch.delenv("ONCOLOGY_ARBITER_ENABLE_SIGLIP_PROXY", raising=False)
 
-    def _raise_gate(_preprocess_result):
+    def _raise_gate(_self, _path):
         raise GatedAccessError(
             repo_id="google/medsiglip-448",
             access_level=AccessLevel.FORBIDDEN,
@@ -146,10 +146,8 @@ def test_gated_screening_response_has_structured_gate_report(monkeypatch):
             reason="accept terms at huggingface.co/google/medsiglip-448",
         )
 
-    # Import the module and patch the runner in-place. The endpoint calls
-    # this name-locally so a monkeypatch of the module attribute is enough.
-    import oncology_arbiter.api.app as app_module
-    monkeypatch.setattr(app_module, "_run_medsiglip_on_preprocessed", _raise_gate)
+    import oncology_arbiter.models.medsiglip_modal_client as ms_mod
+    monkeypatch.setattr(ms_mod.MedSigLipModalClient, "run", _raise_gate)
 
     dicom_b64 = _cbis_dicom_b64()
     with TestClient(create_app()) as client:
@@ -179,6 +177,12 @@ def test_allowed_screening_response_has_allowed_gate_report(monkeypatch):
 
     fake_result = SimpleNamespace(
         model_repo="google/medsiglip-448",
+        app_version="test",
+        input_resolution=448,
+        embedding_dim=1152,
+        embedding_sha256="a" * 64,
+        prompts=["malignant lesion", "no lesion"],
+        inference_seconds=0.01,
         warnings=[],
         gate_report=RuntimeGateReport(
             repo_id="google/medsiglip-448",
@@ -191,11 +195,12 @@ def test_allowed_screening_response_has_allowed_gate_report(monkeypatch):
         labels=["malignant lesion", "no lesion"],
     )
 
-    def _return_ok(_preprocess_result):
+    def _return_ok(_self, _path):
         return fake_result
 
-    import oncology_arbiter.api.app as app_module
-    monkeypatch.setattr(app_module, "_run_medsiglip_on_preprocessed", _return_ok)
+    monkeypatch.setenv("ONCOLOGY_ARBITER_ENABLE_CBIS_DDSM_PROBE", "0")
+    import oncology_arbiter.models.medsiglip_modal_client as ms_mod
+    monkeypatch.setattr(ms_mod.MedSigLipModalClient, "run", _return_ok)
 
     dicom_b64 = _cbis_dicom_b64()
     with TestClient(create_app()) as client:

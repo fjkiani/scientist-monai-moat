@@ -236,7 +236,23 @@ def test_healthcheck_endpoint_exists_in_app():
     """Ensure the /health endpoint referenced by HEALTHCHECK actually exists."""
     from oncology_arbiter.api.app import create_app
     app = create_app()
-    paths = {r.path for r in app.routes if hasattr(r, "path")}
+
+    def _collect(routes) -> set[str]:
+        found: set[str] = set()
+        for route in routes:
+            path = getattr(route, "path", None)
+            if isinstance(path, str):
+                found.add(path)
+            nested = None
+            if type(route).__name__ == "_IncludedRouter":
+                nested = route.original_router.routes
+            elif hasattr(route, "routes"):
+                nested = route.routes
+            if nested:
+                found |= _collect(nested)
+        return found
+
+    paths = _collect(app.routes)
     assert "/health" in paths, (
         f"/health must exist in the FastAPI app for the Dockerfile HEALTHCHECK "
         f"to be meaningful. Existing paths: {sorted(paths)[:10]}..."

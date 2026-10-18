@@ -385,7 +385,7 @@ def test_sklearn_round_trip_matches_our_scorer(tmp_path: Path) -> None:
         "feature_encodings": {
             "x1": "x1 / 1.0",
             "x2": "x2 / 1.0",
-            "x3_bool": {"true": 1.0, "false": 0.0, "unknown": 0.5},
+            "x3_bool": {"true": 1.0, "false": 0.0, "unknown": 0.0},
         },
         "recommendations": {"LOW": "L", "MID": "M", "HIGH": "H"},
         "performance": {

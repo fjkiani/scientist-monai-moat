@@ -223,16 +223,28 @@ def test_biopsy_gated_state_when_forbidden(monkeypatch, client: TestClient) -> N
 # --------------------------------------------------------------------------- #
 
 
-def test_therapy_placeholder_when_flags_off(client: TestClient) -> None:
+def _stub_medgemma_therapy_fail(monkeypatch) -> None:
+    """Offline unit tests must not hit Modal/local MedGemma."""
+    import oncology_arbiter.nlp.medgemma_therapy_client as mtc
+
+    def _boom(**kwargs):
+        raise mtc.MedGemmaTherapyError("unit_test_medgemma_stubbed_unavailable")
+
+    monkeypatch.setattr(mtc, "reason_therapy", _boom)
+
+
+def test_therapy_placeholder_when_flags_off(monkeypatch, client: TestClient) -> None:
+    _stub_medgemma_therapy_fail(monkeypatch)
     resp = client.post("/v1/therapy/reason", json={})
     assert resp.status_code == 200
     body = resp.json()
-    assert body["provenance"]["model_state"] == "placeholder"
+    assert body["provenance"]["model_state"] == "unavailable"
     assert body["recommended_options"] == []
 
 
 def test_therapy_rules_lite_hr_positive(monkeypatch, client: TestClient) -> None:
-    """HR+/HER2- postmenopausal → NCCN-lite recommends AI."""
+    """Rules-lite is not mounted on /v1/therapy/reason. No fabricated regimen."""
+    _stub_medgemma_therapy_fail(monkeypatch)
     monkeypatch.setenv("ONCOLOGY_ARBITER_ENABLE_THERAPY_RULES_PROXY", "1")
     payload = {
         "biopsy_output": _biopsy_output_json(subtype="IDC", grade=2,
@@ -242,17 +254,13 @@ def test_therapy_rules_lite_hr_positive(monkeypatch, client: TestClient) -> None
     resp = client.post("/v1/therapy/reason", json=payload)
     assert resp.status_code == 200, resp.text
     body = resp.json()
-    assert body["provenance"]["model_state"] == "proxy_rules_lite"
-    regimens = [o["regimen"].lower() for o in body["recommended_options"]]
-    assert any("aromatase" in r for r in regimens), regimens
-    # every recommendation carries NCCN evidence
-    for opt in body["recommended_options"]:
-        assert len(opt["evidence"]) >= 1
-        assert "nccn.org" in opt["evidence"][0]["url"]
+    assert body["provenance"]["model_state"] == "unavailable"
+    assert body["recommended_options"] == []
 
 
 def test_therapy_txgemma_gated_falls_through_to_rules(monkeypatch, client: TestClient) -> None:
-    """TxGemma FORBIDDEN + rules-lite ON → rules-lite serves, warning present."""
+    """TxGemma is retired; MedGemma stub failure stays unavailable (no fake plan)."""
+    _stub_medgemma_therapy_fail(monkeypatch)
     monkeypatch.setenv("ONCOLOGY_ARBITER_ENABLE_THERAPY_TXGEMMA", "1")
     monkeypatch.setenv("ONCOLOGY_ARBITER_ENABLE_THERAPY_RULES_PROXY", "1")
     _install_txgemma_stub(monkeypatch, _preflight_forbidden)
@@ -265,18 +273,18 @@ def test_therapy_txgemma_gated_falls_through_to_rules(monkeypatch, client: TestC
     resp = client.post("/v1/therapy/reason", json=payload)
     assert resp.status_code == 200, resp.text
     body = resp.json()
-    assert body["provenance"]["model_state"] == "proxy_rules_lite"
-    assert any("txgemma_gated:forbidden" in w for w in body["warnings"]), body["warnings"]
+    assert body["provenance"]["model_state"] == "unavailable"
+    assert body["recommended_options"] == []
 
 
 def test_therapy_txgemma_gated_no_rules_stays_placeholder(monkeypatch, client: TestClient) -> None:
-    """TxGemma FORBIDDEN + rules-lite OFF → placeholder, no silent fabrication."""
+    """No mutation profile and MedGemma stubbed stays unavailable, not a fake plan."""
+    _stub_medgemma_therapy_fail(monkeypatch)
     monkeypatch.setenv("ONCOLOGY_ARBITER_ENABLE_THERAPY_TXGEMMA", "1")
     _install_txgemma_stub(monkeypatch, _preflight_forbidden)
 
     resp = client.post("/v1/therapy/reason", json={})
     assert resp.status_code == 200
     body = resp.json()
-    assert body["provenance"]["model_state"] == "placeholder"
+    assert body["provenance"]["model_state"] == "unavailable"
     assert body["recommended_options"] == []
-    assert any("txgemma_gated:forbidden" in w for w in body["warnings"])

@@ -6,9 +6,9 @@ pipeline runs through HTTP correctly. This is more meaningful than
 mocking the preprocessor because we actually catch bytes-handling and
 serialization bugs.
 
-The classifier is a placeholder (there's no MedSigLIP weight loaded yet),
-so overall_score must be None. But laterality, view, mask coverage, and
-audit ledger writes are all real.
+The classifier is the MedSigLIP modal client. Without a granted HAI-DEF
+pull this route returns model_state ``gated`` and overall_score None.
+Laterality, view, mask coverage, and audit ledger writes are real.
 """
 from __future__ import annotations
 
@@ -166,11 +166,11 @@ def test_screening_real_dicom_bytes(client, filename, expected_lat, expected_vie
     # Envelope invariants
     assert body["disclaimer"] == RUO_DISCLAIMER
     assert body["caveat"] == AUROC_CAVEAT
-    assert body["provenance"]["model_state"] == "placeholder"
+    assert body["provenance"]["model_state"] == "gated"
     assert body["provenance"]["request_id"], "missing request_id"
-    assert body["honesty_gate"] == {
-        "seen_urls_count": 0, "evidence_kept": 0, "evidence_dropped": 0,
-    }
+    assert body["honesty_gate"]["seen_urls_count"] == 0
+    assert body["honesty_gate"]["evidence_kept"] == 0
+    assert body["honesty_gate"]["evidence_dropped"] == 0
     assert body["evidence"] == []
 
     # Real preprocessing ran
@@ -331,13 +331,11 @@ def test_case_full_chains_placeholder_stages(client):
     )
     assert r.status_code == 200, r.text
     body = r.json()
-    # Every stage populated
     assert body["screening"] is not None
-    assert body["biopsy"] is not None
-    assert body["therapy"] is not None
-    # Screening got the real answer
     assert body["screening"]["laterality"] == "L"
     assert body["screening"]["view"] == "CC"
+    assert body["biopsy"] is not None
+    assert body["therapy"] is not None
     # All disclaimers present at outer envelope
     assert body["disclaimer"] == RUO_DISCLAIMER
     assert body["caveat"] == AUROC_CAVEAT

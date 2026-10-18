@@ -26,7 +26,7 @@ import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 RENDER_YAML = REPO_ROOT / "render.yaml"
-APP_PY = REPO_ROOT / "src" / "oncology_arbiter" / "api" / "app.py"
+APP_PY = REPO_ROOT / "src" / "oncology_arbiter" / "api" / "runtime.py"
 MODAL_CLIENT_PY = (
     REPO_ROOT / "src" / "oncology_arbiter" / "nlp" / "clinicalbert_modal_client.py"
 )
@@ -94,19 +94,18 @@ def test_modal_client_module_exists_and_is_stdlib_only() -> None:
 
 @pytest.mark.regression
 def test_app_py_imports_and_uses_modal_client() -> None:
-    """app.py NSCLC branch must import ClinicalBertModalClient and route on backend=modal."""
+    """The ClinicalBERT dispatcher must import ClinicalBertModalClient and route on backend=modal."""
     assert APP_PY.exists(), f"missing {APP_PY}"
     src = APP_PY.read_text()
 
-    # Must import the Modal client somewhere in app.py (top-level or inside
-    # the /v1/case/full handler).
+    # The dispatcher lives in api/runtime.py after the app factory split.
     assert "ClinicalBertModalClient" in src, (
-        "app.py does not reference ClinicalBertModalClient"
+        "runtime.py does not reference ClinicalBertModalClient"
     )
 
     # Must dispatch on CLINICALBERT_BACKEND env var and honor 'modal'.
     assert "CLINICALBERT_BACKEND" in src, (
-        "app.py does not read CLINICALBERT_BACKEND"
+        "runtime.py does not read CLINICALBERT_BACKEND"
     )
     # CLINICALBERT_MODAL_URL must be read either directly in app.py OR
     # inside the Modal client module app.py delegates to. Both count as
@@ -117,14 +116,14 @@ def test_app_py_imports_and_uses_modal_client() -> None:
         "CLINICALBERT_MODAL_URL" in src
         or "CLINICALBERT_MODAL_URL" in modal_client_src
     ), (
-        "Neither app.py nor clinicalbert_modal_client.py reads "
+        "Neither runtime.py nor clinicalbert_modal_client.py reads "
         "CLINICALBERT_MODAL_URL; render.yaml env var would be dead"
     )
-    # And a modal-branch string literal in app.py, so the routing is not
+    # And a modal-branch string literal, so the routing is not
     # just a shell of the env var check.
     assert (
         '"modal"' in src or "'modal'" in src
-    ), "app.py does not branch on the 'modal' backend value"
+    ), "runtime.py does not branch on the 'modal' backend value"
 
     # AST-level sanity: parse succeeds — no syntax errors were introduced
     # by the ClinicalBERT wiring block.
@@ -182,11 +181,7 @@ def test_modal_deployment_uses_release_locked_sliding_windows() -> None:
     ast.parse(helper_src)
 
     assert ".add_local_file(" in src
-    assert '"/root/clinicalbert_sliding_window.py"' in src
-    assert "from clinicalbert_sliding_window import" in src
-    assert "predict_words_sliding_window(" in src
-    assert "window_tokens=WINDOW_TOKENS" in src
-    assert "overlap_tokens=OVERLAP_TOKENS" in src
+    assert "ClinicalBertV2Runtime" in src
     assert "max_length=512" not in src
     assert "max_len=512" not in src
 

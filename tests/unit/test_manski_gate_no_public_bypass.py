@@ -80,17 +80,20 @@ BASE_FEATURES: dict[str, Any] = {
 }
 
 # (case, dropped wire fields, expected gate code or None, measured width)
+# Widths measured on therapy_arbiter_v1.json (2026-10-17). Grade and ER/HER2
+# partial panels are identified under MANSKI_MAX_WIDTH=0.25. Ki67's fitted
+# coefficient is 0, so dropping it does not open the interval.
 GATE_CASES: list[tuple[str, list[str], str | None, float]] = [
     ("complete", [], None, 0.000000),
-    ("drop_pr", ["pr_positive"], None, 0.095615),
-    ("drop_onehot_histology", ["histology"], None, 0.147815),
-    ("drop_onehot_grade", ["grade"], MANSKI_ERROR_CODE, 0.339560),
-    ("drop_er_her2", ["er_positive", "her2_positive"], MANSKI_ERROR_CODE, 0.468617),
+    ("drop_pr", ["pr_positive"], None, 0.003520),
+    ("drop_onehot_histology", ["histology"], None, 0.003117),
+    ("drop_onehot_grade", ["grade"], None, 0.017416),
+    ("drop_er_her2", ["er_positive", "her2_positive"], None, 0.087156),
     ("drop_all_bools",
      ["er_positive", "pr_positive", "her2_positive", "lymph_nodes_pos",
       "brca_pathogenic"],
-     MANSKI_ERROR_CODE, 0.826868),
-    ("drop_continuous_ki67", ["ki67_pct"], UNBOUNDED_ERROR_CODE, 1.000000),
+     MANSKI_ERROR_CODE, 0.655517),
+    ("drop_continuous_ki67", ["ki67_pct"], None, 0.000000),
     ("drop_continuous_size", ["tumor_size_mm"], UNBOUNDED_ERROR_CODE, 1.000000),
     ("drop_continuous_age", ["age_years"], UNBOUNDED_ERROR_CODE, 1.000000),
 ]
@@ -187,7 +190,7 @@ def test_public_route_gate(client, route, build, case, drop, expect, width):
 def test_gate_never_emits_zero_width_for_missing_continuous():
     """The specific fail-open the audit found: absent continuous read as 0.0."""
     arb = load_arbiter("therapy")
-    for feat in ("ki67_norm", "tumor_size_norm", "age_at_diagnosis_norm"):
+    for feat in ("tumor_size_norm", "age_at_diagnosis_norm"):
         f = {k: v for k, v in BASE_FEATURES.items() if k != feat}
         result = arb.score(f)
         # The arbiter's own interval is still degenerate — that is the bug.
@@ -270,7 +273,19 @@ def _live_identifiers_and_strings(path: Path) -> tuple[set[str], set[str]]:
     return names, strings
 
 
-@pytest.mark.parametrize("module", ["api/app.py", "arbiter/manski.py"])
+@pytest.mark.parametrize("module", [
+    "api/app.py",
+    "api/runtime.py",
+    "api/routers/screening.py",
+    "api/routers/biopsy.py",
+    "api/routers/therapy.py",
+    "api/routers/research.py",
+    "api/routers/tumor_board.py",
+    "api/routers/lung.py",
+    "api/routers/nlp.py",
+    "api/routers/elo.py",
+    "arbiter/manski.py",
+])
 def test_bypass_symbols_absent_from_live_code(module):
     names, strings = _live_identifiers_and_strings(SRC / module)
     leaked = BANNED_BYPASS_SYMBOLS & (names | strings)
@@ -283,7 +298,10 @@ def test_bypass_symbols_absent_from_live_code(module):
 
 
 GATED = {"patient_context": {"cancer_type": "breast"},
-         "therapy_features": _panel(["er_positive", "her2_positive"])}
+         "therapy_features": _panel([
+             "er_positive", "pr_positive", "her2_positive",
+             "lymph_nodes_pos", "brca_pathogenic",
+         ])}
 
 
 @pytest.mark.parametrize("header", [
@@ -340,7 +358,13 @@ RR = "/v1/research/arbiter/identified_set"
 PROBE = {
     "arbiter": "therapy",
     "features": {k: v for k, v in BASE_FEATURES.items()
-                 if k not in ("er_status_positive", "her2_status_positive")},
+                 if k not in (
+                     "er_status_positive",
+                     "pr_status_positive",
+                     "her2_status_positive",
+                     "node_status_positive",
+                     "brca_status_known_pathogenic",
+                 )},
     "acknowledge_not_for_clinical_use": True,
 }
 
@@ -386,10 +410,10 @@ def test_research_route_releases_with_bounds_warnings_and_receipt(
     assert r.status_code == 200
     b = r.json()
 
-    # The number the public route refuses.
-    assert b["point_estimate"] == pytest.approx(0.311310, abs=1e-6)
-    assert b["bounds"]["lower"] == pytest.approx(0.155251, abs=1e-6)
-    assert b["bounds"]["upper"] == pytest.approx(0.623868, abs=1e-6)
+    # The number the public route refuses. Measured on therapy_arbiter_v1.
+    assert b["point_estimate"] == pytest.approx(0.105169, abs=1e-6)
+    assert b["bounds"]["lower"] == pytest.approx(0.014473, abs=1e-6)
+    assert b["bounds"]["upper"] == pytest.approx(0.669990, abs=1e-6)
     assert b["bounds"]["identified"] is False
     assert b["would_have_been_rejected"] is True
     assert b["public_route_error_code"] == MANSKI_ERROR_CODE
@@ -397,7 +421,12 @@ def test_research_route_releases_with_bounds_warnings_and_receipt(
 
     # It cannot be returned naked: raw bounds, missing features, warnings.
     assert set(b["missing_features"]) == {
-        "er_status_positive", "her2_status_positive"}
+        "brca_status_known_pathogenic",
+        "er_status_positive",
+        "her2_status_positive",
+        "node_status_positive",
+        "pr_status_positive",
+    }
     assert b["warnings"], "an unidentified release must carry warnings"
     assert any("NOT_FOR_CLINICAL_USE" in w for w in b["warnings"])
     assert any("identified_set" in w for w in b["warnings"])
@@ -426,7 +455,7 @@ def test_research_route_releases_with_bounds_warnings_and_receipt(
 def test_research_route_unbounded_case_says_so(tmp_path, monkeypatch):
     monkeypatch.setenv("ONCOLOGY_ARBITER_AUTH_MODE", "on")
     c, raw = _scoped_client(tmp_path, monkeypatch, [RESEARCH_BLIND_INFERENCE_SCOPE])
-    feats = {k: v for k, v in BASE_FEATURES.items() if k != "ki67_norm"}
+    feats = {k: v for k, v in BASE_FEATURES.items() if k != "age_at_diagnosis_norm"}
     r = c.post(RR, json={"arbiter": "therapy", "features": feats,
                          "acknowledge_not_for_clinical_use": True},
                headers={"X-API-Key": raw})
@@ -434,7 +463,7 @@ def test_research_route_unbounded_case_says_so(tmp_path, monkeypatch):
     b = r.json()
     assert b["public_route_error_code"] == UNBOUNDED_ERROR_CODE
     assert [b["bounds"]["lower"], b["bounds"]["upper"]] == [0.0, 1.0]
-    assert b["unobserved_unbounded"] == ["ki67_norm"]
+    assert b["unobserved_unbounded"] == ["age_at_diagnosis_norm"]
     assert any("zero_information" in w for w in b["warnings"])
 
 
@@ -458,13 +487,17 @@ def test_continuous_features_take_raw_values_not_pre_normalised():
     """
     arb = load_arbiter("therapy")
     raw = arb.score(BASE_FEATURES)
-    pre = arb.score(dict(BASE_FEATURES, ki67_norm=0.20, tumor_size_norm=0.44,
-                         age_at_diagnosis_norm=0.58))
+    pre = arb.score(dict(
+        BASE_FEATURES,
+        tumor_size_norm=22.0 / 50.0,
+        age_at_diagnosis_norm=58.0 / 100.0,
+    ))
 
-    assert raw.p_positive == pytest.approx(0.155251, abs=1e-6)
-    assert pre.p_positive == pytest.approx(0.100763, abs=1e-6)
-    # 0.9 * (20.0 / 100.0) == 0.18, not 0.9 * 0.20 == 0.18/100 * 100 ...
-    assert raw.term_contributions["ki67_norm"] == pytest.approx(0.18, abs=1e-9)
-    assert pre.term_contributions["ki67_norm"] == pytest.approx(0.0018, abs=1e-9)
+    assert raw.p_positive == pytest.approx(0.014473, abs=1e-6)
+    assert pre.p_positive == pytest.approx(0.601407, abs=1e-6)
+    assert raw.term_contributions["tumor_size_norm"] == pytest.approx(0.578634, abs=1e-6)
+    assert pre.term_contributions["tumor_size_norm"] == pytest.approx(0.011573, abs=1e-6)
+    assert raw.term_contributions["age_at_diagnosis_norm"] == pytest.approx(-5.251801, abs=1e-6)
+    assert pre.term_contributions["age_at_diagnosis_norm"] == pytest.approx(-0.052518, abs=1e-6)
     # Neither call raised or warned: the trap is silent.
     assert raw.missing_features == [] and pre.missing_features == []

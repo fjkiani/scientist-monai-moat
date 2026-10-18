@@ -66,6 +66,18 @@ def test_hgsoc_case_full_is_501_and_skips_breast_therapy(client: TestClient) -> 
     detail = response.json()["detail"]
     assert detail["error"] == "hgsoc_case_full_not_implemented"
     assert detail["cancer"] == "hgsoc"
+
+
+def test_hgsoc_dynamic_tumor_board_is_501(client: TestClient) -> None:
+    response = client.post(
+        "/v1/tumor_board/dynamic",
+        json={"cancer": "hgsoc", "run_co_scientist": False},
+    )
+    assert response.status_code == 501, response.text
+    detail = response.json()["detail"]
+    assert detail["error"] == "hgsoc_tumor_board_dynamic_not_implemented"
+    assert detail["cancer"] == "hgsoc"
+    assert "p_positive" not in response.text
     assert "p_positive" not in response.text
     assert "dss_prognosis" not in response.text
     assert "therapy_triage" not in response.text

@@ -115,14 +115,16 @@ def test_app_module_imports_no_substitute_backend() -> None:
     import importlib
     from pathlib import Path
 
-    app_src = Path(importlib.import_module("oncology_arbiter.api.app").__file__)
-    tree = ast.parse(app_src.read_text(encoding="utf-8"))
+    api_root = Path(importlib.import_module("oncology_arbiter.api.app").__file__).parent
+    sources = [api_root / "app.py", api_root / "runtime.py", *sorted((api_root / "routers").glob("*.py"))]
     imported: set[str] = set()
-    for node in ast.walk(tree):
-        if isinstance(node, ast.ImportFrom) and node.module:
-            imported.add(node.module)
-        elif isinstance(node, ast.Import):
-            imported.update(a.name for a in node.names)
+    for app_src in sources:
+        tree = ast.parse(app_src.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ImportFrom) and node.module:
+                imported.add(node.module)
+            elif isinstance(node, ast.Import):
+                imported.update(a.name for a in node.names)
     banned = {
         "oncology_arbiter.models.siglip_baseline",   # general-domain SigLIP proxy
         "oncology_arbiter.nlp.report_parser_v2",     # regex / regex+BERT fusion parser
@@ -133,10 +135,11 @@ def test_app_module_imports_no_substitute_backend() -> None:
         "oncology_arbiter.lung",
     }
     assert not (imported & banned), sorted(imported & banned)
-    text = app_src.read_text(encoding="utf-8")
-    for token in ("_get_siglip_proxy", "_run_siglip_proxy_on_preprocessed",
-                  "SiglipBaseline", "NsclcCTInput"):
-        assert token not in text, token
+    for app_src in sources:
+        text = app_src.read_text(encoding="utf-8")
+        for token in ("_get_siglip_proxy", "_run_siglip_proxy_on_preprocessed",
+                      "SiglipBaseline", "NsclcCTInput"):
+            assert token not in text, f"{token} in {app_src.name}"
 
 
 def test_zero_shot_probs_are_reported_as_independent_sigmoid_scores(monkeypatch) -> None:

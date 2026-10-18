@@ -107,7 +107,14 @@ class APIKeyDB:
     """
 
     def __init__(self, db_path: Path | None = None) -> None:
-        self.db_path = Path(db_path or DEFAULT_DB)
+        # Resolve at construction, not import. Tests set
+        # ONCOLOGY_ARBITER_AUTH_DB_PATH after api_key has already been imported.
+        if db_path is None:
+            db_path = os.environ.get(
+                "ONCOLOGY_ARBITER_AUTH_DB_PATH",
+                "/tmp/oa-audit/tenants.sqlite",
+            )
+        self.db_path = Path(db_path)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._init_schema()
 

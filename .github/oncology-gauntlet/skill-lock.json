@@ -15,7 +15,7 @@
     "tests/conftest.py": "077cf65ff10f0a1355852a983fb14bc51fa1e30ec896f084cb58511978c89e89",
     "tests/unit/test_luna16_finetune.py": "8961e4cd1ad8c0d7bf3e0eff290c9a4c399414a97482d81e56e54559b7a2841d",
     "tests/unit/test_medsiglip_modal_prod_flip.py": "0079555b99c1a09e101e419770e1ecfd4240426f0d82956626b9f292444a62a4",
-    "tests/unit/test_oncology_gauntlet.py": "86fdcf4ed9b3473488f0cf369e31a014cdb61bd81b72b5c0703a7be36d79ca9f",
+    "tests/unit/test_oncology_gauntlet.py": "9cf56b196a3bf9240f5178151de97a1801338d37fb125ec3f44bb916a0d3c6e4",
     ".cursor/skills/oncology-moat-anti-fortress/SKILL.md": "12b0531db3d38350dcc49711cb2e060614afe467fe808b84b2c852606b79d118",
     ".cursor/skills/oncology-moat-biopsy/SKILL.md": "6561e80ca3b2e21e40e827bf9f8a1d3cfa6ec9757231cdf82d200939ffc87c17",
     ".cursor/skills/oncology-moat-cbis-medsiglip/SKILL.md": "cc2049820f0a5a41abbba24adc2088e652cebb1c6fd41c0cf93d1241f076e82c",

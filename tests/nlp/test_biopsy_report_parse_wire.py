@@ -64,7 +64,7 @@ class TestBiopsyRequestShape:
         assert body["pipeline_status"] == "failed_required_stage"
         receipt = next(
             x for x in body["stage_receipts"]
-            if x["stage"] == "clinicalbert_pathology_parse"
+            if x["stage"] == "medgemma_pathology_parse"
         )
         assert receipt["status"] == "failed_required"
         # No regex-sourced receptor values may appear despite the report text

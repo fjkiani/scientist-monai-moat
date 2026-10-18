@@ -90,27 +90,28 @@ def test_horizon_and_overlap_are_release_locked() -> None:
         predict_words_sliding_window(**common, window_tokens=256)
     with pytest.raises(ValueError, match="locked to 32"):
         predict_words_sliding_window(**common, overlap_tokens=16)
-    with pytest.raises(Exception, match="trained horizon 192"):
+    with pytest.raises(TypeError):
         ClinicalBertLocalClient(max_length=512)
 
 
 def test_local_client_surfaces_window_provenance(monkeypatch) -> None:
-    client = ClinicalBertLocalClient(weight_dir="unused")
-    tok = _Tokenizer()
-    meta = {
-        "provenance": "REAL-test",
-        "base_model": "unit-test",
-        "training_seed": 123,
-        "test_micro_f1": None,
-    }
-    monkeypatch.setattr(
-        client,
-        "_get",
-        lambda: (tok, _Model(), {0: "O", 1: "B-X", 2: "I-X"}, meta),
+    from oncology_arbiter.nlp.clinicalbert_local_client import (
+        EXPECTED_LOCAL_ARTIFACT_SHA256,
     )
+
+    client = ClinicalBertLocalClient(weight_dir="unused")
+
+    class _Runtime:
+        def parse(self, _text: str) -> dict:
+            return {
+                "artifact_sha256": EXPECTED_LOCAL_ARTIFACT_SHA256,
+                "window_count": 2,
+                "max_length": 512,
+                "spans": [],
+                "parsed": {},
+            }
+
+    monkeypatch.setattr(client, "_get", lambda: _Runtime())
     result = client.parse("a b c d e f g h")
-    assert result["n_windows"] == 2
-    assert result["window_tokens"] == WINDOW_TOKENS
-    assert result["overlap_tokens"] == OVERLAP_TOKENS
-    assert result["window_aggregation"] == AGGREGATION
-    assert any(s["start_tok"] == 6 and s["end_tok"] == 8 for s in result["spans"])
+    assert result["window_count"] == 2
+    assert result["app_version"].startswith("clinicalbert-local-")

@@ -74,9 +74,10 @@ def health() -> HealthResponse:
                 "case_full": False,
                 "patient_probability_emitted": False,
                 "retired_scope": "ovarian_prognostic_arbiter_patient_level_scoring",
-                "endpoints": ["tumor_board/dynamic", "tumor_board/bundle"],
+                "endpoints": ["tumor_board/bundle"],
                 "notes": (
-                    "POST /v1/case/full?cancer=hgsoc returns HTTP 501. "
+                    "POST /v1/case/full?cancer=hgsoc and "
+                    "POST /v1/tumor_board/dynamic with cancer=hgsoc return HTTP 501. "
                     "Ovarian requests are not executed on the breast screening, "
                     "breast DSS, or breast therapy path."
                 ),

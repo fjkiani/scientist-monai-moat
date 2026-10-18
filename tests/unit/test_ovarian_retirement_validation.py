@@ -30,9 +30,16 @@ def test_corrected_cohort_excludes_unknown_horizon_outcomes() -> None:
 
 
 def test_retirement_source_cannot_emit_patient_probability() -> None:
-    source = inspect.getsource(create_app)
+    source = (
+        Path(__file__).resolve().parents[2]
+        / "src"
+        / "oncology_arbiter"
+        / "api"
+        / "routers"
+        / "tumor_board.py"
+    ).read_text(encoding="utf-8")
     start = source.index("def _ovarian_retirement")
-    end = source.index("def _run_medgemma_co_scientist", start)
+    end = source.index("def _assemble_dynamic_tumor_board", start)
     retirement_source = source[start:end]
     prohibited_keys = ('"p_positive":', '"risk_bucket":', '"driving_feature":', '"probability":')
     assert all(key not in retirement_source for key in prohibited_keys)
@@ -44,7 +51,8 @@ def test_hgsoc_dynamic_response_has_no_patient_score(monkeypatch) -> None:
         "/v1/tumor_board/dynamic",
         json={"cancer": "hgsoc", "run_co_scientist": False},
     )
-    assert response.status_code == 200
-    ovarian = response.json()["ovarian_arbiter"]
-    assert ovarian["model_state"] == "retired"
-    assert not ({"p_positive", "probability", "risk_bucket", "driving_feature"} & ovarian.keys())
+    assert response.status_code == 501, response.text
+    body = response.json()
+    assert body["detail"]["error"] == "hgsoc_tumor_board_dynamic_not_implemented"
+    assert "p_positive" not in response.text
+    assert "ovarian_arbiter" not in body

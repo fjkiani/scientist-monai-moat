@@ -12,6 +12,12 @@ from urllib import request as urllib_request
 
 EXPECTED_ARTIFACT_SHA256 = "429f804d7f348d7c4eeb27821f766cc2de65c4072f20db0c3b3afaefa9068e50"
 EXPECTED_BASE_REVISION = "d5892b39a4adaed74b92212a44081509db72f87b"
+EXPECTED_APP_VERSION = "clinicalbert-modal-v0.5.2-sliding-window"
+EXPECTED_WINDOW_TOKENS = 192
+EXPECTED_OVERLAP_TOKENS = 32
+EXPECTED_WINDOW_AGGREGATION = "mean_logits_per_word_across_overlapping_windows"
+EXPECTED_MODEL_SHA256 = EXPECTED_ARTIFACT_SHA256
+EXPECTED_METRICS_SHA256 = "6930e543cc0162f300f24231c85c4bb96738a7536879ff176e1f876c809fa193"
 DEFAULT_TIMEOUT_SECONDS = int(os.environ.get("CLINICALBERT_MODAL_TIMEOUT", "120"))
 
 
@@ -129,3 +135,21 @@ class ClinicalBertModalClient:
 
 def parse_report(report_text: str, *, timeout: int = DEFAULT_TIMEOUT_SECONDS) -> Dict[str, Any]:
     return ClinicalBertModalClient(timeout=timeout).parse(report_text)
+
+
+def validate_clinicalbert_contract(payload: dict[str, Any]) -> None:
+    """Refuse a ClinicalBERT payload that is not the 192/32 sliding-window release."""
+    expected = {
+        "app_version": EXPECTED_APP_VERSION,
+        "window_tokens": EXPECTED_WINDOW_TOKENS,
+        "overlap_tokens": EXPECTED_OVERLAP_TOKENS,
+        "window_aggregation": EXPECTED_WINDOW_AGGREGATION,
+        "model_sha256": EXPECTED_MODEL_SHA256,
+        "metrics_sha256": EXPECTED_METRICS_SHA256,
+    }
+    for key, want in expected.items():
+        if payload.get(key) != want:
+            raise ClinicalBertModalError(f"clinicalbert_contract_mismatch: {key}")
+    n_windows = payload.get("n_windows")
+    if not isinstance(n_windows, int) or n_windows <= 0:
+        raise ClinicalBertModalError("clinicalbert_contract_mismatch: n_windows")

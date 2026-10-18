@@ -65,16 +65,16 @@ def test_biopsy_endpoint_returns_arbiter_score(client: TestClient) -> None:
     resp = client.post("/v1/biopsy/analyze", json={"report_text": "invasive ductal carcinoma"})
     assert resp.status_code == 200
     body = resp.json()
-    _arbiter_block_shape(body)
-    assert body["arbiter_score"]["model_name"] == "biopsy_arbiter_v1"
+    # Empty receptor features are not scored. An intercept-only constant
+    # is not an arbiter result.
+    assert body["arbiter_score"] is None
 
 
 def test_therapy_endpoint_returns_arbiter_score(client: TestClient) -> None:
     resp = client.post("/v1/therapy/reason", json={"biopsy_output": None, "patient_context": {}})
     assert resp.status_code == 200
     body = resp.json()
-    _arbiter_block_shape(body)
-    assert body["arbiter_score"]["model_name"] == "therapy_arbiter_v1"
+    assert body["arbiter_score"] is None
 
 
 # ── screening requires DICOM bytes ────────────────────────────────────
@@ -87,8 +87,7 @@ def test_screening_endpoint_returns_arbiter_score(client: TestClient) -> None:
     resp = client.post("/v1/screening/analyze", json={"dicom_bytes_b64": b64})
     assert resp.status_code == 200, resp.text
     body = resp.json()
-    _arbiter_block_shape(body)
-    assert body["arbiter_score"]["model_name"] == "screening_arbiter_v1"
+    assert body["arbiter_score"] is None
 
 
 # ── invariant: sum(term_contributions) == logit ─────────────────────
@@ -102,23 +101,13 @@ def test_biopsy_arbiter_sum_of_terms_matches_logit(client: TestClient) -> None:
     """
     resp = client.post("/v1/biopsy/analyze", json={"report_text": "test"})
     body = resp.json()
-    ab = body["arbiter_score"]
-    terms_sum = sum(ab["term_contributions"].values())
-    assert abs(terms_sum - ab["logit"]) < 1e-4, (
-        f"sum(term_contributions)={terms_sum} != logit={ab['logit']}"
-    )
+    assert body["arbiter_score"] is None
 
 
 def test_therapy_arbiter_bucket_matches_recommendation(client: TestClient) -> None:
     """PLAN.md invariant: recommendation string must match the LOW/MID/HIGH bucket."""
     resp = client.post("/v1/therapy/reason", json={"biopsy_output": None, "patient_context": {}})
-    ab = resp.json()["arbiter_score"]
-    bucket_to_rec = {
-        "LOW": "LOW_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE",
-        "MID": "INTERMEDIATE_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE",
-        "HIGH": "HIGH_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE",
-    }
-    assert ab["recommendation"] == bucket_to_rec[ab["risk_bucket"]]
+    assert resp.json()["arbiter_score"] is None
 
 
 # ── /v1/case/full chains through all three arbiters ─────────────────
@@ -135,6 +124,6 @@ def test_case_full_returns_biopsy_and_therapy_arbiters(client: TestClient) -> No
     assert resp.status_code == 200
     body = resp.json()
     assert body["biopsy"] is not None
-    assert body["biopsy"]["arbiter_score"] is not None
+    assert body["biopsy"]["arbiter_score"] is None
     assert body["therapy"] is not None
-    assert body["therapy"]["arbiter_score"] is not None
+    assert body["therapy"]["arbiter_score"] is None

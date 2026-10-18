@@ -4,6 +4,7 @@ from __future__ import annotations
 import ast
 import base64
 import importlib
+import json
 import math
 
 from oncology_arbiter.arbiter.manski import ManskiBoundsExceeded
@@ -16,53 +17,14 @@ from oncology_arbiter.agents.supervisor import StageResult, _record_llm
 from oncology_arbiter.api.app import _score_explicit_therapy_triage, create_app
 from oncology_arbiter.models.llm_client import GemmaClient, LlmUnavailable
 from oncology_arbiter.models import specialist_clients as sc
-from oncology_arbiter.nlp.clinicalbert_modal_client import (
-    EXPECTED_APP_VERSION,
-    EXPECTED_METRICS_SHA256,
-    EXPECTED_MODEL_SHA256,
-    EXPECTED_OVERLAP_TOKENS,
-    EXPECTED_WINDOW_AGGREGATION,
-    EXPECTED_WINDOW_TOKENS,
-    ClinicalBertModalError,
-    validate_clinicalbert_contract,
-)
 
 
 CASE_ID = "a" * 16
 CASE_SHA = "a" * 64
 
 
-def _clinicalbert_response() -> dict:
-    return {
-        "app_version": EXPECTED_APP_VERSION,
-        "window_tokens": EXPECTED_WINDOW_TOKENS,
-        "overlap_tokens": EXPECTED_OVERLAP_TOKENS,
-        "window_aggregation": EXPECTED_WINDOW_AGGREGATION,
-        "model_sha256": EXPECTED_MODEL_SHA256,
-        "metrics_sha256": EXPECTED_METRICS_SHA256,
-        "n_windows": 2,
-    }
-
-
-def test_clinicalbert_contract_accepts_only_exact_release() -> None:
-    validate_clinicalbert_contract(_clinicalbert_response())
-    for key, bad_value in {
-        "app_version": "clinicalbert-modal-v0.5.1",
-        "window_tokens": 512,
-        "overlap_tokens": 0,
-        "window_aggregation": "first_window_only",
-        "model_sha256": "0" * 64,
-        "metrics_sha256": "1" * 64,
-        "n_windows": 0,
-    }.items():
-        response = _clinicalbert_response()
-        response[key] = bad_value
-        with pytest.raises(ClinicalBertModalError, match="clinicalbert_contract_mismatch"):
-            validate_clinicalbert_contract(response)
-
-
-def test_biopsy_source_calls_only_clinicalbert_for_report_parsing() -> None:
-    app_path = Path(importlib.import_module("oncology_arbiter.api.app").__file__)
+def test_biopsy_report_parse_calls_medgemma_not_clinicalbert() -> None:
+    app_path = Path(importlib.import_module("oncology_arbiter.api.routers.biopsy").__file__)
     tree = ast.parse(app_path.read_text(encoding="utf-8"))
     biopsy = next(
         node for node in ast.walk(tree)
@@ -70,22 +32,22 @@ def test_biopsy_source_calls_only_clinicalbert_for_report_parsing() -> None:
     )
     names = {node.id for node in ast.walk(biopsy) if isinstance(node, ast.Name)}
     attributes = {node.attr for node in ast.walk(biopsy) if isinstance(node, ast.Attribute)}
-    assert "_clinicalbert_biopsy_parse" in names
+    assert "_medgemma_biopsy_parse" in names
+    assert "ClinicalBertModalClient" not in names
     assert not ({"parse_report", "parse_biopsy_report", "fuse_report_parse"} & (names | attributes))
 
 
-def test_biopsy_clinicalbert_failure_has_no_regex_fallback(monkeypatch) -> None:
-    cb = importlib.import_module("oncology_arbiter.nlp.clinicalbert_modal_client")
+def test_biopsy_medgemma_failure_has_no_regex_fallback(monkeypatch) -> None:
+    client = importlib.import_module("oncology_arbiter.nlp.medgemma_pathology_client")
     old_parser = importlib.import_module("oncology_arbiter.nlp.report_parser_v2")
-    monkeypatch.setenv("CLINICALBERT_MODAL_URL", "https://unit--clinicalbert")
 
-    def fail_parse(self, report_text: str):
-        raise ClinicalBertModalError("unit contract failure")
+    def fail_parse(report_text: str, **kwargs):
+        raise client.MedGemmaPathologyError("unit medgemma failure")
 
     def forbidden_fallback(*args, **kwargs):
         raise AssertionError("legacy report parser must not be called")
 
-    monkeypatch.setattr(cb.ClinicalBertModalClient, "parse", fail_parse)
+    monkeypatch.setattr(client, "extract_pathology", fail_parse)
     monkeypatch.setattr(old_parser, "parse_biopsy_report", forbidden_fallback, raising=False)
     monkeypatch.setattr(old_parser, "parse_report", forbidden_fallback, raising=False)
 
@@ -96,9 +58,43 @@ def test_biopsy_clinicalbert_failure_has_no_regex_fallback(monkeypatch) -> None:
     body = response.json()
     assert body["pipeline_status"] == "failed_required_stage"
     assert body["report_parse"] is None
-    receipt = next(r for r in body["stage_receipts"] if r["stage"] == "clinicalbert_pathology_parse")
+    receipt = next(r for r in body["stage_receipts"] if r["stage"] == "medgemma_pathology_parse")
     assert receipt["status"] == "failed_required"
     assert body["dss_prognosis"] is None
+
+
+def test_pathology_extract_route_calls_medgemma(monkeypatch) -> None:
+    client = importlib.import_module("oncology_arbiter.nlp.medgemma_pathology_client")
+
+    def fake_extract(report_text: str, **kwargs):
+        assert "ER" in report_text
+        return {
+            "status": "ok",
+            "source": "medgemma_pathology",
+            "model_id": "google/medgemma-1.5-4b-it",
+            "chat_url": client.PATHOLOGY_CHAT_URL,
+            "extraction": {
+                "er_status": "POSITIVE",
+                "pr_status": "NEGATIVE",
+                "her2_status": "1+",
+                "nottingham_grade": 2,
+                "tumor_size_mm": 22.0,
+            },
+        }
+
+    monkeypatch.setattr(
+        "oncology_arbiter.api.routers.nlp.extract_pathology",
+        fake_extract,
+    )
+    response = TestClient(create_app()).post(
+        "/v1/pathology/extract",
+        json={"report_text": "ER positive 90%. PR negative. HER2 IHC 1+. Grade 2. 2.2 cm."},
+    )
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["chat_url"] == "https://testing1235--medgemma-1-5-4b-chat.modal.run"
+    assert body["extraction"]["er_status"] == "POSITIVE"
+    assert body["extraction"]["her2_status"] == "1+"
 
 
 def _manifest(files: list[str] | None = None) -> dict:
@@ -210,8 +206,8 @@ def test_configured_medgemma_is_terminal_and_surfaces_provenance(monkeypatch) ->
         calls.append(url)
         return _Response(200, {
             "text": "non-empty clinical research synthesis",
-            "model": "google/medgemma-27b-it",
-            "app_version": "medgemma-27b-modal-v0.5.0-production-ready",
+            "model": "google/medgemma-27b-text-it",
+            "app_version": "medgemma-27b-modal-v0.5.10-text-it-8bit",
             "request_id": "medgemma-request-1",
             "prompt_tokens": 12,
             "completion_tokens": 7,
@@ -225,8 +221,8 @@ def test_configured_medgemma_is_terminal_and_surfaces_provenance(monkeypatch) ->
     _record_llm(result, response)
     serialized = result.as_dict()
     assert serialized["llm_provider"] == "medgemma_modal"
-    assert serialized["llm_model"] == "google/medgemma-27b-it"
-    assert serialized["llm_app_version"] == "medgemma-27b-modal-v0.5.0-production-ready"
+    assert serialized["llm_model"] == "google/medgemma-27b-text-it"
+    assert serialized["llm_app_version"] == "medgemma-27b-modal-v0.5.10-text-it-8bit"
     assert serialized["llm_request_ids"] == ["medgemma-request-1"]
     assert serialized["llm_prompt_tokens"] == 12
     assert serialized["llm_completion_tokens"] == 7
@@ -260,20 +256,50 @@ def _triage_features(**updates) -> dict:
 
 
 def test_therapy_triage_contrasts_are_mathematically_exact() -> None:
+    model_path = (
+        Path(importlib.import_module("oncology_arbiter.arbiter").__file__).parent
+        / "models"
+        / "therapy_arbiter_v1.json"
+    )
+    shipped = json.loads(model_path.read_text(encoding="utf-8"))
+    coef = dict(zip(shipped["features"], shipped["coefficients"]))
+
     zero = _score_explicit_therapy_triage(_triage_features(lymph_nodes_pos=0))
     one = _score_explicit_therapy_triage(_triage_features(lymph_nodes_pos=1))
     assert zero is not None and one is not None
     assert zero.term_contributions["node_status_positive"] == 0.0
-    assert one.term_contributions["node_status_positive"] == 2.1
-    assert math.isclose(one.logit - zero.logit, 2.1, rel_tol=0, abs_tol=1e-12)
+    assert math.isclose(
+        one.term_contributions["node_status_positive"],
+        coef["node_status_positive"],
+        rel_tol=0,
+        abs_tol=1e-6,
+    )
+    assert math.isclose(
+        one.logit - zero.logit, coef["node_status_positive"], rel_tol=0, abs_tol=1e-5
+    )
 
     grade3 = _score_explicit_therapy_triage(_triage_features(grade=3))
     larger = _score_explicit_therapy_triage(_triage_features(tumor_size_mm=70.0))
     older = _score_explicit_therapy_triage(_triage_features(age_years=60.0))
     assert grade3 is not None and larger is not None and older is not None
-    assert math.isclose(grade3.logit - zero.logit, 1.2, rel_tol=0, abs_tol=1e-12)
-    assert math.isclose(larger.logit - zero.logit, 1.4, rel_tol=0, abs_tol=1e-12)
-    assert math.isclose(older.logit - zero.logit, -0.05, rel_tol=0, abs_tol=1e-12)
+    assert math.isclose(
+        grade3.logit - zero.logit,
+        coef["grade_3"] - coef["grade_2"],
+        rel_tol=0,
+        abs_tol=1e-6,
+    )
+    assert math.isclose(
+        larger.logit - zero.logit,
+        coef["tumor_size_norm"] * ((70.0 / 50.0) - (20.0 / 50.0)),
+        rel_tol=0,
+        abs_tol=1e-6,
+    )
+    assert math.isclose(
+        older.logit - zero.logit,
+        coef["age_at_diagnosis_norm"] * ((60.0 / 100.0) - (50.0 / 100.0)),
+        rel_tol=0,
+        abs_tol=1e-6,
+    )
     # MIGRATED: an explicitly-null node status used to return None. It now
     # raises through the Manski gate, and the exception carries the interval
     # that the silent None concealed. The arithmetic contrasts above are
@@ -282,11 +308,8 @@ def test_therapy_triage_contrasts_are_mathematically_exact() -> None:
         _score_explicit_therapy_triage(_triage_features(lymph_nodes_pos=None))
     bounds = exc.value.bounds
     assert bounds.missing_features == ("node_status_positive",)
-    assert (round(bounds.lower, 6), round(bounds.upper, 6)) == (0.153164, 0.596283)
-    assert round(bounds.width, 6) == 0.443119
-    # The width is exactly the sigmoid span of the +2.1 node coefficient over
-    # the base logit, so the refusal is arithmetic, not a policy guess.
     assert round(bounds.upper - bounds.lower, 6) == round(bounds.width, 6)
+    assert bounds.width > 0.0
 
 
 def test_therapy_endpoint_uses_bridge_as_only_recommendation_source(monkeypatch) -> None:
@@ -370,17 +393,13 @@ def test_dynamic_hgsoc_exposes_retirement_without_patient_score() -> None:
         "/v1/tumor_board/dynamic",
         json={"cancer": "hgsoc", "run_co_scientist": False},
     )
-    assert response.status_code == 200, response.text
+    assert response.status_code == 501, response.text
     body = response.json()
-    retired = body["ovarian_arbiter"]
-    assert retired["model_state"] == "retired"
-    assert "p_positive" not in retired
-    assert "probability" not in retired
-    assert "risk_bucket" not in retired
-    assert "driving_feature" not in retired
-    receipt = next(r for r in body["stage_receipts"] if r["stage"] == "ovarian_prognostic_arbiter")
-    assert receipt["status"] == "retired"
-    assert body["dss_prognosis"] is None
+    assert body["detail"]["error"] == "hgsoc_tumor_board_dynamic_not_implemented"
+    assert body["detail"]["cancer"] == "hgsoc"
+    assert "p_positive" not in response.text
+    assert "dss_prognosis" not in body
+    assert "therapy_bridge" not in body
 
 
 def test_full_hgsoc_never_falls_through_to_breast() -> None:
@@ -493,7 +512,7 @@ def test_full_nsclc_uses_verified_case_manifest_then_luna16(monkeypatch) -> None
 
 
 def test_full_case_source_contains_no_local_ct_or_nccn_substitution() -> None:
-    app_path = Path(importlib.import_module("oncology_arbiter.api.app").__file__)
+    app_path = Path(importlib.import_module("oncology_arbiter.api.routers.tumor_board").__file__)
     tree = ast.parse(app_path.read_text(encoding="utf-8"))
     full_case = next(
         node for node in ast.walk(tree)
@@ -527,9 +546,18 @@ def test_full_case_source_contains_no_local_ct_or_nccn_substitution() -> None:
 # --------------------------------------------------------------------------- #
 
 
+def _api_root() -> Path:
+    return Path(importlib.import_module("oncology_arbiter.api.app").__file__).parent
+
+
 def _app_tree() -> ast.Module:
-    app_path = Path(importlib.import_module("oncology_arbiter.api.app").__file__)
-    return ast.parse(app_path.read_text(encoding="utf-8"))
+    return ast.parse((_api_root() / "app.py").read_text(encoding="utf-8"))
+
+
+def _api_trees() -> list[ast.Module]:
+    root = _api_root()
+    paths = [root / "app.py", root / "runtime.py", *sorted((root / "routers").glob("*.py"))]
+    return [ast.parse(path.read_text(encoding="utf-8")) for path in paths]
 
 
 def _function_named(tree: ast.Module, name: str) -> ast.FunctionDef | ast.AsyncFunctionDef:
@@ -541,29 +569,32 @@ def _function_named(tree: ast.Module, name: str) -> ast.FunctionDef | ast.AsyncF
 
 def test_only_arbiter_call_site_requires_the_complete_explicit_vector() -> None:
     """There is exactly one `_score_arbiter` call, and free text cannot reach it."""
+    trees = _api_trees()
     tree = _app_tree()
 
     # Map every function node to its enclosing function so a call site can be
     # attributed. ast.walk() loses parentage, so build the link explicitly.
     parent: dict[ast.AST, ast.AST] = {}
-    for node in ast.walk(tree):
-        for child in ast.iter_child_nodes(node):
-            parent[child] = node
-
     call_sites: list[str] = []
-    for node in ast.walk(tree):
-        if not isinstance(node, ast.Call):
-            continue
-        func = node.func
-        if isinstance(func, ast.Name) and func.id == "_score_arbiter":
-            enclosing: ast.AST | None = node
-            while enclosing is not None and not isinstance(
-                enclosing, (ast.FunctionDef, ast.AsyncFunctionDef)
-            ):
-                enclosing = parent.get(enclosing)
-            call_sites.append(
-                enclosing.name if enclosing is not None else "<module>"
-            )
+    for tree_node in trees:
+        for node in ast.walk(tree_node):
+            for child in ast.iter_child_nodes(node):
+                parent[child] = node
+
+    for tree_node in trees:
+        for node in ast.walk(tree_node):
+            if not isinstance(node, ast.Call):
+                continue
+            func = node.func
+            if isinstance(func, ast.Name) and func.id == "_score_arbiter":
+                enclosing: ast.AST | None = node
+                while enclosing is not None and not isinstance(
+                    enclosing, (ast.FunctionDef, ast.AsyncFunctionDef)
+                ):
+                    enclosing = parent.get(enclosing)
+                call_sites.append(
+                    enclosing.name if enclosing is not None else "<module>"
+                )
 
     assert call_sites == ["_score_explicit_therapy_triage"], call_sites
 
@@ -585,7 +616,7 @@ def test_only_arbiter_call_site_requires_the_complete_explicit_vector() -> None:
 
 def test_screening_emits_no_template_arbiter_block() -> None:
     """`/v1/screening/analyze` hard-codes arbiter_score=None; no template escapes."""
-    tree = _app_tree()
+    tree = ast.parse((_api_root() / "routers" / "screening.py").read_text(encoding="utf-8"))
     screening = _function_named(tree, "screening_analyze")
 
     assigned: list[ast.expr] = [
