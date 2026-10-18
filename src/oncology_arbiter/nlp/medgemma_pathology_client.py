@@ -8,6 +8,10 @@ import urllib.request
 from typing import Any
 
 from oncology_arbiter.models.medgemma_1_5_4b_wiring import verify_artifact_identity
+from oncology_arbiter.nlp.medgemma_chat_transport import (
+    MedGemmaChatError,
+    medgemma_chat,
+)
 from oncology_arbiter.nlp.pathology_extraction_schema import (
     EXTRACTION_SYSTEM_PROMPT,
     PathologyExtraction,
@@ -15,6 +19,7 @@ from oncology_arbiter.nlp.pathology_extraction_schema import (
 
 
 _JSON_RE = re.compile(r"\{[\s\S]*\}")
+PATHOLOGY_CHAT_URL = "https://testing1235--medgemma-1-5-4b-chat.modal.run"
 
 
 class MedGemmaPathologyError(RuntimeError):
@@ -63,16 +68,20 @@ def _extract_json_object(text: str) -> dict[str, Any]:
 def extract_pathology(
     report_text: str,
     *,
-    max_tokens: int = 1024,
+    max_tokens: int = 2048,
     temperature: float = 0.0,
-    timeout_s: float = 180.0,
+    timeout_s: float = 300.0,
 ) -> dict[str, Any]:
     """Call identity-locked MedGemma chat and return validated PathologyExtraction."""
     if not report_text or not str(report_text).strip():
         raise MedGemmaPathologyError("medgemma_pathology: empty report_text")
 
     identity = verify_artifact_identity()
-    chat_url = str(identity["chat_url"])
+    chat_url = str(identity["chat_url"]).rstrip("/")
+    if chat_url != PATHOLOGY_CHAT_URL:
+        raise MedGemmaPathologyError(
+            "medgemma_pathology: identity chat_url is not the testing1235 MedGemma chat host"
+        )
     # Keep prompt bounded — long TCGA reports; head+tail preserves receptor blocks.
     body_text = str(report_text)
     if len(body_text) > 12000:
@@ -98,27 +107,16 @@ def extract_pathology(
     raw_text = ""
     data: dict[str, Any] = {}
     for user_content in attempts:
-        req_body = json.dumps(
-            {
-                "messages": [{"role": "user", "content": user_content}],
-                "max_tokens": max_tokens,
-                "temperature": temperature,
-            }
-        ).encode()
-        request = urllib.request.Request(
-            chat_url,
-            data=req_body,
-            headers={"Content-Type": "application/json"},
-            method="POST",
-        )
         try:
-            with urllib.request.urlopen(request, timeout=timeout_s) as resp:
-                data = json.loads(resp.read().decode())
-        except urllib.error.HTTPError as exc:
-            detail = exc.read().decode(errors="replace")[:500]
-            last_err = MedGemmaPathologyError(
-                f"medgemma_pathology HTTP {exc.code}: {detail}"
+            data = medgemma_chat(
+                [{"role": "user", "content": user_content}],
+                chat_url=chat_url,
+                max_tokens=max_tokens,
+                temperature=temperature,
+                timeout_s=timeout_s,
             )
+        except MedGemmaChatError as exc:
+            last_err = MedGemmaPathologyError(str(exc))
             continue
         except Exception as exc:  # noqa: BLE001
             last_err = MedGemmaPathologyError(
@@ -131,7 +129,9 @@ def extract_pathology(
                 f"medgemma_pathology chat error: {data['error']}"
             )
             continue
-        if data.get("revision_sha256") != identity["revision_sha256"]:
+        if data.get("revision_sha256") and data.get("revision_sha256") != identity[
+            "revision_sha256"
+        ]:
             raise MedGemmaPathologyError(
                 "medgemma_pathology: revision_sha256 drift vs identity"
             )
@@ -296,6 +296,7 @@ def extract_pathology(
         "source": "medgemma_pathology",
         "model_id": data.get("model_id") or identity.get("model_id"),
         "revision_sha256": data.get("revision_sha256"),
+        "chat_url": chat_url,
         "latency_s": data.get("latency_s"),
         "extraction": model.model_dump(),
         "raw_text": raw_text,

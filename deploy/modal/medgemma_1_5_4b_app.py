@@ -253,107 +253,137 @@ class MedGemma:
             "honesty_warning": MEDGEMMA_HONESTY_WARNING,
         }
 
-    @modal.fastapi_endpoint(method="POST", label="medgemma-1-5-4b-chat")
-    def chat(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+    def _chat_core(
+        self,
+        messages: list,
+        *,
+        max_tokens: int = 2048,
+        temperature: float = 0.2,
+    ) -> Dict[str, Any]:
+        """Shared generation path for HTTP webhook + Modal SDK `.remote()`."""
         import torch
 
+        if not isinstance(messages, list) or not messages:
+            return {"error": "messages must be a non-empty list"}
+        norm = []
+        for m in messages:
+            if not isinstance(m, dict) or "role" not in m:
+                return {"error": "each message needs role+content"}
+            content = m.get("content")
+            if isinstance(content, list):
+                texts = []
+                for part in content:
+                    if isinstance(part, dict) and part.get("type") == "text":
+                        texts.append(str(part.get("text", "")))
+                    elif isinstance(part, str):
+                        texts.append(part)
+                content = "\n".join(t for t in texts if t)
+            if not isinstance(content, str):
+                return {"error": "content must be a string (text-only chat)"}
+            norm.append({"role": m["role"], "content": content})
+
+        encoded = None
+        for kwargs in (
+            {"enable_thinking": False},
+            {"thinking": False},
+            {},
+        ):
+            try:
+                encoded = self.tokenizer.apply_chat_template(
+                    norm,
+                    add_generation_prompt=True,
+                    tokenize=True,
+                    return_dict=True,
+                    return_tensors="pt",
+                    **kwargs,
+                )
+                break
+            except TypeError:
+                continue
+        if encoded is None:
+            return {"error": "apply_chat_template failed"}
+        inputs = {k: v.to("cuda:0") for k, v in encoded.items()}
+        prompt_tokens = int(inputs["input_ids"].shape[1])
+
+        gen_kwargs: Dict[str, Any] = {
+            "max_new_tokens": int(max_tokens),
+            "do_sample": float(temperature) > 0.0,
+            "pad_token_id": self._gen_pad_id,
+            "eos_token_id": self._gen_eos_id,
+        }
+        if float(temperature) > 0.0:
+            gen_kwargs["temperature"] = float(temperature)
+            gen_kwargs["top_p"] = 0.95
+            gen_kwargs["top_k"] = 64
+        else:
+            gen_kwargs["top_p"] = None
+            gen_kwargs["top_k"] = None
+            gen_kwargs["temperature"] = None
+
+        t0 = time.time()
+        with torch.inference_mode():
+            gen = self.model.generate(**inputs, **gen_kwargs)
+        latency_s = round(time.time() - t0, 3)
+
+        completion_ids = gen[0, prompt_tokens:]
+        completion_text = self.tokenizer.decode(
+            completion_ids, skip_special_tokens=False
+        ).strip()
+        cleaned = self.tokenizer.decode(
+            completion_ids, skip_special_tokens=True
+        ).strip()
+        if "{" in cleaned:
+            completion_text = cleaned
+
+        return {
+            "text": completion_text,
+            "request_id": str(uuid.uuid4()),
+            "model": MODEL_REPO,
+            "model_id": MODEL_REPO,
+            "revision_sha256": self.revision_sha256,
+            "hf_commit": self.hf_commit,
+            "quantization": QUANTIZATION,
+            "prompt_tokens": prompt_tokens,
+            "completion_tokens": int(completion_ids.shape[0]),
+            "latency_s": latency_s,
+            "honesty_warning": MEDGEMMA_HONESTY_WARNING,
+            "app_version": APP_VERSION,
+            "transport": "modal_method",
+        }
+
+    @modal.method()
+    def generate(
+        self,
+        messages: list,
+        max_tokens: int = 2048,
+        temperature: float = 0.2,
+    ) -> Dict[str, Any]:
+        """SDK-callable chat (survives Modal HTTP workspace-disabled gateways)."""
+        try:
+            return self._chat_core(
+                messages, max_tokens=max_tokens, temperature=temperature
+            )
+        except Exception as e:
+            return {
+                "error": f"{type(e).__name__}: {e}",
+                "app_version": APP_VERSION,
+                "model": MODEL_REPO,
+                "quantization": QUANTIZATION,
+            }
+
+    @modal.fastapi_endpoint(method="POST", label="medgemma-1-5-4b-chat")
+    def chat(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         try:
             if not isinstance(payload, dict):
                 return {"error": "expected JSON body object"}
-            messages = payload.get("messages")
-            if not isinstance(messages, list) or not messages:
-                return {"error": "messages must be a non-empty list"}
-            # Normalize: string content only (27b contract). Reject list parts.
-            norm = []
-            for m in messages:
-                if not isinstance(m, dict) or "role" not in m:
-                    return {"error": "each message needs role+content"}
-                content = m.get("content")
-                if isinstance(content, list):
-                    # flatten multimodal parts → text only
-                    texts = []
-                    for part in content:
-                        if isinstance(part, dict) and part.get("type") == "text":
-                            texts.append(str(part.get("text", "")))
-                        elif isinstance(part, str):
-                            texts.append(part)
-                    content = "\n".join(t for t in texts if t)
-                if not isinstance(content, str):
-                    return {"error": "content must be a string (text-only chat)"}
-                norm.append({"role": m["role"], "content": content})
-
-            max_tokens = int(payload.get("max_tokens", 512))
-            temperature = float(payload.get("temperature", 0.2))
-
-            encoded = None
-            for kwargs in (
-                {"enable_thinking": False},
-                {"thinking": False},
-                {},
-            ):
-                try:
-                    encoded = self.tokenizer.apply_chat_template(
-                        norm,
-                        add_generation_prompt=True,
-                        tokenize=True,
-                        return_dict=True,
-                        return_tensors="pt",
-                        **kwargs,
-                    )
-                    break
-                except TypeError:
-                    continue
-            if encoded is None:
-                return {"error": "apply_chat_template failed"}
-            inputs = {k: v.to("cuda:0") for k, v in encoded.items()}
-            prompt_tokens = int(inputs["input_ids"].shape[1])
-
-            gen_kwargs: Dict[str, Any] = {
-                "max_new_tokens": max_tokens,
-                "do_sample": temperature > 0.0,
-                "pad_token_id": self._gen_pad_id,
-                "eos_token_id": self._gen_eos_id,
-            }
-            if temperature > 0.0:
-                gen_kwargs["temperature"] = temperature
-                gen_kwargs["top_p"] = 0.95
-                gen_kwargs["top_k"] = 64
-            else:
-                gen_kwargs["top_p"] = None
-                gen_kwargs["top_k"] = None
-                gen_kwargs["temperature"] = None
-
-            t0 = time.time()
-            with torch.inference_mode():
-                gen = self.model.generate(**inputs, **gen_kwargs)
-            latency_s = round(time.time() - t0, 3)
-
-            completion_ids = gen[0, prompt_tokens:]
-            # Keep special tokens so callers can strip <unused*>thinking channels.
-            completion_text = self.tokenizer.decode(
-                completion_ids, skip_special_tokens=False
-            ).strip()
-            # Prefer a cleaned view without specials when it already contains JSON.
-            cleaned = self.tokenizer.decode(
-                completion_ids, skip_special_tokens=True
-            ).strip()
-            if "{" in cleaned:
-                completion_text = cleaned
-
-            return {
-                "text": completion_text,
-                "request_id": str(uuid.uuid4()),
-                "model": MODEL_REPO,
-                "model_id": MODEL_REPO,
-                "revision_sha256": self.revision_sha256,
-                "hf_commit": self.hf_commit,
-                "quantization": QUANTIZATION,
-                "prompt_tokens": prompt_tokens,
-                "completion_tokens": int(completion_ids.shape[0]),
-                "latency_s": latency_s,
-                "honesty_warning": MEDGEMMA_HONESTY_WARNING,
-                "app_version": APP_VERSION,
-            }
+            out = self._chat_core(
+                payload.get("messages"),
+                max_tokens=int(payload.get("max_tokens", 2048)),
+                temperature=float(payload.get("temperature", 0.2)),
+            )
+            if "error" not in out:
+                out = {**out, "transport": "http_webhook"}
+            return out
         except Exception as e:
             return {
                 "error": f"{type(e).__name__}: {e}",
