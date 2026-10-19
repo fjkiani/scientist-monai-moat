@@ -7,6 +7,11 @@ from fastapi import FastAPI
 
 from oncology_arbiter import AUROC_CAVEAT, RUO_DISCLAIMER, __version__
 
+# Crowned cbis-medsiglip identity. Literal bytes, not the dirty probe constant:
+# that EXPECTED_JOBLIB_SHA256 currently names cbis_ddsm_logreg_v2.joblib.
+# models/cbis_ddsm_logreg_v3.joblib
+CBIS_MEDSIGLIP_SHA256 = "f40f33c1cd3adfa48d1d10cc4d136795ad0642c3d1f94a543872ae1dc283aaf7"
+
 from . import deps
 from .http_stack import _lifespan, install_http_stack
 from .routers import breast, lung, nlp, system, tumor_board
