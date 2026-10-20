@@ -1,0 +1,28 @@
+{
+  "http_status": 200,
+  "engine": "medgemma_clinical_reasoning_swarm",
+  "engine_ok": true,
+  "n_matches": 6,
+  "n_hypotheses": 5,
+  "scalar_leak": false,
+  "sample_winner": "A",
+  "sample_margin": 0.8,
+  "body_keys": [
+    "after_evolve",
+    "after_reflect",
+    "caveat",
+    "disclaimer",
+    "engine",
+    "evidence",
+    "honesty_gate",
+    "hypotheses",
+    "hypotheses_dropped",
+    "initial_count",
+    "patient_context",
+    "phases",
+    "provenance",
+    "tournament_transcript",
+    "urls_dropped_hallucinated",
+    "warnings"
+  ]
+}

@@ -30,6 +30,9 @@ TARGET_CONTRA_VIOLATION = 0.0
 TARGET_LANDMARK_ACCURACY = 0.80
 
 SCORECARD_PATH = Path("artifacts/testing1235/l5_co_scientist_ground_truth_scorecard.json")
+LIVE_SCORECARD_PATH = Path(
+    "artifacts/testing1235/l5_live_medgemma_ground_truth_scorecard.json"
+)
 
 
 def _norm(s: str) -> str:
@@ -160,7 +163,18 @@ def test_l5_ground_truth_scorecard(tmp_path: Path | None = None):
     rows = [_run_case(c) for c in CLINICAL_GROUND_TRUTH_CASES]
     card = _scorecard(rows)
 
-    out_path = SCORECARD_PATH
+    live = os.environ.get("L5_LIVE_EVAL", "").strip() in {"1", "true", "TRUE"}
+    out_path = LIVE_SCORECARD_PATH if live else SCORECARD_PATH
+    card["live"] = live
+    card["cheat_banned"] = live
+    if live:
+        card["all_rows_live"] = all(r.get("mode") == "live" for r in rows)
+        card["all_rows_swarm_engine"] = all(
+            r.get("engine") == "medgemma_clinical_reasoning_swarm" for r in rows
+        )
+        assert card["all_rows_live"] and card["all_rows_swarm_engine"], (
+            "LIVE CHEAT DETECTED — offline scalar leaked into live scorecard"
+        )
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(card, indent=2))
 

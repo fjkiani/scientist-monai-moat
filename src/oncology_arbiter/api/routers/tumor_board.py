@@ -447,6 +447,40 @@ def case_full(
         env["evidence"] = merged_evidence
         if therapy is not None:
             env["honesty_gate"] = therapy.honesty_gate
+        # Elo tournament gated by ONCOLOGY_ARBITER_ENABLE_CO_SCIENTIST.
+        # Default mode=offline so CI / TestClient never hangs on MedGemma.
+        # Set L5_CASE_FULL_LIVE=1 to force the live swarm on case/full.
+        elo_ranked: list = []
+        enable_cs = (
+            os.environ.get("ONCOLOGY_ARBITER_ENABLE_CO_SCIENTIST", "").strip()
+            in {"1", "true", "TRUE"}
+        )
+        if enable_cs:
+            from oncology_arbiter.orchestrator.co_scientist import run_co_scientist
+
+            live_case = os.environ.get("L5_CASE_FULL_LIVE", "").strip() in {
+                "1", "true", "TRUE",
+            }
+            seen: set[str] = set()
+            for env_stage in (
+                screening.model_dump(mode="json") if screening is not None else None,
+                biopsy.model_dump(mode="json") if biopsy is not None else None,
+                therapy.model_dump(mode="json") if therapy is not None else None,
+            ):
+                if not env_stage:
+                    continue
+                for e in env_stage.get("evidence") or []:
+                    if isinstance(e, dict) and e.get("url"):
+                        seen.add(str(e["url"]))
+            cs_out = run_co_scientist(
+                screening=screening.model_dump(mode="json") if screening else None,
+                biopsy=biopsy.model_dump(mode="json") if biopsy else None,
+                therapy=therapy.model_dump(mode="json") if therapy else None,
+                seen_urls=seen,
+                mode="live" if live_case else "offline",
+            )
+            elo_ranked = list(cs_out.get("hypotheses") or [])
+
         return FullCaseResponse(
             **env,
             pipeline_status=dynamic.pipeline_status,
@@ -467,7 +501,7 @@ def case_full(
             biopsy=biopsy,
             therapy=therapy,
             nsclc=None,
-            elo_ranked_hypotheses=[],
+            elo_ranked_hypotheses=elo_ranked,
         )
 
     from .lung import run_nsclc_case

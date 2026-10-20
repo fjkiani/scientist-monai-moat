@@ -291,36 +291,52 @@ def test_run_co_scientist_honesty_gate_actually_drops_unseen():
 
 # --------------------------------------------------------------------------- #
 # /v1/case/full endpoint wire test
+#
+# Hang root cause: lifespan demo DICOM pre-warm + auth 401 / optional live
+# MedGemma. Unit path forces AUTH off, local demo fixture, no MEDGEMMA URL,
+# and never L5_CASE_FULL_LIVE — co-scientist stays offline-scalar.
 
-def test_case_full_endpoint_returns_elo_hypotheses_when_flag_set(monkeypatch):
+def _case_full_client_env(monkeypatch, tmp_path):
+    monkeypatch.setenv("ONCOLOGY_ARBITER_AUTH_MODE", "off")
+    monkeypatch.setenv("ONCOLOGY_ARBITER_AUDIT_DIR", str(tmp_path / "audit"))
+    monkeypatch.setenv("ONCOLOGY_ARBITER_AUTH_DB_PATH", str(tmp_path / "auth.sqlite"))
+    local = tmp_path / "local_demo.dcm"
+    local.write_bytes(b"\x00\x00DICM_test_fixture" + b"\x42" * 4096)
+    monkeypatch.setenv("ONCOLOGY_ARBITER_DEMO_LOCAL_DICOM", str(local))
+    monkeypatch.setenv("ONCOLOGY_ARBITER_DEMO_CACHE_DIR", str(tmp_path / "demo-cache"))
+    monkeypatch.delenv("MEDGEMMA_MODAL_URL", raising=False)
+    monkeypatch.delenv("L5_CASE_FULL_LIVE", raising=False)
+    monkeypatch.delenv("ONCOLOGY_ARBITER_ENABLE_MEDSIGLIP", raising=False)
+
+
+def test_case_full_endpoint_returns_elo_hypotheses_when_flag_set(monkeypatch, tmp_path):
     """/v1/case/full with ONCOLOGY_ARBITER_ENABLE_CO_SCIENTIST=1 populates
-    elo_ranked_hypotheses with the run_co_scientist output shape."""
+    elo_ranked_hypotheses via offline run_co_scientist (never live GPU)."""
     from fastapi.testclient import TestClient
     from oncology_arbiter.api.app import create_app
 
+    _case_full_client_env(monkeypatch, tmp_path)
     monkeypatch.setenv("ONCOLOGY_ARBITER_ENABLE_CO_SCIENTIST", "1")
-    # Don't force any HAI-DEF backends — placeholder stage responses are
-    # enough to prove the loop ran.
-    monkeypatch.delenv("ONCOLOGY_ARBITER_ENABLE_MEDSIGLIP", raising=False)
 
     with TestClient(create_app()) as client:
         resp = client.post("/v1/case/full", json={
-            "therapy_context": {"age": 58, "menopausal_status": "post"}
+            "therapy_context": {"age": 58, "menopausal_status": "post"},
+            "run_co_scientist": False,
         })
     assert resp.status_code == 200, resp.text
     body = resp.json()
-    # Placeholder stages emit no findings / no options, so the loop returns
-    # an empty hypothesis list — but the FIELD must be present as a list.
     assert isinstance(body.get("elo_ranked_hypotheses"), list)
 
 
-def test_case_full_endpoint_no_elo_when_flag_unset(monkeypatch):
+def test_case_full_endpoint_no_elo_when_flag_unset(monkeypatch, tmp_path):
     from fastapi.testclient import TestClient
     from oncology_arbiter.api.app import create_app
 
+    _case_full_client_env(monkeypatch, tmp_path)
     monkeypatch.delenv("ONCOLOGY_ARBITER_ENABLE_CO_SCIENTIST", raising=False)
+
     with TestClient(create_app()) as client:
-        resp = client.post("/v1/case/full", json={})
-    assert resp.status_code == 200
+        resp = client.post("/v1/case/full", json={"run_co_scientist": False})
+    assert resp.status_code == 200, resp.text
     body = resp.json()
     assert body["elo_ranked_hypotheses"] == []

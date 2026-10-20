@@ -42,7 +42,21 @@ def rank_hypotheses(
     pairs = [(a, b) for i, a in enumerate(ids) for b in ids[i + 1:]]
     rng.shuffle(pairs)
     if mode == "live" and len(pairs) > LIVE_MAX_PAIRS:
-        pairs = pairs[:LIVE_MAX_PAIRS]
+        # Prefer therapy↔therapy then therapy↔other so clinical regimens are
+        # not starved by the live pair budget (screening/biopsy noise).
+        def _pair_priority(pair: tuple[str, str]) -> tuple[int, str, str]:
+            a, b = pair
+            sa = entries[a].hypothesis.stage
+            sb = entries[b].hypothesis.stage
+            if sa == "therapy" and sb == "therapy":
+                tier = 0
+            elif "therapy" in (sa, sb):
+                tier = 1
+            else:
+                tier = 2
+            return (tier, a, b)
+
+        pairs = sorted(pairs, key=_pair_priority)[:LIVE_MAX_PAIRS]
 
     for pair_i, (a, b) in enumerate(pairs, start=1):
         if mode == "live":
