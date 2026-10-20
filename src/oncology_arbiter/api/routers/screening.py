@@ -98,6 +98,7 @@ def screening_analyze(
             DEFAULT_MODEL_PATH as CBIS_JOBLIB_PATH,
             EXPECTED_JOBLIB_SHA256,
         )
+        # Identity bind: models/cbis_ddsm_logreg_v2.joblib sha256 e5f5b67caf8ba18006e3d582e91becf95fbb20b8b34417366c7ef07b906a211b
         from oncology_arbiter.models.medsiglip_modal_client import MedSigLipModalClient
 
         ms_client = MedSigLipModalClient()

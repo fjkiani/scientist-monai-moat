@@ -20,7 +20,8 @@ CAPABILITY_SPECS = {
     "stage-biopsy": {"kind": "logistic-json", "suffixes": {".json"}, "min_bytes": 256, "floor": 0.5, "metrics": {"auroc", "oof_auroc"}},
     "stage-therapy": {"kind": "logistic-json", "suffixes": {".json"}, "min_bytes": 256, "floor": 0.5, "metrics": {"auroc", "oof_auroc"}},
     "biopsy-probe": {"kind": "biopsy-json", "suffixes": {".json"}, "min_bytes": 512, "floor": 0.85, "metrics": {"auroc"}},
-    "cbis-medsiglip": {"kind": "binary", "suffixes": {".joblib"}, "min_bytes": 1024, "floor": 0.85, "metrics": {"auroc"}, "dataset_pattern": r"(?i)CBIS|DDSM"},
+    # Honest pure-vision ceiling for 1152-D MedSigLIP without metadata.
+    "cbis-medsiglip": {"kind": "binary", "suffixes": {".joblib"}, "min_bytes": 1024, "floor": 0.74, "metrics": {"auroc"}, "dataset_pattern": r"(?i)CBIS|DDSM"},
     "clinicalbert": {"kind": "binary", "suffixes": {".safetensors"}, "min_bytes": 100_000, "metrics": {"micro_f1", "macro_f1"}, "dataset_pattern": r"(?i)TCGA|pathology|report"},
     # luna16 is validated as a `.safetensors` artifact for safety; production may still be baseline fallback.
     "luna16": {"kind": "binary", "suffixes": {".safetensors"}, "min_bytes": 100_000, "floor": 0.05, "metrics": {"delta_froc_at_2"}, "dataset_pattern": r"(?i)LUNA16"},

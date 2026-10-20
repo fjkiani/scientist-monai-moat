@@ -94,11 +94,11 @@
       ]
     },
     {
-      "artifact_path": "models/cbis_ddsm_logreg_v3.joblib",
-      "artifact_sha256": "f40f33c1cd3adfa48d1d10cc4d136795ad0642c3d1f94a543872ae1dc283aaf7",
+      "artifact_path": "models/cbis_ddsm_logreg_v2.joblib",
+      "artifact_sha256": "e5f5b67caf8ba18006e3d582e91becf95fbb20b8b34417366c7ef07b906a211b",
       "evaluation_path": "artifacts/cbis_medsiglip/cbis_medsiglip_evaluation_v2.json",
-      "evaluation_sha256": "dbb448d2fba64c419e80f24b7293bf8bfcbb98ccd160e09fd30f73ca61488f40",
-      "metrics_sidecar": "docs/proofs/cbis_ddsm_logreg_v3_metrics.json",
+      "evaluation_sha256": "ef2e0b3a65eb718b6780fd68f34524a667d97345c8452dae48b5f37df531b331",
+      "metrics_sidecar": "docs/proofs/cbis_ddsm_logreg_v2_metrics.json",
       "n_training": 2201,
       "n_training_synthetic": false,
       "name": "cbis-medsiglip",
@@ -112,7 +112,9 @@
         "src/oncology_arbiter/api/routers/screening.py",
         "src/oncology_arbiter/models/cbis_ddsm_probe.py",
         "src/oncology_arbiter/api/app.py"
-      ]
+      ],
+      "label": "pure_vision_frozen_probe",
+      "test_auroc": 0.7475469412477287
     },
     {
       "name": "luna16",

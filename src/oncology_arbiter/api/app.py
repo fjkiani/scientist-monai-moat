@@ -6,11 +6,14 @@ from typing import Any
 from fastapi import FastAPI
 
 from oncology_arbiter import AUROC_CAVEAT, RUO_DISCLAIMER, __version__
+from oncology_arbiter.models.cbis_ddsm_probe import (
+    EXPECTED_JOBLIB_SHA256 as CBIS_MEDSIGLIP_SHA256,
+)
 
-# Crowned cbis-medsiglip identity. Literal bytes, not the dirty probe constant:
-# that EXPECTED_JOBLIB_SHA256 currently names cbis_ddsm_logreg_v2.joblib.
-# models/cbis_ddsm_logreg_v3.joblib
-CBIS_MEDSIGLIP_SHA256 = "f40f33c1cd3adfa48d1d10cc4d136795ad0642c3d1f94a543872ae1dc283aaf7"
+# models/cbis_ddsm_logreg_v2.joblib — pure-vision 1152-d, no assessment.
+assert CBIS_MEDSIGLIP_SHA256 == (
+    "e5f5b67caf8ba18006e3d582e91becf95fbb20b8b34417366c7ef07b906a211b"
+)
 
 from . import deps
 from .http_stack import _lifespan, install_http_stack
