@@ -70,45 +70,62 @@ def _run_medgemma_co_scientist(
             "No validated patient stage output was available for synthesis",
         ))
         return None
-    if not os.environ.get("MEDGEMMA_MODAL_URL"):
-        receipts.append(_failed_stage_receipt(
-            "medgemma_co_scientist", False, request_id,
-            "medgemma_not_configured",
-            "MEDGEMMA_MODAL_URL is required; alternate LLMs and deterministic Elo are not substitutes.",
-            service_name="medgemma-27b",
-        ))
-        return None
+    endpoint_url = (os.environ.get("MEDGEMMA_MODAL_URL") or "").strip()
+    if not endpoint_url:
+        # Prefer the identity-locked chat host when the env is unset so case/full
+        # does not silently skip Co-Scientist after therapy already ran MedGemma.
+        try:
+            from oncology_arbiter.models.medgemma_1_5_4b_wiring import verify_artifact_identity
+
+            endpoint_url = str(verify_artifact_identity()["chat_url"]).rstrip("/")
+            os.environ["MEDGEMMA_MODAL_URL"] = endpoint_url
+        except Exception as exc:  # noqa: BLE001
+            receipts.append(_failed_stage_receipt(
+                "medgemma_co_scientist", False, request_id,
+                "medgemma_not_configured",
+                f"MEDGEMMA_MODAL_URL required and identity chat_url unavailable: {exc}",
+                service_name="medgemma-1-5-4b",
+            ))
+            return None
     try:
         from oncology_arbiter.agents.supervisor import execute_stage
+        from oncology_arbiter.models.medgemma_1_5_4b_wiring import (
+            assert_pinned_chat_url,
+            verify_artifact_identity,
+        )
 
+        identity = verify_artifact_identity()
+        assert_pinned_chat_url(endpoint_url)
         result = execute_stage(
             "case_full",
             context,
-            n_hypotheses=6,
-            n_evidence_top_k=3,
+            n_hypotheses=4,
+            n_evidence_top_k=2,
         )
         output = result.as_dict()
         if (
             result.model_state != "executed"
             or output.get("llm_provider") != "medgemma_modal"
-            or output.get("llm_model") != "google/medgemma-27b-text-it"
-            or output.get("llm_app_version") != "medgemma-27b-modal-v0.5.10-text-it-8bit"
+            or output.get("llm_model") != identity["model_id"]
+            or output.get("llm_app_version") != identity["app_version"]
+            or output.get("llm_revision") != identity["revision_sha256"]
             or not output.get("llm_request_ids")
         ):
             raise RuntimeError(
-                "MedGemma Co-Scientist did not complete with required provider provenance"
+                "MedGemma Co-Scientist did not complete with required provider provenance: "
+                f"state={result.model_state} notes={result.notes}"
             )
         receipts.append({
             "stage": "medgemma_co_scientist",
             "required": False,
             "status": "succeeded",
             "request_id": request_id,
-            "service_name": "medgemma-27b",
-            "endpoint_label": os.environ.get("MEDGEMMA_MODAL_URL"),
+            "service_name": "medgemma-1-5-4b",
+            "endpoint_label": endpoint_url,
             "app_version": output["llm_app_version"],
             "model_name": output["llm_model"],
-            "model_version": "27b-text-it",
-            "latency_ms": round(float(output.get("llm_latency_s") or 0.0) * 1000.0, 3),
+            "model_version": identity["revision_sha256"][:16],
+            "latency_ms": round(float(output.get("latency_s") or 0.0) * 1000.0, 3),
             "warnings": list(output.get("llm_honesty_warnings") or []),
             "error": None,
         })
@@ -117,6 +134,6 @@ def _run_medgemma_co_scientist(
         receipts.append(_failed_stage_receipt(
             "medgemma_co_scientist", False, request_id,
             "medgemma_unavailable", f"{type(exc).__name__}: {exc}",
-            service_name="medgemma-27b",
+            service_name="medgemma-1-5-4b",
         ))
         return None

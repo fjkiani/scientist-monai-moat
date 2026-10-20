@@ -57,6 +57,7 @@ class ModelState(str, Enum):
     LOADED_CLINICALBERT_PARSER = "loaded_clinicalbert_parser"  # retired wire value; new parses use LOADED_MEDGEMMA_PATHOLOGY
     LOADED_MEDGEMMA_PATHOLOGY = "loaded_medgemma_1_5_4b_pathology"
     LOADED_MEDGEMMA_THERAPY = "loaded_medgemma_1_5_4b_therapy"
+    LOADED_MEDGEMMA_1P5_4B = "loaded_medgemma_1p5_4b"  # identity-locked Co-Scientist Elo path
     PROXY_CO_SCIENTIST = "proxy_co_scientist"  # offline deterministic ranker; never an LLM result
     LOADED_CASE_STORAGE = "loaded_case_storage"
     LOADED_PHIKON = "loaded_phikon"
@@ -1692,6 +1693,133 @@ class CoScientistRunResponse(ApiEnvelope):
             "in `hypotheses[]` but a caller SHOULD treat them as untrusted."
         ),
     )
+    engine: str | None = Field(
+        default=None,
+        description=(
+            "medgemma_pairwise_judge for live /v1/co_scientist/run; "
+            "offline_scalar_ranker for /v1/offline_ranker/run."
+        ),
+    )
+    tournament_transcript: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description="Per-match MedGemma judge receipts (live mode) or empty offline.",
+    )
+    patient_context: dict[str, Any] | None = Field(
+        default=None,
+        description="Patient context supplied to the live MedGemma judge.",
+    )
+
+
+# --------------------------------------------------------------------------- #
+# POST /v1/co-scientist/run — identity-locked MedGemma GENERATE→REFLECT→Elo
+
+
+class RealCoScientistRequest(BaseModel):
+    """Clinical context for the identity-locked MedGemma Co-Scientist loop."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    stage: Literal["screening", "biopsy", "therapy", "case_full"]
+    context: dict[str, Any] = Field(
+        ...,
+        min_length=1,
+        description="De-identified clinical context supplied to GENERATE.",
+    )
+    seed_urls: list[HttpUrl] = Field(
+        default_factory=list,
+        max_length=10,
+        description="Optional URLs already fetched by the authenticated caller.",
+    )
+    n_hypotheses: int = Field(default=3, ge=2, le=8)
+    n_evidence_top_k: int = Field(
+        default=3,
+        ge=1,
+        le=6,
+        description="Max literature hits retrieved per generated hypothesis.",
+    )
+
+
+class CoScientistHypothesis(BaseModel):
+    """One reflected hypothesis after pairwise Elo ranking."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    hypothesis_id: str
+    claim: str
+    rationale: str
+    source_scope: str
+    initial_confidence: float
+    reflection: str
+    evidence_alignment: str
+    evidence_urls: list[str] = Field(default_factory=list)
+    elo: float
+    tournament_wins: int
+    tournament_losses: int
+    tournament_ties: int = 0
+
+
+class ReflectionReceipt(BaseModel):
+    """Auditable receipt for one evidence-grounded MedGemma reflection."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    hypothesis_id: str
+    model_request_id: str | None = None
+    model_response_sha256: str | None = None
+    model_response_chars: int
+    evidence_alignment: str
+    completed: bool
+
+
+class EloTournamentMatch(BaseModel):
+    """Auditable receipt for one MedGemma pairwise judgment."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    hypothesis_a_id: str
+    hypothesis_b_id: str
+    hypothesis_a_claim: str
+    hypothesis_b_claim: str
+    winner: Literal["A", "B", "TIE", "tie"]
+    margin: str = Field(min_length=1)
+    reason: str = Field(min_length=1)
+    model_request_id: str | None = None
+    model_response_sha256: str | None = None
+    model_response_chars: int
+    completed: bool
+    elo_a_before: float
+    elo_b_before: float
+    elo_a_after: float
+    elo_b_after: float
+
+
+class RealCoScientistResponse(ApiEnvelope):
+    """Evidence-grounded MedGemma Co-Scientist result with Elo receipts."""
+
+    stage: Literal["screening", "biopsy", "therapy", "case_full"]
+    supervisor_version: str
+    hypotheses: list[CoScientistHypothesis] = Field(default_factory=list)
+    meta_review: str
+    seen_urls: list[str] = Field(default_factory=list)
+    reflection_calls_expected: int
+    reflection_calls_completed: int
+    reflection_receipts: list[ReflectionReceipt] = Field(default_factory=list)
+    tournament_pairs_expected: int
+    tournament_pairs_completed: int
+    tournament_matches: list[EloTournamentMatch] = Field(default_factory=list)
+    llm_calls: int
+    tokens_in: int
+    tokens_out: int
+    cost_usd: float
+    provider: str
+    provider_chain: list[str] = Field(default_factory=list)
+    model_id: str
+    app_name: str
+    model_revision: str
+    model_request_ids: list[str] = Field(default_factory=list)
+    meta_review_request_id: str
+    meta_review_response_sha256: str
+    latency_s: float
 
 
 # --------------------------------------------------------------------------- #

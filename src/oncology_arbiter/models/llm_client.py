@@ -2,14 +2,14 @@
 
 Route order (first success wins):
 
-    1. **Google direct** (``generativelanguage.googleapis.com``) — Gemma-4-31b-it,
-       primary route, verified live 2026-07-06.
-    2. **OpenRouter V2** ``:free`` tier.
-    3. **OpenRouter V1** ``:free`` tier.
-    4. **OpenRouter legacy** key (also ``:free``).
+    1. **MedGemma 1.5 4B Modal** when ``MEDGEMMA_MODAL_URL`` is configured.
+       Its model, app version, and revision hash must match the pinned identity.
+    2. **Google direct** (``generativelanguage.googleapis.com``) for development.
+    3. **OpenRouter** development ladder.
 
-Every route target is Gemma-4-31b-it. The client is stateless and thread-safe;
-callers should reuse a single instance to keep the requests session pool hot.
+The Modal route is terminal: failure never falls through and gets relabelled
+as MedGemma output. The client is stateless and thread-safe; callers should
+reuse a single instance to keep the requests session pool hot.
 
 Environment variables (all optional; missing keys are skipped):
 
@@ -74,6 +74,7 @@ class LlmResponse:
     app_version: str | None = None
     request_id: str | None = None
     honesty_warning: str | None = None
+    revision_sha256: str | None = None
 
 
 @dataclass
@@ -184,7 +185,7 @@ class GemmaClient:
         """
         errors: List[str] = []
 
-        # Production route: the deployed MedGemma-27B specialist. When it is
+        # Production route: the identity-locked MedGemma 1.5 4B specialist. When it is
         # configured, failure is terminal: another provider or deterministic
         # Elo must not be relabelled as MedGemma output.
         if self.medgemma_url:
@@ -231,11 +232,16 @@ class GemmaClient:
         max_tokens: int,
         temperature: float,
     ) -> LlmResponse:
-        expected_model = "google/medgemma-27b-text-it"
-        expected_app = "medgemma-27b-modal-v0.5.10-text-it-8bit"
-        url = self.medgemma_url
-        if not url.endswith(".modal.run"):
-            url = f"{url}-chat.modal.run"
+        from oncology_arbiter.models.medgemma_1_5_4b_wiring import (
+            assert_pinned_chat_url,
+            verify_artifact_identity,
+        )
+
+        identity = verify_artifact_identity()
+        expected_model = str(identity["model_id"])
+        expected_app = str(identity["app_version"])
+        expected_revision = str(identity["revision_sha256"])
+        url = assert_pinned_chat_url(self.medgemma_url)
         started = time.time()
         try:
             response = self._session.post(
@@ -262,10 +268,16 @@ class GemmaClient:
         text = str(data.get("text") or "").strip()
         if not text:
             raise _RouteFailure("empty response")
-        if data.get("model") != expected_model or data.get("app_version") != expected_app:
+        response_model = data.get("model") or data.get("model_id")
+        if (
+            response_model != expected_model
+            or data.get("app_version") != expected_app
+            or data.get("revision_sha256") != expected_revision
+        ):
             raise _RouteFailure(
                 "contract_mismatch:"
-                f"model={data.get('model')!r},app_version={data.get('app_version')!r}"
+                f"model={response_model!r},app_version={data.get('app_version')!r},"
+                f"revision_sha256={data.get('revision_sha256')!r}"
             )
         request_id = str(data.get("request_id") or "").strip()
         if not request_id:
@@ -282,6 +294,7 @@ class GemmaClient:
             app_version=expected_app,
             request_id=request_id,
             honesty_warning=str(data.get("honesty_warning") or "") or None,
+            revision_sha256=expected_revision,
         )
         self.usage.record(result)
         return result
@@ -322,7 +335,7 @@ class GemmaClient:
         elapsed = time.time() - t0
 
         if r.status_code == 429:
-            raise _RouteFailure(f"rate_limited (HTTP 429)")
+            raise _RouteFailure("rate_limited (HTTP 429)")
         if r.status_code >= 400:
             raise _RouteFailure(f"HTTP {r.status_code}: {r.text[:200]}")
 
@@ -423,21 +436,21 @@ class GemmaClient:
             if r.status_code == 402:
                 # Insufficient credits — permanent for this key, don't retry
                 self._exhausted_openrouter[api_key] = time.time() + 24 * 3600
-                raise _RouteFailure(f"insufficient_credits (HTTP 402)")
+                raise _RouteFailure("insufficient_credits (HTTP 402)")
             if r.status_code >= 400:
                 raise _RouteFailure(f"HTTP {r.status_code}: {r.text[:200]}")
 
             try:
                 data = r.json()
             except ValueError:
-                raise _RouteFailure(f"non-JSON response")
+                raise _RouteFailure("non-JSON response")
 
             choices = data.get("choices", [])
             if not choices:
                 raise _RouteFailure(f"no choices: {json.dumps(data)[:300]}")
             text = choices[0].get("message", {}).get("content", "").strip()
             if not text:
-                raise _RouteFailure(f"empty response")
+                raise _RouteFailure("empty response")
 
             usage = data.get("usage", {})
             prompt_tokens = usage.get("prompt_tokens", 0)

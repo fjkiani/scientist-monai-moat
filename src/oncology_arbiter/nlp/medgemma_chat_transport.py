@@ -55,7 +55,7 @@ def _sdk_chat(
     profile = (
         os.environ.get("MODAL_PROFILE")
         or os.environ.get("MEDGEMMA_MODAL_PROFILE")
-        or "crispro"
+        or "testing1235"
     )
     # Ensure SDK uses the intended workspace even if process default differs.
     os.environ["MODAL_PROFILE"] = profile

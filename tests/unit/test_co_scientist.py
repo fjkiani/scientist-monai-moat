@@ -174,8 +174,8 @@ def test_rank_is_deterministic():
     hyps = generate_hypotheses(
         screening=_screening_env(), biopsy=_biopsy_env(), therapy=_therapy_env(),
     )
-    a = rank_hypotheses(list(hyps))
-    b = rank_hypotheses(list(hyps))
+    a = rank_hypotheses(list(hyps), mode="offline")
+    b = rank_hypotheses(list(hyps), mode="offline")
     assert [e.hypothesis.hyp_id for e in a] == [e.hypothesis.hyp_id for e in b]
     assert [round(e.rating, 6) for e in a] == [round(e.rating, 6) for e in b]
 
@@ -187,7 +187,7 @@ def test_rank_all_matches_sum_to_zero_rating_delta():
     hyps = generate_hypotheses(
         screening=_screening_env(), biopsy=_biopsy_env(), therapy=_therapy_env(),
     )
-    ranked = rank_hypotheses(hyps)
+    ranked = rank_hypotheses(hyps, mode="offline")
     total = sum(e.rating for e in ranked)
     assert abs(total - 1500.0 * len(ranked)) < 1e-6
 
@@ -199,8 +199,8 @@ def test_evolve_spawns_variants_with_derived_from():
     hyps = generate_hypotheses(
         screening=_screening_env(), biopsy=_biopsy_env(), therapy=_therapy_env(),
     )
-    ranked = rank_hypotheses(hyps)
-    variants = evolve_hypotheses(ranked, top_n=3, n_variants=2)
+    ranked = rank_hypotheses(hyps, mode="offline")
+    variants = evolve_hypotheses(ranked, top_n=3, n_variants=2, mode="offline")
     assert len(variants) > 0
     top_ids = {e.hypothesis.hyp_id for e in ranked[:3]}
     for v in variants:
@@ -209,10 +209,11 @@ def test_evolve_spawns_variants_with_derived_from():
 
 
 def test_evolve_biopsy_swap_flips_subtype_in_id():
+    """Offline catalog still swaps IDC↔DCIS; live evolve uses MedGemma instead."""
     parent = Hypothesis(hyp_id="biopsy:IDC", stage="biopsy", statement="IDC",
                         confidence=0.7)
     ranked = [EloEntry(hypothesis=parent, rating=1600)]
-    variants = evolve_hypotheses(ranked, top_n=1, n_variants=1)
+    variants = evolve_hypotheses(ranked, top_n=1, n_variants=1, mode="offline")
     assert len(variants) == 1
     assert "DCIS" in variants[0].hyp_id
     assert variants[0].derived_from == "biopsy:IDC"
@@ -227,6 +228,7 @@ def test_run_co_scientist_returns_documented_shape():
         biopsy=_biopsy_env(),
         therapy=_therapy_env(),
         seen_urls=ALL_SEEN_URLS,
+        mode="offline",
     )
     assert result["phases"] == ["generate", "reflect", "rank", "evolve", "rank"]
     assert isinstance(result["warnings"], list)
@@ -246,19 +248,23 @@ def test_run_co_scientist_is_deterministic():
         biopsy=_biopsy_env(),
         therapy=_therapy_env(),
         seen_urls=ALL_SEEN_URLS,
+        mode="offline",
     )
     r2 = run_co_scientist(
         screening=_screening_env(),
         biopsy=_biopsy_env(),
         therapy=_therapy_env(),
         seen_urls=ALL_SEEN_URLS,
+        mode="offline",
     )
     assert r1["hypotheses"] == r2["hypotheses"]
 
 
 def test_run_co_scientist_survives_placeholder_inputs():
     """None stage envelopes → empty output; must not crash."""
-    result = run_co_scientist(screening=None, biopsy=None, therapy=None, seen_urls=set())
+    result = run_co_scientist(
+        screening=None, biopsy=None, therapy=None, seen_urls=set(), mode="offline",
+    )
     assert result["initial_count"] == 0
     assert result["after_reflect"] == 0
     assert result["after_evolve"] == 0
@@ -275,6 +281,7 @@ def test_run_co_scientist_honesty_gate_actually_drops_unseen():
         biopsy=_biopsy_env(),
         therapy=_therapy_env(),
         seen_urls=set(),
+        mode="offline",
     )
     for h in r["hypotheses"]:
         assert h["evidence"] == []

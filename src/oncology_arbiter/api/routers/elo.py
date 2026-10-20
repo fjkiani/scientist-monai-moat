@@ -301,6 +301,7 @@ def co_scientist_run(
         top_n_evolve=req.top_n_evolve,
         n_variants=req.n_variants,
         return_top=req.return_top,
+        mode="offline",  # scalar path only — live clinical reasoning is /v1/co_scientist/run
     )
 
     # Count what REFLECT actually removed. Two metrics matter:
@@ -386,4 +387,7 @@ def co_scientist_run(
         after_evolve=int(cs_out.get("after_evolve", 0)),
         urls_dropped_hallucinated=urls_dropped_total,
         hypotheses_dropped=hyps_dropped,
+        engine="offline_scalar_ranker",
+        tournament_transcript=[],
+        patient_context=None,
     )

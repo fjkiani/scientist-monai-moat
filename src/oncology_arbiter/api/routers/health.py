@@ -35,6 +35,7 @@ def health() -> HealthResponse:
         "POST /v1/case/full",
         "POST /v1/elo/rank",
         # v0.4.0-alpha: standalone Co-Scientist loop (PLAN §5 PR #5)
+        "POST /v1/co-scientist/run",
         "POST /v1/offline_ranker/run",
         "POST /v1/tumor_board/dynamic",
         "GET  /v1/demo/case",

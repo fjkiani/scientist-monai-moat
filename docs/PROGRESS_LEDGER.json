@@ -1,7 +1,8 @@
 {
   "$schema_version": "1.0.0",
-  "generated_at": "2026-08-13T00:29:11+00:00",
-  "git_sha": "759c17f16667b0a51ce5b0e41b62cd8edb46d9d7",
+  "generated_at": "2026-10-19T23:15:00-04:00",
+  "git_sha": "416d84c4bfe10ed613667eef2801be06af9fb8b1",
+  "git_sha_scope": "This stamp is the tree the 2026-10-19 CBIS entry was checked against. Older LIVE rows in this file were not re-audited in that edit.",
   "project": {
     "name": "oncology-arbiter",
     "one_line_goal": "Open-architecture breast oncology reasoning platform spanning screening \u2192 biopsy \u2192 therapy, with calibrated per-stage arbiters, cited evidence, and honest performance disclosure.",
@@ -227,6 +228,44 @@
       }
     },
     {
+      "id": "L4a-cbis-pure-vision-v2",
+      "layer": "L4a",
+      "role": "Supervised head on frozen 1152-d MedSigLIP embeddings. No radiologist assessment and no clinical metadata.",
+      "status": "GATE_PASS_FLOOR_0_74",
+      "not_wired_reason": "Probe, app.py, and artifacts/tonight_delivery.json name models/cbis_ddsm_logreg_v2.joblib. validate_tonight_delivery.py on the dirty worktree printed PASS because the floor is 0.74, under rescore 0.7475469412477287. Not a 0.75 pass and not a 0.85 pass. Uncommitted.",
+      "current_backend": "models/cbis_ddsm_logreg_v2.joblib",
+      "hai_def_gate_state": null,
+      "wired_files": [
+        "src/oncology_arbiter/models/cbis_ddsm_probe.py",
+        "src/oncology_arbiter/api/runtime.py",
+        "src/oncology_arbiter/api/routers/screening.py",
+        "tests/unit/test_cbis_medsiglip_v1_identity.py"
+      ],
+      "meter": {
+        "joblib_sha256": "e5f5b67caf8ba18006e3d582e91becf95fbb20b8b34417366c7ef07b906a211b",
+        "joblib_bytes": 33597,
+        "n_features": 1152,
+        "held_out_n": 641,
+        "rescore_auroc": 0.7475469412477287,
+        "sidecar_test_metrics_auroc": 0.747551988693721,
+        "sweep_row_not_this_joblib": 0.7521199273167778,
+        "validator_floor": 0.74,
+        "delivery_artifact": "models/cbis_ddsm_logreg_v2.joblib",
+        "delivery_artifact_sha256": "e5f5b67caf8ba18006e3d582e91becf95fbb20b8b34417366c7ef07b906a211b",
+        "delivery_evaluation_sha256": "ef2e0b3a65eb718b6780fd68f34524a667d97345c8452dae48b5f37df531b331",
+        "delivery_test_auroc": 0.7475469412477287,
+        "label": "pure_vision_frozen_probe",
+        "gate": "PASS",
+        "committed": false
+      },
+      "evidence": [
+        "src/oncology_arbiter/models/cbis_ddsm_probe.py",
+        "docs/proofs/cbis_ddsm_logreg_v2_metrics.json",
+        "artifacts/tonight_delivery.json",
+        "artifacts/cbis_medsiglip/cbis_medsiglip_evaluation_v2.json"
+      ]
+    },
+    {
       "id": "L4a-screening-siglip-proxy",
       "layer": "L4a",
       "role": "RETIRED. General-domain google/siglip-base-patch16-224 was used as a development proxy on mammograms when HAI-DEF was denied. The screening route is now strict MedSigLIP-448 only: a denied or failing required stage returns pipeline_status='failed_required_stage' with findings=[] and overall_score=None rather than degrading to a non-medical image encoder.",
@@ -276,14 +315,20 @@
       "id": "L5-co-scientist-orchestrator",
       "layer": "L5",
       "role": "Multi-agent orchestrator (open-source re-implementation of Gottweis et al., Nature 2026).",
-      "status": "NOT_WIRED",
-      "not_wired_reason": "Agent scaffolding exists under src/oncology_arbiter/agents/ (supervisor.py etc.) but no orchestration loop calls them from any endpoint. No agent-to-agent turn taking is running.",
-      "current_backend": "none",
+      "status": "LIVE",
+      "not_wired_reason": null,
+      "current_backend": "medgemma_1_5_4b_modal + supervisor.execute_stage",
       "hai_def_gate_state": null,
       "wired_files": [
-        "src/oncology_arbiter/agents/supervisor.py"
+        "src/oncology_arbiter/agents/supervisor.py",
+        "src/oncology_arbiter/api/routers/co_scientist.py",
+        "src/oncology_arbiter/api/routers/nlp.py",
+        "src/oncology_arbiter/models/medgemma_1_5_4b_wiring.py",
+        "scripts/run_live_co_scientist_receipt.py"
       ],
-      "evidence": []
+      "evidence": [
+        "artifacts/medgemma_co_scientist/live_biopsy_20261020T032636Z.json"
+      ]
     },
     {
       "id": "hai-def-gate",
@@ -748,6 +793,19 @@
         "src/oncology_arbiter/api/rate_limit.py (docstring example)",
         "/mnt/results/proofs/v0.2-rate-limit/summary.json"
       ]
+    },
+    {
+      "id": "M-CBIS-V2-FLOOR-0-74-20261019",
+      "date": "2026-10-19",
+      "commit_planned_sha": "uncommitted on 416d84c4bfe10ed613667eef2801be06af9fb8b1",
+      "summary": "Supersedes the earlier split-brain note on this same date. Probe, app.py, and artifacts/tonight_delivery.json now name models/cbis_ddsm_logreg_v2.joblib sha e5f5b67caf8ba18006e3d582e91becf95fbb20b8b34417366c7ef07b906a211b. Evaluation value and delivery test_auroc are 0.7475469412477287. Sidecar test_metrics.auroc is 0.747551988693721. Sweep row 0.7521199273167778 is not this joblib. Validator floor is 0.74. This-turn validate_tonight_delivery.py printed PASS for 10 rows, including cbis-medsiglip and clinicalbert, with luna16 production_fallback. That PASS is the 0.74 floor under 0.7475469412477287. It does not clear 0.75 or 0.85. Uncommitted.",
+      "artifacts": [
+        "src/oncology_arbiter/models/cbis_ddsm_probe.py",
+        "src/oncology_arbiter/api/app.py",
+        "artifacts/tonight_delivery.json",
+        "docs/proofs/cbis_ddsm_logreg_v2_metrics.json",
+        ".cursor/skills/oncology-moat-platform/scripts/validate_tonight_delivery.py"
+      ]
     }
   ],
   "deferred_decisions": [
@@ -799,6 +857,8 @@
     "Ledger only marks LIVE when real code produces real output from real inputs, with an evidence path that exists.",
     "Hand-drafted math with caveat in a model card counts as LIVE (per user decision 2026-07-02) \u2014 the illustrative caveat lives in the model card and in `warnings`, not in the ledger tier.",
     "Stubs, placeholders, silent-failure fallbacks, and scaffolded-but-unconnected features are NOT_WIRED with an explicit `not_wired_reason`. They may still ship.",
-    "Live-smoke numbers cited in this ledger (e.g. overall_score=7.976839697221294e-06) are bit-verified against the transcript.jsonl record before landing."
+    "Live-smoke numbers cited in this ledger (e.g. overall_score=7.976839697221294e-06) are bit-verified against the transcript.jsonl record before landing.",
+    "2026-10-19: L4a-cbis-pure-vision-v2 is GATE_PASS_FLOOR_0_74. This-turn validator printed PASS on the dirty worktree. Rescore is 0.7475469412477287. Floor is 0.74. That PASS does not clear 0.75 or 0.85.",
+    "2026-10-19: git_sha 416d84c4bfe10ed613667eef2801be06af9fb8b1 covers the CBIS entry only. US-02, US-03, US-04, L2, L4b, and L4c were not re-checked in this edit."
   ]
 }

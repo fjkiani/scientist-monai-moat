@@ -8,13 +8,22 @@ import hashlib
 import json
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 CAPABILITY = "medgemma"
 ARTIFACT_FILENAME = "medgemma_1_5_4b_identity.json"
 ARTIFACT_PATH = "models/medgemma_1_5_4b_identity.json"
-ARTIFACT_SHA256 = "d13baffc2cf2f5202314ee3b242dadbb36099fcc15a5bd3a8cee3801eec55be5"
+# Updated when chat_url / info_url retarget; recompute via sha256 of identity file.
+ARTIFACT_SHA256 = "63fe0ba5469e726e2d0a615a6c5117058f314cf9e9b6644d974b48f1d92e367f"
 EXPECTED_MODEL_ID = "google/medgemma-1.5-4b-it"
 EXPECTED_REVISION_SHA256 = "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
+PINNED_CHAT_HOSTS = frozenset({
+    # Live workspaces only. Disabled hosts stay out — allowing them lets
+    # MEDGEMMA_MODAL_URL point at a dead host and fail late.
+    "crispro--medgemma-1-5-4b-chat.modal.run",
+    "testing1235--medgemma-1-5-4b-chat.modal.run",
+    "fjkiani--medgemma-1-5-4b-chat.modal.run",
+})
 
 
 def artifact_path() -> Path:
@@ -42,7 +51,23 @@ def verify_artifact_identity(path: Path | None = None) -> dict[str, Any]:
         raise RuntimeError(f"{CAPABILITY}: revision_sha256 mismatch")
     if "qwen" in str(payload.get("model_id", "")).lower():
         raise RuntimeError(f"{CAPABILITY}: Qwen identity is forbidden")
+    chat_host = urlparse(str(payload.get("chat_url") or "")).netloc
+    if chat_host not in PINNED_CHAT_HOSTS:
+        raise RuntimeError(f"{CAPABILITY}: chat_url host is not identity-pinned")
     return payload
+
+
+def assert_pinned_chat_url(url: str) -> str:
+    """Reject a MedGemma URL whose host is not in the identity pin set."""
+    verify_artifact_identity()
+    normalized = (url or "").strip().rstrip("/")
+    parsed = urlparse(normalized)
+    if parsed.scheme != "https" or parsed.netloc not in PINNED_CHAT_HOSTS:
+        raise RuntimeError(
+            f"{CAPABILITY}: MEDGEMMA_MODAL_URL host is not identity-pinned: "
+            f"{parsed.netloc or normalized!r}"
+        )
+    return normalized
 
 
 def info_url() -> str:

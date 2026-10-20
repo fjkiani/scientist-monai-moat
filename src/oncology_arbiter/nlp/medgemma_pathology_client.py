@@ -19,7 +19,7 @@ from oncology_arbiter.nlp.pathology_extraction_schema import (
 
 
 _JSON_RE = re.compile(r"\{[\s\S]*\}")
-PATHOLOGY_CHAT_URL = "https://crispro--medgemma-1-5-4b-chat.modal.run"
+PATHOLOGY_CHAT_URL = "https://testing1235--medgemma-1-5-4b-chat.modal.run"
 
 
 class MedGemmaPathologyError(RuntimeError):

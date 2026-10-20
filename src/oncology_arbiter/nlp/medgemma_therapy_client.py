@@ -16,7 +16,7 @@ from oncology_arbiter.nlp.medgemma_chat_transport import (
 )
 
 _JSON_RE = re.compile(r"\{[\s\S]*\}")
-THERAPY_CHAT_URL = "https://crispro--medgemma-1-5-4b-chat.modal.run"
+THERAPY_CHAT_URL = "https://testing1235--medgemma-1-5-4b-chat.modal.run"
 
 THERAPY_SYSTEM_PROMPT = (
     "You are a research-use-only oncology therapy reasoner. "
