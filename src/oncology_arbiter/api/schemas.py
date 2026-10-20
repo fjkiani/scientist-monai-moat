@@ -1696,7 +1696,7 @@ class CoScientistRunResponse(ApiEnvelope):
     engine: str | None = Field(
         default=None,
         description=(
-            "medgemma_pairwise_judge for live /v1/co_scientist/run; "
+            "medgemma_clinical_reasoning_swarm for live /v1/co_scientist/run; "
             "offline_scalar_ranker for /v1/offline_ranker/run."
         ),
     )

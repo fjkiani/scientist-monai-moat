@@ -387,7 +387,7 @@ def co_scientist_run(
         after_evolve=int(cs_out.get("after_evolve", 0)),
         urls_dropped_hallucinated=urls_dropped_total,
         hypotheses_dropped=hyps_dropped,
-        engine="offline_scalar_ranker",
+        engine=str(cs_out.get("engine") or "offline_scalar_ranker"),
         tournament_transcript=[],
         patient_context=None,
     )

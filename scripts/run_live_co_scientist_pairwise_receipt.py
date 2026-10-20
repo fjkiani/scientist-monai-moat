@@ -180,7 +180,7 @@ def main() -> int:
 
     transcript = list(out.get("tournament_transcript") or [])
     gates = {
-        "engine_medgemma_pairwise": out.get("engine") == "medgemma_pairwise_judge",
+        "engine_medgemma_swarm": out.get("engine") == "medgemma_clinical_reasoning_swarm",
         "mode_live": out.get("mode") == "live",
         "transcript_nonempty": len(transcript) > 0,
         "no_offline_scalar_rationale": all(
@@ -224,8 +224,11 @@ def main() -> int:
     ts = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
     out_dir = ROOT / "artifacts/live_io"
     out_dir.mkdir(parents=True, exist_ok=True)
+    testing_dir = ROOT / "artifacts/testing1235"
+    testing_dir.mkdir(parents=True, exist_ok=True)
     receipt_path = out_dir / f"co_scientist_pairwise_live_{CASE_ID}_{ts}.json"
     latest_path = out_dir / "co_scientist_pairwise_live_latest.json"
+    canon_path = testing_dir / "co_scientist_live_medgemma_receipt.json"
     receipt = {
         "created_at": datetime.now(UTC).isoformat(),
         "live": True,
@@ -250,10 +253,13 @@ def main() -> int:
         "tournament_transcript": transcript,
         "n_matches": len(transcript),
     }
-    receipt_path.write_text(json.dumps(receipt, indent=2))
-    latest_path.write_text(json.dumps(receipt, indent=2))
+    payload = json.dumps(receipt, indent=2)
+    receipt_path.write_text(payload)
+    latest_path.write_text(payload)
+    canon_path.write_text(payload)
     print(json.dumps({
         "receipt": str(receipt_path),
+        "canon_receipt": str(canon_path),
         "verdict_pass": gates["verdict_pass"],
         "engine": out.get("engine"),
         "n_matches": len(transcript),

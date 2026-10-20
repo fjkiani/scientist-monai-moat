@@ -75,8 +75,13 @@ def live_envelope_co_scientist_run(
             detail=f"live co-scientist failed: {type(exc).__name__}: {exc}",
         ) from exc
 
-    if cs_out.get("engine") != "medgemma_pairwise_judge":
-        raise HTTPException(status_code=502, detail="live engine did not engage MedGemma judge")
+    from oncology_arbiter.orchestrator.co_scientist import ENGINE_LIVE
+
+    if cs_out.get("engine") != ENGINE_LIVE:
+        raise HTTPException(
+            status_code=502,
+            detail=f"live engine did not engage swarm (got {cs_out.get('engine')!r})",
+        )
     transcript = list(cs_out.get("tournament_transcript") or [])
     if not transcript:
         raise HTTPException(status_code=503, detail="empty MedGemma tournament transcript")
