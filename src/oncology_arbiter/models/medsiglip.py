@@ -138,6 +138,7 @@ class MedSigLipResult:
     prompts: list[str] = field(default_factory=list)
     embedding_dim: int | None = None
     embedding_sha256: str | None = None
+    embedding: list[float] | None = None
     # HAI-DEF preflight record — the GateReport that justified this run.
     # Endpoint code copies this onto the response envelope for audit.
     gate_report: GateReport | None = None

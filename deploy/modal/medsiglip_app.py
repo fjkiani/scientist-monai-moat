@@ -223,13 +223,8 @@ class MedSigLipModal:
     # @fastapi_endpoint doesn't reliably inject raw fastapi.Request on
     # class methods (it treats unknown types as query params). Base64
     # overhead (~33%) is negligible against total per-call latency.
-    @modal.fastapi_endpoint(method="POST", label="medsiglip-embed")
-    def embed(self, payload: Dict[str, Any]) -> Dict[str, Any]:
-        """POST JSON: `{"dicom_b64": "..."}` OR `{"pixels_b64": "..."}`.
-
-        ``dicom_b64`` decodes as a DICOM (Modality LUT + windowing).
-        ``pixels_b64`` decodes as a PNG/JPEG (RGB conversion only).
-        """
+    def _embed_payload(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        """Shared embed path for HTTP webhook + Modal SDK `.remote()`."""
         t0 = time.time()
         dicom_b64 = payload.get("dicom_b64")
         pixels_b64 = payload.get("pixels_b64")
@@ -255,7 +250,37 @@ class MedSigLipModal:
             "input_format": input_format,
             "seconds": round(time.time() - t0, 3),
             "app_version": APP_VERSION,
+            "model_repo": MODEL_REPO,
+            "model_revision": self.model_revision,
+            "embedding_dim": self.embedding_dim,
         }
+
+    @modal.method()
+    def embed_remote(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        """SDK-callable embed (survives Modal HTTP workspace-disabled gateways)."""
+        return self._embed_payload(payload)
+
+    @modal.method()
+    def info_remote(self) -> Dict[str, Any]:
+        return {
+            "model_repo": MODEL_REPO,
+            "model_revision": self.model_revision,
+            "input_resolution": self.input_resolution,
+            "embedding_dim": self.embedding_dim,
+            "device": self.device,
+            "load_seconds": self.load_seconds,
+            "warmed_at": self.warmed_at,
+            "app_version": APP_VERSION,
+        }
+
+    @modal.fastapi_endpoint(method="POST", label="medsiglip-embed")
+    def embed(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        """POST JSON: `{"dicom_b64": "..."}` OR `{"pixels_b64": "..."}`.
+
+        ``dicom_b64`` decodes as a DICOM (Modality LUT + windowing).
+        ``pixels_b64`` decodes as a PNG/JPEG (RGB conversion only).
+        """
+        return self._embed_payload(payload)
 
     # ─── /embed_batch  (JSON body: base64 list) ─────────────────────
     @modal.fastapi_endpoint(method="POST", label="medsiglip-embed-batch")

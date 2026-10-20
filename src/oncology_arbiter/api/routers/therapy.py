@@ -45,6 +45,66 @@ def _biopsy_summary(req: TherapyRequest) -> dict[str, Any]:
     }
 
 
+_HER2_AGENTS = ("trastuzumab", "herceptin", "pertuzumab")
+_TAXANES = ("nab-paclitaxel", "paclitaxel", "docetaxel", "taxane", "abraxane")
+
+
+def _her2_status(req: TherapyRequest) -> str | None:
+    panel = req.receptors_override
+    if panel is None and req.biopsy_output is not None:
+        panel = req.biopsy_output.receptor_panel
+    if panel is None:
+        return None
+    return panel.her2_status
+
+
+def _case_text(primary_drug: str, medgemma_meta: dict[str, Any] | None, recommended: list[Any]) -> str:
+    parts = [primary_drug or ""]
+    if medgemma_meta:
+        parts.append(str(medgemma_meta.get("reasoning") or ""))
+        parts.append(" ".join(str(x) for x in (medgemma_meta.get("recommended") or [])))
+    for opt in recommended:
+        parts.append(getattr(opt, "regimen", "") or "")
+        parts.append(getattr(opt, "rationale", "") or "")
+    return " ".join(parts).lower()
+
+
+def _is_her2_positive_case(req: TherapyRequest, blob: str) -> bool:
+    status = _her2_status(req)
+    if status == "positive":
+        return True
+    if status == "negative":
+        return False
+    if "her2-negative" in blob or "her2 negative" in blob:
+        return "her2-positive" in blob or "her2 positive" in blob or "her2+" in blob
+    return any(
+        token in blob
+        for token in ("her2-positive", "her2 positive", "her2+", "her2 amplified", "her2 overexpression")
+    )
+
+
+def _text_supports_her2_agent(quoted: str) -> bool:
+    low = quoted.lower()
+    return any(agent in low for agent in ("trastuzumab", "herceptin"))
+
+
+def _pubmed_query_for_case(
+    req: TherapyRequest,
+    primary_drug: str,
+    medgemma_meta: dict[str, Any] | None,
+    recommended: list[Any],
+) -> tuple[str, bool]:
+    """HER2+ searches the targeted agent, not a taxane primary_drug string."""
+    blob = _case_text(primary_drug, medgemma_meta, recommended)
+    her2 = _is_her2_positive_case(req, blob)
+    if not her2:
+        return f"{primary_drug} {req.disease} therapy", False
+    named = next((agent for agent in _HER2_AGENTS if agent in blob), "trastuzumab")
+    if any(tax in (primary_drug or "").lower() for tax in _TAXANES) and named == "trastuzumab":
+        named = "trastuzumab"
+    return f"{named} HER2-positive {req.disease}", True
+
+
 @router.post("/v1/therapy/reason", response_model=TherapyResponse)
 def therapy_reason(
     req: TherapyRequest,
@@ -151,8 +211,21 @@ def therapy_reason(
             from oncology_arbiter.tools.pubmed_sync import evidence_records_from_pubmed
 
             t0 = time.perf_counter()
-            query = f"{primary_drug} {req.disease} therapy"
-            raw_ev = evidence_records_from_pubmed(query, max_results=3)
+            query, her2_case = _pubmed_query_for_case(
+                req, primary_drug, medgemma_meta, recommended
+            )
+            fetch_n = 8 if her2_case else 3
+            raw_ev = evidence_records_from_pubmed(query, max_results=fetch_n)
+            if her2_case:
+                raw_ev = [
+                    row
+                    for row in raw_ev
+                    if _text_supports_her2_agent(str(row.get("quoted_text") or ""))
+                ][:3]
+                if not raw_ev:
+                    warnings.append(
+                        "pubmed_hits_do_not_support_trastuzumab"
+                    )
             for row in raw_ev:
                 evidence.append(EvidenceRecord(**row))
             # Attach top evidence onto the primary TherapyOption as well.

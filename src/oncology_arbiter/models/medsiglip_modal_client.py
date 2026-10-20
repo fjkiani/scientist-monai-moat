@@ -101,6 +101,18 @@ class ModalEndpointConfig:
         return cls(base=base.rstrip("/"))
 
 
+def _sdk_cls():
+    import modal
+
+    profile = (
+        os.environ.get("MODAL_PROFILE")
+        or os.environ.get("MEDSIGLIP_MODAL_PROFILE")
+        or "testing1235"
+    )
+    os.environ["MODAL_PROFILE"] = profile
+    return modal.Cls.from_name("medsiglip-448", "MedSigLipModal")
+
+
 def _post_json(url: str, payload: dict, *, timeout: int) -> dict:
     body = json.dumps(payload).encode("utf-8")
     req = urllib_request.Request(
@@ -112,22 +124,39 @@ def _post_json(url: str, payload: dict, *, timeout: int) -> dict:
     try:
         with urllib_request.urlopen(req, timeout=timeout) as resp:
             raw = resp.read()
-    except urllib_error.HTTPError as exc:  # pragma: no cover - live-network
-        raise RuntimeError(f"HTTP {exc.code} calling {url}: {exc.read()[:512]!r}") from exc
-    except urllib_error.URLError as exc:  # pragma: no cover
-        raise RuntimeError(f"Network error calling {url}: {exc}") from exc
-    try:
         return json.loads(raw)
-    except json.JSONDecodeError as exc:  # pragma: no cover
-        raise RuntimeError(f"Modal response was not JSON ({url}): {raw[:512]!r}") from exc
+    except Exception as http_exc:  # noqa: BLE001 — fall through to SDK
+        detail = str(http_exc).lower()
+        if "disabled" not in detail and "404" not in detail and not isinstance(
+            http_exc, (urllib_error.URLError, urllib_error.HTTPError, TimeoutError, json.JSONDecodeError)
+        ):
+            # Still attempt SDK for any transport failure when workspace HTTP is dead.
+            pass
+        try:
+            out = _sdk_cls()().embed_remote.remote(payload)
+            if not isinstance(out, dict):
+                raise RuntimeError(f"medsiglip sdk embed returned non-dict: {type(out)}")
+            return {**out, "transport": "modal_sdk_embed_remote"}
+        except Exception as sdk_exc:  # noqa: BLE001
+            raise RuntimeError(
+                f"MedSigLIP HTTP+SDK failed: http={http_exc!r}; sdk={type(sdk_exc).__name__}: {sdk_exc}"
+            ) from sdk_exc
 
 
 def _get_json(url: str, *, timeout: int) -> dict:
     try:
         with urllib_request.urlopen(url, timeout=timeout) as resp:
             return json.loads(resp.read())
-    except urllib_error.URLError as exc:  # pragma: no cover
-        raise RuntimeError(f"Network error calling {url}: {exc}") from exc
+    except Exception as http_exc:  # noqa: BLE001
+        try:
+            out = _sdk_cls()().info_remote.remote()
+            if not isinstance(out, dict):
+                raise RuntimeError(f"medsiglip sdk info returned non-dict: {type(out)}")
+            return {**out, "transport": "modal_sdk_info_remote"}
+        except Exception as sdk_exc:  # noqa: BLE001
+            raise RuntimeError(
+                f"Network error calling {url}: {http_exc}; sdk={type(sdk_exc).__name__}: {sdk_exc}"
+            ) from sdk_exc
 
 
 def _b64_of(path: os.PathLike[str] | str) -> str:
@@ -423,12 +452,26 @@ class MedSigLipModalClient:
                 reason=gate.reason,
             )
 
+        import hashlib
+
+        import numpy as np
+
         resp = self.zero_shot_raw(dicom_path, labels=labels_list)
         probs = resp.get("probs")
         if not isinstance(probs, list) or len(probs) != len(labels_list):
             raise RuntimeError(f"malformed zero_shot response: {resp!r}")
         probs_f = [float(x) for x in probs]
         top_idx = max(range(len(probs_f)), key=lambda i: probs_f[i])
+        # Production screening envelope requires a 1152-d embedding receipt.
+        embedding = self.embed_dicom(dicom_path)
+        if len(embedding) != 1152:
+            raise RuntimeError(
+                f"medsiglip embed dim mismatch: expected 1152 got {len(embedding)}"
+            )
+        emb_sha = hashlib.sha256(
+            np.asarray(embedding, dtype=np.float32).tobytes()
+        ).hexdigest()
+        info = self._info()
         return MedSigLipResult(
             source_path=str(dicom_path),
             labels=labels_list,
@@ -441,6 +484,13 @@ class MedSigLipModalClient:
             logits_shape=(1, len(labels_list)),
             warnings=[MEDSIGLIP_MAMMOGRAPHY_WARNING],
             gate_report=gate,
+            app_version=str(info.get("app_version") or resp.get("app_version") or "")
+            or None,
+            inference_seconds=float(resp.get("seconds") or 0.0) or None,
+            prompts=list(labels_list),
+            embedding_dim=1152,
+            embedding_sha256=emb_sha,
+            embedding=[float(x) for x in embedding],
         )
 
 

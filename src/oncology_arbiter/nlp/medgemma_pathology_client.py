@@ -19,7 +19,7 @@ from oncology_arbiter.nlp.pathology_extraction_schema import (
 
 
 _JSON_RE = re.compile(r"\{[\s\S]*\}")
-PATHOLOGY_CHAT_URL = "https://testing1235--medgemma-1-5-4b-chat.modal.run"
+PATHOLOGY_CHAT_URL = "https://crispro--medgemma-1-5-4b-chat.modal.run"
 
 
 class MedGemmaPathologyError(RuntimeError):
@@ -80,7 +80,7 @@ def extract_pathology(
     chat_url = str(identity["chat_url"]).rstrip("/")
     if chat_url != PATHOLOGY_CHAT_URL:
         raise MedGemmaPathologyError(
-            "medgemma_pathology: identity chat_url is not the testing1235 MedGemma chat host"
+            "medgemma_pathology: identity chat_url is not the pinned MedGemma chat host"
         )
     # Keep prompt bounded — long TCGA reports; head+tail preserves receptor blocks.
     body_text = str(report_text)

@@ -1,8 +1,7 @@
 """API-level tests for L4b biopsy + L4c therapy endpoints.
 
-These exercise the wired FastAPI routes end-to-end (via TestClient) without
-hitting HF — we monkey-patch the probe/client construction. Deterministic,
-offline, and fast.
+Biopsy image tests monkey-patch the probe. Therapy tests call the live
+MedGemma 1.5 4B chat host with a stated receptor panel.
 """
 from __future__ import annotations
 
@@ -223,68 +222,139 @@ def test_biopsy_gated_state_when_forbidden(monkeypatch, client: TestClient) -> N
 # --------------------------------------------------------------------------- #
 
 
-def _stub_medgemma_therapy_fail(monkeypatch) -> None:
-    """Offline unit tests must not hit Modal/local MedGemma."""
-    import oncology_arbiter.nlp.medgemma_therapy_client as mtc
+@pytest.mark.integration
+def test_therapy_live_medgemma_hr_positive_postmenopausal(client: TestClient) -> None:
+    """HR+ HER2- grade 2, age 65, postmenopausal. Live 4B, not a stubbed failure."""
+    import json
+    from pathlib import Path
 
-    def _boom(**kwargs):
-        raise mtc.MedGemmaTherapyError("unit_test_medgemma_stubbed_unavailable")
-
-    monkeypatch.setattr(mtc, "reason_therapy", _boom)
-
-
-def test_therapy_placeholder_when_flags_off(monkeypatch, client: TestClient) -> None:
-    _stub_medgemma_therapy_fail(monkeypatch)
-    resp = client.post("/v1/therapy/reason", json={})
-    assert resp.status_code == 200
-    body = resp.json()
-    assert body["provenance"]["model_state"] == "unavailable"
-    assert body["recommended_options"] == []
-
-
-def test_therapy_rules_lite_hr_positive(monkeypatch, client: TestClient) -> None:
-    """Rules-lite is not mounted on /v1/therapy/reason. No fabricated regimen."""
-    _stub_medgemma_therapy_fail(monkeypatch)
-    monkeypatch.setenv("ONCOLOGY_ARBITER_ENABLE_THERAPY_RULES_PROXY", "1")
+    identity = json.loads(
+        (Path(__file__).resolve().parents[2] / "models" / "medgemma_1_5_4b_identity.json").read_text()
+    )
     payload = {
-        "biopsy_output": _biopsy_output_json(subtype="IDC", grade=2,
-                                             er=True, pr=True, her2="negative"),
+        "receptors_override": {
+            "er_positive": True,
+            "pr_positive": True,
+            "her2_status": "negative",
+        },
+        "biopsy_output": _biopsy_output_json(
+            subtype="IDC", grade=2, er=True, pr=True, her2="negative"
+        ),
         "patient_context": {"age": 65, "menopausal_status": "post"},
+        "disease": "breast cancer",
     }
     resp = client.post("/v1/therapy/reason", json=payload)
     assert resp.status_code == 200, resp.text
     body = resp.json()
-    assert body["provenance"]["model_state"] == "unavailable"
-    assert body["recommended_options"] == []
+    assert body["provenance"]["model_state"] == "loaded_medgemma_1_5_4b_therapy"
+    assert body["provenance"]["model_name"] == identity["model_id"]
+    receipt = next(r for r in body["stage_receipts"] if r["stage"] == "medgemma_therapy_reason")
+    assert receipt["status"] == "succeeded"
+    assert receipt["model_version"] == identity["revision_sha256"]
+    assert receipt["endpoint_label"] == identity["chat_url"]
+    options = body["recommended_options"]
+    assert options, body["warnings"]
+    regimens = " ".join(opt["regimen"] for opt in options).lower()
+    assert any(
+        token in regimens
+        for token in ("letrozole", "anastrozole", "exemestane")
+    ), regimens
+    assert not any(
+        token in regimens
+        for token in (
+            "nab-paclitaxel",
+            "paclitaxel",
+            "doxorubicin",
+            "anthracycline",
+            "tamoxifen",
+            "fulvestrant",
+        )
+    ), regimens
+    blob = " ".join(body.get("warnings") or [])
+    assert "RESEARCH USE ONLY" in blob
 
 
-def test_therapy_txgemma_gated_falls_through_to_rules(monkeypatch, client: TestClient) -> None:
-    """TxGemma is retired; MedGemma stub failure stays unavailable (no fake plan)."""
-    _stub_medgemma_therapy_fail(monkeypatch)
-    monkeypatch.setenv("ONCOLOGY_ARBITER_ENABLE_THERAPY_TXGEMMA", "1")
-    monkeypatch.setenv("ONCOLOGY_ARBITER_ENABLE_THERAPY_RULES_PROXY", "1")
-    _install_txgemma_stub(monkeypatch, _preflight_forbidden)
+def test_subtype_router_emits_one_guideline() -> None:
+    """Each receptor panel gets one constraint. The other subtypes' rules stay out."""
+    from oncology_arbiter.nlp.medgemma_therapy_client import (
+        MedGemmaTherapyError,
+        build_therapy_user_message,
+        get_subtype_prompt_constraint,
+        subtype_inputs_from_case,
+    )
 
+    her2 = get_subtype_prompt_constraint(True, True, True, True)
+    hr_post = get_subtype_prompt_constraint(True, True, False, True)
+    hr_pre = get_subtype_prompt_constraint(True, False, False, False)
+    tnbc = get_subtype_prompt_constraint(False, False, False, False)
+    assert "Trastuzumab / Pertuzumab" in her2
+    assert "Aromatase Inhibitor" not in her2
+    assert "Letrozole, Anastrozole, or Exemestane" in hr_post
+    assert "Tamoxifen" not in hr_post
+    assert "Triple-Negative" not in hr_post
+    assert "Tamoxifen or ovarian suppression" in hr_pre
+    assert "Triple-Negative" not in hr_pre
+    assert "CONTRAINDICATED" in tnbc
+    assert "Aromatase Inhibitor (Letrozole, Anastrozole, or Exemestane)" not in tnbc
+
+    def _msg(er: bool, pr: bool, her2_status: str, meno: str) -> str:
+        _kind, content = build_therapy_user_message(
+            patient_context={"age": 60, "menopausal_status": meno},
+            biopsy_summary={
+                "receptor_panel": {
+                    "er_positive": er,
+                    "pr_positive": pr,
+                    "her2_status": her2_status,
+                }
+            },
+            disease="breast cancer",
+        )
+        return content
+
+    post = _msg(True, True, "negative", "post")
+    triple = _msg(False, False, "negative", "pre")
+    assert "HR-positive / HER2-negative postmenopausal" in post
+    assert "Triple-Negative" not in post
+    assert "Tamoxifen or ovarian suppression" not in post
+    assert "Triple-Negative Breast Cancer" in triple
+    assert "HR-positive / HER2-negative postmenopausal" not in triple
+    assert "If menopausal_status is pre" not in triple
+
+    with pytest.raises(MedGemmaTherapyError, match="receptor panel incomplete"):
+        subtype_inputs_from_case({}, {"receptor_panel": {}})
+
+
+@pytest.mark.integration
+def test_therapy_live_medgemma_tnbc_rejects_endocrine(client: TestClient) -> None:
+    """ER-/PR-/HER2- must not come back as tamoxifen. One TNBC guideline only."""
     payload = {
-        "biopsy_output": _biopsy_output_json(subtype="IDC", grade=3,
-                                             er=False, pr=False, her2="negative"),
-        "patient_context": {"age": 45},
+        "receptors_override": {
+            "er_positive": False,
+            "pr_positive": False,
+            "her2_status": "negative",
+        },
+        "biopsy_output": _biopsy_output_json(
+            subtype="IDC", grade=3, er=False, pr=False, her2="negative"
+        ),
+        "patient_context": {"age": 52, "menopausal_status": "pre"},
+        "disease": "breast cancer",
     }
     resp = client.post("/v1/therapy/reason", json=payload)
     assert resp.status_code == 200, resp.text
     body = resp.json()
-    assert body["provenance"]["model_state"] == "unavailable"
-    assert body["recommended_options"] == []
-
-
-def test_therapy_txgemma_gated_no_rules_stays_placeholder(monkeypatch, client: TestClient) -> None:
-    """No mutation profile and MedGemma stubbed stays unavailable, not a fake plan."""
-    _stub_medgemma_therapy_fail(monkeypatch)
-    monkeypatch.setenv("ONCOLOGY_ARBITER_ENABLE_THERAPY_TXGEMMA", "1")
-    _install_txgemma_stub(monkeypatch, _preflight_forbidden)
-
-    resp = client.post("/v1/therapy/reason", json={})
-    assert resp.status_code == 200
-    body = resp.json()
-    assert body["provenance"]["model_state"] == "unavailable"
-    assert body["recommended_options"] == []
+    assert body["provenance"]["model_state"] == "loaded_medgemma_1_5_4b_therapy"
+    regimens = " ".join(opt["regimen"] for opt in body["recommended_options"]).lower()
+    assert any(
+        token in regimens
+        for token in (
+            "carboplatin",
+            "paclitaxel",
+            "doxorubicin",
+            "pembrolizumab",
+            "atezolizumab",
+        )
+    ), regimens
+    assert not any(
+        token in regimens
+        for token in ("tamoxifen", "letrozole", "anastrozole", "exemestane", "fulvestrant")
+    ), regimens

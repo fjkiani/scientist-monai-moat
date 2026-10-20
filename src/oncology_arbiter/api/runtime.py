@@ -115,7 +115,7 @@ def _run_cbis_ddsm_probe_on_bytes(
 ) -> Any | None:
     """Run the trained CBIS-DDSM supervised probe on a mammogram.
 
-    Scores ``models/cbis_ddsm_logreg_v3.joblib`` (sha256 ``f40f33c1cd3adfa48d1d10cc4d136795ad0642c3d1f94a543872ae1dc283aaf7``) over a
+    Scores ``models/cbis_ddsm_logreg_v2.joblib`` (sha256 ``e5f5b67caf8ba18006e3d582e91becf95fbb20b8b34417366c7ef07b906a211b``) over a
     1152-d MedSigLIP-448 embedding. Embedding sources (first hit wins):
 
       1. explicit ``embedding`` list (preferred — reuse the screening receipt)

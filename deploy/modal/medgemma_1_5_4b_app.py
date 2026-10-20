@@ -373,6 +373,13 @@ class MedGemma:
 
     @modal.fastapi_endpoint(method="POST", label="medgemma-1-5-4b-chat")
     def chat(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        """Generate text for messages the client already built.
+
+        Receptor subtype routing stays in
+        ``oncology_arbiter.nlp.medgemma_therapy_client.get_subtype_prompt_constraint``.
+        This process does not choose a breast subtype and must not grow a
+        multi-subtype system prompt.
+        """
         try:
             if not isinstance(payload, dict):
                 return {"error": "expected JSON body object"}

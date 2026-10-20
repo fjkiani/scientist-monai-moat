@@ -96,6 +96,7 @@ def screening_analyze(
         from oncology_arbiter.models.cbis_ddsm_probe import (
             CBIS_DDSM_PROBE_WARNING,
             DEFAULT_MODEL_PATH as CBIS_JOBLIB_PATH,
+            EXPECTED_JOBLIB_SHA256,
         )
         from oncology_arbiter.models.medsiglip_modal_client import MedSigLipModalClient
 
@@ -147,23 +148,27 @@ def screening_analyze(
         })
         model_state = ModelState.LOADED_MEDSIGLIP
 
-        # CBIS-DDSM LogReg v2 (joblib sha256 f40f33c1…) — trained probe over
-        # the same 1152-d embedding. Opt-out only: set
-        # ONCOLOGY_ARBITER_ENABLE_CBIS_DDSM_PROBE=0 to skip.
+        # CBIS-DDSM LogReg v2 — 1152-d MedSigLIP only. Opt-out:
+        # ONCOLOGY_ARBITER_ENABLE_CBIS_DDSM_PROBE=0.
         cbis_disabled = os.environ.get(
             "ONCOLOGY_ARBITER_ENABLE_CBIS_DDSM_PROBE", "1"
         ).strip().lower() in {"0", "false", "no", "off"}
         if not cbis_disabled and Path(CBIS_JOBLIB_PATH).exists():
             try:
                 probe_t0 = time.perf_counter()
+                if result.embedding is None or len(result.embedding) != 1152:
+                    raise RuntimeError(
+                        "cbis_v2_shape_refuse:missing_1152_embedding"
+                    )
                 probe_result = _run_cbis_ddsm_probe_on_bytes(
                     raw_bytes,
+                    embedding=result.embedding,
                     dicom_path=temp_path,
                     modal_client=ms_client,
                 )
                 if probe_result is not None:
                     findings.append({
-                        "label": f"cbis_ddsm_logreg_v3:{probe_result.predicted_label}",
+                        "label": f"{probe_result.probe_version}:{probe_result.predicted_label}",
                         "score": float(probe_result.proba_cancer),
                         "location_bbox_normalized": None,
                     })
@@ -180,16 +185,16 @@ def screening_analyze(
                             "threshold_label": probe_result.threshold_label,
                             "predicted_label": probe_result.predicted_label,
                             "joblib_path": str(CBIS_JOBLIB_PATH),
-                            "joblib_sha256": "f40f33c1cd3adfa48d1d10cc4d136795ad0642c3d1f94a543872ae1dc283aaf7",
+                            "joblib_sha256": EXPECTED_JOBLIB_SHA256,
                         }
                     receipts.append({
-                        "stage": "cbis_ddsm_logreg_v3",
+                        "stage": probe_result.probe_version,
                         "required": False,
                         "status": "succeeded",
                         "request_id": request_id,
                         "service_name": "oncology-arbiter",
                         "model_name": probe_result.probe_version,
-                        "artifact_sha256": "f40f33c1cd3adfa48d1d10cc4d136795ad0642c3d1f94a543872ae1dc283aaf7",
+                        "artifact_sha256": EXPECTED_JOBLIB_SHA256,
                         "input_reference": result.embedding_sha256,
                         "latency_ms": (time.perf_counter() - probe_t0) * 1000.0,
                         "warnings": [CBIS_DDSM_PROBE_WARNING],
@@ -203,7 +208,7 @@ def screening_analyze(
                     f"cbis_ddsm_probe_error:{type(probe_exc).__name__}:{probe_exc}"
                 )
                 receipts.append(_skipped_stage_receipt(
-                    "cbis_ddsm_logreg_v3",
+                    "cbis_ddsm_logreg_v2",
                     request_id,
                     f"cbis_ddsm_probe_unavailable:{type(probe_exc).__name__}:{probe_exc}",
                 ))
@@ -212,7 +217,7 @@ def screening_analyze(
                 f"cbis_ddsm_probe_skipped:joblib_missing:{CBIS_JOBLIB_PATH}"
             )
             receipts.append(_skipped_stage_receipt(
-                "cbis_ddsm_logreg_v3",
+                "cbis_ddsm_logreg_v2",
                 request_id,
                 f"trained probe missing at {CBIS_JOBLIB_PATH}",
             ))
