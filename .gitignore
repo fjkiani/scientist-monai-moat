@@ -14,12 +14,15 @@ __pycache__/
 .vscode/
 .idea/
 
-# Local secrets (R2 S3 keys, Modal tokens, etc.) — never commit
+# Local secrets (R2 S3 keys, Modal tokens, Gemini, etc.) — never commit
 .env
 .env.*
 !.env.example
 !deploy/r2.env.example
 .env.r2
+.env.l5-gemini
+envs/l5-gemini-argon.env
+envs/*-secrets.env
 
 # Runtime artifacts.
 # artifacts/audit/ holds two different kinds of file:

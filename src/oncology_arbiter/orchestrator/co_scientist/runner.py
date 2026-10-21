@@ -1,19 +1,18 @@
 """Top-level Co-Scientist driver."""
 from __future__ import annotations
 
-import os
 from typing import Any, Iterable, Literal
 
 from .const import (
     DEFAULT_N_VARIANTS,
     DEFAULT_RETURN_TOP,
     DEFAULT_TOP_N_EVOLVE,
-    ENGINE_LIVE,
     ENGINE_OFFLINE,
     PHASES,
 )
 from .evolve import evolve_hypotheses
 from .generate import generate_hypotheses
+from .llm_backend import build_live_llm, resolve_live_available
 from .rank import rank_hypotheses
 from .reflect_phase import reflect_hypotheses
 
@@ -23,7 +22,7 @@ def resolve_mode(mode: Literal["live", "offline", "auto"]) -> Literal["live", "o
         return "live"
     if mode == "offline":
         return "offline"
-    return "live" if (os.environ.get("MEDGEMMA_MODAL_URL") or "").strip() else "offline"
+    return "live" if resolve_live_available() else "offline"
 
 
 def run_co_scientist(
@@ -38,11 +37,13 @@ def run_co_scientist(
     patient_context: dict[str, Any] | None = None,
     mode: Literal["live", "offline", "auto"] = "auto",
     llm: Any | None = None,
+    llm_backend: str | None = None,
 ) -> dict[str, Any]:
     """Run generate → reflect → rank → evolve → rank.
 
-    Live mode uses MedGemma pairwise judging + generative evolve.
-    Offline mode is the deterministic scalar path for ``/v1/offline_ranker/run``.
+    Live mode uses the selected LLM backend (MedGemma / Gemini Argon / …)
+    for pairwise judging + generative evolve. Offline mode is the
+    deterministic scalar path for ``/v1/offline_ranker/run``.
     """
     resolved = resolve_mode(mode)
     seen_urls_set: set[str] = set(seen_urls or [])
@@ -50,12 +51,17 @@ def run_co_scientist(
     transcript: list[dict[str, Any]] = []
 
     live_llm = llm
-    if resolved == "live" and live_llm is None:
-        from oncology_arbiter.models.llm_client import GemmaClient
-        from oncology_arbiter.models.medgemma_1_5_4b_wiring import assert_pinned_chat_url
+    engine = ENGINE_OFFLINE
+    backend_name: str | None = None
+    if resolved == "live":
+        if live_llm is None:
+            live_llm, engine, backend_name = build_live_llm(backend=llm_backend)  # type: ignore[arg-type]
+        else:
+            from .llm_backend import resolve_backend
+            from .const import engine_id_for_backend
 
-        assert_pinned_chat_url((os.environ.get("MEDGEMMA_MODAL_URL") or "").strip())
-        live_llm = GemmaClient()
+            backend_name = resolve_backend(llm_backend)
+            engine = engine_id_for_backend(backend_name)
 
     ctx = patient_context or {
         "screening_model_state": (screening or {}).get("provenance", {}).get("model_state"),
@@ -125,7 +131,8 @@ def run_co_scientist(
 
     return {
         "phases": list(PHASES),
-        "engine": ENGINE_LIVE if resolved == "live" else ENGINE_OFFLINE,
+        "engine": engine if resolved == "live" else ENGINE_OFFLINE,
+        "llm_backend": backend_name if resolved == "live" else "offline",
         "mode": resolved,
         "warnings": warnings,
         "initial_count": initial_count,

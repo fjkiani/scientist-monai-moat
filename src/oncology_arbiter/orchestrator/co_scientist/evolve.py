@@ -160,7 +160,7 @@ def evolve_hypotheses(
     """Spawn variants of the top hypotheses."""
     if mode == "live":
         if llm is None:
-            raise RuntimeError("live evolve requires a MedGemma GemmaClient")
+            raise RuntimeError("live evolve requires an LLM client with .chat()")
         return _evolve_medgemma(
             ranked,
             top_n=top_n,

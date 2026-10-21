@@ -58,6 +58,7 @@ class ModelState(str, Enum):
     LOADED_MEDGEMMA_PATHOLOGY = "loaded_medgemma_1_5_4b_pathology"
     LOADED_MEDGEMMA_THERAPY = "loaded_medgemma_1_5_4b_therapy"
     LOADED_MEDGEMMA_1P5_4B = "loaded_medgemma_1p5_4b"  # identity-locked Co-Scientist Elo path
+    LOADED_GEMINI_ARGON = "loaded_gemini_argon"  # Gemini Argon L5 swarm backend (RUO)
     PROXY_CO_SCIENTIST = "proxy_co_scientist"  # offline deterministic ranker; never an LLM result
     LOADED_CASE_STORAGE = "loaded_case_storage"
     LOADED_PHIKON = "loaded_phikon"

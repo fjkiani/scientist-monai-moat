@@ -79,7 +79,7 @@ def rank_hypotheses(
         }
         if mode == "live":
             if llm is None:
-                raise RuntimeError("live rank requires a MedGemma GemmaClient")
+                raise RuntimeError("live rank requires an LLM client with .chat()")
             judgment = score_match(
                 ea.hypothesis,
                 eb.hypothesis,

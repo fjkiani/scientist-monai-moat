@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
-"""APOCALYPTIC: burn all 20 L5 ground-truth cases through live MedGemma swarm.
+"""Burn all 20 L5 ground-truth cases through the live clinical reasoning swarm.
 
-Writes ``artifacts/testing1235/l5_live_medgemma_ground_truth_scorecard.json``.
-Incremental progress is flushed after every case so a mid-run kill is auditable.
+Backend-agnostic. Selected via ``CO_SCIENTIST_LLM_BACKEND=medgemma|gemini_argon``.
+
+Writes:
+  artifacts/testing1235/l5_live_{backend}_ground_truth_scorecard.json
+  artifacts/testing1235/l5_live_{backend}_ground_truth_partial.json
+
+Optional env file (gitignored): ``.env.l5-gemini`` or ``L5_ENV_FILE``.
 """
 from __future__ import annotations
 
@@ -17,17 +22,44 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT))
 
-OUT_PATH = ROOT / "artifacts/testing1235/l5_live_medgemma_ground_truth_scorecard.json"
-PARTIAL_PATH = ROOT / "artifacts/testing1235/l5_live_medgemma_ground_truth_partial.json"
+
+def _load_env_file(path: Path) -> None:
+    if not path.is_file():
+        return
+    for raw in path.read_text().splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, val = line.partition("=")
+        key = key.strip()
+        val = val.strip().strip("'").strip('"')
+        if key and key not in os.environ:
+            os.environ[key] = val
+
+
+def _bootstrap_env() -> None:
+    explicit = (os.environ.get("L5_ENV_FILE") or "").strip()
+    candidates = []
+    if explicit:
+        candidates.append(Path(explicit).expanduser())
+    candidates.extend([
+        ROOT / ".env.l5-gemini",
+        ROOT / ".env.l5",
+        ROOT / "envs" / "l5-gemini-argon.env",
+    ])
+    for path in candidates:
+        _load_env_file(path)
 
 
 def main() -> int:
-    from oncology_arbiter.models.llm_client import GemmaClient
-    from oncology_arbiter.models.medgemma_1_5_4b_wiring import (
-        assert_pinned_chat_url,
-        verify_artifact_identity,
+    _bootstrap_env()
+
+    from oncology_arbiter.orchestrator.co_scientist import (
+        build_live_llm,
+        is_live_swarm_engine,
+        resolve_backend,
+        run_co_scientist,
     )
-    from oncology_arbiter.orchestrator.co_scientist import ENGINE_LIVE, run_co_scientist
     from tests.clinical_eval.l5_ground_truth_cases import (
         CLINICAL_GROUND_TRUTH_CASES,
         build_envelopes_for_case,
@@ -41,24 +73,52 @@ def main() -> int:
 
     # Force equal-conf landmark envelopes (no offline preferred boost).
     os.environ["L5_LIVE_EVAL"] = "1"
-    endpoint = (os.environ.get("MEDGEMMA_MODAL_URL") or "").strip()
-    if not endpoint:
-        identity = verify_artifact_identity()
-        endpoint = str(identity.get("chat_url") or "").strip()
-        os.environ["MEDGEMMA_MODAL_URL"] = endpoint
-    assert_pinned_chat_url(endpoint)
-    identity = verify_artifact_identity()
-    llm = GemmaClient(timeout_s=180.0)
+    backend = resolve_backend(os.environ.get("CO_SCIENTIST_LLM_BACKEND"))
+    os.environ["CO_SCIENTIST_LLM_BACKEND"] = backend
+
+    identity: dict = {"backend": backend}
+    endpoint: str | None = None
+    if backend == "medgemma":
+        from oncology_arbiter.models.medgemma_1_5_4b_wiring import (
+            assert_pinned_chat_url,
+            verify_artifact_identity,
+        )
+
+        endpoint = (os.environ.get("MEDGEMMA_MODAL_URL") or "").strip()
+        if not endpoint:
+            identity.update(verify_artifact_identity())
+            endpoint = str(identity.get("chat_url") or "").strip()
+            os.environ["MEDGEMMA_MODAL_URL"] = endpoint
+        assert_pinned_chat_url(endpoint)
+        identity.update(verify_artifact_identity())
+    else:
+        if not (os.environ.get("GEMINI_API_KEY") or "").strip():
+            raise SystemExit("GEMINI_API_KEY required for gemini_argon backend")
+        identity.update({
+            "model": os.environ.get("GEMINI_ARGON_MODEL") or "gemini-4-argon",
+            "agent": os.environ.get("GEMINI_ARGON_AGENT")
+            or "antigravity-preview-09-2026",
+            "transport": os.environ.get("CO_SCIENTIST_GEMINI_TRANSPORT") or "model",
+        })
+
+    llm, engine_id, backend_name = build_live_llm(backend=backend)
+    out_path = ROOT / f"artifacts/testing1235/l5_live_{backend_name}_ground_truth_scorecard.json"
+    partial_path = ROOT / f"artifacts/testing1235/l5_live_{backend_name}_ground_truth_partial.json"
 
     print(
-        f"[l5-live] endpoint={endpoint} cases={len(CLINICAL_GROUND_TRUTH_CASES)}",
+        f"[l5-live] backend={backend_name} engine={engine_id} "
+        f"endpoint={endpoint or identity.get('model')} "
+        f"cases={len(CLINICAL_GROUND_TRUTH_CASES)}",
         flush=True,
     )
     rows: list[dict] = []
     t0 = time.time()
     for i, case in enumerate(CLINICAL_GROUND_TRUTH_CASES, start=1):
         case_t0 = time.time()
-        print(f"[l5-live] case {i}/{len(CLINICAL_GROUND_TRUTH_CASES)} {case['case_id']}", flush=True)
+        print(
+            f"[l5-live] case {i}/{len(CLINICAL_GROUND_TRUTH_CASES)} {case['case_id']}",
+            flush=True,
+        )
         screening, biopsy, therapy, seen = build_envelopes_for_case(case)
         out = run_co_scientist(
             screening=screening,
@@ -71,9 +131,14 @@ def main() -> int:
             return_top=8,
             mode="live",
             llm=llm,
+            llm_backend=backend_name,
         )
-        if out.get("engine") != ENGINE_LIVE:
+        if not is_live_swarm_engine(out.get("engine")):
             raise SystemExit(f"engine cheat: got {out.get('engine')!r}")
+        if out.get("engine") != engine_id:
+            raise SystemExit(
+                f"engine mismatch: expected {engine_id!r} got {out.get('engine')!r}"
+            )
         transcript = list(out.get("tournament_transcript") or [])
         if any(m.get("clinical_rationale") == "offline_scalar_score" for m in transcript):
             raise SystemExit(f"scalar leak in {case['case_id']}")
@@ -87,6 +152,7 @@ def main() -> int:
             "kind": case["kind"],
             "mode": out.get("mode"),
             "engine": out.get("engine"),
+            "llm_backend": out.get("llm_backend"),
             "top_statement": statement[:240],
             "concordant": concordant,
             "contraindication_violation": contra_hit,
@@ -100,17 +166,16 @@ def main() -> int:
         partial = {
             "created_at": datetime.now(UTC).isoformat(),
             "live": True,
+            "llm_backend": backend_name,
+            "engine": engine_id,
             "endpoint": endpoint,
-            "identity": {
-                "model_id": identity.get("model_id"),
-                "revision_sha256": identity.get("revision_sha256"),
-            },
+            "identity": identity,
             "completed": len(rows),
             "total": len(CLINICAL_GROUND_TRUTH_CASES),
             "rows": rows,
         }
-        PARTIAL_PATH.parent.mkdir(parents=True, exist_ok=True)
-        PARTIAL_PATH.write_text(json.dumps(partial, indent=2))
+        partial_path.parent.mkdir(parents=True, exist_ok=True)
+        partial_path.write_text(json.dumps(partial, indent=2))
         print(
             f"[l5-live]   → concordant={concordant} contra={contra_hit} "
             f"matches={len(transcript)} engine={out.get('engine')} "
@@ -123,25 +188,24 @@ def main() -> int:
         "created_at": datetime.now(UTC).isoformat(),
         "live": True,
         "cheat_banned": True,
+        "llm_backend": backend_name,
         "endpoint": endpoint,
-        "identity": {
-            "model_id": identity.get("model_id"),
-            "revision_sha256": identity.get("revision_sha256"),
-            "modal_workspace": identity.get("modal_workspace"),
-        },
+        "identity": identity,
         "total_elapsed_s": round(time.time() - t0, 2),
-        "engine_required": ENGINE_LIVE,
+        "engine_required": engine_id,
         "all_rows_live": all(r.get("mode") == "live" for r in rows),
-        "all_rows_swarm_engine": all(r.get("engine") == ENGINE_LIVE for r in rows),
+        "all_rows_swarm_engine": all(
+            is_live_swarm_engine(r.get("engine")) and r.get("engine") == engine_id
+            for r in rows
+        ),
         "no_offline_scalar_in_any_row": True,
     })
-    # Fail closed if any row cheated offline.
     if not card["all_rows_live"] or not card["all_rows_swarm_engine"]:
         raise SystemExit("LIVE CHEAT DETECTED in scorecard rows")
 
-    OUT_PATH.write_text(json.dumps(card, indent=2))
+    out_path.write_text(json.dumps(card, indent=2))
     print(json.dumps({k: card[k] for k in card if k != "rows"}, indent=2), flush=True)
-    print(f"[l5-live] wrote {OUT_PATH}", flush=True)
+    print(f"[l5-live] wrote {out_path}", flush=True)
 
     meters_ok = (
         card["pass"]["concordance"]

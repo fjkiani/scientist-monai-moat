@@ -5,8 +5,8 @@ Meters (offline CI path — preferred confidence-boosted envelopes):
   * Contraindication violation   target == 0.0%
   * Landmark pairwise accuracy   target >= 80%
 
-Set ``L5_LIVE_EVAL=1`` + ``MEDGEMMA_MODAL_URL`` to force live MedGemma swarm
-(slow; not the default CI path).
+Set ``L5_LIVE_EVAL=1`` + configured LLM backend to force live swarm
+(``CO_SCIENTIST_LLM_BACKEND=medgemma|gemini_argon``; slow; not default CI).
 """
 from __future__ import annotations
 
@@ -17,7 +17,11 @@ from typing import Any
 
 import pytest
 
-from oncology_arbiter.orchestrator.co_scientist import run_co_scientist
+from oncology_arbiter.orchestrator.co_scientist import (
+    is_live_swarm_engine,
+    resolve_backend,
+    run_co_scientist,
+)
 
 from .l5_ground_truth_cases import (
     CLINICAL_GROUND_TRUTH_CASES,
@@ -30,9 +34,13 @@ TARGET_CONTRA_VIOLATION = 0.0
 TARGET_LANDMARK_ACCURACY = 0.80
 
 SCORECARD_PATH = Path("artifacts/testing1235/l5_co_scientist_ground_truth_scorecard.json")
-LIVE_SCORECARD_PATH = Path(
-    "artifacts/testing1235/l5_live_medgemma_ground_truth_scorecard.json"
-)
+
+
+def _live_scorecard_path() -> Path:
+    backend = resolve_backend(os.environ.get("CO_SCIENTIST_LLM_BACKEND"))
+    return Path(
+        f"artifacts/testing1235/l5_live_{backend}_ground_truth_scorecard.json"
+    )
 
 
 def _norm(s: str) -> str:
@@ -164,13 +172,14 @@ def test_l5_ground_truth_scorecard(tmp_path: Path | None = None):
     card = _scorecard(rows)
 
     live = os.environ.get("L5_LIVE_EVAL", "").strip() in {"1", "true", "TRUE"}
-    out_path = LIVE_SCORECARD_PATH if live else SCORECARD_PATH
+    out_path = _live_scorecard_path() if live else SCORECARD_PATH
     card["live"] = live
     card["cheat_banned"] = live
     if live:
+        card["llm_backend"] = resolve_backend(os.environ.get("CO_SCIENTIST_LLM_BACKEND"))
         card["all_rows_live"] = all(r.get("mode") == "live" for r in rows)
         card["all_rows_swarm_engine"] = all(
-            r.get("engine") == "medgemma_clinical_reasoning_swarm" for r in rows
+            is_live_swarm_engine(r.get("engine")) for r in rows
         )
         assert card["all_rows_live"] and card["all_rows_swarm_engine"], (
             "LIVE CHEAT DETECTED — offline scalar leaked into live scorecard"
@@ -199,10 +208,9 @@ def test_l5_ground_truth_scorecard(tmp_path: Path | None = None):
 )
 def test_each_ground_truth_case_runs(case: GroundTruthCase):
     row = _run_case(case)
-    assert row["engine"] in {
-        "offline_scalar_ranker",
-        "medgemma_clinical_reasoning_swarm",
-    }
+    assert row["engine"] == "offline_scalar_ranker" or is_live_swarm_engine(
+        row["engine"]
+    )
     assert row["top_statement"]
     if case["kind"] == "phenotype":
         assert row["concordant"] is True

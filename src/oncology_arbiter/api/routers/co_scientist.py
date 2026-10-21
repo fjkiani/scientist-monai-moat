@@ -1,7 +1,8 @@
-"""Identity-locked MedGemma Co-Scientist routes (hard path).
+"""Live Co-Scientist routes (LLM-backend agnostic swarm).
 
 * ``POST /v1/co-scientist/run`` — supervisor.execute_stage (GENERATE→REFLECT→Elo)
-* ``POST /v1/co_scientist/run`` — live MedGemma pairwise judge over stage envelopes
+* ``POST /v1/co_scientist/run`` — live pairwise swarm over stage envelopes
+  (``CO_SCIENTIST_LLM_BACKEND=medgemma|gemini_argon``)
 * Offline scalar stays at ``POST /v1/offline_ranker/run`` in ``elo.py``
 """
 from __future__ import annotations
@@ -32,22 +33,38 @@ def live_envelope_co_scientist_run(
     req: CoScientistRunRequest,
     tenant: APIKey = Depends(require_api_key),
 ) -> CoScientistRunResponse:
-    """Live MedGemma pairwise clinical reasoning over caller stage envelopes.
+    """Live pairwise clinical reasoning swarm (MedGemma / Gemini Argon / …).
 
-    Rejects the offline scalar path. Requires ``MEDGEMMA_MODAL_URL`` pinned.
+    Backend selected via ``CO_SCIENTIST_LLM_BACKEND``. Rejects offline scalar.
     """
-    endpoint_url = (os.environ.get("MEDGEMMA_MODAL_URL") or "").strip()
-    if not endpoint_url:
+    from oncology_arbiter.orchestrator.co_scientist import (
+        LLM_BACKEND_GEMINI_ARGON,
+        LLM_BACKEND_MEDGEMMA,
+        is_live_swarm_engine,
+        resolve_backend,
+        resolve_live_available,
+        run_co_scientist,
+    )
+
+    if not resolve_live_available():
         raise HTTPException(
             status_code=503,
-            detail="MEDGEMMA_MODAL_URL is required for live /v1/co_scientist/run",
+            detail=(
+                "No live LLM backend configured. Set MEDGEMMA_MODAL_URL "
+                "(medgemma) or GEMINI_API_KEY (gemini_argon)."
+            ),
         )
+    backend = resolve_backend()
+    endpoint_url = (os.environ.get("MEDGEMMA_MODAL_URL") or "").strip() or None
+    if backend == LLM_BACKEND_MEDGEMMA:
+        from oncology_arbiter.models.medgemma_1_5_4b_wiring import assert_pinned_chat_url
+
+        if not endpoint_url:
+            raise HTTPException(status_code=503, detail="MEDGEMMA_MODAL_URL required")
+        assert_pinned_chat_url(endpoint_url)
+
     request_id = new_request_id()
     try:
-        from oncology_arbiter.models.medgemma_1_5_4b_wiring import assert_pinned_chat_url
-        from oncology_arbiter.orchestrator.co_scientist import run_co_scientist
-
-        assert_pinned_chat_url(endpoint_url)
         seen_urls: set[str] = set(req.seed_urls or [])
         for env in (req.screening, req.biopsy, req.therapy):
             if not env:
@@ -68,6 +85,7 @@ def live_envelope_co_scientist_run(
             n_variants=req.n_variants,
             return_top=req.return_top,
             mode="live",
+            llm_backend=backend,
         )
     except Exception as exc:
         raise HTTPException(
@@ -75,16 +93,14 @@ def live_envelope_co_scientist_run(
             detail=f"live co-scientist failed: {type(exc).__name__}: {exc}",
         ) from exc
 
-    from oncology_arbiter.orchestrator.co_scientist import ENGINE_LIVE
-
-    if cs_out.get("engine") != ENGINE_LIVE:
+    if not is_live_swarm_engine(cs_out.get("engine")):
         raise HTTPException(
             status_code=502,
             detail=f"live engine did not engage swarm (got {cs_out.get('engine')!r})",
         )
     transcript = list(cs_out.get("tournament_transcript") or [])
     if not transcript:
-        raise HTTPException(status_code=503, detail="empty MedGemma tournament transcript")
+        raise HTTPException(status_code=503, detail="empty tournament transcript")
     if any(m.get("clinical_rationale") == "offline_scalar_score" for m in transcript):
         raise HTTPException(status_code=502, detail="scalar score leaked into live transcript")
 
@@ -100,10 +116,16 @@ def live_envelope_co_scientist_run(
         1 for w in (cs_out.get("warnings") or [])
         if str(w).startswith("no_evidence_after_reflect:")
     )
+    if backend == LLM_BACKEND_MEDGEMMA:
+        model_state = ModelState.LOADED_MEDGEMMA_1P5_4B
+    elif backend == LLM_BACKEND_GEMINI_ARGON:
+        model_state = ModelState.LOADED_GEMINI_ARGON
+    else:
+        model_state = ModelState.LOADED
     prov = Provenance(
-        model_name="oa/co_scientist_medgemma_pairwise",
-        model_version="l5-live-v1",
-        model_state=ModelState.LOADED_MEDGEMMA_1P5_4B,
+        model_name=f"oa/co_scientist_{backend}_pairwise",
+        model_version="l5-live-v2-agnostic",
+        model_state=model_state,
         request_id=request_id,
         model_endpoint_url=endpoint_url,
     )
@@ -115,10 +137,11 @@ def live_envelope_co_scientist_run(
     log_event(
         request_id,
         "/v1/co_scientist/run",
-        model_state=ModelState.LOADED_MEDGEMMA_1P5_4B.value,
+        model_state=model_state.value,
         patient_id_hash=None,
         extra={
             "engine": cs_out.get("engine"),
+            "llm_backend": cs_out.get("llm_backend"),
             "n_matches": len(transcript),
             "n_hypotheses": len(cs_out.get("hypotheses") or []),
             "tenant_id": tenant.tenant_id,
