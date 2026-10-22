@@ -78,6 +78,7 @@ class ModelState(str, Enum):
     LOADED_AK_BUNDLE = "loaded_ak_bundle"                  # AK MBD4-LOF tumor board bundle (crispro-backend-v2 bfd6d11f, manuscript d33f6403)
     LOADED_MBD4_EVIDENCE_MATRIX = "loaded_mbd4_evidence_matrix"  # PR #11 evidence matrix (manuscript_claim_type + falsification_narrative + auxiliary_evidence)
     LOADED_SL_THERAPY_BRIDGE = "loaded_sl_therapy_bridge"  # crispro-backend-v2 api/services/sl_therapy_bridge/ mirror
+    LOADED_SL_AGENT = "loaded_sl_agent"  # vendored Synthetic-Lethality@488da52 under vendor/synthetic-lethality/sl_agent
     LOADED_HIPAA_REDACTOR = "loaded_hipaa_redactor"        # HIPAAPIIMiddleware log-redaction (mirror of backend v2 api/middleware/hipaa_pii.py)
 
 
@@ -904,6 +905,14 @@ class FullCaseRequest(BaseModel):
     germline_mutations: list["PatientMutation"] = Field(default_factory=list, max_length=64)
     ranked_drugs: list["RankedDrug"] = Field(default_factory=list, max_length=100)
     run_co_scientist: bool = True
+    resistance_features: dict[str, float] | None = Field(
+        default=None,
+        description=(
+            "HGSOC platinum-resistance panel for ovarian_resistance_multivariate_v2 "
+            "(EMT_*, DDR_*, ratio_mes_epi, grade_ord, figo_ord, residual_ord, "
+            "brca1_mut, hist_serous, hist_undiff). Missing keys imputed."
+        ),
+    )
 
 
 class FullCaseResponse(ApiEnvelope):
@@ -982,6 +991,10 @@ class DynamicTumorBoardRequest(BaseModel):
     ranked_drugs: list[RankedDrug] = Field(default_factory=list, max_length=100)
     clinical_baseline: dict[str, Any] = Field(default_factory=dict)
     run_co_scientist: bool = True
+    resistance_features: dict[str, float] | None = Field(
+        default=None,
+        description="HGSOC multivariate platinum-resistance feature panel.",
+    )
 
 
 class DynamicTumorBoardResponse(ApiEnvelope):

@@ -335,6 +335,42 @@ def compute_models_loaded() -> dict[str, ModelState]:
         "biopsy_probe_v1": biopsy_probe_state,
         "breast_dss_v3": breast_dss_state,
         "sl_therapy_bridge": configured("SL_THERAPY_BRIDGE_MODAL_URL"),
+        "sl_agent": _sl_agent_badge(),
+        "ovarian_mfap4_v1": _mfap4_badge(),
+        "ovarian_resistance_multivariate_v2": _mvr_badge(),
         "offline_ranker_r2_modal": configured("OFFLINE_RANKER_R2_MODAL_URL"),
         "luna16_case_storage": configured("LUNA16_CASE_STORAGE_MODAL_URL"),
     }
+
+
+def _sl_agent_badge() -> ModelState:
+    try:
+        from oncology_arbiter.models.sl_agent_local import pin_is_intact
+
+        return ModelState.LOADED_SL_AGENT if pin_is_intact() else ModelState.UNAVAILABLE
+    except Exception:  # noqa: BLE001 — SL vendor may be absent on HGSOC-only trees
+        return ModelState.UNAVAILABLE
+
+
+def _mfap4_badge() -> ModelState:
+    try:
+        from oncology_arbiter.arbiter.stage_mfap4_wiring import (
+            load_stage_mfap4_arbiter,
+        )
+
+        load_stage_mfap4_arbiter()
+        return ModelState.LOADED
+    except Exception:  # noqa: BLE001 — badge only; fail closed to UNAVAILABLE
+        return ModelState.UNAVAILABLE
+
+
+def _mvr_badge() -> ModelState:
+    try:
+        from oncology_arbiter.arbiter.stage_resistance_multivariate_wiring import (
+            load_multivariate_bundle,
+        )
+
+        load_multivariate_bundle()
+        return ModelState.LOADED
+    except Exception:  # noqa: BLE001
+        return ModelState.UNAVAILABLE

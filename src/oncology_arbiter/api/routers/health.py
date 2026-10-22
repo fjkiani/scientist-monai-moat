@@ -71,16 +71,46 @@ def health() -> HealthResponse:
                 "notes": "Production flow requires verified case storage followed by LUNA16 RetinaNet bundle 0.6.9; no local series path or HU heuristic is accepted.",
             },
             "hgsoc": {
-                "state": ModelState.RETIRED.value,
-                "case_full": False,
-                "patient_probability_emitted": False,
-                "retired_scope": "ovarian_prognostic_arbiter_patient_level_scoring",
-                "endpoints": ["tumor_board/bundle"],
+                "state": ModelState.LOADED.value,
+                "case_full": True,
+                "patient_probability_emitted": True,
+                "retired_scope": "ovarian_mortality_arbiter_v3_tcga_prognostic_only",
+                "multivariate_platinum": {
+                    "state": ModelState.LOADED.value,
+                    "capability": "hgsoc-platinum-resistance-multivariate-v2",
+                    "artifact": "ovarian_resistance_multivariate_v2.joblib",
+                    "n_training": 75,
+                    "note": (
+                        "OOF multivariate does not beat univariate MFAP4 "
+                        "0.6836 on this cohort; honesty_note in proof JSON."
+                    ),
+                },
+                "mfap4_platinum": {
+                    "state": ModelState.LOADED.value,
+                    "capability": "hgsoc-mfap4-platinum",
+                    "probe": "212713_at",
+                    "auroc": 0.684,
+                    "n_training": 75,
+                    "endpoints": [
+                        "GET /v1/hgsoc/mfap4/health",
+                        "GET /v1/hgsoc/mfap4/metrics",
+                        "POST /v1/hgsoc/mfap4/score",
+                    ],
+                },
+                "endpoints": [
+                    "POST /v1/case/full?cancer=hgsoc",
+                    "POST /v1/tumor_board/dynamic",
+                    "tumor_board/bundle",
+                    "GET /v1/hgsoc/mfap4/health",
+                    "GET /v1/hgsoc/mfap4/metrics",
+                    "POST /v1/hgsoc/mfap4/score",
+                ],
                 "notes": (
-                    "POST /v1/case/full?cancer=hgsoc and "
-                    "POST /v1/tumor_board/dynamic with cancer=hgsoc return HTTP 501. "
-                    "Ovarian requests are not executed on the breast screening, "
-                    "breast DSS, or breast therapy path."
+                    "HGSOC case/full executes ovarian_resistance_multivariate_v2 "
+                    "(GSE63885 honest n=75). TCGA ovarian mortality arbiter stays "
+                    "retired. Univariate MFAP4 OOF remains stronger than "
+                    "multivariate on this cohort. Retracted n=101 AUROC 0.7625 "
+                    "forbidden. Breast paths are not used for ovarian requests."
                 ),
             },
         },

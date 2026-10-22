@@ -1,0 +1,39 @@
+{
+  "capability": "hgsoc-mfap4-platinum",
+  "geo": "GSE63885",
+  "probe": "212713_at",
+  "gene": "MFAP4",
+  "honest": {
+    "n": 75,
+    "resistant": 34,
+    "sensitive": 41,
+    "auroc": 0.6836441893830704,
+    "expression_rank_auroc": 0.6836441893830704,
+    "prauc": 0.645317191245118,
+    "auroc_ci": [
+      0.562138431013431,
+      0.8063162401073726
+    ],
+    "mean_expr_resistant": 8.170546636264705,
+    "mean_expr_sensitive": 7.680686253243902,
+    "oof_auroc": 0.6714490674318507
+  },
+  "retracted_na_as_sensitive": {
+    "n": 101,
+    "resistant": 34,
+    "sensitive": 67,
+    "auroc": 0.7625
+  },
+  "source_proof": "crispr-assistant-main/data/external/GSE63885/mfap4_auroc_recompute_proof.json",
+  "reconciliation": "crispr-assistant-main/data/external/GSE63885/mfap4_honest_reconciliation.json",
+  "artifact_path": "src/oncology_arbiter/arbiter/models/ovarian_mfap4_arbiter_v1.json",
+  "artifact_sha256": "1524d1638076a6b382104b823e22080294a0b4ace216e03b8420b5ce0fa7a605",
+  "intercept": -5.8305298738024876,
+  "coefficient_mfap4_expr": 0.7138979646423848,
+  "lambda": 1.0,
+  "seed": 20261021,
+  "validated_at": "2026-10-22T00:54:15.485410Z",
+  "status": "LOCKED",
+  "production_auroc": 0.684,
+  "forbidden": "Do not use retracted n=101 AUROC 0.7625 / 0.763 in production"
+}

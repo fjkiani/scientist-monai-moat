@@ -84,36 +84,65 @@ def _breast_dss_from_features(features: Any) -> BreastDssPrognosis:
         caveats=list(result.caveats),
     )
 
-def _ovarian_retirement(request_id: str) -> tuple[dict[str, Any], dict[str, Any]]:
-    block = {
-        "model_name": "ovarian_mortality_arbiter_v3_tcga",
-        "model_state": "retired",
-        "endpoint": "2-year overall mortality",
-        "retirement_reason": (
-            "FIGO stage did not demonstrate incremental discrimination over age; "
-            "the paired OOF AUROC increment was +0.02475247524752467 with an "
-            "approximate 95% interval spanning zero."
-        ),
-        "retirement_evidence": {
-            "cohort": "TCGA-OV",
-            "n": 271,
-            "age_only_oof_auroc": 0.658057110058832,
-            "age_plus_figo_oof_auroc": 0.6828095853063567,
-            "delta_oof_auroc": 0.02475247524752467,
-            "delta_ci95_approx": [-0.041, 0.095],
-            "external_validation": "no_feature_compatible_external_cohort_available",
-        },
-        "warning": "Retired research model; no patient probability, risk bucket, or driving feature is emitted.",
-    }
+def _hgsoc_multivariate_resistance(
+    request_id: str,
+    resistance_features: dict[str, Any] | None,
+    clinical_baseline: dict[str, Any] | None = None,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Score GSE63885 multivariate platinum-resistance model (RUO)."""
+    from oncology_arbiter.arbiter import stage_resistance_multivariate_wiring as mvr
+
+    features: dict[str, Any] = {}
+    if clinical_baseline:
+        features.update(
+            {k: v for k, v in clinical_baseline.items() if isinstance(v, (int, float))}
+        )
+    if resistance_features:
+        features.update(resistance_features)
+
+    try:
+        if features:
+            block = mvr.score_resistance(features)
+            status = "succeeded"
+            warnings = []
+            if not block.get("beats_univariate_loocv"):
+                warnings.append(
+                    "multivariate_loocv_does_not_beat_univariate_mfap4_0.6836"
+                )
+        else:
+            block = mvr.identity_block()
+            # Identity load without a patient score is still a successful stage
+            # receipt; probability omission is carried in warnings + block.
+            status = "succeeded"
+            warnings = ["resistance_features_omitted"]
+    except Exception as exc:  # noqa: BLE001
+        block = {
+            "model_name": "ovarian_resistance_multivariate_v2",
+            "model_state": "unavailable",
+            "error": f"{type(exc).__name__}: {exc}",
+        }
+        receipt = {
+            "stage": "hgsoc_platinum_resistance_multivariate",
+            "required": True,
+            "status": "failed_required",
+            "request_id": request_id,
+            "service_name": "oncology-arbiter",
+            "model_name": "ovarian_resistance_multivariate_v2",
+            "model_version": "v2",
+            "warnings": [],
+            "error": str(exc),
+        }
+        return block, receipt
+
     receipt = {
-        "stage": "ovarian_prognostic_arbiter",
-        "required": False,
-        "status": "retired",
+        "stage": "hgsoc_platinum_resistance_multivariate",
+        "required": True,
+        "status": status,
         "request_id": request_id,
         "service_name": "oncology-arbiter",
-        "model_name": "ovarian_mortality_arbiter_v3_tcga",
-        "model_version": "v3-retired",
-        "warnings": ["retired_no_incremental_figo_discrimination_over_age"],
+        "model_name": block.get("model_name"),
+        "model_version": "v2",
+        "warnings": warnings,
         "error": None,
     }
     return block, receipt
@@ -135,11 +164,17 @@ def _assemble_dynamic_tumor_board(
     therapy_triage: ArbiterScore | None = None
 
     if req.cancer == "hgsoc":
-        ovarian_arbiter, retired_receipt = _ovarian_retirement(request_id)
-        receipts.append(retired_receipt)
+        ovarian_arbiter, mvr_receipt = _hgsoc_multivariate_resistance(
+            request_id,
+            getattr(req, "resistance_features", None),
+            clinical_baseline=req.clinical_baseline,
+        )
+        receipts.append(mvr_receipt)
     else:
         receipts.append(_skipped_stage_receipt(
-            "ovarian_prognostic_arbiter", request_id, "not applicable to breast cancer"
+            "hgsoc_platinum_resistance_multivariate",
+            request_id,
+            "not applicable to breast cancer",
         ))
 
     if req.case_id:
@@ -321,19 +356,6 @@ def dynamic_tumor_board(
     req: DynamicTumorBoardRequest,
     tenant: APIKey = Depends(require_api_key),
 ) -> DynamicTumorBoardResponse:
-    if req.cancer == "hgsoc":
-        raise HTTPException(
-            status_code=501,
-            detail={
-                "error": "hgsoc_tumor_board_dynamic_not_implemented",
-                "cancer": "hgsoc",
-                "detail": (
-                    "HGSOC is not implemented on /v1/tumor_board/dynamic. "
-                    "Ovarian requests are not scored by breast screening, "
-                    "breast DSS, or breast therapy."
-                ),
-            },
-        )
     request_id = new_request_id()
     response = _assemble_dynamic_tumor_board(
         req, request_id=request_id
@@ -360,20 +382,69 @@ def case_full(
     cancer_norm = cancer.lower().strip()
     if cancer_norm not in _SUPPORTED_CANCERS:
         raise HTTPException(400, f"Unsupported cancer={cancer!r}; supported={sorted(_SUPPORTED_CANCERS)}")
+    request_id = new_request_id()
+
     if cancer_norm == "hgsoc":
-        raise HTTPException(
-            status_code=501,
-            detail={
-                "error": "hgsoc_case_full_not_implemented",
-                "cancer": "hgsoc",
-                "detail": (
-                    "HGSOC is not implemented on /v1/case/full. "
-                    "Ovarian requests are not scored by breast screening, "
-                    "breast DSS, or breast therapy."
+        biopsy_input = req.biopsy_input
+        dynamic_request = DynamicTumorBoardRequest(
+            cancer="hgsoc",
+            case_id=req.case_id,
+            report_text=biopsy_input.report_text if biopsy_input else None,
+            pathology_image_b64=biopsy_input.wsi_bytes_b64 if biopsy_input else None,
+            mutations=req.mutations,
+            germline_mutations=req.germline_mutations,
+            ranked_drugs=req.ranked_drugs,
+            clinical_baseline=req.therapy_context.model_dump(mode="json"),
+            resistance_features=req.resistance_features,
+            run_co_scientist=req.run_co_scientist,
+        )
+        dynamic = _assemble_dynamic_tumor_board(
+            dynamic_request, request_id=request_id
+        )
+        composite_state = (
+            ModelState.LOADED
+            if (dynamic.ovarian_arbiter or {}).get("model_state") == "loaded"
+            else ModelState.UNAVAILABLE
+        )
+        log_event(
+            request_id,
+            "/v1/case/full",
+            model_state=composite_state.value,
+            patient_id_hash=None,
+            extra={
+                "cancer": cancer_norm,
+                "pipeline_status": dynamic.pipeline_status,
+                "has_resistance_score": bool(
+                    (dynamic.ovarian_arbiter or {}).get("p_positive") is not None
                 ),
             },
+            tenant_id=tenant.tenant_id,
         )
-    request_id = new_request_id()
+        env = _envelope(
+            request_id,
+            model_state=composite_state,
+            model_name="hgsoc-platinum-resistance-multivariate-v2",
+        )
+        env["warnings"] = list(dynamic.warnings)
+        return FullCaseResponse(
+            **env,
+            pipeline_status=dynamic.pipeline_status,
+            cancer=cancer_norm,
+            stage_receipts=dynamic.stage_receipts,
+            ovarian_arbiter=dynamic.ovarian_arbiter,
+            case_manifest=dynamic.case_manifest,
+            report_parse=dynamic.report_parse,
+            phikon_embedding=dynamic.phikon_embedding,
+            dss_prognosis=None,
+            therapy_bridge=None,
+            therapy_triage=None,
+            co_scientist=dynamic.co_scientist,
+            screening=None,
+            biopsy=None,
+            therapy=None,
+            nsclc=None,
+            elo_ranked_hypotheses=[],
+        )
 
     if cancer_norm == "breast":
         biopsy_input = req.biopsy_input

@@ -1,8 +1,8 @@
 {
   "$schema_version": "1.0.0",
-  "generated_at": "2026-10-19T23:15:00-04:00",
-  "git_sha": "416d84c4bfe10ed613667eef2801be06af9fb8b1",
-  "git_sha_scope": "This stamp is the tree the 2026-10-19 CBIS entry was checked against. Older LIVE rows in this file were not re-audited in that edit.",
+  "generated_at": "2026-10-21T00:28:00-04:00",
+  "git_sha": "3fa542e4b07122ef3d2a9171906b4b60dcdbbdc2",
+  "git_sha_scope": "HEAD at SL wire start. CBIS rows below were audited earlier on 416d84c. SL wire adds L4c-sl-agent-local without re-auditing older LIVE rows.",
   "project": {
     "name": "oncology-arbiter",
     "one_line_goal": "Open-architecture breast oncology reasoning platform spanning screening \u2192 biopsy \u2192 therapy, with calibrated per-stage arbiters, cited evidence, and honest performance disclosure.",
@@ -310,6 +310,110 @@
       "hai_def_gate_state": "unknown",
       "wired_files": [],
       "evidence": []
+    },
+    {
+      "id": "L3-hgsoc-platinum-multivariate-v2",
+      "layer": "L3",
+      "role": "GSE63885 multivariate platinum-resistance (EMT+DDR+clinical+ratio). OOF CV across uni/L2/ElasticNet/HGB/RF. case/full?cancer=hgsoc unlocked.",
+      "status": "LIVE",
+      "not_wired_reason": "Multivariate LOOCV does not beat univariate MFAP4 on this n=75 cohort (honesty_note in proof). TCGA ovarian mortality arbiter remains retired.",
+      "current_backend": "ovarian_resistance_multivariate_v2.joblib sha256=82febea7003675941afeaffe268ec841281d17146188339900fba8f70f941e26",
+      "hai_def_gate_state": null,
+      "wired_files": [
+        "src/oncology_arbiter/arbiter/models/ovarian_resistance_multivariate_v2.joblib",
+        "src/oncology_arbiter/arbiter/stage_resistance_multivariate_wiring.py",
+        "src/oncology_arbiter/api/routers/tumor_board.py",
+        "docs/proofs/gse63885_multivariate_metrics.json",
+        "scripts/fit_ovarian_resistance_multivariate_v2.py",
+        "tests/unit/test_hgsoc_multivariate_wire.py"
+      ],
+      "meter": {
+        "geo": "GSE63885",
+        "honest_n": 75,
+        "univariate_mfap4_cv5_auroc": 0.6801,
+        "univariate_mfap4_loocv_auroc": 0.6528,
+        "winner_multivariate": "hist_gradient_boosting",
+        "winner_loocv_auroc": 0.5911,
+        "beats_univariate_loocv": false,
+        "routes": [
+          "POST /v1/case/full?cancer=hgsoc",
+          "POST /v1/tumor_board/dynamic"
+        ]
+      },
+      "evidence": [
+        "docs/proofs/gse63885_multivariate_metrics.json"
+      ]
+    },
+    {
+      "id": "L3-hgsoc-mfap4-platinum",
+      "layer": "L3",
+      "role": "GSE63885 MFAP4 (GPL570 212713_at) calibrated L2 logistic for platinum-resistance lean. Dedicated HGSOC score track retained beside multivariate v2.",
+      "status": "LIVE",
+      "not_wired_reason": "Univariate comparator. case/full now routes multivariate v2; /v1/hgsoc/mfap4/score remains expression-only RUO.",
+      "current_backend": "ovarian_mfap4_arbiter_v1.json sha256=1524d1638076a6b382104b823e22080294a0b4ace216e03b8420b5ce0fa7a605",
+      "hai_def_gate_state": null,
+      "wired_files": [
+        "src/oncology_arbiter/arbiter/models/ovarian_mfap4_arbiter_v1.json",
+        "src/oncology_arbiter/arbiter/stage_mfap4_wiring.py",
+        "src/oncology_arbiter/api/routers/hgsoc.py",
+        "docs/proofs/gse63885_mfap4_metrics.json",
+        "scripts/fit_ovarian_mfap4_arbiter_v1.py",
+        "tests/unit/test_hgsoc_mfap4_wire.py"
+      ],
+      "meter": {
+        "geo": "GSE63885",
+        "probe": "212713_at",
+        "gene": "MFAP4",
+        "n_training": 75,
+        "n_resistant": 34,
+        "n_sensitive": 41,
+        "auroc": 0.6836441893830704,
+        "production_auroc": 0.684,
+        "retracted_n101_auroc_forbidden": 0.7625,
+        "routes": [
+          "GET /v1/hgsoc/mfap4/health",
+          "GET /v1/hgsoc/mfap4/metrics",
+          "POST /v1/hgsoc/mfap4/score"
+        ]
+      },
+      "evidence": [
+        "docs/proofs/gse63885_mfap4_metrics.json",
+        "crispr-assistant-main/data/external/GSE63885/mfap4_auroc_recompute_proof.json"
+      ]
+    },
+    {
+      "id": "L4c-sl-agent-local",
+      "layer": "L4c",
+      "role": "Vendored Synthetic-Lethality sl_agent (Sprint 4S) for DDR panel, ATR manuscript receipt, and optional live DepMap analyze.",
+      "status": "LIVE_OFFLINE_PIN",
+      "not_wired_reason": "POST /v1/sl/analyze needs DepMap/PRISM/GDSC caches not vendored in this tree. Offline pin, DDR panel, and ATR receipt endpoints are live.",
+      "current_backend": "vendor/synthetic-lethality/sl_agent @ 488da52d8124c9ae1bfece2e9744414c787ff5b8",
+      "hai_def_gate_state": null,
+      "wired_files": [
+        "vendor/synthetic-lethality/SOURCE.json",
+        "src/oncology_arbiter/models/sl_agent_local.py",
+        "src/oncology_arbiter/api/routers/sl.py",
+        "src/oncology_arbiter/api/app.py",
+        "tests/unit/test_sl_agent_local_wire.py"
+      ],
+      "meter": {
+        "silo_sha": "488da52d8124c9ae1bfece2e9744414c787ff5b8",
+        "ceralasertib_ln_ic50_delta": -0.7324529879649893,
+        "ceralasertib_ln_ic50_p": 0.021484496737088882,
+        "n_lof": 14,
+        "n_wt": 914,
+        "routes": [
+          "GET /v1/sl/health",
+          "GET /v1/sl/source",
+          "GET /v1/sl/panel/ddr",
+          "GET /v1/sl/mbd4/atr_receipt",
+          "POST /v1/sl/analyze"
+        ]
+      },
+      "evidence": [
+        "tests/unit/test_sl_agent_local_wire.py",
+        "vendor/synthetic-lethality/00-mbd4-manuscript/mbd4_parp_response/artifacts/canonical_atr_wee1_rerun_20260405/canonical_atr_wee1_rerun.json"
+      ]
     },
     {
       "id": "L5-co-scientist-orchestrator",
@@ -795,6 +899,18 @@
       ]
     },
     {
+      "id": "M-SL-AGENT-ARBITER-WIRE-20261021",
+      "date": "2026-10-21",
+      "commit_planned_sha": "uncommitted on 3fa542e4b07122ef3d2a9171906b4b60dcdbbdc2",
+      "summary": "Vendored github.com/fjkiani/Synthetic-Lethality@488da52 into vendor/synthetic-lethality/sl_agent (85 py files). Mounted GET /v1/sl/health|/source|/panel/ddr|/mbd4/atr_receipt and POST /v1/sl/analyze on oncology_arbiter. Offline pin intact; ATR LN_IC50 primary Δ=-0.7324529879649893 p=0.021484496737088882 n_lof=14 n_wt=914. models_loaded badges sl_agent=LOADED_SL_AGENT. Caspro was not the wire target. Live analyze still needs DepMap caches.",
+      "artifacts": [
+        "vendor/synthetic-lethality/SOURCE.json",
+        "src/oncology_arbiter/models/sl_agent_local.py",
+        "src/oncology_arbiter/api/routers/sl.py",
+        "tests/unit/test_sl_agent_local_wire.py"
+      ]
+    },
+    {
       "id": "M-CBIS-V2-FLOOR-0-74-20261019",
       "date": "2026-10-19",
       "commit_planned_sha": "uncommitted on 416d84c4bfe10ed613667eef2801be06af9fb8b1",
@@ -859,6 +975,9 @@
     "Stubs, placeholders, silent-failure fallbacks, and scaffolded-but-unconnected features are NOT_WIRED with an explicit `not_wired_reason`. They may still ship.",
     "Live-smoke numbers cited in this ledger (e.g. overall_score=7.976839697221294e-06) are bit-verified against the transcript.jsonl record before landing.",
     "2026-10-19: L4a-cbis-pure-vision-v2 is GATE_PASS_FLOOR_0_74. This-turn validator printed PASS on the dirty worktree. Rescore is 0.7475469412477287. Floor is 0.74. That PASS does not clear 0.75 or 0.85.",
-    "2026-10-19: git_sha 416d84c4bfe10ed613667eef2801be06af9fb8b1 covers the CBIS entry only. US-02, US-03, US-04, L2, L4b, and L4c were not re-checked in this edit."
+    "2026-10-19: git_sha 416d84c4bfe10ed613667eef2801be06af9fb8b1 covers the CBIS entry only. US-02, US-03, US-04, L2, L4b, and L4c were not re-checked in this edit.",
+    "2026-10-21: L4c-sl-agent-local is LIVE_OFFLINE_PIN in scientist-monai-moat (oncology_arbiter). Silo sha 488da52. Caspro is not the host. POST /v1/sl/analyze is cache-gated.",
+    "2026-10-22: L3-hgsoc-mfap4-platinum LIVE. GSE63885 probe 212713_at honest n=75 AUROC 0.683644 (production 0.684). Retracted n=101 0.7625 forbidden. case/full hgsoc remains 501.",
+    "2026-10-22b: L3-hgsoc-platinum-multivariate-v2 LIVE. OOF table: uni LOOCV 0.6528 still beats HGB 0.5911 / ElasticNet 0.4541. case/full?cancer=hgsoc → HTTP 200. Artifact sha 82febea7…"
   ]
 }

@@ -511,9 +511,14 @@ def load_arbiter(name: str) -> L2LogisticArbiter:
         from .stage_therapy_wiring import load_stage_therapy_arbiter
 
         model = load_stage_therapy_arbiter()
+    elif name in ("mfap4", "ovarian_mfap4"):
+        from .stage_mfap4_wiring import load_stage_mfap4_arbiter
+
+        model = load_stage_mfap4_arbiter()
     else:
         raise ValueError(
-            f"Unknown arbiter {name!r}; allowed = ['biopsy', 'screening', 'therapy']"
+            f"Unknown arbiter {name!r}; allowed = "
+            "['biopsy', 'screening', 'therapy', 'mfap4']"
         )
     if model.n_training <= 0:
         raise RuntimeError(

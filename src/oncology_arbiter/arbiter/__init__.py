@@ -19,6 +19,12 @@ from .logistic import (
     therapy_arbiter,
 )
 
+
+def mfap4_arbiter() -> L2LogisticArbiter:
+    """Return the HGSOC MFAP4 platinum-resistance arbiter (GSE63885)."""
+    return load_arbiter("mfap4")
+
+
 __all__ = [
     "ArbiterResult",
     "L2LogisticArbiter",
@@ -27,4 +33,5 @@ __all__ = [
     "screening_arbiter",
     "biopsy_arbiter",
     "therapy_arbiter",
+    "mfap4_arbiter",
 ]
