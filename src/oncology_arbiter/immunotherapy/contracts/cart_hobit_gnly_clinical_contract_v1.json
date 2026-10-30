@@ -1,0 +1,348 @@
+{
+  "schema_version": "1.0.0",
+  "contract_version": "cart_hobit_gnly_clinical_contract_v1",
+  "model_identity": {
+    "cohort": "baseline28",
+    "model": "clinical_hobit_gnly",
+    "nominal_feature_count": 6,
+    "organism": "Homo sapiens",
+    "dataset": "GSE290722",
+    "timepoint": "Leukapheresis baseline",
+    "final_model_selection": "Requested two-gene model, frozen regardless of comparative performance"
+  },
+  "required_metadata": {
+    "timepoint": "BL",
+    "feature_definition_id": "gse290722_v7_cyto_weighted_load_log2_allgene_cpm_v1",
+    "spd_unit": "original_GSE290722_SPD_recorded_units"
+  },
+  "feature_order": [
+    "log_baseline_spd",
+    "prior_regimens",
+    "prior_autologous_transplant",
+    "load_ZNF683",
+    "load_GNLY",
+    "cyto_absent"
+  ],
+  "feature_definitions": {
+    "log_baseline_spd": "Natural log1p of initial SPD in the original recorded SPD units; do not rescale units.",
+    "prior_regimens": "Number of prior treatment regimens, using original coding.",
+    "prior_autologous_transplant": "Original binary prior autologous-transplant flag, 0/1.",
+    "load_ZNF683": "f_cyto * log2(1+1e6*sum_cyto_ZNF683_counts/sum_cyto_all_gene_counts), exactly v7 gated pseudobulk measurement.",
+    "load_GNLY": "f_cyto * log2(1+1e6*sum_cyto_GNLY_counts/sum_cyto_all_gene_counts), exactly v7 gated pseudobulk measurement.",
+    "cyto_absent": "1 if the cytotoxic state is truly absent; 0 if observed. Missing measurement is not absence."
+  },
+  "upstream_measurement": {
+    "gate": "CD8 Tem/Highly cytotoxic",
+    "fraction_denominator": "all singlets",
+    "normalization": "Sum counts across gated cells, divide by the gated all-gene count library, multiply by 1e6, then log2(1+CPM); not mean single-cell log expression.",
+    "limitation": "Requires compatible precomputed loads. This contract does not reannotate cells or normalize raw RNA."
+  },
+  "target": {
+    "positive_label": 1,
+    "positive_meaning": "LtR",
+    "negative_label": 0,
+    "negative_meaning": "R/NR",
+    "output": "Ridge probability from post-selection discovery fit; calibration/generalization not externally established"
+  },
+  "preprocessing": {
+    "features": [
+      "log_baseline_spd",
+      "prior_regimens",
+      "prior_autologous_transplant",
+      "load_ZNF683",
+      "load_GNLY",
+      "cyto_absent"
+    ],
+    "median": [
+      8.235213658251977,
+      3.5,
+      0.0,
+      0.08570545905955793,
+      0.1375609712907553,
+      0.0
+    ],
+    "mean": [
+      8.068757588583766,
+      3.6785714285714284,
+      0.2857142857142857,
+      0.4184554584700256,
+      0.5925610902376625,
+      0.07142857142857142
+    ],
+    "scale": [
+      1.1530011089571859,
+      1.5131228688796328,
+      0.45175395145262565,
+      0.6885212048965147,
+      0.8817311898032414,
+      0.25753937681885636
+    ],
+    "constant": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "all_missing_fallback": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "missing_policy": {
+    "median_imputable": [
+      "log_baseline_spd",
+      "prior_regimens",
+      "prior_autologous_transplant"
+    ],
+    "unavailable_molecular": "Reject missing/nonfinite loads and absence flag; never invent biological zero",
+    "missing_key": "Reject",
+    "infinite_value": "Reject"
+  },
+  "coefficients_standardized": [
+    -0.6149205124281105,
+    -1.1621150422476065,
+    0.9381319128023679,
+    0.4093591713328737,
+    0.35306847541228287,
+    -0.4812472417062784
+  ],
+  "intercept_standardized": -0.22167064750141413,
+  "coefficients_raw_unit": [
+    -0.5333217007781249,
+    -0.7680242405615585,
+    2.0766435131021703,
+    0.5945483863411305,
+    0.40042643324329974,
+    -1.8686355758512605
+  ],
+  "intercept_raw_unit": 5.960883010831351,
+  "formula": "expit(intercept_standardized + sum(beta_j * (x_j - mean_j) / scale_j)); use saved medians for permitted missing clinical values",
+  "selected_C": 1.0,
+  "training_patients": [
+    "P1",
+    "P2",
+    "P3",
+    "P4",
+    "P5",
+    "P6",
+    "P7",
+    "P8",
+    "P9",
+    "P10",
+    "P11",
+    "P12",
+    "P14",
+    "P15",
+    "P16",
+    "P17",
+    "P18",
+    "P19",
+    "P20",
+    "P21",
+    "P22",
+    "P23",
+    "P24",
+    "P25",
+    "P26",
+    "P27",
+    "P28",
+    "P29"
+  ],
+  "solver": {
+    "penalty": "l2",
+    "solver": "lbfgs",
+    "tol": 1e-08,
+    "max_iter": 2000,
+    "convergence_retry_max_iter": 100000,
+    "class_weight": null,
+    "C_grid": [
+      0.0001,
+      0.001,
+      0.01,
+      0.1,
+      1.0,
+      10.0
+    ],
+    "final_tuning": "Three stratified folds, seed 20261023+99999, mean held-out log loss, ties toward smaller C"
+  },
+  "final_convergence": {
+    "converged": true,
+    "retried": false,
+    "iterations": 16
+  },
+  "qualification": "Post-selection fixed-panel discovery comparison; gene panel chosen after same-cohort v8 coefficient review. OOF metrics condition on this panel choice; bootstrap intervals condition on fitted scores. No external validation, validated decision threshold, or mechanistic contraction inference.",
+  "evaluation_receipt": {
+    "status": "Discovery-only OOF evaluation; not independent panel-selection validation",
+    "n": 28,
+    "LtR": 13,
+    "R_NR": 15,
+    "outer_fits": 50,
+    "repeats": 10,
+    "OOF_rows": 280,
+    "metric_definition": "Mean of ten repeat-specific pooled OOF AUROCs, not AUROC of averaged probabilities",
+    "metrics": {
+      "cohort": "baseline28",
+      "model": "clinical_hobit_gnly",
+      "n": 28,
+      "LtR": 13,
+      "R_NR": 15,
+      "score_type": "ridge_probability",
+      "auroc": 0.782051282051282,
+      "ci_low": 0.6005416666666666,
+      "ci_high": 0.9246286549707603,
+      "within_fold_mean": 0.8233333333333335,
+      "within_fold_pairweighted": 0.8153846153846154,
+      "valid_folds": 50,
+      "undefined_folds": 0,
+      "bootstrap_valid": 2000,
+      "average_precision": 0.7311936615909249,
+      "brier": 0.19923577735356499,
+      "nominal_k": 6,
+      "source": "new_fixed_panel_ridge",
+      "delta_clinical": 0.10717948717948711,
+      "delta_clinical_low": -0.05460108901515143,
+      "delta_clinical_high": 0.285128205128205,
+      "delta_sixgene": 0.019487179487179485,
+      "delta_sixgene_low": 0.0005347593582889388,
+      "delta_sixgene_high": 0.03877551020408155,
+      "nonconstant_k_min": 5.0,
+      "nonconstant_k_max": 6.0,
+      "full_cohort_descriptive": null
+    },
+    "paired_AUROC_differences": [
+      {
+        "cohort": "baseline28",
+        "model": "clinical_hobit_gnly",
+        "reference": "clinical",
+        "estimate": 0.10717948717948711,
+        "ci_low": -0.05460108901515143,
+        "ci_high": 0.285128205128205,
+        "bootstrap_valid": 2000
+      },
+      {
+        "cohort": "baseline28",
+        "model": "clinical_hobit_gnly",
+        "reference": "six_gene_clinical",
+        "estimate": 0.019487179487179485,
+        "ci_low": 0.0005347593582889388,
+        "ci_high": 0.03877551020408155,
+        "bootstrap_valid": 2000
+      }
+    ],
+    "bootstrap": {
+      "draws": 2000,
+      "seed": 20261800,
+      "unit": "Patient, all ten repeat scores retained together",
+      "interval": "Conditional percentile 95%, no model-selection or training-pipeline uncertainty"
+    },
+    "hashes": {
+      "/mnt/results/cart_hobit_gnly_lock_v9/tables/ridge_oof_predictions.csv.gz": {
+        "bytes": 23175,
+        "sha256": "b1719e915922f385ed1c5b2d7a8cc1a29923034eb8d8708cfc029ccb4c512b19"
+      },
+      "/mnt/results/cart_hobit_gnly_lock_v9/models/baseline28/clinical_hobit_gnly__folds.json": {
+        "bytes": 442160,
+        "sha256": "943c0d4e218a8bb3b4df457f16571dc4a73eb6e355647b1cb9fa367570011ea9"
+      },
+      "/mnt/results/cart_cd8_tem_singlecell_v7/tables/cohort_features.csv": {
+        "bytes": 240252,
+        "sha256": "0d4711bce7866aa5c427ca105ae3c46a9750ec6627fb3b0bbdd1e5e48486b7d1"
+      },
+      "/mnt/results/cart_cd8_tem_singlecell_v7/tables/outer_splits.csv": {
+        "bytes": 13660,
+        "sha256": "a0e9391dee98bc34af65710968e0e6656dcc4b62d19c8f7e135ede767fc41b10"
+      },
+      "/mnt/results/cart_cd8_tem_singlecell_v7/tables/inner_splits.csv": {
+        "bytes": 34007,
+        "sha256": "7586c25e345e36061b485697ba31a148f3b05c8fab0c58ccc2f0a79387c8c9da"
+      },
+      "/mnt/results/cart_hobit_gnly_lock_v9/code/fit9.py": {
+        "bytes": 5621,
+        "sha256": "bb7567d23c25cd71b6333083bf66eb4e5a337bc33cf919caa2c42d87b26e85ad"
+      },
+      "/mnt/results/cart_hobit_gnly_lock_v9/code/common9.py": {
+        "bytes": 7425,
+        "sha256": "5c4d2c8b5545e26a04ab34b85d0573ece61928193da5005030e7d50f3176c75c"
+      },
+      "/mnt/results/cart_cd8_tem_singlecell_v7/code/models7.py": {
+        "bytes": 10615,
+        "sha256": "acc61e55ae0bf7ded5d49e57402c0ccdf4e7463d5cbb3aa5ff7edf21d680f33a"
+      },
+      "/mnt/results/cart_cd8_tem_singlecell_v7/code/common7.py": {
+        "bytes": 5977,
+        "sha256": "f9412a4acdf048404857baae3ed7b223c684e516aa6ee49b159942d31854681d"
+      },
+      "/mnt/results/cart_two_gate_lock_v8/code/common8.py": {
+        "bytes": 5730,
+        "sha256": "c00e810b475cfc39ac36e283e777fc601d679dba7fbd1476308852db9c3667c9"
+      },
+      "/mnt/results/cart_cd8_tem_singlecell_v7/code/extract7.py": {
+        "bytes": 9379,
+        "sha256": "4f3b015485674a4dc5df053807c39e1d45dc59fb507d10e62ac222f6de17c122"
+      },
+      "/mnt/results/cart_cd8_tem_singlecell_v7/code/features7.py": {
+        "bytes": 7282,
+        "sha256": "898612211f89a639afbdbfecdea3daa6622ca96750470867beeb68a567cda212"
+      },
+      "/mnt/results/cart_hobit_gnly_lock_v9/code/scores9.py": {
+        "bytes": 11154,
+        "sha256": "88d6b2a6a163366d823dc2f11925adbfb6700cfe32f6debf03660321dd9135f2"
+      },
+      "/mnt/results/cart_hobit_gnly_lock_v9/code/contract9.py": {
+        "bytes": 6363,
+        "sha256": "6a00669f694c8e99e12d359d16e4bcae9fafdb5e3cce3c3cdd3c9f47ab0b5021"
+      },
+      "/mnt/results/cart_hobit_gnly_lock_v9/code/predict_contract9.py": {
+        "bytes": 3382,
+        "sha256": "b062b6a293389e98abe7400171e44af936171dd6b0036215a062383426e4466e"
+      }
+    },
+    "final_fit_is_not_OOF_fit": true,
+    "external_validation_performed": false,
+    "validated_threshold": null
+  },
+  "inference_examples": [
+    {
+      "patient_id": "P1",
+      "features": {
+        "log_baseline_spd": 7.954372272531867,
+        "prior_regimens": 10,
+        "prior_autologous_transplant": 1,
+        "load_ZNF683": 0.04503248877844987,
+        "load_GNLY": 0.0953728054946088,
+        "cyto_absent": 0
+      },
+      "final_model_probability": 0.021457469350329782
+    },
+    {
+      "patient_id": "P3",
+      "features": {
+        "log_baseline_spd": 7.563200592358071,
+        "prior_regimens": 4,
+        "prior_autologous_transplant": 0,
+        "load_ZNF683": 0.0,
+        "load_GNLY": 0.0,
+        "cyto_absent": 1
+      },
+      "final_model_probability": 0.04682110546649535
+    },
+    {
+      "patient_id": "P26",
+      "features": {
+        "log_baseline_spd": 6.930494765951626,
+        "prior_regimens": 3,
+        "prior_autologous_transplant": 0,
+        "load_ZNF683": 0.5272585203311212,
+        "load_GNLY": 0.7741694741833988,
+        "cyto_absent": 0
+      },
+      "final_model_probability": 0.6420115698079313
+    }
+  ]
+}

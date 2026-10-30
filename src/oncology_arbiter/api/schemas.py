@@ -913,6 +913,13 @@ class FullCaseRequest(BaseModel):
             "brca1_mut, hist_serous, hist_undiff). Missing keys imputed."
         ),
     )
+    ovarian_two_door: dict[str, Any] | None = Field(
+        default=None,
+        description=(
+            "Optional post-NACT or pre-treatment payload for the two-door v3 scorer. "
+            "Attached on /v1/case/full?cancer=hgsoc without replacing ovarian_arbiter."
+        ),
+    )
 
 
 class FullCaseResponse(ApiEnvelope):
@@ -920,6 +927,7 @@ class FullCaseResponse(ApiEnvelope):
     cancer: Literal["breast", "nsclc", "hgsoc"] | None = None
     stage_receipts: list[StageReceipt] = Field(default_factory=list)
     ovarian_arbiter: dict[str, Any] | None = None
+    ovarian_two_door: dict[str, Any] | None = None
     case_manifest: dict[str, Any] | None = None
     report_parse: ReportParseBlock | None = None
     phikon_embedding: dict[str, Any] | None = None

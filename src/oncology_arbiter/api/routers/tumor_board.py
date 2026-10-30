@@ -32,6 +32,7 @@ from oncology_arbiter.arbiter.manski import (
     ManskiGateError,
 )
 from oncology_arbiter.auth import APIKey, require_api_key, require_scope
+from oncology_arbiter.ovarian.two_door_arbiter import OvarianInputError, score_ovarian_case
 
 from .biopsy import biopsy_analyze
 from .nlp import _run_medgemma_co_scientist
@@ -385,6 +386,15 @@ def case_full(
     request_id = new_request_id()
 
     if cancer_norm == "hgsoc":
+        two_door = None
+        if req.ovarian_two_door is not None:
+            try:
+                two_door = score_ovarian_case(req.ovarian_two_door)
+            except OvarianInputError as exc:
+                raise HTTPException(
+                    status_code=422,
+                    detail={"error": "missing_required_inputs", "missing": exc.missing},
+                ) from exc
         biopsy_input = req.biopsy_input
         dynamic_request = DynamicTumorBoardRequest(
             cancer="hgsoc",
@@ -432,6 +442,7 @@ def case_full(
             cancer=cancer_norm,
             stage_receipts=dynamic.stage_receipts,
             ovarian_arbiter=dynamic.ovarian_arbiter,
+            ovarian_two_door=two_door,
             case_manifest=dynamic.case_manifest,
             report_parse=dynamic.report_parse,
             phikon_embedding=dynamic.phikon_embedding,

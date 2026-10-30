@@ -17,7 +17,7 @@ assert CBIS_MEDSIGLIP_SHA256 == (
 
 from . import deps
 from .http_stack import _lifespan, install_http_stack
-from .routers import breast, hgsoc, lung, nlp, system, tumor_board
+from .routers import breast, hgsoc, immunotherapy, lung, nlp, ovarian, system, tumor_board
 from .runtime import (
     _ARTIFACT_ROOTS,
     _elo_reason_for_modifier,
@@ -85,6 +85,8 @@ def create_app() -> FastAPI:
     app.include_router(lung.router)
     app.include_router(nlp.router)
     app.include_router(hgsoc.router)
+    app.include_router(ovarian.router)
+    app.include_router(immunotherapy.router)
     app.include_router(tumor_board.router)
     return app
 
