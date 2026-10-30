@@ -1,0 +1,345 @@
+{
+  "receipt": "gdsc2_ddr_bh3_tertile_shift",
+  "ruo": "RESEARCH USE ONLY. Exploratory pharmacology, not a treatment rule.",
+  "generated_utc": "2026-10-30T03:45:07.627097+00:00",
+  "git_head_at_generation_expected": "409755be3882275b40743e0a44dc04f4253527fd",
+  "archive": {
+    "path": "/Users/fahadkiani/Downloads/MASTER_OVARIAN_HIBERNATION_V1_TO_V6.tar.gz",
+    "sha256": "f980a2ff7f1c8a680cc0e3dafbbce0ec07a16711a5483bd620513fa7bb90a011"
+  },
+  "source_members": {
+    "tertile_profiles": {
+      "member": "ovarian_hibernation_v3_clinical_and_mechanistic_lock/ddr_bh3_tertile_profiles.csv",
+      "sha256": "5a36cd3ad622ef6c370f5d7e44b0ee21ca1426bc461f3f8f168840db8824d79d",
+      "bytes": 864
+    },
+    "class_sensitivity": {
+      "member": "ovarian_hibernation_v3_clinical_and_mechanistic_lock/ddr_bh3_class_sensitivity_by_tertile.csv",
+      "sha256": "1ddd1d0cdb6caceed8980ac882c8ba73b8dd66362556f5e6f8f02860e0642787",
+      "bytes": 507
+    },
+    "v2_pooled": {
+      "member": "ovarian_hibernation_v2_followup/tertile_resistance_contrast.csv",
+      "sha256": "b847a012ff21cdf3c044dcd9ed5f16fc50dbdd4d3add32addf071e622e03ca04",
+      "bytes": 696
+    },
+    "gdsc2_correlations": {
+      "member": "ovarian_hibernation_screen/gdsc2_hibernation_correlations.csv",
+      "sha256": "770efd3e4580157d8ef0bbc9e42728fc0924cde09d807c917e34ee6c55816eb8",
+      "bytes": 239883
+    }
+  },
+  "per_drug_High_minus_Low": [
+    {
+      "drug": "AZD6738 (Ceralasertib, ATR)",
+      "gdsc2_drug_id": "1917",
+      "class": "DDR_ATR",
+      "requested_in_directive": true,
+      "n_models": 33,
+      "n_Low": 11,
+      "n_Middle": 13,
+      "n_High": 9,
+      "median_LN_IC50_Low": 1.685747,
+      "median_LN_IC50_Middle": 1.902027,
+      "median_LN_IC50_High": 3.395245,
+      "delta_LN_IC50_High_minus_Low": 1.709498,
+      "fold_change_exp_delta_LN_IC50": 5.526186635505881,
+      "orientation": "High hibernation more resistant (higher LN_IC50)",
+      "gdsc2_spearman_unadjusted": {
+        "rho_LN_IC50_vs_hibernation": 0.3432486631016043,
+        "rho_vulnerability": -0.3432486631016043,
+        "n": 33,
+        "p": 0.05050510467489048,
+        "q_BH": 0.09511504884361952,
+        "BH_family": "GDSC2:Spearman:unadjusted",
+        "BH_family_size": 279
+      }
+    },
+    {
+      "drug": "MK-1775 (Adavosertib, WEE1)",
+      "gdsc2_drug_id": "1179",
+      "class": "DDR_ATR",
+      "requested_in_directive": true,
+      "n_models": 33,
+      "n_Low": 11,
+      "n_Middle": 13,
+      "n_High": 9,
+      "median_LN_IC50_Low": 0.310279,
+      "median_LN_IC50_Middle": 0.422011,
+      "median_LN_IC50_High": 1.427036,
+      "delta_LN_IC50_High_minus_Low": 1.116757,
+      "fold_change_exp_delta_LN_IC50": 3.0549309803146993,
+      "orientation": "High hibernation more resistant (higher LN_IC50)",
+      "gdsc2_spearman_unadjusted": {
+        "rho_LN_IC50_vs_hibernation": 0.2784090909090909,
+        "rho_vulnerability": -0.2784090909090909,
+        "n": 33,
+        "p": 0.11667795764270031,
+        "q_BH": 0.1686691719290849,
+        "BH_family": "GDSC2:Spearman:unadjusted",
+        "BH_family_size": 279
+      }
+    },
+    {
+      "drug": "VE-822 (Berzosertib, ATR)",
+      "gdsc2_drug_id": "1613",
+      "class": "DDR_ATR",
+      "requested_in_directive": true,
+      "n_models": 28,
+      "n_Low": 9,
+      "n_Middle": 13,
+      "n_High": 6,
+      "median_LN_IC50_Low": 2.647139,
+      "median_LN_IC50_Middle": 1.855488,
+      "median_LN_IC50_High": 3.3963375000000005,
+      "delta_LN_IC50_High_minus_Low": 0.7491985000000003,
+      "fold_change_exp_delta_LN_IC50": 2.115303920900515,
+      "orientation": "High hibernation more resistant (higher LN_IC50)",
+      "gdsc2_spearman_unadjusted": {
+        "rho_LN_IC50_vs_hibernation": 0.2654625068418172,
+        "rho_vulnerability": -0.2654625068418172,
+        "n": 28,
+        "p": 0.17216009642461633,
+        "q_BH": 0.22872698524984741,
+        "BH_family": "GDSC2:Spearman:unadjusted",
+        "BH_family_size": 279
+      }
+    },
+    {
+      "drug": "Olaparib (PARP)",
+      "gdsc2_drug_id": "1017",
+      "class": "DDR_ATR",
+      "requested_in_directive": true,
+      "n_models": 33,
+      "n_Low": 11,
+      "n_Middle": 13,
+      "n_High": 9,
+      "median_LN_IC50_Low": 4.0047,
+      "median_LN_IC50_Middle": 5.218935,
+      "median_LN_IC50_High": 5.110148,
+      "delta_LN_IC50_High_minus_Low": 1.105448,
+      "fold_change_exp_delta_LN_IC50": 3.0205773843990587,
+      "orientation": "High hibernation more resistant (higher LN_IC50)",
+      "gdsc2_spearman_unadjusted": {
+        "rho_LN_IC50_vs_hibernation": 0.39137700534759357,
+        "rho_vulnerability": -0.39137700534759357,
+        "n": 33,
+        "p": 0.02430362797253109,
+        "q_BH": 0.05909220169384595,
+        "BH_family": "GDSC2:Spearman:unadjusted",
+        "BH_family_size": 279
+      }
+    },
+    {
+      "drug": "Cisplatin (DNA crosslinker)",
+      "gdsc2_drug_id": "1005",
+      "class": "DDR_ATR",
+      "requested_in_directive": true,
+      "n_models": 25,
+      "n_Low": 9,
+      "n_Middle": 8,
+      "n_High": 8,
+      "median_LN_IC50_Low": 1.91346,
+      "median_LN_IC50_Middle": 4.00572,
+      "median_LN_IC50_High": 3.9068015,
+      "delta_LN_IC50_High_minus_Low": 1.9933414999999999,
+      "fold_change_exp_delta_LN_IC50": 7.3400195051479615,
+      "orientation": "High hibernation more resistant (higher LN_IC50)",
+      "gdsc2_spearman_unadjusted": {
+        "rho_LN_IC50_vs_hibernation": 0.5846153846153846,
+        "rho_vulnerability": -0.5846153846153846,
+        "n": 25,
+        "p": 0.0021471592416842586,
+        "q_BH": 0.019324433175158327,
+        "BH_family": "GDSC2:Spearman:unadjusted",
+        "BH_family_size": 279
+      }
+    },
+    {
+      "drug": "Gemcitabine (antimetabolite)",
+      "gdsc2_drug_id": "1190",
+      "class": "DDR_ATR",
+      "requested_in_directive": true,
+      "n_models": 33,
+      "n_Low": 11,
+      "n_Middle": 13,
+      "n_High": 9,
+      "median_LN_IC50_Low": -2.390266,
+      "median_LN_IC50_Middle": 0.289674,
+      "median_LN_IC50_High": 0.430623,
+      "delta_LN_IC50_High_minus_Low": 2.820889,
+      "fold_change_exp_delta_LN_IC50": 16.791771923901102,
+      "orientation": "High hibernation more resistant (higher LN_IC50)",
+      "gdsc2_spearman_unadjusted": {
+        "rho_LN_IC50_vs_hibernation": 0.3713235294117647,
+        "rho_vulnerability": -0.3713235294117647,
+        "n": 33,
+        "p": 0.0333724470847554,
+        "q_BH": 0.07274150575505278,
+        "BH_family": "GDSC2:Spearman:unadjusted",
+        "BH_family_size": 279
+      }
+    },
+    {
+      "drug": "ABT737",
+      "gdsc2_drug_id": "1910",
+      "class": "BH3_BCLxL",
+      "requested_in_directive": true,
+      "n_models": 33,
+      "n_Low": 11,
+      "n_Middle": 13,
+      "n_High": 9,
+      "median_LN_IC50_Low": 3.514654,
+      "median_LN_IC50_Middle": 3.072224,
+      "median_LN_IC50_High": 2.227863,
+      "delta_LN_IC50_High_minus_Low": -1.286791,
+      "fold_change_exp_delta_LN_IC50": 0.27615554587532654,
+      "orientation": "High hibernation more sensitive (lower LN_IC50)",
+      "gdsc2_spearman_unadjusted": {
+        "rho_LN_IC50_vs_hibernation": -0.3760026737967914,
+        "rho_vulnerability": 0.3760026737967914,
+        "n": 33,
+        "p": 0.031042693020481942,
+        "q_BH": 0.06873739168821001,
+        "BH_family": "GDSC2:Spearman:unadjusted",
+        "BH_family_size": 279
+      }
+    },
+    {
+      "drug": "Navitoclax",
+      "gdsc2_drug_id": "1011",
+      "class": "BH3_BCLxL",
+      "requested_in_directive": true,
+      "n_models": 33,
+      "n_Low": 11,
+      "n_Middle": 13,
+      "n_High": 9,
+      "median_LN_IC50_Low": 3.052055,
+      "median_LN_IC50_Middle": 2.649102,
+      "median_LN_IC50_High": 1.848708,
+      "delta_LN_IC50_High_minus_Low": -1.2033470000000002,
+      "fold_change_exp_delta_LN_IC50": 0.30018780005469503,
+      "orientation": "High hibernation more sensitive (lower LN_IC50)",
+      "gdsc2_spearman_unadjusted": {
+        "rho_LN_IC50_vs_hibernation": -0.3252005347593583,
+        "rho_vulnerability": 0.3252005347593583,
+        "n": 33,
+        "p": 0.0647968026096661,
+        "q_BH": 0.11492802723661269,
+        "BH_family": "GDSC2:Spearman:unadjusted",
+        "BH_family_size": 279
+      }
+    },
+    {
+      "drug": "WEHI-539",
+      "gdsc2_drug_id": "1997",
+      "class": "BH3_BCLxL",
+      "requested_in_directive": false,
+      "n_models": 33,
+      "n_Low": 11,
+      "n_Middle": 13,
+      "n_High": 9,
+      "median_LN_IC50_Low": 4.579496,
+      "median_LN_IC50_Middle": 3.332524,
+      "median_LN_IC50_High": 4.177072,
+      "delta_LN_IC50_High_minus_Low": -0.4024239999999999,
+      "fold_change_exp_delta_LN_IC50": 0.6686971579790174,
+      "orientation": "High hibernation more sensitive (lower LN_IC50)",
+      "gdsc2_spearman_unadjusted": {
+        "rho_LN_IC50_vs_hibernation": -0.21022727272727273,
+        "rho_vulnerability": 0.21022727272727273,
+        "n": 33,
+        "p": 0.2402838477334271,
+        "q_BH": 0.30197834917849625,
+        "BH_family": "GDSC2:Spearman:unadjusted",
+        "BH_family_size": 279
+      }
+    }
+  ],
+  "class_level_mannwhitney": [
+    {
+      "class": "DDR_ATR",
+      "tertile": "Low",
+      "n": 11,
+      "mean_sensitivity_z": 0.37062601403615064,
+      "median_sensitivity_z": 0.5551018202401888,
+      "mannwhitney_p_High_vs_Low": null
+    },
+    {
+      "class": "DDR_ATR",
+      "tertile": "Middle",
+      "n": 13,
+      "mean_sensitivity_z": 0.11270037006971392,
+      "median_sensitivity_z": -0.024350122333033488,
+      "mannwhitney_p_High_vs_Low": null
+    },
+    {
+      "class": "DDR_ATR",
+      "tertile": "High",
+      "n": 9,
+      "mean_sensitivity_z": -0.6284158359332073,
+      "median_sensitivity_z": -0.42288195486211233,
+      "mannwhitney_p_High_vs_Low": null
+    },
+    {
+      "class": "DDR_ATR",
+      "tertile": "MWU_High_vs_Low",
+      "n": 20,
+      "mean_sensitivity_z": null,
+      "median_sensitivity_z": null,
+      "mannwhitney_p_High_vs_Low": 0.015050609634599926
+    },
+    {
+      "class": "BH3_BCLxL",
+      "tertile": "Low",
+      "n": 11,
+      "mean_sensitivity_z": -0.2533675981298567,
+      "median_sensitivity_z": -0.5138485166936627,
+      "mannwhitney_p_High_vs_Low": null
+    },
+    {
+      "class": "BH3_BCLxL",
+      "tertile": "Middle",
+      "n": 13,
+      "mean_sensitivity_z": 0.02311937307047126,
+      "median_sensitivity_z": 0.24070591251311346,
+      "mannwhitney_p_High_vs_Low": null
+    },
+    {
+      "class": "BH3_BCLxL",
+      "tertile": "High",
+      "n": 9,
+      "mean_sensitivity_z": 0.2762768588346995,
+      "median_sensitivity_z": 0.3712890259898376,
+      "mannwhitney_p_High_vs_Low": null
+    },
+    {
+      "class": "BH3_BCLxL",
+      "tertile": "MWU_High_vs_Low",
+      "n": 20,
+      "mean_sensitivity_z": null,
+      "median_sensitivity_z": null,
+      "mannwhitney_p_High_vs_Low": 0.06824748837800128
+    }
+  ],
+  "pooled_90_positive_rho_drugs": {
+    "group": "90_positive_rho_drugs_pooled",
+    "n_drugs": 90,
+    "n_pairs_Low": 880,
+    "n_pairs_Middle": 920,
+    "n_pairs_High": 647,
+    "median_LN_IC50_Low": 2.6780165,
+    "median_LN_IC50_High": 4.552591,
+    "median_IC50_uM_Low": 14.55619243523228,
+    "median_IC50_uM_High": 94.87791880636127,
+    "delta_LN_IC50_High_minus_Low": 1.8745744999999996,
+    "fold_change_exp_delta_LN_IC50": 6.51804510200866,
+    "fold_from_median_uM": 6.51804510200866,
+    "honesty": "This ~6.5-fold shift is the pooled 90 GDSC2 drugs with positive Spearman rho(LN_IC50, hibernation), NOT a 90-drug DDR/ATR panel."
+  },
+  "closed_claim": {
+    "former_open_row": "6.5-fold IC50 resistance across 90 DDR/ATR drugs",
+    "status": "CLOSED_WITH_CORRECTION",
+    "correction": "Archive v2 tertile_resistance_contrast.csv measures 6.5180-fold (exp(1.8745744999999996)) on 90 positive-rho GDSC2 drugs pooled. DDR/ATR per-drug High-minus-Low \u0394LN(IC50) is in v3 ddr_bh3_tertile_profiles.csv. BH3 agents shift the opposite direction."
+  }
+}

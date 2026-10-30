@@ -1,0 +1,260 @@
+{
+  "receipt": "ovarian_two_door_fastapi_11patient",
+  "ruo": "RESEARCH USE ONLY. Route scoring is not a treatment order.",
+  "generated_utc": "2026-10-30T03:45:08.404270+00:00",
+  "git_head_expected": "409755be3882275b40743e0a44dc04f4253527fd",
+  "endpoint": "POST /v1/ovarian/arbiter/score",
+  "auth_mode": "off",
+  "all_11_match_expected_classes": true,
+  "patients": [
+    {
+      "patient_id": "EOC1005",
+      "http_status": 200,
+      "four_state_class": "DDRonly",
+      "decision": "DOOR_1_DDR_PROLIFERATIVE",
+      "expected_four_state_class": "DDRonly",
+      "expected_decision": "DOOR_1_DDR_PROLIFERATIVE",
+      "match": true,
+      "gate0_primary_refractory": false,
+      "recommend": [
+        "Ceralasertib",
+        "Adavosertib"
+      ],
+      "contraindicated": []
+    },
+    {
+      "patient_id": "EOC136",
+      "http_status": 200,
+      "four_state_class": "Neither",
+      "decision": "CHEMO_CLEARED_REMISSION",
+      "expected_four_state_class": "Neither",
+      "expected_decision": "CHEMO_CLEARED_REMISSION",
+      "match": true,
+      "gate0_primary_refractory": false,
+      "recommend": [],
+      "contraindicated": []
+    },
+    {
+      "patient_id": "EOC153",
+      "http_status": 200,
+      "four_state_class": "Hcleanonly",
+      "decision": "DOOR_2_HIBERNATION_SENOLYTIC",
+      "expected_four_state_class": "Hcleanonly",
+      "expected_decision": "DOOR_2_HIBERNATION_SENOLYTIC",
+      "match": true,
+      "gate0_primary_refractory": false,
+      "recommend": [
+        "Navitoclax",
+        "ABT-737"
+      ],
+      "contraindicated": [
+        "Venetoclax"
+      ]
+    },
+    {
+      "patient_id": "EOC227",
+      "http_status": 200,
+      "four_state_class": "Both",
+      "decision": "DOOR_2_HIBERNATION_SENOLYTIC",
+      "expected_four_state_class": "Both",
+      "expected_decision": "DOOR_2_HIBERNATION_SENOLYTIC",
+      "match": true,
+      "gate0_primary_refractory": false,
+      "recommend": [
+        "Navitoclax",
+        "ABT-737"
+      ],
+      "contraindicated": [
+        "Venetoclax"
+      ]
+    },
+    {
+      "patient_id": "EOC3",
+      "http_status": 200,
+      "four_state_class": "PRIMARY_REFRACTORY_ESCAPE",
+      "decision": "PRIMARY_REFRACTORY_ESCAPE",
+      "expected_four_state_class": "PRIMARY_REFRACTORY_ESCAPE",
+      "expected_decision": "PRIMARY_REFRACTORY_ESCAPE",
+      "match": true,
+      "gate0_primary_refractory": true,
+      "recommend": [],
+      "contraindicated": []
+    },
+    {
+      "patient_id": "EOC349",
+      "http_status": 200,
+      "four_state_class": "DDRonly",
+      "decision": "DOOR_1_DDR_PROLIFERATIVE",
+      "expected_four_state_class": "DDRonly",
+      "expected_decision": "DOOR_1_DDR_PROLIFERATIVE",
+      "match": true,
+      "gate0_primary_refractory": false,
+      "recommend": [
+        "Ceralasertib",
+        "Adavosertib"
+      ],
+      "contraindicated": []
+    },
+    {
+      "patient_id": "EOC372",
+      "http_status": 200,
+      "four_state_class": "Neither",
+      "decision": "CHEMO_CLEARED_REMISSION",
+      "expected_four_state_class": "Neither",
+      "expected_decision": "CHEMO_CLEARED_REMISSION",
+      "match": true,
+      "gate0_primary_refractory": false,
+      "recommend": [],
+      "contraindicated": []
+    },
+    {
+      "patient_id": "EOC443",
+      "http_status": 200,
+      "four_state_class": "Hcleanonly",
+      "decision": "DOOR_2_HIBERNATION_SENOLYTIC",
+      "expected_four_state_class": "Hcleanonly",
+      "expected_decision": "DOOR_2_HIBERNATION_SENOLYTIC",
+      "match": true,
+      "gate0_primary_refractory": false,
+      "recommend": [
+        "Navitoclax",
+        "ABT-737"
+      ],
+      "contraindicated": [
+        "Venetoclax"
+      ]
+    },
+    {
+      "patient_id": "EOC540",
+      "http_status": 200,
+      "four_state_class": "Hcleanonly",
+      "decision": "DOOR_2_HIBERNATION_SENOLYTIC",
+      "expected_four_state_class": "Hcleanonly",
+      "expected_decision": "DOOR_2_HIBERNATION_SENOLYTIC",
+      "match": true,
+      "gate0_primary_refractory": false,
+      "recommend": [
+        "Navitoclax",
+        "ABT-737"
+      ],
+      "contraindicated": [
+        "Venetoclax"
+      ]
+    },
+    {
+      "patient_id": "EOC733",
+      "http_status": 200,
+      "four_state_class": "DDRonly",
+      "decision": "DOOR_1_DDR_PROLIFERATIVE",
+      "expected_four_state_class": "DDRonly",
+      "expected_decision": "DOOR_1_DDR_PROLIFERATIVE",
+      "match": true,
+      "gate0_primary_refractory": false,
+      "recommend": [
+        "Ceralasertib",
+        "Adavosertib"
+      ],
+      "contraindicated": []
+    },
+    {
+      "patient_id": "EOC87",
+      "http_status": 200,
+      "four_state_class": "DDRonly",
+      "decision": "DOOR_1_DDR_PROLIFERATIVE",
+      "expected_four_state_class": "DDRonly",
+      "expected_decision": "DOOR_1_DDR_PROLIFERATIVE",
+      "match": true,
+      "gate0_primary_refractory": false,
+      "recommend": [
+        "Ceralasertib",
+        "Adavosertib"
+      ],
+      "contraindicated": []
+    }
+  ],
+  "empty_payload": {
+    "http_status": 422,
+    "fail_closed_422": true,
+    "detail": {
+      "detail": {
+        "error": "missing_required_inputs",
+        "missing": [
+          "post_H_clean"
+        ]
+      }
+    }
+  },
+  "immunotherapy_v12_already_wired_at_409755b": true,
+  "immunotherapy_endpoint": "POST /v1/immunotherapy/arbiter/score",
+  "immunotherapy_live": {
+    "bag": {
+      "http_status": 200,
+      "body": {
+        "specimen": "cart_infusion_bag",
+        "Bag_Index_1": 0.0,
+        "Bag_Index_3": 0.48542682717024166,
+        "flag": null,
+        "model_state": "loaded"
+      }
+    },
+    "blood": {
+      "http_status": 200,
+      "intercept_standardized": -0.22167064750141413,
+      "probability": 0.2832518017120924
+    },
+    "ici_bulk": {
+      "http_status": 200,
+      "E_effector": 0.0,
+      "S_stem_eff": 0.0,
+      "S_triad": 0.0
+    },
+    "bag_missing_422": true
+  },
+  "immunotherapy_published_contract_rows": {
+    "Bag_Index_3_Deng_literal_CD8_primary_CR": {
+      "path": "v12.tables.master_bag_indices[18]",
+      "gate": "literal_CD8",
+      "endpoint": "primary_CR",
+      "n": 23,
+      "auroc": 0.880952380952381,
+      "ci": [
+        0.704431818181818,
+        1.0
+      ],
+      "p": 0.002769577361818,
+      "q": 0.008307831178192,
+      "q_global_new_primary": 0.019071759187235,
+      "prose_rounding": "directive 0.881 [q=0.00831] matches this row",
+      "validation": "outcome-informed same-cohort exploratory"
+    },
+    "GSE290722_clinical_hobit_gnly": {
+      "path": "parent_v2.parent_v1.original_cart_contract.evaluation_receipt.metrics",
+      "n": 28,
+      "pooled_OOF_auroc": 0.782051282051282,
+      "within_fold_mean": 0.8233333333333335,
+      "brier": 0.19923577735356499,
+      "scope": "post-selection internal discovery; not external panel validation"
+    },
+    "Gide_E_effector_ZNF683_GNLY": {
+      "response_auroc_path": "parent_v2.parent_v1.external_response_evaluations[9]",
+      "cohort": "Gide_PRJEB23709 pretreatment",
+      "score": "ZNF683_GNLY_effector",
+      "n": 41,
+      "auroc": 0.8038277512,
+      "q": 0.0056528005,
+      "os_hr_path": "parent_v2.v11.tables.master_gide_survival[0]",
+      "os_hr": 0.369656981096761,
+      "os_wald_p": 0.002301604062677,
+      "os_wald_q_bh": 0.006674234534071,
+      "prose_rounding": "directive E_effector 0.804 [q=0.00565], OS HR 0.370 [q=0.00667]"
+    }
+  },
+  "tcga_01A_barcode_filter": {
+    "status": "ABSENT_IN_ARCHIVE_EXTRACT",
+    "searched": [
+      "ovarian_hibernation_v6_timevarying_and_specificity_lock/coverage/TCGA_OV_calibration.json",
+      "ovarian_hibernation_two_door_contract_v3.json (0 hits for -01A)"
+    ],
+    "honesty": "Do not fabricate TCGA -01A timestamps. Closed as unverified provenance, not proven."
+  }
+}

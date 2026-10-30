@@ -1,0 +1,785 @@
+{
+  "receipt": "gse165897_two_door_pfi_separation",
+  "ruo": "RESEARCH USE ONLY. Descriptive PFI separation on n=11 uncensored times; not a treatment rule.",
+  "generated_utc": "2026-10-30T03:45:07.630799+00:00",
+  "source_module": "src/oncology_arbiter/ovarian/ovarian_two_door_standalone_v3.py",
+  "source_sha256": "8e98492229f25fb83d4b195f73a68908eb7b39932d88796f58bf2f5d75f6f87e",
+  "gate0_eoc3": {
+    "patient_id": "EOC3",
+    "geometric_four_state_class": "Hcleanonly",
+    "pfi_days": 14,
+    "post_BCL2A1_z": 3.5932456955972425,
+    "delta_MCL1_z": 3.4138693942564275,
+    "post_EMT_z": 1.3756431431327438,
+    "gate0_rule": "post_BCL2A1_z>2.5 AND (delta_MCL1_z>2.5 OR post_EMT_z>1.0)",
+    "gate0_fires": true
+  },
+  "primary_all11_geometric": {
+    "n": 11,
+    "note": "EOC3 remains geometric Hcleanonly in the frozen table; product Gate 0 overrides class.",
+    "groups": {
+      "DDRonly_Door1": {
+        "n": 4,
+        "values": [
+          30.0,
+          36.0,
+          65.0,
+          83.0
+        ],
+        "min": 30.0,
+        "max": 83.0,
+        "median": 50.5,
+        "q1": 34.5,
+        "q3": 69.5,
+        "iqr": 35.0,
+        "mean": 53.5
+      },
+      "Hcleanonly_including_EOC3": {
+        "n": 4,
+        "values": [
+          393.0,
+          177.0,
+          126.0,
+          14.0
+        ],
+        "min": 14.0,
+        "max": 393.0,
+        "median": 151.5,
+        "q1": 98.0,
+        "q3": 231.0,
+        "iqr": 133.0,
+        "mean": 177.5
+      },
+      "Both": {
+        "n": 1,
+        "values": [
+          230.0
+        ],
+        "min": 230.0,
+        "max": 230.0,
+        "median": 230.0,
+        "q1": 230.0,
+        "q3": 230.0,
+        "iqr": 0.0,
+        "mean": 230.0
+      },
+      "Neither": {
+        "n": 2,
+        "values": [
+          520.0,
+          460.0
+        ],
+        "min": 460.0,
+        "max": 520.0,
+        "median": 490.0,
+        "q1": 475.0,
+        "q3": 505.0,
+        "iqr": 30.0,
+        "mean": 490.0
+      },
+      "Door2ish_Hcleanonly_Both_EOC3": {
+        "n": 5,
+        "values": [
+          393.0,
+          177.0,
+          126.0,
+          230.0,
+          14.0
+        ],
+        "min": 14.0,
+        "max": 393.0,
+        "median": 177.0,
+        "q1": 126.0,
+        "q3": 230.0,
+        "iqr": 104.0,
+        "mean": 188.0
+      }
+    },
+    "contrasts": [
+      {
+        "contrast": "Door1 vs Door2ish_incl_EOC3",
+        "group_a": {
+          "label": "DDRonly",
+          "patient_ids": [
+            "EOC87",
+            "EOC349",
+            "EOC1005",
+            "EOC733"
+          ],
+          "summary": {
+            "n": 4,
+            "values": [
+              30.0,
+              36.0,
+              65.0,
+              83.0
+            ],
+            "min": 30.0,
+            "max": 83.0,
+            "median": 50.5,
+            "q1": 34.5,
+            "q3": 69.5,
+            "iqr": 35.0,
+            "mean": 53.5
+          }
+        },
+        "group_b": {
+          "label": "Hcleanonly+Both+EOC3",
+          "patient_ids": [
+            "EOC153",
+            "EOC443",
+            "EOC540",
+            "EOC227",
+            "EOC3"
+          ],
+          "summary": {
+            "n": 5,
+            "values": [
+              393.0,
+              177.0,
+              126.0,
+              230.0,
+              14.0
+            ],
+            "min": 14.0,
+            "max": 393.0,
+            "median": 177.0,
+            "q1": 126.0,
+            "q3": 230.0,
+            "iqr": 104.0,
+            "mean": 188.0
+          }
+        },
+        "mannwhitney_U": 4.0,
+        "mannwhitney_exact_two_sided_p": 0.19047619047619047,
+        "permutation_n_enumerations": 126,
+        "permutation_n_as_or_more_extreme": 24,
+        "permutation_exact_two_sided_p": 0.19047619047619047,
+        "hodges_lehmann_median_a_minus_b": -126.5
+      },
+      {
+        "contrast": "Door1 vs Hcleanonly_incl_EOC3",
+        "group_a": {
+          "label": "DDRonly",
+          "patient_ids": [
+            "EOC87",
+            "EOC349",
+            "EOC1005",
+            "EOC733"
+          ],
+          "summary": {
+            "n": 4,
+            "values": [
+              30.0,
+              36.0,
+              65.0,
+              83.0
+            ],
+            "min": 30.0,
+            "max": 83.0,
+            "median": 50.5,
+            "q1": 34.5,
+            "q3": 69.5,
+            "iqr": 35.0,
+            "mean": 53.5
+          }
+        },
+        "group_b": {
+          "label": "Hcleanonly incl EOC3 14d",
+          "patient_ids": [
+            "EOC153",
+            "EOC443",
+            "EOC540",
+            "EOC3"
+          ],
+          "summary": {
+            "n": 4,
+            "values": [
+              393.0,
+              177.0,
+              126.0,
+              14.0
+            ],
+            "min": 14.0,
+            "max": 393.0,
+            "median": 151.5,
+            "q1": 98.0,
+            "q3": 231.0,
+            "iqr": 133.0,
+            "mean": 177.5
+          }
+        },
+        "mannwhitney_U": 4.0,
+        "mannwhitney_exact_two_sided_p": 0.34285714285714286,
+        "permutation_n_enumerations": 70,
+        "permutation_n_as_or_more_extreme": 24,
+        "permutation_exact_two_sided_p": 0.34285714285714286,
+        "hodges_lehmann_median_a_minus_b": -95.0
+      },
+      {
+        "contrast": "Door1 vs Neither",
+        "group_a": {
+          "label": "DDRonly",
+          "patient_ids": [
+            "EOC87",
+            "EOC349",
+            "EOC1005",
+            "EOC733"
+          ],
+          "summary": {
+            "n": 4,
+            "values": [
+              30.0,
+              36.0,
+              65.0,
+              83.0
+            ],
+            "min": 30.0,
+            "max": 83.0,
+            "median": 50.5,
+            "q1": 34.5,
+            "q3": 69.5,
+            "iqr": 35.0,
+            "mean": 53.5
+          }
+        },
+        "group_b": {
+          "label": "Neither",
+          "patient_ids": [
+            "EOC136",
+            "EOC372"
+          ],
+          "summary": {
+            "n": 2,
+            "values": [
+              520.0,
+              460.0
+            ],
+            "min": 460.0,
+            "max": 520.0,
+            "median": 490.0,
+            "q1": 475.0,
+            "q3": 505.0,
+            "iqr": 30.0,
+            "mean": 490.0
+          }
+        },
+        "mannwhitney_U": 0.0,
+        "mannwhitney_exact_two_sided_p": 0.13333333333333333,
+        "permutation_n_enumerations": 15,
+        "permutation_n_as_or_more_extreme": 2,
+        "permutation_exact_two_sided_p": 0.13333333333333333,
+        "hodges_lehmann_median_a_minus_b": -433.5
+      },
+      {
+        "contrast": "Door2ish_incl_EOC3 vs Neither",
+        "group_a": {
+          "label": "Door2ish+EOC3",
+          "patient_ids": [
+            "EOC153",
+            "EOC443",
+            "EOC540",
+            "EOC227",
+            "EOC3"
+          ],
+          "summary": {
+            "n": 5,
+            "values": [
+              393.0,
+              177.0,
+              126.0,
+              230.0,
+              14.0
+            ],
+            "min": 14.0,
+            "max": 393.0,
+            "median": 177.0,
+            "q1": 126.0,
+            "q3": 230.0,
+            "iqr": 104.0,
+            "mean": 188.0
+          }
+        },
+        "group_b": {
+          "label": "Neither",
+          "patient_ids": [
+            "EOC136",
+            "EOC372"
+          ],
+          "summary": {
+            "n": 2,
+            "values": [
+              520.0,
+              460.0
+            ],
+            "min": 460.0,
+            "max": 520.0,
+            "median": 490.0,
+            "q1": 475.0,
+            "q3": 505.0,
+            "iqr": 30.0,
+            "mean": 490.0
+          }
+        },
+        "mannwhitney_U": 0.0,
+        "mannwhitney_exact_two_sided_p": 0.09523809523809523,
+        "permutation_n_enumerations": 21,
+        "permutation_n_as_or_more_extreme": 2,
+        "permutation_exact_two_sided_p": 0.09523809523809523,
+        "hodges_lehmann_median_a_minus_b": -312.0
+      }
+    ],
+    "ordered_trend_Door1_Door2ish_Neither": {
+      "jonckheere_terpstra_S": 34.0,
+      "n_between_group_pairs": 38,
+      "alternative": "Door1 < Door2 < Neither (later group larger PFI)",
+      "permutation_n_enumerations": 6930,
+      "permutation_n_S_ge_observed": 34,
+      "permutation_one_sided_p": 0.004906204906204906,
+      "permutation_two_sided_note": "one-sided ordered alternative; two-sided is not the pre-specified hypothesis",
+      "spearman": {
+        "patient_ids": [
+          "EOC87",
+          "EOC349",
+          "EOC1005",
+          "EOC733",
+          "EOC153",
+          "EOC443",
+          "EOC540",
+          "EOC227",
+          "EOC3",
+          "EOC136",
+          "EOC372"
+        ],
+        "order_codes": [
+          1,
+          1,
+          1,
+          1,
+          2,
+          2,
+          2,
+          2,
+          2,
+          3,
+          3
+        ],
+        "pfi": [
+          30,
+          36,
+          65,
+          83,
+          393,
+          177,
+          126,
+          230,
+          14,
+          520,
+          460
+        ],
+        "spearman_rho": 0.7503246050790371,
+        "spearman_p_two_sided": 0.007810619595550272,
+        "order": "Door1=1 < Door2=2 < Neither=3 versus PFI days"
+      }
+    },
+    "cox_Door1_vs_rest": {
+      "covariate": "Door1=1 vs not-Door1=0 on all 11",
+      "n": 11,
+      "events": 11,
+      "censored": 0,
+      "ties_present": false,
+      "ties_method": "none needed; Efron equals Breslow with no ties",
+      "beta": 2.3692642885527944,
+      "se_beta": 1.1448551399587592,
+      "HR": 10.689524984538421,
+      "HR_ci95": [
+        1.1335431001938814,
+        100.80423441819467
+      ],
+      "complete_separation": false,
+      "wald_z": 2.0694882748555785,
+      "wald_p": 0.03850029048197787,
+      "small_n_warning": "Small n uncensored PFI times; Wald CI/p are large-sample and fragile. Prefer exact Mann-Whitney / permutation."
+    }
+  },
+  "gate0_filtered_n10_post_remission": {
+    "n": 10,
+    "excluded": "EOC3 PRIMARY_REFRACTORY_ESCAPE",
+    "groups": {
+      "DDRonly_Door1": {
+        "n": 4,
+        "values": [
+          30.0,
+          36.0,
+          65.0,
+          83.0
+        ],
+        "min": 30.0,
+        "max": 83.0,
+        "median": 50.5,
+        "q1": 34.5,
+        "q3": 69.5,
+        "iqr": 35.0,
+        "mean": 53.5
+      },
+      "Hcleanonly_nonrefractory": {
+        "n": 3,
+        "values": [
+          393.0,
+          177.0,
+          126.0
+        ],
+        "min": 126.0,
+        "max": 393.0,
+        "median": 177.0,
+        "q1": 151.5,
+        "q3": 285.0,
+        "iqr": 133.5,
+        "mean": 232.0
+      },
+      "Both": {
+        "n": 1,
+        "values": [
+          230.0
+        ],
+        "min": 230.0,
+        "max": 230.0,
+        "median": 230.0,
+        "q1": 230.0,
+        "q3": 230.0,
+        "iqr": 0.0,
+        "mean": 230.0
+      },
+      "Door2_nonrefractory_Hcleanonly_plus_Both": {
+        "n": 4,
+        "values": [
+          393.0,
+          177.0,
+          126.0,
+          230.0
+        ],
+        "min": 126.0,
+        "max": 393.0,
+        "median": 203.5,
+        "q1": 164.25,
+        "q3": 270.75,
+        "iqr": 106.5,
+        "mean": 231.5
+      },
+      "Neither": {
+        "n": 2,
+        "values": [
+          520.0,
+          460.0
+        ],
+        "min": 460.0,
+        "max": 520.0,
+        "median": 490.0,
+        "q1": 475.0,
+        "q3": 505.0,
+        "iqr": 30.0,
+        "mean": 490.0
+      }
+    },
+    "contrasts": [
+      {
+        "contrast": "Door1 vs Door2_nonrefractory",
+        "group_a": {
+          "label": "DDRonly 30-83d",
+          "patient_ids": [
+            "EOC87",
+            "EOC349",
+            "EOC1005",
+            "EOC733"
+          ],
+          "summary": {
+            "n": 4,
+            "values": [
+              30.0,
+              36.0,
+              65.0,
+              83.0
+            ],
+            "min": 30.0,
+            "max": 83.0,
+            "median": 50.5,
+            "q1": 34.5,
+            "q3": 69.5,
+            "iqr": 35.0,
+            "mean": 53.5
+          }
+        },
+        "group_b": {
+          "label": "Hcleanonly+Both 126-393d",
+          "patient_ids": [
+            "EOC153",
+            "EOC443",
+            "EOC540",
+            "EOC227"
+          ],
+          "summary": {
+            "n": 4,
+            "values": [
+              393.0,
+              177.0,
+              126.0,
+              230.0
+            ],
+            "min": 126.0,
+            "max": 393.0,
+            "median": 203.5,
+            "q1": 164.25,
+            "q3": 270.75,
+            "iqr": 106.5,
+            "mean": 231.5
+          }
+        },
+        "mannwhitney_U": 0.0,
+        "mannwhitney_exact_two_sided_p": 0.02857142857142857,
+        "permutation_n_enumerations": 70,
+        "permutation_n_as_or_more_extreme": 2,
+        "permutation_exact_two_sided_p": 0.02857142857142857,
+        "hodges_lehmann_median_a_minus_b": -147.0
+      },
+      {
+        "contrast": "Door1 vs Hcleanonly_nonrefractory",
+        "group_a": {
+          "label": "DDRonly",
+          "patient_ids": [
+            "EOC87",
+            "EOC349",
+            "EOC1005",
+            "EOC733"
+          ],
+          "summary": {
+            "n": 4,
+            "values": [
+              30.0,
+              36.0,
+              65.0,
+              83.0
+            ],
+            "min": 30.0,
+            "max": 83.0,
+            "median": 50.5,
+            "q1": 34.5,
+            "q3": 69.5,
+            "iqr": 35.0,
+            "mean": 53.5
+          }
+        },
+        "group_b": {
+          "label": "Hcleanonly 126,177,393d",
+          "patient_ids": [
+            "EOC153",
+            "EOC443",
+            "EOC540"
+          ],
+          "summary": {
+            "n": 3,
+            "values": [
+              393.0,
+              177.0,
+              126.0
+            ],
+            "min": 126.0,
+            "max": 393.0,
+            "median": 177.0,
+            "q1": 151.5,
+            "q3": 285.0,
+            "iqr": 133.5,
+            "mean": 232.0
+          }
+        },
+        "mannwhitney_U": 0.0,
+        "mannwhitney_exact_two_sided_p": 0.05714285714285714,
+        "permutation_n_enumerations": 35,
+        "permutation_n_as_or_more_extreme": 2,
+        "permutation_exact_two_sided_p": 0.05714285714285714,
+        "hodges_lehmann_median_a_minus_b": -126.5
+      },
+      {
+        "contrast": "Door1 vs Neither",
+        "group_a": {
+          "label": "DDRonly",
+          "patient_ids": [
+            "EOC87",
+            "EOC349",
+            "EOC1005",
+            "EOC733"
+          ],
+          "summary": {
+            "n": 4,
+            "values": [
+              30.0,
+              36.0,
+              65.0,
+              83.0
+            ],
+            "min": 30.0,
+            "max": 83.0,
+            "median": 50.5,
+            "q1": 34.5,
+            "q3": 69.5,
+            "iqr": 35.0,
+            "mean": 53.5
+          }
+        },
+        "group_b": {
+          "label": "Neither 460,520d",
+          "patient_ids": [
+            "EOC136",
+            "EOC372"
+          ],
+          "summary": {
+            "n": 2,
+            "values": [
+              520.0,
+              460.0
+            ],
+            "min": 460.0,
+            "max": 520.0,
+            "median": 490.0,
+            "q1": 475.0,
+            "q3": 505.0,
+            "iqr": 30.0,
+            "mean": 490.0
+          }
+        },
+        "mannwhitney_U": 0.0,
+        "mannwhitney_exact_two_sided_p": 0.13333333333333333,
+        "permutation_n_enumerations": 15,
+        "permutation_n_as_or_more_extreme": 2,
+        "permutation_exact_two_sided_p": 0.13333333333333333,
+        "hodges_lehmann_median_a_minus_b": -433.5
+      },
+      {
+        "contrast": "Door2_nonrefractory vs Neither",
+        "group_a": {
+          "label": "Door2 126-393d",
+          "patient_ids": [
+            "EOC153",
+            "EOC443",
+            "EOC540",
+            "EOC227"
+          ],
+          "summary": {
+            "n": 4,
+            "values": [
+              393.0,
+              177.0,
+              126.0,
+              230.0
+            ],
+            "min": 126.0,
+            "max": 393.0,
+            "median": 203.5,
+            "q1": 164.25,
+            "q3": 270.75,
+            "iqr": 106.5,
+            "mean": 231.5
+          }
+        },
+        "group_b": {
+          "label": "Neither 460-520d",
+          "patient_ids": [
+            "EOC136",
+            "EOC372"
+          ],
+          "summary": {
+            "n": 2,
+            "values": [
+              520.0,
+              460.0
+            ],
+            "min": 460.0,
+            "max": 520.0,
+            "median": 490.0,
+            "q1": 475.0,
+            "q3": 505.0,
+            "iqr": 30.0,
+            "mean": 490.0
+          }
+        },
+        "mannwhitney_U": 0.0,
+        "mannwhitney_exact_two_sided_p": 0.13333333333333333,
+        "permutation_n_enumerations": 15,
+        "permutation_n_as_or_more_extreme": 2,
+        "permutation_exact_two_sided_p": 0.13333333333333333,
+        "hodges_lehmann_median_a_minus_b": -286.5
+      }
+    ],
+    "ordered_trend_Door1_Door2_Neither": {
+      "jonckheere_terpstra_S": 32.0,
+      "n_between_group_pairs": 32,
+      "alternative": "Door1 < Door2 < Neither (later group larger PFI)",
+      "permutation_n_enumerations": 3150,
+      "permutation_n_S_ge_observed": 1,
+      "permutation_one_sided_p": 0.00031746031746031746,
+      "permutation_two_sided_note": "one-sided ordered alternative; two-sided is not the pre-specified hypothesis",
+      "spearman": {
+        "patient_ids": [
+          "EOC87",
+          "EOC349",
+          "EOC1005",
+          "EOC733",
+          "EOC153",
+          "EOC443",
+          "EOC540",
+          "EOC227",
+          "EOC136",
+          "EOC372"
+        ],
+        "order_codes": [
+          1,
+          1,
+          1,
+          1,
+          2,
+          2,
+          2,
+          2,
+          3,
+          3
+        ],
+        "pfi": [
+          30,
+          36,
+          65,
+          83,
+          393,
+          177,
+          126,
+          230,
+          520,
+          460
+        ],
+        "spearman_rho": 0.9341987329938275,
+        "spearman_p_two_sided": 7.571865577837222e-05,
+        "order": "Door1=1 < Door2=2 < Neither=3 versus PFI days"
+      }
+    },
+    "cox_Door1_vs_rest": {
+      "covariate": "Door1=1 vs not-Door1=0 on n=10",
+      "n": 10,
+      "events": 10,
+      "censored": 0,
+      "ties_present": false,
+      "complete_separation": true,
+      "HR": null,
+      "wald_p": null,
+      "small_n_warning": "Complete separation: every Door1 PFI is below every comparator PFI. Cox Newton-Raphson diverges; do not report a finite HR. Use exact Mann-Whitney."
+    },
+    "cox_Door1_vs_Door2_nonrefractory_excluding_Neither": {
+      "covariate": "Door1=1 vs Door2_nonrefractory=0 excluding Neither and EOC3",
+      "n": 8,
+      "events": 8,
+      "censored": 0,
+      "ties_present": false,
+      "complete_separation": true,
+      "HR": null,
+      "wald_p": null,
+      "small_n_warning": "Complete separation: every Door1 PFI is below every comparator PFI. Cox Newton-Raphson diverges; do not report a finite HR. Use exact Mann-Whitney."
+    }
+  }
+}
