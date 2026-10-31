@@ -3,7 +3,7 @@
   "ruo": true,
   "ruo_disclaimer": "RESEARCH USE ONLY. Route scoring is not a treatment order.",
   "contract_status": "evidence_bound_exploratory_prioritization",
-  "generated_utc": "2026-10-31T01:30:12.412522+00:00",
+  "generated_utc": "2026-10-31T01:49:08.267924+00:00",
   "git_head_expected": "409755be3882275b40743e0a44dc04f4253527fd",
   "endpoint": "POST /v1/ovarian/arbiter/score",
   "auth_mode": "off",
@@ -193,8 +193,8 @@
       "http_status": 200,
       "body": {
         "specimen": "cart_infusion_bag",
-        "Bag_Index_1": 0.0,
-        "Bag_Index_3": 0.48542682717024166,
+        "Bag_Index_1": 0.5516124652232999,
+        "Bag_Index_3": -0.4004107904839966,
         "flag": null,
         "model_state": "loaded"
       }
@@ -202,13 +202,13 @@
     "blood": {
       "http_status": 200,
       "intercept_standardized": -0.22167064750141413,
-      "probability": 0.2832518017120924
+      "probability": 0.6420115698079314
     },
     "ici_bulk": {
       "http_status": 200,
-      "E_effector": 0.0,
-      "S_stem_eff": 0.0,
-      "S_triad": 0.0
+      "E_effector": 1.1872289279519324,
+      "S_stem_eff": 1.2509571364136252,
+      "S_triad": 0.37864643134714526
     },
     "bag_missing_422": true
   },

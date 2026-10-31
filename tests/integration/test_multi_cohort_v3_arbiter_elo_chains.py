@@ -86,13 +86,14 @@ def test_1_gse165897_all_11_patients_and_l5_elo_rankings() -> None:
     cf = client.post(
         "/v1/case/full?cancer=hgsoc",
         json={
-            "resistance_features": {"EMT_MFAP4": 8.17},
+            "resistance_features": {"EMT_MFAP4": 8.1705},
             "ovarian_two_door": _ovarian_payload(row_153),
         },
     )
     assert cf.status_code == 200, cf.text
     cf_body = cf.json()
     assert cf_body["ovarian_two_door"]["four_state_class"] == "Hcleanonly"
+    assert math.isclose(cf_body["ovarian_arbiter"]["p_positive"], 0.500593, rel_tol=0.0, abs_tol=1e-6)
     assert cf_body["elo_ranked_hypotheses"][0]["drug_id"] == "Navitoclax"
 
 
@@ -125,69 +126,71 @@ def test_2_mbd4_lof_brca_wt_promotes_ceralasertib_gemcitabine_demotes_olaparib()
 def test_3_immunotherapy_three_compartments_score_and_route_to_l5() -> None:
     client = _client()
     v3 = load_v3_contract()
-    bag_spec = v3["v12"]["bag_transforms"]["literal_CD8"]
-    bag_resp = client.post(
+    cart = load_cart_contract()
+
+    # 1. Real Deng GSE151511 patient ac01 (GSM4579891, CR=1) & ac18 (CR=0 burnout bag)
+    ac01_resp = client.post(
         "/v1/immunotherapy/arbiter/score",
         json={
             "specimen": "cart_infusion_bag",
-            "n_CD8": 120,
-            "M_ratio": bag_spec["M_ratio"]["mean"] + bag_spec["M_ratio"]["sd"],
-            "M_expr": bag_spec["M_expr"]["mean"],
-            "f_cyto_marker": bag_spec["f_cyto_marker"]["mean"] - bag_spec["f_cyto_marker"]["sd"],
-            "n_memory": 12,
-            "n_cyto": 2,
-            "n_exhausted": 1,
+            "bag_gate": "literal_CD8",
+            "n_CD8": 1520,
+            "M_ratio": 1.14149467448654,
+            "M_expr": 1.087685923313923,
+            "f_cyto_marker": 0.78421052631579,
+            "n_memory": 1375,
+            "n_cyto": 1192,
+            "n_exhausted": 623,
         },
     )
-    assert bag_resp.status_code == 200, bag_resp.text
-    bag_body = bag_resp.json()
+    assert ac01_resp.status_code == 200, ac01_resp.text
+    bag_body = ac01_resp.json()
     assert bag_body["ruo"] is True
     assert bag_body["contract_status"] == "evidence_bound_exploratory_prioritization"
+    assert math.isclose(bag_body["Bag_Index_1"], 0.5516124652233043, rel_tol=0.0, abs_tol=1e-12)
+    assert math.isclose(bag_body["Bag_Index_2"], 0.6875185306880747, rel_tol=0.0, abs_tol=1e-12)
+    assert math.isclose(bag_body["Bag_Index_3"], -0.4004107904839966, rel_tol=0.0, abs_tol=1e-12)
+    assert math.isclose(bag_body["Bag_low_cyto"], 0.21578947368421053, rel_tol=0.0, abs_tol=1e-12)
     bag_metrics = bag_body["elo_bridge"]["receipts"]["metrics_literal_CD8"]["Bag_Index_3_primary_CR"]
     assert round(float(bag_metrics["auroc"]), 3) == 0.881
     assert round(float(bag_metrics["q"]), 5) == 0.00831
     assert round(float(bag_metrics["q_global_new_primary"]), 4) == 0.0191
     assert bag_body["elo_bridge"]["top_candidate"] == "Autologous_CD19_CART_Infusion"
 
-    cart = load_cart_contract()
-    blood_payload = {
-        "specimen": "cart_in_vivo_blood",
-        "log1p_spd": cart["preprocessing"]["mean"][0],
-        "prior_regimens": 2,
-        "prior_auto_sct": 1.0,
-        "load_ZNF683": 1.2,
-        "load_GNLY": 1.1,
-        "cyto_absent": 0.0,
-    }
-    blood_resp = client.post("/v1/immunotherapy/arbiter/score", json=blood_payload)
+    # 2. Real GSE290722 patient P26 (responder, prob=0.6420115698079313) & P1 (non-responder, prob=0.021457469350329782)
+    p26_feats = next(x["features"] for x in cart["inference_examples"] if x["patient_id"] == "P26")
+    blood_resp = client.post(
+        "/v1/immunotherapy/arbiter/score",
+        json={"specimen": "cart_in_vivo_blood", **p26_feats},
+    )
     assert blood_resp.status_code == 200, blood_resp.text
     blood_body = blood_resp.json()
     assert blood_body["ruo"] is True
+    assert math.isclose(blood_body["probability"], 0.6420115698079313, rel_tol=0.0, abs_tol=1e-12)
     blood_eval = blood_body["elo_bridge"]["receipts"]["evaluation_receipt"]
     assert round(float(blood_eval["auroc"]), 3) == 0.782
     assert round(float(blood_eval["within_fold_mean"]), 3) == 0.823
     assert round(float(blood_eval["brier"]), 3) == 0.199
     assert blood_body["elo_bridge"]["top_candidate"] == "Standard_Leukapheresis_CART_Proceed"
 
-    scales = v3["parent_v2"]["parent_v1"]["cohort_population_transforms"][
-        "Gide_PRJEB23709_pretreatment"
-    ]["population_transforms"]
+    # 3. Real Gide_PRJEB23709|pretreatment patient PD1_35 (ERR2208952, responder y=1)
+    mel_rows = v3["v12"]["patient_inputs"]["melanoma"]
+    pd1_35 = next(r for r in mel_rows if r["patient_id"] == "PD1_35" and r["timepoint"] == "pretreatment")
     genes = ["TCF7", "ZNF683", "GNLY", "CD8A", "CD8B", "CD4", "IL7R", "FOXP3", "IL2RA"]
-    expr = {g: scales[g]["mean"] for g in genes}
-    expr["ZNF683"] = scales["ZNF683"]["mean"] + scales["ZNF683"]["sd"]
-    expr["GNLY"] = scales["GNLY"]["mean"] + scales["GNLY"]["sd"]
     ici_resp = client.post(
         "/v1/immunotherapy/arbiter/score",
         json={
             "specimen": "ici_tumor_biopsy",
             "mode": "bulk",
             "context": "Gide_PRJEB23709|pretreatment",
-            "expression": expr,
+            "expression": {g: pd1_35[f"expr_{g}"] for g in genes},
         },
     )
     assert ici_resp.status_code == 200, ici_resp.text
     ici_body = ici_resp.json()
-    assert math.isclose(ici_body["E_effector"], 1.0, abs_tol=1e-12)
+    assert math.isclose(ici_body["E_effector"], 1.187228927951933, rel_tol=0.0, abs_tol=1e-12)
+    assert math.isclose(ici_body["S_triad"], 0.378646431347146, rel_tol=0.0, abs_tol=1e-12)
+    assert math.isclose(ici_body["S_stem_eff"], 1.250957136413626, rel_tol=0.0, abs_tol=1e-12)
     gide_metrics = ici_body["elo_bridge"]["receipts"]["gide_pretreatment_metrics"]
     assert round(float(gide_metrics["ZNF683_GNLY_effector_response"]["auroc"]), 3) == 0.804
     assert round(float(gide_metrics["ZNF683_GNLY_effector_OS"]["hr"]), 3) == 0.370

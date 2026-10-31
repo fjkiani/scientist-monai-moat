@@ -263,7 +263,11 @@ def build_immunotherapy_elo_bridge(immuno_score: dict[str, Any]) -> dict[str, An
 
     if specimen == "cart_infusion_bag":
         auroc = float(contract["metrics_literal_CD8"]["Bag_Index_3_primary_CR"]["auroc"])
-        favorable = immuno_score.get("risk_flag") is None and float(immuno_score.get("Bag_Index_3") or 0.0) >= 0.0
+        idx1 = float(immuno_score.get("Bag_Index_1") or 0.0)
+        idx3 = float(immuno_score.get("Bag_Index_3") or -1.0)
+        # In Deng GSE151511 literal_CD8 (n=23), Bag_Index_1 is z-centered at 0.0
+        # and Bag_Index_3 cohort median is -0.829239333794604 (due to cyto/memory overlap).
+        favorable = immuno_score.get("risk_flag") is None and (idx1 > 0.0 or idx3 >= -0.829239333794604)
     elif specimen == "cart_in_vivo_blood":
         auroc = float(contract["evaluation_receipt"]["auroc"])
         favorable = float(immuno_score.get("probability") or 0.0) >= 0.50
