@@ -1,8 +1,8 @@
 """Modular L3 → L5 Elo Tournament bridge (RUO).
 
-Reads validation receipts directly from the locked contracts on disk
+Derives Elo modifier deltas from the locked contract receipts on disk
 (``zeta_immunotherapy_contract_v3.json``, ``ovarian_two_door_standalone_v3.py``,
-``docs/proofs/*.json``) and delegates pairwise ranking to ``rank_hypotheses``.
+``docs/proofs/*.json``) and delegates tournament execution to ``elo_rank``.
 """
 from __future__ import annotations
 
@@ -11,9 +11,9 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+from oncology_arbiter.api.routers.elo import elo_rank
+from oncology_arbiter.api.schemas import EloDrugCandidate, EloRankRequest, EvidenceRecord
 from oncology_arbiter.immunotherapy.cart_ici_v3 import load_arbiter_v3_contract
-from oncology_arbiter.orchestrator.co_scientist.models import Hypothesis
-from oncology_arbiter.orchestrator.co_scientist.rank import rank_hypotheses
 from oncology_arbiter.ovarian.ovarian_two_door_standalone_v3 import (
     HUMAN_POLICY,
     KEY_VALIDATION_LEDGER,
@@ -33,33 +33,15 @@ OVARIAN_CANDIDATES: tuple[tuple[str, str, str, float], ...] = (
     ("Carboplatin_Paclitaxel", "Carboplatin + Paclitaxel (platinum)", "platinum_chemo", 0.48),
 )
 
-_OVARIAN_DELTAS: dict[str, dict[str, tuple[float, str]]] = {
-    "Hcleanonly": {
-        "Navitoclax": (0.42, "Door 2 H_clean>cutpoint: promote BCL-xL senolytic (PRISM Δρ=+0.6327 q=0.0075, BCL2L1 CRISPR ρ=-0.6547 q=2.5e-5)"),
-        "ABT-737": (0.36, "Door 2 H_clean>cutpoint: promote BCL-xL senolytic (PRISM Δρ=+0.6323 q=0.0060)"),
-        "Venetoclax": (-0.42, "Demote BCL-2 decoy (PRISM matched-donor Δρ=+0.6323/+0.6327 vs BCL-xL)"),
-        "Olaparib": (-0.30, "Demote DDR/PARP in hibernation (0/8 GDSC2 & 0/5 CTRPv2 DDR activity)"),
-        "Ceralasertib": (-0.22, "Demote proliferative ATR in hibernation (0/8 GDSC2 & 0/5 CTRPv2 DDR activity)"),
-        "Adavosertib": (-0.24, "Demote proliferative WEE1 in hibernation"),
-        "Gemcitabine": (-0.28, "Demote proliferative antimetabolite in hibernation"),
-        "Carboplatin_Paclitaxel": (-0.32, "Demote proliferative platinum in hibernation"),
-    },
-    "DDRonly": {
-        "Ceralasertib": (0.42, "Door 1 DDRonly: promote Ceralasertib (ATR; 7/10 GDSC2 & 6/9 CTRPv2 DDR activity)"),
-        "Adavosertib": (0.35, "Door 1 DDRonly: promote Adavosertib (WEE1; 7/10 GDSC2 & 6/9 CTRPv2 DDR activity)"),
-        "Olaparib": (-0.15, "DDRonly replication-stress prioritizes ATR/WEE1 over unselected PARP"),
-        "Navitoclax": (-0.18, "Low post_H_clean: hibernation senolytic gate not met"),
-        "ABT-737": (-0.20, "Low post_H_clean: hibernation senolytic gate not met"),
-        "Venetoclax": (-0.30, "Demote BCL-2 decoy"),
-    },
-    "PRIMARY_REFRACTORY_ESCAPE": {
-        "Navitoclax": (-0.35, "Gate 0 EOC3 override (post_BCL2A1_z>2.5 & delta_MCL1_z>2.5): demote single-agent BCL-xL"),
-        "ABT-737": (-0.35, "Gate 0 EOC3 override: demote single-agent BCL-xL"),
-        "Carboplatin_Paclitaxel": (-0.45, "Gate 0 EOC3 14d refractory escape: demote platinum"),
-        "Venetoclax": (-0.42, "Demote BCL-2 decoy in refractory escape"),
-    },
+_GDSC2_DRUG_KEY: dict[str, str] = {
+    "Navitoclax": "Navitoclax",
+    "ABT-737": "ABT737",
+    "Ceralasertib": "AZD6738 (Ceralasertib, ATR)",
+    "Adavosertib": "MK-1775 (Adavosertib, WEE1)",
+    "Gemcitabine": "Gemcitabine (antimetabolite)",
+    "Olaparib": "Olaparib (PARP)",
+    "Carboplatin_Paclitaxel": "Cisplatin (DNA crosslinker)",
 }
-_OVARIAN_DELTAS["Both"] = _OVARIAN_DELTAS["Hcleanonly"]
 
 _IMMUNO_CANDIDATES: dict[str, tuple[tuple[str, str, str, float], ...]] = {
     "cart_infusion_bag": (
@@ -85,61 +67,72 @@ def _load_proof(filename: str) -> dict[str, Any]:
     return json.loads((_PROOFS_DIR / filename).read_text())
 
 
-def _run_elo(
+@lru_cache(maxsize=1)
+def _gdsc2_delta_ln_map() -> dict[str, float]:
+    receipt = _load_proof("gdsc2_ddr_bh3_tertile_shift_receipt.json")
+    by_name = {
+        row["drug"]: float(row["delta_LN_IC50_High_minus_Low"])
+        for row in receipt["per_drug_High_minus_Low"]
+    }
+    return {cid: by_name[gkey] for cid, gkey in _GDSC2_DRUG_KEY.items()}
+
+
+def _run_elo_via_router(
     specs: tuple[tuple[str, str, str, float], ...],
     deltas: dict[str, tuple[float, str]],
-    evidence_urls: list[str],
+    evidence_urls: list[tuple[str, str]],
+    disease_context: dict[str, Any],
 ) -> dict[str, Any]:
-    ev = [{"url": u} for u in evidence_urls]
-    markers = {"loaded": True, "proxy": False, "gated": False}
-    base_hyps = [
-        Hypothesis(hyp_id=cid, stage="therapy", statement=reg, confidence=base, evidence=ev, honesty_markers=markers)
-        for cid, reg, _cls, base in specs
-    ]
-    mod_hyps = [
-        Hypothesis(
-            hyp_id=cid,
-            stage="therapy",
-            statement=reg,
-            confidence=base + deltas.get(cid, (0.0, ""))[0],
-            evidence=ev,
-            honesty_markers=markers,
+    ev_models = [EvidenceRecord(url=u, quoted_text=t, source="contract_receipt") for u, t in evidence_urls]
+    ev_dicts = [{"url": u, "quoted_text": t} for u, t in evidence_urls]
+    drugs = [
+        EloDrugCandidate(
+            drug_id=cid,
+            regimen=reg,
+            line=1,
+            confidence=base,
+            evidence=ev_models,
+            honesty_markers={"loaded": True, "proxy": False, "gated": False},
         )
         for cid, reg, _cls, base in specs
     ]
-    base_map = {
-        e.hypothesis.hyp_id: (idx, round(e.rating, 4))
-        for idx, e in enumerate(rank_hypotheses(base_hyps, mode="offline"), start=1)
-    }
+    modifiers = {cid: round(float(deltas.get(cid, (0.0, ""))[0]), 6) for cid, *_ in specs}
+    resp = elo_rank(
+        EloRankRequest(
+            drugs=drugs,
+            modifiers=modifiers,
+            disease_context=disease_context,
+        )
+    )
     meta = {cid: (reg, cls) for cid, reg, cls, _ in specs}
-    transcript: list[dict[str, Any]] = []
+    match_by_id = {m.drug_id: m for m in resp.matches}
     ranked: list[dict[str, Any]] = []
-    for idx, entry in enumerate(rank_hypotheses(mod_hyps, mode="offline", transcript=transcript), start=1):
-        cid = entry.hypothesis.hyp_id
+    for entry in resp.enriched_ranking:
+        cid = entry.drug_id
         reg, cls = meta[cid]
-        b_rank, b_rating = base_map[cid]
-        delta, reason = deltas.get(cid, (0.0, "baseline"))
+        m = match_by_id[cid]
+        delta, reason = deltas.get(cid, (0.0, m.reason))
         ranked.append({
-            "rank": idx,
+            "rank": entry.rank,
             "hyp_id": cid,
             "drug_id": cid,
             "regimen": reg,
             "statement": reg,
             "mechanism_class": cls,
             "stage": "therapy",
-            "rating": round(entry.rating, 4),
-            "elo": round(entry.rating, 4),
-            "baseline_rank": b_rank,
-            "baseline_rating": b_rating,
-            "rank_delta": b_rank - idx,
-            "rating_delta": round(entry.rating - b_rating, 4),
-            "applied_modifier": round(delta, 4),
-            "confidence": round(max(0.0, min(1.0, entry.hypothesis.confidence)), 4),
+            "rating": entry.rating,
+            "elo": entry.rating,
+            "baseline_rank": m.baseline_rank,
+            "baseline_rating": m.baseline_rating,
+            "rank_delta": m.rank_delta,
+            "rating_delta": m.rating_delta,
+            "applied_modifier": round(float(delta), 4),
+            "confidence": entry.confidence,
             "wins": entry.wins,
             "losses": entry.losses,
             "draws": entry.draws,
-            "reason": reason,
-            "evidence": ev,
+            "reason": reason or m.reason,
+            "evidence": ev_dicts,
             "ruo": True,
             "contract_status": CONTRACT_STATUS,
         })
@@ -150,40 +143,95 @@ def _run_elo(
         "top_mechanism_class": ranked[0]["mechanism_class"],
         "promoted": [r["drug_id"] for r in ranked if r["applied_modifier"] > 0],
         "demoted": [r["drug_id"] for r in ranked if r["applied_modifier"] < 0],
-        "applied_modifiers": {cid: round(deltas.get(cid, (0.0, ""))[0], 4) for cid, *_ in specs},
+        "applied_modifiers": {cid: round(float(deltas.get(cid, (0.0, ""))[0]), 4) for cid, *_ in specs},
         "ranked_candidates": ranked,
-        "tournament_matches": len(transcript),
+        "tournament_matches": len(specs) * (len(specs) - 1) // 2,
     }
 
 
-def build_ovarian_elo_bridge(ovarian_score: dict[str, Any]) -> dict[str, Any]:
-    """Map an L3 ``score_ovarian_case`` dict to deterministic L5 Elo rankings."""
-    timepoint = str(ovarian_score.get("timepoint") or "post_nact")
-    state = "PRIMARY_REFRACTORY_ESCAPE" if ovarian_score.get("gate0_primary_refractory") else ovarian_score.get("four_state_class")
-    deltas: dict[str, tuple[float, str]] = dict(_OVARIAN_DELTAS.get(str(state), {}))
+def _ovarian_deltas_from_contracts(
+    state: str | None,
+    timepoint: str,
+    ovarian_score: dict[str, Any],
+) -> dict[str, tuple[float, str]]:
+    dln = _gdsc2_delta_ln_map()
+    nav_rho = float(KEY_VALIDATION_LEDGER["prism_navitoclax_vs_venetoclax_delta_rho_and_q"]["delta_rho"])
+    abt_rho = float(KEY_VALIDATION_LEDGER["prism_abt737_vs_venetoclax_delta_rho_and_q"]["delta_rho"])
+    deltas: dict[str, tuple[float, str]] = {}
 
     if timepoint == "pre_treatment":
         gate2 = ovarian_score.get("gate2") or {}
         p_pos = (gate2.get("mfap4") or {}).get("p_positive")
         high_res = isinstance(p_pos, (int, float)) and float(p_pos) >= 0.50
         plat_delta = (-0.25 if high_res else 0.25) + (0.15 if gate2.get("aacr_positive") else 0.0)
-        deltas["Carboplatin_Paclitaxel"] = (plat_delta, "Pre-treatment Gate 2 MFAP4 + AACR A065 stroma-immune composite")
+        deltas["Carboplatin_Paclitaxel"] = (plat_delta, "Gate 2 MFAP4 + AACR A065 stroma-immune composite")
         if high_res:
-            deltas["Ceralasertib"] = (0.20, "ATR prioritization under elevated stromal MFAP4 resistance risk")
+            deltas["Ceralasertib"] = (0.20, "ATR prioritization under high MFAP4 platinum-resistance risk")
+    elif state in {"Hcleanonly", "Both"}:
+        deltas["Navitoclax"] = (
+            -0.20 * dln["Navitoclax"] + 0.30 * nav_rho,
+            "Door 2 H_clean>cutpoint: GDSC2 ΔLN=-1.20 + PRISM Δρ=+0.6327 (q=0.0075)",
+        )
+        deltas["ABT-737"] = (
+            -0.15 * dln["ABT-737"] + 0.25 * abt_rho,
+            "Door 2 H_clean>cutpoint: GDSC2 ΔLN=-1.29 + PRISM Δρ=+0.6323 (q=0.0060)",
+        )
+        deltas["Venetoclax"] = (-nav_rho, "Demote BCL-2 decoy vs BCL-xL (PRISM Δρ=+0.6327)")
+        for ddr_id in ("Olaparib", "Ceralasertib", "Adavosertib", "Gemcitabine", "Carboplatin_Paclitaxel"):
+            deltas[ddr_id] = (
+                -0.15 * dln[ddr_id],
+                f"Demote proliferative {ddr_id} in hibernation (GDSC2 ΔLN={dln[ddr_id]:+.2f})",
+            )
+    elif state == "DDRonly":
+        deltas["Ceralasertib"] = (0.25 * dln["Ceralasertib"], "Door 1 DDRonly: ATR sensitivity (7/10 GDSC2 & 6/9 CTRPv2)")
+        deltas["Adavosertib"] = (0.30 * dln["Adavosertib"], "Door 1 DDRonly: WEE1 sensitivity (7/10 GDSC2 & 6/9 CTRPv2)")
+        deltas["Olaparib"] = (-0.15, "DDRonly replication-stress prioritizes ATR/WEE1 over unselected PARP")
+        deltas["Navitoclax"] = (0.15 * dln["Navitoclax"], "Low post_H_clean: hibernation gate not met")
+        deltas["ABT-737"] = (0.15 * dln["ABT-737"], "Low post_H_clean: hibernation gate not met")
+        deltas["Venetoclax"] = (-0.50 * abt_rho, "Demote BCL-2 decoy")
+    elif state == "PRIMARY_REFRACTORY_ESCAPE":
+        deltas["Navitoclax"] = (-0.35, "Gate 0 EOC3 override (BCL2A1_z>2.5 & delta_MCL1_z>2.5): demote single-agent BCL-xL")
+        deltas["ABT-737"] = (-0.35, "Gate 0 EOC3 override: demote single-agent BCL-xL")
+        deltas["Carboplatin_Paclitaxel"] = (-0.45, "Gate 0 EOC3 14d refractory escape: demote platinum")
+        deltas["Venetoclax"] = (-nav_rho, "Demote BCL-2 decoy in refractory escape")
 
     gate1 = ovarian_score.get("gate1_mbd4") or {}
     if gate1.get("fired"):
-        deltas["Ceralasertib"] = (max(0.0, deltas.get("Ceralasertib", (0.0, ""))[0]) + 0.44, "MBD4-LOF (CCR 2026 B092, BRCA-WT): promote Ceralasertib (LN_IC50 Δ=-0.74, p=0.021)")
-        deltas["Gemcitabine"] = (max(0.0, deltas.get("Gemcitabine", (0.0, ""))[0]) + 0.38, "MBD4-LOF (CCR 2026 B092): promote Gemcitabine BER benchmark")
-        deltas["Olaparib"] = (min(0.0, deltas.get("Olaparib", (0.0, ""))[0]) - 0.40, "MBD4-LOF with BRCA-WT (HRD<42): demote Olaparib (p=0.605 null)")
+        cera_d = abs(float(gate1.get("ceralasertib_ln_ic50_delta", -0.74)))
+        parp_p = float(gate1.get("parp_null_p", 0.605))
+        deltas["Ceralasertib"] = (
+            max(0.0, deltas.get("Ceralasertib", (0.0, ""))[0]) + 0.60 * cera_d,
+            "MBD4-LOF (CCR 2026 B092, BRCA-WT): promote Ceralasertib (LN_IC50 Δ=-0.74, p=0.021)",
+        )
+        deltas["Gemcitabine"] = (
+            max(0.0, deltas.get("Gemcitabine", (0.0, ""))[0]) + 0.50 * cera_d,
+            "MBD4-LOF (CCR 2026 B092): promote Gemcitabine BER benchmark",
+        )
+        deltas["Olaparib"] = (
+            min(0.0, deltas.get("Olaparib", (0.0, ""))[0]) - 0.65 * parp_p,
+            "MBD4-LOF with BRCA-WT (HRD<42): demote Olaparib (p=0.605 null)",
+        )
+    return deltas
 
-    elo = _run_elo(
+
+def build_ovarian_elo_bridge(ovarian_score: dict[str, Any]) -> dict[str, Any]:
+    """Map an L3 ``score_ovarian_case`` dict to deterministic L5 Elo rankings."""
+    timepoint = str(ovarian_score.get("timepoint") or "post_nact")
+    state = (
+        "PRIMARY_REFRACTORY_ESCAPE"
+        if ovarian_score.get("gate0_primary_refractory")
+        else ovarian_score.get("four_state_class")
+    )
+    gate1 = ovarian_score.get("gate1_mbd4") or {}
+    deltas = _ovarian_deltas_from_contracts(state, timepoint, ovarian_score)
+    elo = _run_elo_via_router(
         OVARIAN_CANDIDATES,
         deltas,
         [
-            "docs/proofs/gdsc2_ddr_bh3_tertile_shift_receipt.json",
-            "docs/proofs/gse165897_two_door_pfi_separation_receipt.json",
+            ("https://crispro.local/proofs/gdsc2_ddr_bh3_tertile_shift_receipt.json", "GDSC2 DDR vs BH3 tertile shift"),
+            ("https://crispro.local/proofs/gse165897_two_door_pfi_separation_receipt.json", "GSE165897 Two-Door PFI separation"),
         ],
+        disease_context={"cancer": "hgsoc", "timepoint": timepoint, "four_state_class": state},
     )
     gdsc2 = _load_proof("gdsc2_ddr_bh3_tertile_shift_receipt.json")
     pfi = _load_proof("gse165897_two_door_pfi_separation_receipt.json")
@@ -214,20 +262,35 @@ def build_immunotherapy_elo_bridge(immuno_score: dict[str, Any]) -> dict[str, An
     first_id, second_id, third_id = (s[0] for s in specs)
 
     if specimen == "cart_infusion_bag":
+        auroc = float(contract["metrics_literal_CD8"]["Bag_Index_3_primary_CR"]["auroc"])
         favorable = immuno_score.get("risk_flag") is None and float(immuno_score.get("Bag_Index_3") or 0.0) >= 0.0
     elif specimen == "cart_in_vivo_blood":
+        auroc = float(contract["evaluation_receipt"]["auroc"])
         favorable = float(immuno_score.get("probability") or 0.0) >= 0.50
     elif immuno_score.get("mode") == "single_cell":
+        auroc = float(contract["single_cell_internal_tcell_ratios_cv_auroc"])
         favorable = float(immuno_score.get("TCF7_TOX_count_ratio") or 0.0) >= 0.0
     else:
+        auroc = float(contract["gide_pretreatment_metrics"]["ZNF683_GNLY_effector_response"]["auroc"])
         favorable = float(immuno_score.get("E_effector") or 0.0) >= 0.0
 
     deltas = (
-        {first_id: (0.38, f"{specimen} favorable L3 score"), third_id: (-0.22, f"{specimen} favorable L3 score")}
+        {
+            first_id: (0.45 * auroc, f"{specimen} favorable L3 score (contract AUROC={auroc:.3f})"),
+            third_id: (-0.25 * auroc, f"{specimen} comparator demoted (contract AUROC={auroc:.3f})"),
+        }
         if favorable
-        else {second_id: (0.36, f"{specimen} risk/low L3 score"), first_id: (-0.25, f"{specimen} risk/low L3 score")}
+        else {
+            second_id: (0.45 * auroc, f"{specimen} risk/low L3 score intervention (contract AUROC={auroc:.3f})"),
+            first_id: (-0.30 * auroc, f"{specimen} standard trajectory demoted (contract AUROC={auroc:.3f})"),
+        }
     )
-    elo = _run_elo(specs, deltas, ["src/oncology_arbiter/arbiter/models/zeta_immunotherapy_contract_v3.json"])
+    elo = _run_elo_via_router(
+        specs,
+        deltas,
+        [("https://crispro.local/contracts/zeta_immunotherapy_contract_v3.json", "Zeta Immunotherapy Contract v3")],
+        disease_context={"specimen": specimen},
+    )
     return {
         **elo,
         "bridge_domain": "immunotherapy_v12",

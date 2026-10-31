@@ -18,6 +18,13 @@ from .logistic import (
     biopsy_arbiter,
     therapy_arbiter,
 )
+from oncology_arbiter.immunotherapy.cart_ici_v3 import (
+    load_arbiter_v3_contract,
+    score_immunotherapy as immunotherapy_v3_arbiter,
+)
+from oncology_arbiter.ovarian.two_door_arbiter import (
+    score_ovarian_case as ovarian_two_door_arbiter,
+)
 
 
 def mfap4_arbiter() -> L2LogisticArbiter:
@@ -34,4 +41,7 @@ __all__ = [
     "biopsy_arbiter",
     "therapy_arbiter",
     "mfap4_arbiter",
+    "ovarian_two_door_arbiter",
+    "immunotherapy_v3_arbiter",
+    "load_arbiter_v3_contract",
 ]

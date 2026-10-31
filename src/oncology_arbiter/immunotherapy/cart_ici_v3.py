@@ -67,9 +67,9 @@ def _z(value: float, spec: dict[str, float]) -> float:
 
 
 def score_infusion_bag(payload: dict[str, Any]) -> dict[str, Any]:
-    contract = load_v3_contract()
+    bag_contract = load_arbiter_v3_contract()["compartments"]["cart_infusion_bag"]
     gate = str(payload.get("bag_gate") or "literal_CD8")
-    transforms = contract["v12"]["bag_transforms"]
+    transforms = bag_contract["transforms"]
     if gate not in transforms:
         raise ImmunoInputError(["bag_gate"])
     need = ["n_CD8", "M_ratio", "M_expr", "f_cyto_marker", "n_memory", "n_cyto", "n_exhausted"]
@@ -86,6 +86,7 @@ def score_infusion_bag(payload: dict[str, Any]) -> dict[str, Any]:
     index3 = math.log2(
         (values["n_memory"] + 0.5) / (values["n_cyto"] + values["n_exhausted"] + 0.5)
     )
+    high_cyto = z_cyto > 0.0
     return {
         "ruo": True,
         "ruo_disclaimer": RUO,
@@ -97,8 +98,8 @@ def score_infusion_bag(payload: dict[str, Any]) -> dict[str, Any]:
         "Bag_Index_2": 0.5 * (_z(values["M_expr"], spec["M_expr"]) - z_cyto),
         "Bag_Index_3": index3,
         "Bag_low_cyto": 1.0 - values["f_cyto_marker"],
-        "flag": "EX_VIVO_PREMATURE_BURNOUT" if z_cyto > 0.0 else None,
-        "risk_flag": "EX_VIVO_CYTOTOXIC_DIFFERENTIATION_RISK" if z_cyto > 0.0 else None,
+        "flag": bag_contract["legacy_risk_flag_alias"] if high_cyto else None,
+        "risk_flag": bag_contract["risk_flag_high_f_cyto_marker"] if high_cyto else None,
     }
 
 
@@ -109,7 +110,7 @@ _BLOOD_ALIASES = {
 
 
 def score_in_vivo_blood(payload: dict[str, Any]) -> dict[str, Any]:
-    contract = load_cart_contract()
+    contract = load_arbiter_v3_contract()["compartments"]["cart_in_vivo_blood"]
     names = list(contract["feature_order"])
     prep = contract["preprocessing"]
     normalized = dict(payload)
@@ -147,9 +148,10 @@ def score_in_vivo_blood(payload: dict[str, Any]) -> dict[str, Any]:
         (value - float(prep["mean"][index])) / float(prep["scale"][index])
         for index, value in enumerate(values)
     ]
+    coefs = list(contract["coefficients_standardized_list"])
     linear = float(contract["intercept_standardized"]) + sum(
         float(beta) * zee
-        for beta, zee in zip(contract["coefficients_standardized"], standardized, strict=True)
+        for beta, zee in zip(coefs, standardized, strict=True)
     )
     if linear >= 0:
         probability = 1.0 / (1.0 + math.exp(-linear))
@@ -165,7 +167,7 @@ def score_in_vivo_blood(payload: dict[str, Any]) -> dict[str, Any]:
         "model_name": "cart_hobit_gnly_clinical_contract_v1",
         "selected_C": contract["selected_C"],
         "intercept_standardized": contract["intercept_standardized"],
-        "coefficients_standardized": contract["coefficients_standardized"],
+        "coefficients_standardized": coefs,
         "probability": probability,
         "feature_order": names,
     }
@@ -184,11 +186,11 @@ def _gene_z(expression: dict[str, Any], spec: dict[str, Any], gene: str) -> floa
 
 
 def _population_scale(context: str) -> dict[str, Any]:
-    contract = load_v3_contract()
-    if context not in contract["v12"]["melanoma_transforms"]:
+    ici_contract = load_arbiter_v3_contract()["compartments"]["ici_tumor_biopsy"]
+    if context not in ici_contract["melanoma_transforms"]:
         raise ImmunoInputError(["context"])
     population_key = context.replace("|", "_")
-    scales = contract["parent_v2"]["parent_v1"]["cohort_population_transforms"]
+    scales = ici_contract["cohort_population_transforms"]
     block = scales.get(population_key, {}).get("population_transforms")
     if not isinstance(block, dict):
         raise ImmunoInputError(["context"])
@@ -196,6 +198,7 @@ def _population_scale(context: str) -> dict[str, Any]:
 
 
 def score_ici_biopsy(payload: dict[str, Any]) -> dict[str, Any]:
+    ici_contract = load_arbiter_v3_contract()["compartments"]["ici_tumor_biopsy"]
     mode = str(payload.get("mode") or "bulk")
     if mode == "single_cell":
         n_tcf7 = _finite(payload, "n_TCF7_positive")
@@ -217,7 +220,7 @@ def score_ici_biopsy(payload: dict[str, Any]) -> dict[str, Any]:
     expression = payload.get("expression")
     if not isinstance(expression, dict):
         raise ImmunoInputError(["expression"])
-    triad = load_v3_contract()["parent_v2"]["parent_v1"]["registry"]["S_triad"]
+    triad = ici_contract["S_triad"]
     genes = ["TCF7", "ZNF683", "GNLY", *triad["positive"], *triad["negative"]]
     ordered: list[str] = []
     for gene in genes:
