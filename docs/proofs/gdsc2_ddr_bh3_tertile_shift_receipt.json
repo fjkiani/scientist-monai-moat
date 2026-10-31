@@ -1,7 +1,9 @@
 {
   "receipt": "gdsc2_ddr_bh3_tertile_shift",
-  "ruo": "RESEARCH USE ONLY. Exploratory pharmacology, not a treatment rule.",
-  "generated_utc": "2026-10-30T03:45:07.627097+00:00",
+  "ruo": true,
+  "ruo_disclaimer": "RESEARCH USE ONLY. Exploratory pharmacology, not a treatment rule.",
+  "contract_status": "evidence_bound_exploratory_prioritization",
+  "generated_utc": "2026-10-31T01:19:10.215531+00:00",
   "git_head_at_generation_expected": "409755be3882275b40743e0a44dc04f4253527fd",
   "archive": {
     "path": "/Users/fahadkiani/Downloads/MASTER_OVARIAN_HIBERNATION_V1_TO_V6.tar.gz",

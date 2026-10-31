@@ -9,6 +9,7 @@ from pydantic import BaseModel, ConfigDict
 from oncology_arbiter.api.audit import log_event, new_request_id
 from oncology_arbiter.auth import APIKey, require_api_key
 from oncology_arbiter.immunotherapy.cart_ici_v3 import ImmunoInputError, score_immunotherapy
+from oncology_arbiter.orchestrator.biological_elo_bridge import build_immunotherapy_elo_bridge
 
 router = APIRouter(prefix="/v1/immunotherapy", tags=["immunotherapy-v3"])
 
@@ -25,8 +26,10 @@ class ImmunoArbiterRequest(BaseModel):
     n_cyto: float | None = None
     n_exhausted: float | None = None
     log_baseline_spd: float | None = None
+    log1p_spd: float | None = None
     prior_regimens: float | None = None
     prior_autologous_transplant: float | None = None
+    prior_auto_sct: float | None = None
     load_ZNF683: float | None = None
     load_GNLY: float | None = None
     cyto_absent: float | None = None
@@ -51,6 +54,7 @@ def immunotherapy_arbiter_score(
             status_code=422,
             detail={"error": "missing_required_inputs", "missing": exc.missing},
         ) from exc
+    body["elo_bridge"] = build_immunotherapy_elo_bridge(body)
     body["request_id"] = request_id
     log_event(
         request_id,

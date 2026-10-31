@@ -180,7 +180,9 @@ def score_ovarian_case(payload: dict[str, Any]) -> dict[str, Any]:
     if timepoint not in {"pre_treatment", "post_nact"}:
         raise OvarianInputError(["timepoint"])
     result: dict[str, Any] = {
-        "ruo": RUO,
+        "ruo": True,
+        "ruo_disclaimer": RUO,
+        "contract_status": "evidence_bound_exploratory_prioritization",
         "timepoint": timepoint,
         "patient_id": payload.get("patient_id"),
         "cutpoints": {"post_DDR": DDR_CUT, "post_H_clean": H_CUT, "ties": "low"},

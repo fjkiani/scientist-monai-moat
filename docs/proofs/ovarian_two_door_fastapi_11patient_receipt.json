@@ -1,7 +1,9 @@
 {
   "receipt": "ovarian_two_door_fastapi_11patient",
-  "ruo": "RESEARCH USE ONLY. Route scoring is not a treatment order.",
-  "generated_utc": "2026-10-30T03:45:08.404270+00:00",
+  "ruo": true,
+  "ruo_disclaimer": "RESEARCH USE ONLY. Route scoring is not a treatment order.",
+  "contract_status": "evidence_bound_exploratory_prioritization",
+  "generated_utc": "2026-10-31T01:19:10.973693+00:00",
   "git_head_expected": "409755be3882275b40743e0a44dc04f4253527fd",
   "endpoint": "POST /v1/ovarian/arbiter/score",
   "auth_mode": "off",

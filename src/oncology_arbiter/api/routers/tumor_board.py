@@ -387,6 +387,7 @@ def case_full(
 
     if cancer_norm == "hgsoc":
         two_door = None
+        hgsoc_elo_ranked: list[dict[str, Any]] = []
         if req.ovarian_two_door is not None:
             try:
                 two_door = score_ovarian_case(req.ovarian_two_door)
@@ -395,6 +396,12 @@ def case_full(
                     status_code=422,
                     detail={"error": "missing_required_inputs", "missing": exc.missing},
                 ) from exc
+            from oncology_arbiter.orchestrator.biological_elo_bridge import (
+                build_ovarian_elo_bridge,
+            )
+
+            two_door["elo_bridge"] = build_ovarian_elo_bridge(two_door)
+            hgsoc_elo_ranked = list(two_door["elo_bridge"]["ranked_candidates"])
         biopsy_input = req.biopsy_input
         dynamic_request = DynamicTumorBoardRequest(
             cancer="hgsoc",
@@ -454,7 +461,7 @@ def case_full(
             biopsy=None,
             therapy=None,
             nsclc=None,
-            elo_ranked_hypotheses=[],
+            elo_ranked_hypotheses=hgsoc_elo_ranked,
         )
 
     if cancer_norm == "breast":

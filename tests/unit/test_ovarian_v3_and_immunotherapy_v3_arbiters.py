@@ -11,7 +11,11 @@ import math
 from fastapi.testclient import TestClient
 
 from oncology_arbiter.api.app import create_app
-from oncology_arbiter.immunotherapy.cart_ici_v3 import load_cart_contract, load_v3_contract
+from oncology_arbiter.immunotherapy.cart_ici_v3 import (
+    load_arbiter_v3_contract,
+    load_cart_contract,
+    load_v3_contract,
+)
 from oncology_arbiter.ovarian.ovarian_two_door_standalone_v3 import (
     GSE165897_11_PATIENT_TABLE,
 )
@@ -66,6 +70,8 @@ def test_eleven_gse165897_patients_match_four_state():
     for row in GSE165897_11_PATIENT_TABLE:
         body = _post_row(client, row)
         seen[row["patient_id"]] = body["four_state_class"]
+        assert body["ruo"] is True
+        assert body["contract_status"] == "evidence_bound_exploratory_prioritization"
         assert body["four_state_class"] == EXPECTED[row["patient_id"]]
         assert body["decision"] == DECISION[body["four_state_class"]]
     assert seen["EOC3"] == "PRIMARY_REFRACTORY_ESCAPE"
@@ -134,6 +140,12 @@ def test_three_immunotherapy_modes_and_missing_inputs():
     hot_response = client.post("/v1/immunotherapy/arbiter/score", json=hot)
     assert hot_response.status_code == 200
     assert hot_response.json()["flag"] == "EX_VIVO_PREMATURE_BURNOUT"
+    assert hot_response.json()["risk_flag"] == "EX_VIVO_CYTOTOXIC_DIFFERENTIATION_RISK"
+    assert hot_response.json()["ruo"] is True
+    assert hot_response.json()["contract_status"] == "evidence_bound_exploratory_prioritization"
+    arb_v3 = load_arbiter_v3_contract()
+    assert arb_v3["contract_version"] == "zeta_immunotherapy_contract_v3"
+    assert arb_v3["contract_status"] == "evidence_bound_exploratory_prioritization"
 
     cart = load_cart_contract()
     blood = {"specimen": "cart_in_vivo_blood"}

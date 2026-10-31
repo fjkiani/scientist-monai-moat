@@ -15,6 +15,8 @@ from pathlib import Path
 from typing import Any
 
 _CONTRACTS = Path(__file__).resolve().parent / "contracts"
+_ARBITER_MODELS = Path(__file__).resolve().parents[1] / "arbiter" / "models"
+CONTRACT_STATUS = "evidence_bound_exploratory_prioritization"
 RUO = (
     "RESEARCH USE ONLY. Compartment scores are not a treatment order and are "
     "not an FDA-cleared diagnostic."
@@ -25,6 +27,12 @@ class ImmunoInputError(ValueError):
     def __init__(self, missing: list[str]) -> None:
         self.missing = missing
         super().__init__("missing_required_inputs:" + ",".join(missing))
+
+
+@lru_cache(maxsize=1)
+def load_arbiter_v3_contract() -> dict[str, Any]:
+    path = _ARBITER_MODELS / "zeta_immunotherapy_contract_v3.json"
+    return json.loads(path.read_text())
 
 
 @lru_cache(maxsize=1)
@@ -79,7 +87,9 @@ def score_infusion_bag(payload: dict[str, Any]) -> dict[str, Any]:
         (values["n_memory"] + 0.5) / (values["n_cyto"] + values["n_exhausted"] + 0.5)
     )
     return {
-        "ruo": RUO,
+        "ruo": True,
+        "ruo_disclaimer": RUO,
+        "contract_status": CONTRACT_STATUS,
         "specimen": "cart_infusion_bag",
         "model_state": "loaded",
         "bag_gate": gate,
@@ -88,19 +98,33 @@ def score_infusion_bag(payload: dict[str, Any]) -> dict[str, Any]:
         "Bag_Index_3": index3,
         "Bag_low_cyto": 1.0 - values["f_cyto_marker"],
         "flag": "EX_VIVO_PREMATURE_BURNOUT" if z_cyto > 0.0 else None,
+        "risk_flag": "EX_VIVO_CYTOTOXIC_DIFFERENTIATION_RISK" if z_cyto > 0.0 else None,
     }
+
+
+_BLOOD_ALIASES = {
+    "log_baseline_spd": ("log_baseline_spd", "log1p_spd"),
+    "prior_autologous_transplant": ("prior_autologous_transplant", "prior_auto_sct"),
+}
 
 
 def score_in_vivo_blood(payload: dict[str, Any]) -> dict[str, Any]:
     contract = load_cart_contract()
     names = list(contract["feature_order"])
     prep = contract["preprocessing"]
-    missing = [name for name in names if name not in payload or payload[name] is None]
+    normalized = dict(payload)
+    for canonical, aliases in _BLOOD_ALIASES.items():
+        if normalized.get(canonical) is None:
+            for alias in aliases:
+                if normalized.get(alias) is not None:
+                    normalized[canonical] = normalized[alias]
+                    break
+    missing = [name for name in names if name not in normalized or normalized[name] is None]
     if missing:
         raise ImmunoInputError(missing)
     values: list[float] = []
     for name in names:
-        raw = payload[name]
+        raw = normalized[name]
         if isinstance(raw, bool):
             raw = int(raw)
         if not isinstance(raw, (int, float)) or not math.isfinite(float(raw)):
@@ -133,7 +157,9 @@ def score_in_vivo_blood(payload: dict[str, Any]) -> dict[str, Any]:
         exp_linear = math.exp(linear)
         probability = exp_linear / (1.0 + exp_linear)
     return {
-        "ruo": RUO,
+        "ruo": True,
+        "ruo_disclaimer": RUO,
+        "contract_status": CONTRACT_STATUS,
         "specimen": "cart_in_vivo_blood",
         "model_state": "loaded",
         "model_name": "cart_hobit_gnly_clinical_contract_v1",
@@ -175,7 +201,9 @@ def score_ici_biopsy(payload: dict[str, Any]) -> dict[str, Any]:
         n_tcf7 = _finite(payload, "n_TCF7_positive")
         n_tox = _finite(payload, "n_TOX_positive")
         return {
-            "ruo": RUO,
+            "ruo": True,
+            "ruo_disclaimer": RUO,
+            "contract_status": CONTRACT_STATUS,
             "specimen": "ici_tumor_biopsy",
             "mode": "single_cell",
             "model_state": "loaded",
@@ -203,7 +231,9 @@ def score_ici_biopsy(payload: dict[str, Any]) -> dict[str, Any]:
     positive = [zz[gene] for gene in triad["positive"]]
     negative = [zz[gene] for gene in triad["negative"]]
     return {
-        "ruo": RUO,
+        "ruo": True,
+        "ruo_disclaimer": RUO,
+        "contract_status": CONTRACT_STATUS,
         "specimen": "ici_tumor_biopsy",
         "mode": "bulk",
         "model_state": "loaded",
