@@ -209,6 +209,13 @@ def test_eleven_gse165897_patients_from_table_and_raw_z_components() -> None:
         assert body["recommend"] == exp_rec
         assert body["contraindicated"] == exp_contra
         assert body["gate0_primary_refractory"] is (pid == "EOC3")
+        argon = body["argon_interpretation"]
+        assert argon["model"] == "gemini-4-argon"
+        assert argon["temperature"] == 0.0
+        assert argon["deterministic"] is True
+        assert argon["argon_input"]["patient_id"] == pid
+        assert exp_cls in argon["argon_output"]["biological_state_meaning"]
+        assert body["elo_bridge"]["top_candidate"] in argon["argon_output"]["elo_ranking_meaning"]
 
         # 2. Raw component z-scores -> derive post_H_clean & post_S_sen to 1e-12
         comp = GSE165897_RAW_Z_COMPONENTS[pid]
@@ -639,3 +646,58 @@ def test_ovarian_and_immunotherapy_missing_inputs_fail_closed_422() -> None:
     )
     assert missing_ici.status_code == 422
     assert "context" in missing_ici.json()["detail"]["missing"]
+
+
+def test_argon_patient_interpreter_is_deterministic_across_all_cohorts(monkeypatch) -> None:
+    """Verify deterministic Argon input->output mapping and temperature=0.0 enforcement."""
+    from oncology_arbiter.models.gemini_argon_client import GeminiArgonClient
+    from oncology_arbiter.orchestrator.argon_patient_interpreter import (
+        interpret_patient_with_argon,
+    )
+
+    client = _client()
+    row_153 = next(r for r in GSE165897_11_PATIENT_TABLE if r["patient_id"] == "EOC153")
+    payload = {
+        "timepoint": "post_nact",
+        "patient_id": "EOC153",
+        "post_H_clean": row_153["post_H_clean"],
+        "post_DDR": row_153["post_DDR"],
+        "post_S_sen": row_153["post_S_sen"],
+        "post_BCL2A1_z": row_153["post_BCL2A1_z"],
+        "delta_MCL1_z": row_153["delta_MCL1_z"],
+        "post_EMT_z": row_153["post_EMT_z"],
+    }
+    r1 = client.post("/v1/ovarian/arbiter/score", json=payload).json()["argon_interpretation"]
+    r2 = client.post("/v1/ovarian/arbiter/score", json=payload).json()["argon_interpretation"]
+    assert r1 == r2
+    assert r1["temperature"] == 0.0
+    assert r1["deterministic"] is True
+    assert "3.3602" in r1["argon_output"]["biological_state_meaning"]
+    assert "Navitoclax" in r1["argon_output"]["elo_ranking_meaning"]
+
+    # Also verify GeminiArgonClient forces temperature=0.0 when deterministic=True
+    captured_temps: list[float] = []
+
+    def _fake_interaction_model(self, *, system, user, max_tokens, temperature):
+        captured_temps.append(temperature)
+        return (
+            '{"biological_state_meaning": "EOC153 post_H_clean=3.3602 > 1.0165 -> Hcleanonly hibernation.", '
+            '"gate_and_compartment_meaning": "Gate 3 Door 2 senolytic vulnerability.", '
+            '"elo_ranking_meaning": "Navitoclax #1 over Venetoclax/Olaparib.", '
+            '"actionable_summary_ruo": "Prioritize BCL-xL senolytic (RUO)."}',
+            "req_argon_det_01",
+        )
+
+    monkeypatch.setattr(GeminiArgonClient, "_chat_interaction_model", _fake_interaction_model)
+    argon_llm = GeminiArgonClient(api_key="AIzaSyDeterministicUnitTestKey000000000", deterministic=True)
+    resp = argon_llm.chat([{"role": "user", "content": r1["argon_prompt"]}], temperature=0.9)
+    assert captured_temps == [0.0]
+    assert resp.request_id == "req_argon_det_01"
+
+    body_153 = client.post("/v1/ovarian/arbiter/score", json=payload).json()
+    live_interp = interpret_patient_with_argon(body_153, llm=argon_llm)
+    assert live_interp["mode"] == "live_gemini_argon"
+    assert live_interp["temperature"] == 0.0
+    assert live_interp["request_id"] == "req_argon_det_01"
+    assert "3.3602" in live_interp["argon_output"]["biological_state_meaning"]
+

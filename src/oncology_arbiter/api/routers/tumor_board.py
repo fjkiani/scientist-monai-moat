@@ -396,11 +396,15 @@ def case_full(
                     status_code=422,
                     detail={"error": "missing_required_inputs", "missing": exc.missing},
                 ) from exc
+            from oncology_arbiter.orchestrator.argon_patient_interpreter import (
+                interpret_patient_with_argon,
+            )
             from oncology_arbiter.orchestrator.biological_elo_bridge import (
                 build_ovarian_elo_bridge,
             )
 
             two_door["elo_bridge"] = build_ovarian_elo_bridge(two_door)
+            two_door["argon_interpretation"] = interpret_patient_with_argon(two_door)
             hgsoc_elo_ranked = list(two_door["elo_bridge"]["ranked_candidates"])
         biopsy_input = req.biopsy_input
         dynamic_request = DynamicTumorBoardRequest(

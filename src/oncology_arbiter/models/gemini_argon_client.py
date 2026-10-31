@@ -46,6 +46,7 @@ class GeminiArgonClient:
         transport: Optional[str] = None,
         timeout_s: float = 180.0,
         system_instruction: Optional[str] = None,
+        deterministic: bool = True,
     ) -> None:
         key = _normalize_api_key(api_key or os.environ.get("GEMINI_API_KEY") or "")
         if not key:
@@ -76,14 +77,16 @@ class GeminiArgonClient:
         ).strip().lower()
         self.timeout_s = float(timeout_s)
         self.system_instruction = system_instruction or ZETA_SYSTEM_INSTRUCTION
+        self.deterministic = bool(deterministic)
         self.usage = UsageLedger()
 
     def chat(
         self,
         messages: List[Dict[str, str]],
         max_tokens: int = 1024,
-        temperature: float = 0.7,
+        temperature: float = 0.0,
     ) -> LlmResponse:
+        eff_temperature = 0.0 if self.deterministic else float(temperature)
         system_parts: list[str] = [self.system_instruction]
         user_parts: list[str] = []
         for msg in messages:
@@ -103,7 +106,7 @@ class GeminiArgonClient:
                 route = "gemini_argon_agent"
             elif self.transport == "generate":
                 text, request_id = self._chat_generate(
-                    system=system, user=user, max_tokens=max_tokens, temperature=temperature,
+                    system=system, user=user, max_tokens=max_tokens, temperature=eff_temperature,
                 )
                 route = "gemini_argon_generate"
             else:
@@ -111,7 +114,7 @@ class GeminiArgonClient:
                     system=system,
                     user=user,
                     max_tokens=max_tokens,
-                    temperature=temperature,
+                    temperature=eff_temperature,
                 )
                 route = "gemini_argon_model"
         except LlmUnavailable:
