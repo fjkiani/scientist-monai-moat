@@ -13,8 +13,33 @@ import pytest
 from oncology_arbiter.orchestrator.reflection import LoopResult
 from oncology_arbiter.tools import WebFetchTool, filter_evidence_by_seen_urls
 from oncology_arbiter.tools.base import ToolCtx
+from oncology_arbiter.tools.web_fetch import is_non_authoritative
 
 pytestmark = pytest.mark.integration
+
+
+def _skip_if_upstream_substituted(result) -> None:
+    """Skip only when the UPSTREAM served a substitute, never on a real bug.
+
+    Observed 2026-08-13 from this network: PubMed answered
+    ``https://pubmed.ncbi.nlm.nih.gov/22007042/`` with HTTP 203 and a
+    100-character "Cookies must be enabled" interstitial. Before the fix,
+    web_fetch's success gate was ``status_code >= 400``, so the bot wall was
+    extracted and returned as a successful document with ``is_error=False`` and
+    none of the ground-truth statistics in it. web_fetch now refuses any
+    non-200, which is correct, and which means these live tests have no
+    document to measure when the wall is up.
+
+    The refusal behaviour itself is pinned hermetically in
+    ``tests/unit/test_web_fetch_authoritative_status.py`` (11 tests, including
+    the exact 203 regression), so skipping here loses no coverage. The
+    predicate is imported from the tool so a reworded message cannot silently
+    turn a real failure into a skip.
+    """
+    if is_non_authoritative(result):
+        pytest.skip(
+            f"upstream served a non-authoritative response: {result.error_message}"
+        )
 
 
 @pytest.mark.asyncio
@@ -26,6 +51,7 @@ async def test_web_fetch_hubbard_pubmed_page(tmp_path) -> None:
         {"url": "https://pubmed.ncbi.nlm.nih.gov/22007042/", "max_chars": 30000},
         ctx,
     )
+    _skip_if_upstream_substituted(result)
     assert not result.is_error, f"web_fetch failed: {result.error_message}"
     payload = result.content
 
@@ -53,6 +79,7 @@ async def test_web_fetch_end_to_end_with_honesty_gate(tmp_path) -> None:
 
     real_url = "https://pubmed.ncbi.nlm.nih.gov/22007042/"
     result = await tool.call({"url": real_url, "max_chars": 5000}, ctx)
+    _skip_if_upstream_substituted(result)
     assert not result.is_error
     fetched_url = result.content["url"]
 
@@ -78,6 +105,7 @@ async def test_web_fetch_cache_roundtrip(tmp_path) -> None:
     url = "https://pubmed.ncbi.nlm.nih.gov/22007042/"
 
     r1 = await tool.call({"url": url}, ctx)
+    _skip_if_upstream_substituted(r1)
     assert not r1.is_error
     first_ms = r1.duration_ms
 

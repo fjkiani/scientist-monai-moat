@@ -1,0 +1,12 @@
+{
+  "status": "A100_PROBE_OK",
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "probe_app": "a100-capacity-probe",
+  "fullfit_queue": "PENDING_WITH_TASKS_GT_0",
+  "deployed_app_tasks": 2,
+  "active_call_id": "see gateD_posneg_lr1e6_spawn_20261005T010700Z.json",
+  "baseline_lock": true,
+  "froc_at_2_baseline": 0.8267399271674979,
+  "clinical_meter": "FROC@2 UNPROVEN until heldout after fullfit",
+  "ts": "2026-10-05T05:09:04Z"
+}

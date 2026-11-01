@@ -1,0 +1,14 @@
+{
+  "status": "spawned",
+  "mode": "spawn-fullfit",
+  "request_id": "gateD-fjkiani-posneg-20261004T231448Z-zo",
+  "call_id": "fc-01M450X3EBHDZH2M4PTW2BF6TD",
+  "gate_c_request_id": "gateC-fjkiani-20261003T0435Z-zo",
+  "app_version": "luna16-fullfit-v0.1.3-posneg-1to1",
+  "learning_rate": 1e-05,
+  "epochs": 5,
+  "sampler": {"pos": 1, "neg": 1, "num_samples": 2},
+  "modal_run": "https://modal.com/apps/fjkiani/main/ap-ed6ACgkIdjabPJ8GAwTpKf",
+  "clinical_meter": "FROC@2 held-out 88 — evaluate only after train completes",
+  "baseline_sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01"
+}

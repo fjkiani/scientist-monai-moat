@@ -1,0 +1,2247 @@
+{
+  "base_commit": "715aca9c8bac",
+  "n_removed_tests": 107,
+  "n_rows": 109,
+  "n_unmapped": 0,
+  "problems": [],
+  "receipt_type": "retired_test_migration",
+  "retirement_status": {
+    "co_scientist_proxy": {
+      "absent_from_api": true,
+      "absent_from_registry": true,
+      "api_leaks": [],
+      "declared_retired_in_registry": true,
+      "registry_leaks": [],
+      "substitute": "deterministic proxy standing in for a live Co-Scientist LLM"
+    },
+    "lung_hu_heuristic": {
+      "absent_from_api": true,
+      "absent_from_registry": true,
+      "api_leaks": [],
+      "declared_retired_in_registry": true,
+      "registry_leaks": [],
+      "substitute": "Hounsfield-unit threshold heuristic standing in for LUNA16"
+    },
+    "midpoint_unknown_imputation": {
+      "absent_from_api": true,
+      "absent_from_registry": true,
+      "api_leaks": [],
+      "declared_retired_in_registry": true,
+      "registry_leaks": [],
+      "substitute": "unknown boolean imputed at 0.5 (the midpoint of the encoding)"
+    },
+    "monai_screening_heuristic": {
+      "absent_from_api": true,
+      "absent_from_registry": true,
+      "api_leaks": [],
+      "declared_retired_in_registry": true,
+      "registry_leaks": [],
+      "substitute": "MONAI intensity heuristic standing in for a screening detector"
+    },
+    "ovarian_patient_scoring": {
+      "absent_from_api": true,
+      "absent_from_registry": true,
+      "api_leaks": [],
+      "declared_retired_in_registry": true,
+      "registry_leaks": [],
+      "substitute": "patient-level ovarian mortality probability"
+    },
+    "regex_report_parser": {
+      "absent_from_api": true,
+      "absent_from_registry": true,
+      "api_leaks": [],
+      "declared_retired_in_registry": true,
+      "registry_leaks": [],
+      "substitute": "regex report parser standing in for ClinicalBERT NER"
+    },
+    "rules_lite_therapy": {
+      "absent_from_api": true,
+      "absent_from_registry": true,
+      "api_leaks": [],
+      "declared_retired_in_registry": true,
+      "registry_leaks": [],
+      "substitute": "NCCN-lite static rules standing in for the SL bridge / TxGemma"
+    },
+    "siglip_proxy": {
+      "absent_from_api": true,
+      "absent_from_registry": true,
+      "api_leaks": [],
+      "declared_retired_in_registry": true,
+      "registry_leaks": [],
+      "substitute": "open-domain SigLIP standing in for MedSigLIP"
+    },
+    "template_arbiter_on_free_text": {
+      "absent_from_api": true,
+      "absent_from_registry": true,
+      "api_leaks": [],
+      "declared_retired_in_registry": true,
+      "registry_leaks": [],
+      "substitute": "template L2 arbiter scored from free text / inferred / empty inputs"
+    }
+  },
+  "rows": [
+    {
+      "capability_retired": null,
+      "migration_kind": "behaviour_replaced",
+      "new_invariant": "the precedence ladder is gone: there is exactly one success path, it requires a 1152-dimensional production embedding receipt, and the zero-shot outputs are labelled independent uncalibrated sigmoids rather than a normalised distribution",
+      "old_test": "test_all_backends_disabled_returns_placeholder",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed",
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt": "passed",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible"
+      ],
+      "retired_behavior": "asserted a placeholder envelope when every backend was disabled"
+    },
+    {
+      "capability_retired": "siglip_proxy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the proxy is deleted from the codebase, cannot be imported by the API module, and `proxy_siglip` is not a constructible ModelState; a screening success now requires a 1152-dimensional MedSigLIP receipt",
+      "old_test": "test_baseline_calls_processor_with_sigLIP_padding",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy": "passed",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend": "passed",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed"
+      },
+      "replacement_test": [
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend"
+      ],
+      "retired_behavior": "asserted the behaviour of an open-domain SigLIP proxy substituted for MedSigLIP, including its warning text and its precedence over other backends",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "siglip_proxy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the proxy is deleted from the codebase, cannot be imported by the API module, and `proxy_siglip` is not a constructible ModelState; a screening success now requires a 1152-dimensional MedSigLIP receipt",
+      "old_test": "test_baseline_close_drops_model",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy": "passed",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend": "passed",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed"
+      },
+      "replacement_test": [
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend"
+      ],
+      "retired_behavior": "asserted the behaviour of an open-domain SigLIP proxy substituted for MedSigLIP, including its warning text and its precedence over other backends",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "siglip_proxy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the proxy is deleted from the codebase, cannot be imported by the API module, and `proxy_siglip` is not a constructible ModelState; a screening success now requires a 1152-dimensional MedSigLIP receipt",
+      "old_test": "test_baseline_defaults_to_ungated_proxy_repo",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy": "passed",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend": "passed",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed"
+      },
+      "replacement_test": [
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend"
+      ],
+      "retired_behavior": "asserted the behaviour of an open-domain SigLIP proxy substituted for MedSigLIP, including its warning text and its precedence over other backends",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "siglip_proxy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the proxy is deleted from the codebase, cannot be imported by the API module, and `proxy_siglip` is not a constructible ModelState; a screening success now requires a 1152-dimensional MedSigLIP receipt",
+      "old_test": "test_baseline_load_is_idempotent",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy": "passed",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend": "passed",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed"
+      },
+      "replacement_test": [
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend"
+      ],
+      "retired_behavior": "asserted the behaviour of an open-domain SigLIP proxy substituted for MedSigLIP, including its warning text and its precedence over other backends",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "siglip_proxy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the proxy is deleted from the codebase, cannot be imported by the API module, and `proxy_siglip` is not a constructible ModelState; a screening success now requires a 1152-dimensional MedSigLIP receipt",
+      "old_test": "test_baseline_rejects_single_label",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy": "passed",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend": "passed",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed"
+      },
+      "replacement_test": [
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend"
+      ],
+      "retired_behavior": "asserted the behaviour of an open-domain SigLIP proxy substituted for MedSigLIP, including its warning text and its precedence over other backends",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "siglip_proxy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the proxy is deleted from the codebase, cannot be imported by the API module, and `proxy_siglip` is not a constructible ModelState; a screening success now requires a 1152-dimensional MedSigLIP receipt",
+      "old_test": "test_baseline_run_returns_proxy_siglip_state",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy": "passed",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend": "passed",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed"
+      },
+      "replacement_test": [
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend"
+      ],
+      "retired_behavior": "asserted the behaviour of an open-domain SigLIP proxy substituted for MedSigLIP, including its warning text and its precedence over other backends",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "template_arbiter_on_free_text",
+      "migration_kind": "capability_retired",
+      "new_invariant": "only an explicit, complete, caller-supplied feature vector produces a score; screening and biopsy emit arbiter_score = null",
+      "old_test": "test_biopsy_arbiter_sum_of_terms_matches_logit",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_endpoint_emits_no_template_arbiter_score": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_case_full_emits_no_template_arbiters_from_free_text": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_only_arbiter_call_site_requires_the_complete_explicit_vector": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_screening_emits_no_template_arbiter_block": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_only_arbiter_call_site_requires_the_complete_explicit_vector",
+        "tests/unit/test_production_specialist_contracts.py::test_screening_emits_no_template_arbiter_block",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_endpoint_emits_no_template_arbiter_score",
+        "tests/unit/test_production_specialist_contracts.py::test_case_full_emits_no_template_arbiters_from_free_text"
+      ],
+      "retired_behavior": "asserted that screening, biopsy and case_full emitted an L2 template arbiter score derived from free text or from another stage's inferred output",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": null,
+      "migration_kind": "behaviour_replaced",
+      "new_invariant": "the precedence ladder is gone: there is exactly one success path, it requires a 1152-dimensional production embedding receipt, and the zero-shot outputs are labelled independent uncalibrated sigmoids rather than a normalised distribution",
+      "old_test": "test_biopsy_classifier_default_placeholder",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed",
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt": "passed",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible"
+      ],
+      "retired_behavior": "asserted biopsy defaulted to a placeholder classifier state"
+    },
+    {
+      "capability_retired": "template_arbiter_on_free_text",
+      "migration_kind": "capability_retired",
+      "new_invariant": "only an explicit, complete, caller-supplied feature vector produces a score; screening and biopsy emit arbiter_score = null",
+      "old_test": "test_biopsy_endpoint_returns_arbiter_score",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_endpoint_emits_no_template_arbiter_score": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_case_full_emits_no_template_arbiters_from_free_text": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_only_arbiter_call_site_requires_the_complete_explicit_vector": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_screening_emits_no_template_arbiter_block": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_only_arbiter_call_site_requires_the_complete_explicit_vector",
+        "tests/unit/test_production_specialist_contracts.py::test_screening_emits_no_template_arbiter_block",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_endpoint_emits_no_template_arbiter_score",
+        "tests/unit/test_production_specialist_contracts.py::test_case_full_emits_no_template_arbiters_from_free_text"
+      ],
+      "retired_behavior": "asserted that screening, biopsy and case_full emitted an L2 template arbiter score derived from free text or from another stage's inferred output",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": null,
+      "migration_kind": "behaviour_replaced",
+      "new_invariant": "the precedence ladder is gone: there is exactly one success path, it requires a 1152-dimensional production embedding receipt, and the zero-shot outputs are labelled independent uncalibrated sigmoids rather than a normalised distribution",
+      "old_test": "test_biopsy_gated_response_has_structured_gate_report",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed",
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt": "passed",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible"
+      ],
+      "retired_behavior": "asserted the gated biopsy response carried a structured gate report"
+    },
+    {
+      "capability_retired": null,
+      "migration_kind": "behaviour_replaced",
+      "new_invariant": "the precedence ladder is gone: there is exactly one success path, it requires a 1152-dimensional production embedding receipt, and the zero-shot outputs are labelled independent uncalibrated sigmoids rather than a normalised distribution",
+      "old_test": "test_biopsy_gated_state_when_forbidden",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed",
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt": "passed",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible"
+      ],
+      "retired_behavior": "asserted a gated biopsy state when access was forbidden"
+    },
+    {
+      "capability_retired": "regex_report_parser",
+      "migration_kind": "capability_retired",
+      "new_invariant": "report parsing is ClinicalBERT-only; a ClinicalBERT failure is terminal for the parsing stage and no regex path can produce a panel",
+      "old_test": "test_biopsy_her2_equivocal_marked_ambiguous",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_clinicalbert_failure_has_no_regex_fallback": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_source_calls_only_clinicalbert_for_report_parsing": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_clinicalbert_failure_has_no_regex_fallback",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_source_calls_only_clinicalbert_for_report_parsing"
+      ],
+      "retired_behavior": "asserted that a regex parser populated the receptor panel and that its output was reported as a parsed report",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "regex_report_parser",
+      "migration_kind": "capability_retired",
+      "new_invariant": "report parsing is ClinicalBERT-only; a ClinicalBERT failure is terminal for the parsing stage and no regex path can produce a panel",
+      "old_test": "test_biopsy_her2_positive_case",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_clinicalbert_failure_has_no_regex_fallback": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_source_calls_only_clinicalbert_for_report_parsing": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_clinicalbert_failure_has_no_regex_fallback",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_source_calls_only_clinicalbert_for_report_parsing"
+      ],
+      "retired_behavior": "asserted that a regex parser populated the receptor panel and that its output was reported as a parsed report",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "regex_report_parser",
+      "migration_kind": "capability_retired",
+      "new_invariant": "report parsing is ClinicalBERT-only; a ClinicalBERT failure is terminal for the parsing stage and no regex path can produce a panel",
+      "old_test": "test_biopsy_luminal_a_receptor_panel_and_grade_populated",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_clinicalbert_failure_has_no_regex_fallback": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_source_calls_only_clinicalbert_for_report_parsing": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_clinicalbert_failure_has_no_regex_fallback",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_source_calls_only_clinicalbert_for_report_parsing"
+      ],
+      "retired_behavior": "asserted that a regex parser populated the receptor panel and that its output was reported as a parsed report",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": null,
+      "migration_kind": "behaviour_replaced",
+      "new_invariant": "the precedence ladder is gone: there is exactly one success path, it requires a 1152-dimensional production embedding receipt, and the zero-shot outputs are labelled independent uncalibrated sigmoids rather than a normalised distribution",
+      "old_test": "test_biopsy_medsiglip_probe_on",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed",
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt": "passed",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible"
+      ],
+      "retired_behavior": "asserted a MedSigLIP probe flag changed the biopsy state"
+    },
+    {
+      "capability_retired": "regex_report_parser",
+      "migration_kind": "capability_retired",
+      "new_invariant": "report parsing is ClinicalBERT-only; a ClinicalBERT failure is terminal for the parsing stage and no regex path can produce a panel",
+      "old_test": "test_biopsy_needs_wsi_or_report",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_clinicalbert_failure_has_no_regex_fallback": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_source_calls_only_clinicalbert_for_report_parsing": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_clinicalbert_failure_has_no_regex_fallback",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_source_calls_only_clinicalbert_for_report_parsing"
+      ],
+      "retired_behavior": "asserted that a regex parser populated the receptor panel and that its output was reported as a parsed report",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "regex_report_parser",
+      "migration_kind": "capability_retired",
+      "new_invariant": "report parsing is ClinicalBERT-only; a ClinicalBERT failure is terminal for the parsing stage and no regex path can produce a panel",
+      "old_test": "test_biopsy_no_match_report_returns_all_no_match",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_clinicalbert_failure_has_no_regex_fallback": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_source_calls_only_clinicalbert_for_report_parsing": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_clinicalbert_failure_has_no_regex_fallback",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_source_calls_only_clinicalbert_for_report_parsing"
+      ],
+      "retired_behavior": "asserted that a regex parser populated the receptor panel and that its output was reported as a parsed report",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "regex_report_parser",
+      "migration_kind": "capability_retired",
+      "new_invariant": "report parsing is ClinicalBERT-only; a ClinicalBERT failure is terminal for the parsing stage and no regex path can produce a panel",
+      "old_test": "test_biopsy_no_report_text_returns_empty_panel_but_valid_response",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_clinicalbert_failure_has_no_regex_fallback": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_source_calls_only_clinicalbert_for_report_parsing": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_clinicalbert_failure_has_no_regex_fallback",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_source_calls_only_clinicalbert_for_report_parsing"
+      ],
+      "retired_behavior": "asserted that a regex parser populated the receptor panel and that its output was reported as a parsed report",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": null,
+      "migration_kind": "behaviour_replaced",
+      "new_invariant": "the precedence ladder is gone: there is exactly one success path, it requires a 1152-dimensional production embedding receipt, and the zero-shot outputs are labelled independent uncalibrated sigmoids rather than a normalised distribution",
+      "old_test": "test_biopsy_placeholder_has_no_gate_report",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed",
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt": "passed",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible"
+      ],
+      "retired_behavior": "asserted the placeholder biopsy response carried no gate report"
+    },
+    {
+      "capability_retired": null,
+      "migration_kind": "behaviour_replaced",
+      "new_invariant": "free text yields model_state != placeholder, pipeline_status == 'failed_required_stage', report_parse is None, grade and every receptor field None, and arbiter_score None; app.py now promotes PLACEHOLDER to UNAVAILABLE whenever any receipt is failed_required, matching what /v1/therapy/reason already did in the identical situation",
+      "old_test": "test_biopsy_placeholder_returns_shape",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/data/test_api_real_dicom.py::test_biopsy_free_text_yields_no_regex_parse": "passed"
+      },
+      "replacement_test": [
+        "tests/data/test_api_real_dicom.py::test_biopsy_free_text_yields_no_regex_parse"
+      ],
+      "retired_behavior": "asserted that /v1/biopsy/analyze returned a PLACEHOLDER-shaped response for free text, which reported 'nothing was attempted' even though the ClinicalBERT required stage had been attempted and had failed"
+    },
+    {
+      "capability_retired": null,
+      "migration_kind": "behaviour_replaced",
+      "new_invariant": "the precedence ladder is gone: there is exactly one success path, it requires a 1152-dimensional production embedding receipt, and the zero-shot outputs are labelled independent uncalibrated sigmoids rather than a normalised distribution",
+      "old_test": "test_biopsy_placeholder_when_flag_off",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed",
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt": "passed",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible"
+      ],
+      "retired_behavior": "asserted a placeholder biopsy response when the flag was off"
+    },
+    {
+      "capability_retired": "regex_report_parser",
+      "migration_kind": "capability_retired",
+      "new_invariant": "report parsing is ClinicalBERT-only; a ClinicalBERT failure is terminal for the parsing stage and no regex path can produce a panel",
+      "old_test": "test_biopsy_report_parser_always_proxy_regex",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_clinicalbert_failure_has_no_regex_fallback": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_source_calls_only_clinicalbert_for_report_parsing": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_clinicalbert_failure_has_no_regex_fallback",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_source_calls_only_clinicalbert_for_report_parsing"
+      ],
+      "retired_behavior": "asserted that a regex parser populated the receptor panel and that its output was reported as a parsed report",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "regex_report_parser",
+      "migration_kind": "capability_retired",
+      "new_invariant": "report parsing is ClinicalBERT-only; a ClinicalBERT failure is terminal for the parsing stage and no regex path can produce a panel",
+      "old_test": "test_biopsy_tnbc_receptor_panel_all_negative",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_clinicalbert_failure_has_no_regex_fallback": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_source_calls_only_clinicalbert_for_report_parsing": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_clinicalbert_failure_has_no_regex_fallback",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_source_calls_only_clinicalbert_for_report_parsing"
+      ],
+      "retired_behavior": "asserted that a regex parser populated the receptor panel and that its output was reported as a parsed report",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "regex_report_parser",
+      "migration_kind": "capability_retired",
+      "new_invariant": "report parsing is ClinicalBERT-only; a ClinicalBERT failure is terminal for the parsing stage and no regex path can produce a panel",
+      "old_test": "test_biopsy_wired_returns_subtype",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_clinicalbert_failure_has_no_regex_fallback": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_source_calls_only_clinicalbert_for_report_parsing": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_clinicalbert_failure_has_no_regex_fallback",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_source_calls_only_clinicalbert_for_report_parsing"
+      ],
+      "retired_behavior": "asserted that a regex parser populated the receptor panel and that its output was reported as a parsed report",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "midpoint_unknown_imputation",
+      "migration_kind": "capability_retired",
+      "new_invariant": "an unobserved boolean contributes exactly zero log-odds; the midpoint encoding is unreachable, and on the screening template it would have injected +1.15 log-odds and inflated the base rate by 26.78%",
+      "old_test": "test_bool_unknown_encodes_as_half",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_arbiter_missingness_encoding.py::test_midpoint_inflation_is_no_longer_reachable": "passed",
+        "tests/unit/test_arbiter_missingness_encoding.py::test_missing_bool_encoding_constant_is_zero_not_half": "passed",
+        "tests/unit/test_arbiter_missingness_encoding.py::test_missing_bool_is_indistinguishable_from_observed_false_in_logit": "passed",
+        "tests/unit/test_arbiter_missingness_encoding.py::test_prevalence_valued_encoding_would_still_overshoot_the_base_rate": "passed",
+        "tests/unit/test_arbiter_missingness_encoding.py::test_shipped_templates_declare_no_nonzero_unknown_level": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_arbiter_missingness_encoding.py::test_missing_bool_encoding_constant_is_zero_not_half",
+        "tests/unit/test_arbiter_missingness_encoding.py::test_midpoint_inflation_is_no_longer_reachable",
+        "tests/unit/test_arbiter_missingness_encoding.py::test_shipped_templates_declare_no_nonzero_unknown_level",
+        "tests/unit/test_arbiter_missingness_encoding.py::test_missing_bool_is_indistinguishable_from_observed_false_in_logit",
+        "tests/unit/test_arbiter_missingness_encoding.py::test_prevalence_valued_encoding_would_still_overshoot_the_base_rate"
+      ],
+      "retired_behavior": "asserted that an unobserved boolean was encoded at 0.5, the midpoint of the {false: 0.0, true: 1.0} encoding",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "template_arbiter_on_free_text",
+      "migration_kind": "capability_retired",
+      "new_invariant": "only an explicit, complete, caller-supplied feature vector produces a score; screening and biopsy emit arbiter_score = null",
+      "old_test": "test_case_full_no_confirmed_falls_back_to_biopsy",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_endpoint_emits_no_template_arbiter_score": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_case_full_emits_no_template_arbiters_from_free_text": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_only_arbiter_call_site_requires_the_complete_explicit_vector": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_screening_emits_no_template_arbiter_block": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_only_arbiter_call_site_requires_the_complete_explicit_vector",
+        "tests/unit/test_production_specialist_contracts.py::test_screening_emits_no_template_arbiter_block",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_endpoint_emits_no_template_arbiter_score",
+        "tests/unit/test_production_specialist_contracts.py::test_case_full_emits_no_template_arbiters_from_free_text"
+      ],
+      "retired_behavior": "asserted that screening, biopsy and case_full emitted an L2 template arbiter score derived from free text or from another stage's inferred output",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "lung_hu_heuristic",
+      "migration_kind": "capability_retired",
+      "new_invariant": "NSCLC requires a verified case manifest and a loaded LUNA16 bundle; ALLOW_SERIES_DIR stays off and the heuristic symbols are banned from the case_full AST",
+      "old_test": "test_case_full_nsclc_placeholder_when_gate_off",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_full_nsclc_requires_case_id_and_never_substitutes_heuristic": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_luna16_requires_case_id_loaded_state_and_bundle": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_full_nsclc_requires_case_id_and_never_substitutes_heuristic",
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution",
+        "tests/unit/test_production_specialist_contracts.py::test_luna16_requires_case_id_loaded_state_and_bundle"
+      ],
+      "retired_behavior": "asserted that a Hounsfield-unit threshold heuristic produced nodule findings when LUNA16 was unavailable, and that a local series directory could be read directly",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "lung_hu_heuristic",
+      "migration_kind": "capability_retired",
+      "new_invariant": "NSCLC requires a verified case manifest and a loaded LUNA16 bundle; ALLOW_SERIES_DIR stays off and the heuristic symbols are banned from the case_full AST",
+      "old_test": "test_case_full_nsclc_placeholder_when_no_ct_input",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_full_nsclc_requires_case_id_and_never_substitutes_heuristic": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_luna16_requires_case_id_loaded_state_and_bundle": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_full_nsclc_requires_case_id_and_never_substitutes_heuristic",
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution",
+        "tests/unit/test_production_specialist_contracts.py::test_luna16_requires_case_id_loaded_state_and_bundle"
+      ],
+      "retired_behavior": "asserted that a Hounsfield-unit threshold heuristic produced nodule findings when LUNA16 was unavailable, and that a local series directory could be read directly",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "lung_hu_heuristic",
+      "migration_kind": "capability_retired",
+      "new_invariant": "NSCLC requires a verified case manifest and a loaded LUNA16 bundle; ALLOW_SERIES_DIR stays off and the heuristic symbols are banned from the case_full AST",
+      "old_test": "test_case_full_nsclc_real_pipeline_400_on_missing_dir",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_full_nsclc_requires_case_id_and_never_substitutes_heuristic": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_luna16_requires_case_id_loaded_state_and_bundle": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_full_nsclc_requires_case_id_and_never_substitutes_heuristic",
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution",
+        "tests/unit/test_production_specialist_contracts.py::test_luna16_requires_case_id_loaded_state_and_bundle"
+      ],
+      "retired_behavior": "asserted that a Hounsfield-unit threshold heuristic produced nodule findings when LUNA16 was unavailable, and that a local series directory could be read directly",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "lung_hu_heuristic",
+      "migration_kind": "capability_retired",
+      "new_invariant": "NSCLC requires a verified case manifest and a loaded LUNA16 bundle; ALLOW_SERIES_DIR stays off and the heuristic symbols are banned from the case_full AST",
+      "old_test": "test_case_full_nsclc_real_pipeline_on_synthetic_ct",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_full_nsclc_requires_case_id_and_never_substitutes_heuristic": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_luna16_requires_case_id_loaded_state_and_bundle": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_full_nsclc_requires_case_id_and_never_substitutes_heuristic",
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution",
+        "tests/unit/test_production_specialist_contracts.py::test_luna16_requires_case_id_loaded_state_and_bundle"
+      ],
+      "retired_behavior": "asserted that a Hounsfield-unit threshold heuristic produced nodule findings when LUNA16 was unavailable, and that a local series directory could be read directly",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "template_arbiter_on_free_text",
+      "migration_kind": "capability_retired",
+      "new_invariant": "only an explicit, complete, caller-supplied feature vector produces a score; screening and biopsy emit arbiter_score = null",
+      "old_test": "test_case_full_receptors_confirmed_drives_therapy_branch",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_endpoint_emits_no_template_arbiter_score": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_case_full_emits_no_template_arbiters_from_free_text": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_only_arbiter_call_site_requires_the_complete_explicit_vector": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_screening_emits_no_template_arbiter_block": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_only_arbiter_call_site_requires_the_complete_explicit_vector",
+        "tests/unit/test_production_specialist_contracts.py::test_screening_emits_no_template_arbiter_block",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_endpoint_emits_no_template_arbiter_score",
+        "tests/unit/test_production_specialist_contracts.py::test_case_full_emits_no_template_arbiters_from_free_text"
+      ],
+      "retired_behavior": "asserted that screening, biopsy and case_full emitted an L2 template arbiter score derived from free text or from another stage's inferred output",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "template_arbiter_on_free_text",
+      "migration_kind": "capability_retired",
+      "new_invariant": "only an explicit, complete, caller-supplied feature vector produces a score; screening and biopsy emit arbiter_score = null",
+      "old_test": "test_case_full_returns_biopsy_and_therapy_arbiters",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_endpoint_emits_no_template_arbiter_score": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_case_full_emits_no_template_arbiters_from_free_text": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_only_arbiter_call_site_requires_the_complete_explicit_vector": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_screening_emits_no_template_arbiter_block": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_only_arbiter_call_site_requires_the_complete_explicit_vector",
+        "tests/unit/test_production_specialist_contracts.py::test_screening_emits_no_template_arbiter_block",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_endpoint_emits_no_template_arbiter_score",
+        "tests/unit/test_production_specialist_contracts.py::test_case_full_emits_no_template_arbiters_from_free_text"
+      ],
+      "retired_behavior": "asserted that screening, biopsy and case_full emitted an L2 template arbiter score derived from free text or from another stage's inferred output",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": null,
+      "migration_kind": "behaviour_replaced",
+      "new_invariant": "no vacuous test remains in the suite; helpers are fixtures",
+      "old_test": "test_client",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_manski_gate_no_public_bypass.py::test_enforce_manski_gate_accepts_no_bypass_argument": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_manski_gate_no_public_bypass.py::test_enforce_manski_gate_accepts_no_bypass_argument"
+      ],
+      "retired_behavior": "a fixture-shaped helper collected as a test; it asserted nothing"
+    },
+    {
+      "capability_retired": "co_scientist_proxy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "a configured MedGemma failure is terminal and surfaces its provenance rather than degrading to a deterministic stand-in",
+      "old_test": "test_co_scientist_default_placeholder",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_configured_medgemma_is_terminal_and_surfaces_provenance": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_configured_medgemma_is_terminal_and_surfaces_provenance"
+      ],
+      "retired_behavior": "asserted that a deterministic proxy satisfied the Co-Scientist stage",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "co_scientist_proxy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "a configured MedGemma failure is terminal and surfaces its provenance rather than degrading to a deterministic stand-in",
+      "old_test": "test_co_scientist_enabled_reports_proxy_co_scientist",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_configured_medgemma_is_terminal_and_surfaces_provenance": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_configured_medgemma_is_terminal_and_surfaces_provenance"
+      ],
+      "retired_behavior": "asserted that a deterministic proxy satisfied the Co-Scientist stage",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "siglip_proxy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the proxy is deleted from the codebase, cannot be imported by the API module, and `proxy_siglip` is not a constructible ModelState; a screening success now requires a 1152-dimensional MedSigLIP receipt",
+      "old_test": "test_default_labels_are_two_neutral_prompts",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy": "passed",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend": "passed",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed"
+      },
+      "replacement_test": [
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend"
+      ],
+      "retired_behavior": "asserted the behaviour of an open-domain SigLIP proxy substituted for MedSigLIP, including its warning text and its precedence over other backends",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": null,
+      "migration_kind": "behaviour_replaced",
+      "new_invariant": "--check exits 1 on drift against the committed ledger, and --ledger-path exits 2 unless combined with --check or --dry-run so it cannot be used to write somewhere unexpected",
+      "old_test": "test_dry_run_reports_no_changes_when_repo_is_current",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_progress_ledger.py::test_check_fails_on_a_stale_ledger": "passed",
+        "tests/unit/test_progress_ledger.py::test_committed_ledger_is_current_without_regenerating_it": "passed",
+        "tests/unit/test_progress_ledger.py::test_ledger_path_override_cannot_be_used_to_write": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_progress_ledger.py::test_committed_ledger_is_current_without_regenerating_it",
+        "tests/unit/test_progress_ledger.py::test_check_fails_on_a_stale_ledger",
+        "tests/unit/test_progress_ledger.py::test_ledger_path_override_cannot_be_used_to_write"
+      ],
+      "retired_behavior": "asserted that a dry run reported no changes, which was vacuous: the assertion held whether or not the ledger was current"
+    },
+    {
+      "capability_retired": "regex_report_parser",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the wire contract now forbids a regex parse block entirely: an unparseable report yields report_parse = null, pipeline_status = 'failed_required_stage', a failed_required ClinicalBERT receipt, grade and every receptor field null, and no receptor_panel_source warning",
+      "old_test": "test_full_luminal_a_report",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/nlp/test_biopsy_report_parse_wire.py::TestBiopsyRequestShape::test_no_report_text_returns_no_parse_block": "passed",
+        "tests/nlp/test_biopsy_report_parse_wire.py::TestBiopsyRequestShape::test_unparseable_report_yields_no_parse_block_and_a_failed_stage": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_clinicalbert_failure_has_no_regex_fallback": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_source_calls_only_clinicalbert_for_report_parsing": "passed"
+      },
+      "replacement_test": [
+        "tests/nlp/test_biopsy_report_parse_wire.py::TestBiopsyRequestShape::test_unparseable_report_yields_no_parse_block_and_a_failed_stage",
+        "tests/nlp/test_biopsy_report_parse_wire.py::TestBiopsyRequestShape::test_no_report_text_returns_no_parse_block",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_clinicalbert_failure_has_no_regex_fallback",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_source_calls_only_clinicalbert_for_report_parsing"
+      ],
+      "retired_behavior": "asserted on the WIRE that a regex parser was an accepted success source: parser_id == 'proxy_regex_v0', fusion_mode == 'regex', a populated receptor panel from free text, and a 'matched count' warning describing how many regexes fired",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": null,
+      "migration_kind": "behaviour_replaced",
+      "new_invariant": "the precedence ladder is gone: there is exactly one success path, it requires a 1152-dimensional production embedding receipt, and the zero-shot outputs are labelled independent uncalibrated sigmoids rather than a normalised distribution",
+      "old_test": "test_gated_response_warning_encodes_level_and_reason",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed",
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt": "passed",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible"
+      ],
+      "retired_behavior": "asserted the gated warning string encoded level and reason"
+    },
+    {
+      "capability_retired": null,
+      "migration_kind": "behaviour_replaced",
+      "new_invariant": "no retired substitute state can appear in the health payload; the advertised slots are constrained by the registry rather than by a hand-maintained list",
+      "old_test": "test_health_includes_all_expected_slots",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible"
+      ],
+      "retired_behavior": "asserted the health payload advertised every model slot as present"
+    },
+    {
+      "capability_retired": null,
+      "migration_kind": "behaviour_replaced",
+      "new_invariant": "the precedence ladder is gone: there is exactly one success path, it requires a 1152-dimensional production embedding receipt, and the zero-shot outputs are labelled independent uncalibrated sigmoids rather than a normalised distribution",
+      "old_test": "test_l3_arbiter_always_template",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed",
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt": "passed",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible"
+      ],
+      "retired_behavior": "asserted the L3 arbiter was permanently in template state"
+    },
+    {
+      "capability_retired": "siglip_proxy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the proxy is deleted from the codebase, cannot be imported by the API module, and `proxy_siglip` is not a constructible ModelState; a screening success now requires a 1152-dimensional MedSigLIP receipt",
+      "old_test": "test_medsiglip_allowed_takes_precedence_over_proxy",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy": "passed",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend": "passed",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed"
+      },
+      "replacement_test": [
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend"
+      ],
+      "retired_behavior": "asserted the behaviour of an open-domain SigLIP proxy substituted for MedSigLIP, including its warning text and its precedence over other backends",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "siglip_proxy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the proxy is deleted from the codebase, cannot be imported by the API module, and `proxy_siglip` is not a constructible ModelState; a screening success now requires a 1152-dimensional MedSigLIP receipt",
+      "old_test": "test_medsiglip_disabled_proxy_still_works",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy": "passed",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend": "passed",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed"
+      },
+      "replacement_test": [
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend"
+      ],
+      "retired_behavior": "asserted the behaviour of an open-domain SigLIP proxy substituted for MedSigLIP, including its warning text and its precedence over other backends",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "siglip_proxy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the proxy is deleted from the codebase, cannot be imported by the API module, and `proxy_siglip` is not a constructible ModelState; a screening success now requires a 1152-dimensional MedSigLIP receipt",
+      "old_test": "test_medsiglip_gate_denied_does_not_fall_back_to_proxy_by_default",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy": "passed",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend": "passed",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed"
+      },
+      "replacement_test": [
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend"
+      ],
+      "retired_behavior": "asserted the behaviour of an open-domain SigLIP proxy substituted for MedSigLIP, including its warning text and its precedence over other backends",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "siglip_proxy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the proxy is deleted from the codebase, cannot be imported by the API module, and `proxy_siglip` is not a constructible ModelState; a screening success now requires a 1152-dimensional MedSigLIP receipt",
+      "old_test": "test_medsiglip_gate_denied_with_proxy_enabled_falls_back_with_both_warnings",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy": "passed",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend": "passed",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed"
+      },
+      "replacement_test": [
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend"
+      ],
+      "retired_behavior": "asserted the behaviour of an open-domain SigLIP proxy substituted for MedSigLIP, including its warning text and its precedence over other backends",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "template_arbiter_on_free_text",
+      "migration_kind": "capability_retired",
+      "new_invariant": "only an explicit, complete, caller-supplied feature vector produces a score; screening and biopsy emit arbiter_score = null",
+      "old_test": "test_medsiglip_score_present_alongside_arbiter_block",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_endpoint_emits_no_template_arbiter_score": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_case_full_emits_no_template_arbiters_from_free_text": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_only_arbiter_call_site_requires_the_complete_explicit_vector": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_screening_emits_no_template_arbiter_block": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_only_arbiter_call_site_requires_the_complete_explicit_vector",
+        "tests/unit/test_production_specialist_contracts.py::test_screening_emits_no_template_arbiter_block",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_endpoint_emits_no_template_arbiter_score",
+        "tests/unit/test_production_specialist_contracts.py::test_case_full_emits_no_template_arbiters_from_free_text"
+      ],
+      "retired_behavior": "asserted that screening, biopsy and case_full emitted an L2 template arbiter score derived from free text or from another stage's inferred output",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "siglip_proxy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the proxy is deleted from the codebase, cannot be imported by the API module, and `proxy_siglip` is not a constructible ModelState; a screening success now requires a 1152-dimensional MedSigLIP receipt",
+      "old_test": "test_model_state_enum_has_proxy_siglip_variant",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy": "passed",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend": "passed",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed"
+      },
+      "replacement_test": [
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend"
+      ],
+      "retired_behavior": "asserted the behaviour of an open-domain SigLIP proxy substituted for MedSigLIP, including its warning text and its precedence over other backends",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": null,
+      "migration_kind": "behaviour_replaced",
+      "new_invariant": "the precedence ladder is gone: there is exactly one success path, it requires a 1152-dimensional production embedding receipt, and the zero-shot outputs are labelled independent uncalibrated sigmoids rather than a normalised distribution",
+      "old_test": "test_model_state_loaded_medsiglip_is_distinct",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed",
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt": "passed",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible"
+      ],
+      "retired_behavior": "asserted LOADED_MEDSIGLIP was distinct from the proxy state"
+    },
+    {
+      "capability_retired": "monai_screening_heuristic",
+      "migration_kind": "capability_retired",
+      "new_invariant": "`proxy_monai_heuristic` is not a constructible ModelState and a screening success requires a production MedSigLIP embedding receipt",
+      "old_test": "test_monai_detector_off_by_default",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed",
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible"
+      ],
+      "retired_behavior": "asserted that a MONAI intensity heuristic promoted a placeholder screening response to a proxy result carrying bounding boxes",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "monai_screening_heuristic",
+      "migration_kind": "capability_retired",
+      "new_invariant": "`proxy_monai_heuristic` is not a constructible ModelState and a screening success requires a production MedSigLIP embedding receipt",
+      "old_test": "test_monai_detector_on_produces_bbox_findings",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed",
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible"
+      ],
+      "retired_behavior": "asserted that a MONAI intensity heuristic promoted a placeholder screening response to a proxy result carrying bounding boxes",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "monai_screening_heuristic",
+      "migration_kind": "capability_retired",
+      "new_invariant": "`proxy_monai_heuristic` is not a constructible ModelState and a screening success requires a production MedSigLIP embedding receipt",
+      "old_test": "test_monai_detector_promotes_placeholder_to_proxy",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed",
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible"
+      ],
+      "retired_behavior": "asserted that a MONAI intensity heuristic promoted a placeholder screening response to a proxy result carrying bounding boxes",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "monai_screening_heuristic",
+      "migration_kind": "capability_retired",
+      "new_invariant": "`proxy_monai_heuristic` is not a constructible ModelState and a screening success requires a production MedSigLIP embedding receipt",
+      "old_test": "test_monai_honesty_warning_surfaced",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed",
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible"
+      ],
+      "retired_behavior": "asserted that a MONAI intensity heuristic promoted a placeholder screening response to a proxy result carrying bounding boxes",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "lung_hu_heuristic",
+      "migration_kind": "capability_retired",
+      "new_invariant": "NSCLC requires a verified case manifest and a loaded LUNA16 bundle; ALLOW_SERIES_DIR stays off and the heuristic symbols are banned from the case_full AST",
+      "old_test": "test_nsclc_always_proxy_lung_heuristic",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_full_nsclc_requires_case_id_and_never_substitutes_heuristic": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_luna16_requires_case_id_loaded_state_and_bundle": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_full_nsclc_requires_case_id_and_never_substitutes_heuristic",
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution",
+        "tests/unit/test_production_specialist_contracts.py::test_luna16_requires_case_id_loaded_state_and_bundle"
+      ],
+      "retired_behavior": "asserted that a Hounsfield-unit threshold heuristic produced nodule findings when LUNA16 was unavailable, and that a local series directory could be read directly",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "lung_hu_heuristic",
+      "migration_kind": "capability_retired",
+      "new_invariant": "NSCLC requires a verified case manifest and a loaded LUNA16 bundle; ALLOW_SERIES_DIR stays off and the heuristic symbols are banned from the case_full AST",
+      "old_test": "test_nsclc_flagged_at_least_as_proxy",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_full_nsclc_requires_case_id_and_never_substitutes_heuristic": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_luna16_requires_case_id_loaded_state_and_bundle": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_full_nsclc_requires_case_id_and_never_substitutes_heuristic",
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution",
+        "tests/unit/test_production_specialist_contracts.py::test_luna16_requires_case_id_loaded_state_and_bundle"
+      ],
+      "retired_behavior": "asserted that a Hounsfield-unit threshold heuristic produced nodule findings when LUNA16 was unavailable, and that a local series directory could be read directly",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "lung_hu_heuristic",
+      "migration_kind": "capability_retired",
+      "new_invariant": "NSCLC requires a verified case manifest and a loaded LUNA16 bundle; ALLOW_SERIES_DIR stays off and the heuristic symbols are banned from the case_full AST",
+      "old_test": "test_nsclc_returns_placeholder_envelope",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_full_nsclc_requires_case_id_and_never_substitutes_heuristic": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_luna16_requires_case_id_loaded_state_and_bundle": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_full_nsclc_requires_case_id_and_never_substitutes_heuristic",
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution",
+        "tests/unit/test_production_specialist_contracts.py::test_luna16_requires_case_id_loaded_state_and_bundle"
+      ],
+      "retired_behavior": "asserted that a Hounsfield-unit threshold heuristic produced nodule findings when LUNA16 was unavailable, and that a local series directory could be read directly",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "siglip_proxy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the proxy is deleted from the codebase, cannot be imported by the API module, and `proxy_siglip` is not a constructible ModelState; a screening success now requires a 1152-dimensional MedSigLIP receipt",
+      "old_test": "test_proxy_warning_cites_pathology_anchor",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy": "passed",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend": "passed",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed"
+      },
+      "replacement_test": [
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend"
+      ],
+      "retired_behavior": "asserted the behaviour of an open-domain SigLIP proxy substituted for MedSigLIP, including its warning text and its precedence over other backends",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "siglip_proxy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the proxy is deleted from the codebase, cannot be imported by the API module, and `proxy_siglip` is not a constructible ModelState; a screening success now requires a 1152-dimensional MedSigLIP receipt",
+      "old_test": "test_proxy_warning_forbids_reporting_as_medsiglip",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy": "passed",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend": "passed",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed"
+      },
+      "replacement_test": [
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend"
+      ],
+      "retired_behavior": "asserted the behaviour of an open-domain SigLIP proxy substituted for MedSigLIP, including its warning text and its precedence over other backends",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "siglip_proxy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the proxy is deleted from the codebase, cannot be imported by the API module, and `proxy_siglip` is not a constructible ModelState; a screening success now requires a 1152-dimensional MedSigLIP receipt",
+      "old_test": "test_proxy_warning_names_apache_or_general_domain",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy": "passed",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend": "passed",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed"
+      },
+      "replacement_test": [
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend"
+      ],
+      "retired_behavior": "asserted the behaviour of an open-domain SigLIP proxy substituted for MedSigLIP, including its warning text and its precedence over other backends",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "siglip_proxy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the proxy is deleted from the codebase, cannot be imported by the API module, and `proxy_siglip` is not a constructible ModelState; a screening success now requires a 1152-dimensional MedSigLIP receipt",
+      "old_test": "test_proxy_warning_references_mammography_absence",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy": "passed",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend": "passed",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed"
+      },
+      "replacement_test": [
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend"
+      ],
+      "retired_behavior": "asserted the behaviour of an open-domain SigLIP proxy substituted for MedSigLIP, including its warning text and its precedence over other backends",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "siglip_proxy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the proxy is deleted from the codebase, cannot be imported by the API module, and `proxy_siglip` is not a constructible ModelState; a screening success now requires a 1152-dimensional MedSigLIP receipt",
+      "old_test": "test_proxy_warning_references_proxy_and_medsiglip",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy": "passed",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend": "passed",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed"
+      },
+      "replacement_test": [
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend"
+      ],
+      "retired_behavior": "asserted the behaviour of an open-domain SigLIP proxy substituted for MedSigLIP, including its warning text and its precedence over other backends",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "siglip_proxy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the proxy is deleted from the codebase, cannot be imported by the API module, and `proxy_siglip` is not a constructible ModelState; a screening success now requires a 1152-dimensional MedSigLIP receipt",
+      "old_test": "test_real_siglip_smoke_on_cbis_dicom",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy": "passed",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend": "passed",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed"
+      },
+      "replacement_test": [
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend"
+      ],
+      "retired_behavior": "asserted the behaviour of an open-domain SigLIP proxy substituted for MedSigLIP, including its warning text and its precedence over other backends",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "siglip_proxy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the proxy is deleted from the codebase, cannot be imported by the API module, and `proxy_siglip` is not a constructible ModelState; a screening success now requires a 1152-dimensional MedSigLIP receipt",
+      "old_test": "test_real_siglip_two_fixtures_produce_distinct_logits",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy": "passed",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend": "passed",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed"
+      },
+      "replacement_test": [
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend"
+      ],
+      "retired_behavior": "asserted the behaviour of an open-domain SigLIP proxy substituted for MedSigLIP, including its warning text and its precedence over other backends",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": null,
+      "migration_kind": "behaviour_replaced",
+      "new_invariant": "proxy states are not expressible, so there is no realistic-proxy mixture left to assert",
+      "old_test": "test_render_env_reports_realistic_state",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible"
+      ],
+      "retired_behavior": "asserted the deployed environment reported a 'realistic' mixture of placeholder and proxy states"
+    },
+    {
+      "capability_retired": "regex_report_parser",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the wire contract now forbids a regex parse block entirely: an unparseable report yields report_parse = null, pipeline_status = 'failed_required_stage', a failed_required ClinicalBERT receipt, grade and every receptor field null, and no receptor_panel_source warning",
+      "old_test": "test_report_with_no_signal_returns_no_match_block",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/nlp/test_biopsy_report_parse_wire.py::TestBiopsyRequestShape::test_no_report_text_returns_no_parse_block": "passed",
+        "tests/nlp/test_biopsy_report_parse_wire.py::TestBiopsyRequestShape::test_unparseable_report_yields_no_parse_block_and_a_failed_stage": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_clinicalbert_failure_has_no_regex_fallback": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_source_calls_only_clinicalbert_for_report_parsing": "passed"
+      },
+      "replacement_test": [
+        "tests/nlp/test_biopsy_report_parse_wire.py::TestBiopsyRequestShape::test_unparseable_report_yields_no_parse_block_and_a_failed_stage",
+        "tests/nlp/test_biopsy_report_parse_wire.py::TestBiopsyRequestShape::test_no_report_text_returns_no_parse_block",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_clinicalbert_failure_has_no_regex_fallback",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_source_calls_only_clinicalbert_for_report_parsing"
+      ],
+      "retired_behavior": "asserted on the WIRE that a regex parser was an accepted success source: parser_id == 'proxy_regex_v0', fusion_mode == 'regex', a populated receptor panel from free text, and a 'matched count' warning describing how many regexes fired",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": null,
+      "migration_kind": "behaviour_replaced",
+      "new_invariant": "the precedence ladder is gone: there is exactly one success path, it requires a 1152-dimensional production embedding receipt, and the zero-shot outputs are labelled independent uncalibrated sigmoids rather than a normalised distribution",
+      "old_test": "test_screening_analyze_preprocessing_still_runs_on_real_dicom",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed",
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt": "passed",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible"
+      ],
+      "retired_behavior": "asserted preprocessing ran on a real DICOM"
+    },
+    {
+      "capability_retired": null,
+      "migration_kind": "behaviour_replaced",
+      "new_invariant": "the precedence ladder is gone: there is exactly one success path, it requires a 1152-dimensional production embedding receipt, and the zero-shot outputs are labelled independent uncalibrated sigmoids rather than a normalised distribution",
+      "old_test": "test_screening_analyze_returns_two_zero_shot_findings",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed",
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt": "passed",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible"
+      ],
+      "retired_behavior": "asserted two zero-shot findings were returned"
+    },
+    {
+      "capability_retired": null,
+      "migration_kind": "behaviour_replaced",
+      "new_invariant": "the precedence ladder is gone: there is exactly one success path, it requires a 1152-dimensional production embedding receipt, and the zero-shot outputs are labelled independent uncalibrated sigmoids rather than a normalised distribution",
+      "old_test": "test_screening_analyze_uses_modal_and_reports_loaded_medsiglip",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed",
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt": "passed",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible"
+      ],
+      "retired_behavior": "asserted the Modal path reported LOADED_MEDSIGLIP"
+    },
+    {
+      "capability_retired": null,
+      "migration_kind": "behaviour_replaced",
+      "new_invariant": "the precedence ladder is gone: there is exactly one success path, it requires a 1152-dimensional production embedding receipt, and the zero-shot outputs are labelled independent uncalibrated sigmoids rather than a normalised distribution",
+      "old_test": "test_screening_analyze_wires_cbis_ddsm_probe_when_enabled",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed",
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt": "passed",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible"
+      ],
+      "retired_behavior": "asserted a CBIS-DDSM probe was wired in when enabled"
+    },
+    {
+      "capability_retired": null,
+      "migration_kind": "behaviour_replaced",
+      "new_invariant": "the precedence ladder is gone: there is exactly one success path, it requires a 1152-dimensional production embedding receipt, and the zero-shot outputs are labelled independent uncalibrated sigmoids rather than a normalised distribution",
+      "old_test": "test_screening_default_placeholder",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed",
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt": "passed",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible"
+      ],
+      "retired_behavior": "asserted screening defaulted to a placeholder score"
+    },
+    {
+      "capability_retired": "template_arbiter_on_free_text",
+      "migration_kind": "capability_retired",
+      "new_invariant": "only an explicit, complete, caller-supplied feature vector produces a score; screening and biopsy emit arbiter_score = null",
+      "old_test": "test_screening_endpoint_returns_arbiter_score",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_endpoint_emits_no_template_arbiter_score": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_case_full_emits_no_template_arbiters_from_free_text": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_only_arbiter_call_site_requires_the_complete_explicit_vector": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_screening_emits_no_template_arbiter_block": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_only_arbiter_call_site_requires_the_complete_explicit_vector",
+        "tests/unit/test_production_specialist_contracts.py::test_screening_emits_no_template_arbiter_block",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_endpoint_emits_no_template_arbiter_score",
+        "tests/unit/test_production_specialist_contracts.py::test_case_full_emits_no_template_arbiters_from_free_text"
+      ],
+      "retired_behavior": "asserted that screening, biopsy and case_full emitted an L2 template arbiter score derived from free text or from another stage's inferred output",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": null,
+      "migration_kind": "behaviour_replaced",
+      "new_invariant": "the precedence ladder is gone: there is exactly one success path, it requires a 1152-dimensional production embedding receipt, and the zero-shot outputs are labelled independent uncalibrated sigmoids rather than a normalised distribution",
+      "old_test": "test_screening_medsiglip_wins",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed",
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt": "passed",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt",
+        "tests/unit/test_screening_production_contract.py::test_zero_shot_probs_are_reported_as_independent_sigmoid_scores",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible"
+      ],
+      "retired_behavior": "asserted MedSigLIP won a precedence contest against proxies"
+    },
+    {
+      "capability_retired": "monai_screening_heuristic",
+      "migration_kind": "capability_retired",
+      "new_invariant": "`proxy_monai_heuristic` is not a constructible ModelState and a screening success requires a production MedSigLIP embedding receipt",
+      "old_test": "test_screening_monai_heuristic",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed",
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_screening_production_contract.py::test_success_requires_1152_dimensional_production_receipt",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible"
+      ],
+      "retired_behavior": "asserted that a MONAI intensity heuristic promoted a placeholder screening response to a proxy result carrying bounding boxes",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "siglip_proxy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the proxy is deleted from the codebase, cannot be imported by the API module, and `proxy_siglip` is not a constructible ModelState; a screening success now requires a 1152-dimensional MedSigLIP receipt",
+      "old_test": "test_screening_siglip_proxy_beats_medsiglip",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy": "passed",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend": "passed",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed"
+      },
+      "replacement_test": [
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend"
+      ],
+      "retired_behavior": "asserted the behaviour of an open-domain SigLIP proxy substituted for MedSigLIP, including its warning text and its precedence over other backends",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "siglip_proxy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the proxy is deleted from the codebase, cannot be imported by the API module, and `proxy_siglip` is not a constructible ModelState; a screening success now requires a 1152-dimensional MedSigLIP receipt",
+      "old_test": "test_screening_siglip_proxy_beats_monai",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy": "passed",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend": "passed",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed"
+      },
+      "replacement_test": [
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend"
+      ],
+      "retired_behavior": "asserted the behaviour of an open-domain SigLIP proxy substituted for MedSigLIP, including its warning text and its precedence over other backends",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": null,
+      "migration_kind": "behaviour_replaced",
+      "new_invariant": "the URL input is refused with HTTP 400, the string 'not yet wired' is absent from the body, and no overall_score or medsiglip key is emitted -- a refusal, not a promise",
+      "old_test": "test_screening_url_not_yet_wired",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/data/test_api_real_dicom.py::test_screening_url_is_refused_not_deferred": "passed"
+      },
+      "replacement_test": [
+        "tests/data/test_api_real_dicom.py::test_screening_url_is_refused_not_deferred"
+      ],
+      "retired_behavior": "asserted HTTP 501 'not yet wired' for a screening URL input, i.e. that the capability was merely deferred and would arrive later"
+    },
+    {
+      "capability_retired": "siglip_proxy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the proxy is deleted from the codebase, cannot be imported by the API module, and `proxy_siglip` is not a constructible ModelState; a screening success now requires a 1152-dimensional MedSigLIP receipt",
+      "old_test": "test_siglip_proxy_architecture_is_vit_b_16",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy": "passed",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend": "passed",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed"
+      },
+      "replacement_test": [
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend"
+      ],
+      "retired_behavior": "asserted the behaviour of an open-domain SigLIP proxy substituted for MedSigLIP, including its warning text and its precedence over other backends",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "siglip_proxy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the proxy is deleted from the codebase, cannot be imported by the API module, and `proxy_siglip` is not a constructible ModelState; a screening success now requires a 1152-dimensional MedSigLIP receipt",
+      "old_test": "test_siglip_proxy_input_resolution_is_224",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy": "passed",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend": "passed",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed"
+      },
+      "replacement_test": [
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend"
+      ],
+      "retired_behavior": "asserted the behaviour of an open-domain SigLIP proxy substituted for MedSigLIP, including its warning text and its precedence over other backends",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "siglip_proxy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the proxy is deleted from the codebase, cannot be imported by the API module, and `proxy_siglip` is not a constructible ModelState; a screening success now requires a 1152-dimensional MedSigLIP receipt",
+      "old_test": "test_siglip_proxy_license_is_apache",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy": "passed",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend": "passed",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed"
+      },
+      "replacement_test": [
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend"
+      ],
+      "retired_behavior": "asserted the behaviour of an open-domain SigLIP proxy substituted for MedSigLIP, including its warning text and its precedence over other backends",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "siglip_proxy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the proxy is deleted from the codebase, cannot be imported by the API module, and `proxy_siglip` is not a constructible ModelState; a screening success now requires a 1152-dimensional MedSigLIP receipt",
+      "old_test": "test_siglip_proxy_repo_verbatim",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy": "passed",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend": "passed",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed"
+      },
+      "replacement_test": [
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend"
+      ],
+      "retired_behavior": "asserted the behaviour of an open-domain SigLIP proxy substituted for MedSigLIP, including its warning text and its precedence over other backends",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": null,
+      "migration_kind": "behaviour_replaced",
+      "new_invariant": "the vocabulary is three-tier so a partially-delivered item cannot be rounded up to done",
+      "old_test": "test_status_is_one_of_the_two_tiers",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_progress_ledger.py::test_status_is_one_of_the_three_tiers": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_progress_ledger.py::test_status_is_one_of_the_three_tiers"
+      ],
+      "retired_behavior": "asserted a two-tier ledger status vocabulary"
+    },
+    {
+      "capability_retired": null,
+      "migration_kind": "behaviour_replaced",
+      "new_invariant": "a null field is unobserved, never negative: it either closes the interval when supplied or trips the Manski gate when not",
+      "old_test": "test_therapy_arbiter_bucket_matches_recommendation",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_api_arbiter_wiring.py::test_therapy_arbiter_scores_only_from_explicit_inputs": "passed",
+        "tests/unit/test_api_arbiter_wiring.py::test_therapy_bucket_matches_recommendation": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_triage_contrasts_are_mathematically_exact": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_api_arbiter_wiring.py::test_therapy_arbiter_scores_only_from_explicit_inputs",
+        "tests/unit/test_api_arbiter_wiring.py::test_therapy_bucket_matches_recommendation",
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_triage_contrasts_are_mathematically_exact"
+      ],
+      "retired_behavior": "asserted the risk bucket matched the recommendation on an inferred panel"
+    },
+    {
+      "capability_retired": null,
+      "migration_kind": "behaviour_replaced",
+      "new_invariant": "an unobserved node status returns HTTP 422 ManskiBoundsExceeded carrying the identified set [0.168682, 0.623634], width 0.454952 -- nearly half the probability scale from one missing field",
+      "old_test": "test_therapy_arbiter_suppressed_when_nodes_missing",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_api_arbiter_wiring.py::test_therapy_arbiter_gates_when_nodes_missing": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_api_arbiter_wiring.py::test_therapy_arbiter_gates_when_nodes_missing"
+      ],
+      "retired_behavior": "asserted that an unobserved lymph-node status returned therapy_triage = null with a skipped receipt, which hid how much the missing covariate cost"
+    },
+    {
+      "capability_retired": "rules_lite_therapy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the live SL bridge is the only recommendation source; when it is unavailable the stage fails required and no options are emitted",
+      "old_test": "test_therapy_default_placeholder",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source",
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution"
+      ],
+      "retired_behavior": "asserted that a static NCCN-lite rules table produced therapy recommendations when TxGemma was gated or absent",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "template_arbiter_on_free_text",
+      "migration_kind": "capability_retired",
+      "new_invariant": "only an explicit, complete, caller-supplied feature vector produces a score; screening and biopsy emit arbiter_score = null",
+      "old_test": "test_therapy_endpoint_returns_arbiter_score",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_endpoint_emits_no_template_arbiter_score": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_case_full_emits_no_template_arbiters_from_free_text": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_only_arbiter_call_site_requires_the_complete_explicit_vector": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_screening_emits_no_template_arbiter_block": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_only_arbiter_call_site_requires_the_complete_explicit_vector",
+        "tests/unit/test_production_specialist_contracts.py::test_screening_emits_no_template_arbiter_block",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_endpoint_emits_no_template_arbiter_score",
+        "tests/unit/test_production_specialist_contracts.py::test_case_full_emits_no_template_arbiters_from_free_text"
+      ],
+      "retired_behavior": "asserted that screening, biopsy and case_full emitted an L2 template arbiter score derived from free text or from another stage's inferred output",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": null,
+      "migration_kind": "behaviour_replaced",
+      "new_invariant": "a null field is unobserved, never negative: it either closes the interval when supplied or trips the Manski gate when not",
+      "old_test": "test_therapy_override_absent_falls_back_to_biopsy_panel",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_api_arbiter_wiring.py::test_therapy_arbiter_scores_only_from_explicit_inputs": "passed",
+        "tests/unit/test_api_arbiter_wiring.py::test_therapy_bucket_matches_recommendation": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_triage_contrasts_are_mathematically_exact": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_api_arbiter_wiring.py::test_therapy_arbiter_scores_only_from_explicit_inputs",
+        "tests/unit/test_api_arbiter_wiring.py::test_therapy_bucket_matches_recommendation",
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_triage_contrasts_are_mathematically_exact"
+      ],
+      "retired_behavior": "asserted an absent override fell back to the biopsy panel"
+    },
+    {
+      "capability_retired": null,
+      "migration_kind": "behaviour_replaced",
+      "new_invariant": "a null field is unobserved, never negative: it either closes the interval when supplied or trips the Manski gate when not",
+      "old_test": "test_therapy_override_her2_positive_wins",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_api_arbiter_wiring.py::test_therapy_arbiter_scores_only_from_explicit_inputs": "passed",
+        "tests/unit/test_api_arbiter_wiring.py::test_therapy_bucket_matches_recommendation": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_triage_contrasts_are_mathematically_exact": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_api_arbiter_wiring.py::test_therapy_arbiter_scores_only_from_explicit_inputs",
+        "tests/unit/test_api_arbiter_wiring.py::test_therapy_bucket_matches_recommendation",
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_triage_contrasts_are_mathematically_exact"
+      ],
+      "retired_behavior": "asserted a receptor override beat the biopsy panel"
+    },
+    {
+      "capability_retired": null,
+      "migration_kind": "behaviour_replaced",
+      "new_invariant": "a null field is unobserved, never negative: it either closes the interval when supplied or trips the Manski gate when not",
+      "old_test": "test_therapy_override_none_fields_treated_as_negative",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_api_arbiter_wiring.py::test_therapy_arbiter_scores_only_from_explicit_inputs": "passed",
+        "tests/unit/test_api_arbiter_wiring.py::test_therapy_bucket_matches_recommendation": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_triage_contrasts_are_mathematically_exact": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_api_arbiter_wiring.py::test_therapy_arbiter_scores_only_from_explicit_inputs",
+        "tests/unit/test_api_arbiter_wiring.py::test_therapy_bucket_matches_recommendation",
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_triage_contrasts_are_mathematically_exact"
+      ],
+      "retired_behavior": "asserted null override fields were treated as negative -- an imputation"
+    },
+    {
+      "capability_retired": "rules_lite_therapy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the live SL bridge is the only recommendation source; when it is unavailable the stage fails required and no options are emitted",
+      "old_test": "test_therapy_placeholder_has_no_gate_report",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source",
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution"
+      ],
+      "retired_behavior": "asserted that a static NCCN-lite rules table produced therapy recommendations when TxGemma was gated or absent",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": null,
+      "migration_kind": "behaviour_replaced",
+      "new_invariant": "the response reports model_state == 'unavailable' (not placeholder), empty option lists, therapy_bridge is None and prognostic_model_executed is False, so an absent dependency is distinguishable from a negative result",
+      "old_test": "test_therapy_placeholder_returns_empty_options",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/data/test_api_real_dicom.py::test_therapy_without_bridge_is_unavailable_not_placeholder": "passed"
+      },
+      "replacement_test": [
+        "tests/data/test_api_real_dicom.py::test_therapy_without_bridge_is_unavailable_not_placeholder"
+      ],
+      "retired_behavior": "asserted that /v1/therapy/reason returned empty option lists in a PLACEHOLDER state, which conflated 'no bridge configured' with 'bridge ran and found nothing'"
+    },
+    {
+      "capability_retired": "rules_lite_therapy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the live SL bridge is the only recommendation source; when it is unavailable the stage fails required and no options are emitted",
+      "old_test": "test_therapy_placeholder_when_flags_off",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source",
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution"
+      ],
+      "retired_behavior": "asserted that a static NCCN-lite rules table produced therapy recommendations when TxGemma was gated or absent",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "rules_lite_therapy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the live SL bridge is the only recommendation source; when it is unavailable the stage fails required and no options are emitted",
+      "old_test": "test_therapy_reason_fingerprint_is_stable_across_calls",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source",
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution"
+      ],
+      "retired_behavior": "asserted that a static NCCN-lite rules table produced therapy recommendations when TxGemma was gated or absent",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "rules_lite_therapy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the live SL bridge is the only recommendation source; when it is unavailable the stage fails required and no options are emitted",
+      "old_test": "test_therapy_reason_non_strict_still_serves_on_bad_stage",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source",
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution"
+      ],
+      "retired_behavior": "asserted that a static NCCN-lite rules table produced therapy recommendations when TxGemma was gated or absent",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "rules_lite_therapy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the live SL bridge is the only recommendation source; when it is unavailable the stage fails required and no options are emitted",
+      "old_test": "test_therapy_reason_placeholder_leaves_fingerprint_fields_null",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source",
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution"
+      ],
+      "retired_behavior": "asserted that a static NCCN-lite rules table produced therapy recommendations when TxGemma was gated or absent",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "rules_lite_therapy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the live SL bridge is the only recommendation source; when it is unavailable the stage fails required and no options are emitted",
+      "old_test": "test_therapy_reason_rules_lite_surfaces_sha_and_branch",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source",
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution"
+      ],
+      "retired_behavior": "asserted that a static NCCN-lite rules table produced therapy recommendations when TxGemma was gated or absent",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "rules_lite_therapy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the live SL bridge is the only recommendation source; when it is unavailable the stage fails required and no options are emitted",
+      "old_test": "test_therapy_reason_strict_rejects_bad_stage_with_400",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source",
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution"
+      ],
+      "retired_behavior": "asserted that a static NCCN-lite rules table produced therapy recommendations when TxGemma was gated or absent",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "rules_lite_therapy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the live SL bridge is the only recommendation source; when it is unavailable the stage fails required and no options are emitted",
+      "old_test": "test_therapy_rules_lite_fallback",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source",
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution"
+      ],
+      "retired_behavior": "asserted that a static NCCN-lite rules table produced therapy recommendations when TxGemma was gated or absent",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "rules_lite_therapy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the live SL bridge is the only recommendation source; when it is unavailable the stage fails required and no options are emitted",
+      "old_test": "test_therapy_rules_lite_hr_positive",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source",
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution"
+      ],
+      "retired_behavior": "asserted that a static NCCN-lite rules table produced therapy recommendations when TxGemma was gated or absent",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "rules_lite_therapy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the live SL bridge is the only recommendation source; when it is unavailable the stage fails required and no options are emitted",
+      "old_test": "test_therapy_rules_proxy_has_no_gate_report",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source",
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution"
+      ],
+      "retired_behavior": "asserted that a static NCCN-lite rules table produced therapy recommendations when TxGemma was gated or absent",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "rules_lite_therapy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the live SL bridge is the only recommendation source; when it is unavailable the stage fails required and no options are emitted",
+      "old_test": "test_therapy_txgemma_gated_falls_through_to_rules",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source",
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution"
+      ],
+      "retired_behavior": "asserted that a static NCCN-lite rules table produced therapy recommendations when TxGemma was gated or absent",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "rules_lite_therapy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the live SL bridge is the only recommendation source; when it is unavailable the stage fails required and no options are emitted",
+      "old_test": "test_therapy_txgemma_gated_no_rules_stays_placeholder",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source",
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution"
+      ],
+      "retired_behavior": "asserted that a static NCCN-lite rules table produced therapy recommendations when TxGemma was gated or absent",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "rules_lite_therapy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the live SL bridge is the only recommendation source; when it is unavailable the stage fails required and no options are emitted",
+      "old_test": "test_therapy_txgemma_gated_response_has_structured_gate_report",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source",
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution"
+      ],
+      "retired_behavior": "asserted that a static NCCN-lite rules table produced therapy recommendations when TxGemma was gated or absent",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "rules_lite_therapy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the live SL bridge is the only recommendation source; when it is unavailable the stage fails required and no options are emitted",
+      "old_test": "test_therapy_txgemma_gated_still_falls_through_to_rules_proxy",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source",
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution"
+      ],
+      "retired_behavior": "asserted that a static NCCN-lite rules table produced therapy recommendations when TxGemma was gated or absent",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "rules_lite_therapy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the live SL bridge is the only recommendation source; when it is unavailable the stage fails required and no options are emitted",
+      "old_test": "test_therapy_txgemma_wins",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_endpoint_uses_bridge_as_only_recommendation_source",
+        "tests/unit/test_production_specialist_contracts.py::test_full_case_source_contains_no_local_ct_or_nccn_substitution"
+      ],
+      "retired_behavior": "asserted that a static NCCN-lite rules table produced therapy recommendations when TxGemma was gated or absent",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": null,
+      "migration_kind": "behaviour_replaced",
+      "new_invariant": "a null field is unobserved, never negative: it either closes the interval when supplied or trips the Manski gate when not",
+      "old_test": "test_therapy_uses_receptors_override_over_biopsy_output",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/unit/test_api_arbiter_wiring.py::test_therapy_arbiter_scores_only_from_explicit_inputs": "passed",
+        "tests/unit/test_api_arbiter_wiring.py::test_therapy_bucket_matches_recommendation": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_triage_contrasts_are_mathematically_exact": "passed"
+      },
+      "replacement_test": [
+        "tests/unit/test_api_arbiter_wiring.py::test_therapy_arbiter_scores_only_from_explicit_inputs",
+        "tests/unit/test_api_arbiter_wiring.py::test_therapy_bucket_matches_recommendation",
+        "tests/unit/test_production_specialist_contracts.py::test_therapy_triage_contrasts_are_mathematically_exact"
+      ],
+      "retired_behavior": "asserted the override took precedence over biopsy output"
+    },
+    {
+      "capability_retired": "siglip_proxy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the proxy is deleted from the codebase, cannot be imported by the API module, and `proxy_siglip` is not a constructible ModelState; a screening success now requires a 1152-dimensional MedSigLIP receipt",
+      "old_test": "test_to_pil_clips_out_of_range_values",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy": "passed",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend": "passed",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed"
+      },
+      "replacement_test": [
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend"
+      ],
+      "retired_behavior": "asserted the behaviour of an open-domain SigLIP proxy substituted for MedSigLIP, including its warning text and its precedence over other backends",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "siglip_proxy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the proxy is deleted from the codebase, cannot be imported by the API module, and `proxy_siglip` is not a constructible ModelState; a screening success now requires a 1152-dimensional MedSigLIP receipt",
+      "old_test": "test_to_pil_grayscale_to_rgb",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy": "passed",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend": "passed",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed"
+      },
+      "replacement_test": [
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend"
+      ],
+      "retired_behavior": "asserted the behaviour of an open-domain SigLIP proxy substituted for MedSigLIP, including its warning text and its precedence over other backends",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "siglip_proxy",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the proxy is deleted from the codebase, cannot be imported by the API module, and `proxy_siglip` is not a constructible ModelState; a screening success now requires a 1152-dimensional MedSigLIP receipt",
+      "old_test": "test_to_pil_rejects_3d_input",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy": "passed",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend": "passed",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible": "passed"
+      },
+      "replacement_test": [
+        "tests/models/test_hai_def.py::test_model_state_enum_cannot_express_the_retired_siglip_proxy",
+        "tests/unit/test_screening_production_contract.py::test_no_retired_substitute_state_is_constructible",
+        "tests/unit/test_screening_production_contract.py::test_app_module_imports_no_substitute_backend"
+      ],
+      "retired_behavior": "asserted the behaviour of an open-domain SigLIP proxy substituted for MedSigLIP, including its warning text and its precedence over other backends",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    },
+    {
+      "capability_retired": "regex_report_parser",
+      "migration_kind": "capability_retired",
+      "new_invariant": "the wire contract now forbids a regex parse block entirely: an unparseable report yields report_parse = null, pipeline_status = 'failed_required_stage', a failed_required ClinicalBERT receipt, grade and every receptor field null, and no receptor_panel_source warning",
+      "old_test": "test_warnings_still_carry_matched_count",
+      "old_test_absent_from_suite": true,
+      "replacement_result": "passed",
+      "replacement_result_detail": {
+        "tests/nlp/test_biopsy_report_parse_wire.py::TestBiopsyRequestShape::test_no_report_text_returns_no_parse_block": "passed",
+        "tests/nlp/test_biopsy_report_parse_wire.py::TestBiopsyRequestShape::test_unparseable_report_yields_no_parse_block_and_a_failed_stage": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_clinicalbert_failure_has_no_regex_fallback": "passed",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_source_calls_only_clinicalbert_for_report_parsing": "passed"
+      },
+      "replacement_test": [
+        "tests/nlp/test_biopsy_report_parse_wire.py::TestBiopsyRequestShape::test_unparseable_report_yields_no_parse_block_and_a_failed_stage",
+        "tests/nlp/test_biopsy_report_parse_wire.py::TestBiopsyRequestShape::test_no_report_text_returns_no_parse_block",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_clinicalbert_failure_has_no_regex_fallback",
+        "tests/unit/test_production_specialist_contracts.py::test_biopsy_source_calls_only_clinicalbert_for_report_parsing"
+      ],
+      "retired_behavior": "asserted on the WIRE that a regex parser was an accepted success source: parser_id == 'proxy_regex_v0', fusion_mode == 'regex', a populated receptor panel from free text, and a 'matched count' warning describing how many regexes fired",
+      "retired_from_api": true,
+      "retired_from_registry": true
+    }
+  ],
+  "unmapped": [],
+  "verdict": "MIGRATED",
+  "verification": {
+    "all_replacements_exist": true,
+    "all_replacements_pass": true,
+    "missing_replacements": [],
+    "old_tests_confirmed_absent": true
+  }
+}

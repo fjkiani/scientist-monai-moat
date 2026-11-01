@@ -1,0 +1,192 @@
+{
+  "disclaimer": "RESEARCH USE ONLY \u2014 not FDA-cleared; not for clinical decision-making.",
+  "patient_id": "patient_sample_with_ct",
+  "elapsed_seconds": 95.083,
+  "artifact_verification": {
+    "luna16": {
+      "path": "models/luna16/luna16_baseline_b5e79231466a.pt",
+      "sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01",
+      "metric_receipt": {
+        "name": "froc_at_2",
+        "value": 0.8267399271674979
+      },
+      "verified": true
+    },
+    "mammo-retinanet": {
+      "path": "models/mammo/mammo_retinanet_v1.safetensors",
+      "sha256": "691233bca51c4eb99fd6859301b8e1393ada6643b25e79622548ef80de951d32",
+      "metric_receipt": {
+        "name": "auroc",
+        "value": 0.785453260650111
+      },
+      "verified": true
+    },
+    "cbis-medsiglip": {
+      "path": "models/cbis_ddsm_logreg_v3.joblib",
+      "sha256": "f40f33c1cd3adfa48d1d10cc4d136795ad0642c3d1f94a543872ae1dc283aaf7",
+      "metric_receipt": {
+        "name": "auroc",
+        "value": 0.8614476075105997
+      },
+      "verified": true
+    },
+    "clinicalbert": {
+      "path": "artifacts/clinicalbert/clinicalbert_head_v2.safetensors",
+      "sha256": "429f804d7f348d7c4eeb27821f766cc2de65c4072f20db0c3b3afaefa9068e50",
+      "metric_receipt": {
+        "name": "span_f1",
+        "value": 0.1916
+      },
+      "verified": true
+    },
+    "medgemma": {
+      "path": "models/medgemma_1_5_4b_identity.json",
+      "sha256": "1013eee9b36bf4468d682e86b259bfc1cd9c89f442d50e50816bf3f2526d9b1e",
+      "metric_receipt": {
+        "name": "chat_success_rate",
+        "value": 1.0
+      },
+      "verified": true
+    },
+    "stage-therapy": {
+      "path": "src/oncology_arbiter/arbiter/models/therapy_arbiter_v1.json",
+      "sha256": "a5f8ead83b3458b20b8e33203de6cfc13c2fa91dde360e0490722afd2f4ac889",
+      "metric_receipt": {
+        "name": "auroc",
+        "value": 0.9597117364447495
+      },
+      "verified": true
+    }
+  },
+  "modalities": {
+    "luna16": {
+      "capability": "luna16",
+      "artifact_sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01",
+      "froc_at_2_production": 0.8267399271674979,
+      "model_state": "loaded_luna16_retinanet",
+      "status": "ok",
+      "backend": "modal_luna16_detect",
+      "detect_url": "https://testing1235--luna16-detect.modal.run",
+      "case_id": "892531e5e4dde1e8",
+      "series_uid": "1.3.6.1.4.1.14519.5.2.1.6279.6001.153985109349433321657655488650",
+      "bundle_version": "0.6.9",
+      "n_detections": 4,
+      "top_score": 0.7112138867378235,
+      "inference_seconds": 1.6512,
+      "total_seconds": 2.1706,
+      "input_shape": [
+        121,
+        512,
+        512
+      ],
+      "device": "cuda:0",
+      "ingest_source": "modal-volume://oncology-arbiter-cases/892531e5e4dde1e8/dicom_series/",
+      "detections": [
+        {
+          "center_z_mm": 222.43036270141602,
+          "center_y_mm": 202.91556451121141,
+          "center_x_mm": 297.3749489545371,
+          "width_mm": 2.317422161664581,
+          "height_mm": 3.9998150470346445,
+          "depth_mm": 12.791557312011719,
+          "diameter_mm": 12.791557312011719,
+          "score": 0.7112138867378235
+        },
+        {
+          "center_z_mm": 223.75205993652344,
+          "center_y_mm": 202.77683346498088,
+          "center_x_mm": 96.23111682156195,
+          "width_mm": 2.422830326733674,
+          "height_mm": 4.192894817475462,
+          "depth_mm": 13.85162353515625,
+          "diameter_mm": 13.85162353515625,
+          "score": 0.2374849021434784
+        },
+        {
+          "center_z_mm": 103.37517738342285,
+          "center_y_mm": 223.2776696976216,
+          "center_x_mm": 242.4481012322285,
+          "width_mm": 2.407894888194278,
+          "height_mm": 3.9445829817123013,
+          "depth_mm": 13.084144592285156,
+          "diameter_mm": 13.084144592285156,
+          "score": 0.1847762018442154
+        },
+        {
+          "center_z_mm": 142.66379356384277,
+          "center_y_mm": 268.8630921766453,
+          "center_x_mm": 255.1514995021862,
+          "width_mm": 2.836454802454682,
+          "height_mm": 4.826808294470538,
+          "depth_mm": 15.767574310302734,
+          "diameter_mm": 15.767574310302734,
+          "score": 0.03135721758008003
+        }
+      ]
+    },
+    "mammo_retinanet": {
+      "capability": "mammo-retinanet",
+      "artifact_path": "models/mammo/mammo_retinanet_v1.safetensors",
+      "artifact_sha256": "691233bca51c4eb99fd6859301b8e1393ada6643b25e79622548ef80de951d32",
+      "proba_cancer": 0.9826356172561646,
+      "test_auroc_receipt": 0.785453260650111,
+      "model_state": "loaded_mammo_retinanet_v1",
+      "input": "/Users/fahadkiani/Desktop/development/scientist-monai-moat/fixtures/patient_sample_with_ct/mammogram.png",
+      "status": "ok",
+      "cbis_medsiglip_artifact": {
+        "path": "models/cbis_ddsm_logreg_v3.joblib",
+        "sha256": "f40f33c1cd3adfa48d1d10cc4d136795ad0642c3d1f94a543872ae1dc283aaf7",
+        "test_auroc_receipt": 0.8614476075105997,
+        "note": "Multimodal fusion probe verified by SHA; PNG scored by mammo-retinanet v1 in this runner."
+      }
+    },
+    "clinicalbert": {
+      "status": "ok",
+      "artifact_sha256": "1013eee9b36bf4468d682e86b259bfc1cd9c89f442d50e50816bf3f2526d9b1e",
+      "entities": {
+        "er_status": "POSITIVE",
+        "er_percent": null,
+        "pr_status": "POSITIVE",
+        "her2_status": "POSITIVE",
+        "nottingham_grade": 3,
+        "tumor_size_mm": 45.0,
+        "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+      }
+    },
+    "medgemma": {
+      "status": "ok",
+      "model_id": "google/medgemma-1.5-4b-it",
+      "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8",
+      "reasoning": "As a research-use-only oncology co-scientist, based on the provided patient data (age 54, HER2=True, ER=True, mammo_proba_cancer=0.9826356172561646), the dominant driver is likely **HER2 amplification**, given the positive HER2 status. A research-use-only treatment hypothesis would be to investigate the efficacy of **HER2-targeted therapies**, such as anti-HER2 monoclonal antibodies (e.g., trastuzumab, pertuzumab) or HER2 inhibitors (e.g.,"
+    },
+    "stage_therapy": {
+      "capability": "stage-therapy",
+      "status": "ok",
+      "artifact_sha256": "a5f8ead83b3458b20b8e33203de6cfc13c2fa91dde360e0490722afd2f4ac889",
+      "p_event": 0.773762,
+      "risk_bucket": "HIGH",
+      "logit": 1.229674,
+      "recommendation": "HIGH_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE",
+      "driving_feature": "er_status_positive",
+      "missing_features": [],
+      "caveat": "Real-patient retrospective grouped training and held-out evaluation; research use only. The score is not prospectively validated. The target is observed chemotherapy receipt in METABRIC, not treatment response, benefit, efficacy, or a causal recommendation."
+    }
+  },
+  "final_clinical_action_report": {
+    "observed_chemo_receipt_risk_pct": 77.4,
+    "risk_bucket": "HIGH",
+    "prescription_ruo": "Trastuzumab + chemo (RUO hypothesis)",
+    "primary_driver": "HER2 amplification / overexpression",
+    "mammo_proba_cancer": 0.9826356172561646,
+    "luna16_froc_at_2_production": 0.8267399271674979,
+    "therapy_target": "observed_chemotherapy_receipt",
+    "provenance": {
+      "mammo_sha256": "691233bca51c4eb99fd6859301b8e1393ada6643b25e79622548ef80de951d32",
+      "luna16_sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01",
+      "clinicalbert_sha256": "429f804d7f348d7c4eeb27821f766cc2de65c4072f20db0c3b3afaefa9068e50",
+      "cbis_medsiglip_sha256": "f40f33c1cd3adfa48d1d10cc4d136795ad0642c3d1f94a543872ae1dc283aaf7",
+      "medgemma_revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8",
+      "therapy_sha256": "a5f8ead83b3458b20b8e33203de6cfc13c2fa91dde360e0490722afd2f4ac889"
+    }
+  }
+}

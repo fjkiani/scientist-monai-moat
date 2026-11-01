@@ -1,0 +1,183 @@
+{
+  "capability": "clinicalbert",
+  "created_at": "2026-09-30T00:20:00Z",
+  "dataset_sha256": "13fd452d103da8c97634ba089ceabfa72e905a9365524699f7aefefac5ca62c2",
+  "entity_mention_coverage": {
+    "external_validation": {
+      "GRADE": 82,
+      "LVI": 6,
+      "MARGIN": 55,
+      "M_STAGE": 21,
+      "N_STAGE": 43,
+      "TUMOR_SIZE_MM": 14,
+      "T_STAGE": 70
+    },
+    "test": {
+      "ER_VALUE": 17,
+      "GRADE": 34,
+      "HER2_VALUE": 1,
+      "LVI": 12,
+      "MARGIN": 66,
+      "M_STAGE": 49,
+      "N_STAGE": 18,
+      "PR_VALUE": 15,
+      "TUMOR_SIZE_MM": 39,
+      "T_STAGE": 62
+    },
+    "train": {
+      "ALK": 55,
+      "BRAF": 7,
+      "EGFR": 90,
+      "ER_VALUE": 484,
+      "GRADE": 1721,
+      "HER2_AMP": 74,
+      "HER2_VALUE": 400,
+      "KI67_PCT": 48,
+      "KRAS": 56,
+      "LVI": 406,
+      "MARGIN": 2071,
+      "MET": 5,
+      "MSI": 7,
+      "M_STAGE": 876,
+      "N_STAGE": 1300,
+      "PR_VALUE": 358,
+      "ROS1": 1,
+      "TUMOR_SIZE_MM": 3447,
+      "T_STAGE": 2009
+    },
+    "validation": {
+      "ALK": 15,
+      "BRAF": 13,
+      "EGFR": 17,
+      "ER_VALUE": 49,
+      "GRADE": 188,
+      "HER2_AMP": 8,
+      "HER2_VALUE": 39,
+      "KI67_PCT": 4,
+      "KRAS": 8,
+      "LVI": 43,
+      "MARGIN": 237,
+      "MET": 5,
+      "MSI": 2,
+      "M_STAGE": 100,
+      "N_STAGE": 158,
+      "PR_VALUE": 42,
+      "TUMOR_SIZE_MM": 361,
+      "T_STAGE": 204
+    }
+  },
+  "entity_report_coverage": {
+    "external_validation": {
+      "GRADE": 82,
+      "LVI": 6,
+      "MARGIN": 55,
+      "M_STAGE": 21,
+      "N_STAGE": 43,
+      "TUMOR_SIZE_MM": 14,
+      "T_STAGE": 70
+    },
+    "test": {
+      "ER_VALUE": 17,
+      "GRADE": 34,
+      "HER2_VALUE": 1,
+      "LVI": 12,
+      "MARGIN": 66,
+      "M_STAGE": 49,
+      "N_STAGE": 18,
+      "PR_VALUE": 15,
+      "TUMOR_SIZE_MM": 39,
+      "T_STAGE": 62
+    },
+    "train": {
+      "ALK": 23,
+      "BRAF": 2,
+      "EGFR": 45,
+      "ER_VALUE": 298,
+      "GRADE": 938,
+      "HER2_AMP": 43,
+      "HER2_VALUE": 263,
+      "KI67_PCT": 42,
+      "KRAS": 41,
+      "LVI": 352,
+      "MARGIN": 1116,
+      "MET": 1,
+      "MSI": 4,
+      "M_STAGE": 702,
+      "N_STAGE": 803,
+      "PR_VALUE": 277,
+      "ROS1": 1,
+      "TUMOR_SIZE_MM": 1381,
+      "T_STAGE": 1552
+    },
+    "validation": {
+      "ALK": 4,
+      "BRAF": 2,
+      "EGFR": 5,
+      "ER_VALUE": 31,
+      "GRADE": 100,
+      "HER2_AMP": 5,
+      "HER2_VALUE": 29,
+      "KI67_PCT": 4,
+      "KRAS": 4,
+      "LVI": 40,
+      "MARGIN": 121,
+      "MET": 1,
+      "MSI": 1,
+      "M_STAGE": 85,
+      "N_STAGE": 88,
+      "PR_VALUE": 31,
+      "TUMOR_SIZE_MM": 156,
+      "T_STAGE": 165
+    }
+  },
+  "exclusions": {
+    "bytes": 101973,
+    "counts_by_reason": {
+      "duplicate_normalized_report_text": 7,
+      "no_deterministic_span_label": 251,
+      "no_schema_entity_could_be_surface_anchored": 18,
+      "reserved_tcga242_patient": 101
+    },
+    "filename": "clinicalbert_data_exclusions_v2.json",
+    "sha256": "89c7fd3a741cc6ad57823bbaf2b2955e15f9feda1bf5f7be68b694217a1becc6"
+  },
+  "labeler_code_sha256": "5c6a6b5345f8986c08545743a5ba1597fb61668bdadf49d04964c969dd522b0b",
+  "n_external_validation": 128,
+  "n_reserved_tcga242_patients": 237,
+  "n_reserved_tcga242_reports": 242,
+  "n_source_reports": 2789,
+  "n_test": 96,
+  "n_training": 2187,
+  "n_training_synthetic": false,
+  "n_validation": 243,
+  "patient_disjoint": true,
+  "schema_version": 2,
+  "source_licenses": {
+    "https://doi.org/10.17632/hyg5xkznpx.1": "CC BY 4.0",
+    "https://doi.org/10.5281/zenodo.20263861": "CC BY 4.0"
+  },
+  "source_parquet_sha256": "4dd3977e7f55eb4d2ce5922a6515ed821cc36fdbe3a976fb4675becf74eca37f",
+  "split_files": {
+    "external_validation": {
+      "bytes": 1470631,
+      "filename": "clinicalbert_external_reports.jsonl",
+      "sha256": "562d92b352be2a0a7278927a27bdd2fca71a6dd9f8b72ea4cdb86c6cbd169abd"
+    },
+    "test": {
+      "bytes": 1609833,
+      "filename": "clinicalbert_test_reports.jsonl",
+      "sha256": "36635abc97eadf462bc88fe2e3c6d9cf4cf357db1ad73a8c3f105a35dd90877d"
+    },
+    "train": {
+      "bytes": 35564581,
+      "filename": "clinicalbert_train_reports.jsonl",
+      "sha256": "f864d0678fa078074c20fcf59dbef573a4e220bec5a57e2f12ea1a71d59724f3"
+    },
+    "validation": {
+      "bytes": 3655370,
+      "filename": "clinicalbert_validation_reports.jsonl",
+      "sha256": "5c7d4b161d6ea7b443b4ea194b979f30b2c2e1f83f244b345c99e4ffca677885"
+    }
+  },
+  "split_sha256": "0d7f3f754adf9305dadbcc628786217a329b5050e802b7968bc4a5c2ccf5b888"
+}

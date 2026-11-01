@@ -1,0 +1,1498 @@
+{
+  "contract_version": "zeta_immunotherapy_contract_v3",
+  "source_version": "v12_lock",
+  "ruo": true,
+  "contract_status": "evidence_bound_exploratory_prioritization",
+  "n_training": 28,
+  "n_training_synthetic": false,
+  "provenance": {
+    "cart_hobit_gnly_clinical_contract_v1_sha256": "f347152c7a8ca7ccddf8ec756f608b8a7ffc067b91b7a7f88030f4119eb3f4fa",
+    "zeta_immunotherapy_external_validation_v3_sha256": "86041215a833606eb219f85276165e4435ca0a16748867a779c4c0420232afa9"
+  },
+  "compartments": {
+    "cart_infusion_bag": {
+      "cohort": "Deng_GSE151511",
+      "version": "v12",
+      "n_patients_primary_CR": 23,
+      "n_patients_ORR": 24,
+      "n_cells": 137326,
+      "formulas": {
+        "Bag_Index_1": "0.5*(z(M_ratio)-z(f_cyto_marker))",
+        "Bag_Index_2": "0.5*(z(M_expr)-z(f_cyto_marker))",
+        "Bag_Index_3": "log2((n_memory+0.5)/(n_cyto+n_exhausted+0.5))",
+        "Bag_low_cyto": "1-f_cyto_marker"
+      },
+      "transforms": {
+        "CD3_nested": {
+          "M_ratio": {
+            "mean": 0.6913412532559516,
+            "sd": 0.6856831059956312,
+            "n": 24,
+            "ddof": 0
+          },
+          "M_expr": {
+            "mean": 2.220446049250313e-16,
+            "sd": 1.1793502541590053,
+            "n": 24,
+            "ddof": 0
+          },
+          "f_cyto_marker": {
+            "mean": 0.8149754550656599,
+            "sd": 0.06718172658584746,
+            "n": 24,
+            "ddof": 0
+          }
+        },
+        "literal_CD8": {
+          "M_ratio": {
+            "mean": 0.6948031018852522,
+            "sd": 0.6872223456932677,
+            "n": 24,
+            "ddof": 0
+          },
+          "M_expr": {
+            "mean": -4.070817756958907e-16,
+            "sd": 1.1799486636389542,
+            "n": 24,
+            "ddof": 0
+          },
+          "f_cyto_marker": {
+            "mean": 0.8147277559123327,
+            "sd": 0.06733288110338605,
+            "n": 24,
+            "ddof": 0
+          }
+        }
+      },
+      "risk_flag_high_f_cyto_marker": "EX_VIVO_CYTOTOXIC_DIFFERENTIATION_RISK",
+      "legacy_risk_flag_alias": "EX_VIVO_PREMATURE_BURNOUT",
+      "metrics_literal_CD8": {
+        "Bag_Index_3_primary_CR": {
+          "gate": "literal_CD8",
+          "endpoint": "primary_CR",
+          "eligibility": "all_defined",
+          "score": "Bag_Index_3",
+          "n": 23,
+          "responders": 9,
+          "nonresponders": 14,
+          "auroc": 0.880952380952381,
+          "ci_low": 0.704431818181818,
+          "ci_high": 1.0,
+          "p": 0.002769577361818,
+          "bootstrap_valid": 2000,
+          "status": "estimated",
+          "reason": null,
+          "q": 0.008307831178192,
+          "global_primary_member": true,
+          "q_global_new_primary": 0.019071759187235
+        },
+        "Bag_Index_3_ORR": {
+          "gate": "literal_CD8",
+          "endpoint": "sensitivity_ORR",
+          "eligibility": "all_defined",
+          "score": "Bag_Index_3",
+          "n": 23,
+          "responders": 10,
+          "nonresponders": 13,
+          "auroc": 0.792307692307692,
+          "ci_low": 0.555505952380952,
+          "ci_high": 0.973258928571428,
+          "p": 0.020037161890743,
+          "bootstrap_valid": 2000,
+          "status": "estimated",
+          "reason": null,
+          "q": 0.055384813314467,
+          "global_primary_member": false,
+          "q_global_new_primary": null
+        },
+        "Bag_Index_1_primary_CR": {
+          "gate": "literal_CD8",
+          "endpoint": "primary_CR",
+          "eligibility": "all_defined",
+          "score": "Bag_Index_1",
+          "n": 23,
+          "responders": 9,
+          "nonresponders": 14,
+          "auroc": 0.865079365079365,
+          "ci_low": 0.676875,
+          "ci_high": 0.992307692307692,
+          "p": 0.004153915589096,
+          "bootstrap_valid": 2000,
+          "status": "estimated",
+          "reason": null,
+          "q": 0.008307831178192,
+          "global_primary_member": true,
+          "q_global_new_primary": 0.019071759187235
+        },
+        "Bag_low_cyto_primary_CR": {
+          "gate": "literal_CD8",
+          "endpoint": "primary_CR",
+          "eligibility": "all_defined",
+          "score": "Bag_low_cyto",
+          "n": 23,
+          "responders": 9,
+          "nonresponders": 14,
+          "auroc": 0.80952380952381,
+          "ci_low": 0.592272727272727,
+          "ci_high": 0.966666666666667,
+          "p": 0.015296919476967,
+          "bootstrap_valid": 2000,
+          "status": "estimated",
+          "reason": null,
+          "q": 0.015296919476967,
+          "global_primary_member": true,
+          "q_global_new_primary": 0.040791785271912
+        }
+      }
+    },
+    "cart_in_vivo_blood": {
+      "cohort": "GSE290722",
+      "version": "v9",
+      "n_patients": 28,
+      "n_cells": 405775,
+      "selected_C": 1.0,
+      "feature_order": [
+        "log_baseline_spd",
+        "prior_regimens",
+        "prior_autologous_transplant",
+        "load_ZNF683",
+        "load_GNLY",
+        "cyto_absent"
+      ],
+      "feature_aliases": {
+        "log1p_spd": "log_baseline_spd",
+        "prior_auto_sct": "prior_autologous_transplant"
+      },
+      "preprocessing": {
+        "features": [
+          "log_baseline_spd",
+          "prior_regimens",
+          "prior_autologous_transplant",
+          "load_ZNF683",
+          "load_GNLY",
+          "cyto_absent"
+        ],
+        "median": [
+          8.235213658251977,
+          3.5,
+          0.0,
+          0.08570545905955793,
+          0.1375609712907553,
+          0.0
+        ],
+        "mean": [
+          8.068757588583766,
+          3.6785714285714284,
+          0.2857142857142857,
+          0.4184554584700256,
+          0.5925610902376625,
+          0.07142857142857142
+        ],
+        "scale": [
+          1.1530011089571859,
+          1.5131228688796328,
+          0.45175395145262565,
+          0.6885212048965147,
+          0.8817311898032414,
+          0.25753937681885636
+        ],
+        "constant": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "all_missing_fallback": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      "intercept_standardized": -0.22167064750141413,
+      "coefficients_standardized": {
+        "log_baseline_spd": -0.6149205124281105,
+        "prior_regimens": -1.1621150422476065,
+        "prior_autologous_transplant": 0.9381319128023679,
+        "load_ZNF683": 0.4093591713328737,
+        "load_GNLY": 0.35306847541228287,
+        "cyto_absent": -0.4812472417062784
+      },
+      "coefficients_standardized_list": [
+        -0.6149205124281105,
+        -1.1621150422476065,
+        0.9381319128023679,
+        0.4093591713328737,
+        0.35306847541228287,
+        -0.4812472417062784
+      ],
+      "prose_rounded_reference": {
+        "note": "Directive prose rounds/mixes v10 cart_proxy_weights; scorer uses exact cart_hobit_gnly_clinical_contract_v1.json standardized refit.",
+        "intercept_prose": -0.223724,
+        "cart_proxy_weights_v10": {
+          "ZNF683": 0.409429,
+          "GNLY": 0.353096
+        }
+      },
+      "fold_sign_stability_50_folds": {
+        "load_ZNF683_positive_folds": "50/50",
+        "load_GNLY_positive_folds": "49/50",
+        "cyto_absent_negative_or_zero_folds": "50/50"
+      },
+      "evaluation_receipt": {
+        "cohort": "baseline28",
+        "model": "clinical_hobit_gnly",
+        "n": 28,
+        "LtR": 13,
+        "R_NR": 15,
+        "score_type": "ridge_probability",
+        "auroc": 0.782051282051282,
+        "ci_low": 0.6005416666666666,
+        "ci_high": 0.9246286549707603,
+        "within_fold_mean": 0.8233333333333335,
+        "within_fold_pairweighted": 0.8153846153846154,
+        "valid_folds": 50,
+        "undefined_folds": 0,
+        "bootstrap_valid": 2000,
+        "average_precision": 0.7311936615909249,
+        "brier": 0.19923577735356499,
+        "nominal_k": 6,
+        "source": "new_fixed_panel_ridge",
+        "delta_clinical": 0.10717948717948711,
+        "delta_clinical_low": -0.05460108901515143,
+        "delta_clinical_high": 0.285128205128205,
+        "delta_sixgene": 0.019487179487179485,
+        "delta_sixgene_low": 0.0005347593582889388,
+        "delta_sixgene_high": 0.03877551020408155,
+        "nonconstant_k_min": 5.0,
+        "nonconstant_k_max": 6.0,
+        "full_cohort_descriptive": null
+      }
+    },
+    "ici_tumor_biopsy": {
+      "cohorts": [
+        "Gide_PRJEB23709",
+        "Riaz_GSE91061",
+        "TCGA_SKCM",
+        "SadeFeldman_GSE120575"
+      ],
+      "melanoma_formulas": {
+        "S_stem_eff": "(z(TCF7)+z(ZNF683)+z(GNLY))/3",
+        "S_stem_eff_TCF7_half": "0.5*z(TCF7)+0.25*z(ZNF683)+0.25*z(GNLY)"
+      },
+      "melanoma_transforms": {
+        "Gide_PRJEB23709|on_treatment": {
+          "TCF7": {
+            "mean": 2.8872055301657573,
+            "sd": 0.631780328945215,
+            "n": 9,
+            "ddof": 0
+          },
+          "ZNF683": {
+            "mean": 0.6869132200722431,
+            "sd": 0.5744653515236541,
+            "n": 9,
+            "ddof": 0
+          },
+          "GNLY": {
+            "mean": 2.2894638386981567,
+            "sd": 1.6198371151142592,
+            "n": 9,
+            "ddof": 0
+          }
+        },
+        "Gide_PRJEB23709|pretreatment": {
+          "TCF7": {
+            "mean": 2.923508182072939,
+            "sd": 0.7293048365255396,
+            "n": 41,
+            "ddof": 0
+          },
+          "ZNF683": {
+            "mean": 0.49714710040074644,
+            "sd": 0.6094938137850919,
+            "n": 41,
+            "ddof": 0
+          },
+          "GNLY": {
+            "mean": 1.835405534014204,
+            "sd": 1.2267729516972536,
+            "n": 41,
+            "ddof": 0
+          }
+        },
+        "Hugo_GSE78220|on_treatment": {
+          "TCF7": {
+            "mean": 2.390728363414529,
+            "sd": 0.0,
+            "n": 1,
+            "ddof": 0
+          },
+          "ZNF683": {
+            "mean": 0.195339728561127,
+            "sd": 0.0,
+            "n": 1,
+            "ddof": 0
+          },
+          "GNLY": {
+            "mean": 1.4952393879003216,
+            "sd": 0.0,
+            "n": 1,
+            "ddof": 0
+          }
+        },
+        "Hugo_GSE78220|pretreatment": {
+          "TCF7": {
+            "mean": 1.3485227289449044,
+            "sd": 1.2818721273755644,
+            "n": 26,
+            "ddof": 0
+          },
+          "ZNF683": {
+            "mean": 0.28047666326203174,
+            "sd": 0.29343929386577094,
+            "n": 26,
+            "ddof": 0
+          },
+          "GNLY": {
+            "mean": 1.3541079622548202,
+            "sd": 1.502306449290169,
+            "n": 26,
+            "ddof": 0
+          }
+        },
+        "Riaz_GSE91061|on_treatment": {
+          "TCF7": {
+            "mean": 3.2649373253679053,
+            "sd": 1.4162709317962618,
+            "n": 57,
+            "ddof": 0
+          },
+          "ZNF683": {
+            "mean": 1.2873942603497994,
+            "sd": 1.145728087401579,
+            "n": 57,
+            "ddof": 0
+          },
+          "GNLY": {
+            "mean": 3.5800596468830115,
+            "sd": 1.7655319696487768,
+            "n": 57,
+            "ddof": 0
+          }
+        },
+        "Riaz_GSE91061|pretreatment": {
+          "TCF7": {
+            "mean": 3.067274489724198,
+            "sd": 1.2182150638802063,
+            "n": 51,
+            "ddof": 0
+          },
+          "ZNF683": {
+            "mean": 0.9010736119090756,
+            "sd": 0.8660234034872085,
+            "n": 51,
+            "ddof": 0
+          },
+          "GNLY": {
+            "mean": 3.00322760778337,
+            "sd": 1.7190625464482425,
+            "n": 51,
+            "ddof": 0
+          }
+        },
+        "TCGA_SKCM|tumor_sampling": {
+          "TCF7": {
+            "mean": 8.442000189842382,
+            "sd": 1.6173062931879019,
+            "n": 441,
+            "ddof": 0
+          },
+          "ZNF683": {
+            "mean": 3.570200733527277,
+            "sd": 2.084443222928094,
+            "n": 441,
+            "ddof": 0
+          },
+          "GNLY": {
+            "mean": 5.583245863189142,
+            "sd": 2.2821230420307135,
+            "n": 441,
+            "ddof": 0
+          }
+        }
+      },
+      "cohort_population_transforms": {
+        "riaz": {
+          "expression_samples": 109,
+          "unique_patients": 65,
+          "metadata_missing_response": 4,
+          "event_coding": "1-OS_SOR; 1-PFS_SOR; verified author R source"
+        },
+        "hugo": {
+          "expression_samples": 28,
+          "unique_patients": 27,
+          "on_treatment_samples": 1,
+          "duplicate_patient": "Pt27A/Pt27B; lexicographic A retained"
+        },
+        "gide": {
+          "clinical_samples": 50,
+          "source": "xmuyulab/ims_gene_signature",
+          "original_study": "PRJEB23709",
+          "patient_mapping": "ENA sample_alias",
+          "therapy": "anti-PD1 monotherapy; PD1_ aliases only",
+          "response_mapping": "1 responder; 0 nonresponder; -1 SD mapped to 0",
+          "survival_blocked": "secondary OS values exist; units/origin not independently verified"
+        },
+        "Riaz_GSE91061_on_treatment": {
+          "n": 57,
+          "population_transforms": {
+            "TCF7": {
+              "mean": 3.2649373253679053,
+              "sd": 1.4162709317962618
+            },
+            "GZMB": {
+              "mean": 4.6470721080952595,
+              "sd": 2.1228564371366967
+            },
+            "FOXP3": {
+              "mean": 1.8475081349621043,
+              "sd": 1.1230243564183162
+            },
+            "TOX": {
+              "mean": 2.5970757150493107,
+              "sd": 1.5293557778592837
+            },
+            "CXCL13": {
+              "mean": 5.132584704754625,
+              "sd": 2.7253875840404143
+            },
+            "IDO1": {
+              "mean": 4.64564140495722,
+              "sd": 2.3613820652104107
+            },
+            "ARG1": {
+              "mean": 1.7096717096760652,
+              "sd": 2.492468267679222
+            },
+            "TGFB1": {
+              "mean": 5.74435602866763,
+              "sd": 1.0956959567056839
+            },
+            "VEGFA": {
+              "mean": 5.381439001302931,
+              "sd": 1.283800714778163
+            },
+            "CD8A": {
+              "mean": 4.355038625340031,
+              "sd": 2.138937395490583
+            },
+            "CD8B": {
+              "mean": 3.1148398861908215,
+              "sd": 1.9005309994378827
+            },
+            "CD4": {
+              "mean": 6.421870342640389,
+              "sd": 1.441979210649474
+            },
+            "IL7R": {
+              "mean": 3.8219911395827144,
+              "sd": 1.6639533263531419
+            },
+            "IL2RA": {
+              "mean": 3.4272670409437436,
+              "sd": 1.4160317189682465
+            },
+            "ZNF683": {
+              "mean": 1.2873942603497994,
+              "sd": 1.145728087401579
+            },
+            "GNLY": {
+              "mean": 3.5800596468830115,
+              "sd": 1.7655319696487768
+            }
+          }
+        },
+        "Riaz_GSE91061_pretreatment": {
+          "n": 51,
+          "population_transforms": {
+            "TCF7": {
+              "mean": 3.067274489724198,
+              "sd": 1.2182150638802063
+            },
+            "GZMB": {
+              "mean": 3.7226792773266766,
+              "sd": 1.9337897004806799
+            },
+            "FOXP3": {
+              "mean": 1.5397428160718536,
+              "sd": 1.0192084754983324
+            },
+            "TOX": {
+              "mean": 1.9670673930445635,
+              "sd": 1.195801992107381
+            },
+            "CXCL13": {
+              "mean": 4.003064988907538,
+              "sd": 2.558911023114873
+            },
+            "IDO1": {
+              "mean": 3.644875493268304,
+              "sd": 2.047991955135261
+            },
+            "ARG1": {
+              "mean": 1.4486455320081182,
+              "sd": 2.3507160659874806
+            },
+            "TGFB1": {
+              "mean": 5.351817477211623,
+              "sd": 1.2692579307184175
+            },
+            "VEGFA": {
+              "mean": 5.45601627104977,
+              "sd": 1.442056055039129
+            },
+            "CD8A": {
+              "mean": 3.424504302282777,
+              "sd": 1.8077535455055151
+            },
+            "CD8B": {
+              "mean": 2.227368469252169,
+              "sd": 1.4536668865527753
+            },
+            "CD4": {
+              "mean": 5.888034535122199,
+              "sd": 1.4343892026941145
+            },
+            "IL7R": {
+              "mean": 3.563487447275842,
+              "sd": 1.7660829965230154
+            },
+            "IL2RA": {
+              "mean": 2.735181379670726,
+              "sd": 1.3284252758357125
+            },
+            "ZNF683": {
+              "mean": 0.9010736119090756,
+              "sd": 0.8660234034872084
+            },
+            "GNLY": {
+              "mean": 3.00322760778337,
+              "sd": 1.7190625464482425
+            }
+          }
+        },
+        "Hugo_GSE78220_on_treatment": {
+          "n": 1,
+          "population_transforms": {
+            "TCF7": {
+              "mean": 2.390728363414529,
+              "sd": 0.0
+            },
+            "GZMB": {
+              "mean": 2.0538716696375126,
+              "sd": 0.0
+            },
+            "FOXP3": {
+              "mean": 1.3861314955259463,
+              "sd": 0.0
+            },
+            "TOX": {
+              "mean": 0.2627626574660066,
+              "sd": 0.0
+            },
+            "CXCL13": {
+              "mean": 3.5508058051369042,
+              "sd": 0.0
+            },
+            "IDO1": {
+              "mean": 3.9837662366928446,
+              "sd": 0.0
+            },
+            "ARG1": {
+              "mean": 0.8778130359747641,
+              "sd": 0.0
+            },
+            "TGFB1": {
+              "mean": 5.426531126077616,
+              "sd": 0.0
+            },
+            "VEGFA": {
+              "mean": 6.011311312957781,
+              "sd": 0.0
+            },
+            "CD8A": {
+              "mean": 2.1622277753150443,
+              "sd": 0.0
+            },
+            "CD8B": {
+              "mean": 1.3427654703724956,
+              "sd": 0.0
+            },
+            "CD4": {
+              "mean": 3.939259534672778,
+              "sd": 0.0
+            },
+            "IL7R": {
+              "mean": 3.4804861142005605,
+              "sd": 0.0
+            },
+            "IL2RA": {
+              "mean": 2.306062892031924,
+              "sd": 0.0
+            },
+            "ZNF683": {
+              "mean": 0.19533972856112705,
+              "sd": 0.0
+            },
+            "GNLY": {
+              "mean": 1.4952393879003216,
+              "sd": 0.0
+            }
+          }
+        },
+        "Hugo_GSE78220_pretreatment": {
+          "n": 26,
+          "population_transforms": {
+            "TCF7": {
+              "mean": 1.3485227289449044,
+              "sd": 1.2818721273755644
+            },
+            "GZMB": {
+              "mean": 1.444747994358159,
+              "sd": 1.444494823158939
+            },
+            "FOXP3": {
+              "mean": 0.6926554558588365,
+              "sd": 0.8704959254826425
+            },
+            "TOX": {
+              "mean": 0.5199552731690773,
+              "sd": 0.7639599817121748
+            },
+            "CXCL13": {
+              "mean": 2.2138682193193993,
+              "sd": 2.0859604172449213
+            },
+            "IDO1": {
+              "mean": 1.5251495687306296,
+              "sd": 1.4167612729585135
+            },
+            "ARG1": {
+              "mean": 0.40439128218366505,
+              "sd": 1.3615242690687714
+            },
+            "TGFB1": {
+              "mean": 3.6028516792969643,
+              "sd": 1.813023698597495
+            },
+            "VEGFA": {
+              "mean": 2.4956311308498624,
+              "sd": 1.410137031021056
+            },
+            "CD8A": {
+              "mean": 1.847664153886106,
+              "sd": 1.3645709184270467
+            },
+            "CD8B": {
+              "mean": 1.2619368318152882,
+              "sd": 1.0659802916313226
+            },
+            "CD4": {
+              "mean": 2.867801889623263,
+              "sd": 1.354883269244064
+            },
+            "IL7R": {
+              "mean": 1.1296448339012684,
+              "sd": 1.1878340462951393
+            },
+            "IL2RA": {
+              "mean": 0.6467721307384733,
+              "sd": 0.7542879822055085
+            },
+            "ZNF683": {
+              "mean": 0.2804766632620318,
+              "sd": 0.29343929386577094
+            },
+            "GNLY": {
+              "mean": 1.3541079622548202,
+              "sd": 1.502306449290169
+            }
+          }
+        },
+        "Gide_PRJEB23709_on_treatment": {
+          "n": 9,
+          "population_transforms": {
+            "TCF7": {
+              "mean": 2.8872055301657573,
+              "sd": 0.631780328945215
+            },
+            "GZMB": {
+              "mean": 4.038244354486057,
+              "sd": 1.7491109855232005
+            },
+            "FOXP3": {
+              "mean": 1.1685438826963186,
+              "sd": 0.5375370950145351
+            },
+            "TOX": {
+              "mean": 2.2994534777487505,
+              "sd": 1.1593730793495718
+            },
+            "CXCL13": {
+              "mean": 3.242442862585041,
+              "sd": 2.087382297926901
+            },
+            "IDO1": {
+              "mean": 3.707939756841957,
+              "sd": 1.7837331093559068
+            },
+            "ARG1": {
+              "mean": 2.237143986894113,
+              "sd": 1.3989627055720826
+            },
+            "TGFB1": {
+              "mean": 4.696348981770668,
+              "sd": 0.8605077188668346
+            },
+            "VEGFA": {
+              "mean": 6.61682524727306,
+              "sd": 1.095129098040147
+            },
+            "CD8A": {
+              "mean": 4.863787664310983,
+              "sd": 2.0999741495384336
+            },
+            "CD8B": {
+              "mean": 2.5233604867849557,
+              "sd": 1.5677191009676597
+            },
+            "CD4": {
+              "mean": 3.996610497362925,
+              "sd": 1.2855490642685452
+            },
+            "IL7R": {
+              "mean": 5.269736262912923,
+              "sd": 1.4873569418822565
+            },
+            "IL2RA": {
+              "mean": 4.233550771203181,
+              "sd": 1.2697452068451753
+            },
+            "ZNF683": {
+              "mean": 0.6869132200722431,
+              "sd": 0.5744653515236541
+            },
+            "GNLY": {
+              "mean": 2.2894638386981567,
+              "sd": 1.6198371151142592
+            }
+          }
+        },
+        "Gide_PRJEB23709_pretreatment": {
+          "n": 41,
+          "population_transforms": {
+            "TCF7": {
+              "mean": 2.923508182072939,
+              "sd": 0.7293048365255396
+            },
+            "GZMB": {
+              "mean": 2.7288235128469505,
+              "sd": 1.24131138201596
+            },
+            "FOXP3": {
+              "mean": 1.1554948203904032,
+              "sd": 0.4490820370835332
+            },
+            "TOX": {
+              "mean": 1.6297787587307924,
+              "sd": 0.9984444130374045
+            },
+            "CXCL13": {
+              "mean": 2.6726591383022824,
+              "sd": 1.87389180586983
+            },
+            "IDO1": {
+              "mean": 2.848619956908522,
+              "sd": 1.959795540015683
+            },
+            "ARG1": {
+              "mean": 1.5720343255002394,
+              "sd": 1.183626103661742
+            },
+            "TGFB1": {
+              "mean": 4.5473038926170775,
+              "sd": 0.7917968203602022
+            },
+            "VEGFA": {
+              "mean": 7.089732984008892,
+              "sd": 1.3586304996987568
+            },
+            "CD8A": {
+              "mean": 3.4603509236949703,
+              "sd": 1.8400777880843788
+            },
+            "CD8B": {
+              "mean": 1.5059459704978313,
+              "sd": 1.2246693526419095
+            },
+            "CD4": {
+              "mean": 3.6939420145930293,
+              "sd": 1.0930706564189772
+            },
+            "IL7R": {
+              "mean": 4.5385175482751805,
+              "sd": 1.722612813395608
+            },
+            "IL2RA": {
+              "mean": 3.552945600522453,
+              "sd": 1.2459814803079763
+            },
+            "ZNF683": {
+              "mean": 0.49714710040074644,
+              "sd": 0.6094938137850919
+            },
+            "GNLY": {
+              "mean": 1.835405534014204,
+              "sd": 1.2267729516972536
+            }
+          }
+        },
+        "TCGA_SKCM_tumor_sampling": {
+          "n": 441,
+          "population_transforms": {
+            "TCF7": {
+              "mean": 8.442000189842382,
+              "sd": 1.617306293187902
+            },
+            "GZMB": {
+              "mean": 6.271956714736422,
+              "sd": 2.4578956799859433
+            },
+            "FOXP3": {
+              "mean": 5.7003025334821915,
+              "sd": 1.672155517598853
+            },
+            "TOX": {
+              "mean": 5.826870988854547,
+              "sd": 2.1402461887039363
+            },
+            "CXCL13": {
+              "mean": 6.753791822581563,
+              "sd": 3.1021041386058115
+            },
+            "IDO1": {
+              "mean": 6.617086946576337,
+              "sd": 2.867980798789541
+            },
+            "ARG1": {
+              "mean": 0.9348227738933091,
+              "sd": 2.030529211992959
+            },
+            "TGFB1": {
+              "mean": 10.196993888259204,
+              "sd": 1.1864666897921312
+            },
+            "VEGFA": {
+              "mean": 10.010409300931594,
+              "sd": 1.3578255843410172
+            },
+            "CD8A": {
+              "mean": 7.660387695841205,
+              "sd": 2.596745418695472
+            },
+            "CD8B": {
+              "mean": 5.7260724165448265,
+              "sd": 2.651096486450025
+            },
+            "CD4": {
+              "mean": 10.065505363787352,
+              "sd": 1.5671517004665607
+            },
+            "IL7R": {
+              "mean": 4.70776296118085,
+              "sd": 2.3151542266584153
+            },
+            "IL2RA": {
+              "mean": 5.329913593934512,
+              "sd": 1.943484352443683
+            },
+            "ZNF683": {
+              "mean": 3.570200733527277,
+              "sd": 2.084443222928094
+            },
+            "GNLY": {
+              "mean": 5.583245863189142,
+              "sd": 2.2821230420307135
+            }
+          }
+        }
+      },
+      "E_effector_formula": "0.5 * (z(ZNF683) + z(GNLY))",
+      "S_triad": {
+        "positive": [
+          "CD8A",
+          "CD8B",
+          "CD4",
+          "IL7R",
+          "TCF7"
+        ],
+        "negative": [
+          "FOXP3",
+          "IL2RA"
+        ]
+      },
+      "single_cell_TCF7_TOX_formula": "log2((n_TCF7_positive + 0.5) / (n_TOX_positive + 0.5))",
+      "single_cell_internal_tcell_ratios_cv_auroc": 0.8766666666666667,
+      "single_cell_internal_tcell_ratios_cv_auroc_rounded": 0.877,
+      "gide_pretreatment_metrics": {
+        "ZNF683_GNLY_effector_response": {
+          "cohort": "Gide_PRJEB23709",
+          "timepoint": "pretreatment",
+          "score": "ZNF683_GNLY_effector",
+          "tier": "molecular_proxy",
+          "n": 41.0,
+          "responders": 19.0,
+          "nonresponders": 22.0,
+          "auroc": 0.8038277512,
+          "ci_low": 0.6483253589,
+          "ci_high": 0.9258461495,
+          "p": 0.0009421334,
+          "bootstrap_valid": 2000.0,
+          "reason": null,
+          "endpoint": "secondary_release_response_SD_as_nonresponse",
+          "q": 0.0056528005
+        },
+        "ZNF683_GNLY_effector_OS": {
+          "cohort": "Gide_antiPD1_monotherapy",
+          "analysis_set": "baseline",
+          "endpoint": "OS",
+          "score": "ZNF683_GNLY_effector",
+          "n": 41,
+          "events": 24,
+          "censored": 17.0,
+          "duration_unit": "days",
+          "time_origin": "author-reported endpoint; explicit calendar origin not stated in accessible primary sources",
+          "primary_test": "Wald",
+          "family": "baseline_two_scores_two_endpoints",
+          "ties_method": "Efron",
+          "score_sd_ddof": 0.0,
+          "status": "estimated",
+          "reason": null,
+          "warning": null,
+          "score_center": -7.0404386927449e-17,
+          "score_sd": 0.883793114052568,
+          "median_cut": -0.196881644302311,
+          "n_high": 20.0,
+          "n_low": 21.0,
+          "events_high": 8.0,
+          "events_low": 16.0,
+          "high_definition": "score strictly greater than median; low at/below median",
+          "beta_per_sd": -0.995179781463432,
+          "se_beta": 0.32647326662201,
+          "hr": 0.369656981096761,
+          "ci_low": 0.19494152718843,
+          "ci_high": 0.700960363060504,
+          "wald_z": -3.048273421467146,
+          "wald_p": 0.002301604062677,
+          "lrt_stat": 13.28600777819142,
+          "lrt_p": 0.000267394257843,
+          "logrank_stat": 4.883188003189454,
+          "logrank_p": 0.027119486202436,
+          "exact_logrank_p": 0.027119486202436,
+          "exact_logrank_stat": 4.883188003189452,
+          "ph_rank_stat": 3.77585399312228,
+          "ph_rank_p": 0.051997351307947,
+          "ph_caveat": "Schoenfeld rank-time test; nonrejection does not establish PH",
+          "statsmodels_beta": -0.995179781496938,
+          "statsmodels_se": 0.326473266626765,
+          "statsmodels_wald_p": 0.00230160406223,
+          "statsmodels_lrt_p": 0.000267394257843,
+          "independent_beta_absdiff": 3.3507e-11,
+          "independent_se_absdiff": 4.755e-12,
+          "independent_wald_p_absdiff": 4.46e-13,
+          "independent_lrt_p_absdiff": 4.60785923306339e-18,
+          "independent_logrank_p_absdiff": 1.45716771982052e-16,
+          "scale_factor_tested": 30.4375,
+          "scale_hr_absdiff": 0.0,
+          "scale_wald_p_absdiff": 0.0,
+          "scale_lrt_p_absdiff": 0.0,
+          "scale_logrank_p_absdiff": 0.0,
+          "scale_ties_preserved": true,
+          "independent_reconciliation_passed": true,
+          "scale_invariance_passed": true,
+          "landmark_candidate_n": null,
+          "wald_q_bh": 0.006674234534071,
+          "lrt_q_bh": 0.001069577031372,
+          "logrank_q_bh": 0.054238972404871
+        },
+        "ZNF683_GNLY_effector_PFS": {
+          "cohort": "Gide_antiPD1_monotherapy",
+          "analysis_set": "baseline",
+          "endpoint": "PFS",
+          "score": "ZNF683_GNLY_effector",
+          "n": 41,
+          "events": 29,
+          "censored": 12.0,
+          "duration_unit": "days",
+          "time_origin": "author-reported endpoint; explicit calendar origin not stated in accessible primary sources",
+          "primary_test": "Wald",
+          "family": "baseline_two_scores_two_endpoints",
+          "ties_method": "Efron",
+          "score_sd_ddof": 0.0,
+          "status": "estimated",
+          "reason": null,
+          "warning": null,
+          "score_center": -7.0404386927449e-17,
+          "score_sd": 0.883793114052568,
+          "median_cut": -0.196881644302311,
+          "n_high": 20.0,
+          "n_low": 21.0,
+          "events_high": 10.0,
+          "events_low": 19.0,
+          "high_definition": "score strictly greater than median; low at/below median",
+          "beta_per_sd": -0.817467348106732,
+          "se_beta": 0.278538277417213,
+          "hr": 0.441548528298903,
+          "ci_low": 0.255791571446264,
+          "ci_high": 0.762202998873574,
+          "wald_z": -2.93484743169527,
+          "wald_p": 0.003337117267036,
+          "lrt_stat": 11.866707552744629,
+          "lrt_p": 0.000571463502325,
+          "logrank_stat": 5.959405604159914,
+          "logrank_p": 0.014638975616151,
+          "exact_logrank_p": 0.014638975616151,
+          "exact_logrank_stat": 5.959405604159918,
+          "ph_rank_stat": 0.693017952184799,
+          "ph_rank_p": 0.40513975638772,
+          "ph_caveat": "Schoenfeld rank-time test; nonrejection does not establish PH",
+          "statsmodels_beta": -0.817469619703614,
+          "statsmodels_se": 0.278538584466463,
+          "statsmodels_wald_p": 0.003337064354892,
+          "statsmodels_lrt_p": 0.000571463502305,
+          "independent_beta_absdiff": 2.271596882e-06,
+          "independent_se_absdiff": 3.0704925e-07,
+          "independent_wald_p_absdiff": 5.2912144e-08,
+          "independent_lrt_p_absdiff": 2e-14,
+          "independent_logrank_p_absdiff": 7.80625564189563e-17,
+          "scale_factor_tested": 30.4375,
+          "scale_hr_absdiff": 0.0,
+          "scale_wald_p_absdiff": 0.0,
+          "scale_lrt_p_absdiff": 0.0,
+          "scale_logrank_p_absdiff": 0.0,
+          "scale_ties_preserved": true,
+          "independent_reconciliation_passed": true,
+          "scale_invariance_passed": true,
+          "landmark_candidate_n": null,
+          "wald_q_bh": 0.006674234534071,
+          "lrt_q_bh": 0.00114292700465,
+          "logrank_q_bh": 0.054238972404871
+        },
+        "S_triad_response": {
+          "cohort": "Gide_PRJEB23709",
+          "timepoint": "pretreatment",
+          "score": "S_triad",
+          "tier": "molecular_proxy",
+          "n": 41.0,
+          "responders": 19.0,
+          "nonresponders": 22.0,
+          "auroc": 0.7224880383,
+          "ci_low": 0.5516991504,
+          "ci_high": 0.8768115942,
+          "p": 0.0155909733,
+          "bootstrap_valid": 2000.0,
+          "reason": null,
+          "endpoint": "secondary_release_response_SD_as_nonresponse",
+          "q": 0.0311819466
+        },
+        "S_triad_OS": {
+          "cohort": "Gide_antiPD1_monotherapy",
+          "analysis_set": "baseline",
+          "endpoint": "OS",
+          "score": "S_triad",
+          "n": 41,
+          "events": 24,
+          "censored": 17.0,
+          "duration_unit": "days",
+          "time_origin": "author-reported endpoint; explicit calendar origin not stated in accessible primary sources",
+          "primary_test": "Wald",
+          "family": "baseline_two_scores_two_endpoints",
+          "ties_method": "Efron",
+          "score_sd_ddof": 0.0,
+          "status": "estimated",
+          "reason": null,
+          "warning": null,
+          "score_center": 3.08696158066507e-16,
+          "score_sd": 0.536200036589129,
+          "median_cut": -0.010244886324505,
+          "n_high": 20.0,
+          "n_low": 21.0,
+          "events_high": 9.0,
+          "events_low": 15.0,
+          "high_definition": "score strictly greater than median; low at/below median",
+          "beta_per_sd": -0.527578456123255,
+          "se_beta": 0.21248382877244,
+          "hr": 0.59003202958525,
+          "ci_low": 0.389053229558221,
+          "ci_high": 0.894833327387636,
+          "wald_z": -2.482911095734567,
+          "wald_p": 0.013031360646892,
+          "lrt_stat": 6.202662431592671,
+          "lrt_p": 0.012755829385852,
+          "logrank_stat": 2.079646125906119,
+          "logrank_p": 0.149274779637594,
+          "exact_logrank_p": 0.149274779637593,
+          "exact_logrank_stat": 2.07964612590612,
+          "ph_rank_stat": 2.56036162022658,
+          "ph_rank_p": 0.109573517039682,
+          "ph_caveat": "Schoenfeld rank-time test; nonrejection does not establish PH",
+          "statsmodels_beta": -0.527578390484129,
+          "statsmodels_se": 0.212483828937381,
+          "statsmodels_wald_p": 0.013031372017894,
+          "statsmodels_lrt_p": 0.012755829385852,
+          "independent_beta_absdiff": 6.5639126e-08,
+          "independent_se_absdiff": 1.64942e-10,
+          "independent_wald_p_absdiff": 1.1371002e-08,
+          "independent_lrt_p_absdiff": 5.86336534880161e-16,
+          "independent_logrank_p_absdiff": 8.32667268468867e-17,
+          "scale_factor_tested": 30.4375,
+          "scale_hr_absdiff": 0.0,
+          "scale_wald_p_absdiff": 0.0,
+          "scale_lrt_p_absdiff": 0.0,
+          "scale_logrank_p_absdiff": 0.0,
+          "scale_ties_preserved": true,
+          "independent_reconciliation_passed": true,
+          "scale_invariance_passed": true,
+          "landmark_candidate_n": null,
+          "wald_q_bh": 0.013031360646892,
+          "lrt_q_bh": 0.012755829385852,
+          "logrank_q_bh": 0.199033039516791
+        },
+        "S_triad_PFS": {
+          "cohort": "Gide_antiPD1_monotherapy",
+          "analysis_set": "baseline",
+          "endpoint": "PFS",
+          "score": "S_triad",
+          "n": 41,
+          "events": 29,
+          "censored": 12.0,
+          "duration_unit": "days",
+          "time_origin": "author-reported endpoint; explicit calendar origin not stated in accessible primary sources",
+          "primary_test": "Wald",
+          "family": "baseline_two_scores_two_endpoints",
+          "ties_method": "Efron",
+          "score_sd_ddof": 0.0,
+          "status": "estimated",
+          "reason": null,
+          "warning": null,
+          "score_center": 3.08696158066507e-16,
+          "score_sd": 0.536200036589129,
+          "median_cut": -0.010244886324505,
+          "n_high": 20.0,
+          "n_low": 21.0,
+          "events_high": 13.0,
+          "events_low": 16.0,
+          "high_definition": "score strictly greater than median; low at/below median",
+          "beta_per_sd": -0.51936552894839,
+          "se_beta": 0.200246787533577,
+          "hr": 0.594897873735949,
+          "ci_low": 0.401783448618735,
+          "ci_high": 0.880831406550506,
+          "wald_z": -2.5936272703566,
+          "wald_p": 0.009496938227412,
+          "lrt_stat": 6.984129186918153,
+          "lrt_p": 0.008223565560066,
+          "logrank_stat": 0.736714521824629,
+          "logrank_p": 0.390715370833167,
+          "exact_logrank_p": 0.390715370833167,
+          "exact_logrank_stat": 0.73671452182463,
+          "ph_rank_stat": 0.488644059534176,
+          "ph_rank_p": 0.484532782659997,
+          "ph_caveat": "Schoenfeld rank-time test; nonrejection does not establish PH",
+          "statsmodels_beta": -0.519366567671486,
+          "statsmodels_se": 0.20024680358769,
+          "statsmodels_wald_p": 0.009496800704385,
+          "statsmodels_lrt_p": 0.008223565559943,
+          "independent_beta_absdiff": 1.038723096e-06,
+          "independent_se_absdiff": 1.6054113e-08,
+          "independent_wald_p_absdiff": 1.37523027e-07,
+          "independent_lrt_p_absdiff": 1.23e-13,
+          "independent_logrank_p_absdiff": 1.11022302462516e-16,
+          "scale_factor_tested": 30.4375,
+          "scale_hr_absdiff": 0.0,
+          "scale_wald_p_absdiff": 0.0,
+          "scale_lrt_p_absdiff": 0.0,
+          "scale_logrank_p_absdiff": 0.0,
+          "scale_ties_preserved": true,
+          "independent_reconciliation_passed": true,
+          "scale_invariance_passed": true,
+          "landmark_candidate_n": null,
+          "wald_q_bh": 0.012662584303216,
+          "lrt_q_bh": 0.010964754080088,
+          "logrank_q_bh": 0.390715370833167
+        },
+        "gide_response_sensitivity_rows": [
+          {
+            "timepoint": "on_treatment",
+            "score": "ZNF683_GNLY_effector",
+            "endpoint": "primary_source_durable_benefit_CR_PR_or_SD_over_6months",
+            "n": 9,
+            "responders": 5,
+            "nonresponders": 4,
+            "auroc": 0.6,
+            "ci_low": 0.166666666666667,
+            "ci_high": 1.0,
+            "p": 0.713303173878458,
+            "bootstrap_valid": 1988,
+            "status": "estimated",
+            "reason": null,
+            "q": 0.815203627289666
+          },
+          {
+            "timepoint": "on_treatment",
+            "score": "S_triad",
+            "endpoint": "primary_source_durable_benefit_CR_PR_or_SD_over_6months",
+            "n": 9,
+            "responders": 5,
+            "nonresponders": 4,
+            "auroc": 0.6,
+            "ci_low": 0.142857142857143,
+            "ci_high": 1.0,
+            "p": 0.713303173878458,
+            "bootstrap_valid": 1988,
+            "status": "estimated",
+            "reason": null,
+            "q": 0.815203627289666
+          },
+          {
+            "timepoint": "pretreatment",
+            "score": "ZNF683_GNLY_effector",
+            "endpoint": "primary_source_durable_benefit_CR_PR_or_SD_over_6months",
+            "n": 41,
+            "responders": 22,
+            "nonresponders": 19,
+            "auroc": 0.722488038277512,
+            "ci_low": 0.553828502415459,
+            "ci_high": 0.873234572445098,
+            "p": 0.015590973295014,
+            "bootstrap_valid": 2000,
+            "status": "estimated",
+            "reason": null,
+            "q": 0.124727786360116
+          },
+          {
+            "timepoint": "pretreatment",
+            "score": "S_triad",
+            "endpoint": "primary_source_durable_benefit_CR_PR_or_SD_over_6months",
+            "n": 41,
+            "responders": 22,
+            "nonresponders": 19,
+            "auroc": 0.66267942583732,
+            "ci_low": 0.484978174603175,
+            "ci_high": 0.818203463203463,
+            "p": 0.077606871316283,
+            "bootstrap_valid": 2000,
+            "status": "estimated",
+            "reason": null,
+            "q": 0.146777606700831
+          }
+        ]
+      },
+      "riaz_on_treatment_metrics": {
+        "ZNF683_GNLY_effector_response": {
+          "cohort": "Riaz_GSE91061",
+          "timepoint": "on_treatment",
+          "score": "ZNF683_GNLY_effector",
+          "tier": "molecular_proxy",
+          "n": 55.0,
+          "responders": 13.0,
+          "nonresponders": 42.0,
+          "auroc": 0.6996336996,
+          "ci_low": 0.5256410256,
+          "ci_high": 0.8533064738,
+          "p": 0.0315976954,
+          "bootstrap_valid": 2000.0,
+          "reason": null,
+          "endpoint": "CR_PR_vs_SD_PD",
+          "q": 0.1895861726
+        },
+        "S_triad_response": {
+          "cohort": "Riaz_GSE91061",
+          "timepoint": "on_treatment",
+          "score": "S_triad",
+          "tier": "molecular_proxy",
+          "n": 55.0,
+          "responders": 13.0,
+          "nonresponders": 42.0,
+          "auroc": 0.5732600733,
+          "ci_low": 0.3849994241,
+          "ci_high": 0.7403409729,
+          "p": 0.4339069854,
+          "bootstrap_valid": 2000.0,
+          "reason": null,
+          "endpoint": "CR_PR_vs_SD_PD",
+          "q": 0.8384104163
+        }
+      },
+      "tcga_skcm_metrics": {
+        "ZNF683_GNLY_effector_OS_univariate": {
+          "cohort": "TCGA_SKCM",
+          "timepoint": "tumor_sampling",
+          "score": "ZNF683_GNLY_effector",
+          "tier": "molecular_proxy",
+          "endpoint": "OS",
+          "reason": null,
+          "context": "general prognostic association; diagnosis-origin, non-baseline sampling bias",
+          "n": 425.0,
+          "events": 210.0,
+          "cox_reason": null,
+          "median_cut": 0.0277936147,
+          "n_high": 212.0,
+          "n_low": 213.0,
+          "rmst_tau_months": 60.0,
+          "rmst_delta_months": 8.1800267659,
+          "rmst_delta_years": 0.6816688972,
+          "rmst_ci_low": 4.4533074878,
+          "rmst_ci_high": 11.8154608472,
+          "rmst_bootstrap_valid": 2000.0,
+          "at_risk_high": 84.0,
+          "at_risk_low": 68.0,
+          "model": "univariate",
+          "adjustment_coefficients": null,
+          "complete_case_loss": null,
+          "hr": 0.7466500094,
+          "hr_low": 0.6537195404,
+          "hr_high": 0.8527911468,
+          "cox_p": 1.64685e-05,
+          "ph_p": 0.1198129453,
+          "rmst_reason": null,
+          "ph_min_covariate_p": null,
+          "ph_covariate_pvalues": null,
+          "covariates": null,
+          "cox_q": 4.94056e-05,
+          "rmst_ci_low_years": 0.3711089573,
+          "rmst_ci_high_years": 0.9846217373
+        },
+        "ZNF683_GNLY_effector_OS_age_stage_adjusted": {
+          "cohort": "TCGA_SKCM",
+          "timepoint": "tumor_sampling",
+          "score": "ZNF683_GNLY_effector",
+          "tier": "molecular_proxy",
+          "endpoint": "OS",
+          "reason": null,
+          "context": "general prognostic association; diagnosis-origin, non-baseline sampling bias",
+          "n": 390.0,
+          "events": 191.0,
+          "cox_reason": null,
+          "median_cut": null,
+          "n_high": null,
+          "n_low": null,
+          "rmst_tau_months": null,
+          "rmst_delta_months": null,
+          "rmst_delta_years": null,
+          "rmst_ci_low": null,
+          "rmst_ci_high": null,
+          "rmst_bootstrap_valid": null,
+          "at_risk_high": null,
+          "at_risk_low": null,
+          "model": "age_stage_adjusted",
+          "adjustment_coefficients": 5.0,
+          "complete_case_loss": 35.0,
+          "hr": 0.7179485941,
+          "hr_low": 0.6195341899,
+          "hr_high": 0.8319963484,
+          "cox_p": 1.05721e-05,
+          "ph_p": 0.1257805118,
+          "rmst_reason": null,
+          "ph_min_covariate_p": 0.0276906419,
+          "ph_covariate_pvalues": "{\"age\": 0.8796703539022496, \"score_sd\": 0.12578051177121308, \"stage_II\": 0.3531510101317299, \"stage_III\": 0.02769064188887394, \"stage_IV\": 0.22892909225706115}",
+          "covariates": "age+categorical_stage",
+          "cox_q": 2.88127e-05,
+          "rmst_ci_low_years": null,
+          "rmst_ci_high_years": null
+        },
+        "ZNF683_GNLY_effector_PFS_univariate": {
+          "cohort": "TCGA_SKCM",
+          "timepoint": "tumor_sampling",
+          "score": "ZNF683_GNLY_effector",
+          "tier": "molecular_proxy",
+          "endpoint": "PFS",
+          "reason": null,
+          "context": "general prognostic association; diagnosis-origin, non-baseline sampling bias",
+          "n": 421.0,
+          "events": 297.0,
+          "cox_reason": null,
+          "median_cut": 0.0198667866,
+          "n_high": 210.0,
+          "n_low": 211.0,
+          "rmst_tau_months": 60.0,
+          "rmst_delta_months": 6.8108095171,
+          "rmst_delta_years": 0.5675674598,
+          "rmst_ci_low": 2.6175880312,
+          "rmst_ci_high": 11.1649866807,
+          "rmst_bootstrap_valid": 2000.0,
+          "at_risk_high": 51.0,
+          "at_risk_low": 40.0,
+          "model": "univariate",
+          "adjustment_coefficients": null,
+          "complete_case_loss": null,
+          "hr": 0.8648981755,
+          "hr_low": 0.773119673,
+          "hr_high": 0.9675718779,
+          "cox_p": 0.0112147313,
+          "ph_p": 0.1779715162,
+          "rmst_reason": null,
+          "ph_min_covariate_p": null,
+          "ph_covariate_pvalues": null,
+          "covariates": null,
+          "cox_q": 0.033644194,
+          "rmst_ci_low_years": 0.2181323359,
+          "rmst_ci_high_years": 0.9304155567
+        },
+        "ZNF683_GNLY_effector_PFS_age_stage_adjusted": {
+          "cohort": "TCGA_SKCM",
+          "timepoint": "tumor_sampling",
+          "score": "ZNF683_GNLY_effector",
+          "tier": "molecular_proxy",
+          "endpoint": "PFS",
+          "reason": null,
+          "context": "general prognostic association; diagnosis-origin, non-baseline sampling bias",
+          "n": 388.0,
+          "events": 274.0,
+          "cox_reason": null,
+          "median_cut": null,
+          "n_high": null,
+          "n_low": null,
+          "rmst_tau_months": null,
+          "rmst_delta_months": null,
+          "rmst_delta_years": null,
+          "rmst_ci_low": null,
+          "rmst_ci_high": null,
+          "rmst_bootstrap_valid": null,
+          "at_risk_high": null,
+          "at_risk_low": null,
+          "model": "age_stage_adjusted",
+          "adjustment_coefficients": 5.0,
+          "complete_case_loss": 33.0,
+          "hr": 0.837297633,
+          "hr_low": 0.7389231279,
+          "hr_high": 0.9487689582,
+          "cox_p": 0.0053584898,
+          "ph_p": 0.0534804402,
+          "rmst_reason": null,
+          "ph_min_covariate_p": 0.0048701199,
+          "ph_covariate_pvalues": "{\"age\": 0.28983926563350254, \"score_sd\": 0.053480440155121295, \"stage_II\": 0.5383538961316748, \"stage_III\": 0.004870119864675701, \"stage_IV\": 0.006144829550750909}",
+          "covariates": "age+categorical_stage",
+          "cox_q": 0.0160754695,
+          "rmst_ci_low_years": null,
+          "rmst_ci_high_years": null
+        }
+      }
+    }
+  }
+}

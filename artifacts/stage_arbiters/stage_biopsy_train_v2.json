@@ -1,0 +1,179 @@
+{
+  "capability": "stage-biopsy",
+  "command": "/workspace/.venv/bin/python scripts/train_stage_arbiters_v1.py --seed 20260928 --out-dir /workspace/stage-arbiters-full --repo-root /workspace/smm-ten-delivery --write-repo",
+  "completed_at": "2026-09-29T03:51:24.674597Z",
+  "dataset": "CBIS-DDSM official training case descriptions (biopsy pathology)",
+  "dataset_manifest_path": "artifacts/stage_arbiters/stage_biopsy_dataset_v2.json",
+  "dataset_sha256": "2ae3a8b7d367f29cce0cb205ef63f880a211f3551578d0eb2d4f4f51eb69d903",
+  "n_test": 412,
+  "n_training": 1977,
+  "n_training_synthetic": false,
+  "n_validation": 475,
+  "nested_grouped_cv": [
+    {
+      "fold": 0,
+      "inner_mean_auroc_by_c": {
+        "0.01": 0.7318826367504703,
+        "0.1": 0.7517509423574283,
+        "1.0": 0.7517509423574283,
+        "10.0": 0.7519517304506943
+      },
+      "n_train": 1599,
+      "n_valid": 378,
+      "outer_auroc": 0.7453736381770754,
+      "selected_c": 10.0
+    },
+    {
+      "fold": 1,
+      "inner_mean_auroc_by_c": {
+        "0.01": 0.7365348156646477,
+        "0.1": 0.7469184534071763,
+        "1.0": 0.7552920362183375,
+        "10.0": 0.7552920362183375
+      },
+      "n_train": 1608,
+      "n_valid": 369,
+      "outer_auroc": 0.7364789312617701,
+      "selected_c": 1.0
+    },
+    {
+      "fold": 2,
+      "inner_mean_auroc_by_c": {
+        "0.01": 0.7375365709720022,
+        "0.1": 0.7414006754256425,
+        "1.0": 0.7506368186423681,
+        "10.0": 0.7506368186423681
+      },
+      "n_train": 1568,
+      "n_valid": 409,
+      "outer_auroc": 0.7520036064916851,
+      "selected_c": 1.0
+    },
+    {
+      "fold": 3,
+      "inner_mean_auroc_by_c": {
+        "0.01": 0.7249419336554926,
+        "0.1": 0.7422738692115728,
+        "1.0": 0.7406840413201682,
+        "10.0": 0.7406840413201682
+      },
+      "n_train": 1576,
+      "n_valid": 401,
+      "outer_auroc": 0.7857789855072465,
+      "selected_c": 0.1
+    },
+    {
+      "fold": 4,
+      "inner_mean_auroc_by_c": {
+        "0.01": 0.7380982597253904,
+        "0.1": 0.7384836952364345,
+        "1.0": 0.7384836952364345,
+        "10.0": 0.7466162787306474
+      },
+      "n_train": 1557,
+      "n_valid": 420,
+      "outer_auroc": 0.736325767437457,
+      "selected_c": 10.0
+    }
+  ],
+  "patient_disjoint": true,
+  "schema_version": 2,
+  "secondary_evaluation_summary": {
+    "purpose": "Mathematically interrogate weak/null signals using test-stratified AUROC, within-stratum regressions, and leave-stratum-out cross-cohort validation.",
+    "selected_c_fixed_before_test": 0.1,
+    "strata": {
+      "calc": {
+        "final_model_test": {
+          "auroc": 0.7780172413793103,
+          "auroc_ci": [
+            0.667420483701049,
+            0.863626842993256
+          ],
+          "n": 200,
+          "n_negative": 116,
+          "n_patients": 80,
+          "n_positive": 84,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        },
+        "leave_stratum_out_validation": {
+          "auroc": 0.5,
+          "auroc_ci": [
+            0.5,
+            0.5
+          ],
+          "n": 200,
+          "n_negative": 116,
+          "n_patients": 80,
+          "n_positive": 84,
+          "n_training": 897,
+          "null_signal_result": "inconclusive_vs_null",
+          "status": "estimated"
+        },
+        "within_stratum_regression": {
+          "auroc": 0.7780172413793103,
+          "auroc_ci": [
+            0.6695799847103333,
+            0.8595871414697743
+          ],
+          "n": 200,
+          "n_negative": 116,
+          "n_patients": 80,
+          "n_positive": 84,
+          "n_training": 1080,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        }
+      },
+      "mass": {
+        "final_model_test": {
+          "auroc": 0.79945666696357,
+          "auroc_ci": [
+            0.7283478905618352,
+            0.8722469622859773
+          ],
+          "n": 212,
+          "n_negative": 109,
+          "n_patients": 117,
+          "n_positive": 103,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        },
+        "leave_stratum_out_validation": {
+          "auroc": 0.5,
+          "auroc_ci": [
+            0.5,
+            0.5
+          ],
+          "n": 212,
+          "n_negative": 109,
+          "n_patients": 117,
+          "n_positive": 103,
+          "n_training": 1080,
+          "null_signal_result": "inconclusive_vs_null",
+          "status": "estimated"
+        },
+        "within_stratum_regression": {
+          "auroc": 0.79945666696357,
+          "auroc_ci": [
+            0.7246898541687875,
+            0.8660467043669676
+          ],
+          "n": 212,
+          "n_negative": 109,
+          "n_patients": 117,
+          "n_positive": 103,
+          "n_training": 897,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        }
+      }
+    }
+  },
+  "seed": 20260929,
+  "selected_c": 0.1,
+  "source_commit": "55fc3a8fd4e5d8e7db87613b948e51974664790a",
+  "split_manifest_path": "artifacts/stage_arbiters/stage_biopsy_split_v2.json",
+  "split_sha256": "41e3a7078d7e0643343f86090bb98f2c72fb47cecc2f2801d3d73c056ce2fbb7",
+  "started_at": "2026-09-29T03:51:19.900017Z"
+}

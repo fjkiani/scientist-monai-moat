@@ -1,0 +1,35 @@
+{
+  "status": "ok",
+  "workspace": "testing1235",
+  "deploy": "https://modal.com/apps/testing1235/main/deployed/medgemma-1-5-4b",
+  "info_url": "https://testing1235--medgemma-1-5-4b-info.modal.run",
+  "chat_url": "https://testing1235--medgemma-1-5-4b-chat.modal.run",
+  "identity_sha256": "1013eee9b36bf4468d682e86b259bfc1cd9c89f442d50e50816bf3f2526d9b1e",
+  "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8",
+  "chat_sla": {
+    "status": "ok",
+    "latency_s": 1.618,
+    "sla_seconds": 120,
+    "sla_met": true,
+    "model": "google/medgemma-1.5-4b-it",
+    "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8",
+    "text": "<unused94>thought\nThe user wants me to reply with the word \"ok\". I",
+    "chat_url": "https://testing1235--medgemma-1-5-4b-chat.modal.run"
+  },
+  "pathology_extract": {
+    "status": "ok",
+    "source": "medgemma_pathology",
+    "model_id": "google/medgemma-1.5-4b-it",
+    "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8",
+    "latency_s": 52.071,
+    "extraction": {
+      "er_status": "POSITIVE",
+      "er_percent": null,
+      "pr_status": "POSITIVE",
+      "her2_status": "POSITIVE",
+      "nottingham_grade": 3,
+      "tumor_size_mm": 45.0
+    }
+  },
+  "ts": "2026-10-06T01:07:19.935329+00:00"
+}

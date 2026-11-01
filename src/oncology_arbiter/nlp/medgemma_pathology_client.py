@@ -1,0 +1,307 @@
+"""MedGemma Modal client for structured pathology biomarker extraction (RUO)."""
+from __future__ import annotations
+
+import json
+import re
+import urllib.error
+import urllib.request
+from typing import Any
+
+from oncology_arbiter.models.medgemma_1_5_4b_wiring import verify_artifact_identity
+from oncology_arbiter.nlp.medgemma_chat_transport import (
+    MedGemmaChatError,
+    medgemma_chat,
+)
+from oncology_arbiter.nlp.pathology_extraction_schema import (
+    EXTRACTION_SYSTEM_PROMPT,
+    PathologyExtraction,
+)
+
+
+_JSON_RE = re.compile(r"\{[\s\S]*\}")
+PATHOLOGY_CHAT_URL = "https://testing1235--medgemma-1-5-4b-chat.modal.run"
+
+
+class MedGemmaPathologyError(RuntimeError):
+    pass
+
+
+def _extract_json_object(text: str) -> dict[str, Any]:
+    text = text.strip()
+    # Strip MedGemma/Gemma3 thinking channel wrappers when present.
+    text = re.sub(
+        r"<unused\d+>thought[\s\S]*?(?:</?unused\d+>|</thought>|$)",
+        "",
+        text,
+        flags=re.IGNORECASE,
+    )
+    text = re.sub(r"<think>[\s\S]*?</think>", "", text, flags=re.IGNORECASE)
+    text = text.strip()
+    if text.startswith("```"):
+        text = re.sub(r"^```(?:json)?\s*", "", text)
+        text = re.sub(r"\s*```$", "", text)
+    # Prefer first JSON object (tolerates trailing prose / second blobs).
+    decoder = json.JSONDecoder()
+    for idx, ch in enumerate(text):
+        if ch != "{":
+            continue
+        try:
+            payload, _end = decoder.raw_decode(text[idx:])
+        except json.JSONDecodeError:
+            continue
+        if isinstance(payload, dict):
+            return payload
+    match = _JSON_RE.search(text)
+    if not match:
+        raise MedGemmaPathologyError("medgemma_pathology: no JSON object in model text")
+    try:
+        payload = json.loads(match.group(0))
+    except json.JSONDecodeError as exc:
+        raise MedGemmaPathologyError(
+            f"medgemma_pathology: JSON parse failed: {exc}"
+        ) from exc
+    if not isinstance(payload, dict):
+        raise MedGemmaPathologyError("medgemma_pathology: JSON payload is not an object")
+    return payload
+
+
+def extract_pathology(
+    report_text: str,
+    *,
+    max_tokens: int = 2048,
+    temperature: float = 0.0,
+    timeout_s: float = 300.0,
+) -> dict[str, Any]:
+    """Call identity-locked MedGemma chat and return validated PathologyExtraction."""
+    if not report_text or not str(report_text).strip():
+        raise MedGemmaPathologyError("medgemma_pathology: empty report_text")
+
+    identity = verify_artifact_identity()
+    chat_url = str(identity["chat_url"]).rstrip("/")
+    if chat_url != PATHOLOGY_CHAT_URL:
+        raise MedGemmaPathologyError(
+            "medgemma_pathology: identity chat_url is not the pinned MedGemma chat host"
+        )
+    # Keep prompt bounded — long TCGA reports; head+tail preserves receptor blocks.
+    body_text = str(report_text)
+    if len(body_text) > 12000:
+        body_text = body_text[:8000] + "\n...\n" + body_text[-4000:]
+
+    attempts = [
+        (
+            EXTRACTION_SYSTEM_PROMPT
+            + "\n\nPATHOLOGY REPORT:\n"
+            + body_text
+            + "\n\nJSON:"
+        ),
+        (
+            "Return ONLY one JSON object with keys "
+            "er_status, er_percent, pr_status, her2_status, nottingham_grade, tumor_size_mm. "
+            "Use null when unknown. First character must be '{'. "
+            "UNIT CONVERSION RULE: tumor_size_mm is millimeters. "
+            "1.3 cm = 13 mm. Multiply cm by 10, never by 100.\n\nREPORT:\n"
+            + body_text[:6000]
+            + "\n\n{"
+        ),
+    ]
+
+    last_err: Exception | None = None
+    raw_text = ""
+    data: dict[str, Any] = {}
+    for user_content in attempts:
+        try:
+            data = medgemma_chat(
+                [{"role": "user", "content": user_content}],
+                chat_url=chat_url,
+                max_tokens=max_tokens,
+                temperature=temperature,
+                timeout_s=timeout_s,
+            )
+        except MedGemmaChatError as exc:
+            last_err = MedGemmaPathologyError(str(exc))
+            continue
+        except Exception as exc:  # noqa: BLE001
+            last_err = MedGemmaPathologyError(
+                f"medgemma_pathology request failed: {type(exc).__name__}: {exc}"
+            )
+            continue
+
+        if data.get("error"):
+            last_err = MedGemmaPathologyError(
+                f"medgemma_pathology chat error: {data['error']}"
+            )
+            continue
+        if data.get("revision_sha256") and data.get("revision_sha256") != identity[
+            "revision_sha256"
+        ]:
+            raise MedGemmaPathologyError(
+                "medgemma_pathology: revision_sha256 drift vs identity"
+            )
+
+        raw_text = str(data.get("text") or "")
+        try:
+            parsed = _extract_json_object(raw_text)
+            break
+        except MedGemmaPathologyError as exc:
+            last_err = exc
+            continue
+    else:
+        raise last_err or MedGemmaPathologyError(
+            "medgemma_pathology: no JSON object in model text"
+        )
+    # Drop unknown keys before pydantic; keep honesty on disclaimer.
+    allowed = {
+        "er_status",
+        "er_percent",
+        "pr_status",
+        "her2_status",
+        "nottingham_grade",
+        "tumor_size_mm",
+    }
+    slim = {k: parsed.get(k) for k in allowed if k in parsed}
+
+    def _norm_status(value: Any, *, her2: bool = False) -> str:
+        if value is None:
+            return "UNKNOWN"
+        raw = str(value).strip().upper()
+        compact = (
+            raw.replace(" ", "_")
+            .replace("-", "_")
+            .replace("/", "_")
+            .replace("(", "_")
+            .replace(")", "_")
+        )
+        aliases = {
+            "POS": "POSITIVE",
+            "NEG": "NEGATIVE",
+            "NOT_AMPLIFIED": "NON_AMPLIFIED",
+            "NONAMPLIFIED": "NON_AMPLIFIED",
+            "NON_AMPLIFIED": "NON_AMPLIFIED",
+            "HER2_POSITIVE": "POSITIVE",
+            "HER2_NEGATIVE": "NEGATIVE",
+            "NEGATIVE_1+": "1+",
+            "NEGATIVE_(1+)": "1+",
+            "NEGATIVE__1+_": "1+",
+            "NEGATIVE__1+": "1+",
+            "POSITIVE_3+": "3+",
+            "POSITIVE_(3+)": "3+",
+            "POSITIVE__3+_": "3+",
+            "EQUIVOCAL_2+": "2+",
+            "EQUIVOCAL_(2+)": "2+",
+            "EQUIVOCAL__2+_": "2+",
+        }
+        # collapse repeated underscores from paren/punct scrub
+        while "__" in compact:
+            compact = compact.replace("__", "_")
+        compact = compact.strip("_")
+        if compact in aliases:
+            return aliases[compact]
+        if her2:
+            if "3+" in raw:
+                return "3+"
+            if "2+" in raw:
+                return "2+"
+            if "1+" in raw:
+                return "1+"
+            if "NON" in raw and "AMPLIF" in raw:
+                return "NON_AMPLIFIED"
+            if "NOT" in raw and "AMPLIF" in raw:
+                return "NON_AMPLIFIED"
+            if "AMPLIF" in raw and "NON" not in raw and "NOT" not in raw:
+                return "AMPLIFIED"
+            if "POSITIVE" in raw:
+                return "POSITIVE"
+            if "NEGATIVE" in raw:
+                return "NEGATIVE"
+            if "EQUIVOCAL" in raw:
+                return "EQUIVOCAL"
+            if raw in {"0", "1+", "2+", "3+"}:
+                return raw
+            return "UNKNOWN"
+        if compact in {"POSITIVE", "NEGATIVE", "EQUIVOCAL", "UNKNOWN"}:
+            return compact
+        if "POSITIVE" in raw:
+            return "POSITIVE"
+        if "NEGATIVE" in raw:
+            return "NEGATIVE"
+        if "EQUIVOCAL" in raw:
+            return "EQUIVOCAL"
+        return "UNKNOWN"
+
+    def _norm_grade(value: Any) -> Any:
+        if value is None or value == "":
+            return None
+        if isinstance(value, int) and value in (1, 2, 3):
+            return value
+        if isinstance(value, float) and int(value) in (1, 2, 3):
+            return int(value)
+        text = str(value).strip().upper()
+        import re
+
+        m = re.search(r"\b([123])\b", text)
+        if m:
+            return int(m.group(1))
+        m = re.search(r"G([123])\b", text)
+        if m:
+            return int(m.group(1))
+        if "POOR" in text or "HIGH" in text:
+            return 3
+        if "MODERATE" in text or "INTERMEDIATE" in text:
+            return 2
+        if "WELL" in text or "LOW" in text:
+            return 1
+        return None
+
+    def _norm_float(value: Any) -> Any:
+        if value is None or value == "":
+            return None
+        if isinstance(value, (int, float)):
+            return float(value)
+        text = str(value).strip().replace("%", "")
+        try:
+            return float(text)
+        except ValueError:
+            import re
+
+            m = re.search(r"(\d+(?:\.\d+)?)", text)
+            return float(m.group(1)) if m else None
+
+    if "er_status" in slim:
+        slim["er_status"] = _norm_status(slim.get("er_status"))
+    if "pr_status" in slim:
+        slim["pr_status"] = _norm_status(slim.get("pr_status"))
+    if "her2_status" in slim:
+        slim["her2_status"] = _norm_status(slim.get("her2_status"), her2=True)
+    if "nottingham_grade" in slim:
+        slim["nottingham_grade"] = _norm_grade(slim.get("nottingham_grade"))
+    if "er_percent" in slim:
+        slim["er_percent"] = _norm_float(slim.get("er_percent"))
+    # A fractional value <= 15 is an unconverted centimeter (1.3 cm).
+    # An integer in that range is already millimeters (13 mm). Multiplying
+    # those integers by 10 turns 1.3 cm → 13 mm into 130 mm.
+    size = _norm_float(slim.get("tumor_size_mm")) if "tumor_size_mm" in slim else None
+    if size is not None:
+        if 0 < float(size) <= 15.0 and abs(float(size) - round(float(size))) > 1e-6:
+            size = float(size) * 10.0
+        slim["tumor_size_mm"] = size
+    try:
+        model = PathologyExtraction.model_validate(slim)
+    except Exception:
+        # Last-ditch: drop fields that still fail validation.
+        for key in list(slim.keys()):
+            try:
+                PathologyExtraction.model_validate({key: slim[key]})
+            except Exception:
+                slim.pop(key, None)
+        model = PathologyExtraction.model_validate(slim)
+    return {
+        "status": "ok",
+        "source": "medgemma_pathology",
+        "model_id": data.get("model_id") or identity.get("model_id"),
+        "revision_sha256": data.get("revision_sha256"),
+        "chat_url": chat_url,
+        "latency_s": data.get("latency_s"),
+        "extraction": model.model_dump(),
+        "raw_text": raw_text,
+        "disclaimer": model.disclaimer,
+    }

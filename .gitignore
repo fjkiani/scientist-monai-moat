@@ -14,8 +14,25 @@ __pycache__/
 .vscode/
 .idea/
 
-# Runtime artifacts
-artifacts/audit/
+# Local secrets (R2 S3 keys, Modal tokens, Gemini, etc.) — never commit
+.env
+.env.*
+!.env.example
+!deploy/r2.env.example
+.env.r2
+.env.l5-gemini
+envs/l5-gemini-argon.env
+envs/*-secrets.env
+
+# Runtime artifacts.
+# artifacts/audit/ holds two different kinds of file:
+#   1. runtime audit-log tenant directories (artifacts/audit/<tenant>/audit-*.jsonl)
+#   2. deliberate audit receipts committed as evidence for the external audit
+# Ignore the directory *contents* (not the directory itself, otherwise the
+# negation below cannot re-include anything) and re-admit the top-level
+# receipt JSONs only.
+artifacts/audit/*
+!artifacts/audit/*.json
 artifacts/logs/
 *.log
 
@@ -38,3 +55,30 @@ frontend/dist/
 
 # v0.3.0 corpora (synthetic pathology reports live outside the repo).
 data/
+
+# Fat tensors / weights — Modal volumes + R2 hold these; never PR them.
+# Keep tiny receipts: artifacts/**/*_receipt.json, models/*_identity.json
+*.npy
+*.npz
+*.h5
+*.onnx
+*.bin
+*.safetensors
+models/**/*.pt
+models/**/*.pth
+models/**/*.ckpt
+artifacts/**/embeddings*/
+artifacts/**/embeddings_*/
+
+# LUNA16 official evaluation kit's own demo/example submission files
+# (~87 MB: sampleSubmission.csv, froc_sampleSubmission*.{txt,csv,png}).
+# Not produced by, or needed by, this repo's own evaluation runs against
+# real subset0 results -- only the evaluator script + the ground-truth
+# annotations/seriesuids CSVs (kept, small) are needed to reproduce our FROC.
+vendor/luna16_evaluation/exampleFiles/
+
+# Fat CT fixtures — Modal volume oncology-arbiter-cases holds DICOM series
+fixtures/**/dicom_series/
+fixtures/**/*.nii.gz
+fixtures/**/*.mhd
+fixtures/**/*.raw

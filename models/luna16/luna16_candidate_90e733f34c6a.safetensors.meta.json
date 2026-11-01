@@ -1,0 +1,9 @@
+{
+  "status": "ok",
+  "ckpt_request_id": "gateD-fjkiani-20261003T0435Z-zo",
+  "pt_sha256": "90e733f34c6a6806fff70f2847f07c061481a0465222dbd38e81045bf0283b0a",
+  "safetensors": "/vol/output/fullfit-v0.1/gateD-fjkiani-20261003T0435Z-zo/export/luna16_candidate_90e733f34c6a.safetensors",
+  "safetensors_sha256": "a1cf3fadf3bebcf14d405c75799acf9e045f13e41370f1d83368900662d4ed24",
+  "safetensors_bytes": 83672692,
+  "n_tensors": 190
+}

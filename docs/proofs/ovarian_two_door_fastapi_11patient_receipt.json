@@ -1,0 +1,1429 @@
+{
+  "receipt": "ovarian_two_door_fastapi_11patient",
+  "ruo": true,
+  "ruo_disclaimer": "RESEARCH USE ONLY. Route scoring is not a treatment order.",
+  "contract_status": "evidence_bound_exploratory_prioritization",
+  "generated_utc": "2026-11-01T15:42:48.475903+00:00",
+  "git_head_expected": "409755be3882275b40743e0a44dc04f4253527fd",
+  "endpoint": "POST /v1/ovarian/arbiter/score",
+  "auth_mode": "off",
+  "all_11_match_expected_classes": true,
+  "patients": [
+    {
+      "patient_id": "EOC1005",
+      "http_status": 200,
+      "four_state_class": "DDRonly",
+      "decision": "DOOR_1_DDR_PROLIFERATIVE",
+      "expected_four_state_class": "DDRonly",
+      "expected_decision": "DOOR_1_DDR_PROLIFERATIVE",
+      "match": true,
+      "gate0_primary_refractory": false,
+      "recommend": [
+        "Ceralasertib",
+        "Adavosertib"
+      ],
+      "contraindicated": [],
+      "argon_interpretation": {
+        "ruo": true,
+        "contract_status": "evidence_bound_exploratory_prioritization",
+        "model": "gemini-4-argon",
+        "temperature": 0.0,
+        "deterministic": true,
+        "mode": "deterministic_argon_contract_engine",
+        "request_id": null,
+        "argon_input": {
+          "patient_id": "EOC1005",
+          "domain": "ovarian_two_door_v3",
+          "timepoint_or_specimen": "post_nact",
+          "l3_arbiter_state": {
+            "timepoint": "post_nact",
+            "four_state_class": "DDRonly",
+            "decision": "DOOR_1_DDR_PROLIFERATIVE",
+            "cutpoints": {
+              "post_DDR": 0.05212375139760441,
+              "post_H_clean": 1.016542942721253,
+              "ties": "low"
+            },
+            "scores": {
+              "post_H_clean": 0.3636598278878161,
+              "post_DDR": 0.0608244465174617,
+              "post_BCL2A1_z": -0.5388748687253585,
+              "delta_MCL1_z": 1.5072484386987437,
+              "post_EMT_z": 0.23490034345435717,
+              "post_S_sen": 1.6587761974730872
+            },
+            "gate0_primary_refractory": false,
+            "gate1_mbd4": null,
+            "gate2": null,
+            "recommend": [
+              "Ceralasertib",
+              "Adavosertib"
+            ],
+            "contraindicated": []
+          },
+          "l5_elo_summary": {
+            "top_candidate": "Ceralasertib",
+            "top_mechanism_class": "DDR_ATR",
+            "promoted": [
+              "Ceralasertib",
+              "Adavosertib"
+            ],
+            "demoted": [
+              "Dasatinib",
+              "Azithromycin",
+              "Doxercalciferol",
+              "Vismodegib",
+              "Olaparib",
+              "Navitoclax",
+              "ABT-737",
+              "Venetoclax"
+            ],
+            "door2_subtype_routing": null,
+            "top_3_ranked": [
+              {
+                "rank": 1,
+                "drug_id": "Ceralasertib",
+                "elo": 1578.833,
+                "applied_modifier": 0.4274,
+                "reason": "Door 1 DDRonly: ATR sensitivity (7/10 GDSC2 & 6/9 CTRPv2)"
+              },
+              {
+                "rank": 2,
+                "drug_id": "Adavosertib",
+                "elo": 1564.8184,
+                "applied_modifier": 0.335,
+                "reason": "Door 1 DDRonly: WEE1 sensitivity (7/10 GDSC2 & 6/9 CTRPv2)"
+              },
+              {
+                "rank": 3,
+                "drug_id": "Carboplatin_Paclitaxel",
+                "elo": 1549.5243,
+                "applied_modifier": 0.0,
+                "reason": "no modifier"
+              }
+            ]
+          }
+        },
+        "argon_prompt": "PATIENT_INPUT_JSON:\n{\"domain\": \"ovarian_two_door_v3\", \"l3_arbiter_state\": {\"contraindicated\": [], \"cutpoints\": {\"post_DDR\": 0.05212375139760441, \"post_H_clean\": 1.016542942721253, \"ties\": \"low\"}, \"decision\": \"DOOR_1_DDR_PROLIFERATIVE\", \"four_state_class\": \"DDRonly\", \"gate0_primary_refractory\": false, \"gate1_mbd4\": null, \"gate2\": null, \"recommend\": [\"Ceralasertib\", \"Adavosertib\"], \"scores\": {\"delta_MCL1_z\": 1.5072484386987437, \"post_BCL2A1_z\": -0.5388748687253585, \"post_DDR\": 0.0608244465174617, \"post_EMT_z\": 0.23490034345435717, \"post_H_clean\": 0.3636598278878161, \"post_S_sen\": 1.6587761974730872}, \"timepoint\": \"post_nact\"}, \"l5_elo_summary\": {\"demoted\": [\"Dasatinib\", \"Azithromycin\", \"Doxercalciferol\", \"Vismodegib\", \"Olaparib\", \"Navitoclax\", \"ABT-737\", \"Venetoclax\"], \"door2_subtype_routing\": null, \"promoted\": [\"Ceralasertib\", \"Adavosertib\"], \"top_3_ranked\": [{\"applied_modifier\": 0.4274, \"drug_id\": \"Ceralasertib\", \"elo\": 1578.833, \"rank\": 1, \"reason\": \"Door 1 DDRonly: ATR sensitivity (7/10 GDSC2 & 6/9 CTRPv2)\"}, {\"applied_modifier\": 0.335, \"drug_id\": \"Adavosertib\", \"elo\": 1564.8184, \"rank\": 2, \"reason\": \"Door 1 DDRonly: WEE1 sensitivity (7/10 GDSC2 & 6/9 CTRPv2)\"}, {\"applied_modifier\": 0.0, \"drug_id\": \"Carboplatin_Paclitaxel\", \"elo\": 1549.5243, \"rank\": 3, \"reason\": \"no modifier\"}], \"top_candidate\": \"Ceralasertib\", \"top_mechanism_class\": \"DDR_ATR\"}, \"patient_id\": \"EOC1005\", \"timepoint_or_specimen\": \"post_nact\"}\n\nInterpret what this patient's scores and L5 Elo ranking mean (JSON):",
+        "argon_output": {
+          "biological_state_meaning": "Post-NACT residual tumor has post_H_clean=0.3637 (cutpoint>1.0165, ties low) and post_DDR=0.060824 (cutpoint>0.052124), with senolytic index post_S_sen=1.6587761974730872 -> state=DDRonly (DOOR_1_DDR_PROLIFERATIVE).",
+          "gate_and_compartment_meaning": "Gate 3 Door 1 (DDR Proliferative) fired: actively cycling residual disease with elevated replication-stress DDR proxy (7/10 GDSC2 & 6/9 CTRPv2 DDR-sensitive; GSE165897 Door 1 median PFI 50.5d vs Door 2 203.5d, exact MWU p=0.02857).",
+          "elo_ranking_meaning": "L5 Elo ranks Ceralasertib #1 (DDR_ATR); promoted=[Ceralasertib, Adavosertib], demoted=[Dasatinib, Azithromycin, Doxercalciferol, Vismodegib, Olaparib, Navitoclax, ABT-737, Venetoclax].",
+          "actionable_summary_ruo": "Post-NACT residual tumor has post_H_clean=0.3637 (cutpoint>1.0165, ties low) and post_DDR=0.060824 (cutpoint>0.052124), with senolytic index post_S_sen=1.6587761974730872 -> state=DDRonly (DOOR_1_DDR_PROLIFERATIVE). L5 Elo ranks Ceralasertib #1 (DDR_ATR); promoted=[Ceralasertib, Adavosertib], demoted=[Dasatinib, Azithromycin, Doxercalciferol, Vismodegib, Olaparib, Navitoclax, ABT-737, Venetoclax]. (RUO exploratory prioritization)."
+        }
+      }
+    },
+    {
+      "patient_id": "EOC136",
+      "http_status": 200,
+      "four_state_class": "Neither",
+      "decision": "CHEMO_CLEARED_REMISSION",
+      "expected_four_state_class": "Neither",
+      "expected_decision": "CHEMO_CLEARED_REMISSION",
+      "match": true,
+      "gate0_primary_refractory": false,
+      "recommend": [],
+      "contraindicated": [],
+      "argon_interpretation": {
+        "ruo": true,
+        "contract_status": "evidence_bound_exploratory_prioritization",
+        "model": "gemini-4-argon",
+        "temperature": 0.0,
+        "deterministic": true,
+        "mode": "deterministic_argon_contract_engine",
+        "request_id": null,
+        "argon_input": {
+          "patient_id": "EOC136",
+          "domain": "ovarian_two_door_v3",
+          "timepoint_or_specimen": "post_nact",
+          "l3_arbiter_state": {
+            "timepoint": "post_nact",
+            "four_state_class": "Neither",
+            "decision": "CHEMO_CLEARED_REMISSION",
+            "cutpoints": {
+              "post_DDR": 0.05212375139760441,
+              "post_H_clean": 1.016542942721253,
+              "ties": "low"
+            },
+            "scores": {
+              "post_H_clean": 0.2976437314912196,
+              "post_DDR": 0.042086486191433986,
+              "post_BCL2A1_z": -0.30677686132660775,
+              "delta_MCL1_z": 0.6735154949956546,
+              "post_EMT_z": -0.24903631344175597,
+              "post_S_sen": 0.11307577572267635
+            },
+            "gate0_primary_refractory": false,
+            "gate1_mbd4": null,
+            "gate2": null,
+            "recommend": [],
+            "contraindicated": []
+          },
+          "l5_elo_summary": {
+            "top_candidate": "Ceralasertib",
+            "top_mechanism_class": "DDR_ATR",
+            "promoted": [],
+            "demoted": [],
+            "door2_subtype_routing": null,
+            "top_3_ranked": [
+              {
+                "rank": 1,
+                "drug_id": "Ceralasertib",
+                "elo": 1579.5117,
+                "applied_modifier": 0.0,
+                "reason": "no modifier"
+              },
+              {
+                "rank": 2,
+                "drug_id": "Navitoclax",
+                "elo": 1563.3985,
+                "applied_modifier": 0.0,
+                "reason": "no modifier"
+              },
+              {
+                "rank": 3,
+                "drug_id": "ABT-737",
+                "elo": 1550.5489,
+                "applied_modifier": 0.0,
+                "reason": "no modifier"
+              }
+            ]
+          }
+        },
+        "argon_prompt": "PATIENT_INPUT_JSON:\n{\"domain\": \"ovarian_two_door_v3\", \"l3_arbiter_state\": {\"contraindicated\": [], \"cutpoints\": {\"post_DDR\": 0.05212375139760441, \"post_H_clean\": 1.016542942721253, \"ties\": \"low\"}, \"decision\": \"CHEMO_CLEARED_REMISSION\", \"four_state_class\": \"Neither\", \"gate0_primary_refractory\": false, \"gate1_mbd4\": null, \"gate2\": null, \"recommend\": [], \"scores\": {\"delta_MCL1_z\": 0.6735154949956546, \"post_BCL2A1_z\": -0.30677686132660775, \"post_DDR\": 0.042086486191433986, \"post_EMT_z\": -0.24903631344175597, \"post_H_clean\": 0.2976437314912196, \"post_S_sen\": 0.11307577572267635}, \"timepoint\": \"post_nact\"}, \"l5_elo_summary\": {\"demoted\": [], \"door2_subtype_routing\": null, \"promoted\": [], \"top_3_ranked\": [{\"applied_modifier\": 0.0, \"drug_id\": \"Ceralasertib\", \"elo\": 1579.5117, \"rank\": 1, \"reason\": \"no modifier\"}, {\"applied_modifier\": 0.0, \"drug_id\": \"Navitoclax\", \"elo\": 1563.3985, \"rank\": 2, \"reason\": \"no modifier\"}, {\"applied_modifier\": 0.0, \"drug_id\": \"ABT-737\", \"elo\": 1550.5489, \"rank\": 3, \"reason\": \"no modifier\"}], \"top_candidate\": \"Ceralasertib\", \"top_mechanism_class\": \"DDR_ATR\"}, \"patient_id\": \"EOC136\", \"timepoint_or_specimen\": \"post_nact\"}\n\nInterpret what this patient's scores and L5 Elo ranking mean (JSON):",
+        "argon_output": {
+          "biological_state_meaning": "Post-NACT residual tumor has post_H_clean=0.2976 (cutpoint>1.0165, ties low) and post_DDR=0.042086 (cutpoint>0.052124), with senolytic index post_S_sen=0.11307577572267635 -> state=Neither (CHEMO_CLEARED_REMISSION).",
+          "gate_and_compartment_meaning": "Gate 3 Chemo-Cleared Remission (Neither): both post_DDR and post_H_clean sit at or below cutpoints (GSE165897 Neither median PFI 490.0d).",
+          "elo_ranking_meaning": "L5 Elo ranks Ceralasertib #1 (DDR_ATR); promoted=[none], demoted=[none].",
+          "actionable_summary_ruo": "Post-NACT residual tumor has post_H_clean=0.2976 (cutpoint>1.0165, ties low) and post_DDR=0.042086 (cutpoint>0.052124), with senolytic index post_S_sen=0.11307577572267635 -> state=Neither (CHEMO_CLEARED_REMISSION). L5 Elo ranks Ceralasertib #1 (DDR_ATR); promoted=[none], demoted=[none]. (RUO exploratory prioritization)."
+        }
+      }
+    },
+    {
+      "patient_id": "EOC153",
+      "http_status": 200,
+      "four_state_class": "Hcleanonly",
+      "decision": "DOOR_2_HIBERNATION_SENOLYTIC",
+      "expected_four_state_class": "Hcleanonly",
+      "expected_decision": "DOOR_2_HIBERNATION_SENOLYTIC",
+      "match": true,
+      "gate0_primary_refractory": false,
+      "recommend": [
+        "Navitoclax",
+        "ABT-737"
+      ],
+      "contraindicated": [
+        "Venetoclax"
+      ],
+      "argon_interpretation": {
+        "ruo": true,
+        "contract_status": "evidence_bound_exploratory_prioritization",
+        "model": "gemini-4-argon",
+        "temperature": 0.0,
+        "deterministic": true,
+        "mode": "deterministic_argon_contract_engine",
+        "request_id": null,
+        "argon_input": {
+          "patient_id": "EOC153",
+          "domain": "ovarian_two_door_v3",
+          "timepoint_or_specimen": "post_nact",
+          "l3_arbiter_state": {
+            "timepoint": "post_nact",
+            "four_state_class": "Hcleanonly",
+            "decision": "DOOR_2_HIBERNATION_SENOLYTIC",
+            "cutpoints": {
+              "post_DDR": 0.05212375139760441,
+              "post_H_clean": 1.016542942721253,
+              "ties": "low"
+            },
+            "scores": {
+              "post_H_clean": 3.3602410192058887,
+              "post_DDR": 0.035789058341352986,
+              "post_BCL2A1_z": -0.18181484127915193,
+              "delta_MCL1_z": 1.7373046656403557,
+              "post_EMT_z": 0.44326565209960356,
+              "post_S_sen": 4.1663709675362295
+            },
+            "gate0_primary_refractory": false,
+            "gate1_mbd4": null,
+            "gate2": null,
+            "recommend": [
+              "Navitoclax",
+              "ABT-737"
+            ],
+            "contraindicated": [
+              "Venetoclax"
+            ]
+          },
+          "l5_elo_summary": {
+            "top_candidate": "Navitoclax",
+            "top_mechanism_class": "BCL-xL_senolytic",
+            "promoted": [
+              "Navitoclax",
+              "ABT-737",
+              "Doxercalciferol",
+              "Dasatinib",
+              "Azithromycin",
+              "Vismodegib"
+            ],
+            "demoted": [
+              "Adavosertib",
+              "Olaparib",
+              "Ceralasertib",
+              "Carboplatin_Paclitaxel",
+              "Gemcitabine",
+              "Venetoclax"
+            ],
+            "door2_subtype_routing": {
+              "ruo": true,
+              "contract_status": "evidence_bound_exploratory_prioritization",
+              "exploratory": true,
+              "subtype": "Subtype_2A_BCLxL_Classical",
+              "subtype_2B_triggered": false,
+              "triggers": [
+                "S_sen - H_clean buffer >= 0 and no VDR/EPHA2 elevation"
+              ],
+              "S_sen_minus_H_clean_buffer": 0.8061299483303408,
+              "highlighted_2B_agents": [],
+              "bcl_xl_agents": [
+                "Navitoclax",
+                "ABT-737"
+              ],
+              "five_bh_fdr_consensus_winners_q_0_047242": [
+                "Doxercalciferol",
+                "Azithromycin",
+                "Dasatinib",
+                "Navitoclax",
+                "ABT-737"
+              ],
+              "prism_secondary_fdr_winner_q_0_035734": "Vismodegib",
+              "dasatinib_navitoclax_composite": {
+                "composite": "dasatinib+navitoclax",
+                "predictor": "S_sen",
+                "n": 45,
+                "rho": 0.527931,
+                "p_positive": 0.00015,
+                "p_two_sided": 0.0003,
+                "ci_low": 0.224457,
+                "ci_high": 0.719325,
+                "permutations": 100000,
+                "bootstrap": 2000,
+                "q_positive": 0.0006
+              },
+              "subtype_2B_reference_donors": [
+                "COV362",
+                "SNU-840",
+                "EFO-21"
+              ],
+              "observed_or_coverage": {
+                "v9_dose_response": {
+                  "active": 10,
+                  "inactive": 0,
+                  "unknown": 1
+                },
+                "v8_four_screen": {
+                  "active": 11,
+                  "inactive": 0,
+                  "unknown": 0
+                }
+              }
+            },
+            "top_3_ranked": [
+              {
+                "rank": 1,
+                "drug_id": "Navitoclax",
+                "elo": 1576.8859,
+                "applied_modifier": 0.4305,
+                "reason": "Door 2 H_clean>cutpoint: GDSC2 \u0394LN=-1.20 + PRISM \u0394\u03c1=+0.6327 + v9 DoseResponse_Consensus_Z rho=+0.3397 (BH q=0.047242)"
+              },
+              {
+                "rank": 2,
+                "drug_id": "ABT-737",
+                "elo": 1564.1259,
+                "applied_modifier": 0.3511,
+                "reason": "Door 2 H_clean>cutpoint: GDSC2 \u0394LN=-1.29 + PRISM \u0394\u03c1=+0.6323 + v9 DoseResponse_Consensus_Z rho=+0.3266 (BH q=0.047242)"
+              },
+              {
+                "rank": 3,
+                "drug_id": "Doxercalciferol",
+                "elo": 1548.3992,
+                "applied_modifier": 0.2225,
+                "reason": "Door 2 v9 DoseResponse_Consensus_Z rho=+0.46358 (P=0.01534, BH q=0.047242; VDR agonist)"
+              }
+            ]
+          }
+        },
+        "argon_prompt": "PATIENT_INPUT_JSON:\n{\"domain\": \"ovarian_two_door_v3\", \"l3_arbiter_state\": {\"contraindicated\": [\"Venetoclax\"], \"cutpoints\": {\"post_DDR\": 0.05212375139760441, \"post_H_clean\": 1.016542942721253, \"ties\": \"low\"}, \"decision\": \"DOOR_2_HIBERNATION_SENOLYTIC\", \"four_state_class\": \"Hcleanonly\", \"gate0_primary_refractory\": false, \"gate1_mbd4\": null, \"gate2\": null, \"recommend\": [\"Navitoclax\", \"ABT-737\"], \"scores\": {\"delta_MCL1_z\": 1.7373046656403557, \"post_BCL2A1_z\": -0.18181484127915193, \"post_DDR\": 0.035789058341352986, \"post_EMT_z\": 0.44326565209960356, \"post_H_clean\": 3.3602410192058887, \"post_S_sen\": 4.1663709675362295}, \"timepoint\": \"post_nact\"}, \"l5_elo_summary\": {\"demoted\": [\"Adavosertib\", \"Olaparib\", \"Ceralasertib\", \"Carboplatin_Paclitaxel\", \"Gemcitabine\", \"Venetoclax\"], \"door2_subtype_routing\": {\"S_sen_minus_H_clean_buffer\": 0.8061299483303408, \"bcl_xl_agents\": [\"Navitoclax\", \"ABT-737\"], \"contract_status\": \"evidence_bound_exploratory_prioritization\", \"dasatinib_navitoclax_composite\": {\"bootstrap\": 2000, \"ci_high\": 0.719325, \"ci_low\": 0.224457, \"composite\": \"dasatinib+navitoclax\", \"n\": 45, \"p_positive\": 0.00015, \"p_two_sided\": 0.0003, \"permutations\": 100000, \"predictor\": \"S_sen\", \"q_positive\": 0.0006, \"rho\": 0.527931}, \"exploratory\": true, \"five_bh_fdr_consensus_winners_q_0_047242\": [\"Doxercalciferol\", \"Azithromycin\", \"Dasatinib\", \"Navitoclax\", \"ABT-737\"], \"highlighted_2B_agents\": [], \"observed_or_coverage\": {\"v8_four_screen\": {\"active\": 11, \"inactive\": 0, \"unknown\": 0}, \"v9_dose_response\": {\"active\": 10, \"inactive\": 0, \"unknown\": 1}}, \"prism_secondary_fdr_winner_q_0_035734\": \"Vismodegib\", \"ruo\": true, \"subtype\": \"Subtype_2A_BCLxL_Classical\", \"subtype_2B_reference_donors\": [\"COV362\", \"SNU-840\", \"EFO-21\"], \"subtype_2B_triggered\": false, \"triggers\": [\"S_sen - H_clean buffer >= 0 and no VDR/EPHA2 elevation\"]}, \"promoted\": [\"Navitoclax\", \"ABT-737\", \"Doxercalciferol\", \"Dasatinib\", \"Azithromycin\", \"Vismodegib\"], \"top_3_ranked\": [{\"applied_modifier\": 0.4305, \"drug_id\": \"Navitoclax\", \"elo\": 1576.8859, \"rank\": 1, \"reason\": \"Door 2 H_clean>cutpoint: GDSC2 \u0394LN=-1.20 + PRISM \u0394\u03c1=+0.6327 + v9 DoseResponse_Consensus_Z rho=+0.3397 (BH q=0.047242)\"}, {\"applied_modifier\": 0.3511, \"drug_id\": \"ABT-737\", \"elo\": 1564.1259, \"rank\": 2, \"reason\": \"Door 2 H_clean>cutpoint: GDSC2 \u0394LN=-1.29 + PRISM \u0394\u03c1=+0.6323 + v9 DoseResponse_Consensus_Z rho=+0.3266 (BH q=0.047242)\"}, {\"applied_modifier\": 0.2225, \"drug_id\": \"Doxercalciferol\", \"elo\": 1548.3992, \"rank\": 3, \"reason\": \"Door 2 v9 DoseResponse_Consensus_Z rho=+0.46358 (P=0.01534, BH q=0.047242; VDR agonist)\"}], \"top_candidate\": \"Navitoclax\", \"top_mechanism_class\": \"BCL-xL_senolytic\"}, \"patient_id\": \"EOC153\", \"timepoint_or_specimen\": \"post_nact\"}\n\nInterpret what this patient's scores and L5 Elo ranking mean (JSON):",
+        "argon_output": {
+          "biological_state_meaning": "Post-NACT residual tumor has post_H_clean=3.3602 (cutpoint>1.0165, ties low) and post_DDR=0.035789 (cutpoint>0.052124), with senolytic index post_S_sen=4.1663709675362295 -> state=Hcleanonly (DOOR_2_HIBERNATION_SENOLYTIC).",
+          "gate_and_compartment_meaning": "Gate 3 Door 2 (Hibernation / Senolytic) fired: therapy-induced quiescent persister state is pan-resistant to proliferative DDR/chemo (0/8 GDSC2 & 0/5 CTRPv2) but dependent on BCL2L1/BCL-xL (CRISPR rho=-0.6547, q=2.5e-5; 7-gene CRISPR vulnerability rho=-0.6645, q=0.00012; CLPP rho=-0.336, P=0.01680). Exploratory Subtype 2A routing (Subtype_2A_BCLxL_Classical, buffer S_sen-H_clean=+0.8061 >= 0): classical BCL-xL senolytic vulnerability (Navitoclax/ABT-737) with v9 DoseResponse_Consensus_Z co-winners Dasatinib, Doxercalciferol, Azithromycin (all 5 BH q=0.047242) + Vismodegib (q=0.035734) and Dasatinib+Navitoclax composite (rho=+0.5279, q=0.00060).",
+          "elo_ranking_meaning": "L5 Elo ranks Navitoclax #1 (BCL-xL_senolytic); promoted=[Navitoclax, ABT-737, Doxercalciferol, Dasatinib, Azithromycin, Vismodegib], demoted=[Adavosertib, Olaparib, Ceralasertib, Carboplatin_Paclitaxel, Gemcitabine, Venetoclax].",
+          "actionable_summary_ruo": "Post-NACT residual tumor has post_H_clean=3.3602 (cutpoint>1.0165, ties low) and post_DDR=0.035789 (cutpoint>0.052124), with senolytic index post_S_sen=4.1663709675362295 -> state=Hcleanonly (DOOR_2_HIBERNATION_SENOLYTIC). L5 Elo ranks Navitoclax #1 (BCL-xL_senolytic); promoted=[Navitoclax, ABT-737, Doxercalciferol, Dasatinib, Azithromycin, Vismodegib], demoted=[Adavosertib, Olaparib, Ceralasertib, Carboplatin_Paclitaxel, Gemcitabine, Venetoclax]. (RUO exploratory prioritization)."
+        }
+      }
+    },
+    {
+      "patient_id": "EOC227",
+      "http_status": 200,
+      "four_state_class": "Both",
+      "decision": "DOOR_2_HIBERNATION_SENOLYTIC",
+      "expected_four_state_class": "Both",
+      "expected_decision": "DOOR_2_HIBERNATION_SENOLYTIC",
+      "match": true,
+      "gate0_primary_refractory": false,
+      "recommend": [
+        "Navitoclax",
+        "ABT-737"
+      ],
+      "contraindicated": [
+        "Venetoclax"
+      ],
+      "argon_interpretation": {
+        "ruo": true,
+        "contract_status": "evidence_bound_exploratory_prioritization",
+        "model": "gemini-4-argon",
+        "temperature": 0.0,
+        "deterministic": true,
+        "mode": "deterministic_argon_contract_engine",
+        "request_id": null,
+        "argon_input": {
+          "patient_id": "EOC227",
+          "domain": "ovarian_two_door_v3",
+          "timepoint_or_specimen": "post_nact",
+          "l3_arbiter_state": {
+            "timepoint": "post_nact",
+            "four_state_class": "Both",
+            "decision": "DOOR_2_HIBERNATION_SENOLYTIC",
+            "cutpoints": {
+              "post_DDR": 0.05212375139760441,
+              "post_H_clean": 1.016542942721253,
+              "ties": "low"
+            },
+            "scores": {
+              "post_H_clean": 1.3426304023940026,
+              "post_DDR": 0.0603097752866016,
+              "post_BCL2A1_z": -0.4442081985539285,
+              "delta_MCL1_z": 1.4707121213300942,
+              "post_EMT_z": -0.3663950681529344,
+              "post_S_sen": 1.657031937721254
+            },
+            "gate0_primary_refractory": false,
+            "gate1_mbd4": null,
+            "gate2": null,
+            "recommend": [
+              "Navitoclax",
+              "ABT-737"
+            ],
+            "contraindicated": [
+              "Venetoclax"
+            ]
+          },
+          "l5_elo_summary": {
+            "top_candidate": "Navitoclax",
+            "top_mechanism_class": "BCL-xL_senolytic",
+            "promoted": [
+              "Navitoclax",
+              "ABT-737",
+              "Doxercalciferol",
+              "Dasatinib",
+              "Azithromycin",
+              "Vismodegib"
+            ],
+            "demoted": [
+              "Adavosertib",
+              "Olaparib",
+              "Ceralasertib",
+              "Carboplatin_Paclitaxel",
+              "Gemcitabine",
+              "Venetoclax"
+            ],
+            "door2_subtype_routing": {
+              "ruo": true,
+              "contract_status": "evidence_bound_exploratory_prioritization",
+              "exploratory": true,
+              "subtype": "Subtype_2A_BCLxL_Classical",
+              "subtype_2B_triggered": false,
+              "triggers": [
+                "S_sen - H_clean buffer >= 0 and no VDR/EPHA2 elevation"
+              ],
+              "S_sen_minus_H_clean_buffer": 0.31440153532725135,
+              "highlighted_2B_agents": [],
+              "bcl_xl_agents": [
+                "Navitoclax",
+                "ABT-737"
+              ],
+              "five_bh_fdr_consensus_winners_q_0_047242": [
+                "Doxercalciferol",
+                "Azithromycin",
+                "Dasatinib",
+                "Navitoclax",
+                "ABT-737"
+              ],
+              "prism_secondary_fdr_winner_q_0_035734": "Vismodegib",
+              "dasatinib_navitoclax_composite": {
+                "composite": "dasatinib+navitoclax",
+                "predictor": "S_sen",
+                "n": 45,
+                "rho": 0.527931,
+                "p_positive": 0.00015,
+                "p_two_sided": 0.0003,
+                "ci_low": 0.224457,
+                "ci_high": 0.719325,
+                "permutations": 100000,
+                "bootstrap": 2000,
+                "q_positive": 0.0006
+              },
+              "subtype_2B_reference_donors": [
+                "COV362",
+                "SNU-840",
+                "EFO-21"
+              ],
+              "observed_or_coverage": {
+                "v9_dose_response": {
+                  "active": 10,
+                  "inactive": 0,
+                  "unknown": 1
+                },
+                "v8_four_screen": {
+                  "active": 11,
+                  "inactive": 0,
+                  "unknown": 0
+                }
+              }
+            },
+            "top_3_ranked": [
+              {
+                "rank": 1,
+                "drug_id": "Navitoclax",
+                "elo": 1576.8859,
+                "applied_modifier": 0.4305,
+                "reason": "Door 2 H_clean>cutpoint: GDSC2 \u0394LN=-1.20 + PRISM \u0394\u03c1=+0.6327 + v9 DoseResponse_Consensus_Z rho=+0.3397 (BH q=0.047242)"
+              },
+              {
+                "rank": 2,
+                "drug_id": "ABT-737",
+                "elo": 1564.1259,
+                "applied_modifier": 0.3511,
+                "reason": "Door 2 H_clean>cutpoint: GDSC2 \u0394LN=-1.29 + PRISM \u0394\u03c1=+0.6323 + v9 DoseResponse_Consensus_Z rho=+0.3266 (BH q=0.047242)"
+              },
+              {
+                "rank": 3,
+                "drug_id": "Doxercalciferol",
+                "elo": 1548.3992,
+                "applied_modifier": 0.2225,
+                "reason": "Door 2 v9 DoseResponse_Consensus_Z rho=+0.46358 (P=0.01534, BH q=0.047242; VDR agonist)"
+              }
+            ]
+          }
+        },
+        "argon_prompt": "PATIENT_INPUT_JSON:\n{\"domain\": \"ovarian_two_door_v3\", \"l3_arbiter_state\": {\"contraindicated\": [\"Venetoclax\"], \"cutpoints\": {\"post_DDR\": 0.05212375139760441, \"post_H_clean\": 1.016542942721253, \"ties\": \"low\"}, \"decision\": \"DOOR_2_HIBERNATION_SENOLYTIC\", \"four_state_class\": \"Both\", \"gate0_primary_refractory\": false, \"gate1_mbd4\": null, \"gate2\": null, \"recommend\": [\"Navitoclax\", \"ABT-737\"], \"scores\": {\"delta_MCL1_z\": 1.4707121213300942, \"post_BCL2A1_z\": -0.4442081985539285, \"post_DDR\": 0.0603097752866016, \"post_EMT_z\": -0.3663950681529344, \"post_H_clean\": 1.3426304023940026, \"post_S_sen\": 1.657031937721254}, \"timepoint\": \"post_nact\"}, \"l5_elo_summary\": {\"demoted\": [\"Adavosertib\", \"Olaparib\", \"Ceralasertib\", \"Carboplatin_Paclitaxel\", \"Gemcitabine\", \"Venetoclax\"], \"door2_subtype_routing\": {\"S_sen_minus_H_clean_buffer\": 0.31440153532725135, \"bcl_xl_agents\": [\"Navitoclax\", \"ABT-737\"], \"contract_status\": \"evidence_bound_exploratory_prioritization\", \"dasatinib_navitoclax_composite\": {\"bootstrap\": 2000, \"ci_high\": 0.719325, \"ci_low\": 0.224457, \"composite\": \"dasatinib+navitoclax\", \"n\": 45, \"p_positive\": 0.00015, \"p_two_sided\": 0.0003, \"permutations\": 100000, \"predictor\": \"S_sen\", \"q_positive\": 0.0006, \"rho\": 0.527931}, \"exploratory\": true, \"five_bh_fdr_consensus_winners_q_0_047242\": [\"Doxercalciferol\", \"Azithromycin\", \"Dasatinib\", \"Navitoclax\", \"ABT-737\"], \"highlighted_2B_agents\": [], \"observed_or_coverage\": {\"v8_four_screen\": {\"active\": 11, \"inactive\": 0, \"unknown\": 0}, \"v9_dose_response\": {\"active\": 10, \"inactive\": 0, \"unknown\": 1}}, \"prism_secondary_fdr_winner_q_0_035734\": \"Vismodegib\", \"ruo\": true, \"subtype\": \"Subtype_2A_BCLxL_Classical\", \"subtype_2B_reference_donors\": [\"COV362\", \"SNU-840\", \"EFO-21\"], \"subtype_2B_triggered\": false, \"triggers\": [\"S_sen - H_clean buffer >= 0 and no VDR/EPHA2 elevation\"]}, \"promoted\": [\"Navitoclax\", \"ABT-737\", \"Doxercalciferol\", \"Dasatinib\", \"Azithromycin\", \"Vismodegib\"], \"top_3_ranked\": [{\"applied_modifier\": 0.4305, \"drug_id\": \"Navitoclax\", \"elo\": 1576.8859, \"rank\": 1, \"reason\": \"Door 2 H_clean>cutpoint: GDSC2 \u0394LN=-1.20 + PRISM \u0394\u03c1=+0.6327 + v9 DoseResponse_Consensus_Z rho=+0.3397 (BH q=0.047242)\"}, {\"applied_modifier\": 0.3511, \"drug_id\": \"ABT-737\", \"elo\": 1564.1259, \"rank\": 2, \"reason\": \"Door 2 H_clean>cutpoint: GDSC2 \u0394LN=-1.29 + PRISM \u0394\u03c1=+0.6323 + v9 DoseResponse_Consensus_Z rho=+0.3266 (BH q=0.047242)\"}, {\"applied_modifier\": 0.2225, \"drug_id\": \"Doxercalciferol\", \"elo\": 1548.3992, \"rank\": 3, \"reason\": \"Door 2 v9 DoseResponse_Consensus_Z rho=+0.46358 (P=0.01534, BH q=0.047242; VDR agonist)\"}], \"top_candidate\": \"Navitoclax\", \"top_mechanism_class\": \"BCL-xL_senolytic\"}, \"patient_id\": \"EOC227\", \"timepoint_or_specimen\": \"post_nact\"}\n\nInterpret what this patient's scores and L5 Elo ranking mean (JSON):",
+        "argon_output": {
+          "biological_state_meaning": "Post-NACT residual tumor has post_H_clean=1.3426 (cutpoint>1.0165, ties low) and post_DDR=0.060310 (cutpoint>0.052124), with senolytic index post_S_sen=1.657031937721254 -> state=Both (DOOR_2_HIBERNATION_SENOLYTIC).",
+          "gate_and_compartment_meaning": "Gate 3 Door 2 (Hibernation / Senolytic) fired: therapy-induced quiescent persister state is pan-resistant to proliferative DDR/chemo (0/8 GDSC2 & 0/5 CTRPv2) but dependent on BCL2L1/BCL-xL (CRISPR rho=-0.6547, q=2.5e-5; 7-gene CRISPR vulnerability rho=-0.6645, q=0.00012; CLPP rho=-0.336, P=0.01680). Exploratory Subtype 2A routing (Subtype_2A_BCLxL_Classical, buffer S_sen-H_clean=+0.3144 >= 0): classical BCL-xL senolytic vulnerability (Navitoclax/ABT-737) with v9 DoseResponse_Consensus_Z co-winners Dasatinib, Doxercalciferol, Azithromycin (all 5 BH q=0.047242) + Vismodegib (q=0.035734) and Dasatinib+Navitoclax composite (rho=+0.5279, q=0.00060).",
+          "elo_ranking_meaning": "L5 Elo ranks Navitoclax #1 (BCL-xL_senolytic); promoted=[Navitoclax, ABT-737, Doxercalciferol, Dasatinib, Azithromycin, Vismodegib], demoted=[Adavosertib, Olaparib, Ceralasertib, Carboplatin_Paclitaxel, Gemcitabine, Venetoclax].",
+          "actionable_summary_ruo": "Post-NACT residual tumor has post_H_clean=1.3426 (cutpoint>1.0165, ties low) and post_DDR=0.060310 (cutpoint>0.052124), with senolytic index post_S_sen=1.657031937721254 -> state=Both (DOOR_2_HIBERNATION_SENOLYTIC). L5 Elo ranks Navitoclax #1 (BCL-xL_senolytic); promoted=[Navitoclax, ABT-737, Doxercalciferol, Dasatinib, Azithromycin, Vismodegib], demoted=[Adavosertib, Olaparib, Ceralasertib, Carboplatin_Paclitaxel, Gemcitabine, Venetoclax]. (RUO exploratory prioritization)."
+        }
+      }
+    },
+    {
+      "patient_id": "EOC3",
+      "http_status": 200,
+      "four_state_class": "PRIMARY_REFRACTORY_ESCAPE",
+      "decision": "PRIMARY_REFRACTORY_ESCAPE",
+      "expected_four_state_class": "PRIMARY_REFRACTORY_ESCAPE",
+      "expected_decision": "PRIMARY_REFRACTORY_ESCAPE",
+      "match": true,
+      "gate0_primary_refractory": true,
+      "recommend": [],
+      "contraindicated": [],
+      "argon_interpretation": {
+        "ruo": true,
+        "contract_status": "evidence_bound_exploratory_prioritization",
+        "model": "gemini-4-argon",
+        "temperature": 0.0,
+        "deterministic": true,
+        "mode": "deterministic_argon_contract_engine",
+        "request_id": null,
+        "argon_input": {
+          "patient_id": "EOC3",
+          "domain": "ovarian_two_door_v3",
+          "timepoint_or_specimen": "post_nact",
+          "l3_arbiter_state": {
+            "timepoint": "post_nact",
+            "four_state_class": "PRIMARY_REFRACTORY_ESCAPE",
+            "decision": "PRIMARY_REFRACTORY_ESCAPE",
+            "cutpoints": {
+              "post_DDR": 0.05212375139760441,
+              "post_H_clean": 1.016542942721253,
+              "ties": "low"
+            },
+            "scores": {
+              "post_H_clean": 2.574637860448994,
+              "post_DDR": 0.047761554835575135,
+              "post_BCL2A1_z": 3.5932456955972425,
+              "delta_MCL1_z": 3.4138693942564275,
+              "post_EMT_z": 1.3756431431327438,
+              "post_S_sen": 0.6648281303856893
+            },
+            "gate0_primary_refractory": true,
+            "gate1_mbd4": null,
+            "gate2": null,
+            "recommend": [],
+            "contraindicated": []
+          },
+          "l5_elo_summary": {
+            "top_candidate": "Ceralasertib",
+            "top_mechanism_class": "DDR_ATR",
+            "promoted": [],
+            "demoted": [
+              "Navitoclax",
+              "ABT-737",
+              "Carboplatin_Paclitaxel",
+              "Venetoclax"
+            ],
+            "door2_subtype_routing": null,
+            "top_3_ranked": [
+              {
+                "rank": 1,
+                "drug_id": "Ceralasertib",
+                "elo": 1579.1164,
+                "applied_modifier": 0.0,
+                "reason": "no modifier"
+              },
+              {
+                "rank": 2,
+                "drug_id": "Adavosertib",
+                "elo": 1564.5747,
+                "applied_modifier": 0.0,
+                "reason": "no modifier"
+              },
+              {
+                "rank": 3,
+                "drug_id": "Dasatinib",
+                "elo": 1548.3338,
+                "applied_modifier": 0.0,
+                "reason": "no modifier"
+              }
+            ]
+          }
+        },
+        "argon_prompt": "PATIENT_INPUT_JSON:\n{\"domain\": \"ovarian_two_door_v3\", \"l3_arbiter_state\": {\"contraindicated\": [], \"cutpoints\": {\"post_DDR\": 0.05212375139760441, \"post_H_clean\": 1.016542942721253, \"ties\": \"low\"}, \"decision\": \"PRIMARY_REFRACTORY_ESCAPE\", \"four_state_class\": \"PRIMARY_REFRACTORY_ESCAPE\", \"gate0_primary_refractory\": true, \"gate1_mbd4\": null, \"gate2\": null, \"recommend\": [], \"scores\": {\"delta_MCL1_z\": 3.4138693942564275, \"post_BCL2A1_z\": 3.5932456955972425, \"post_DDR\": 0.047761554835575135, \"post_EMT_z\": 1.3756431431327438, \"post_H_clean\": 2.574637860448994, \"post_S_sen\": 0.6648281303856893}, \"timepoint\": \"post_nact\"}, \"l5_elo_summary\": {\"demoted\": [\"Navitoclax\", \"ABT-737\", \"Carboplatin_Paclitaxel\", \"Venetoclax\"], \"door2_subtype_routing\": null, \"promoted\": [], \"top_3_ranked\": [{\"applied_modifier\": 0.0, \"drug_id\": \"Ceralasertib\", \"elo\": 1579.1164, \"rank\": 1, \"reason\": \"no modifier\"}, {\"applied_modifier\": 0.0, \"drug_id\": \"Adavosertib\", \"elo\": 1564.5747, \"rank\": 2, \"reason\": \"no modifier\"}, {\"applied_modifier\": 0.0, \"drug_id\": \"Dasatinib\", \"elo\": 1548.3338, \"rank\": 3, \"reason\": \"no modifier\"}], \"top_candidate\": \"Ceralasertib\", \"top_mechanism_class\": \"DDR_ATR\"}, \"patient_id\": \"EOC3\", \"timepoint_or_specimen\": \"post_nact\"}\n\nInterpret what this patient's scores and L5 Elo ranking mean (JSON):",
+        "argon_output": {
+          "biological_state_meaning": "Post-NACT residual tumor has post_H_clean=2.5746 (cutpoint>1.0165, ties low) and post_DDR=0.047762 (cutpoint>0.052124), with senolytic index post_S_sen=0.6648281303856893 -> state=PRIMARY_REFRACTORY_ESCAPE (PRIMARY_REFRACTORY_ESCAPE).",
+          "gate_and_compartment_meaning": "Gate 0 PRIMARY_REFRACTORY_ESCAPE fired (post_BCL2A1_z=3.593>2.5 and delta_MCL1_z=3.414>2.5 / post_EMT_z=1.376>1.0), overriding geometric H_clean to flag rapid refractory escape (EOC3 14d archetype).",
+          "elo_ranking_meaning": "L5 Elo ranks Ceralasertib #1 (DDR_ATR); promoted=[none], demoted=[Navitoclax, ABT-737, Carboplatin_Paclitaxel, Venetoclax].",
+          "actionable_summary_ruo": "Post-NACT residual tumor has post_H_clean=2.5746 (cutpoint>1.0165, ties low) and post_DDR=0.047762 (cutpoint>0.052124), with senolytic index post_S_sen=0.6648281303856893 -> state=PRIMARY_REFRACTORY_ESCAPE (PRIMARY_REFRACTORY_ESCAPE). L5 Elo ranks Ceralasertib #1 (DDR_ATR); promoted=[none], demoted=[Navitoclax, ABT-737, Carboplatin_Paclitaxel, Venetoclax]. (RUO exploratory prioritization)."
+        }
+      }
+    },
+    {
+      "patient_id": "EOC349",
+      "http_status": 200,
+      "four_state_class": "DDRonly",
+      "decision": "DOOR_1_DDR_PROLIFERATIVE",
+      "expected_four_state_class": "DDRonly",
+      "expected_decision": "DOOR_1_DDR_PROLIFERATIVE",
+      "match": true,
+      "gate0_primary_refractory": false,
+      "recommend": [
+        "Ceralasertib",
+        "Adavosertib"
+      ],
+      "contraindicated": [],
+      "argon_interpretation": {
+        "ruo": true,
+        "contract_status": "evidence_bound_exploratory_prioritization",
+        "model": "gemini-4-argon",
+        "temperature": 0.0,
+        "deterministic": true,
+        "mode": "deterministic_argon_contract_engine",
+        "request_id": null,
+        "argon_input": {
+          "patient_id": "EOC349",
+          "domain": "ovarian_two_door_v3",
+          "timepoint_or_specimen": "post_nact",
+          "l3_arbiter_state": {
+            "timepoint": "post_nact",
+            "four_state_class": "DDRonly",
+            "decision": "DOOR_1_DDR_PROLIFERATIVE",
+            "cutpoints": {
+              "post_DDR": 0.05212375139760441,
+              "post_H_clean": 1.016542942721253,
+              "ties": "low"
+            },
+            "scores": {
+              "post_H_clean": 1.016542942721253,
+              "post_DDR": 0.05547302403492261,
+              "post_BCL2A1_z": -0.33877176393362163,
+              "delta_MCL1_z": -0.7599171562078231,
+              "post_EMT_z": 0.8218760879549553,
+              "post_S_sen": 2.981969422847814
+            },
+            "gate0_primary_refractory": false,
+            "gate1_mbd4": null,
+            "gate2": null,
+            "recommend": [
+              "Ceralasertib",
+              "Adavosertib"
+            ],
+            "contraindicated": []
+          },
+          "l5_elo_summary": {
+            "top_candidate": "Ceralasertib",
+            "top_mechanism_class": "DDR_ATR",
+            "promoted": [
+              "Ceralasertib",
+              "Adavosertib"
+            ],
+            "demoted": [
+              "Dasatinib",
+              "Azithromycin",
+              "Doxercalciferol",
+              "Vismodegib",
+              "Olaparib",
+              "Navitoclax",
+              "ABT-737",
+              "Venetoclax"
+            ],
+            "door2_subtype_routing": null,
+            "top_3_ranked": [
+              {
+                "rank": 1,
+                "drug_id": "Ceralasertib",
+                "elo": 1578.833,
+                "applied_modifier": 0.4274,
+                "reason": "Door 1 DDRonly: ATR sensitivity (7/10 GDSC2 & 6/9 CTRPv2)"
+              },
+              {
+                "rank": 2,
+                "drug_id": "Adavosertib",
+                "elo": 1564.8184,
+                "applied_modifier": 0.335,
+                "reason": "Door 1 DDRonly: WEE1 sensitivity (7/10 GDSC2 & 6/9 CTRPv2)"
+              },
+              {
+                "rank": 3,
+                "drug_id": "Carboplatin_Paclitaxel",
+                "elo": 1549.5243,
+                "applied_modifier": 0.0,
+                "reason": "no modifier"
+              }
+            ]
+          }
+        },
+        "argon_prompt": "PATIENT_INPUT_JSON:\n{\"domain\": \"ovarian_two_door_v3\", \"l3_arbiter_state\": {\"contraindicated\": [], \"cutpoints\": {\"post_DDR\": 0.05212375139760441, \"post_H_clean\": 1.016542942721253, \"ties\": \"low\"}, \"decision\": \"DOOR_1_DDR_PROLIFERATIVE\", \"four_state_class\": \"DDRonly\", \"gate0_primary_refractory\": false, \"gate1_mbd4\": null, \"gate2\": null, \"recommend\": [\"Ceralasertib\", \"Adavosertib\"], \"scores\": {\"delta_MCL1_z\": -0.7599171562078231, \"post_BCL2A1_z\": -0.33877176393362163, \"post_DDR\": 0.05547302403492261, \"post_EMT_z\": 0.8218760879549553, \"post_H_clean\": 1.016542942721253, \"post_S_sen\": 2.981969422847814}, \"timepoint\": \"post_nact\"}, \"l5_elo_summary\": {\"demoted\": [\"Dasatinib\", \"Azithromycin\", \"Doxercalciferol\", \"Vismodegib\", \"Olaparib\", \"Navitoclax\", \"ABT-737\", \"Venetoclax\"], \"door2_subtype_routing\": null, \"promoted\": [\"Ceralasertib\", \"Adavosertib\"], \"top_3_ranked\": [{\"applied_modifier\": 0.4274, \"drug_id\": \"Ceralasertib\", \"elo\": 1578.833, \"rank\": 1, \"reason\": \"Door 1 DDRonly: ATR sensitivity (7/10 GDSC2 & 6/9 CTRPv2)\"}, {\"applied_modifier\": 0.335, \"drug_id\": \"Adavosertib\", \"elo\": 1564.8184, \"rank\": 2, \"reason\": \"Door 1 DDRonly: WEE1 sensitivity (7/10 GDSC2 & 6/9 CTRPv2)\"}, {\"applied_modifier\": 0.0, \"drug_id\": \"Carboplatin_Paclitaxel\", \"elo\": 1549.5243, \"rank\": 3, \"reason\": \"no modifier\"}], \"top_candidate\": \"Ceralasertib\", \"top_mechanism_class\": \"DDR_ATR\"}, \"patient_id\": \"EOC349\", \"timepoint_or_specimen\": \"post_nact\"}\n\nInterpret what this patient's scores and L5 Elo ranking mean (JSON):",
+        "argon_output": {
+          "biological_state_meaning": "Post-NACT residual tumor has post_H_clean=1.0165 (cutpoint>1.0165, ties low) and post_DDR=0.055473 (cutpoint>0.052124), with senolytic index post_S_sen=2.981969422847814 -> state=DDRonly (DOOR_1_DDR_PROLIFERATIVE).",
+          "gate_and_compartment_meaning": "Gate 3 Door 1 (DDR Proliferative) fired: actively cycling residual disease with elevated replication-stress DDR proxy (7/10 GDSC2 & 6/9 CTRPv2 DDR-sensitive; GSE165897 Door 1 median PFI 50.5d vs Door 2 203.5d, exact MWU p=0.02857).",
+          "elo_ranking_meaning": "L5 Elo ranks Ceralasertib #1 (DDR_ATR); promoted=[Ceralasertib, Adavosertib], demoted=[Dasatinib, Azithromycin, Doxercalciferol, Vismodegib, Olaparib, Navitoclax, ABT-737, Venetoclax].",
+          "actionable_summary_ruo": "Post-NACT residual tumor has post_H_clean=1.0165 (cutpoint>1.0165, ties low) and post_DDR=0.055473 (cutpoint>0.052124), with senolytic index post_S_sen=2.981969422847814 -> state=DDRonly (DOOR_1_DDR_PROLIFERATIVE). L5 Elo ranks Ceralasertib #1 (DDR_ATR); promoted=[Ceralasertib, Adavosertib], demoted=[Dasatinib, Azithromycin, Doxercalciferol, Vismodegib, Olaparib, Navitoclax, ABT-737, Venetoclax]. (RUO exploratory prioritization)."
+        }
+      }
+    },
+    {
+      "patient_id": "EOC372",
+      "http_status": 200,
+      "four_state_class": "Neither",
+      "decision": "CHEMO_CLEARED_REMISSION",
+      "expected_four_state_class": "Neither",
+      "expected_decision": "CHEMO_CLEARED_REMISSION",
+      "match": true,
+      "gate0_primary_refractory": false,
+      "recommend": [],
+      "contraindicated": [],
+      "argon_interpretation": {
+        "ruo": true,
+        "contract_status": "evidence_bound_exploratory_prioritization",
+        "model": "gemini-4-argon",
+        "temperature": 0.0,
+        "deterministic": true,
+        "mode": "deterministic_argon_contract_engine",
+        "request_id": null,
+        "argon_input": {
+          "patient_id": "EOC372",
+          "domain": "ovarian_two_door_v3",
+          "timepoint_or_specimen": "post_nact",
+          "l3_arbiter_state": {
+            "timepoint": "post_nact",
+            "four_state_class": "Neither",
+            "decision": "CHEMO_CLEARED_REMISSION",
+            "cutpoints": {
+              "post_DDR": 0.05212375139760441,
+              "post_H_clean": 1.016542942721253,
+              "ties": "low"
+            },
+            "scores": {
+              "post_H_clean": 0.6284012873173085,
+              "post_DDR": 0.04644650745488275,
+              "post_BCL2A1_z": 0.004390297418664615,
+              "delta_MCL1_z": 0.5585962551996078,
+              "post_EMT_z": 0.9217603203024951,
+              "post_S_sen": -0.19899521191347916
+            },
+            "gate0_primary_refractory": false,
+            "gate1_mbd4": null,
+            "gate2": null,
+            "recommend": [],
+            "contraindicated": []
+          },
+          "l5_elo_summary": {
+            "top_candidate": "Ceralasertib",
+            "top_mechanism_class": "DDR_ATR",
+            "promoted": [],
+            "demoted": [],
+            "door2_subtype_routing": null,
+            "top_3_ranked": [
+              {
+                "rank": 1,
+                "drug_id": "Ceralasertib",
+                "elo": 1579.5117,
+                "applied_modifier": 0.0,
+                "reason": "no modifier"
+              },
+              {
+                "rank": 2,
+                "drug_id": "Navitoclax",
+                "elo": 1563.3985,
+                "applied_modifier": 0.0,
+                "reason": "no modifier"
+              },
+              {
+                "rank": 3,
+                "drug_id": "ABT-737",
+                "elo": 1550.5489,
+                "applied_modifier": 0.0,
+                "reason": "no modifier"
+              }
+            ]
+          }
+        },
+        "argon_prompt": "PATIENT_INPUT_JSON:\n{\"domain\": \"ovarian_two_door_v3\", \"l3_arbiter_state\": {\"contraindicated\": [], \"cutpoints\": {\"post_DDR\": 0.05212375139760441, \"post_H_clean\": 1.016542942721253, \"ties\": \"low\"}, \"decision\": \"CHEMO_CLEARED_REMISSION\", \"four_state_class\": \"Neither\", \"gate0_primary_refractory\": false, \"gate1_mbd4\": null, \"gate2\": null, \"recommend\": [], \"scores\": {\"delta_MCL1_z\": 0.5585962551996078, \"post_BCL2A1_z\": 0.004390297418664615, \"post_DDR\": 0.04644650745488275, \"post_EMT_z\": 0.9217603203024951, \"post_H_clean\": 0.6284012873173085, \"post_S_sen\": -0.19899521191347916}, \"timepoint\": \"post_nact\"}, \"l5_elo_summary\": {\"demoted\": [], \"door2_subtype_routing\": null, \"promoted\": [], \"top_3_ranked\": [{\"applied_modifier\": 0.0, \"drug_id\": \"Ceralasertib\", \"elo\": 1579.5117, \"rank\": 1, \"reason\": \"no modifier\"}, {\"applied_modifier\": 0.0, \"drug_id\": \"Navitoclax\", \"elo\": 1563.3985, \"rank\": 2, \"reason\": \"no modifier\"}, {\"applied_modifier\": 0.0, \"drug_id\": \"ABT-737\", \"elo\": 1550.5489, \"rank\": 3, \"reason\": \"no modifier\"}], \"top_candidate\": \"Ceralasertib\", \"top_mechanism_class\": \"DDR_ATR\"}, \"patient_id\": \"EOC372\", \"timepoint_or_specimen\": \"post_nact\"}\n\nInterpret what this patient's scores and L5 Elo ranking mean (JSON):",
+        "argon_output": {
+          "biological_state_meaning": "Post-NACT residual tumor has post_H_clean=0.6284 (cutpoint>1.0165, ties low) and post_DDR=0.046447 (cutpoint>0.052124), with senolytic index post_S_sen=-0.19899521191347916 -> state=Neither (CHEMO_CLEARED_REMISSION).",
+          "gate_and_compartment_meaning": "Gate 3 Chemo-Cleared Remission (Neither): both post_DDR and post_H_clean sit at or below cutpoints (GSE165897 Neither median PFI 490.0d).",
+          "elo_ranking_meaning": "L5 Elo ranks Ceralasertib #1 (DDR_ATR); promoted=[none], demoted=[none].",
+          "actionable_summary_ruo": "Post-NACT residual tumor has post_H_clean=0.6284 (cutpoint>1.0165, ties low) and post_DDR=0.046447 (cutpoint>0.052124), with senolytic index post_S_sen=-0.19899521191347916 -> state=Neither (CHEMO_CLEARED_REMISSION). L5 Elo ranks Ceralasertib #1 (DDR_ATR); promoted=[none], demoted=[none]. (RUO exploratory prioritization)."
+        }
+      }
+    },
+    {
+      "patient_id": "EOC443",
+      "http_status": 200,
+      "four_state_class": "Hcleanonly",
+      "decision": "DOOR_2_HIBERNATION_SENOLYTIC",
+      "expected_four_state_class": "Hcleanonly",
+      "expected_decision": "DOOR_2_HIBERNATION_SENOLYTIC",
+      "match": true,
+      "gate0_primary_refractory": false,
+      "recommend": [
+        "Navitoclax",
+        "ABT-737"
+      ],
+      "contraindicated": [
+        "Venetoclax"
+      ],
+      "argon_interpretation": {
+        "ruo": true,
+        "contract_status": "evidence_bound_exploratory_prioritization",
+        "model": "gemini-4-argon",
+        "temperature": 0.0,
+        "deterministic": true,
+        "mode": "deterministic_argon_contract_engine",
+        "request_id": null,
+        "argon_input": {
+          "patient_id": "EOC443",
+          "domain": "ovarian_two_door_v3",
+          "timepoint_or_specimen": "post_nact",
+          "l3_arbiter_state": {
+            "timepoint": "post_nact",
+            "four_state_class": "Hcleanonly",
+            "decision": "DOOR_2_HIBERNATION_SENOLYTIC",
+            "cutpoints": {
+              "post_DDR": 0.05212375139760441,
+              "post_H_clean": 1.016542942721253,
+              "ties": "low"
+            },
+            "scores": {
+              "post_H_clean": 1.7892209755470652,
+              "post_DDR": 0.05212375139760441,
+              "post_BCL2A1_z": -0.3227616225306785,
+              "delta_MCL1_z": -0.16983844912305013,
+              "post_EMT_z": -1.2321387996700024,
+              "post_S_sen": 3.62227842519978
+            },
+            "gate0_primary_refractory": false,
+            "gate1_mbd4": null,
+            "gate2": null,
+            "recommend": [
+              "Navitoclax",
+              "ABT-737"
+            ],
+            "contraindicated": [
+              "Venetoclax"
+            ]
+          },
+          "l5_elo_summary": {
+            "top_candidate": "Navitoclax",
+            "top_mechanism_class": "BCL-xL_senolytic",
+            "promoted": [
+              "Navitoclax",
+              "ABT-737",
+              "Doxercalciferol",
+              "Dasatinib",
+              "Azithromycin",
+              "Vismodegib"
+            ],
+            "demoted": [
+              "Adavosertib",
+              "Olaparib",
+              "Ceralasertib",
+              "Carboplatin_Paclitaxel",
+              "Gemcitabine",
+              "Venetoclax"
+            ],
+            "door2_subtype_routing": {
+              "ruo": true,
+              "contract_status": "evidence_bound_exploratory_prioritization",
+              "exploratory": true,
+              "subtype": "Subtype_2A_BCLxL_Classical",
+              "subtype_2B_triggered": false,
+              "triggers": [
+                "S_sen - H_clean buffer >= 0 and no VDR/EPHA2 elevation"
+              ],
+              "S_sen_minus_H_clean_buffer": 1.8330574496527148,
+              "highlighted_2B_agents": [],
+              "bcl_xl_agents": [
+                "Navitoclax",
+                "ABT-737"
+              ],
+              "five_bh_fdr_consensus_winners_q_0_047242": [
+                "Doxercalciferol",
+                "Azithromycin",
+                "Dasatinib",
+                "Navitoclax",
+                "ABT-737"
+              ],
+              "prism_secondary_fdr_winner_q_0_035734": "Vismodegib",
+              "dasatinib_navitoclax_composite": {
+                "composite": "dasatinib+navitoclax",
+                "predictor": "S_sen",
+                "n": 45,
+                "rho": 0.527931,
+                "p_positive": 0.00015,
+                "p_two_sided": 0.0003,
+                "ci_low": 0.224457,
+                "ci_high": 0.719325,
+                "permutations": 100000,
+                "bootstrap": 2000,
+                "q_positive": 0.0006
+              },
+              "subtype_2B_reference_donors": [
+                "COV362",
+                "SNU-840",
+                "EFO-21"
+              ],
+              "observed_or_coverage": {
+                "v9_dose_response": {
+                  "active": 10,
+                  "inactive": 0,
+                  "unknown": 1
+                },
+                "v8_four_screen": {
+                  "active": 11,
+                  "inactive": 0,
+                  "unknown": 0
+                }
+              }
+            },
+            "top_3_ranked": [
+              {
+                "rank": 1,
+                "drug_id": "Navitoclax",
+                "elo": 1576.8859,
+                "applied_modifier": 0.4305,
+                "reason": "Door 2 H_clean>cutpoint: GDSC2 \u0394LN=-1.20 + PRISM \u0394\u03c1=+0.6327 + v9 DoseResponse_Consensus_Z rho=+0.3397 (BH q=0.047242)"
+              },
+              {
+                "rank": 2,
+                "drug_id": "ABT-737",
+                "elo": 1564.1259,
+                "applied_modifier": 0.3511,
+                "reason": "Door 2 H_clean>cutpoint: GDSC2 \u0394LN=-1.29 + PRISM \u0394\u03c1=+0.6323 + v9 DoseResponse_Consensus_Z rho=+0.3266 (BH q=0.047242)"
+              },
+              {
+                "rank": 3,
+                "drug_id": "Doxercalciferol",
+                "elo": 1548.3992,
+                "applied_modifier": 0.2225,
+                "reason": "Door 2 v9 DoseResponse_Consensus_Z rho=+0.46358 (P=0.01534, BH q=0.047242; VDR agonist)"
+              }
+            ]
+          }
+        },
+        "argon_prompt": "PATIENT_INPUT_JSON:\n{\"domain\": \"ovarian_two_door_v3\", \"l3_arbiter_state\": {\"contraindicated\": [\"Venetoclax\"], \"cutpoints\": {\"post_DDR\": 0.05212375139760441, \"post_H_clean\": 1.016542942721253, \"ties\": \"low\"}, \"decision\": \"DOOR_2_HIBERNATION_SENOLYTIC\", \"four_state_class\": \"Hcleanonly\", \"gate0_primary_refractory\": false, \"gate1_mbd4\": null, \"gate2\": null, \"recommend\": [\"Navitoclax\", \"ABT-737\"], \"scores\": {\"delta_MCL1_z\": -0.16983844912305013, \"post_BCL2A1_z\": -0.3227616225306785, \"post_DDR\": 0.05212375139760441, \"post_EMT_z\": -1.2321387996700024, \"post_H_clean\": 1.7892209755470652, \"post_S_sen\": 3.62227842519978}, \"timepoint\": \"post_nact\"}, \"l5_elo_summary\": {\"demoted\": [\"Adavosertib\", \"Olaparib\", \"Ceralasertib\", \"Carboplatin_Paclitaxel\", \"Gemcitabine\", \"Venetoclax\"], \"door2_subtype_routing\": {\"S_sen_minus_H_clean_buffer\": 1.8330574496527148, \"bcl_xl_agents\": [\"Navitoclax\", \"ABT-737\"], \"contract_status\": \"evidence_bound_exploratory_prioritization\", \"dasatinib_navitoclax_composite\": {\"bootstrap\": 2000, \"ci_high\": 0.719325, \"ci_low\": 0.224457, \"composite\": \"dasatinib+navitoclax\", \"n\": 45, \"p_positive\": 0.00015, \"p_two_sided\": 0.0003, \"permutations\": 100000, \"predictor\": \"S_sen\", \"q_positive\": 0.0006, \"rho\": 0.527931}, \"exploratory\": true, \"five_bh_fdr_consensus_winners_q_0_047242\": [\"Doxercalciferol\", \"Azithromycin\", \"Dasatinib\", \"Navitoclax\", \"ABT-737\"], \"highlighted_2B_agents\": [], \"observed_or_coverage\": {\"v8_four_screen\": {\"active\": 11, \"inactive\": 0, \"unknown\": 0}, \"v9_dose_response\": {\"active\": 10, \"inactive\": 0, \"unknown\": 1}}, \"prism_secondary_fdr_winner_q_0_035734\": \"Vismodegib\", \"ruo\": true, \"subtype\": \"Subtype_2A_BCLxL_Classical\", \"subtype_2B_reference_donors\": [\"COV362\", \"SNU-840\", \"EFO-21\"], \"subtype_2B_triggered\": false, \"triggers\": [\"S_sen - H_clean buffer >= 0 and no VDR/EPHA2 elevation\"]}, \"promoted\": [\"Navitoclax\", \"ABT-737\", \"Doxercalciferol\", \"Dasatinib\", \"Azithromycin\", \"Vismodegib\"], \"top_3_ranked\": [{\"applied_modifier\": 0.4305, \"drug_id\": \"Navitoclax\", \"elo\": 1576.8859, \"rank\": 1, \"reason\": \"Door 2 H_clean>cutpoint: GDSC2 \u0394LN=-1.20 + PRISM \u0394\u03c1=+0.6327 + v9 DoseResponse_Consensus_Z rho=+0.3397 (BH q=0.047242)\"}, {\"applied_modifier\": 0.3511, \"drug_id\": \"ABT-737\", \"elo\": 1564.1259, \"rank\": 2, \"reason\": \"Door 2 H_clean>cutpoint: GDSC2 \u0394LN=-1.29 + PRISM \u0394\u03c1=+0.6323 + v9 DoseResponse_Consensus_Z rho=+0.3266 (BH q=0.047242)\"}, {\"applied_modifier\": 0.2225, \"drug_id\": \"Doxercalciferol\", \"elo\": 1548.3992, \"rank\": 3, \"reason\": \"Door 2 v9 DoseResponse_Consensus_Z rho=+0.46358 (P=0.01534, BH q=0.047242; VDR agonist)\"}], \"top_candidate\": \"Navitoclax\", \"top_mechanism_class\": \"BCL-xL_senolytic\"}, \"patient_id\": \"EOC443\", \"timepoint_or_specimen\": \"post_nact\"}\n\nInterpret what this patient's scores and L5 Elo ranking mean (JSON):",
+        "argon_output": {
+          "biological_state_meaning": "Post-NACT residual tumor has post_H_clean=1.7892 (cutpoint>1.0165, ties low) and post_DDR=0.052124 (cutpoint>0.052124), with senolytic index post_S_sen=3.62227842519978 -> state=Hcleanonly (DOOR_2_HIBERNATION_SENOLYTIC).",
+          "gate_and_compartment_meaning": "Gate 3 Door 2 (Hibernation / Senolytic) fired: therapy-induced quiescent persister state is pan-resistant to proliferative DDR/chemo (0/8 GDSC2 & 0/5 CTRPv2) but dependent on BCL2L1/BCL-xL (CRISPR rho=-0.6547, q=2.5e-5; 7-gene CRISPR vulnerability rho=-0.6645, q=0.00012; CLPP rho=-0.336, P=0.01680). Exploratory Subtype 2A routing (Subtype_2A_BCLxL_Classical, buffer S_sen-H_clean=+1.8331 >= 0): classical BCL-xL senolytic vulnerability (Navitoclax/ABT-737) with v9 DoseResponse_Consensus_Z co-winners Dasatinib, Doxercalciferol, Azithromycin (all 5 BH q=0.047242) + Vismodegib (q=0.035734) and Dasatinib+Navitoclax composite (rho=+0.5279, q=0.00060).",
+          "elo_ranking_meaning": "L5 Elo ranks Navitoclax #1 (BCL-xL_senolytic); promoted=[Navitoclax, ABT-737, Doxercalciferol, Dasatinib, Azithromycin, Vismodegib], demoted=[Adavosertib, Olaparib, Ceralasertib, Carboplatin_Paclitaxel, Gemcitabine, Venetoclax].",
+          "actionable_summary_ruo": "Post-NACT residual tumor has post_H_clean=1.7892 (cutpoint>1.0165, ties low) and post_DDR=0.052124 (cutpoint>0.052124), with senolytic index post_S_sen=3.62227842519978 -> state=Hcleanonly (DOOR_2_HIBERNATION_SENOLYTIC). L5 Elo ranks Navitoclax #1 (BCL-xL_senolytic); promoted=[Navitoclax, ABT-737, Doxercalciferol, Dasatinib, Azithromycin, Vismodegib], demoted=[Adavosertib, Olaparib, Ceralasertib, Carboplatin_Paclitaxel, Gemcitabine, Venetoclax]. (RUO exploratory prioritization)."
+        }
+      }
+    },
+    {
+      "patient_id": "EOC540",
+      "http_status": 200,
+      "four_state_class": "Hcleanonly",
+      "decision": "DOOR_2_HIBERNATION_SENOLYTIC",
+      "expected_four_state_class": "Hcleanonly",
+      "expected_decision": "DOOR_2_HIBERNATION_SENOLYTIC",
+      "match": true,
+      "gate0_primary_refractory": false,
+      "recommend": [
+        "Navitoclax",
+        "ABT-737"
+      ],
+      "contraindicated": [
+        "Venetoclax"
+      ],
+      "argon_interpretation": {
+        "ruo": true,
+        "contract_status": "evidence_bound_exploratory_prioritization",
+        "model": "gemini-4-argon",
+        "temperature": 0.0,
+        "deterministic": true,
+        "mode": "deterministic_argon_contract_engine",
+        "request_id": null,
+        "argon_input": {
+          "patient_id": "EOC540",
+          "domain": "ovarian_two_door_v3",
+          "timepoint_or_specimen": "post_nact",
+          "l3_arbiter_state": {
+            "timepoint": "post_nact",
+            "four_state_class": "Hcleanonly",
+            "decision": "DOOR_2_HIBERNATION_SENOLYTIC",
+            "cutpoints": {
+              "post_DDR": 0.05212375139760441,
+              "post_H_clean": 1.016542942721253,
+              "ties": "low"
+            },
+            "scores": {
+              "post_H_clean": 1.29406508570328,
+              "post_DDR": 0.03578019329012831,
+              "post_BCL2A1_z": 0.5637629685336738,
+              "delta_MCL1_z": -0.33992094028148045,
+              "post_EMT_z": -1.8657152767622194,
+              "post_S_sen": 1.3948272101198667
+            },
+            "gate0_primary_refractory": false,
+            "gate1_mbd4": null,
+            "gate2": null,
+            "recommend": [
+              "Navitoclax",
+              "ABT-737"
+            ],
+            "contraindicated": [
+              "Venetoclax"
+            ]
+          },
+          "l5_elo_summary": {
+            "top_candidate": "Navitoclax",
+            "top_mechanism_class": "BCL-xL_senolytic",
+            "promoted": [
+              "Navitoclax",
+              "ABT-737",
+              "Doxercalciferol",
+              "Dasatinib",
+              "Azithromycin",
+              "Vismodegib"
+            ],
+            "demoted": [
+              "Adavosertib",
+              "Olaparib",
+              "Ceralasertib",
+              "Carboplatin_Paclitaxel",
+              "Gemcitabine",
+              "Venetoclax"
+            ],
+            "door2_subtype_routing": {
+              "ruo": true,
+              "contract_status": "evidence_bound_exploratory_prioritization",
+              "exploratory": true,
+              "subtype": "Subtype_2A_BCLxL_Classical",
+              "subtype_2B_triggered": false,
+              "triggers": [
+                "S_sen - H_clean buffer >= 0 and no VDR/EPHA2 elevation"
+              ],
+              "S_sen_minus_H_clean_buffer": 0.10076212441658661,
+              "highlighted_2B_agents": [],
+              "bcl_xl_agents": [
+                "Navitoclax",
+                "ABT-737"
+              ],
+              "five_bh_fdr_consensus_winners_q_0_047242": [
+                "Doxercalciferol",
+                "Azithromycin",
+                "Dasatinib",
+                "Navitoclax",
+                "ABT-737"
+              ],
+              "prism_secondary_fdr_winner_q_0_035734": "Vismodegib",
+              "dasatinib_navitoclax_composite": {
+                "composite": "dasatinib+navitoclax",
+                "predictor": "S_sen",
+                "n": 45,
+                "rho": 0.527931,
+                "p_positive": 0.00015,
+                "p_two_sided": 0.0003,
+                "ci_low": 0.224457,
+                "ci_high": 0.719325,
+                "permutations": 100000,
+                "bootstrap": 2000,
+                "q_positive": 0.0006
+              },
+              "subtype_2B_reference_donors": [
+                "COV362",
+                "SNU-840",
+                "EFO-21"
+              ],
+              "observed_or_coverage": {
+                "v9_dose_response": {
+                  "active": 10,
+                  "inactive": 0,
+                  "unknown": 1
+                },
+                "v8_four_screen": {
+                  "active": 11,
+                  "inactive": 0,
+                  "unknown": 0
+                }
+              }
+            },
+            "top_3_ranked": [
+              {
+                "rank": 1,
+                "drug_id": "Navitoclax",
+                "elo": 1576.8859,
+                "applied_modifier": 0.4305,
+                "reason": "Door 2 H_clean>cutpoint: GDSC2 \u0394LN=-1.20 + PRISM \u0394\u03c1=+0.6327 + v9 DoseResponse_Consensus_Z rho=+0.3397 (BH q=0.047242)"
+              },
+              {
+                "rank": 2,
+                "drug_id": "ABT-737",
+                "elo": 1564.1259,
+                "applied_modifier": 0.3511,
+                "reason": "Door 2 H_clean>cutpoint: GDSC2 \u0394LN=-1.29 + PRISM \u0394\u03c1=+0.6323 + v9 DoseResponse_Consensus_Z rho=+0.3266 (BH q=0.047242)"
+              },
+              {
+                "rank": 3,
+                "drug_id": "Doxercalciferol",
+                "elo": 1548.3992,
+                "applied_modifier": 0.2225,
+                "reason": "Door 2 v9 DoseResponse_Consensus_Z rho=+0.46358 (P=0.01534, BH q=0.047242; VDR agonist)"
+              }
+            ]
+          }
+        },
+        "argon_prompt": "PATIENT_INPUT_JSON:\n{\"domain\": \"ovarian_two_door_v3\", \"l3_arbiter_state\": {\"contraindicated\": [\"Venetoclax\"], \"cutpoints\": {\"post_DDR\": 0.05212375139760441, \"post_H_clean\": 1.016542942721253, \"ties\": \"low\"}, \"decision\": \"DOOR_2_HIBERNATION_SENOLYTIC\", \"four_state_class\": \"Hcleanonly\", \"gate0_primary_refractory\": false, \"gate1_mbd4\": null, \"gate2\": null, \"recommend\": [\"Navitoclax\", \"ABT-737\"], \"scores\": {\"delta_MCL1_z\": -0.33992094028148045, \"post_BCL2A1_z\": 0.5637629685336738, \"post_DDR\": 0.03578019329012831, \"post_EMT_z\": -1.8657152767622194, \"post_H_clean\": 1.29406508570328, \"post_S_sen\": 1.3948272101198667}, \"timepoint\": \"post_nact\"}, \"l5_elo_summary\": {\"demoted\": [\"Adavosertib\", \"Olaparib\", \"Ceralasertib\", \"Carboplatin_Paclitaxel\", \"Gemcitabine\", \"Venetoclax\"], \"door2_subtype_routing\": {\"S_sen_minus_H_clean_buffer\": 0.10076212441658661, \"bcl_xl_agents\": [\"Navitoclax\", \"ABT-737\"], \"contract_status\": \"evidence_bound_exploratory_prioritization\", \"dasatinib_navitoclax_composite\": {\"bootstrap\": 2000, \"ci_high\": 0.719325, \"ci_low\": 0.224457, \"composite\": \"dasatinib+navitoclax\", \"n\": 45, \"p_positive\": 0.00015, \"p_two_sided\": 0.0003, \"permutations\": 100000, \"predictor\": \"S_sen\", \"q_positive\": 0.0006, \"rho\": 0.527931}, \"exploratory\": true, \"five_bh_fdr_consensus_winners_q_0_047242\": [\"Doxercalciferol\", \"Azithromycin\", \"Dasatinib\", \"Navitoclax\", \"ABT-737\"], \"highlighted_2B_agents\": [], \"observed_or_coverage\": {\"v8_four_screen\": {\"active\": 11, \"inactive\": 0, \"unknown\": 0}, \"v9_dose_response\": {\"active\": 10, \"inactive\": 0, \"unknown\": 1}}, \"prism_secondary_fdr_winner_q_0_035734\": \"Vismodegib\", \"ruo\": true, \"subtype\": \"Subtype_2A_BCLxL_Classical\", \"subtype_2B_reference_donors\": [\"COV362\", \"SNU-840\", \"EFO-21\"], \"subtype_2B_triggered\": false, \"triggers\": [\"S_sen - H_clean buffer >= 0 and no VDR/EPHA2 elevation\"]}, \"promoted\": [\"Navitoclax\", \"ABT-737\", \"Doxercalciferol\", \"Dasatinib\", \"Azithromycin\", \"Vismodegib\"], \"top_3_ranked\": [{\"applied_modifier\": 0.4305, \"drug_id\": \"Navitoclax\", \"elo\": 1576.8859, \"rank\": 1, \"reason\": \"Door 2 H_clean>cutpoint: GDSC2 \u0394LN=-1.20 + PRISM \u0394\u03c1=+0.6327 + v9 DoseResponse_Consensus_Z rho=+0.3397 (BH q=0.047242)\"}, {\"applied_modifier\": 0.3511, \"drug_id\": \"ABT-737\", \"elo\": 1564.1259, \"rank\": 2, \"reason\": \"Door 2 H_clean>cutpoint: GDSC2 \u0394LN=-1.29 + PRISM \u0394\u03c1=+0.6323 + v9 DoseResponse_Consensus_Z rho=+0.3266 (BH q=0.047242)\"}, {\"applied_modifier\": 0.2225, \"drug_id\": \"Doxercalciferol\", \"elo\": 1548.3992, \"rank\": 3, \"reason\": \"Door 2 v9 DoseResponse_Consensus_Z rho=+0.46358 (P=0.01534, BH q=0.047242; VDR agonist)\"}], \"top_candidate\": \"Navitoclax\", \"top_mechanism_class\": \"BCL-xL_senolytic\"}, \"patient_id\": \"EOC540\", \"timepoint_or_specimen\": \"post_nact\"}\n\nInterpret what this patient's scores and L5 Elo ranking mean (JSON):",
+        "argon_output": {
+          "biological_state_meaning": "Post-NACT residual tumor has post_H_clean=1.2941 (cutpoint>1.0165, ties low) and post_DDR=0.035780 (cutpoint>0.052124), with senolytic index post_S_sen=1.3948272101198667 -> state=Hcleanonly (DOOR_2_HIBERNATION_SENOLYTIC).",
+          "gate_and_compartment_meaning": "Gate 3 Door 2 (Hibernation / Senolytic) fired: therapy-induced quiescent persister state is pan-resistant to proliferative DDR/chemo (0/8 GDSC2 & 0/5 CTRPv2) but dependent on BCL2L1/BCL-xL (CRISPR rho=-0.6547, q=2.5e-5; 7-gene CRISPR vulnerability rho=-0.6645, q=0.00012; CLPP rho=-0.336, P=0.01680). Exploratory Subtype 2A routing (Subtype_2A_BCLxL_Classical, buffer S_sen-H_clean=+0.1008 >= 0): classical BCL-xL senolytic vulnerability (Navitoclax/ABT-737) with v9 DoseResponse_Consensus_Z co-winners Dasatinib, Doxercalciferol, Azithromycin (all 5 BH q=0.047242) + Vismodegib (q=0.035734) and Dasatinib+Navitoclax composite (rho=+0.5279, q=0.00060).",
+          "elo_ranking_meaning": "L5 Elo ranks Navitoclax #1 (BCL-xL_senolytic); promoted=[Navitoclax, ABT-737, Doxercalciferol, Dasatinib, Azithromycin, Vismodegib], demoted=[Adavosertib, Olaparib, Ceralasertib, Carboplatin_Paclitaxel, Gemcitabine, Venetoclax].",
+          "actionable_summary_ruo": "Post-NACT residual tumor has post_H_clean=1.2941 (cutpoint>1.0165, ties low) and post_DDR=0.035780 (cutpoint>0.052124), with senolytic index post_S_sen=1.3948272101198667 -> state=Hcleanonly (DOOR_2_HIBERNATION_SENOLYTIC). L5 Elo ranks Navitoclax #1 (BCL-xL_senolytic); promoted=[Navitoclax, ABT-737, Doxercalciferol, Dasatinib, Azithromycin, Vismodegib], demoted=[Adavosertib, Olaparib, Ceralasertib, Carboplatin_Paclitaxel, Gemcitabine, Venetoclax]. (RUO exploratory prioritization)."
+        }
+      }
+    },
+    {
+      "patient_id": "EOC733",
+      "http_status": 200,
+      "four_state_class": "DDRonly",
+      "decision": "DOOR_1_DDR_PROLIFERATIVE",
+      "expected_four_state_class": "DDRonly",
+      "expected_decision": "DOOR_1_DDR_PROLIFERATIVE",
+      "match": true,
+      "gate0_primary_refractory": false,
+      "recommend": [
+        "Ceralasertib",
+        "Adavosertib"
+      ],
+      "contraindicated": [],
+      "argon_interpretation": {
+        "ruo": true,
+        "contract_status": "evidence_bound_exploratory_prioritization",
+        "model": "gemini-4-argon",
+        "temperature": 0.0,
+        "deterministic": true,
+        "mode": "deterministic_argon_contract_engine",
+        "request_id": null,
+        "argon_input": {
+          "patient_id": "EOC733",
+          "domain": "ovarian_two_door_v3",
+          "timepoint_or_specimen": "post_nact",
+          "l3_arbiter_state": {
+            "timepoint": "post_nact",
+            "four_state_class": "DDRonly",
+            "decision": "DOOR_1_DDR_PROLIFERATIVE",
+            "cutpoints": {
+              "post_DDR": 0.05212375139760441,
+              "post_H_clean": 1.016542942721253,
+              "ties": "low"
+            },
+            "scores": {
+              "post_H_clean": -1.5338562205878068,
+              "post_DDR": 0.10297662711873573,
+              "post_BCL2A1_z": -0.43417860047825657,
+              "delta_MCL1_z": 0.8881084195948392,
+              "post_EMT_z": -1.9331402686516581,
+              "post_S_sen": -3.642853314808584
+            },
+            "gate0_primary_refractory": false,
+            "gate1_mbd4": null,
+            "gate2": null,
+            "recommend": [
+              "Ceralasertib",
+              "Adavosertib"
+            ],
+            "contraindicated": []
+          },
+          "l5_elo_summary": {
+            "top_candidate": "Ceralasertib",
+            "top_mechanism_class": "DDR_ATR",
+            "promoted": [
+              "Ceralasertib",
+              "Adavosertib"
+            ],
+            "demoted": [
+              "Dasatinib",
+              "Azithromycin",
+              "Doxercalciferol",
+              "Vismodegib",
+              "Olaparib",
+              "Navitoclax",
+              "ABT-737",
+              "Venetoclax"
+            ],
+            "door2_subtype_routing": null,
+            "top_3_ranked": [
+              {
+                "rank": 1,
+                "drug_id": "Ceralasertib",
+                "elo": 1578.833,
+                "applied_modifier": 0.4274,
+                "reason": "Door 1 DDRonly: ATR sensitivity (7/10 GDSC2 & 6/9 CTRPv2)"
+              },
+              {
+                "rank": 2,
+                "drug_id": "Adavosertib",
+                "elo": 1564.8184,
+                "applied_modifier": 0.335,
+                "reason": "Door 1 DDRonly: WEE1 sensitivity (7/10 GDSC2 & 6/9 CTRPv2)"
+              },
+              {
+                "rank": 3,
+                "drug_id": "Carboplatin_Paclitaxel",
+                "elo": 1549.5243,
+                "applied_modifier": 0.0,
+                "reason": "no modifier"
+              }
+            ]
+          }
+        },
+        "argon_prompt": "PATIENT_INPUT_JSON:\n{\"domain\": \"ovarian_two_door_v3\", \"l3_arbiter_state\": {\"contraindicated\": [], \"cutpoints\": {\"post_DDR\": 0.05212375139760441, \"post_H_clean\": 1.016542942721253, \"ties\": \"low\"}, \"decision\": \"DOOR_1_DDR_PROLIFERATIVE\", \"four_state_class\": \"DDRonly\", \"gate0_primary_refractory\": false, \"gate1_mbd4\": null, \"gate2\": null, \"recommend\": [\"Ceralasertib\", \"Adavosertib\"], \"scores\": {\"delta_MCL1_z\": 0.8881084195948392, \"post_BCL2A1_z\": -0.43417860047825657, \"post_DDR\": 0.10297662711873573, \"post_EMT_z\": -1.9331402686516581, \"post_H_clean\": -1.5338562205878068, \"post_S_sen\": -3.642853314808584}, \"timepoint\": \"post_nact\"}, \"l5_elo_summary\": {\"demoted\": [\"Dasatinib\", \"Azithromycin\", \"Doxercalciferol\", \"Vismodegib\", \"Olaparib\", \"Navitoclax\", \"ABT-737\", \"Venetoclax\"], \"door2_subtype_routing\": null, \"promoted\": [\"Ceralasertib\", \"Adavosertib\"], \"top_3_ranked\": [{\"applied_modifier\": 0.4274, \"drug_id\": \"Ceralasertib\", \"elo\": 1578.833, \"rank\": 1, \"reason\": \"Door 1 DDRonly: ATR sensitivity (7/10 GDSC2 & 6/9 CTRPv2)\"}, {\"applied_modifier\": 0.335, \"drug_id\": \"Adavosertib\", \"elo\": 1564.8184, \"rank\": 2, \"reason\": \"Door 1 DDRonly: WEE1 sensitivity (7/10 GDSC2 & 6/9 CTRPv2)\"}, {\"applied_modifier\": 0.0, \"drug_id\": \"Carboplatin_Paclitaxel\", \"elo\": 1549.5243, \"rank\": 3, \"reason\": \"no modifier\"}], \"top_candidate\": \"Ceralasertib\", \"top_mechanism_class\": \"DDR_ATR\"}, \"patient_id\": \"EOC733\", \"timepoint_or_specimen\": \"post_nact\"}\n\nInterpret what this patient's scores and L5 Elo ranking mean (JSON):",
+        "argon_output": {
+          "biological_state_meaning": "Post-NACT residual tumor has post_H_clean=-1.5339 (cutpoint>1.0165, ties low) and post_DDR=0.102977 (cutpoint>0.052124), with senolytic index post_S_sen=-3.642853314808584 -> state=DDRonly (DOOR_1_DDR_PROLIFERATIVE).",
+          "gate_and_compartment_meaning": "Gate 3 Door 1 (DDR Proliferative) fired: actively cycling residual disease with elevated replication-stress DDR proxy (7/10 GDSC2 & 6/9 CTRPv2 DDR-sensitive; GSE165897 Door 1 median PFI 50.5d vs Door 2 203.5d, exact MWU p=0.02857).",
+          "elo_ranking_meaning": "L5 Elo ranks Ceralasertib #1 (DDR_ATR); promoted=[Ceralasertib, Adavosertib], demoted=[Dasatinib, Azithromycin, Doxercalciferol, Vismodegib, Olaparib, Navitoclax, ABT-737, Venetoclax].",
+          "actionable_summary_ruo": "Post-NACT residual tumor has post_H_clean=-1.5339 (cutpoint>1.0165, ties low) and post_DDR=0.102977 (cutpoint>0.052124), with senolytic index post_S_sen=-3.642853314808584 -> state=DDRonly (DOOR_1_DDR_PROLIFERATIVE). L5 Elo ranks Ceralasertib #1 (DDR_ATR); promoted=[Ceralasertib, Adavosertib], demoted=[Dasatinib, Azithromycin, Doxercalciferol, Vismodegib, Olaparib, Navitoclax, ABT-737, Venetoclax]. (RUO exploratory prioritization)."
+        }
+      }
+    },
+    {
+      "patient_id": "EOC87",
+      "http_status": 200,
+      "four_state_class": "DDRonly",
+      "decision": "DOOR_1_DDR_PROLIFERATIVE",
+      "expected_four_state_class": "DDRonly",
+      "expected_decision": "DOOR_1_DDR_PROLIFERATIVE",
+      "match": true,
+      "gate0_primary_refractory": false,
+      "recommend": [
+        "Ceralasertib",
+        "Adavosertib"
+      ],
+      "contraindicated": [],
+      "argon_interpretation": {
+        "ruo": true,
+        "contract_status": "evidence_bound_exploratory_prioritization",
+        "model": "gemini-4-argon",
+        "temperature": 0.0,
+        "deterministic": true,
+        "mode": "deterministic_argon_contract_engine",
+        "request_id": null,
+        "argon_input": {
+          "patient_id": "EOC87",
+          "domain": "ovarian_two_door_v3",
+          "timepoint_or_specimen": "post_nact",
+          "l3_arbiter_state": {
+            "timepoint": "post_nact",
+            "four_state_class": "DDRonly",
+            "decision": "DOOR_1_DDR_PROLIFERATIVE",
+            "cutpoints": {
+              "post_DDR": 0.05212375139760441,
+              "post_H_clean": 1.016542942721253,
+              "ties": "low"
+            },
+            "scores": {
+              "post_H_clean": -0.06027952665745273,
+              "post_DDR": 0.10592860657412567,
+              "post_BCL2A1_z": -0.37232643536704374,
+              "delta_MCL1_z": 0.5667916984902449,
+              "post_EMT_z": 0.942491820653889,
+              "post_S_sen": -0.9067348213302341
+            },
+            "gate0_primary_refractory": false,
+            "gate1_mbd4": null,
+            "gate2": null,
+            "recommend": [
+              "Ceralasertib",
+              "Adavosertib"
+            ],
+            "contraindicated": []
+          },
+          "l5_elo_summary": {
+            "top_candidate": "Ceralasertib",
+            "top_mechanism_class": "DDR_ATR",
+            "promoted": [
+              "Ceralasertib",
+              "Adavosertib"
+            ],
+            "demoted": [
+              "Dasatinib",
+              "Azithromycin",
+              "Doxercalciferol",
+              "Vismodegib",
+              "Olaparib",
+              "Navitoclax",
+              "ABT-737",
+              "Venetoclax"
+            ],
+            "door2_subtype_routing": null,
+            "top_3_ranked": [
+              {
+                "rank": 1,
+                "drug_id": "Ceralasertib",
+                "elo": 1578.833,
+                "applied_modifier": 0.4274,
+                "reason": "Door 1 DDRonly: ATR sensitivity (7/10 GDSC2 & 6/9 CTRPv2)"
+              },
+              {
+                "rank": 2,
+                "drug_id": "Adavosertib",
+                "elo": 1564.8184,
+                "applied_modifier": 0.335,
+                "reason": "Door 1 DDRonly: WEE1 sensitivity (7/10 GDSC2 & 6/9 CTRPv2)"
+              },
+              {
+                "rank": 3,
+                "drug_id": "Carboplatin_Paclitaxel",
+                "elo": 1549.5243,
+                "applied_modifier": 0.0,
+                "reason": "no modifier"
+              }
+            ]
+          }
+        },
+        "argon_prompt": "PATIENT_INPUT_JSON:\n{\"domain\": \"ovarian_two_door_v3\", \"l3_arbiter_state\": {\"contraindicated\": [], \"cutpoints\": {\"post_DDR\": 0.05212375139760441, \"post_H_clean\": 1.016542942721253, \"ties\": \"low\"}, \"decision\": \"DOOR_1_DDR_PROLIFERATIVE\", \"four_state_class\": \"DDRonly\", \"gate0_primary_refractory\": false, \"gate1_mbd4\": null, \"gate2\": null, \"recommend\": [\"Ceralasertib\", \"Adavosertib\"], \"scores\": {\"delta_MCL1_z\": 0.5667916984902449, \"post_BCL2A1_z\": -0.37232643536704374, \"post_DDR\": 0.10592860657412567, \"post_EMT_z\": 0.942491820653889, \"post_H_clean\": -0.06027952665745273, \"post_S_sen\": -0.9067348213302341}, \"timepoint\": \"post_nact\"}, \"l5_elo_summary\": {\"demoted\": [\"Dasatinib\", \"Azithromycin\", \"Doxercalciferol\", \"Vismodegib\", \"Olaparib\", \"Navitoclax\", \"ABT-737\", \"Venetoclax\"], \"door2_subtype_routing\": null, \"promoted\": [\"Ceralasertib\", \"Adavosertib\"], \"top_3_ranked\": [{\"applied_modifier\": 0.4274, \"drug_id\": \"Ceralasertib\", \"elo\": 1578.833, \"rank\": 1, \"reason\": \"Door 1 DDRonly: ATR sensitivity (7/10 GDSC2 & 6/9 CTRPv2)\"}, {\"applied_modifier\": 0.335, \"drug_id\": \"Adavosertib\", \"elo\": 1564.8184, \"rank\": 2, \"reason\": \"Door 1 DDRonly: WEE1 sensitivity (7/10 GDSC2 & 6/9 CTRPv2)\"}, {\"applied_modifier\": 0.0, \"drug_id\": \"Carboplatin_Paclitaxel\", \"elo\": 1549.5243, \"rank\": 3, \"reason\": \"no modifier\"}], \"top_candidate\": \"Ceralasertib\", \"top_mechanism_class\": \"DDR_ATR\"}, \"patient_id\": \"EOC87\", \"timepoint_or_specimen\": \"post_nact\"}\n\nInterpret what this patient's scores and L5 Elo ranking mean (JSON):",
+        "argon_output": {
+          "biological_state_meaning": "Post-NACT residual tumor has post_H_clean=-0.0603 (cutpoint>1.0165, ties low) and post_DDR=0.105929 (cutpoint>0.052124), with senolytic index post_S_sen=-0.9067348213302341 -> state=DDRonly (DOOR_1_DDR_PROLIFERATIVE).",
+          "gate_and_compartment_meaning": "Gate 3 Door 1 (DDR Proliferative) fired: actively cycling residual disease with elevated replication-stress DDR proxy (7/10 GDSC2 & 6/9 CTRPv2 DDR-sensitive; GSE165897 Door 1 median PFI 50.5d vs Door 2 203.5d, exact MWU p=0.02857).",
+          "elo_ranking_meaning": "L5 Elo ranks Ceralasertib #1 (DDR_ATR); promoted=[Ceralasertib, Adavosertib], demoted=[Dasatinib, Azithromycin, Doxercalciferol, Vismodegib, Olaparib, Navitoclax, ABT-737, Venetoclax].",
+          "actionable_summary_ruo": "Post-NACT residual tumor has post_H_clean=-0.0603 (cutpoint>1.0165, ties low) and post_DDR=0.105929 (cutpoint>0.052124), with senolytic index post_S_sen=-0.9067348213302341 -> state=DDRonly (DOOR_1_DDR_PROLIFERATIVE). L5 Elo ranks Ceralasertib #1 (DDR_ATR); promoted=[Ceralasertib, Adavosertib], demoted=[Dasatinib, Azithromycin, Doxercalciferol, Vismodegib, Olaparib, Navitoclax, ABT-737, Venetoclax]. (RUO exploratory prioritization)."
+        }
+      }
+    }
+  ],
+  "empty_payload": {
+    "http_status": 422,
+    "fail_closed_422": true,
+    "detail": {
+      "detail": {
+        "error": "missing_required_inputs",
+        "missing": [
+          "post_H_clean"
+        ]
+      }
+    }
+  },
+  "immunotherapy_v12_already_wired_at_409755b": true,
+  "immunotherapy_endpoint": "POST /v1/immunotherapy/arbiter/score",
+  "immunotherapy_live": {
+    "bag": {
+      "http_status": 200,
+      "body": {
+        "specimen": "cart_infusion_bag",
+        "Bag_Index_1": 0.5516124652232999,
+        "Bag_Index_3": -0.4004107904839966,
+        "flag": null,
+        "model_state": "loaded"
+      }
+    },
+    "blood": {
+      "http_status": 200,
+      "intercept_standardized": -0.22167064750141413,
+      "probability": 0.6420115698079314
+    },
+    "ici_bulk": {
+      "http_status": 200,
+      "E_effector": 1.1872289279519324,
+      "S_stem_eff": 1.2509571364136252,
+      "S_triad": 0.37864643134714526
+    },
+    "bag_missing_422": true
+  },
+  "immunotherapy_published_contract_rows": {
+    "Bag_Index_3_Deng_literal_CD8_primary_CR": {
+      "path": "v12.tables.master_bag_indices[18]",
+      "gate": "literal_CD8",
+      "endpoint": "primary_CR",
+      "n": 23,
+      "auroc": 0.880952380952381,
+      "ci": [
+        0.704431818181818,
+        1.0
+      ],
+      "p": 0.002769577361818,
+      "q": 0.008307831178192,
+      "q_global_new_primary": 0.019071759187235,
+      "prose_rounding": "directive 0.881 [q=0.00831] matches this row",
+      "validation": "outcome-informed same-cohort exploratory"
+    },
+    "GSE290722_clinical_hobit_gnly": {
+      "path": "parent_v2.parent_v1.original_cart_contract.evaluation_receipt.metrics",
+      "n": 28,
+      "pooled_OOF_auroc": 0.782051282051282,
+      "within_fold_mean": 0.8233333333333335,
+      "brier": 0.19923577735356499,
+      "scope": "post-selection internal discovery; not external panel validation"
+    },
+    "Gide_E_effector_ZNF683_GNLY": {
+      "response_auroc_path": "parent_v2.parent_v1.external_response_evaluations[9]",
+      "cohort": "Gide_PRJEB23709 pretreatment",
+      "score": "ZNF683_GNLY_effector",
+      "n": 41,
+      "auroc": 0.8038277512,
+      "q": 0.0056528005,
+      "os_hr_path": "parent_v2.v11.tables.master_gide_survival[0]",
+      "os_hr": 0.369656981096761,
+      "os_wald_p": 0.002301604062677,
+      "os_wald_q_bh": 0.006674234534071,
+      "prose_rounding": "directive E_effector 0.804 [q=0.00565], OS HR 0.370 [q=0.00667]"
+    }
+  },
+  "tcga_01A_barcode_filter": {
+    "status": "ABSENT_IN_ARCHIVE_EXTRACT",
+    "searched": [
+      "ovarian_hibernation_v6_timevarying_and_specificity_lock/coverage/TCGA_OV_calibration.json",
+      "ovarian_hibernation_two_door_contract_v3.json (0 hits for -01A)"
+    ],
+    "honesty": "Do not fabricate TCGA -01A timestamps. Closed as unverified provenance, not proven."
+  }
+}

@@ -1,0 +1,12 @@
+---
+description: 72h clinical hardening pin for scientist-monai-moat
+alwaysApply: true
+---
+
+# 72h Clinical Hardening (moat)
+
+Load `.cursor/skills/oncology-72h-clinical-hardening/SKILL.md` when hardening for tumor-board pilot.
+
+**Supersession:** ClinicalBERT NER is not the primary pathology parser during the 72h window — MedGemma structured JSON is. Tissue product path → Phikon. Calc-only biopsy → HTTP 422.
+
+Cite `git branch` + `HEAD` + receipt `.json` paths before PASS language. No essay DONE.

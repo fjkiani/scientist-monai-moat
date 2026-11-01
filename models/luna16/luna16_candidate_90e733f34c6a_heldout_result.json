@@ -1,0 +1,25 @@
+{
+  "status": "ok",
+  "returncode": 0,
+  "request_id": "heldout-fjkiani-20261004T0722Z-zo",
+  "ckpt_request_id": "gateD-fjkiani-20261003T0435Z-zo",
+  "ckpt_sha256": "90e733f34c6a6806fff70f2847f07c061481a0465222dbd38e81045bf0283b0a",
+  "app_version": "luna16-fullfit-v0.1.2-empty-box-patch",
+  "elapsed_seconds": 907.602,
+  "n_test": 88,
+  "monai_run_key": "run",
+  "config_file": "['/tmp/heldout-fjkiani-20261004T0722Z-zo/bundle/configs/train.json','/tmp/heldout-fjkiani-20261004T0722Z-zo/bundle/configs/evaluate.json','/tmp/heldout-fjkiani-20261004T0722Z-zo/bundle/configs/evaluate_heldout_overlay.json']",
+  "artifacts": [
+    "/vol/output/fullfit-v0.1/heldout-fjkiani-20261004T0722Z-zo/heldout/eval/metrics.csv"
+  ],
+  "log_path": "/vol/output/fullfit-v0.1/heldout-fjkiani-20261004T0722Z-zo/heldout/evaluate.log",
+  "froc_at_2": null,
+  "refined": {},
+  "baseline": {
+    "returncode": 0,
+    "ckpt_sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01"
+  },
+  "delta": null,
+  "verdict": "UNPROVEN",
+  "verdict_note": "Held-out bundle evaluate completed; FROC parsed from log when present. +0.05 floor is reference only, not automatic promotion."
+}

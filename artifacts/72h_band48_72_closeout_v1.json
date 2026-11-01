@@ -1,0 +1,80 @@
+{
+  "status": "ok",
+  "band": "48-72",
+  "directive": "KILL_429_LOCK_12K_GHOST_DOCKER",
+  "git": {
+    "branch": "feat/ten-capability-delivery-20260928",
+    "head": "56ff5c919fba9c574673a02a299395ebf0c0ebc1"
+  },
+  "kaggle_loop": "terminated",
+  "mammo_scale_lock": {
+    "dataset_id": "rsna_theoviel_256_png_tree_12k",
+    "n_total": 12000,
+    "test_auc": 0.676880875702046,
+    "meets_10k_floor": true,
+    "joblib_sha256": "9aa35cc30c22b2dbf58d91e039c91e36c897d7364ccc5efc9d792f69ee3688b6",
+    "evaluation": "artifacts/rsna_mammo/probe_v2_12k/evaluation_v2.json"
+  },
+  "official_probe_secondary": {
+    "n": 826,
+    "test_auc": 0.6074137931034482,
+    "joblib_sha256": "f3c7ed59a264f6abc952425cf73a093db8d319e232f861f072945dcebbd1175d"
+  },
+  "ghost_trial": {
+    "source_ledger": "artifacts/ghost_trial/ledger_v5_n500_retried.json",
+    "source_summary": "artifacts/ghost_trial/ledger_v5_n500_summary.json",
+    "n_cases": 500,
+    "n_ok": 500,
+    "ok_rate": 1.0,
+    "elapsed_s_total": 6059.639,
+    "mean_wall_s_per_case": 12.119,
+    "workers": 4,
+    "modalities_exercised": [
+      "medgemma_pathology",
+      "stage_therapy",
+      "mammo_rsna",
+      "phikon_wsi"
+    ],
+    "modalities_absent": [
+      "luna16_ct"
+    ],
+    "stage_therapy": {
+      "n_ok": 500,
+      "n_total": 500,
+      "execution_ok_rate": 1.0,
+      "mean_wall_s_per_case_proxy": 12.119,
+      "risk_bucket_hist": {
+        "HIGH": 469,
+        "MID": 31
+      },
+      "note": "No per-call stage-arbiter latency field in ledger; mean wall = total_elapsed/n_cases under workers=4"
+    },
+    "clinical_concordance": {
+      "historical_tumor_board_agreement": null,
+      "historical_tumor_board_agreement_status": "NOT_IN_LEDGER",
+      "mammo_label_concordance_rate": 0.8937875751503006,
+      "mammo_label_concordance_n": 499,
+      "mammo_label_concordance_correct": 446,
+      "honesty": "Ledger has no historical treatment concordance field. Reported mammo p_cancer vs folder label_true agreement as available proxy. RUO \u2014 not clinical validation."
+    }
+  },
+  "docker_smoke_prior": "artifacts/sovereign_docker/smoke_72h_v1.json",
+  "ts": "2026-10-05T23:52:19.240022+00:00",
+  "disclaimer": "RUO. Ghost trial is harness execution receipt, not FDA clinical concordance vs historical tumor boards.",
+  "docker_smoke": {
+    "status": "ok",
+    "image": "crispro-oncology-ruo:72h",
+    "healthz": 200,
+    "ts": "2026-10-05T23:52:19.237206+00:00",
+    "script": "deploy/docker/smoke_sovereign.sh",
+    "log": "/tmp/sovereign_smoke_48_72.txt",
+    "dockerfile": "deploy/docker/Dockerfile.sovereign",
+    "mounts_tonight_delivery": true,
+    "note": "Band 48-72 re-smoke; mounts artifacts/tonight_delivery.json (10-cap delivery manifest)",
+    "raw": {
+      "status": "ok",
+      "image": "crispro-oncology-ruo:72h",
+      "healthz": 200
+    }
+  }
+}

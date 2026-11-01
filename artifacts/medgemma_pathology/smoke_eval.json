@@ -1,0 +1,193 @@
+{
+  "disclaimer": "RUO \u2014 MedGemma structured pathology extract eval",
+  "n_requested": 6,
+  "n_rows": 6,
+  "metrics": {
+    "er_status": {
+      "n": 6,
+      "accuracy": 1.0
+    },
+    "tumor_size_mm": {
+      "n": 5,
+      "accuracy": 0.0
+    },
+    "pr_status": {
+      "n": 5,
+      "accuracy": 1.0
+    },
+    "nottingham_grade": {
+      "n": 2,
+      "accuracy": 1.0
+    }
+  },
+  "rows": [
+    {
+      "sample_id": "TCGA242-C1-tcga1_1",
+      "status": "ok",
+      "gold": {
+        "er_status": "POSITIVE",
+        "pr_status": "UNKNOWN",
+        "her2_status": "UNKNOWN",
+        "nottingham_grade": null,
+        "tumor_size_mm": 17.0
+      },
+      "pred": {
+        "er_status": "POSITIVE",
+        "er_percent": null,
+        "pr_status": "UNKNOWN",
+        "her2_status": "NON_AMPLIFIED",
+        "nottingham_grade": null,
+        "tumor_size_mm": 2.5,
+        "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+      },
+      "field_match": {
+        "er_status": true,
+        "pr_status": null,
+        "her2_status": null,
+        "nottingham_grade": null,
+        "tumor_size_mm": false
+      },
+      "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
+    },
+    {
+      "sample_id": "TCGA242-C1-tcga1_24",
+      "status": "ok",
+      "gold": {
+        "er_status": "POSITIVE",
+        "pr_status": "NEGATIVE",
+        "her2_status": "UNKNOWN",
+        "nottingham_grade": null,
+        "tumor_size_mm": 35.0
+      },
+      "pred": {
+        "er_status": "POSITIVE",
+        "er_percent": null,
+        "pr_status": "NEGATIVE",
+        "her2_status": "NEGATIVE",
+        "nottingham_grade": 3,
+        "tumor_size_mm": 3.5,
+        "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+      },
+      "field_match": {
+        "er_status": true,
+        "pr_status": true,
+        "her2_status": null,
+        "nottingham_grade": null,
+        "tumor_size_mm": false
+      },
+      "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
+    },
+    {
+      "sample_id": "TCGA242-C1-tcga1_26",
+      "status": "ok",
+      "gold": {
+        "er_status": "NEGATIVE",
+        "pr_status": "NEGATIVE",
+        "her2_status": "UNKNOWN",
+        "nottingham_grade": 3,
+        "tumor_size_mm": 35.0
+      },
+      "pred": {
+        "er_status": "NEGATIVE",
+        "er_percent": null,
+        "pr_status": "NEGATIVE",
+        "her2_status": "NEGATIVE",
+        "nottingham_grade": 3,
+        "tumor_size_mm": 3.5,
+        "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+      },
+      "field_match": {
+        "er_status": true,
+        "pr_status": true,
+        "her2_status": null,
+        "nottingham_grade": true,
+        "tumor_size_mm": false
+      },
+      "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
+    },
+    {
+      "sample_id": "TCGA242-C1-tcga1_30",
+      "status": "ok",
+      "gold": {
+        "er_status": "POSITIVE",
+        "pr_status": "POSITIVE",
+        "her2_status": "UNKNOWN",
+        "nottingham_grade": null,
+        "tumor_size_mm": null
+      },
+      "pred": {
+        "er_status": "POSITIVE",
+        "er_percent": null,
+        "pr_status": "POSITIVE",
+        "her2_status": "2+",
+        "nottingham_grade": 2,
+        "tumor_size_mm": 3.0,
+        "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+      },
+      "field_match": {
+        "er_status": true,
+        "pr_status": true,
+        "her2_status": null,
+        "nottingham_grade": null,
+        "tumor_size_mm": null
+      },
+      "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
+    },
+    {
+      "sample_id": "TCGA242-C1-tcga1_34",
+      "status": "ok",
+      "gold": {
+        "er_status": "POSITIVE",
+        "pr_status": "NEGATIVE",
+        "her2_status": "UNKNOWN",
+        "nottingham_grade": null,
+        "tumor_size_mm": 20.0
+      },
+      "pred": {
+        "er_status": "POSITIVE",
+        "er_percent": null,
+        "pr_status": "NEGATIVE",
+        "her2_status": "NON_AMPLIFIED",
+        "nottingham_grade": 3,
+        "tumor_size_mm": 2.0,
+        "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+      },
+      "field_match": {
+        "er_status": true,
+        "pr_status": true,
+        "her2_status": null,
+        "nottingham_grade": null,
+        "tumor_size_mm": false
+      },
+      "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
+    },
+    {
+      "sample_id": "TCGA242-C1-tcga1_38",
+      "status": "ok",
+      "gold": {
+        "er_status": "POSITIVE",
+        "pr_status": "NEGATIVE",
+        "her2_status": "UNKNOWN",
+        "nottingham_grade": 2,
+        "tumor_size_mm": 19.0
+      },
+      "pred": {
+        "er_status": "POSITIVE",
+        "er_percent": null,
+        "pr_status": "NEGATIVE",
+        "her2_status": "NEGATIVE",
+        "nottingham_grade": 2,
+        "tumor_size_mm": 1.9,
+        "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+      },
+      "field_match": {
+        "er_status": true,
+        "pr_status": true,
+        "her2_status": null,
+        "nottingham_grade": true,
+        "tumor_size_mm": false
+      },
+      "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
+    }
+  ]
+}

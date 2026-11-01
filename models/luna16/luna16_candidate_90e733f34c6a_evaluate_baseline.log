@@ -1,0 +1,31 @@
+2026-10-04 07:30:20,730 - INFO - --- input summary of monai.bundle.scripts.run ---
+2026-10-04 07:30:20,730 - INFO - > config_file: ['/tmp/heldout-fjkiani-20261004T0722Z-zo/bundle/configs/train.json',
+ '/tmp/heldout-fjkiani-20261004T0722Z-zo/bundle/configs/evaluate.json',
+ '/tmp/heldout-fjkiani-20261004T0722Z-zo/bundle/configs/evaluate_heldout_overlay.json']
+2026-10-04 07:30:20,731 - INFO - > run_id: 'run'
+2026-10-04 07:30:20,731 - INFO - > bundle_root: '/tmp/heldout-fjkiani-20261004T0722Z-zo/bundle'
+2026-10-04 07:30:20,731 - INFO - > dataset_dir: '/vol/luna16/nifti_v3'
+2026-10-04 07:30:20,731 - INFO - > data_list_file_path: '/tmp/heldout-fjkiani-20261004T0722Z-zo/heldout_datalist.json'
+2026-10-04 07:30:20,732 - INFO - > ckpt_dir: '/vol/output/fullfit-v0.1/heldout-fjkiani-20261004T0722Z-zo/heldout/baseline_checkpoints'
+2026-10-04 07:30:20,732 - INFO - > output_dir: '/vol/output/fullfit-v0.1/heldout-fjkiani-20261004T0722Z-zo/heldout/eval'
+2026-10-04 07:30:20,732 - INFO - ---
+
+
+2026-10-04 07:30:20,733 - INFO - Setting logging properties based on config: /tmp/heldout-fjkiani-20261004T0722Z-zo/bundle/configs/logging.conf.
+2026-10-04 07:30:22,220 - root - INFO - Running ATSS Matching with num_candidates=4 and center_in_gt False.
+2026-10-04 07:30:22,221 - root - INFO - Sampling hard negatives on a per batch basis
+2026-10-04 07:30:22,249 - ignite.engine.engine.DetectionEvaluator - INFO - Engine run resuming from iteration 0, epoch 0 until 1 epochs
+/usr/local/lib/python3.10/site-packages/monai/handlers/checkpoint_loader.py:125: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  checkpoint = torch.load(self.load_path, map_location=self.map_location)
+2026-10-04 07:30:22,375 - ignite.engine.engine.DetectionEvaluator - INFO - Restored all variables from /vol/output/fullfit-v0.1/heldout-fjkiani-20261004T0722Z-zo/heldout/baseline_checkpoints/model.pt
+/usr/local/lib/python3.10/site-packages/monai/engines/evaluator.py:331: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with torch.cuda.amp.autocast(**engine.amp_kwargs):
+2026-10-04 07:37:27,627 - root - INFO - Start COCO metric computation...
+2026-10-04 07:37:27,631 - root - INFO - Statistics for COCO metrics finished (t=0.00s).
+2026-10-04 07:37:27,632 - root - INFO - COCO metrics computed in t=0.00s.
+/usr/local/lib/python3.10/site-packages/monai/engines/workflow.py:249: UserWarning: Key metric is not a scalar value, skip the metric comparison with the current best metric.Please set other metrics as the key metric, or change the `reduction` mode to 'mean'.
+  warnings.warn(
+2026-10-04 07:37:27,634 - INFO - Epoch[1] Metrics -- AP_IoU_0.10_MaxDet_100: 0.8007 AR_IoU_0.10_MaxDet_100: 1.0000 mAP_IoU_0.10_0.50_0.05_MaxDet_100: 0.7913 mAR_IoU_0.10_0.50_0.05_MaxDet_100: 0.9915 nodule_AP_IoU_0.10_MaxDet_100: 0.8007 nodule_AR_IoU_0.10_MaxDet_100: 1.0000 nodule_mAP_IoU_0.10_0.50_0.05_MaxDet_100: 0.7913 nodule_mAR_IoU_0.10_0.50_0.05_MaxDet_100: 0.9915 val_coco: {'mAP_IoU_0.10_0.50_0.05_MaxDet_100': 0.791273967366014, 'nodule_mAP_IoU_0.10_0.50_0.05_MaxDet_100': 0.791273967366014, 'AP_IoU_0.10_MaxDet_100': 0.8007495839997093, 'nodule_AP_IoU_0.10_MaxDet_100': 0.8007495839997093, 'mAR_IoU_0.10_0.50_0.05_MaxDet_100': 0.9915343920389811, 'nodule_mAR_IoU_0.10_0.50_0.05_MaxDet_100': 0.9915343920389811, 'AR_IoU_0.10_MaxDet_100': 1.0, 'nodule_AR_IoU_0.10_MaxDet_100': 1.0}
+2026-10-04 07:37:27,634 - INFO - Key metric: val_coco best value: -1 at epoch: -1
+2026-10-04 07:37:27,636 - ignite.engine.engine.DetectionEvaluator - INFO - Epoch[1] Complete. Time taken: 00:07:05.116
+2026-10-04 07:37:27,636 - ignite.engine.engine.DetectionEvaluator - INFO - Engine run complete. Time taken: 00:07:05.386

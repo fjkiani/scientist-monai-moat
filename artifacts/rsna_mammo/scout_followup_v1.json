@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "band": "24-48",
+  "source": "scout_0c5ed0a8 + CLEAR scaffold",
+  "competition": "rsna-breast-cancer-detection",
+  "blocker": {
+    "id": "KAGGLE_CREDENTIALS",
+    "status": "UNCLEAR_UNTIL_ALPHA",
+    "detail": "No ~/.kaggle/kaggle.json and kaggle package not installed on host.",
+    "clear_owner": "Alpha",
+    "clear_action": "Accept Kaggle competition rules; place kaggle.json; pip install kaggle"
+  },
+  "modal_volumes": {
+    "status": "created",
+    "profile": "fjkiani",
+    "names": ["rsna-mammo-png", "rsna-mammo-embeddings"],
+    "run": "https://modal.com/apps/fjkiani/main/ap-xn2fVMsRxCIZH6tChwfi2Y"
+  },
+  "present_reuse": {
+    "embed_generic": "scripts/embed_mammo_png_tree.py",
+    "prepare": "scripts/prepare_rsna_mammo_layout.py",
+    "modal_volumes": "deploy/modal/rsna_mammo_volume_app.py",
+    "cbis_embed_reference": "scripts/embed_cbis_ddsm.py",
+    "cbis_local_png": "data/cbis_ddsm/hf_png/CBIS-DDSM_1024"
+  },
+  "missing": ["RSNA images", "VinDr images", "Kaggle/S3 mounts"],
+  "next_exec_after_kaggle": [
+    "python3 scripts/prepare_rsna_mammo_layout.py --download",
+    "unzip + DICOM→PNG convert (limit-patients 500 first)",
+    "python3 scripts/prepare_rsna_mammo_layout.py --materialize --limit-patients 500",
+    "MODAL_PROFILE=fjkiani modal run deploy/modal/rsna_mammo_volume_app.py",
+    "MODAL_MEDSIGLIP_URL=... python3 scripts/embed_mammo_png_tree.py --root data/rsna_mammo/png_tree --out-dir artifacts/rsna_mammo/embeddings_v1 --dataset-id rsna_breast_cancer_detection --limit 256"
+  ]
+}

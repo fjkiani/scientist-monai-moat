@@ -1,0 +1,151 @@
+{
+  "status": "ok",
+  "app_version": "mammo-retinanet-cls-v1.1.0-frozen-backbone",
+  "mode": "retinanet_backbone_cls_frozen",
+  "backbone_frozen": true,
+  "optimizer_params": "head_only",
+  "weight_decay": 0.0001,
+  "val_frac": 0.05,
+  "dataset_root": "/vol/cbis/CBIS-DDSM_1024",
+  "dataset_note": "Full CBIS-DDSM_1024 HF-PNG pool on cbis-ddsm-hf-png (max available mammography PNGs).",
+  "epochs": 30,
+  "lr": 0.001,
+  "batch_size": 16,
+  "img_size": 384,
+  "n_train_pool": 2445,
+  "n_train_fit": 2323,
+  "n_validation": 122,
+  "n_test": 641,
+  "n_trainable_params": 66049,
+  "n_frozen_backbone_params": 31505472,
+  "val_auroc": 0.7723202170963365,
+  "test_auroc": 0.6827074500302847,
+  "meets_floor_0.85": false,
+  "artifact": "/vol/out/mammo_retinanet_v2_frozen/mammo_retinanet_v2_frozen.safetensors",
+  "artifact_sha256": "f1353f8ad2b8afb4d7676904da997c30c2a3606fd8f3071a14811d2c168e74e1",
+  "history": [
+    {
+      "epoch": 1,
+      "loss_mean": 0.7166549014310314
+    },
+    {
+      "epoch": 2,
+      "loss_mean": 0.6791168843230156
+    },
+    {
+      "epoch": 3,
+      "loss_mean": 0.678056099643446
+    },
+    {
+      "epoch": 4,
+      "loss_mean": 0.6667729295688133
+    },
+    {
+      "epoch": 5,
+      "loss_mean": 0.6712987051434713
+    },
+    {
+      "epoch": 6,
+      "loss_mean": 0.6618296638743518
+    },
+    {
+      "epoch": 7,
+      "loss_mean": 0.6627654241372462
+    },
+    {
+      "epoch": 8,
+      "loss_mean": 0.6580424227126657
+    },
+    {
+      "epoch": 9,
+      "loss_mean": 0.6565920673821071
+    },
+    {
+      "epoch": 10,
+      "loss_mean": 0.655020053256048
+    },
+    {
+      "epoch": 11,
+      "loss_mean": 0.6537091340104194
+    },
+    {
+      "epoch": 12,
+      "loss_mean": 0.6475021104290061
+    },
+    {
+      "epoch": 13,
+      "loss_mean": 0.6493363217131732
+    },
+    {
+      "epoch": 14,
+      "loss_mean": 0.6425134268117277
+    },
+    {
+      "epoch": 15,
+      "loss_mean": 0.6470925334381731
+    },
+    {
+      "epoch": 16,
+      "loss_mean": 0.6452891734773165
+    },
+    {
+      "epoch": 17,
+      "loss_mean": 0.6458795513600519
+    },
+    {
+      "epoch": 18,
+      "loss_mean": 0.6448078665831317
+    },
+    {
+      "epoch": 19,
+      "loss_mean": 0.6413756531395324
+    },
+    {
+      "epoch": 20,
+      "loss_mean": 0.6298656492200616
+    },
+    {
+      "epoch": 21,
+      "loss_mean": 0.6356030255556107
+    },
+    {
+      "epoch": 22,
+      "loss_mean": 0.6374762060299312
+    },
+    {
+      "epoch": 23,
+      "loss_mean": 0.6336645318628991
+    },
+    {
+      "epoch": 24,
+      "loss_mean": 0.6289536128305409
+    },
+    {
+      "epoch": 25,
+      "loss_mean": 0.6309291040652418
+    },
+    {
+      "epoch": 26,
+      "loss_mean": 0.6274053727927273
+    },
+    {
+      "epoch": 27,
+      "loss_mean": 0.6280528229393371
+    },
+    {
+      "epoch": 28,
+      "loss_mean": 0.6287265981305136
+    },
+    {
+      "epoch": 29,
+      "loss_mean": 0.6285721088108951
+    },
+    {
+      "epoch": 30,
+      "loss_mean": 0.6324213318628807
+    }
+  ],
+  "elapsed_seconds": 785.148,
+  "gpu_name": "NVIDIA A10",
+  "prior_unfrozen_test_auroc": 0.785453260650111
+}

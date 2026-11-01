@@ -1,0 +1,764 @@
+{
+  "capability": "luna16",
+  "dataset": "LUNA16 held-out Gate-D FROC evaluation cohort (88 scans)",
+  "samples": [
+    {
+      "patient_id": "LUNA-P-000",
+      "payload_sha256": "d464b06e6836e4f80dca522bcc0d92066fecac35fc7261e9098e4b1f23fb7d2c",
+      "sample_id": "luna16-heldout-000",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-001",
+      "payload_sha256": "d6bcfd764e2721516205406d704c927c1227677f00dc5c5e26ee9726e0ad22fa",
+      "sample_id": "luna16-heldout-001",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-002",
+      "payload_sha256": "8fd1f2ad11a772b2090343decaaa9f5388497ea2fe2caff1193d4c85e30ee90b",
+      "sample_id": "luna16-heldout-002",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-003",
+      "payload_sha256": "14bbe0ba773a5515bdd15378813bb648157aba1dfe1d9afbc81361686f61e2ed",
+      "sample_id": "luna16-heldout-003",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-004",
+      "payload_sha256": "5bf6667814529921634b287254728e17be742576d12c29a3c5e1e5f3efdd0ed9",
+      "sample_id": "luna16-heldout-004",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-005",
+      "payload_sha256": "4a8230cae7d10a6807ed5784d72fba15910c920b6564e0837a146c77e2e5a010",
+      "sample_id": "luna16-heldout-005",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-006",
+      "payload_sha256": "1386cae2857f4cfccdf7d243910ee700ef740074ebb270f15922ebec4db5d880",
+      "sample_id": "luna16-heldout-006",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-007",
+      "payload_sha256": "069c5cebec8aadf83d43fbb4a1af07fe9daea989d6c20191e7e4839cb4c7e611",
+      "sample_id": "luna16-heldout-007",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-008",
+      "payload_sha256": "55424913c9f90ebf182fb26126b023815d45f7d3e69faede1d23c1c845ce60ea",
+      "sample_id": "luna16-heldout-008",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-009",
+      "payload_sha256": "ac9eb1c28b3a0a3ba6953346576c7a917c6e905d823ea7fd3ea20c03e43224b8",
+      "sample_id": "luna16-heldout-009",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-010",
+      "payload_sha256": "ed7d4ad4fbbfe24d11f7f2701c34c092bfa6ffcbca72d255232e999cda70ae5f",
+      "sample_id": "luna16-heldout-010",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-011",
+      "payload_sha256": "999e8574ca45ad834234caa0a2ba17af2b38aab5b15de5314eb0fd3c0bc80373",
+      "sample_id": "luna16-heldout-011",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-012",
+      "payload_sha256": "218af5708e4a53458e9ea1d7d0a2660757f6de4c04329000aed3aecb1750add6",
+      "sample_id": "luna16-heldout-012",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-013",
+      "payload_sha256": "2d0b1277aac1d30d89bd9dc0e71cec4521c1a5a4c67daa1a5e6c48ebb1020ce7",
+      "sample_id": "luna16-heldout-013",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-014",
+      "payload_sha256": "3cd1d1c8aadb92d8132ad70c9864ee3bbc4c35b941453f6a8c900d1f0f2d291a",
+      "sample_id": "luna16-heldout-014",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-015",
+      "payload_sha256": "1c8fcf6c30a8c26eef098d41d07cf21d4e03f5fd9c9425acd9315f5b0a777b0a",
+      "sample_id": "luna16-heldout-015",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-016",
+      "payload_sha256": "6c2057e2f87ee786acf5a51f54c345c3237d550cd71dbb329c4d7feb9c53df17",
+      "sample_id": "luna16-heldout-016",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-017",
+      "payload_sha256": "18d3ad0dc6b3d7b0239cbf644a1615c4a1927efb54abf98d5b6954f5715824f1",
+      "sample_id": "luna16-heldout-017",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-018",
+      "payload_sha256": "8e38fe5bd6a24f9a06ed9944881245ccefcd0c53d082fea6eb82d2539f5edbc8",
+      "sample_id": "luna16-heldout-018",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-019",
+      "payload_sha256": "52f29ff122c258cfc93d06ae14ba1abab3a4a623f260f5e4aa1627f06e8912a3",
+      "sample_id": "luna16-heldout-019",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-020",
+      "payload_sha256": "873d5044fae405ed900a5c240b6e58cfb1d91a4293b740efd3bb8a489899f7a9",
+      "sample_id": "luna16-heldout-020",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-021",
+      "payload_sha256": "a77f234e8e53de3a14dae45332c2693232ceb90cb0f87a4c35b309b2bb2a2bdb",
+      "sample_id": "luna16-heldout-021",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-022",
+      "payload_sha256": "2752d044153627a719931e83685570496497a48d268daac4fad16df59f81267b",
+      "sample_id": "luna16-heldout-022",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-023",
+      "payload_sha256": "aea0d4708238f42480446dc3cedaa61927176654b3925660e48f6c37d5372fc2",
+      "sample_id": "luna16-heldout-023",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-024",
+      "payload_sha256": "5b7b450eb489fa80d48ccfcd1dd4d2ae1339757520968e4b7bc67f951cf06f40",
+      "sample_id": "luna16-heldout-024",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-025",
+      "payload_sha256": "d1f5bdf669fd702e88739b4c93f0064db9744df53e0074662f0a7fd5afe9beb2",
+      "sample_id": "luna16-heldout-025",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-026",
+      "payload_sha256": "ccf3ddc4454e174500a0e75379f1921b5f75d9ab08d611440f3be3eab4aad655",
+      "sample_id": "luna16-heldout-026",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-027",
+      "payload_sha256": "465598e9abb0b155374b776d73d8b7d3c5398eb33e17769816b184772b0c6c84",
+      "sample_id": "luna16-heldout-027",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-028",
+      "payload_sha256": "4ac056d8de85866f829885db76f38aeb703915731e44d9df574009a1b1362362",
+      "sample_id": "luna16-heldout-028",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-029",
+      "payload_sha256": "a325e0268d43f52f329415d925681d1f93644c181666d189b42618f3b07b36aa",
+      "sample_id": "luna16-heldout-029",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-030",
+      "payload_sha256": "322ae678afc8bee80d262e2bf1d79267ffc4bf94a86e655434d66cded7f61c79",
+      "sample_id": "luna16-heldout-030",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-031",
+      "payload_sha256": "a7d7bb16390a374844721572cc8920b519481cf1fcdbc445e421ca2915376fd1",
+      "sample_id": "luna16-heldout-031",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-032",
+      "payload_sha256": "1e21290da8058fb43a5712f55d4c09c4c11697af3754ade4109e53697799e2d0",
+      "sample_id": "luna16-heldout-032",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-033",
+      "payload_sha256": "cae924e7d2c72565e1cc84c089d072b966db4e1b85ee17f25deb07b6fffcbada",
+      "sample_id": "luna16-heldout-033",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-034",
+      "payload_sha256": "53e842cc401eaff3f463ef2963bdaa1e1a2633becf7c560b896d27928a7eaf64",
+      "sample_id": "luna16-heldout-034",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-035",
+      "payload_sha256": "4b8d4586d7a49c6881f625ec9e2fb6aec91979204c07d86be8314aff222f36cb",
+      "sample_id": "luna16-heldout-035",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-036",
+      "payload_sha256": "9e80e04ca42a5d3f841dbeb804d21756566d9835971a6eddbe858d514da29d61",
+      "sample_id": "luna16-heldout-036",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-037",
+      "payload_sha256": "eb64acc738d9365c6092869c92776585ef076abf345ed1d2da02e829a3588589",
+      "sample_id": "luna16-heldout-037",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-038",
+      "payload_sha256": "b32dc563b44f847a52bce89009a7b6e48538122df2704adf8ff92254b4bc88b5",
+      "sample_id": "luna16-heldout-038",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-039",
+      "payload_sha256": "2f40fb774a1e6c471d155276012d5a63d8612f2883ef62cee90aced7e446b82c",
+      "sample_id": "luna16-heldout-039",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-040",
+      "payload_sha256": "5c2bb3f7ccdf08c2a4b56d0cfb819f8aaeb331e7bbf4c4097b01997d792ffbf0",
+      "sample_id": "luna16-heldout-040",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-041",
+      "payload_sha256": "cc021a85ea7848adf72d7d76071111c69ecb6ae681cf944e2c1c290906e5de20",
+      "sample_id": "luna16-heldout-041",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-042",
+      "payload_sha256": "a387afa3bef83afe6268aa620aeca1c245a8b9ac54e9e22de032e4b9dfe174c1",
+      "sample_id": "luna16-heldout-042",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-043",
+      "payload_sha256": "d51f37e623b61df36045b80c20a8ca169e1560999ede8e4d2a4cd1ef69c16d67",
+      "sample_id": "luna16-heldout-043",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-044",
+      "payload_sha256": "9df15b078f44f263ffef140a28c969461736e7ddf019ab2c275dd05170d8b1bb",
+      "sample_id": "luna16-heldout-044",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-045",
+      "payload_sha256": "43d6e80d353125cc87023b62973edbd2a6dbdbee2b89014aad2d54fe8b4acb84",
+      "sample_id": "luna16-heldout-045",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-046",
+      "payload_sha256": "c498e87886e8bc2a95e1ac8a36052de1baa38031b0b5729ff5632a0495bc38ec",
+      "sample_id": "luna16-heldout-046",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-047",
+      "payload_sha256": "f9c040e481564606bacdc4f2098ccbe674564d37337e8c6e3d213a9060576dc0",
+      "sample_id": "luna16-heldout-047",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-048",
+      "payload_sha256": "ebfac5b50dc02d293e527cb37a376a0168e9e3bc0075f75e6b39c6879dacb34c",
+      "sample_id": "luna16-heldout-048",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-049",
+      "payload_sha256": "de76f48039dda9d323967cc49e9ff90aacff7189dd30bba40dcac46ede0a62d2",
+      "sample_id": "luna16-heldout-049",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-050",
+      "payload_sha256": "989332516147b37c06f8927c0fff05619d7bffb5162b19f3fb8558ea1864c576",
+      "sample_id": "luna16-heldout-050",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-051",
+      "payload_sha256": "ddb70541538be9f7e0aa669ef65e9b7edb71aef25436b8035ef2fd404bf84967",
+      "sample_id": "luna16-heldout-051",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-052",
+      "payload_sha256": "90016cd23742783f3095ec2fc6f1296983e30e6b7e1e7d82c89b98c4b87c15f0",
+      "sample_id": "luna16-heldout-052",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-053",
+      "payload_sha256": "bce612125f8ba51deb0737a9597ed78a74429f3a91af388bb31831668fa1c927",
+      "sample_id": "luna16-heldout-053",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-054",
+      "payload_sha256": "1df5a216ae939a9f2815ecde243966e4d2a07c819839af34ab0f6577b3f3b43b",
+      "sample_id": "luna16-heldout-054",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-055",
+      "payload_sha256": "16391f5ca16b51546a5e0037b4b4d28615e99d47748f50e44fff4cc7aec19378",
+      "sample_id": "luna16-heldout-055",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-056",
+      "payload_sha256": "1f5a446fea7fa3a42048c6bb9f92b1e3f81695086ee04faf99546553aa130029",
+      "sample_id": "luna16-heldout-056",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-057",
+      "payload_sha256": "168500df4e6350ba41fccd52a3301398f996616d91966e8b7751c1ec3f56538b",
+      "sample_id": "luna16-heldout-057",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-058",
+      "payload_sha256": "74ccaeaaf9186e1cc99a9b378ead9d02f217957368a4de62c140487720328856",
+      "sample_id": "luna16-heldout-058",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-059",
+      "payload_sha256": "e408c10c99386775feb6c230f3a6bde3a0a08034af3c5718cb87f9858fbf1d3f",
+      "sample_id": "luna16-heldout-059",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-060",
+      "payload_sha256": "d6b319298c2f55ef4d5f177355a380139c3a12db9ec1e0a2cad6c1249ec18111",
+      "sample_id": "luna16-heldout-060",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-061",
+      "payload_sha256": "50f8d42c1033b9878758bb45e3e6e462b01c97c4f86f55d8ccca51688f00faa6",
+      "sample_id": "luna16-heldout-061",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-062",
+      "payload_sha256": "428521232b705d88d303ba1053838501ab1847162e0c53cd3a11a79c26439df2",
+      "sample_id": "luna16-heldout-062",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-063",
+      "payload_sha256": "8078e78a5443d4541395bf5d08b5266c87c3d3b2b3260ffabfadf0c503c93e75",
+      "sample_id": "luna16-heldout-063",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-064",
+      "payload_sha256": "f12a7c122d8e81216992e789c40d831713c61c0b72959c8b41ecbeba139bb158",
+      "sample_id": "luna16-heldout-064",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-065",
+      "payload_sha256": "501b9cede69db0e44212d76e17fa40e185ab095cb14270601a9e0f1ee60e5490",
+      "sample_id": "luna16-heldout-065",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-066",
+      "payload_sha256": "bfed2cd996c952d9a0cf3006019f1a5b853f174dfaaa823becaeed685f1dbfaf",
+      "sample_id": "luna16-heldout-066",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-067",
+      "payload_sha256": "3410c20f19be7e868f5505e67b8eb449b9e67f19720f044133c10587dc9ed44f",
+      "sample_id": "luna16-heldout-067",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-068",
+      "payload_sha256": "d50b41ea1e0d17c4267c174bb322c7d1c7db28d6d5250fe7f8b706f937548585",
+      "sample_id": "luna16-heldout-068",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-069",
+      "payload_sha256": "11f37f363d3e7f63356b828150ed273c8cbb43a688cce225c15a67f579f860c1",
+      "sample_id": "luna16-heldout-069",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-070",
+      "payload_sha256": "0a34709dfb36251c98f33603548b5007f6a9e6b51c577291149124917a4f72b4",
+      "sample_id": "luna16-heldout-070",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-071",
+      "payload_sha256": "83621f87eb7ec9648e07b0c150cdd0c2605661b09356cb1cab0e7a66b4406247",
+      "sample_id": "luna16-heldout-071",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-072",
+      "payload_sha256": "028bdb29aa08d8f60b4a164dbd1cf2bcc92d760a3f002e79b860268723733f17",
+      "sample_id": "luna16-heldout-072",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-073",
+      "payload_sha256": "06408bcc14b236ec9b9a06374975d2aab724baa8cf8aaea292d4f1859100420a",
+      "sample_id": "luna16-heldout-073",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-074",
+      "payload_sha256": "c5090ad3eb530cf450e856d64d68f161fc4137a6711c7c74ab715bdf6d47c341",
+      "sample_id": "luna16-heldout-074",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-075",
+      "payload_sha256": "f924d30846790d0118c15becdf132ed405b0b51ac9a902772a8f35246cf5fc03",
+      "sample_id": "luna16-heldout-075",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-076",
+      "payload_sha256": "0d5c4399e5b20d4977a0314ccaa2a605f25cd30c788275755a7e81d0b6395550",
+      "sample_id": "luna16-heldout-076",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-077",
+      "payload_sha256": "2689e0a2ceec463d8cdfddb554150c323daecb0fe6324246df7073f1b88eff07",
+      "sample_id": "luna16-heldout-077",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-078",
+      "payload_sha256": "944c718ff33955caabb3fc6d1cf09971577314d0f4c22889f48b00c27043f4eb",
+      "sample_id": "luna16-heldout-078",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-079",
+      "payload_sha256": "930cea09ae93230555c01065527946584dee81de9250997bd4e76e6816e1d18f",
+      "sample_id": "luna16-heldout-079",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-080",
+      "payload_sha256": "5841891e56b59bf39b554685de3ff869900b39332deb4cfd6d2c0d4ffe6e4dfe",
+      "sample_id": "luna16-heldout-080",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-081",
+      "payload_sha256": "53004c951e5cd6a9c7b5261000914736d8cb4de125cfd2b6e0c52fde9a9aaed0",
+      "sample_id": "luna16-heldout-081",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-082",
+      "payload_sha256": "04921d1a189b2306b9af686af848fa3940de324486b4c31168e6bd81a2769915",
+      "sample_id": "luna16-heldout-082",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-083",
+      "payload_sha256": "a2697f3f352b65753a72978f55c98bacddebfa0204a3eef016b08b932a0d69ee",
+      "sample_id": "luna16-heldout-083",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-084",
+      "payload_sha256": "023a2c607a388746c0bf5a5af8ae6026f9f4192abfca4878ed0e843d5108d9c2",
+      "sample_id": "luna16-heldout-084",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-085",
+      "payload_sha256": "fd45c6c4a76c2f9c736db99b7668a4853ccfa662b3d5d2e2ede82e8f5266a7d2",
+      "sample_id": "luna16-heldout-085",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-086",
+      "payload_sha256": "68195e82b38f68148a15e77fad110d8f287089d2d508a87e8173b22dd98d8645",
+      "sample_id": "luna16-heldout-086",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-087",
+      "payload_sha256": "2a61cbb85d7faf148ed6b3d4ac36ed10d129dcdaf828ec13ae605eca01e7bcc7",
+      "sample_id": "luna16-heldout-087",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "patient_id": "LUNA-P-088",
+      "payload_sha256": "4fc60da9e2dffdbf7293d2c30f9bf9988598262f3cc78fb9f59da9623489e701",
+      "sample_id": "luna16-heldout-088",
+      "target": 0,
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    {
+      "patient_id": "LUNA-P-089",
+      "payload_sha256": "8b211ca563125b923e1c702895fc756d9a316eb438fa9ddce8ebb83698030ef5",
+      "sample_id": "luna16-heldout-089",
+      "target": 0,
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    {
+      "patient_id": "LUNA-P-090",
+      "payload_sha256": "e57150d6bba61e7aa4707078b66c75d0a9f52ee84de9f2c6e9aa939e382a330c",
+      "sample_id": "luna16-heldout-090",
+      "target": 0,
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    {
+      "patient_id": "LUNA-P-091",
+      "payload_sha256": "da32ddbf82d2026c7395b1e939d7772cddc893559063541f4c1edfbc32d3922d",
+      "sample_id": "luna16-heldout-091",
+      "target": 0,
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    {
+      "patient_id": "LUNA-P-092",
+      "payload_sha256": "281b9486f1796172dcc144ffc0ebf0b1d792d037e123ff382c9ef1f4d6d91a4c",
+      "sample_id": "luna16-heldout-092",
+      "target": 0,
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    {
+      "patient_id": "LUNA-P-093",
+      "payload_sha256": "664f599864f611f7313aa634297a54621b66d8e214cadcba6b049df49f81fbca",
+      "sample_id": "luna16-heldout-093",
+      "target": 0,
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    {
+      "patient_id": "LUNA-P-094",
+      "payload_sha256": "1053dceaa0c30903cf64c8bb620ad0fe512f06fe67dc29a7f475227a3fab4952",
+      "sample_id": "luna16-heldout-094",
+      "target": 0,
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    {
+      "patient_id": "LUNA-P-095",
+      "payload_sha256": "fa923b7258e3023b28082d6b1f262e231af00c1c631f981fa5aeff4f492b02cc",
+      "sample_id": "luna16-heldout-095",
+      "target": 0,
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    {
+      "patient_id": "LUNA-P-096",
+      "payload_sha256": "bbba27e93981a81c1ac9eac733bed2c74f10e5f5fab7a93caa83b6c953e7b976",
+      "sample_id": "luna16-heldout-096",
+      "target": 0,
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    {
+      "patient_id": "LUNA-P-097",
+      "payload_sha256": "dbf7d475c163a71382ac99e5e54095cbe32856d1fac0e49c1d341a3f2066296d",
+      "sample_id": "luna16-heldout-097",
+      "target": 0,
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    {
+      "patient_id": "LUNA-P-098",
+      "payload_sha256": "799990d2594f70c584c91b9b2c2d3eb7796b785611ee7f2409e8f14dc3474590",
+      "sample_id": "luna16-heldout-098",
+      "target": 0,
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    {
+      "patient_id": "LUNA-P-099",
+      "payload_sha256": "951fe94d0240847cd5433d4f436524d402830acb68b03c3ee5d88738fceb6d9a",
+      "sample_id": "luna16-heldout-099",
+      "target": 0,
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    {
+      "patient_id": "LUNA-P-100",
+      "payload_sha256": "af393a06b30f10305c0871e7eaa30b1e70e824da9909d20238dd35a98d8c188c",
+      "sample_id": "luna16-heldout-100",
+      "target": 0,
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    {
+      "patient_id": "LUNA-P-101",
+      "payload_sha256": "b40fb756cd142cd002aec22e39ba05426ef955e3261807cb9ae764e4c96657c1",
+      "sample_id": "luna16-heldout-101",
+      "target": 0,
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    {
+      "patient_id": "LUNA-P-102",
+      "payload_sha256": "f5a7e8c23c5247b0029d129afb27745ad25f46c29b90ad875a1364fbe420f163",
+      "sample_id": "luna16-heldout-102",
+      "target": 0,
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    {
+      "patient_id": "LUNA-P-103",
+      "payload_sha256": "0f03e474b5cc6407d7370b590ab59b18947c47b15569b763341b618dc2f89ca6",
+      "sample_id": "luna16-heldout-103",
+      "target": 0,
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    {
+      "patient_id": "LUNA-P-104",
+      "payload_sha256": "2a1bd6b302a98cc6cd28dfb9cd870749c1773b0a686f87becac6b1238ee07ee8",
+      "sample_id": "luna16-heldout-104",
+      "target": 0,
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    {
+      "patient_id": "LUNA-P-105",
+      "payload_sha256": "d2ce752f3215300724e2ee68ac1d55bea17b51a4958d2f42dbbf7f1cd509826c",
+      "sample_id": "luna16-heldout-105",
+      "target": 0,
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    {
+      "patient_id": "LUNA-P-106",
+      "payload_sha256": "ba36766df668aff4c68cf15e388e58c91c7ba494320ce6bcd68b2255a95e84cd",
+      "sample_id": "luna16-heldout-106",
+      "target": 0,
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    {
+      "patient_id": "LUNA-P-107",
+      "payload_sha256": "1a6fb8621887853b6315db22de6d1bd04bb9dad9a47ffd2c853aae7f1d1897ad",
+      "sample_id": "luna16-heldout-107",
+      "target": 0,
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    }
+  ],
+  "schema_version": 2,
+  "source_uri": "https://luna16.grand-challenge.org/"
+}

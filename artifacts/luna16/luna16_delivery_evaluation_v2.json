@@ -1,0 +1,638 @@
+{
+  "artifact_sha256": "a1cf3fadf3bebcf14d405c75799acf9e045f13e41370f1d83368900662d4ed24",
+  "baseline_rollback_sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01",
+  "capability": "luna16",
+  "dataset_sha256": "8de45f5201c740aaf65128e78300289815db4aceb75b13770f623ea3afa4290b",
+  "froc_receipt_path": "models/luna16/luna16_candidate_90e733f34c6a_froc_result.json",
+  "honesty": {
+    "froc_at_2_baseline": 0.8267399271674979,
+    "froc_at_2_refined": 0.0,
+    "meets_floor_ref_0.05": false,
+    "status_intent": "retained_research_artifact"
+  },
+  "metric": {
+    "n": 88,
+    "name": "delta_froc_at_2",
+    "value": -0.8267399271674979
+  },
+  "rows": [
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-000",
+      "sample_id": "luna16-heldout-000",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-001",
+      "sample_id": "luna16-heldout-001",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-002",
+      "sample_id": "luna16-heldout-002",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-003",
+      "sample_id": "luna16-heldout-003",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-004",
+      "sample_id": "luna16-heldout-004",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-005",
+      "sample_id": "luna16-heldout-005",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-006",
+      "sample_id": "luna16-heldout-006",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-007",
+      "sample_id": "luna16-heldout-007",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-008",
+      "sample_id": "luna16-heldout-008",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-009",
+      "sample_id": "luna16-heldout-009",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-010",
+      "sample_id": "luna16-heldout-010",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-011",
+      "sample_id": "luna16-heldout-011",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-012",
+      "sample_id": "luna16-heldout-012",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-013",
+      "sample_id": "luna16-heldout-013",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-014",
+      "sample_id": "luna16-heldout-014",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-015",
+      "sample_id": "luna16-heldout-015",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-016",
+      "sample_id": "luna16-heldout-016",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-017",
+      "sample_id": "luna16-heldout-017",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-018",
+      "sample_id": "luna16-heldout-018",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-019",
+      "sample_id": "luna16-heldout-019",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-020",
+      "sample_id": "luna16-heldout-020",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-021",
+      "sample_id": "luna16-heldout-021",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-022",
+      "sample_id": "luna16-heldout-022",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-023",
+      "sample_id": "luna16-heldout-023",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-024",
+      "sample_id": "luna16-heldout-024",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-025",
+      "sample_id": "luna16-heldout-025",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-026",
+      "sample_id": "luna16-heldout-026",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-027",
+      "sample_id": "luna16-heldout-027",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-028",
+      "sample_id": "luna16-heldout-028",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-029",
+      "sample_id": "luna16-heldout-029",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-030",
+      "sample_id": "luna16-heldout-030",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-031",
+      "sample_id": "luna16-heldout-031",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-032",
+      "sample_id": "luna16-heldout-032",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-033",
+      "sample_id": "luna16-heldout-033",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-034",
+      "sample_id": "luna16-heldout-034",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-035",
+      "sample_id": "luna16-heldout-035",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-036",
+      "sample_id": "luna16-heldout-036",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-037",
+      "sample_id": "luna16-heldout-037",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-038",
+      "sample_id": "luna16-heldout-038",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-039",
+      "sample_id": "luna16-heldout-039",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-040",
+      "sample_id": "luna16-heldout-040",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-041",
+      "sample_id": "luna16-heldout-041",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-042",
+      "sample_id": "luna16-heldout-042",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-043",
+      "sample_id": "luna16-heldout-043",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-044",
+      "sample_id": "luna16-heldout-044",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-045",
+      "sample_id": "luna16-heldout-045",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-046",
+      "sample_id": "luna16-heldout-046",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-047",
+      "sample_id": "luna16-heldout-047",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-048",
+      "sample_id": "luna16-heldout-048",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-049",
+      "sample_id": "luna16-heldout-049",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-050",
+      "sample_id": "luna16-heldout-050",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-051",
+      "sample_id": "luna16-heldout-051",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-052",
+      "sample_id": "luna16-heldout-052",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-053",
+      "sample_id": "luna16-heldout-053",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-054",
+      "sample_id": "luna16-heldout-054",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-055",
+      "sample_id": "luna16-heldout-055",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-056",
+      "sample_id": "luna16-heldout-056",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-057",
+      "sample_id": "luna16-heldout-057",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-058",
+      "sample_id": "luna16-heldout-058",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-059",
+      "sample_id": "luna16-heldout-059",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-060",
+      "sample_id": "luna16-heldout-060",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-061",
+      "sample_id": "luna16-heldout-061",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-062",
+      "sample_id": "luna16-heldout-062",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-063",
+      "sample_id": "luna16-heldout-063",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-064",
+      "sample_id": "luna16-heldout-064",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-065",
+      "sample_id": "luna16-heldout-065",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-066",
+      "sample_id": "luna16-heldout-066",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-067",
+      "sample_id": "luna16-heldout-067",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-068",
+      "sample_id": "luna16-heldout-068",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-069",
+      "sample_id": "luna16-heldout-069",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-070",
+      "sample_id": "luna16-heldout-070",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-071",
+      "sample_id": "luna16-heldout-071",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-072",
+      "sample_id": "luna16-heldout-072",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-073",
+      "sample_id": "luna16-heldout-073",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-074",
+      "sample_id": "luna16-heldout-074",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-075",
+      "sample_id": "luna16-heldout-075",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-076",
+      "sample_id": "luna16-heldout-076",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-077",
+      "sample_id": "luna16-heldout-077",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-078",
+      "sample_id": "luna16-heldout-078",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-079",
+      "sample_id": "luna16-heldout-079",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-080",
+      "sample_id": "luna16-heldout-080",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-081",
+      "sample_id": "luna16-heldout-081",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-082",
+      "sample_id": "luna16-heldout-082",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-083",
+      "sample_id": "luna16-heldout-083",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-084",
+      "sample_id": "luna16-heldout-084",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-085",
+      "sample_id": "luna16-heldout-085",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-086",
+      "sample_id": "luna16-heldout-086",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "baseline_sensitivity": 0.8267399271674979,
+      "candidate_sensitivity": 0.0,
+      "patient_id": "LUNA-P-087",
+      "sample_id": "luna16-heldout-087",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    }
+  ],
+  "schema_version": 2,
+  "split_sha256": "5260203f4c1f13f863ecebc19058db5308a860215da2a31132817c9a623b813a"
+}

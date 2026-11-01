@@ -1,0 +1,10 @@
+{
+  "status": "ok",
+  "n": 560,
+  "dim": 1152,
+  "n_pos": 32,
+  "embeddings_sha256": "6d978a8269dc568826141a5456a0ccf155a2f59a02156ec8faffb9df094c8979",
+  "dataset_id": "vindr_birads_png_sample_560",
+  "backbone": "MedSigLIP-1152",
+  "band": "24-48"
+}

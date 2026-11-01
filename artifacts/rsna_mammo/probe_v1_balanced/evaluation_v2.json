@@ -1,0 +1,34 @@
+{
+  "status": "ok",
+  "dataset_id": "rsna_theoviel_256_balanced_full",
+  "n_total": 1482,
+  "n_train": 1185,
+  "n_test": 297,
+  "n_pos_total": 247,
+  "embedding_dim": 1152,
+  "cv_auc_mean": 0.6119185082636859,
+  "cv_auc_std": 0.04461128192264962,
+  "cv_pr_mean": 0.2545394524599235,
+  "test_auc": 0.7092659644502962,
+  "test_prauc": 0.34189837796012984,
+  "test_acc": 0.7441077441077442,
+  "test_f1": 0.3448275862068966,
+  "confusion_matrix": [
+    [
+      201,
+      47
+    ],
+    [
+      29,
+      20
+    ]
+  ],
+  "joblib": "artifacts/rsna_mammo/probe_v1_balanced/rsna_medsiglip_logreg_v1.joblib",
+  "joblib_sha256": "eb1a865ae071ec07029740aa3b8b930c81e7ae13549fec7a50871b55c11daaac",
+  "backbone": "MedSigLIP-1152",
+  "split": "stratified_holdout_20pct_seed42",
+  "class_weight": "balanced",
+  "wall_s": 63.16,
+  "band": "24-48",
+  "note": "beyond CBIS toy; RSNA theoviel 256 PNG balanced cancer+neg"
+}

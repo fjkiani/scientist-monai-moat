@@ -1,0 +1,44 @@
+{
+  "seed": 20260927,
+  "n_bootstrap_replicates": 1000,
+  "official_fp_per_scan_points": [
+    0.125,
+    0.25,
+    0.5,
+    1,
+    2,
+    4,
+    8
+  ],
+  "per_point_sensitivity_bootstrap_mean": [
+    0.4447977865636349,
+    0.47010525184869767,
+    0.49706059649586676,
+    0.5745518811941147,
+    0.6136274812306677,
+    0.6559528601510181,
+    0.7269685792028904
+  ],
+  "per_point_sensitivity_95ci_lower": [
+    0.3147569358348846,
+    0.3333333432674408,
+    0.3570684604346752,
+    0.43103447556495667,
+    0.4753666952252388,
+    0.5124652668833732,
+    0.59375
+  ],
+  "per_point_sensitivity_95ci_upper": [
+    0.5862069129943848,
+    0.6078644722700118,
+    0.6479182362556457,
+    0.7250122785568237,
+    0.7586366444826126,
+    0.7924528121948242,
+    0.8451301023364066
+  ],
+  "cpm_bootstrap_mean": 0.5690092052409843,
+  "cpm_95ci_lower_joint": 0.44940475480897085,
+  "cpm_95ci_upper_joint": 0.6948052048683167,
+  "method": "Joint bootstrap: for each of n_bootstrap_replicates case-level resamples of the *same* underlying vendored FROC bootstrap (np.random seed fixed before the run), evaluate the interpolated FROC curve at all 7 official FP/scan points, average those 7 values within the replicate, then take the 2.5th/97.5th percentile ACROSS replicates of that per-replicate average. This differs from (and is more correct than) averaging the 7 independently-computed marginal per-point CIs, because all 7 points on a given replicate are driven by the same resampled cases and are therefore highly correlated."
+}

@@ -1,0 +1,12 @@
+{
+  "status": "ok",
+  "n_png": 560,
+  "train_cancer": 26,
+  "train_not_cancer": 448,
+  "test_cancer": 6,
+  "test_not_cancer": 80,
+  "label_rule": "BI-RADS 4/5=cancer; 1/2=not_cancer",
+  "source": "Modal volume rsna-mammo-png:/vindr_png_tree",
+  "band": "24-48",
+  "ts": "2026-10-05T04:57:59Z"
+}

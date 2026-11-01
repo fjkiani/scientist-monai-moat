@@ -1,0 +1,138 @@
+{
+  "templates": {
+    "screening_arbiter_template_v0": {
+      "sha256_before": "33b9ba3a6cc7f38eba52ad6eb5cc741ef15f5467373246dff0695d0ec95f82ac",
+      "intercept": -2.0,
+      "intercept_only_base_rate": 0.11920292202211755,
+      "boolean_features": {
+        "prior_biopsy_history": 0.6,
+        "family_history_first_degree": 0.5,
+        "brca_status_known_pathogenic": 1.2
+      },
+      "sum_boolean_coefficients": 2.3,
+      "encodings": {
+        "midpoint_0.5": {
+          "encoding_value": 0.5,
+          "injected_log_odds": 1.15,
+          "logit": -0.8500000000000001,
+          "p": 0.29943285752602705,
+          "abs_error_vs_intercept_base_rate": 0.1802299355039095,
+          "rel_error_vs_intercept_base_rate": 1.51195903964895
+        },
+        "prevalence_0.1192": {
+          "encoding_value": 0.1192,
+          "injected_log_odds": 0.27415999999999996,
+          "logit": -1.72584,
+          "p": 0.15112046314902652,
+          "abs_error_vs_intercept_base_rate": 0.03191754112690898,
+          "rel_error_vs_intercept_base_rate": 0.26775804305356565
+        },
+        "reference_0.0": {
+          "encoding_value": 0.0,
+          "injected_log_odds": 0.0,
+          "logit": -2.0,
+          "p": 0.11920292202211755,
+          "abs_error_vs_intercept_base_rate": 0.0,
+          "rel_error_vs_intercept_base_rate": 0.0
+        }
+      },
+      "assumption_free_bounds_all_unknown": {
+        "p_lower": 0.11920292202211755,
+        "p_upper": 0.5744425168116589,
+        "width": 0.45523959478954135
+      },
+      "sha256_after": "55ba9492c9ec676e7c45af809b0c78ccc559cccf716f4072960d99984542c401"
+    },
+    "biopsy_arbiter_template_v0": {
+      "sha256_before": "59a0ec615f8f2b4567983eef50b7e396643026f0456f74f1941437c9eee518c4",
+      "intercept": -1.5,
+      "intercept_only_base_rate": 0.18242552380635635,
+      "boolean_features": {
+        "prior_biopsy_benign_at_site": -1.2,
+        "family_history_first_degree": 0.4,
+        "brca_status_known_pathogenic": 1.1,
+        "us_correlate_hypoechoic_mass": 1.3,
+        "us_correlate_simple_cyst": -2.2
+      },
+      "sum_boolean_coefficients": -0.6000000000000001,
+      "encodings": {
+        "midpoint_0.5": {
+          "encoding_value": 0.5,
+          "injected_log_odds": -0.30000000000000004,
+          "logit": -1.8,
+          "p": 0.14185106490048777,
+          "abs_error_vs_intercept_base_rate": -0.04057445890586858,
+          "rel_error_vs_intercept_base_rate": -0.22241656791918074
+        },
+        "prevalence_0.1192": {
+          "encoding_value": 0.1192,
+          "injected_log_odds": -0.07152000000000001,
+          "logit": -1.57152,
+          "p": 0.1719998116651481,
+          "abs_error_vs_intercept_base_rate": -0.010425712141208243,
+          "rel_error_vs_intercept_base_rate": -0.057150512294952084
+        },
+        "reference_0.0": {
+          "encoding_value": 0.0,
+          "injected_log_odds": -0.0,
+          "logit": -1.5,
+          "p": 0.18242552380635635,
+          "abs_error_vs_intercept_base_rate": 0.0,
+          "rel_error_vs_intercept_base_rate": 0.0
+        }
+      },
+      "assumption_free_bounds_all_unknown": {
+        "p_lower": 0.007391541344281971,
+        "p_upper": 0.7858349830425586,
+        "width": 0.7784434416982766
+      },
+      "sha256_after": "29516cbe913ac273d0f60e61d88d32937a8f94132fbaaa664ff6fa3295f9fd53"
+    },
+    "therapy_arbiter_template_v0": {
+      "sha256_before": "c6d02d02003b2fe3edc9ae38bc4be3250501202dbd65eff214181e48fdaac0b0",
+      "intercept": -1.8,
+      "intercept_only_base_rate": 0.14185106490048777,
+      "boolean_features": {
+        "er_status_positive": -0.9,
+        "pr_status_positive": -0.6,
+        "her2_status_positive": 1.3,
+        "node_status_positive": 2.1,
+        "brca_status_known_pathogenic": 0.8
+      },
+      "sum_boolean_coefficients": 2.7,
+      "encodings": {
+        "midpoint_0.5": {
+          "encoding_value": 0.5,
+          "injected_log_odds": 1.35,
+          "logit": -0.44999999999999996,
+          "p": 0.389360766050778,
+          "abs_error_vs_intercept_base_rate": 0.24750970115029025,
+          "rel_error_vs_intercept_base_rate": 1.74485613713175
+        },
+        "prevalence_0.1192": {
+          "encoding_value": 0.1192,
+          "injected_log_odds": 0.32184,
+          "logit": -1.47816,
+          "p": 0.18570550130045949,
+          "abs_error_vs_intercept_base_rate": 0.04385443639997172,
+          "rel_error_vs_intercept_base_rate": 0.3091583163703195
+        },
+        "reference_0.0": {
+          "encoding_value": 0.0,
+          "injected_log_odds": 0.0,
+          "logit": -1.8,
+          "p": 0.14185106490048777,
+          "abs_error_vs_intercept_base_rate": 0.0,
+          "rel_error_vs_intercept_base_rate": 0.0
+        }
+      },
+      "assumption_free_bounds_all_unknown": {
+        "p_lower": 0.03557118927263618,
+        "p_upper": 0.9168273035060777,
+        "width": 0.8812561142334415
+      },
+      "sha256_after": "f27dc2d7e970b495728434aefbacf8be78c7a9d5f83ed389fc49728b093713ac"
+    }
+  },
+  "finding": "The requested base rate 0.1192 equals sigmoid(screening intercept -2.0) = 0.1192029220, i.e. a probability, not a feature value. Encoding the missing FEATURE at 0.1192 still injects +0.274160 log-odds and overshoots that base rate by +0.031918 absolute. Encoding at the reference level 0.0 hits it exactly."
+}

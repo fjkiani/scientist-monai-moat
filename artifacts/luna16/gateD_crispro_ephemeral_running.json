@@ -1,0 +1,13 @@
+{
+  "status": "RUNNING_EPHEMERAL",
+  "profile": "crispro",
+  "request_id": "gateD-crispro-ephemeral-20261005T014000Z-zo",
+  "modal_app_url": "https://modal.com/apps/crispro/main/ap-tq8sn6BTf91gjfhdCoX8ZS",
+  "gate_c_request_id": "gateC-crispro-20261005T013729Z-zo",
+  "learning_rate": 1e-06,
+  "epochs": 5,
+  "note": "deployed Function.from_name falsely reports missing Gate C; ephemeral modal run fullfit sees Gate C and trains",
+  "clinical_meter": "FROC@2 after train completes",
+  "baseline_froc_at_2": 0.8267399271674979,
+  "ts": "2026-10-05T05:51:53Z"
+}

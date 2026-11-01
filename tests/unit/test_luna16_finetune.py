@@ -37,7 +37,7 @@ class TestFinetuneConfig:
             output_dir=tmp_path / "out",
         )
         assert cfg.epochs == 20
-        assert cfg.learning_rate == 1e-3
+        assert cfg.learning_rate == 1e-5
         assert cfg.batch_size == 4
         assert cfg.val_interval == 5
         assert cfg.initial_weights is None
@@ -72,7 +72,16 @@ class TestRunFinetuneDryRun:
         # sys.executable should be in the cmd
         assert cmd[0] == sys.executable
         assert "monai.bundle" in cmd
-        assert "training" in cmd
+        # Executable key is "run" -> $@train#trainer.run(); not "train"/"training"
+        assert cmd[cmd.index("run") + 1] == "run" or (
+            "monai.bundle" in cmd and cmd[cmd.index("-m") + 2 : cmd.index("-m") + 5]
+        )
+        assert "run" in cmd
+        # Must not use the non-existent "training" ID or the non-executable "train" object as run_id
+        # Find the token immediately after `monai.bundle`, `run` CLI verb
+        i = cmd.index("monai.bundle")
+        assert cmd[i + 1] == "run"  # fire verb
+        assert cmd[i + 2] == "run"  # config run_id
         # Overrides present
         assert "5" in cmd  # epochs
         assert "0.0005" in cmd  # learning_rate

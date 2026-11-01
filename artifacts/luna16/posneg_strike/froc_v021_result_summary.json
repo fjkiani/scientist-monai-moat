@@ -1,0 +1,16 @@
+{
+  "request_id": "froc-fjkiani-posneg-20261005T011322Z-zo",
+  "ckpt_request_id": "gateD-fjkiani-posneg-20261004T203623Z-zo",
+  "end_ckpt_sha256": "6227a69cc89c9f65adb77a3537904b38017899b4dbbbd0292008cf097e9dd6dd",
+  "app_version_train": "luna16-fullfit-v0.1.3-posneg-1to1",
+  "froc_at_2_baseline": 0.8267399271674979,
+  "froc_at_2_refined": null,
+  "delta_froc_at_2": null,
+  "meets_floor_ref": false,
+  "refined_n_candidates": 8800,
+  "baseline_n_candidates": 1181,
+  "status": "ok",
+  "verdict": "PROVEN_BUT_REFINED_NAN",
+  "promote": false,
+  "note": "1:1 pos/neg sampler did not fix score flood; refined FROC@2=NaN (same 8800-cand collapse class as lr1e5). Baseline remains production."
+}

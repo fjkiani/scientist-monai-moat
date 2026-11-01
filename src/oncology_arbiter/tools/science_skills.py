@@ -22,6 +22,7 @@ import asyncio
 import json
 import os
 import re
+import sys
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -163,7 +164,7 @@ class ScienceSkillTool:
 
         cmd: list[str]
         if entry.suffix == ".py":
-            cmd = ["python", str(entry)]
+            cmd = [sys.executable, str(entry)]
         elif entry.suffix in (".sh", ""):
             cmd = ["bash", str(entry)]
         else:

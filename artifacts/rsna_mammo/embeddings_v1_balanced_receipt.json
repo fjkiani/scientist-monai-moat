@@ -1,0 +1,12 @@
+{
+  "status": "ok",
+  "path": "artifacts/rsna_mammo/embeddings_v1_balanced",
+  "n": 1482,
+  "dim": 1152,
+  "n_pos": 247,
+  "n_neg": 1235,
+  "dataset_id": "rsna_theoviel_256_balanced_full",
+  "embeddings_sha256": "c239b535e65ec60b31212b5204ea86694cec69f9518242589b2601263fb763b3",
+  "backbone": "MedSigLIP-1152",
+  "band": "24-48"
+}

@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "model_name": "ovarian_mfap4_arbiter_v1",
+  "model_type": "L2_regularized_logistic_regression",
+  "lambda": 1.0,
+  "seed": 20261021,
+  "n_training": 75,
+  "n_training_synthetic": false,
+  "n_positive": 34,
+  "n_negative": 41,
+  "trained_on_real_patient_data": true,
+  "positive_class": "platinum_resistant",
+  "intercept": -5.8305298738024876,
+  "features": [
+    "mfap4_expr"
+  ],
+  "coefficients": [
+    0.7138979646423848
+  ],
+  "feature_encodings": {
+    "mfap4_expr": "gpl570_212713_at_log2_expression / 1.0"
+  },
+  "recommendations": {
+    "LOW": "PLATINUM_SENSITIVE_LEAN \u2014 lower MFAP4 expression relative to GSE63885 resistant mean",
+    "MID": "INDETERMINATE \u2014 MFAP4 alone does not clear a clinical gate",
+    "HIGH": "PLATINUM_RESISTANCE_LEAN \u2014 higher MFAP4 expression (RUO hypothesis)"
+  },
+  "performance": {
+    "AUROC_CAVEAT": "Honest GSE63885 n=75 (34 resistant / 41 sensitive). NA labels excluded. Retracted n=101 AUROC 0.7625 (NA-as-sensitive) is forbidden. Research use only \u2014 not prospectively validated.",
+    "held_out_test_auroc": 0.6836441893830704,
+    "expression_rank_auroc": 0.6836441893830704,
+    "oof_auroc": 0.6714490674318507,
+    "prauc": 0.645317191245118,
+    "auroc_ci": [
+      0.562138431013431,
+      0.8063162401073726
+    ],
+    "proof_auroc": 0.6836,
+    "proof_match_abs_delta": 4.4189383070381005e-05
+  },
+  "oof_auroc": 0.6714490674318507,
+  "oof_auroc_ci": [
+    0.562138431013431,
+    0.8063162401073726
+  ],
+  "dataset": {
+    "geo": "GSE63885",
+    "platform": "GPL570",
+    "probe": "212713_at",
+    "gene": "MFAP4",
+    "canon_path": "/Users/fahadkiani/Desktop/development/crispr-assistant-main/data/external/GSE63885",
+    "direction": "higher_in_resistant",
+    "mean_expr_resistant": 8.170546636264705,
+    "mean_expr_sensitive": 7.680686253243902,
+    "label_rule": "resistant=1; moderately+highly sensitive=0; NA excluded",
+    "forbidden": "Do not use retracted n=101 AUROC 0.7625"
+  },
+  "disclaimer": "RESEARCH USE ONLY \u2014 not validated for clinical decision-making. Not FDA-cleared. Not CE-marked. Platinum-resistance hypothesis from transcriptomic association only."
+}
