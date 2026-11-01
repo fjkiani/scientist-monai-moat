@@ -3,7 +3,7 @@
   "ruo": true,
   "ruo_disclaimer": "RESEARCH USE ONLY. Descriptive PFI separation on n=11 uncensored times; not a treatment rule.",
   "contract_status": "evidence_bound_exploratory_prioritization",
-  "generated_utc": "2026-10-31T02:51:24.109662+00:00",
+  "generated_utc": "2026-11-01T15:42:45.087010+00:00",
   "source_module": "src/oncology_arbiter/ovarian/ovarian_two_door_standalone_v3.py",
   "source_sha256": "8e98492229f25fb83d4b195f73a68908eb7b39932d88796f58bf2f5d75f6f87e",
   "contract_v3_member": "ovarian_hibernation_v6_timevarying_and_specificity_lock/ovarian_hibernation_two_door_contract_v3.json",

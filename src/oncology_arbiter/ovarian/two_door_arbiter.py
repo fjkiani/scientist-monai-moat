@@ -133,6 +133,9 @@ def _resolve_post_scores(payload: dict[str, Any]) -> dict[str, float]:
         )
     elif payload.get("post_S_sen") is not None:
         values["post_S_sen"] = _need(payload, ["post_S_sen"])["post_S_sen"]
+    for opt_key in ("vdr_expr", "epha2_expr", "z_VDR", "z_EPHA2"):
+        if payload.get(opt_key) is not None:
+            values[opt_key] = _need(payload, [opt_key])[opt_key]
     return values
 
 

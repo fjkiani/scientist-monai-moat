@@ -33,6 +33,10 @@ class OvarianArbiterRequest(BaseModel):
     z_FAP: float | None = None
     z_CXCL10: float | None = None
     mfap4_expr: float | None = None
+    vdr_expr: float | None = None
+    epha2_expr: float | None = None
+    z_VDR: float | None = None
+    z_EPHA2: float | None = None
     mbd4_lof: bool | None = None
     mbd4_hgvs_c: str | None = None
     mbd4_consequence: str | None = None

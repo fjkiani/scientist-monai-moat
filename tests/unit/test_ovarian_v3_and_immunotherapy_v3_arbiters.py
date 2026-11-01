@@ -293,7 +293,7 @@ def test_ovarian_gate1_mbd4_lof_c1293delA_and_hrd_gate() -> None:
     ranks = {r["drug_id"]: r["rank"] for r in fired["elo_bridge"]["ranked_candidates"]}
     assert ranks["Ceralasertib"] == 1
     assert ranks["Gemcitabine"] == 2
-    assert ranks["Olaparib"] == 8
+    assert ranks["Olaparib"] == len(ranks)
 
     # HRD 55.0 (>=42) -> Gate 1 does not fire
     unfired_resp = client.post(
@@ -370,6 +370,7 @@ def test_case_full_hgsoc_attaches_two_door_and_elo_without_dropping_mfap4() -> N
         params={"cancer": "hgsoc"},
         json={
             "resistance_features": {"EMT_MFAP4": 8.1705},
+            "run_co_scientist": False,
             "ovarian_two_door": {
                 "timepoint": "post_nact",
                 "patient_id": "EOC153",
@@ -700,4 +701,125 @@ def test_argon_patient_interpreter_is_deterministic_across_all_cohorts(monkeypat
     assert live_interp["temperature"] == 0.0
     assert live_interp["request_id"] == "req_argon_det_01"
     assert "3.3602" in live_interp["argon_output"]["biological_state_meaning"]
+
+
+def test_ovarian_v9_dose_response_consensus_and_subtype_2a_2b_routing() -> None:
+    """Verify ovarian_two_door_standalone_v9.py, v9 receipt, and Subtype 2A/2B VDR+EPHA2 routing."""
+    import hashlib
+    import json
+    from pathlib import Path
+    from oncology_arbiter.ovarian import ovarian_two_door_standalone_v9 as v9
+
+    root = Path(__file__).resolve().parents[2]
+    v9_py = root / "src" / "oncology_arbiter" / "ovarian" / "ovarian_two_door_standalone_v9.py"
+    assert v9_py.is_file()
+    assert len(v9_py.read_text().splitlines()) == 71
+    assert (
+        hashlib.sha256(v9_py.read_bytes()).hexdigest()
+        == "dd5f2ef197efef7afce320aad0f3c436936c306f67c582534e3c4cd155a00c92"
+    )
+    assert v9.CLINICAL_USE is False
+
+    # Coverage in v9 dose-response vs v8 4-screen for BCL_OR_dasatinib_OR_VDR
+    cov_dr = v9.observed_coverage(
+        ["abt-737", "navitoclax", "dasatinib", "paricalcitol", "doxercalciferol"],
+        threshold=0.5,
+        endpoint="dr",
+    )
+    cov_v8 = v9.observed_coverage(
+        ["abt-737", "navitoclax", "dasatinib", "paricalcitol", "doxercalciferol"],
+        threshold=0.5,
+        endpoint="v8",
+    )
+    assert cov_dr == {"active": 10, "inactive": 0, "unknown": 1}
+    assert cov_v8 == {"active": 11, "inactive": 0, "unknown": 0}
+
+    # Verify v9 receipt on disk
+    v9_receipt_path = root / "docs" / "proofs" / "ovarian_v9_dose_response_and_subtype2B_receipt.json"
+    assert v9_receipt_path.is_file()
+    v9_receipt = json.loads(v9_receipt_path.read_text())
+    assert v9_receipt["ruo"] is True
+    assert v9_receipt["clinical_use"] is False
+    assert (
+        v9_receipt["archive"]["sha256"]
+        == "bba6304005e8291b61eb2e5f840cba5e48daa8462fac00340e8d52b98dac9c0b"
+    )
+    assert v9_receipt["archive"]["verified_file_count"] == 398
+    winners = v9_receipt["dose_response_consensus_z_13drug_family_winners"]["winners"]
+    assert [w["drug"] for w in winners] == [
+        "doxercalciferol",
+        "azithromycin",
+        "dasatinib",
+        "navitoclax",
+        "abt-737",
+    ]
+    for w in winners:
+        assert round(float(w["q_positive_bh"]), 6) == 0.047242
+
+    client = _client()
+    # Subtype 2A case: EOC153 (H=3.360241, S=4.166371, buffer=+0.806130 >= 0)
+    row_153 = next(r for r in GSE165897_11_PATIENT_TABLE if r["patient_id"] == "EOC153")
+    resp_2a = client.post(
+        "/v1/ovarian/arbiter/score",
+        json={
+            "timepoint": "post_nact",
+            "patient_id": "EOC153",
+            "post_H_clean": row_153["post_H_clean"],
+            "post_DDR": row_153["post_DDR"],
+            "post_S_sen": row_153["post_S_sen"],
+            "post_BCL2A1_z": row_153["post_BCL2A1_z"],
+            "delta_MCL1_z": row_153["delta_MCL1_z"],
+            "post_EMT_z": row_153["post_EMT_z"],
+        },
+    ).json()
+    sr_2a = resp_2a["elo_bridge"]["door2_subtype_routing"]
+    assert sr_2a["subtype"] == "Subtype_2A_BCLxL_Classical"
+    assert sr_2a["subtype_2B_triggered"] is False
+    assert math.isclose(sr_2a["S_sen_minus_H_clean_buffer"], 0.8061299483303408, rel_tol=0.0, abs_tol=1e-12)
+    assert set(
+        ["Navitoclax", "ABT-737", "Dasatinib", "Doxercalciferol", "Azithromycin", "Vismodegib"]
+    ).issubset(set(resp_2a["elo_bridge"]["promoted"]))
+
+    # Subtype 2B case 1: COV362 / SNU-840 archetype with S_sen - H_clean < 0 (H=1.50, S=0.70, buffer=-0.80)
+    resp_2b_buf = client.post(
+        "/v1/ovarian/arbiter/score",
+        json={
+            "timepoint": "post_nact",
+            "patient_id": "COV362_SUBTYPE_2B_BUFFER",
+            "post_H_clean": 1.50,
+            "post_DDR": 0.035,
+            "post_S_sen": 0.70,
+            "post_BCL2A1_z": -0.30,
+            "delta_MCL1_z": 0.20,
+            "post_EMT_z": -0.20,
+        },
+    ).json()
+    sr_2b_buf = resp_2b_buf["elo_bridge"]["door2_subtype_routing"]
+    assert sr_2b_buf["subtype"] == "Subtype_2B_VDR_EPHA2_Dasatinib"
+    assert sr_2b_buf["subtype_2B_triggered"] is True
+    assert math.isclose(sr_2b_buf["S_sen_minus_H_clean_buffer"], -0.80, rel_tol=0.0, abs_tol=1e-12)
+    assert sr_2b_buf["highlighted_2B_agents"] == ["Dasatinib", "Doxercalciferol", "Paricalcitol"]
+    assert "Subtype 2B" in resp_2b_buf["argon_interpretation"]["argon_output"]["gate_and_compartment_meaning"]
+
+    # Subtype 2B case 2: EFO-21 archetype with positive buffer (+1.0878) but elevated VDR (3.369) & EPHA2 (7.566)
+    resp_2b_expr = client.post(
+        "/v1/ovarian/arbiter/score",
+        json={
+            "timepoint": "post_nact",
+            "patient_id": "EFO21_SUBTYPE_2B_VDR_EPHA2",
+            "post_H_clean": 2.996812,
+            "post_DDR": 0.035,
+            "post_S_sen": 4.084614,
+            "post_BCL2A1_z": -0.20,
+            "delta_MCL1_z": 0.10,
+            "post_EMT_z": -0.10,
+            "vdr_expr": 3.369371,
+            "epha2_expr": 7.566443,
+        },
+    ).json()
+    sr_2b_expr = resp_2b_expr["elo_bridge"]["door2_subtype_routing"]
+    assert sr_2b_expr["subtype"] == "Subtype_2B_VDR_EPHA2_Dasatinib"
+    assert sr_2b_expr["subtype_2B_triggered"] is True
+    assert len(sr_2b_expr["triggers"]) == 2
+
 

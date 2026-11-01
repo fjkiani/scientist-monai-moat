@@ -80,6 +80,7 @@ def build_argon_patient_input(scored_body: dict[str, Any]) -> dict[str, Any]:
             "top_mechanism_class": bridge.get("top_mechanism_class"),
             "promoted": bridge.get("promoted"),
             "demoted": bridge.get("demoted"),
+            "door2_subtype_routing": bridge.get("door2_subtype_routing"),
             "top_3_ranked": top_3,
         },
     }
@@ -143,10 +144,30 @@ def _ovarian_deterministic_meaning(
                 "(Ceralasertib ΔLN_IC50=-0.74, p=0.021) while PARP monotherapy is null (p=0.605)."
             )
         elif cls in {"Hcleanonly", "Both"}:
+            sub_route = l5.get("door2_subtype_routing") or {}
+            sub_name = sub_route.get("subtype") or "Subtype_2A_BCLxL_Classical"
+            buf = sub_route.get("S_sen_minus_H_clean_buffer")
+            buf_str = f"{buf:+.4f}" if isinstance(buf, (int, float)) else "N/A"
+            if sub_route.get("subtype_2B_triggered"):
+                sub_detail = (
+                    f"Exploratory Subtype 2B routing triggered ({sub_name}, buffer S_sen-H_clean={buf_str}; "
+                    f"triggers={sub_route.get('triggers')}): highlight Subtype 2B (Dasatinib + "
+                    "Doxercalciferol/Paricalcitol; VDR 3.369 vs 1.427, EPHA2 7.566 vs 6.227, exact P=0.04444) "
+                    "alongside BCL-xL (Navitoclax/ABT-737)."
+                )
+            else:
+                sub_detail = (
+                    f"Exploratory Subtype 2A routing ({sub_name}, buffer S_sen-H_clean={buf_str} >= 0): "
+                    "classical BCL-xL senolytic vulnerability (Navitoclax/ABT-737) with v9 DoseResponse_Consensus_Z "
+                    "co-winners Dasatinib, Doxercalciferol, Azithromycin (all 5 BH q=0.047242) + Vismodegib (q=0.035734) "
+                    "and Dasatinib+Navitoclax composite (rho=+0.5279, q=0.00060)."
+                )
             gate_msg = (
                 "Gate 3 Door 2 (Hibernation / Senolytic) fired: therapy-induced quiescent persister "
                 "state is pan-resistant to proliferative DDR/chemo (0/8 GDSC2 & 0/5 CTRPv2) but "
-                "dependent on BCL2L1/BCL-xL (CRISPR rho=-0.6547, q=2.5e-5; PRISM Δρ=+0.6327 vs Venetoclax)."
+                "dependent on BCL2L1/BCL-xL (CRISPR rho=-0.6547, q=2.5e-5; 7-gene CRISPR vulnerability "
+                "rho=-0.6645, q=0.00012; CLPP rho=-0.336, P=0.01680). "
+                + sub_detail
             )
         elif cls == "DDRonly":
             gate_msg = (

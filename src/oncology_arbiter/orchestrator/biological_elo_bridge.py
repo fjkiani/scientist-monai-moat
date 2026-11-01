@@ -2,7 +2,8 @@
 
 Derives Elo modifier deltas from the locked contract receipts on disk
 (``zeta_immunotherapy_contract_v3.json``, ``ovarian_two_door_standalone_v3.py``,
-``docs/proofs/*.json``) and delegates tournament execution to ``elo_rank``.
+``ovarian_two_door_standalone_v9.py``, ``docs/proofs/*.json``) and delegates
+tournament execution to ``elo_rank``.
 """
 from __future__ import annotations
 
@@ -14,6 +15,7 @@ from typing import Any
 from oncology_arbiter.api.routers.elo import elo_rank
 from oncology_arbiter.api.schemas import EloDrugCandidate, EloRankRequest, EvidenceRecord
 from oncology_arbiter.immunotherapy.cart_ici_v3 import load_arbiter_v3_contract
+from oncology_arbiter.ovarian import ovarian_two_door_standalone_v9 as v9_standalone
 from oncology_arbiter.ovarian.ovarian_two_door_standalone_v3 import (
     HUMAN_POLICY,
     KEY_VALIDATION_LEDGER,
@@ -25,6 +27,10 @@ _PROOFS_DIR = Path(__file__).resolve().parents[3] / "docs" / "proofs"
 OVARIAN_CANDIDATES: tuple[tuple[str, str, str, float], ...] = (
     ("Navitoclax", "Navitoclax (BCL-xL/BCL-2 senolytic)", "BCL-xL_senolytic", 0.50),
     ("ABT-737", "ABT-737 (BCL-xL/BCL-2/BCL-w senolytic)", "BCL-xL_senolytic", 0.49),
+    ("Dasatinib", "Dasatinib / Sprycel (SRC/EPHA2 inhibitor)", "Door2_Subtype2B_SRC_EPHA2", 0.48),
+    ("Doxercalciferol", "Doxercalciferol / Paricalcitol (VDR agonist)", "Door2_Subtype2B_VDR", 0.47),
+    ("Azithromycin", "Azithromycin (mitoribosome senolytic)", "Door2_mitoribosome_senolytic", 0.47),
+    ("Vismodegib", "Vismodegib / Erivedge (Hedgehog SMO inhibitor)", "Door2_Hedgehog", 0.46),
     ("Ceralasertib", "Ceralasertib / AZD6738 (ATR inhibitor)", "DDR_ATR", 0.50),
     ("Adavosertib", "Adavosertib / MK-1775 (WEE1 inhibitor)", "DDR_WEE1", 0.49),
     ("Gemcitabine", "Gemcitabine (BER antimetabolite)", "DDR_BER_chemo", 0.48),
@@ -75,6 +81,89 @@ def _gdsc2_delta_ln_map() -> dict[str, float]:
         for row in receipt["per_drug_High_minus_Low"]
     }
     return {cid: by_name[gkey] for cid, gkey in _GDSC2_DRUG_KEY.items()}
+
+
+@lru_cache(maxsize=1)
+def _v9_dr_rho_map() -> dict[str, dict[str, Any]]:
+    out: dict[str, dict[str, Any]] = {}
+    for row in v9_standalone.DRUG_LEDGER:
+        if row["version"] == "v9" and row["endpoint"] == "DoseResponse_Consensus_Z":
+            out[row["drug"]] = row
+        elif row["version"] == "v9" and row["drug"] == "vismodegib" and row["endpoint"] == "PRISM_secondary":
+            out["vismodegib"] = row
+    return out
+
+
+def evaluate_door2_subtype_routing(
+    state: str | None,
+    ovarian_score: dict[str, Any],
+) -> dict[str, Any] | None:
+    """Evaluate exploratory Subtype 2A vs Subtype 2B routing inside Door 2 (RUO)."""
+    if state not in {"Hcleanonly", "Both"}:
+        return None
+    scores = ovarian_score.get("scores") or {}
+    h_val = scores.get("post_H_clean")
+    s_val = scores.get("post_S_sen")
+    buffer_val = (
+        float(s_val) - float(h_val)
+        if isinstance(s_val, (int, float)) and isinstance(h_val, (int, float))
+        else None
+    )
+    vdr_expr = scores.get("vdr_expr")
+    epha2_expr = scores.get("epha2_expr")
+    z_vdr = scores.get("z_VDR")
+    z_epha2 = scores.get("z_EPHA2")
+
+    low_buffer = buffer_val is not None and buffer_val < 0.0
+    vdr_elevated = (
+        (isinstance(vdr_expr, (int, float)) and float(vdr_expr) > 1.4267765310938791)
+        or (isinstance(z_vdr, (int, float)) and float(z_vdr) > 0.0)
+    )
+    epha2_elevated = (
+        (isinstance(epha2_expr, (int, float)) and float(epha2_expr) > 6.226977334125634)
+        or (isinstance(z_epha2, (int, float)) and float(z_epha2) > 0.0)
+    )
+    is_2b = bool(low_buffer or vdr_elevated or epha2_elevated)
+    triggers: list[str] = []
+    if low_buffer:
+        triggers.append(f"S_sen - H_clean buffer={buffer_val:+.4f} < 0")
+    if vdr_elevated:
+        triggers.append("VDR elevated (Subtype 2B mean 3.369 vs 2A 1.427, exact P=0.04444)")
+    if epha2_elevated:
+        triggers.append("EPHA2 elevated (Subtype 2B mean 7.566 vs 2A 6.227, exact P=0.04444)")
+
+    v9_receipt = _load_proof("ovarian_v9_dose_response_and_subtype2B_receipt.json")
+    return {
+        "ruo": True,
+        "contract_status": CONTRACT_STATUS,
+        "exploratory": True,
+        "subtype": "Subtype_2B_VDR_EPHA2_Dasatinib" if is_2b else "Subtype_2A_BCLxL_Classical",
+        "subtype_2B_triggered": is_2b,
+        "triggers": triggers or ["S_sen - H_clean buffer >= 0 and no VDR/EPHA2 elevation"],
+        "S_sen_minus_H_clean_buffer": buffer_val,
+        "highlighted_2B_agents": (
+            ["Dasatinib", "Doxercalciferol", "Paricalcitol"]
+            if is_2b
+            else []
+        ),
+        "bcl_xl_agents": ["Navitoclax", "ABT-737"],
+        "five_bh_fdr_consensus_winners_q_0_047242": [
+            "Doxercalciferol",
+            "Azithromycin",
+            "Dasatinib",
+            "Navitoclax",
+            "ABT-737",
+        ],
+        "prism_secondary_fdr_winner_q_0_035734": "Vismodegib",
+        "dasatinib_navitoclax_composite": next(
+            c for c in v9_standalone.V8_COMPOSITES
+            if c["composite"] == "dasatinib+navitoclax" and c["predictor"] == "S_sen"
+        ),
+        "subtype_2B_reference_donors": ["COV362", "SNU-840", "EFO-21"],
+        "observed_or_coverage": v9_receipt["subtype_2A_vs_2B_molecular_split"][
+            "observed_or_coverage_bcl_or_dasatinib_or_vdr_t05"
+        ],
+    }
 
 
 def _run_elo_via_router(
@@ -153,8 +242,10 @@ def _ovarian_deltas_from_contracts(
     state: str | None,
     timepoint: str,
     ovarian_score: dict[str, Any],
+    subtype_routing: dict[str, Any] | None = None,
 ) -> dict[str, tuple[float, str]]:
     dln = _gdsc2_delta_ln_map()
+    v9_rho = _v9_dr_rho_map()
     nav_rho = float(KEY_VALIDATION_LEDGER["prism_navitoclax_vs_venetoclax_delta_rho_and_q"]["delta_rho"])
     abt_rho = float(KEY_VALIDATION_LEDGER["prism_abt737_vs_venetoclax_delta_rho_and_q"]["delta_rho"])
     deltas: dict[str, tuple[float, str]] = {}
@@ -170,11 +261,34 @@ def _ovarian_deltas_from_contracts(
     elif state in {"Hcleanonly", "Both"}:
         deltas["Navitoclax"] = (
             -0.20 * dln["Navitoclax"] + 0.30 * nav_rho,
-            "Door 2 H_clean>cutpoint: GDSC2 ΔLN=-1.20 + PRISM Δρ=+0.6327 (q=0.0075)",
+            "Door 2 H_clean>cutpoint: GDSC2 ΔLN=-1.20 + PRISM Δρ=+0.6327 + v9 DoseResponse_Consensus_Z rho=+0.3397 (BH q=0.047242)",
         )
         deltas["ABT-737"] = (
             -0.15 * dln["ABT-737"] + 0.25 * abt_rho,
-            "Door 2 H_clean>cutpoint: GDSC2 ΔLN=-1.29 + PRISM Δρ=+0.6323 (q=0.0060)",
+            "Door 2 H_clean>cutpoint: GDSC2 ΔLN=-1.29 + PRISM Δρ=+0.6323 + v9 DoseResponse_Consensus_Z rho=+0.3266 (BH q=0.047242)",
+        )
+        dasa_rho = float(v9_rho["dasatinib"]["rho"])
+        dox_rho = float(v9_rho["doxercalciferol"]["rho"])
+        azi_rho = float(v9_rho["azithromycin"]["rho"])
+        vis_rho = float(v9_rho["vismodegib"]["rho"])
+        is_2b = bool(subtype_routing and subtype_routing.get("subtype_2B_triggered"))
+        b2_boost = 0.06 if is_2b else 0.0
+        b2_tag = " [Subtype 2B VDR/EPHA2/low-buffer highlight]" if is_2b else ""
+        deltas["Dasatinib"] = (
+            0.55 * dasa_rho + b2_boost,
+            f"Door 2 v9 DoseResponse_Consensus_Z rho={dasa_rho:+.5f} (P=0.01817, BH q=0.047242) + Dasatinib+Navitoclax composite rho=+0.5279 (q=0.00060){b2_tag}",
+        )
+        deltas["Doxercalciferol"] = (
+            0.48 * dox_rho + b2_boost,
+            f"Door 2 v9 DoseResponse_Consensus_Z rho={dox_rho:+.5f} (P=0.01534, BH q=0.047242; VDR agonist){b2_tag}",
+        )
+        deltas["Azithromycin"] = (
+            0.45 * azi_rho,
+            f"Door 2 v9 DoseResponse_Consensus_Z rho={azi_rho:+.5f} (P=0.01150, BH q=0.047242; mitoribosome senolytic, CLPP CRISPR rho=-0.336, P=0.01680)",
+        )
+        deltas["Vismodegib"] = (
+            0.40 * vis_rho,
+            f"Door 2 v9 PRISM Secondary rho={vis_rho:+.5f} (P=0.01363, BH q=0.035734; Hedgehog inhibitor)",
         )
         deltas["Venetoclax"] = (-nav_rho, "Demote BCL-2 decoy vs BCL-xL (PRISM Δρ=+0.6327)")
         for ddr_id in ("Olaparib", "Ceralasertib", "Adavosertib", "Gemcitabine", "Carboplatin_Paclitaxel"):
@@ -188,6 +302,8 @@ def _ovarian_deltas_from_contracts(
         deltas["Olaparib"] = (-0.15, "DDRonly replication-stress prioritizes ATR/WEE1 over unselected PARP")
         deltas["Navitoclax"] = (0.15 * dln["Navitoclax"], "Low post_H_clean: hibernation gate not met")
         deltas["ABT-737"] = (0.15 * dln["ABT-737"], "Low post_H_clean: hibernation gate not met")
+        for d2_id in ("Dasatinib", "Doxercalciferol", "Azithromycin", "Vismodegib"):
+            deltas[d2_id] = (-0.12, "Low post_H_clean: Door 2 hibernation gate not met")
         deltas["Venetoclax"] = (-0.50 * abt_rho, "Demote BCL-2 decoy")
     elif state == "PRIMARY_REFRACTORY_ESCAPE":
         deltas["Navitoclax"] = (-0.35, "Gate 0 EOC3 override (BCL2A1_z>2.5 & delta_MCL1_z>2.5): demote single-agent BCL-xL")
@@ -223,18 +339,21 @@ def build_ovarian_elo_bridge(ovarian_score: dict[str, Any]) -> dict[str, Any]:
         else ovarian_score.get("four_state_class")
     )
     gate1 = ovarian_score.get("gate1_mbd4") or {}
-    deltas = _ovarian_deltas_from_contracts(state, timepoint, ovarian_score)
+    subtype_routing = evaluate_door2_subtype_routing(state, ovarian_score)
+    deltas = _ovarian_deltas_from_contracts(state, timepoint, ovarian_score, subtype_routing)
     elo = _run_elo_via_router(
         OVARIAN_CANDIDATES,
         deltas,
         [
             ("https://crispro.local/proofs/gdsc2_ddr_bh3_tertile_shift_receipt.json", "GDSC2 DDR vs BH3 tertile shift"),
             ("https://crispro.local/proofs/gse165897_two_door_pfi_separation_receipt.json", "GSE165897 Two-Door PFI separation"),
+            ("https://crispro.local/proofs/ovarian_v9_dose_response_and_subtype2B_receipt.json", "Ovarian v9 Dose-Response Consensus & Subtype 2A/2B receipt"),
         ],
         disease_context={"cancer": "hgsoc", "timepoint": timepoint, "four_state_class": state},
     )
     gdsc2 = _load_proof("gdsc2_ddr_bh3_tertile_shift_receipt.json")
     pfi = _load_proof("gse165897_two_door_pfi_separation_receipt.json")
+    v9_receipt = _load_proof("ovarian_v9_dose_response_and_subtype2B_receipt.json")
     return {
         **elo,
         "bridge_domain": "ovarian_two_door_v3",
@@ -242,11 +361,44 @@ def build_ovarian_elo_bridge(ovarian_score: dict[str, Any]) -> dict[str, Any]:
         "four_state_class": state,
         "gate0_primary_refractory": bool(ovarian_score.get("gate0_primary_refractory")),
         "gate1_mbd4_fired": bool(gate1.get("fired")),
+        "door2_subtype_routing": subtype_routing,
         "receipts": {
             "cutpoints": HUMAN_POLICY,
             "validation_ledger": KEY_VALIDATION_LEDGER,
             "gdsc2_source_members": gdsc2["source_members"],
             "gse165897_omnibus": pfi["omnibus_4state_kruskal_wallis"],
+            "v9_dose_response_and_subtype2B": {
+                "standalone_sha256": v9_receipt["standalone_module"]["sha256"],
+                "dose_response_consensus_z_13drug_family_winners": v9_receipt[
+                    "dose_response_consensus_z_13drug_family_winners"
+                ],
+                "vismodegib_prism_secondary": v9_receipt["additional_v9_and_v8_signals"][
+                    "vismodegib_prism_secondary"
+                ],
+                "omipalisib_dose_response_consensus": v9_receipt["additional_v9_and_v8_signals"][
+                    "omipalisib_dose_response_consensus"
+                ],
+                "wye_125132_dose_response_consensus": v9_receipt["additional_v9_and_v8_signals"][
+                    "wye_125132_dose_response_consensus"
+                ],
+                "dasatinib_navitoclax_composite": next(
+                    c for c in v9_standalone.V8_COMPOSITES
+                    if c["composite"] == "dasatinib+navitoclax" and c["predictor"] == "S_sen"
+                ),
+                "seven_gene_crispr_vulnerability": v9_standalone.V8_CRISPR_INDICES,
+                "clpp_mitochondrial_protease_s_sen": v9_receipt["additional_v9_and_v8_signals"][
+                    "clpp_mitochondrial_protease_s_sen"
+                ],
+                "subtype_2A_vs_2B_molecular_split": {
+                    "subtype_2B_donors": v9_receipt["subtype_2A_vs_2B_molecular_split"]["subtype_2B_donors"],
+                    "observed_or_coverage_bcl_or_dasatinib_or_vdr_t05": v9_receipt[
+                        "subtype_2A_vs_2B_molecular_split"
+                    ]["observed_or_coverage_bcl_or_dasatinib_or_vdr_t05"],
+                    "key_molecular_contrasts": v9_receipt["subtype_2A_vs_2B_molecular_split"][
+                        "key_molecular_contrasts"
+                    ],
+                },
+            },
             "gate2": ovarian_score.get("gate2"),
         },
     }
@@ -265,8 +417,6 @@ def build_immunotherapy_elo_bridge(immuno_score: dict[str, Any]) -> dict[str, An
         auroc = float(contract["metrics_literal_CD8"]["Bag_Index_3_primary_CR"]["auroc"])
         idx1 = float(immuno_score.get("Bag_Index_1") or 0.0)
         idx3 = float(immuno_score.get("Bag_Index_3") or -1.0)
-        # In Deng GSE151511 literal_CD8 (n=23), Bag_Index_1 is z-centered at 0.0
-        # and Bag_Index_3 cohort median is -0.829239333794604 (due to cyto/memory overlap).
         favorable = immuno_score.get("risk_flag") is None and (idx1 > 0.0 or idx3 >= -0.829239333794604)
     elif specimen == "cart_in_vivo_blood":
         auroc = float(contract["evaluation_receipt"]["auroc"])

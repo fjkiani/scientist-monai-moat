@@ -87,6 +87,7 @@ def test_1_gse165897_all_11_patients_and_l5_elo_rankings() -> None:
         "/v1/case/full?cancer=hgsoc",
         json={
             "resistance_features": {"EMT_MFAP4": 8.1705},
+            "run_co_scientist": False,
             "ovarian_two_door": _ovarian_payload(row_153),
         },
     )
