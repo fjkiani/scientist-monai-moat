@@ -7,6 +7,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict
 
 from oncology_arbiter.api.audit import log_event, new_request_id
+from oncology_arbiter.arbiter.ml_8d_trial_decoder import (
+    BilinearDecoderInputError,
+    score_bilinear_ml_loto,
+)
 from oncology_arbiter.arbiter.pathway_8d_ranker import (
     Pathway8DRankerInputError,
     score_pathway_8d_case,
@@ -75,6 +79,12 @@ class Ranker8DScoreRequest(BaseModel):
     apply_gate: bool | None = None
     use_axis_mask_for_ranking: bool | None = None
 
+    # engine omitted or "path_a_gated" keeps the existing PATH A ranker.
+    # "bilinear_ml_loto" loads frozen signed-axis weights and never falls back.
+    engine: str | None = None
+    p_signed_8d: list[Any] | None = None
+    moa_weights: dict[str, Any] | None = None
+
 
 @router.post("/8d/score")
 def ranker_8d_score(
@@ -84,15 +94,49 @@ def ranker_8d_score(
     request_id = new_request_id()
     # Keep only explicitly supplied fields so empty `{}` body fails-closed with HTTP 422
     payload = req.model_dump(exclude_unset=True)
+    engine = payload.get("engine") or "path_a_gated"
     try:
-        body = score_pathway_8d_case(payload)
+        if engine == "path_a_gated":
+            path_payload = {
+                k: v
+                for k, v in payload.items()
+                if k not in {"engine", "p_signed_8d", "moa_weights"}
+            }
+            body = score_pathway_8d_case(path_payload)
+            body["engine"] = "path_a_gated"
+        elif engine == "bilinear_ml_loto":
+            body = score_bilinear_ml_loto(payload)
+        else:
+            raise HTTPException(
+                status_code=422,
+                detail={
+                    "error": "unknown_engine",
+                    "engine": engine,
+                    "allowed": ["path_a_gated", "bilinear_ml_loto"],
+                    "fallback": False,
+                    "message": "engine must be path_a_gated or bilinear_ml_loto",
+                },
+            )
     except Pathway8DRankerInputError as exc:
         raise HTTPException(
             status_code=422,
             detail={
                 "error": "invalid_or_missing_inputs",
+                "engine": "path_a_gated",
                 "missing": exc.missing,
                 "message": str(exc),
+                "fallback": False,
+            },
+        ) from exc
+    except BilinearDecoderInputError as exc:
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "error": exc.code,
+                "engine": "bilinear_ml_loto",
+                "missing": exc.missing,
+                "message": str(exc),
+                "fallback": False,
             },
         ) from exc
     body["request_id"] = request_id
