@@ -1,0 +1,12 @@
+{
+  "status": "ok",
+  "path": "artifacts/rsna_mammo/embeddings_v2_12k",
+  "n": 12000,
+  "dim": 1152,
+  "n_pos": 247,
+  "embeddings_sha256": "b8d2069f48a9ed31e4f1563fd737ae76820ee4f7690f0f0f539bdd140b363857",
+  "dataset_id": "rsna_theoviel_256_png_tree_12k",
+  "backbone": "MedSigLIP-1152",
+  "band": "24-48",
+  "meets_10k_floor": true
+}

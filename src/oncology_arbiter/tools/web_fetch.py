@@ -36,6 +36,24 @@ USER_AGENT: str = (
 )
 MAX_REDIRECTS: int = 5
 
+# Sentinel prefix for the "upstream answered, but not with the document"
+# refusal. Exported so callers and tests key on a symbol rather than on a
+# substring of prose that a later reword would silently break.
+NON_AUTHORITATIVE_PREFIX: str = "non-authoritative HTTP "
+
+
+def is_non_authoritative(result: "ToolResult") -> bool:
+    """True when web_fetch refused a reachable-but-substituted response.
+
+    Distinguishes "the network/upstream gave us something other than the
+    requested document" (bot wall, cookie interstitial, transforming proxy)
+    from "the fetch logic is broken", which must never be skipped over.
+    """
+    return bool(
+        result.is_error
+        and (result.error_message or "").startswith(NON_AUTHORITATIVE_PREFIX)
+    )
+
 
 # --------------------------------------------------------------------------- #
 # SSRF guard
@@ -149,6 +167,25 @@ class WebFetchTool:
                     return ToolResult(
                         is_error=True,
                         error_message=f"HTTP {r.status_code}",
+                        content={"url": url, "status": r.status_code},
+                    )
+                if r.status_code != 200:
+                    # Only 200 carries an authoritative representation of the
+                    # requested document. httpx already follows redirects, so a
+                    # 3xx arriving here means redirect handling was exhausted.
+                    # 203 in particular (RFC 9110 s15.3.4, "Non-Authoritative
+                    # Information") means a transforming proxy replaced the
+                    # payload -- in practice a bot wall or cookie interstitial.
+                    # Extraction then "succeeds" on the interstitial and the
+                    # caller receives a short, plausible-looking document that
+                    # is not the source at all. Refuse it rather than let a
+                    # substitute page be recorded as a successful fetch.
+                    return ToolResult(
+                        is_error=True,
+                        error_message=(
+                            f"{NON_AUTHORITATIVE_PREFIX}{r.status_code}: the "
+                            "response did not carry the requested document"
+                        ),
                         content={"url": url, "status": r.status_code},
                     )
                 cl = r.headers.get("content-length")

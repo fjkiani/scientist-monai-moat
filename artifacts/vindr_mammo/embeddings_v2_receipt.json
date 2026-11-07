@@ -1,0 +1,8 @@
+{
+  "status": "ok",
+  "n": 2000,
+  "n_pos": 92,
+  "embeddings_sha256": "13a0110d499ea6cfd0b8e5ddd16efac6f25842283bda85e26881d473541daf76",
+  "dataset_id": "vindr_birads_png_sample_2k",
+  "medsiglip": "https://crispro--medsiglip"
+}

@@ -1,0 +1,644 @@
+✓ Initialized. View run at 
+https://modal.com/apps/testing-123/main/ap-0KSttjptImxLNPNQADwOiM
+
+Building image im-3W9dQkpKFzIuOvoJKt80wA
+
+=> Step 0: FROM base
+
+=> Step 1: RUN apt-get update
+Get:1 http://deb.debian.org/debian bookworm InRelease [151 kB]
+Get:2 http://deb.debian.org/debian bookworm-updates InRelease [55.4 kB]
+Get:3 http://deb.debian.org/debian-security bookworm-security InRelease [34.8 kB]
+Get:4 http://deb.debian.org/debian bookworm/main amd64 Packages [8790 kB]
+Get:5 http://deb.debian.org/debian bookworm-updates/main amd64 Packages.diff/Index [21.8 kB]
+Ign:5 http://deb.debian.org/debian bookworm-updates/main amd64 Packages.diff/Index
+Get:6 http://deb.debian.org/debian bookworm-updates/main amd64 Packages [6924 B]
+Get:7 http://deb.debian.org/debian-security bookworm-security/main amd64 Packages [349 kB]
+Fetched 9409 kB in 1s (9867 kB/s)
+Reading package lists...
+
+=> Step 2: RUN apt-get install -y libgomp1 libgl1
+Reading package lists...
+Building dependency tree...
+Reading state information...
+libgomp1 is already the newest version (12.2.0-14+deb12u1).
+libgomp1 set to manually installed.
+The following additional packages will be installed:
+  libdrm-amdgpu1 libdrm-common libdrm-intel1 libdrm-nouveau2 libdrm-radeon1
+  libdrm2 libedit2 libelf1 libgl1-mesa-dri libglapi-mesa libglvnd0
+  libglx-mesa0 libglx0 libicu72 libllvm15 libpciaccess0 libsensors-config
+  libsensors5 libx11-xcb1 libxcb-dri2-0 libxcb-dri3-0 libxcb-glx0
+  libxcb-present0 libxcb-randr0 libxcb-shm0 libxcb-sync1 libxcb-xfixes0
+  libxext6 libxfixes3 libxml2 libxshmfence1 libxxf86vm1 libz3-4
+Suggested packages:
+  pciutils lm-sensors
+The following NEW packages will be installed:
+  libdrm-amdgpu1 libdrm-common libdrm-intel1 libdrm-nouveau2 libdrm-radeon1
+  libdrm2 libedit2 libelf1 libgl1 libgl1-mesa-dri libglapi-mesa libglvnd0
+  libglx-mesa0 libglx0 libicu72 libllvm15 libpciaccess0 libsensors-config
+  libsensors5 libx11-xcb1 libxcb-dri2-0 libxcb-dri3-0 libxcb-glx0
+  libxcb-present0 libxcb-randr0 libxcb-shm0 libxcb-sync1 libxcb-xfixes0
+  libxext6 libxfixes3 libxml2 libxshmfence1 libxxf86vm1 libz3-4
+0 upgraded, 34 newly installed, 0 to remove and 62 not upgraded.
+Need to get 49.7 MB of archives.
+After this operation, 212 MB of additional disk space will be used.
+Get:1 http://deb.debian.org/debian bookworm/main amd64 libdrm-common all 2.4.114-1 [7112 B]
+Get:2 http://deb.debian.org/debian bookworm/main amd64 libdrm2 amd64 2.4.114-1+b1 [37.5 kB]
+Get:3 http://deb.debian.org/debian bookworm/main amd64 libdrm-amdgpu1 amd64 2.4.114-1+b1 [20.9 kB]
+Get:4 http://deb.debian.org/debian bookworm/main amd64 libpciaccess0 amd64 0.17-2 [51.4 kB]
+Get:5 http://deb.debian.org/debian bookworm/main amd64 libdrm-intel1 amd64 2.4.114-1+b1 [64.0 kB]
+Get:6 http://deb.debian.org/debian bookworm/main amd64 libdrm-nouveau2 amd64 2.4.114-1+b1 [19.1 kB]
+Get:7 http://deb.debian.org/debian bookworm/main amd64 libdrm-radeon1 amd64 2.4.114-1+b1 [21.8 kB]
+Get:8 http://deb.debian.org/debian bookworm/main amd64 libedit2 amd64 3.1-20221030-2 [93.0 kB]
+Get:9 http://deb.debian.org/debian bookworm/main amd64 libelf1 amd64 0.188-2.1 [174 kB]
+Get:10 http://deb.debian.org/debian bookworm/main amd64 libglvnd0 amd64 1.6.0-1 [51.8 kB]
+Get:11 http://deb.debian.org/debian bookworm/main amd64 libglapi-mesa amd64 22.3.6-1+deb12u2 [35.9 kB]
+Get:12 http://deb.debian.org/debian bookworm/main amd64 libx11-xcb1 amd64 2:1.8.4-2+deb12u2 [192 kB]
+Get:13 http://deb.debian.org/debian bookworm/main amd64 libxcb-dri2-0 amd64 1.15-1 [107 kB]
+Get:14 http://deb.debian.org/debian bookworm/main amd64 libxcb-dri3-0 amd64 1.15-1 [107 kB]
+Get:15 http://deb.debian.org/debian bookworm/main amd64 libxcb-glx0 amd64 1.15-1 [122 kB]
+Get:16 http://deb.debian.org/debian bookworm/main amd64 libxcb-present0 amd64 1.15-1 [105 kB]
+Get:17 http://deb.debian.org/debian bookworm/main amd64 libxcb-randr0 amd64 1.15-1 [117 kB]
+Get:18 http://deb.debian.org/debian bookworm/main amd64 libxcb-shm0 amd64 1.15-1 [105 kB]
+Get:19 http://deb.debian.org/debian bookworm/main amd64 libxcb-sync1 amd64 1.15-1 [109 kB]
+Get:20 http://deb.debian.org/debian bookworm/main amd64 libxcb-xfixes0 amd64 1.15-1 [109 kB]
+Get:21 http://deb.debian.org/debian bookworm/main amd64 libxext6 amd64 2:1.3.4-1+b1 [52.9 kB]
+Get:22 http://deb.debian.org/debian bookworm/main amd64 libxfixes3 amd64 1:6.0.0-2 [22.7 kB]
+Get:23 http://deb.debian.org/debian bookworm/main amd64 libxshmfence1 amd64 1.3-1 [8820 B]
+Get:24 http://deb.debian.org/debian bookworm/main amd64 libxxf86vm1 amd64 1:1.1.4-1+b2 [20.8 kB]
+Get:25 http://deb.debian.org/debian bookworm/main amd64 libicu72 amd64 72.1-3+deb12u1 [9376 kB]
+Get:26 http://deb.debian.org/debian bookworm/main amd64 libxml2 amd64 2.9.14+dfsg-1.3~deb12u6 [689 kB]
+Get:27 http://deb.debian.org/debian bookworm/main amd64 libz3-4 amd64 4.8.12-3.1 [7216 kB]
+Get:28 http://deb.debian.org/debian bookworm/main amd64 libllvm15 amd64 1:15.0.6-4+b1 [23.1 MB]
+Get:29 http://deb.debian.org/debian bookworm/main amd64 libsensors-config all 1:3.6.0-7.1 [14.3 kB]
+Get:30 http://deb.debian.org/debian bookworm/main amd64 libsensors5 amd64 1:3.6.0-7.1 [34.2 kB]
+Get:31 http://deb.debian.org/debian bookworm/main amd64 libgl1-mesa-dri amd64 22.3.6-1+deb12u2 [7240 kB]
+Get:32 http://deb.debian.org/debian bookworm/main amd64 libglx-mesa0 amd64 22.3.6-1+deb12u2 [148 kB]
+Get:33 http://deb.debian.org/debian bookworm/main amd64 libglx0 amd64 1.6.0-1 [34.4 kB]
+Get:34 http://deb.debian.org/debian bookworm/main amd64 libgl1 amd64 1.6.0-1 [88.4 kB]
+debconf: delaying package configuration, since apt-utils is not installed
+Fetched 49.7 MB in 0s (186 MB/s)
+Selecting previously unselected package libdrm-common.
+(Reading database ... 
+[1A(Reading database ... 5%
+[1A(Reading database ... 10%
+[1A(Reading database ... 15%
+[1A(Reading database ... 20%
+[1A(Reading database ... 25%
+[1A(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%
+[1A(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%
+[1A(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 16439 files and directories currently installed.)
+Preparing to unpack .../00-libdrm-common_2.4.114-1_all.deb ...
+Unpacking libdrm-common (2.4.114-1) ...
+Selecting previously unselected package libdrm2:amd64.
+Preparing to unpack .../01-libdrm2_2.4.114-1+b1_amd64.deb ...
+Unpacking libdrm2:amd64 (2.4.114-1+b1) ...
+Selecting previously unselected package libdrm-amdgpu1:amd64.
+Preparing to unpack .../02-libdrm-amdgpu1_2.4.114-1+b1_amd64.deb ...
+Unpacking libdrm-amdgpu1:amd64 (2.4.114-1+b1) ...
+Selecting previously unselected package libpciaccess0:amd64.
+Preparing to unpack .../03-libpciaccess0_0.17-2_amd64.deb ...
+Unpacking libpciaccess0:amd64 (0.17-2) ...
+Selecting previously unselected package libdrm-intel1:amd64.
+Preparing to unpack .../04-libdrm-intel1_2.4.114-1+b1_amd64.deb ...
+Unpacking libdrm-intel1:amd64 (2.4.114-1+b1) ...
+Selecting previously unselected package libdrm-nouveau2:amd64.
+Preparing to unpack .../05-libdrm-nouveau2_2.4.114-1+b1_amd64.deb ...
+Unpacking libdrm-nouveau2:amd64 (2.4.114-1+b1) ...
+Selecting previously unselected package libdrm-radeon1:amd64.
+Preparing to unpack .../06-libdrm-radeon1_2.4.114-1+b1_amd64.deb ...
+Unpacking libdrm-radeon1:amd64 (2.4.114-1+b1) ...
+Selecting previously unselected package libedit2:amd64.
+Preparing to unpack .../07-libedit2_3.1-20221030-2_amd64.deb ...
+Unpacking libedit2:amd64 (3.1-20221030-2) ...
+Selecting previously unselected package libelf1:amd64.
+Preparing to unpack .../08-libelf1_0.188-2.1_amd64.deb ...
+Unpacking libelf1:amd64 (0.188-2.1) ...
+Selecting previously unselected package libglvnd0:amd64.
+Preparing to unpack .../09-libglvnd0_1.6.0-1_amd64.deb ...
+Unpacking libglvnd0:amd64 (1.6.0-1) ...
+Selecting previously unselected package libglapi-mesa:amd64.
+Preparing to unpack .../10-libglapi-mesa_22.3.6-1+deb12u2_amd64.deb ...
+Unpacking libglapi-mesa:amd64 (22.3.6-1+deb12u2) ...
+Selecting previously unselected package libx11-xcb1:amd64.
+Preparing to unpack .../11-libx11-xcb1_2%3a1.8.4-2+deb12u2_amd64.deb ...
+Unpacking libx11-xcb1:amd64 (2:1.8.4-2+deb12u2) ...
+Selecting previously unselected package libxcb-dri2-0:amd64.
+Preparing to unpack .../12-libxcb-dri2-0_1.15-1_amd64.deb ...
+Unpacking libxcb-dri2-0:amd64 (1.15-1) ...
+Selecting previously unselected package libxcb-dri3-0:amd64.
+Preparing to unpack .../13-libxcb-dri3-0_1.15-1_amd64.deb ...
+Unpacking libxcb-dri3-0:amd64 (1.15-1) ...
+Selecting previously unselected package libxcb-glx0:amd64.
+Preparing to unpack .../14-libxcb-glx0_1.15-1_amd64.deb ...
+Unpacking libxcb-glx0:amd64 (1.15-1) ...
+Selecting previously unselected package libxcb-present0:amd64.
+Preparing to unpack .../15-libxcb-present0_1.15-1_amd64.deb ...
+Unpacking libxcb-present0:amd64 (1.15-1) ...
+Selecting previously unselected package libxcb-randr0:amd64.
+Preparing to unpack .../16-libxcb-randr0_1.15-1_amd64.deb ...
+Unpacking libxcb-randr0:amd64 (1.15-1) ...
+Selecting previously unselected package libxcb-shm0:amd64.
+Preparing to unpack .../17-libxcb-shm0_1.15-1_amd64.deb ...
+Unpacking libxcb-shm0:amd64 (1.15-1) ...
+Selecting previously unselected package libxcb-sync1:amd64.
+Preparing to unpack .../18-libxcb-sync1_1.15-1_amd64.deb ...
+Unpacking libxcb-sync1:amd64 (1.15-1) ...
+Selecting previously unselected package libxcb-xfixes0:amd64.
+Preparing to unpack .../19-libxcb-xfixes0_1.15-1_amd64.deb ...
+Unpacking libxcb-xfixes0:amd64 (1.15-1) ...
+Selecting previously unselected package libxext6:amd64.
+Preparing to unpack .../20-libxext6_2%3a1.3.4-1+b1_amd64.deb ...
+Unpacking libxext6:amd64 (2:1.3.4-1+b1) ...
+Selecting previously unselected package libxfixes3:amd64.
+Preparing to unpack .../21-libxfixes3_1%3a6.0.0-2_amd64.deb ...
+Unpacking libxfixes3:amd64 (1:6.0.0-2) ...
+Selecting previously unselected package libxshmfence1:amd64.
+Preparing to unpack .../22-libxshmfence1_1.3-1_amd64.deb ...
+Unpacking libxshmfence1:amd64 (1.3-1) ...
+Selecting previously unselected package libxxf86vm1:amd64.
+Preparing to unpack .../23-libxxf86vm1_1%3a1.1.4-1+b2_amd64.deb ...
+Unpacking libxxf86vm1:amd64 (1:1.1.4-1+b2) ...
+Selecting previously unselected package libicu72:amd64.
+Preparing to unpack .../24-libicu72_72.1-3+deb12u1_amd64.deb ...
+Unpacking libicu72:amd64 (72.1-3+deb12u1) ...
+Selecting previously unselected package libxml2:amd64.
+Preparing to unpack .../25-libxml2_2.9.14+dfsg-1.3~deb12u6_amd64.deb ...
+Unpacking libxml2:amd64 (2.9.14+dfsg-1.3~deb12u6) ...
+Selecting previously unselected package libz3-4:amd64.
+Preparing to unpack .../26-libz3-4_4.8.12-3.1_amd64.deb ...
+Unpacking libz3-4:amd64 (4.8.12-3.1) ...
+Selecting previously unselected package libllvm15:amd64.
+Preparing to unpack .../27-libllvm15_1%3a15.0.6-4+b1_amd64.deb ...
+Unpacking libllvm15:amd64 (1:15.0.6-4+b1) ...
+Selecting previously unselected package libsensors-config.
+Preparing to unpack .../28-libsensors-config_1%3a3.6.0-7.1_all.deb ...
+Unpacking libsensors-config (1:3.6.0-7.1) ...
+Selecting previously unselected package libsensors5:amd64.
+Preparing to unpack .../29-libsensors5_1%3a3.6.0-7.1_amd64.deb ...
+Unpacking libsensors5:amd64 (1:3.6.0-7.1) ...
+Selecting previously unselected package libgl1-mesa-dri:amd64.
+Preparing to unpack .../30-libgl1-mesa-dri_22.3.6-1+deb12u2_amd64.deb ...
+Unpacking libgl1-mesa-dri:amd64 (22.3.6-1+deb12u2) ...
+Selecting previously unselected package libglx-mesa0:amd64.
+Preparing to unpack .../31-libglx-mesa0_22.3.6-1+deb12u2_amd64.deb ...
+Unpacking libglx-mesa0:amd64 (22.3.6-1+deb12u2) ...
+Selecting previously unselected package libglx0:amd64.
+Preparing to unpack .../32-libglx0_1.6.0-1_amd64.deb ...
+Unpacking libglx0:amd64 (1.6.0-1) ...
+Selecting previously unselected package libgl1:amd64.
+Preparing to unpack .../33-libgl1_1.6.0-1_amd64.deb ...
+Unpacking libgl1:amd64 (1.6.0-1) ...
+Setting up libxcb-dri3-0:amd64 (1.15-1) ...
+Setting up libx11-xcb1:amd64 (2:1.8.4-2+deb12u2) ...
+Setting up libpciaccess0:amd64 (0.17-2) ...
+Setting up libicu72:amd64 (72.1-3+deb12u1) ...
+Setting up libxcb-xfixes0:amd64 (1.15-1) ...
+Setting up libglvnd0:amd64 (1.6.0-1) ...
+Setting up libxcb-glx0:amd64 (1.15-1) ...
+Setting up libedit2:amd64 (3.1-20221030-2) ...
+Setting up libsensors-config (1:3.6.0-7.1) ...
+Setting up libxext6:amd64 (2:1.3.4-1+b1) ...
+Setting up libxcb-shm0:amd64 (1.15-1) ...
+Setting up libxxf86vm1:amd64 (1:1.1.4-1+b2) ...
+Setting up libxcb-present0:amd64 (1.15-1) ...
+Setting up libz3-4:amd64 (4.8.12-3.1) ...
+Setting up libxfixes3:amd64 (1:6.0.0-2) ...
+Setting up libxcb-sync1:amd64 (1.15-1) ...
+Setting up libsensors5:amd64 (1:3.6.0-7.1) ...
+Setting up libglapi-mesa:amd64 (22.3.6-1+deb12u2) ...
+Setting up libxcb-dri2-0:amd64 (1.15-1) ...
+Setting up libxshmfence1:amd64 (1.3-1) ...
+Setting up libxcb-randr0:amd64 (1.15-1) ...
+Setting up libdrm-common (2.4.114-1) ...
+Setting up libelf1:amd64 (0.188-2.1) ...
+Setting up libxml2:amd64 (2.9.14+dfsg-1.3~deb12u6) ...
+Setting up libdrm2:amd64 (2.4.114-1+b1) ...
+Setting up libllvm15:amd64 (1:15.0.6-4+b1) ...
+Setting up libdrm-amdgpu1:amd64 (2.4.114-1+b1) ...
+Setting up libdrm-nouveau2:amd64 (2.4.114-1+b1) ...
+Setting up libdrm-radeon1:amd64 (2.4.114-1+b1) ...
+Setting up libdrm-intel1:amd64 (2.4.114-1+b1) ...
+Setting up libgl1-mesa-dri:amd64 (22.3.6-1+deb12u2) ...
+Setting up libglx-mesa0:amd64 (22.3.6-1+deb12u2) ...
+Setting up libglx0:amd64 (1.6.0-1) ...
+Setting up libgl1:amd64 (1.6.0-1) ...
+Processing triggers for libc-bin (2.36-9+deb12u10) ...
+Saving image...
+Image saved, took 545.01ms
+
+Built image im-3W9dQkpKFzIuOvoJKt80wA in 8.16s
+
+
+Building image im-1YD9nNJdLPIVVV7PnFiKsz
+
+=> Step 0: FROM base
+
+=> Step 1: RUN python -m pip install SimpleITK==2.4.0 fire==0.6.0 matplotlib==3.9.2 monai==1.4.0 nibabel==5.2.1 numpy==1.24.4 pandas==2.2.2 pytorch-ignite==0.4.11 scikit-image==0.24.0 scikit-learn==1.5.1 scipy==1.13.1 torch==2.4.0 torchvision==0.19.0
+Looking in indexes: http://pypi-mirror.modal.local:5555/simple
+Collecting SimpleITK==2.4.0
+  Downloading http://pypi-mirror.modal.local:5555/simple/simpleitk/SimpleITK-2.4.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (7.9 kB)
+Collecting fire==0.6.0
+  Downloading http://pypi-mirror.modal.local:5555/simple/fire/fire-0.6.0.tar.gz (88 kB)
+  Preparing metadata (setup.py): started
+  Preparing metadata (setup.py): finished with status 'done'
+Collecting matplotlib==3.9.2
+  Downloading http://pypi-mirror.modal.local:5555/simple/matplotlib/matplotlib-3.9.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (11 kB)
+Collecting monai==1.4.0
+  Downloading http://pypi-mirror.modal.local:5555/simple/monai/monai-1.4.0-py3-none-any.whl.metadata (11 kB)
+Collecting nibabel==5.2.1
+  Downloading http://pypi-mirror.modal.local:5555/simple/nibabel/nibabel-5.2.1-py3-none-any.whl.metadata (8.8 kB)
+Collecting numpy==1.24.4
+  Downloading http://pypi-mirror.modal.local:5555/simple/numpy/numpy-1.24.4-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (5.6 kB)
+Collecting pandas==2.2.2
+  Downloading http://pypi-mirror.modal.local:5555/simple/pandas/pandas-2.2.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (19 kB)
+Collecting pytorch-ignite==0.4.11
+  Downloading http://pypi-mirror.modal.local:5555/simple/pytorch-ignite/pytorch_ignite-0.4.11-py3-none-any.whl.metadata (28 kB)
+Collecting scikit-image==0.24.0
+  Downloading http://pypi-mirror.modal.local:5555/simple/scikit-image/scikit_image-0.24.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (14 kB)
+Collecting scikit-learn==1.5.1
+  Downloading http://pypi-mirror.modal.local:5555/simple/scikit-learn/scikit_learn-1.5.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (12 kB)
+Collecting scipy==1.13.1
+  Downloading http://pypi-mirror.modal.local:5555/simple/scipy/scipy-1.13.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (60 kB)
+Collecting torch==2.4.0
+  Downloading http://pypi-mirror.modal.local:5555/simple/torch/torch-2.4.0-cp310-cp310-manylinux1_x86_64.whl.metadata (26 kB)
+Collecting torchvision==0.19.0
+  Downloading http://pypi-mirror.modal.local:5555/simple/torchvision/torchvision-0.19.0-cp310-cp310-manylinux1_x86_64.whl.metadata (6.0 kB)
+Collecting six (from fire==0.6.0)
+  Downloading http://pypi-mirror.modal.local:5555/simple/six/six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+Collecting termcolor (from fire==0.6.0)
+  Downloading http://pypi-mirror.modal.local:5555/simple/termcolor/termcolor-3.3.0-py3-none-any.whl.metadata (6.5 kB)
+Collecting contourpy>=1.0.1 (from matplotlib==3.9.2)
+  Downloading http://pypi-mirror.modal.local:5555/simple/contourpy/contourpy-1.3.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (5.5 kB)
+Collecting cycler>=0.10 (from matplotlib==3.9.2)
+  Downloading http://pypi-mirror.modal.local:5555/simple/cycler/cycler-0.12.1-py3-none-any.whl.metadata (3.8 kB)
+Collecting fonttools>=4.22.0 (from matplotlib==3.9.2)
+  Downloading http://pypi-mirror.modal.local:5555/simple/fonttools/fonttools-4.65.0-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (125 kB)
+Collecting kiwisolver>=1.3.1 (from matplotlib==3.9.2)
+  Downloading http://pypi-mirror.modal.local:5555/simple/kiwisolver/kiwisolver-1.5.1-cp310-cp310-manylinux_2_12_x86_64.manylinux2010_x86_64.whl.metadata (5.2 kB)
+Collecting packaging>=20.0 (from matplotlib==3.9.2)
+  Downloading http://pypi-mirror.modal.local:5555/simple/packaging/packaging-26.3-py3-none-any.whl.metadata (3.5 kB)
+Collecting pillow>=8 (from matplotlib==3.9.2)
+  Downloading http://pypi-mirror.modal.local:5555/simple/pillow/pillow-12.3.0-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (9.1 kB)
+Collecting pyparsing>=2.3.1 (from matplotlib==3.9.2)
+  Downloading http://pypi-mirror.modal.local:5555/simple/pyparsing/pyparsing-3.3.3-py3-none-any.whl.metadata (5.9 kB)
+Collecting python-dateutil>=2.7 (from matplotlib==3.9.2)
+  Downloading http://pypi-mirror.modal.local:5555/simple/python-dateutil/python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+Collecting pytz>=2020.1 (from pandas==2.2.2)
+  Downloading http://pypi-mirror.modal.local:5555/simple/pytz/pytz-2026.5-py2.py3-none-any.whl.metadata (22 kB)
+Collecting tzdata>=2022.7 (from pandas==2.2.2)
+  Downloading http://pypi-mirror.modal.local:5555/simple/tzdata/tzdata-2026.5-py2.py3-none-any.whl.metadata (1.4 kB)
+Collecting filelock (from torch==2.4.0)
+  Downloading http://pypi-mirror.modal.local:5555/simple/filelock/filelock-4.0.11-py3-none-any.whl.metadata (2.0 kB)
+Collecting typing-extensions>=4.8.0 (from torch==2.4.0)
+  Downloading http://pypi-mirror.modal.local:5555/simple/typing-extensions/typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting sympy (from torch==2.4.0)
+  Downloading http://pypi-mirror.modal.local:5555/simple/sympy/sympy-1.14.0-py3-none-any.whl.metadata (12 kB)
+Collecting networkx (from torch==2.4.0)
+  Downloading http://pypi-mirror.modal.local:5555/simple/networkx/networkx-3.4.2-py3-none-any.whl.metadata (6.3 kB)
+Collecting jinja2 (from torch==2.4.0)
+  Downloading http://pypi-mirror.modal.local:5555/simple/jinja2/jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+Collecting fsspec (from torch==2.4.0)
+  Downloading http://pypi-mirror.modal.local:5555/simple/fsspec/fsspec-2026.9.0-py3-none-any.whl.metadata (10 kB)
+Collecting nvidia-cuda-nvrtc-cu12==12.1.105 (from torch==2.4.0)
+  Downloading http://pypi-mirror.modal.local:5555/simple/nvidia-cuda-nvrtc-cu12/nvidia_cuda_nvrtc_cu12-12.1.105-py3-none-manylinux1_x86_64.whl.metadata (1.5 kB)
+Collecting nvidia-cuda-runtime-cu12==12.1.105 (from torch==2.4.0)
+  Downloading http://pypi-mirror.modal.local:5555/simple/nvidia-cuda-runtime-cu12/nvidia_cuda_runtime_cu12-12.1.105-py3-none-manylinux1_x86_64.whl.metadata (1.5 kB)
+Collecting nvidia-cuda-cupti-cu12==12.1.105 (from torch==2.4.0)
+  Downloading http://pypi-mirror.modal.local:5555/simple/nvidia-cuda-cupti-cu12/nvidia_cuda_cupti_cu12-12.1.105-py3-none-manylinux1_x86_64.whl.metadata (1.6 kB)
+Collecting nvidia-cudnn-cu12==9.1.0.70 (from torch==2.4.0)
+  Downloading http://pypi-mirror.modal.local:5555/simple/nvidia-cudnn-cu12/nvidia_cudnn_cu12-9.1.0.70-py3-none-manylinux2014_x86_64.whl.metadata (1.6 kB)
+Collecting nvidia-cublas-cu12==12.1.3.1 (from torch==2.4.0)
+  Downloading http://pypi-mirror.modal.local:5555/simple/nvidia-cublas-cu12/nvidia_cublas_cu12-12.1.3.1-py3-none-manylinux1_x86_64.whl.metadata (1.5 kB)
+Collecting nvidia-cufft-cu12==11.0.2.54 (from torch==2.4.0)
+  Downloading http://pypi-mirror.modal.local:5555/simple/nvidia-cufft-cu12/nvidia_cufft_cu12-11.0.2.54-py3-none-manylinux1_x86_64.whl.metadata (1.5 kB)
+Collecting nvidia-curand-cu12==10.3.2.106 (from torch==2.4.0)
+  Downloading http://pypi-mirror.modal.local:5555/simple/nvidia-curand-cu12/nvidia_curand_cu12-10.3.2.106-py3-none-manylinux1_x86_64.whl.metadata (1.5 kB)
+Collecting nvidia-cusolver-cu12==11.4.5.107 (from torch==2.4.0)
+  Downloading http://pypi-mirror.modal.local:5555/simple/nvidia-cusolver-cu12/nvidia_cusolver_cu12-11.4.5.107-py3-none-manylinux1_x86_64.whl.metadata (1.6 kB)
+Collecting nvidia-cusparse-cu12==12.1.0.106 (from torch==2.4.0)
+  Downloading http://pypi-mirror.modal.local:5555/simple/nvidia-cusparse-cu12/nvidia_cusparse_cu12-12.1.0.106-py3-none-manylinux1_x86_64.whl.metadata (1.6 kB)
+Collecting nvidia-nccl-cu12==2.20.5 (from torch==2.4.0)
+  Downloading http://pypi-mirror.modal.local:5555/simple/nvidia-nccl-cu12/nvidia_nccl_cu12-2.20.5-py3-none-manylinux2014_x86_64.whl.metadata (1.8 kB)
+Collecting nvidia-nvtx-cu12==12.1.105 (from torch==2.4.0)
+  Downloading http://pypi-mirror.modal.local:5555/simple/nvidia-nvtx-cu12/nvidia_nvtx_cu12-12.1.105-py3-none-manylinux1_x86_64.whl.metadata (1.7 kB)
+Collecting triton==3.0.0 (from torch==2.4.0)
+  Downloading http://pypi-mirror.modal.local:5555/simple/triton/triton-3.0.0-1-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (1.3 kB)
+Collecting imageio>=2.33 (from scikit-image==0.24.0)
+  Downloading http://pypi-mirror.modal.local:5555/simple/imageio/imageio-2.38.0-py3-none-any.whl.metadata (9.7 kB)
+Collecting tifffile>=2022.8.12 (from scikit-image==0.24.0)
+  Downloading http://pypi-mirror.modal.local:5555/simple/tifffile/tifffile-2025.5.10-py3-none-any.whl.metadata (31 kB)
+Collecting lazy-loader>=0.4 (from scikit-image==0.24.0)
+  Downloading http://pypi-mirror.modal.local:5555/simple/lazy-loader/lazy_loader-0.6-py3-none-any.whl.metadata (6.0 kB)
+Collecting joblib>=1.2.0 (from scikit-learn==1.5.1)
+  Downloading http://pypi-mirror.modal.local:5555/simple/joblib/joblib-1.6.0-py3-none-any.whl.metadata (6.5 kB)
+Collecting threadpoolctl>=3.1.0 (from scikit-learn==1.5.1)
+  Downloading http://pypi-mirror.modal.local:5555/simple/threadpoolctl/threadpoolctl-3.7.0-py3-none-any.whl.metadata (24 kB)
+Collecting nvidia-nvjitlink-cu12 (from nvidia-cusolver-cu12==11.4.5.107->torch==2.4.0)
+  Downloading http://pypi-mirror.modal.local:5555/simple/nvidia-nvjitlink-cu12/nvidia_nvjitlink_cu12-12.9.86-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl.metadata (1.7 kB)
+Collecting cloudpickle>=3.0 (from joblib>=1.2.0->scikit-learn==1.5.1)
+  Downloading http://pypi-mirror.modal.local:5555/simple/cloudpickle/cloudpickle-3.1.2-py3-none-any.whl.metadata (7.1 kB)
+Collecting MarkupSafe>=2.0 (from jinja2->torch==2.4.0)
+  Downloading http://pypi-mirror.modal.local:5555/simple/markupsafe/markupsafe-3.0.4-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+Collecting mpmath<1.4,>=1.1.0 (from sympy->torch==2.4.0)
+  Downloading http://pypi-mirror.modal.local:5555/simple/mpmath/mpmath-1.3.0-py3-none-any.whl.metadata (8.6 kB)
+Downloading http://pypi-mirror.modal.local:5555/simple/simpleitk/SimpleITK-2.4.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (52.4 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 52.4/52.4 MB 225.1 MB/s eta 0:00:00
+Downloading http://pypi-mirror.modal.local:5555/simple/matplotlib/matplotlib-3.9.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (8.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 8.3/8.3 MB 289.2 MB/s eta 0:00:00
+Downloading http://pypi-mirror.modal.local:5555/simple/monai/monai-1.4.0-py3-none-any.whl (1.5 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.5/1.5 MB 235.6 MB/s eta 0:00:00
+Downloading http://pypi-mirror.modal.local:5555/simple/numpy/numpy-1.24.4-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (17.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 17.3/17.3 MB 377.6 MB/s eta 0:00:00
+Downloading http://pypi-mirror.modal.local:5555/simple/nibabel/nibabel-5.2.1-py3-none-any.whl (3.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.3/3.3 MB 298.6 MB/s eta 0:00:00
+Downloading http://pypi-mirror.modal.local:5555/simple/pandas/pandas-2.2.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (13.0 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 13.0/13.0 MB 306.3 MB/s eta 0:00:00
+Downloading http://pypi-mirror.modal.local:5555/simple/pytorch-ignite/pytorch_ignite-0.4.11-py3-none-any.whl (266 kB)
+Downloading http://pypi-mirror.modal.local:5555/simple/torch/torch-2.4.0-cp310-cp310-manylinux1_x86_64.whl (797.2 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 797.2/797.2 MB 296.3 MB/s eta 0:00:00
+Downloading http://pypi-mirror.modal.local:5555/simple/scikit-image/scikit_image-0.24.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (14.9 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 14.9/14.9 MB 295.3 MB/s eta 0:00:00
+Downloading http://pypi-mirror.modal.local:5555/simple/scikit-learn/scikit_learn-1.5.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (13.4 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 13.4/13.4 MB 303.6 MB/s eta 0:00:00
+Downloading http://pypi-mirror.modal.local:5555/simple/scipy/scipy-1.13.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (38.6 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 38.6/38.6 MB 292.8 MB/s eta 0:00:00
+Downloading http://pypi-mirror.modal.local:5555/simple/torchvision/torchvision-0.19.0-cp310-cp310-manylinux1_x86_64.whl (7.0 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 7.0/7.0 MB 286.0 MB/s eta 0:00:00
+Downloading http://pypi-mirror.modal.local:5555/simple/nvidia-cublas-cu12/nvidia_cublas_cu12-12.1.3.1-py3-none-manylinux1_x86_64.whl (410.6 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 410.6/410.6 MB 544.8 MB/s eta 0:00:00
+Downloading http://pypi-mirror.modal.local:5555/simple/nvidia-cuda-cupti-cu12/nvidia_cuda_cupti_cu12-12.1.105-py3-none-manylinux1_x86_64.whl (14.1 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 14.1/14.1 MB 549.8 MB/s eta 0:00:00
+Downloading http://pypi-mirror.modal.local:5555/simple/nvidia-cuda-nvrtc-cu12/nvidia_cuda_nvrtc_cu12-12.1.105-py3-none-manylinux1_x86_64.whl (23.7 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 23.7/23.7 MB 534.4 MB/s eta 0:00:00
+Downloading http://pypi-mirror.modal.local:5555/simple/nvidia-cuda-runtime-cu12/nvidia_cuda_runtime_cu12-12.1.105-py3-none-manylinux1_x86_64.whl (823 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 823.6/823.6 kB 864.8 MB/s eta 0:00:00
+Downloading http://pypi-mirror.modal.local:5555/simple/nvidia-cudnn-cu12/nvidia_cudnn_cu12-9.1.0.70-py3-none-manylinux2014_x86_64.whl (664.8 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 664.8/664.8 MB 537.1 MB/s eta 0:00:00
+Downloading http://pypi-mirror.modal.local:5555/simple/nvidia-cufft-cu12/nvidia_cufft_cu12-11.0.2.54-py3-none-manylinux1_x86_64.whl (121.6 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 121.6/121.6 MB 524.7 MB/s eta 0:00:00
+Downloading http://pypi-mirror.modal.local:5555/simple/nvidia-curand-cu12/nvidia_curand_cu12-10.3.2.106-py3-none-manylinux1_x86_64.whl (56.5 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 56.5/56.5 MB 535.3 MB/s eta 0:00:00
+Downloading http://pypi-mirror.modal.local:5555/simple/nvidia-cusolver-cu12/nvidia_cusolver_cu12-11.4.5.107-py3-none-manylinux1_x86_64.whl (124.2 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 124.2/124.2 MB 526.5 MB/s eta 0:00:00
+Downloading http://pypi-mirror.modal.local:5555/simple/nvidia-cusparse-cu12/nvidia_cusparse_cu12-12.1.0.106-py3-none-manylinux1_x86_64.whl (196.0 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 196.0/196.0 MB 530.3 MB/s eta 0:00:00
+Downloading http://pypi-mirror.modal.local:5555/simple/nvidia-nccl-cu12/nvidia_nccl_cu12-2.20.5-py3-none-manylinux2014_x86_64.whl (176.2 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 176.2/176.2 MB 536.1 MB/s eta 0:00:00
+Downloading http://pypi-mirror.modal.local:5555/simple/nvidia-nvtx-cu12/nvidia_nvtx_cu12-12.1.105-py3-none-manylinux1_x86_64.whl (99 kB)
+Downloading http://pypi-mirror.modal.local:5555/simple/triton/triton-3.0.0-1-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (209.4 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 209.4/209.4 MB 287.7 MB/s eta 0:00:00
+Downloading http://pypi-mirror.modal.local:5555/simple/contourpy/contourpy-1.3.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (325 kB)
+Downloading http://pypi-mirror.modal.local:5555/simple/cycler/cycler-0.12.1-py3-none-any.whl (8.3 kB)
+Downloading http://pypi-mirror.modal.local:5555/simple/fonttools/fonttools-4.65.0-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (5.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 5.3/5.3 MB 526.4 MB/s eta 0:00:00
+Downloading http://pypi-mirror.modal.local:5555/simple/imageio/imageio-2.38.0-py3-none-any.whl (328 kB)
+Downloading http://pypi-mirror.modal.local:5555/simple/joblib/joblib-1.6.0-py3-none-any.whl (306 kB)
+Downloading http://pypi-mirror.modal.local:5555/simple/cloudpickle/cloudpickle-3.1.2-py3-none-any.whl (22 kB)
+Downloading http://pypi-mirror.modal.local:5555/simple/kiwisolver/kiwisolver-1.5.1-cp310-cp310-manylinux_2_12_x86_64.manylinux2010_x86_64.whl (1.6 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.6/1.6 MB 536.8 MB/s eta 0:00:00
+Downloading http://pypi-mirror.modal.local:5555/simple/lazy-loader/lazy_loader-0.6-py3-none-any.whl (8.8 kB)
+Downloading http://pypi-mirror.modal.local:5555/simple/networkx/networkx-3.4.2-py3-none-any.whl (1.7 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.7/1.7 MB 543.6 MB/s eta 0:00:00
+Downloading http://pypi-mirror.modal.local:5555/simple/packaging/packaging-26.3-py3-none-any.whl (129 kB)
+Downloading http://pypi-mirror.modal.local:5555/simple/pillow/pillow-12.3.0-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (6.9 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.9/6.9 MB 532.6 MB/s eta 0:00:00
+Downloading http://pypi-mirror.modal.local:5555/simple/pyparsing/pyparsing-3.3.3-py3-none-any.whl (126 kB)
+Downloading http://pypi-mirror.modal.local:5555/simple/python-dateutil/python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+Downloading http://pypi-mirror.modal.local:5555/simple/pytz/pytz-2026.5-py2.py3-none-any.whl (506 kB)
+Downloading http://pypi-mirror.modal.local:5555/simple/six/six-1.17.0-py2.py3-none-any.whl (11 kB)
+Downloading http://pypi-mirror.modal.local:5555/simple/threadpoolctl/threadpoolctl-3.7.0-py3-none-any.whl (26 kB)
+Downloading http://pypi-mirror.modal.local:5555/simple/tifffile/tifffile-2025.5.10-py3-none-any.whl (226 kB)
+Downloading http://pypi-mirror.modal.local:5555/simple/typing-extensions/typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+Downloading http://pypi-mirror.modal.local:5555/simple/tzdata/tzdata-2026.5-py2.py3-none-any.whl (347 kB)
+Downloading http://pypi-mirror.modal.local:5555/simple/filelock/filelock-4.0.11-py3-none-any.whl (111 kB)
+Downloading http://pypi-mirror.modal.local:5555/simple/fsspec/fsspec-2026.9.0-py3-none-any.whl (221 kB)
+Downloading http://pypi-mirror.modal.local:5555/simple/jinja2/jinja2-3.1.6-py3-none-any.whl (134 kB)
+Downloading http://pypi-mirror.modal.local:5555/simple/markupsafe/markupsafe-3.0.4-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (20 kB)
+Downloading http://pypi-mirror.modal.local:5555/simple/nvidia-nvjitlink-cu12/nvidia_nvjitlink_cu12-12.9.86-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl (39.7 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 39.7/39.7 MB 509.3 MB/s eta 0:00:00
+Downloading http://pypi-mirror.modal.local:5555/simple/sympy/sympy-1.14.0-py3-none-any.whl (6.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.3/6.3 MB 481.9 MB/s eta 0:00:00
+Downloading http://pypi-mirror.modal.local:5555/simple/mpmath/mpmath-1.3.0-py3-none-any.whl (536 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 536.2/536.2 kB 552.8 MB/s eta 0:00:00
+Downloading http://pypi-mirror.modal.local:5555/simple/termcolor/termcolor-3.3.0-py3-none-any.whl (7.7 kB)
+Building wheels for collected packages: fire
+  DEPRECATION: Building 'fire' using the legacy setup.py bdist_wheel mechanism, which will be removed in a future version. pip 25.3 will enforce this behaviour change. A possible replacement is to use the standardized build interface by setting the `--use-pep517` option, (possibly combined with `--no-build-isolation`), or adding a `pyproject.toml` file to the source tree of 'fire'. Discussion can be found at https://github.com/pypa/pip/issues/6334
+  Building wheel for fire (setup.py): started
+  Building wheel for fire (setup.py): finished with status 'done'
+  Created wheel for fire: filename=fire-0.6.0-py2.py3-none-any.whl size=117031 sha256=81668fca56eed4f080c1c2122b0effb7512e28da87ebd613269ebb028b25e765
+  Stored in directory: /tmp/pip-ephem-wheel-cache-nbas6vpb/wheels/8f/86/33/e433c4e34586e0b65af53844adb7833bd12a41bb4a817fe86e
+Successfully built fire
+Installing collected packages: SimpleITK, pytz, mpmath, tzdata, typing-extensions, threadpoolctl, termcolor, sympy, six, pyparsing, pillow, packaging, nvidia-nvtx-cu12, nvidia-nvjitlink-cu12, nvidia-nccl-cu12, nvidia-curand-cu12, nvidia-cufft-cu12, nvidia-cuda-runtime-cu12, nvidia-cuda-nvrtc-cu12, nvidia-cuda-cupti-cu12, nvidia-cublas-cu12, numpy, networkx, MarkupSafe, kiwisolver, fsspec, fonttools, filelock, cycler, cloudpickle, triton, tifffile, scipy, python-dateutil, nvidia-cusparse-cu12, nvidia-cudnn-cu12, nibabel, lazy-loader, joblib, jinja2, imageio, fire, contourpy, scikit-learn, scikit-image, pandas, nvidia-cusolver-cu12, matplotlib, torch, torchvision, pytorch-ignite, monai
+
+Successfully installed MarkupSafe-3.0.4 SimpleITK-2.4.0 cloudpickle-3.1.2 contourpy-1.3.2 cycler-0.12.1 filelock-4.0.11 fire-0.6.0 fonttools-4.65.0 fsspec-2026.9.0 imageio-2.38.0 jinja2-3.1.6 joblib-1.6.0 kiwisolver-1.5.1 lazy-loader-0.6 matplotlib-3.9.2 monai-1.4.0 mpmath-1.3.0 networkx-3.4.2 nibabel-5.2.1 numpy-1.24.4 nvidia-cublas-cu12-12.1.3.1 nvidia-cuda-cupti-cu12-12.1.105 nvidia-cuda-nvrtc-cu12-12.1.105 nvidia-cuda-runtime-cu12-12.1.105 nvidia-cudnn-cu12-9.1.0.70 nvidia-cufft-cu12-11.0.2.54 nvidia-curand-cu12-10.3.2.106 nvidia-cusolver-cu12-11.4.5.107 nvidia-cusparse-cu12-12.1.0.106 nvidia-nccl-cu12-2.20.5 nvidia-nvjitlink-cu12-12.9.86 nvidia-nvtx-cu12-12.1.105 packaging-26.3 pandas-2.2.2 pillow-12.3.0 pyparsing-3.3.3 python-dateutil-2.9.0.post0 pytorch-ignite-0.4.11 pytz-2026.5 scikit-image-0.24.0 scikit-learn-1.5.1 scipy-1.13.1 six-1.17.0 sympy-1.14.0 termcolor-3.3.0 threadpoolctl-3.7.0 tifffile-2025.5.10 torch-2.4.0 torchvision-0.19.0 triton-3.0.0 typing-extensions-4.16.0 tzdata-2026.5
+
+[notice] A new release of pip is available: 25.1.1 -> 26.2.1
+[notice] To update, run: pip install --upgrade pip
+Saving image...
+Image saved, took 2.99s
+
+Built image im-1YD9nNJdLPIVVV7PnFiKsz in 73.25s
+
+
+
+✓ Created objects.
+├── 🔨 Created mount 
+│   /Users/fahadkiani/Desktop/development/scientist-monai-moat/deploy/modal/_lun
+│   a16_froc_bundle/ann/annotations_excluded.csv
+├── 🔨 Created mount 
+│   /Users/fahadkiani/Desktop/development/scientist-monai-moat/deploy/modal/luna
+│   16_heldout_froc_app.py
+├── 🔨 Created mount 
+│   /Users/fahadkiani/Desktop/development/scientist-monai-moat/deploy/modal/_lun
+│   a16_froc_bundle/ann/annotations.csv
+├── 🔨 Created mount 
+│   /Users/fahadkiani/Desktop/development/scientist-monai-moat/deploy/modal/luna
+│   16_full_482_60_datalist.json
+├── 🔨 Created mount 
+│   /Users/fahadkiani/Desktop/development/scientist-monai-moat/deploy/modal/_lun
+│   a16_froc_bundle/py3_port
+└── 🔨 Created function run_paired_froc.
+device=cuda:0 n_test=88 baseline_thresh=0.02 refined_thresh=0.02
+[baseline] 10/88 series
+[baseline] 20/88 series
+[baseline] 30/88 series
+[baseline] 40/88 series
+[baseline] 50/88 series
+[baseline] 60/88 series
+[baseline] 70/88 series
+[baseline] 80/88 series
+[refined] 10/88 series
+[refined] 20/88 series
+[refined] 30/88 series
+[refined] 40/88 series
+[refined] 50/88 series
+[refined] 60/88 series
+[refined] 70/88 series
+[refined] 80/88 series
+{
+  "app_version": "luna16-heldout-froc-v0.2.2-score-thresh",
+  "request_id": "gateE-froc-testing123-20261005T073100Z-zo",
+  "ckpt_request_id": "gateD-crispro-ephemeral-20261005T014000Z-zo",
+  "n_test": 88,
+  "device": "cuda:0",
+  "gpu_name": "NVIDIA A100-SXM4-40GB",
+  "baseline_score_thresh": 0.02,
+  "refined_score_thresh": 0.02,
+  "baseline": {
+    "label": "baseline",
+    "ckpt_sha256": 
+"b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01",
+    "n_series_ok": 88,
+    "n_series_err": 0,
+    "n_candidates": 1181,
+    "results_csv": 
+"/vol/output/fullfit-v0.1/gateE-froc-testing123-20261005T073100Z-zo/froc/baselin
+e/results.csv",
+    "elapsed_seconds": 264.523,
+    "returncode": 0,
+    "froc_txt": 
+"/vol/output/fullfit-v0.1/gateE-froc-testing123-20261005T073100Z-zo/froc/baselin
+e/cad/froc_results.txt",
+    "froc_at_2": 0.8267399271674979,
+    "froc_points": {
+      "0.125": 0.619047619,
+      "0.25": 0.6613095238946428,
+      "0.5": 0.7066666664335238,
+      "1.0": 0.7464285713619048,
+      "2.0": 0.8267399271674979,
+      "4.0": 0.867460317752328,
+      "8.0": 0.895238095
+    },
+    "log_tail": " FROC: bootstrap 920/1000\ncomputing FROC: bootstrap 
+921/1000\ncomputing FROC: bootstrap 922/1000\ncomputing FROC: bootstrap 
+923/1000\ncomputing FROC: bootstrap 924/1000\ncomputing FROC: bootstrap 
+925/1000\ncomputing FROC: bootstrap 926/1000\ncomputing FROC: bootstrap 
+927/1000\ncomputing FROC: bootstrap 928/1000\ncomputing FROC: bootstrap 
+929/1000\ncomputing FROC: bootstrap 930/1000\ncomputing FROC: bootstrap 
+931/1000\ncomputing FROC: bootstrap 932/1000\ncomputing FROC: bootstrap 
+933/1000\ncomputing FROC: bootstrap 934/1000\ncomputing FROC: bootstrap 
+935/1000\ncomputing FROC: bootstrap 936/1000\ncomputing FROC: bootstrap 
+937/1000\ncomputing FROC: bootstrap 938/1000\ncomputing FROC: bootstrap 
+939/1000\ncomputing FROC: bootstrap 940/1000\ncomputing FROC: bootstrap 
+941/1000\ncomputing FROC: bootstrap 942/1000\ncomputing FROC: bootstrap 
+943/1000\ncomputing FROC: bootstrap 944/1000\ncomputing FROC: bootstrap 
+945/1000\ncomputing FROC: bootstrap 946/1000\ncomputing FROC: bootstrap 
+947/1000\ncomputing FROC: bootstrap 948/1000\ncomputing FROC: bootstrap 
+949/1000\ncomputing FROC: bootstrap 950/1000\ncomputing FROC: bootstrap 
+951/1000\ncomputing FROC: bootstrap 952/1000\ncomputing FROC: bootstrap 
+953/1000\ncomputing FROC: bootstrap 954/1000\ncomputing FROC: bootstrap 
+955/1000\ncomputing FROC: bootstrap 956/1000\ncomputing FROC: bootstrap 
+957/1000\ncomputing FROC: bootstrap 958/1000\ncomputing FROC: bootstrap 
+959/1000\n/opt/luna16_eval/noduleCADEvaluationLUNA16.py:400: UserWarning: 
+FixedFormatter should only be used together with FixedLocator\n  
+ax.xaxis.set_major_formatter(FixedFormatter([0.125,0.25,0.5,1,2,4,8]))\ncomputin
+g FROC: bootstrap 960/1000\ncomputing FROC: bootstrap 961/1000\ncomputing FROC: 
+bootstrap 962/1000\ncomputing FROC: bootstrap 963/1000\ncomputing FROC: 
+bootstrap 964/1000\ncomputing FROC: bootstrap 965/1000\ncomputing FROC: 
+bootstrap 966/1000\ncomputing FROC: bootstrap 967/1000\ncomputing FROC: 
+bootstrap 968/1000\ncomputing FROC: bootstrap 969/1000\ncomputing FROC: 
+bootstrap 970/1000\ncomputing FROC: bootstrap 971/1000\ncomputing FROC: 
+bootstrap 972/1000\ncomputing FROC: bootstrap 973/1000\ncomputing FROC: 
+bootstrap 974/1000\ncomputing FROC: bootstrap 975/1000\ncomputing FROC: 
+bootstrap 976/1000\ncomputing FROC: bootstrap 977/1000\ncomputing FROC: 
+bootstrap 978/1000\ncomputing FROC: bootstrap 979/1000\ncomputing FROC: 
+bootstrap 980/1000\ncomputing FROC: bootstrap 981/1000\ncomputing FROC: 
+bootstrap 982/1000\ncomputing FROC: bootstrap 983/1000\ncomputing FROC: 
+bootstrap 984/1000\ncomputing FROC: bootstrap 985/1000\ncomputing FROC: 
+bootstrap 986/1000\ncomputing FROC: bootstrap 987/1000\ncomputing FROC: 
+bootstrap 988/1000\ncomputing FROC: bootstrap 989/1000\ncomputing FROC: 
+bootstrap 990/1000\ncomputing FROC: bootstrap 991/1000\ncomputing FROC: 
+bootstrap 992/1000\ncomputing FROC: bootstrap 993/1000\ncomputing FROC: 
+bootstrap 994/1000\ncomputing FROC: bootstrap 995/1000\ncomputing FROC: 
+bootstrap 996/1000\ncomputing FROC: bootstrap 997/1000\ncomputing FROC: 
+bootstrap 998/1000\ncomputing FROC: bootstrap 999/1000\nFinished!\n"
+  },
+  "refined": {
+    "label": "refined",
+    "ckpt_sha256": 
+"327306f1cc8d500e34cc7352d14bb1a4959fb1643123b4ce31ebc360cb51c2d5",
+    "n_series_ok": 88,
+    "n_series_err": 0,
+    "n_candidates": 8800,
+    "results_csv": 
+"/vol/output/fullfit-v0.1/gateE-froc-testing123-20261005T073100Z-zo/froc/refined
+/results.csv",
+    "elapsed_seconds": 289.418,
+    "returncode": 0,
+    "froc_txt": 
+"/vol/output/fullfit-v0.1/gateE-froc-testing123-20261005T073100Z-zo/froc/refined
+/cad/froc_results.txt",
+    "froc_at_2": NaN,
+    "froc_points": {
+      "0.125": NaN,
+      "0.25": NaN,
+      "0.5": NaN,
+      "1.0": NaN,
+      "2.0": NaN,
+      "4.0": NaN,
+      "8.0": NaN
+    },
+    "log_tail": "ples in y_true, true positive value should be meaningless\n  
+warnings.warn(\n/usr/local/lib/python3.10/site-packages/sklearn/metrics/_ranking
+.py:1183: UndefinedMetricWarning: No positive samples in y_true, true positive 
+value should be meaningless\n  
+warnings.warn(\n/usr/local/lib/python3.10/site-packages/sklearn/metrics/_ranking
+.py:1183: UndefinedMetricWarning: No positive samples in y_true, true positive 
+value should be meaningless\n  
+warnings.warn(\n/usr/local/lib/python3.10/site-packages/sklearn/metrics/_ranking
+.py:1183: UndefinedMetricWarning: No positive samples in y_true, true positive 
+value should be meaningless\n  
+warnings.warn(\n/usr/local/lib/python3.10/site-packages/sklearn/metrics/_ranking
+.py:1183: UndefinedMetricWarning: No positive samples in y_true, true positive 
+value should be meaningless\n  
+warnings.warn(\n/usr/local/lib/python3.10/site-packages/sklearn/metrics/_ranking
+.py:1183: UndefinedMetricWarning: No positive samples in y_true, true positive 
+value should be meaningless\n  
+warnings.warn(\n/usr/local/lib/python3.10/site-packages/sklearn/metrics/_ranking
+.py:1183: UndefinedMetricWarning: No positive samples in y_true, true positive 
+value should be meaningless\n  
+warnings.warn(\n/usr/local/lib/python3.10/site-packages/sklearn/metrics/_ranking
+.py:1183: UndefinedMetricWarning: No positive samples in y_true, true positive 
+value should be meaningless\n  
+warnings.warn(\n/opt/luna16_eval/noduleCADEvaluationLUNA16.py:400: UserWarning: 
+FixedFormatter should only be used together with FixedLocator\n  
+ax.xaxis.set_major_formatter(FixedFormatter([0.125,0.25,0.5,1,2,4,8]))\ncomputin
+g FROC: bootstrap 960/1000\ncomputing FROC: bootstrap 961/1000\ncomputing FROC: 
+bootstrap 962/1000\ncomputing FROC: bootstrap 963/1000\ncomputing FROC: 
+bootstrap 964/1000\ncomputing FROC: bootstrap 965/1000\ncomputing FROC: 
+bootstrap 966/1000\ncomputing FROC: bootstrap 967/1000\ncomputing FROC: 
+bootstrap 968/1000\ncomputing FROC: bootstrap 969/1000\ncomputing FROC: 
+bootstrap 970/1000\ncomputing FROC: bootstrap 971/1000\ncomputing FROC: 
+bootstrap 972/1000\ncomputing FROC: bootstrap 973/1000\ncomputing FROC: 
+bootstrap 974/1000\ncomputing FROC: bootstrap 975/1000\ncomputing FROC: 
+bootstrap 976/1000\ncomputing FROC: bootstrap 977/1000\ncomputing FROC: 
+bootstrap 978/1000\ncomputing FROC: bootstrap 979/1000\ncomputing FROC: 
+bootstrap 980/1000\ncomputing FROC: bootstrap 981/1000\ncomputing FROC: 
+bootstrap 982/1000\ncomputing FROC: bootstrap 983/1000\ncomputing FROC: 
+bootstrap 984/1000\ncomputing FROC: bootstrap 985/1000\ncomputing FROC: 
+bootstrap 986/1000\ncomputing FROC: bootstrap 987/1000\ncomputing FROC: 
+bootstrap 988/1000\ncomputing FROC: bootstrap 989/1000\ncomputing FROC: 
+bootstrap 990/1000\ncomputing FROC: bootstrap 991/1000\ncomputing FROC: 
+bootstrap 992/1000\ncomputing FROC: bootstrap 993/1000\ncomputing FROC: 
+bootstrap 994/1000\ncomputing FROC: bootstrap 995/1000\ncomputing FROC: 
+bootstrap 996/1000\ncomputing FROC: bootstrap 997/1000\ncomputing FROC: 
+bootstrap 998/1000\ncomputing FROC: bootstrap 999/1000\nFinished!\n"
+  },
+  "froc_at_2_baseline": 0.8267399271674979,
+  "froc_at_2_refined": NaN,
+  "delta": {
+    "froc_at_2": NaN,
+    "floor_ref_0.05": 0.05,
+    "meets_floor_ref": false
+  },
+  "status": "ok",
+  "verdict": "PROVEN",
+  "verdict_note": "Paired official CAD FROC@2 parsed. +0.05 floor is reference 
+only \u2014 do not auto-promote; do not overwrite luna16-infer.",
+  "elapsed_seconds": 554.296
+}
+
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/testing-123/main/ap-0KSttjptImxLNPNQADwOiM

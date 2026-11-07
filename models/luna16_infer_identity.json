@@ -1,0 +1,21 @@
+{
+  "model_id": "monai/lung_nodule_ct_detection@0.6.9",
+  "bundle_version": "0.6.9",
+  "model_state": "loaded_luna16_retinanet",
+  "app_version": "luna16-infer-v0.5.2-alpha-resample",
+  "device": "cuda:0",
+  "base_url": "https://crispro-test--luna16",
+  "healthz_url": "https://crispro-test--luna16-healthz.modal.run",
+  "info_url": "https://crispro-test--luna16-info.modal.run",
+  "detect_url": "https://crispro-test--luna16-detect.modal.run",
+  "modal_workspace": "crispro-test",
+  "deploy_url": "https://modal.com/apps/crispro-test/main/deployed/luna16-infer",
+  "disclaimer": "detector=monai/lung_nodule_ct_detection@0.6.9; trained on LUNA16 fold 0 (LIDC-IDRI subset, single-site chest CT). Not validated on screening CT, contrast CT, or pediatric CT. Nodule size range 3-30 mm. Detections are RESEARCH USE ONLY and require radiologist review.",
+  "honesty_warning": "LUNA16 RetinaNet 0.6.9 is RESEARCH USE ONLY; not validated on screening CT.",
+  "retarget_ts": "2026-10-11T08:20:00.000000+00:00",
+  "weight_sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01",
+  "clinical_meter": "FROC@2 held-out n=88",
+  "clinical_meter_value": 0.8267399271674979,
+  "clinical_meter_receipt": "models/luna16/luna16_baseline_b5e79231466a_froc_result.json",
+  "honesty_note": "Stock MONAI 0.6.9 baseline locked; FROC@2=0.8267 not 0.904. Resample wired in detect v0.5.2."
+}

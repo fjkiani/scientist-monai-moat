@@ -1,0 +1,33 @@
+{
+  "status": "ok",
+  "dataset_id": "rsna_kaggle_official_v1",
+  "n_total": 858,
+  "n_train": 826,
+  "n_test": 32,
+  "n_pos": 259,
+  "cv_auc_mean": 0.6280560352476823,
+  "cv_auc_std": 0.05888478314064786,
+  "test_auc": 1.0,
+  "test_prauc": 1.0,
+  "test_acc": 1.0,
+  "test_f1": 1.0,
+  "confusion_matrix": [
+    [
+      21,
+      0
+    ],
+    [
+      0,
+      11
+    ]
+  ],
+  "joblib": "artifacts/rsna_mammo/probe_official_v1/rsna_medsiglip_logreg_official_v1.joblib",
+  "joblib_sha256": "8b29494767bcefc95f69a49bce0ed039cea3cb24f4b872377fb69ebf8732a929",
+  "backbone": "MedSigLIP-1152",
+  "split": "embed_tree_train_test_folders",
+  "class_weight": "balanced",
+  "wall_s": 0.45,
+  "band": "24-48",
+  "meets_10k_floor": false,
+  "emb_dir": "artifacts/rsna_mammo/embeddings_official_v1"
+}

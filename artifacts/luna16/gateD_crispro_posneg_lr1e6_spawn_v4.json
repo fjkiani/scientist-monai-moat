@@ -1,0 +1,7 @@
+{
+  "call_id": "fc-01M45933ZQ9Y4FCCV0NGDVATHY",
+  "request_id": "gateD-crispro-posneg-lr1e6-20261005T013753Z-zo",
+  "gate_c_request_id": "gateC-crispro-20261005T013729Z-zo",
+  "learning_rate": 1e-06,
+  "profile": "crispro"
+}

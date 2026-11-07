@@ -1,0 +1,277 @@
+{
+  "version": "cbis_ddsm_logreg_v2",
+  "artifact": "models/cbis_ddsm_logreg_v2.joblib",
+  "dataset": {
+    "name": "CBIS-DDSM_1024",
+    "source": "https://huggingface.co/datasets/dbaek111/CBIS-DDSM_1024",
+    "n_total": 3086,
+    "n_train": 2445,
+    "n_test": 641,
+    "n_train_positive": 1098,
+    "n_train_negative": 1347,
+    "n_test_positive": 260,
+    "n_test_negative": 381
+  },
+  "features": {
+    "source_model": "google/medsiglip-448",
+    "modal_endpoint": "https://crispro-test--medsiglip-embed-batch.modal.run",
+    "modal_app_version": "medsiglip-modal-v0.3.0",
+    "embedding_dim": 1152,
+    "artifacts_dir": "artifacts/cbis_ddsm_1024",
+    "shard_dir": "artifacts/cbis_parallel"
+  },
+  "winner": {
+    "name": "LogisticRegression",
+    "params": {
+      "C": 0.01,
+      "penalty": "l2",
+      "class_weight": "balanced"
+    }
+  },
+  "sweep": [
+    {
+      "name": "LogisticRegression",
+      "params": {
+        "C": 0.01,
+        "penalty": "l2",
+        "class_weight": "balanced"
+      },
+      "test_auroc": 0.7521199273167778,
+      "test_prauc": 0.6809244175792264,
+      "test_accuracy": 0.6755070202808112,
+      "test_f1": 0.6245487364620939,
+      "fit_seconds": 1.5598793029785156
+    },
+    {
+      "name": "RidgeClassifier",
+      "params": {
+        "alpha": 1000.0,
+        "C_equiv": 0.001,
+        "class_weight": "balanced"
+      },
+      "test_auroc": 0.74867756915001,
+      "test_prauc": 0.6742430751135,
+      "test_accuracy": 0.6692667706708268,
+      "test_f1": 0.6227758007117438,
+      "fit_seconds": 0.06831002235412598
+    },
+    {
+      "name": "LogisticRegression",
+      "params": {
+        "C": 0.1,
+        "penalty": "l2",
+        "class_weight": "balanced"
+      },
+      "test_auroc": 0.7444780940843932,
+      "test_prauc": 0.6795406461824454,
+      "test_accuracy": 0.6848673946957878,
+      "test_f1": 0.63003663003663,
+      "fit_seconds": 8.586559057235718
+    },
+    {
+      "name": "RidgeClassifier",
+      "params": {
+        "alpha": 100.0,
+        "C_equiv": 0.01,
+        "class_weight": "balanced"
+      },
+      "test_auroc": 0.7423783565515849,
+      "test_prauc": 0.675540874850867,
+      "test_accuracy": 0.6708268330733229,
+      "test_f1": 0.6128440366972477,
+      "fit_seconds": 0.040116071701049805
+    },
+    {
+      "name": "LogisticRegression",
+      "params": {
+        "C": 0.001,
+        "penalty": "l2",
+        "class_weight": "balanced"
+      },
+      "test_auroc": 0.7373410054512417,
+      "test_prauc": 0.6527291031435164,
+      "test_accuracy": 0.6552262090483619,
+      "test_f1": 0.6169844020797227,
+      "fit_seconds": 0.3818061351776123
+    },
+    {
+      "name": "MLP_2layer",
+      "params": {
+        "hidden": [
+          256,
+          64
+        ],
+        "alpha": 0.01,
+        "C_equiv": 0.1,
+        "sample_weight": "balanced"
+      },
+      "test_auroc": 0.737038158691702,
+      "test_prauc": 0.653077608091022,
+      "test_accuracy": 0.6755070202808112,
+      "test_f1": 0.6218181818181818,
+      "fit_seconds": 0.7240180969238281
+    },
+    {
+      "name": "MLP_2layer",
+      "params": {
+        "hidden": [
+          256,
+          64
+        ],
+        "alpha": 0.1,
+        "C_equiv": 0.01,
+        "sample_weight": "balanced"
+      },
+      "test_auroc": 0.7367050272562083,
+      "test_prauc": 0.6505536572627155,
+      "test_accuracy": 0.6833073322932918,
+      "test_f1": 0.6419753086419753,
+      "fit_seconds": 0.9234468936920166
+    },
+    {
+      "name": "MLP_2layer",
+      "params": {
+        "hidden": [
+          256,
+          64
+        ],
+        "alpha": 0.0001,
+        "C_equiv": 10.0,
+        "sample_weight": "balanced"
+      },
+      "test_auroc": 0.7352614577024026,
+      "test_prauc": 0.6317594990024025,
+      "test_accuracy": 0.6677067082683308,
+      "test_f1": 0.6282722513089005,
+      "fit_seconds": 0.5040240287780762
+    },
+    {
+      "name": "MLP_2layer",
+      "params": {
+        "hidden": [
+          256,
+          64
+        ],
+        "alpha": 1.0,
+        "C_equiv": 0.001,
+        "sample_weight": "balanced"
+      },
+      "test_auroc": 0.7343630123157683,
+      "test_prauc": 0.6335853083194338,
+      "test_accuracy": 0.6583463338533542,
+      "test_f1": 0.6204506065857885,
+      "fit_seconds": 0.5647609233856201
+    },
+    {
+      "name": "MLP_2layer",
+      "params": {
+        "hidden": [
+          256,
+          64
+        ],
+        "alpha": 0.001,
+        "C_equiv": 1.0,
+        "sample_weight": "balanced"
+      },
+      "test_auroc": 0.7342721582879064,
+      "test_prauc": 0.6302541458380776,
+      "test_accuracy": 0.6645865834633385,
+      "test_f1": 0.6273830155979203,
+      "fit_seconds": 0.5024981498718262
+    },
+    {
+      "name": "LogisticRegression",
+      "params": {
+        "C": 1.0,
+        "penalty": "l2",
+        "class_weight": "balanced"
+      },
+      "test_auroc": 0.727801332525742,
+      "test_prauc": 0.6604888168766914,
+      "test_accuracy": 0.6661466458658346,
+      "test_f1": 0.608058608058608,
+      "fit_seconds": 30.63017773628235
+    },
+    {
+      "name": "RidgeClassifier",
+      "params": {
+        "alpha": 10.0,
+        "C_equiv": 0.1,
+        "class_weight": "balanced"
+      },
+      "test_auroc": 0.723046638400969,
+      "test_prauc": 0.6533491092343451,
+      "test_accuracy": 0.6833073322932918,
+      "test_f1": 0.6247689463955638,
+      "fit_seconds": 0.039298057556152344
+    },
+    {
+      "name": "LogisticRegression",
+      "params": {
+        "C": 10.0,
+        "penalty": "l2",
+        "class_weight": "balanced"
+      },
+      "test_auroc": 0.7147435897435898,
+      "test_prauc": 0.6504437648523962,
+      "test_accuracy": 0.6739469578783152,
+      "test_f1": 0.6122448979591837,
+      "fit_seconds": 72.63214898109436
+    },
+    {
+      "name": "RidgeClassifier",
+      "params": {
+        "alpha": 1.0,
+        "C_equiv": 1.0,
+        "class_weight": "balanced"
+      },
+      "test_auroc": 0.7125277609529579,
+      "test_prauc": 0.6354737690903677,
+      "test_accuracy": 0.6848673946957878,
+      "test_f1": 0.6145038167938931,
+      "fit_seconds": 0.039566755294799805
+    },
+    {
+      "name": "RidgeClassifier",
+      "params": {
+        "alpha": 0.1,
+        "C_equiv": 10.0,
+        "class_weight": "balanced"
+      },
+      "test_auroc": 0.7032606501110439,
+      "test_prauc": 0.6211184729682007,
+      "test_accuracy": 0.6770670826833073,
+      "test_f1": 0.6130841121495327,
+      "fit_seconds": 0.046974897384643555
+    }
+  ],
+  "test_metrics": {
+    "auroc": 0.747551988693721,
+    "prauc": 0.6809244175792264,
+    "accuracy": 0.6755070202808112,
+    "f1": 0.6245487364620939,
+    "precision": 0.5884353741496599,
+    "recall": 0.6653846153846154,
+    "brier": 0.20354759693145752,
+    "confusion_matrix": [
+      [
+        260,
+        121
+      ],
+      [
+        87,
+        173
+      ]
+    ]
+  },
+  "floor": {
+    "auroc": 0.85,
+    "pass": false
+  },
+  "seed": 42,
+  "class_weight": "balanced",
+  "created_unix": 1791105020,
+  "artifact_sha256": "e5f5b67caf8ba18006e3d582e91becf95fbb20b8b34417366c7ef07b906a211b",
+  "n_training_manifest": 2201,
+  "n_validation_manifest": 244
+}

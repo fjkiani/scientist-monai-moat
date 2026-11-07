@@ -1,0 +1,42 @@
+{
+  "status": "ok",
+  "app_version": "mammo-retinanet-cls-v1.2.0-frozen-multiscale-lr",
+  "mode": "retinanet_backbone_cls_frozen_multiscale_lr",
+  "backbone_frozen": true,
+  "optimizer_params": "head_only_sklearn_lr",
+  "weight_decay": 0.0001,
+  "val_frac": 0.05,
+  "dataset_root": "/vol/cbis/CBIS-DDSM_1024",
+  "dataset_note": "Full CBIS-DDSM_1024 HF-PNG pool on cbis-ddsm-hf-png (max available mammography PNGs).",
+  "epochs": 1,
+  "lr": 0.001,
+  "batch_size": 16,
+  "img_size": 384,
+  "feat_dim": 1280,
+  "head_mode": "multiscale_lr",
+  "best_C": 0.01,
+  "cv_auroc": 0.7300576197034874,
+  "n_train_pool": 2445,
+  "n_train_fit": 2323,
+  "n_validation": 122,
+  "n_test": 641,
+  "n_trainable_params": 1281,
+  "n_frozen_backbone_params": 31505472,
+  "val_auroc": 0.7839891451831751,
+  "test_auroc": 0.6955885322027053,
+  "meets_floor_0.85": false,
+  "artifact": "/vol/out/mammo_retinanet_v2_frozen/mammo_retinanet_v2_frozen.safetensors",
+  "artifact_sha256": "0c454591afaf7f65064a4a5f11733a087ba3f4e94704d404a11345fdce4a4c3b",
+  "history": [
+    {
+      "epoch": 1,
+      "loss_mean": 0.26994238029651263,
+      "cv_auroc": 0.7300576197034874,
+      "best_C": 0.01
+    }
+  ],
+  "elapsed_seconds": 90.603,
+  "gpu_name": "NVIDIA A10",
+  "prior_unfrozen_test_auroc": 0.785453260650111,
+  "prior_frozen_mlp_test_auroc": 0.6827074500302847
+}

@@ -22,6 +22,8 @@ from pathlib import Path
 
 import pytest
 
+from tests._gate import require_gate_input
+
 RUNS_DIR = Path("/mnt/shared-workspace/shared/clinicalbert_runs")
 SEEDS = (42, 123, 456, 789, 1234)
 FLOOR = 0.85
@@ -29,8 +31,7 @@ FLOOR = 0.85
 
 def _load_seed_metric(seed: int) -> dict:
     p = RUNS_DIR / f"seed{seed}" / "metrics.json"
-    if not p.exists():
-        pytest.skip(f"metrics.json missing for seed {seed} at {p}")
+    require_gate_input(p, 'the per-seed ClinicalBERT F1 floor')
     return json.loads(p.read_text())
 
 
@@ -47,8 +48,7 @@ def _extract_test_micro_f1(m: dict) -> float | None:
 
 def _load_aggregate() -> dict:
     p = RUNS_DIR / "AGGREGATE.json"
-    if not p.exists():
-        pytest.skip(f"AGGREGATE.json missing at {p}")
+    require_gate_input(p, 'the per-seed ClinicalBERT F1 floor')
     return json.loads(p.read_text())
 
 

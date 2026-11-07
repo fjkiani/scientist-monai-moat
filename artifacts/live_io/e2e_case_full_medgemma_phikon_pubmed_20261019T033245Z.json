@@ -1,0 +1,305 @@
+{
+  "ts_utc": "20261019T033245Z",
+  "elapsed_s": 267.91,
+  "status_code": 200,
+  "probe_smoke": {
+    "pred_class": 8,
+    "pred_label": "TUM",
+    "proba": {
+      "ADI": 5.162883490264944e-10,
+      "BACK": 6.741719366901444e-07,
+      "DEB": 2.94910630595474e-09,
+      "LYM": 0.0005862854501837983,
+      "MUC": 7.89421968606583e-09,
+      "MUS": 6.310311041632195e-07,
+      "NORM": 1.9508800485308972e-08,
+      "STR": 0.01207746825089243,
+      "TUM": 0.9873349102274681
+    },
+    "probe_version": "phikon_probe_v1",
+    "artifact_sha256": "7c77d0759dbcc00440dac6c9b6d99255523ff9706041ce275e8c56724ff8a713"
+  },
+  "inputs": {
+    "fixture": "fixtures/patient_sample_01",
+    "dicom_bytes": 2097858,
+    "report_chars": 4939,
+    "phikon_source": "artifacts/phikon_staging/embeddings.npy",
+    "phikon_sample_id": "phikon-val-TUM-TUM-TCGA-AAHIDTWA",
+    "phikon_row_index": 105947,
+    "phikon_embedding_sha256": "bf33d32a5327222683a262b43bb6e661e469f7ab4e6e38149c01fc6fd4f00f2e",
+    "phikon_embedding_dim": 768,
+    "phikon_generator": "real_histology_row"
+  },
+  "gates": {
+    "screening_state": "loaded_medsiglip",
+    "biopsy_state": "loaded_phikon",
+    "therapy_state": "loaded_medgemma_1_5_4b_therapy",
+    "phikon_probe": {
+      "pred_class": 8,
+      "pred_label": "TUM",
+      "proba": {
+        "ADI": 5.162883490264944e-10,
+        "BACK": 6.741719366901444e-07,
+        "DEB": 2.94910630595474e-09,
+        "LYM": 0.0005862854501837983,
+        "MUC": 7.89421968606583e-09,
+        "MUS": 6.310311041632195e-07,
+        "NORM": 1.9508800485308972e-08,
+        "STR": 0.01207746825089243,
+        "TUM": 0.9873349102274681
+      },
+      "probe_version": "phikon_probe_v1",
+      "artifact_sha256": "7c77d0759dbcc00440dac6c9b6d99255523ff9706041ce275e8c56724ff8a713"
+    },
+    "n_evidence": 3,
+    "therapy_n_evidence": 3,
+    "recommended": [
+      "Trastuzumab + Pertuzumab + Neoadjuvant Chemotherapy"
+    ],
+    "therapy_transport": "transport:http"
+  },
+  "screening_compact": {
+    "provenance": {
+      "model_state": "loaded_medsiglip",
+      "model_name": "google/medsiglip-448+cbis_ddsm_logreg_v2",
+      "model_version": null,
+      "request_id": "7d16cac619f34b0d98d1cab7f1c73c36",
+      "gate_report": {
+        "repo_id": "google/medsiglip-448",
+        "access_level": "allowed",
+        "status_code": 200,
+        "reason": "modal-remote model_repo=google/medsiglip-448 revision=9cea28a1a1195f665105faa6e8544c112fd960a4 dim=1152",
+        "has_token": true,
+        "allowed": true
+      },
+      "model_endpoint_url": null
+    },
+    "overall_score": 0.4556921422481537,
+    "findings": [
+      {
+        "label": "a mammogram of a breast with a malignant mass",
+        "score": 0.0009049380896613002,
+        "location_bbox_normalized": null
+      },
+      {
+        "label": "a mammogram of a breast without a malignant mass",
+        "score": 0.0011242710752412677,
+        "location_bbox_normalized": null
+      },
+      {
+        "label": "cbis_ddsm_logreg_v2:cancer",
+        "score": 0.4556921422481537,
+        "location_bbox_normalized": null
+      }
+    ],
+    "warnings": [
+      "This score is from google/medsiglip-448 (HAI-DEF-gated Health AI Developer Foundations model). MedSigLIP is a genuine medical vision-language model, but its published training corpus covers chest X-ray (MIMIC-CXR), dermatology (SCIN, PAD-UFES-20), ophthalmology (EyePACS), histopathology (TCGA, CAMELYON), and CT/MRI slices \u2014 it does NOT include mammography. Running MedSigLIP zero-shot on a mammogram is therefore OFF-LABEL and this score is an out-of-distribution probe, not a validated mammographic score. The only Google-published breast-related AUROC for MedSigLIP is histopathology (Invasive Breast Cancer, n=5000, 3-class, zero-shot 0.933 / linear-probe 0.930 / HAI-DEF LP 0.943).",
+      "Zero-shot probabilities are uncalibrated, off-label, and are not diagnostic or treatment evidence.",
+      "This probe is a supervised classifier trained on 2445 CBIS-DDSM images using 1152-d MedSigLIP embeddings only (held-out test AUROC = 0.747552 on n=641). No clinical metadata and no radiologist assessment. MedSigLIP-448 was NOT pretrained on mammography \u2014 the backbone is used off-label. Fine-tuned mammography CNNs on CBIS-DDSM typically reach AUC 0.85-0.90, so this probe is a research prototype, not a clinical tool."
+    ],
+    "stage_receipts": [
+      {
+        "stage": "medsiglip_screening",
+        "required": true,
+        "status": "succeeded",
+        "request_id": "7d16cac619f34b0d98d1cab7f1c73c36",
+        "service_name": "crispro--medsiglip",
+        "endpoint_label": "medsiglip-zero-shot+medsiglip-embed",
+        "app_version": "medsiglip-modal-v0.4.0-alpha",
+        "model_name": "google/medsiglip-448",
+        "model_version": null,
+        "artifact_sha256": null,
+        "input_reference": "7faec0e7626ad59fec947fc9a20244a910e89998b1495dc0d4b95dc3861a1070",
+        "latency_ms": 3082.283499999903,
+        "warnings": [
+          "This score is from google/medsiglip-448 (HAI-DEF-gated Health AI Developer Foundations model). MedSigLIP is a genuine medical vision-language model, but its published training corpus covers chest X-ray (MIMIC-CXR), dermatology (SCIN, PAD-UFES-20), ophthalmology (EyePACS), histopathology (TCGA, CAMELYON), and CT/MRI slices \u2014 it does NOT include mammography. Running MedSigLIP zero-shot on a mammogram is therefore OFF-LABEL and this score is an out-of-distribution probe, not a validated mammographic score. The only Google-published breast-related AUROC for MedSigLIP is histopathology (Invasive Breast Cancer, n=5000, 3-class, zero-shot 0.933 / linear-probe 0.930 / HAI-DEF LP 0.943).",
+          "Zero-shot probabilities are uncalibrated, off-label, and are not diagnostic or treatment evidence."
+        ],
+        "error": null
+      },
+      {
+        "stage": "cbis_ddsm_logreg_v2",
+        "required": false,
+        "status": "succeeded",
+        "request_id": "7d16cac619f34b0d98d1cab7f1c73c36",
+        "service_name": "oncology-arbiter",
+        "endpoint_label": null,
+        "app_version": null,
+        "model_name": "cbis_ddsm_logreg_v2",
+        "model_version": null,
+        "artifact_sha256": "e5f5b67caf8ba18006e3d582e91becf95fbb20b8b34417366c7ef07b906a211b",
+        "input_reference": "e4de437ece983b12694376273b3c5fff7256469c7ab01b3b82fb63653021bfca",
+        "latency_ms": 391.39941707253456,
+        "warnings": [
+          "This probe is a supervised classifier trained on 2445 CBIS-DDSM images using 1152-d MedSigLIP embeddings only (held-out test AUROC = 0.747552 on n=641). No clinical metadata and no radiologist assessment. MedSigLIP-448 was NOT pretrained on mammography \u2014 the backbone is used off-label. Fine-tuned mammography CNNs on CBIS-DDSM typically reach AUC 0.85-0.90, so this probe is a research prototype, not a clinical tool."
+        ],
+        "error": null
+      }
+    ]
+  },
+  "biopsy_compact": {
+    "provenance": {
+      "model_state": "loaded_phikon",
+      "model_name": "owkin/phikon+phikon_probe_v1.joblib@sha256:7c77d0759dbc",
+      "model_version": null,
+      "request_id": "709c0d451a58451080a33ffee255543d",
+      "gate_report": null,
+      "model_endpoint_url": null
+    },
+    "subtype": "TUM",
+    "receptor_panel": {
+      "er_positive": true,
+      "pr_positive": true,
+      "her2_status": "positive",
+      "ki67_percent": null,
+      "parse_state": {
+        "er": "matched",
+        "pr": "matched",
+        "her2": "matched",
+        "grade": "matched"
+      }
+    },
+    "probe": {
+      "pred_class": 8,
+      "pred_label": "TUM",
+      "proba": {
+        "ADI": 5.162883490264944e-10,
+        "BACK": 6.741719366901444e-07,
+        "DEB": 2.94910630595474e-09,
+        "LYM": 0.0005862854501837983,
+        "MUC": 7.89421968606583e-09,
+        "MUS": 6.310311041632195e-07,
+        "NORM": 1.9508800485308972e-08,
+        "STR": 0.01207746825089243,
+        "TUM": 0.9873349102274681
+      },
+      "probe_version": "phikon_probe_v1",
+      "artifact_sha256": "7c77d0759dbcc00440dac6c9b6d99255523ff9706041ce275e8c56724ff8a713"
+    }
+  },
+  "therapy_compact": {
+    "provenance": {
+      "model_state": "loaded_medgemma_1_5_4b_therapy",
+      "model_name": "google/medgemma-1.5-4b-it",
+      "model_version": null,
+      "request_id": "49a8b28f92184787a219be4e55e1a05e",
+      "gate_report": null,
+      "model_endpoint_url": null
+    },
+    "recommended_options": [
+      {
+        "regimen": "Trastuzumab + Pertuzumab + Neoadjuvant Chemotherapy",
+        "line_of_therapy": 1,
+        "rationale": "The patient has HER2-positive breast cancer, which is the primary indication for HER2-targeted therapy. The clinical guideline explicitly states that HER2-targeted therapy must be included in the recommended first-line treatment.",
+        "evidence": [
+          {
+            "url": "https://pubmed.ncbi.nlm.nih.gov/27939064/",
+            "quoted_text": "HER2-positive breast cancer.\n\nAnti-HER2 treatment for HER2-positive breast cancer has changed the natural biology of this disease. This Series article reviews the main achievements so far in the treatment of both metastatic and early HER2-positive breast cancer. The success of neoadjuvant therapy in HER2-positive early breast cancer is especially acknowledged, as pertuzumab has been approved on the basis of a higher proportion of patients achieving a pathological complete response with pertuzumab and trastuzumab than with trastuzumab alone in a neoadjuvant study. Event-free survival after the confirmatory adjuvant trial completed recruitment was numerically better with pertuzumab plus trastuzumab than with trastuzumab alone. With survival rates of almost 5 years in women with metastatic HER2-positive breast cancer and",
+            "source": "pubmed"
+          },
+          {
+            "url": "https://pubmed.ncbi.nlm.nih.gov/38621469/",
+            "quoted_text": "Trastuzumab deruxtecan in breast cancer.\n\nTrastuzumab deruxtecan (T-DXd) is an antibody-drug conjugate (ADC) consisting of a humanised, anti-human epidermal growth factor receptor 2 (HER2) monoclonal antibody covalently linked to a topoisomerase I inhibitor cytotoxic payload (DXd). The high drug-to-antibody ratio (8:1) ensures a high DXd concentration is delivered to target tumour cells, following internalisation of T-DXd and subsequent cleavage of its tetrapeptide-based linker. DXd's membrane-permeable nature enables it to cross cell membranes and potentially exert antitumour activity on surrounding tumour cells regardless of HER2 expression. T-DXd's unique mechanism of action is reflected in its efficacy in clinical trials in patients with HER2-positive advanced breast cancer (in heavily pretreated populations and in those previ",
+            "source": "pubmed"
+          },
+          {
+            "url": "https://pubmed.ncbi.nlm.nih.gov/35148934/",
+            "quoted_text": "Neoadjuvant and adjuvant treatment of patients with HER2-positive early breast cancer.\n\nThe availability of HER2-targeted therapy has dramatically improved patient outcome in HER2-positive (HER2+) early breast cancer (EBC) as recently demonstrated by the EBCTCTG metaanalysis on trastuzumab in HER2+ EBC: Adding trastuzumab to chemotherapy has reduced recurrence rates and breast-cancer related mortality by a third [1]. Today, neoadjuvant therapy has become standard of care for women with stage II or III tumors as pathological complete response (pCR) status after surgery can be used to individualize adjuvant systemic therapy. pCR is correlated with favorable patient outcome, particularly in hormone receptor (HR) negative HER2+ EBC, as demonstrated by the FDA meta-analysis. Moreover, for patients with non-pCR, 14 cycles of adjuvant T-DM1 have become a new adjuvant therapy standar",
+            "source": "pubmed"
+          }
+        ],
+        "contraindications": []
+      }
+    ],
+    "evidence": [
+      {
+        "url": "https://pubmed.ncbi.nlm.nih.gov/27939064/",
+        "quoted_text": "HER2-positive breast cancer.\n\nAnti-HER2 treatment for HER2-positive breast cancer has changed the natural biology of this disease. This Series article reviews the main achievements so far in the treatment of both metastatic and early HER2-positive breast cancer. The success of neoadjuvant therapy in HER2-positive early breast cancer is especially acknowledged, as pertuzumab has been approved on the basis of a higher proportion of patients achieving a pathological complete response with pertuzumab and trastuzumab than with trastuzumab alone in a neoadjuvant study. Event-free survival after the confirmatory adjuvant trial completed recruitment was numerically better with pertuzumab plus trastuzumab than with trastuzumab alone. With survival rates of almost 5 years in women with metastatic HER2-positive breast cancer and",
+        "source": "pubmed"
+      },
+      {
+        "url": "https://pubmed.ncbi.nlm.nih.gov/38621469/",
+        "quoted_text": "Trastuzumab deruxtecan in breast cancer.\n\nTrastuzumab deruxtecan (T-DXd) is an antibody-drug conjugate (ADC) consisting of a humanised, anti-human epidermal growth factor receptor 2 (HER2) monoclonal antibody covalently linked to a topoisomerase I inhibitor cytotoxic payload (DXd). The high drug-to-antibody ratio (8:1) ensures a high DXd concentration is delivered to target tumour cells, following internalisation of T-DXd and subsequent cleavage of its tetrapeptide-based linker. DXd's membrane-permeable nature enables it to cross cell membranes and potentially exert antitumour activity on surrounding tumour cells regardless of HER2 expression. T-DXd's unique mechanism of action is reflected in its efficacy in clinical trials in patients with HER2-positive advanced breast cancer (in heavily pretreated populations and in those previ",
+        "source": "pubmed"
+      },
+      {
+        "url": "https://pubmed.ncbi.nlm.nih.gov/35148934/",
+        "quoted_text": "Neoadjuvant and adjuvant treatment of patients with HER2-positive early breast cancer.\n\nThe availability of HER2-targeted therapy has dramatically improved patient outcome in HER2-positive (HER2+) early breast cancer (EBC) as recently demonstrated by the EBCTCTG metaanalysis on trastuzumab in HER2+ EBC: Adding trastuzumab to chemotherapy has reduced recurrence rates and breast-cancer related mortality by a third [1]. Today, neoadjuvant therapy has become standard of care for women with stage II or III tumors as pathological complete response (pCR) status after surgery can be used to individualize adjuvant systemic therapy. pCR is correlated with favorable patient outcome, particularly in hormone receptor (HR) negative HER2+ EBC, as demonstrated by the FDA meta-analysis. Moreover, for patients with non-pCR, 14 cycles of adjuvant T-DM1 have become a new adjuvant therapy standar",
+        "source": "pubmed"
+      }
+    ],
+    "stage_receipts": [
+      {
+        "stage": "medgemma_therapy_reason",
+        "required": true,
+        "status": "succeeded",
+        "request_id": "49a8b28f92184787a219be4e55e1a05e",
+        "service_name": "medgemma-1-5-4b",
+        "endpoint_label": "https://crispro--medgemma-1-5-4b-chat.modal.run",
+        "app_version": "medgemma-1-5-4b-modal-v1.1.0-causal-clone",
+        "model_name": "google/medgemma-1.5-4b-it",
+        "model_version": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8",
+        "artifact_sha256": null,
+        "input_reference": "transport:http",
+        "latency_ms": 52990.251249982975,
+        "warnings": [
+          "MedGemma 1.5 4B-IT is a Google research LLM (google/medgemma-1.5-4b-it, HAI-DEF gated, bf16 on A10G). Outputs are generative suggestions, NOT verified clinical decisions. RESEARCH USE ONLY.",
+          "ruo_generative_therapy_not_clinical_decision"
+        ],
+        "error": null
+      },
+      {
+        "stage": "pubmed_evidence_fetch",
+        "required": false,
+        "status": "succeeded",
+        "request_id": "49a8b28f92184787a219be4e55e1a05e",
+        "service_name": "ncbi_eutils",
+        "endpoint_label": null,
+        "app_version": null,
+        "model_name": "pubmed_search",
+        "model_version": null,
+        "artifact_sha256": null,
+        "input_reference": "query:trastuzumab HER2-positive breast cancer",
+        "latency_ms": 899.5625829556957,
+        "warnings": [],
+        "error": null
+      },
+      {
+        "stage": "synthetic_lethality_therapy_bridge",
+        "required": false,
+        "status": "skipped_not_applicable",
+        "request_id": "49a8b28f92184787a219be4e55e1a05e",
+        "service_name": null,
+        "endpoint_label": null,
+        "app_version": null,
+        "model_name": null,
+        "model_version": null,
+        "artifact_sha256": null,
+        "input_reference": null,
+        "latency_ms": null,
+        "warnings": [
+          "no patient mutation profile supplied"
+        ],
+        "error": null
+      },
+      {
+        "stage": "therapy_research_triage",
+        "required": false,
+        "status": "skipped_not_applicable",
+        "request_id": "49a8b28f92184787a219be4e55e1a05e",
+        "service_name": null,
+        "endpoint_label": null,
+        "app_version": null,
+        "model_name": null,
+        "model_version": null,
+        "artifact_sha256": null,
+        "input_reference": null,
+        "latency_ms": null,
+        "warnings": [
+          "no explicit triage vector supplied; nothing to identify"
+        ],
+        "error": null
+      }
+    ]
+  }
+}

@@ -1,5 +1,11 @@
 # Model card: `google/siglip-base-patch16-224` (ungated public SigLIP proxy)
 
+> **RETIRED (this pass).** The proxy client
+> `src/oncology_arbiter/models/siglip_baseline.py` has been **deleted** and the
+> `proxy_siglip` wire value removed from `ModelState`, so no route can serve a
+> general-domain SigLIP score. This card is retained only as the audit record of
+> what the proxy was and why its output was never MedSigLIP output.
+
 This is the **public, ungated** SigLIP checkpoint used by `oncology-arbiter`
 as a smoke-test proxy when the gated `google/medsiglip-448` cannot be
 accessed. It is a general-domain SigLIP, NOT a medical model.

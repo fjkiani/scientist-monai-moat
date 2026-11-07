@@ -1,0 +1,1 @@
+{"model_repo":"google/medsiglip-448","model_revision":"9cea28a1a1195f665105faa6e8544c112fd960a4","input_resolution":448,"embedding_dim":1152,"device":"cuda","load_seconds":50.759,"warmed_at":1791256524.505851,"app_version":"medsiglip-modal-v0.4.0-alpha"}

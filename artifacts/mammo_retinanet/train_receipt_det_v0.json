@@ -1,0 +1,70 @@
+{
+  "status": "ok",
+  "app_version": "mammo-retinanet-train-v1.0.0",
+  "epochs": 12,
+  "lr": 0.0001,
+  "batch_size": 4,
+  "img_size": 512,
+  "n_train_fit": 2201,
+  "n_validation": 244,
+  "n_test": 641,
+  "val_auroc": 0.8099764071452646,
+  "test_auroc": 0.7401675752069452,
+  "meets_floor_0.85": false,
+  "artifact": "/vol/out/mammo_retinanet_v1/mammo_retinanet_v1.safetensors",
+  "artifact_sha256": "3c63ee42a99684090257ad11214ccd066afb374c683e88307c583de25b1f5fdf",
+  "pt_path": "/vol/out/mammo_retinanet_v1/model.pt",
+  "history": [
+    {
+      "epoch": 1,
+      "loss_mean": 242.32828705216536
+    },
+    {
+      "epoch": 2,
+      "loss_mean": 0.19949478224664927
+    },
+    {
+      "epoch": 3,
+      "loss_mean": 0.20206324987587468
+    },
+    {
+      "epoch": 4,
+      "loss_mean": 0.1981435741158569
+    },
+    {
+      "epoch": 5,
+      "loss_mean": 0.19987785573568315
+    },
+    {
+      "epoch": 6,
+      "loss_mean": 0.2390846391189731
+    },
+    {
+      "epoch": 7,
+      "loss_mean": 0.22474028855335326
+    },
+    {
+      "epoch": 8,
+      "loss_mean": 0.2425172780861375
+    },
+    {
+      "epoch": 9,
+      "loss_mean": 0.17274283351343728
+    },
+    {
+      "epoch": 10,
+      "loss_mean": 0.10509422189518479
+    },
+    {
+      "epoch": 11,
+      "loss_mean": 0.1662248570098198
+    },
+    {
+      "epoch": 12,
+      "loss_mean": 0.15292947733027665
+    }
+  ],
+  "elapsed_seconds": 2069.067,
+  "gpu_name": "NVIDIA A10",
+  "root": "/vol/cbis/CBIS-DDSM_1024"
+}

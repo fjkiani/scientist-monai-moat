@@ -5,7 +5,7 @@ Contract under test:
 * Round-trip: post the shipped AK bundle → 200 + envelope + bundle_sha256.
 * Idempotent: identical bundle → identical sha256.
 * Wrong contract_version → 422 (pydantic Literal + explicit route check).
-* HIPAA_MODE=true flips provenance.model_state to LOADED_HIPAA_REDACTOR.
+* HIPAA_MODE=true redacts patient_id and name, then sets LOADED_HIPAA_REDACTOR.
 * HIPAA_MODE=false (or unset) keeps provenance.model_state = LOADED_AK_BUNDLE.
 * The shipped demo sample /v1/demo/samples/ak_mbd4_lof_case is byte-for-byte
   equal to the payload accepted by /v1/tumor_board/bundle → the two paths
@@ -116,9 +116,18 @@ def test_hipaa_mode_flips_model_state(
     client: TestClient, bundle: dict, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.setenv("HIPAA_MODE", "true")
-    r = client.post("/v1/tumor_board/bundle", json=bundle)
+    posted = copy.deepcopy(bundle)
+    posted["name"] = "Ada Patient"
+    raw_id = posted["patient_id"]
+    r = client.post("/v1/tumor_board/bundle", json=posted)
     assert r.status_code == 200, r.text
-    assert r.json()["provenance"]["model_state"] == "loaded_hipaa_redactor"
+    body = r.json()
+    assert body["provenance"]["model_state"] == "loaded_hipaa_redactor"
+    assert body["bundle"]["patient_id"] == "[REDACTED]"
+    assert body["bundle"]["name"] == "[REDACTED]"
+    assert body["bundle"]["synthetic_lethality"]["patient_id"] == "[REDACTED]"
+    assert raw_id not in r.text
+    assert "Ada Patient" not in r.text
 
 
 def test_no_hipaa_mode_uses_ak_bundle_state(
@@ -147,7 +156,11 @@ def test_demo_sample_matches_post_body(client: TestClient, bundle: dict) -> None
 def test_health_cancers_lists_hgsoc(client: TestClient) -> None:
     h = client.get("/health").json()
     assert "hgsoc" in h["cancers"]
+    # /v1/case/full?cancer=hgsoc is HTTP 501, so health must not advertise it.
     assert h["cancers"]["hgsoc"]["case_full"] is False
+    assert "case/full" not in h["cancers"]["hgsoc"]["endpoints"]
+    assert h["cancers"]["hgsoc"]["state"] == "retired"
+    assert h["cancers"]["hgsoc"]["patient_probability_emitted"] is False
     # POST /v1/tumor_board/bundle must be advertised on the cancer entry
     assert "tumor_board/bundle" in h["cancers"]["hgsoc"]["endpoints"]
 

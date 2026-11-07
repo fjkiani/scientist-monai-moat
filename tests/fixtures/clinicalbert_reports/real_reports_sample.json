@@ -1,0 +1,676 @@
+[
+  {
+    "source_corpus": "clinicalbert_corpus_v51/test_breast_crc.jsonl",
+    "source_index": 55,
+    "cancer": "breast_crc",
+    "text": "SPECIMEN. Right colon. CLINICAL NOTES. PRE-OP DIAGNOSIS: Carcinoma right colon. GROSS DESCRIPTION. Received fresh for tissue procurement labeled \"right. colon\". is a previously unopened 15 cm. segment of proximal right. colon with attached 15 cm. distal ileum surfaced by smooth to. scabrous tan pink serosa with a copious amount of attached. mesocolon. and mesentery. No appendix is present. The proximal and distal. margins measure 3.2 and 5.2 cm. in circumference respectively. On. opening there is a well circumscribed, 4.4 x 4.0 cm. rubbery tan. white-red tumor mass within the cecal pouch, 1 cm. distal to the. ileocecal valve. A portion of tumor and a portion of normal are. submitted for tissue procurement as requested. On sectioning, the. tumor has a maximal thickness of 1.1 cm., grossly extending through. the muscularis to within 0.1 cm. of the inked free serosal surface. The ileal mucosa and remaining colonic mucosa is unremarkable. glistening tan pink with irregular folds and the walls average 0.5. cm. in thickness. Multiple soft pale tan to tan pink tissues in. keeping with lymph nodes measuring up to 1.4 cm. in greatest. dimension are recovered from the attached mesocolon and mesentery. Representative sections are submitted in 13 blocks as labeled. RS13. BLOCK SUMMARY: 1 - Proximal and distal margins; 2-4 - tumor full. thickness to inked free radial serosal surface; 5 - tumor to. normal;. 6 - ileum; 7 - ICB; 8 - colon; 9 and 10 - eight whole lymph nodes. per cassette; 11 - six whole lymph nodes; 12 and 13 - one bisected. lymph node per cassette. MICROSCOPIC DESCRIPTION. Histologic type: Adenocarcinoma with mucinous differentiation. Histologic grade Moderately-differentiated. Primary tumor (pT) : Tumor invades through the muscularis propria. into the pericolonic fat (pT3). Proximal margin: Negative. Distal margin: Negative. Circumferential (radial) margin: Negative. Vascular invasion: Negative. Regional lymph nodes (pN) : 24 lymph nodes are negative for. metastatic carcinoma (pN0). Non-lymph node pericolonic tumor: Absent. Distant metastasis (pM) : Cannot be assessed (pMx) . DIAGNOSIS. Colon, right and terminal ileum, resection: Invasive moderately-differentiated colonic adenocarcinoma with. mucinous differentiation extending through the wall of the colon. into the pericolonic fat. The proximal, distal and radial margins of resection are free of. tumor. Twenty four mesenteric lymph nodes are negative for. metastatic carcinoma (0/24).\n",
+    "entities": [
+      {
+        "entity_type": "T_STAGE",
+        "value": "pT3",
+        "char_start": 1802,
+        "char_end": 1805,
+        "surface": "pT3"
+      },
+      {
+        "entity_type": "N_STAGE",
+        "value": "pN0",
+        "char_start": 2015,
+        "char_end": 2018,
+        "surface": "pN0"
+      },
+      {
+        "entity_type": "M_STAGE",
+        "value": "pMx",
+        "char_start": 2109,
+        "char_end": 2112,
+        "surface": "pMx"
+      },
+      {
+        "entity_type": "MARGIN",
+        "value": "margin: Negative",
+        "char_start": 1817,
+        "char_end": 1833,
+        "surface": "margin: Negative"
+      }
+    ],
+    "tcga242_file": "tcga2_18.txt"
+  },
+  {
+    "source_corpus": "clinicalbert_corpus_v51/test_breast_crc.jsonl",
+    "source_index": 62,
+    "cancer": "breast_crc",
+    "text": "SPECIMEN. A. Apical lymph node. B. Extended right nemi-colectomy. CLINICAL NOTES. PRE-OP DIAGNOSIS: Colon cancer. GROSS DESCRIPTION. A. Received in formalin labeled \"apical lymph node\" is an. 0.6 cm. in greatest dimension soft tan lymph node. It is. bisected. AS-1. B. Received fresh in a container labeled \"extended right. hemi-colectomy\" is a previously unopened portion of bowel,. consisting of 8 cm. of distal ileum with 25 cm. of contiguous. right. colon. The serosal surface is smooth to slightly scabrous tan-. pink,. with a moderate amount of attached omentum and mesenteric adipose. tissue. There is an appendix present, 6.4 cm. long, and averaging. 0.8 cm. in diameter. The appendix has a tan serosa, tan wall and. mucosa, and is without focal lesion, and without gross evidence of. inflammation. The bowel measures 3.6 cm. and 5.2 cm. in. circumference at the proximal and distal resection margins. respectively. The bowel is opened. There is a 4.5 X 4.2 cm. circumsribed rubbery tan-pink-red tumor 11 cm. from the distal. margin. On cut surface, it is maximally 1 cm. thick and extends. through the muscularis propria and into the surrounding adipose. tissue. It is approximately 1.5 cm. from the outer surface of the. specimen. Per the clinical request, tumor and normal mucosa are. submitted for tissue procurement. The remainder of the mucosa is. unremarkable and tan, with a normal pattern of folds, including in. the ileum and the remainder of the colon The wall of the ileum. averages 0.4 cm. thick, and of the colon 0.5 cm. thick. The. adipose tissue is dissected, and multiple soft tan lymph nodes. measuring up to 0.9 cm. in greatest dimension are identified. RS-15, according to the accompanying block summary, following. fixation. BLOCK SUMMARY: B1 - proximal and distal resection margins; B2-B6 -. tumor, with B2 & B3 together forming a composite full thickness. section to outer surface of the specimen, with point of continuity. between blocks inked orange; B7 - ICV; B8 - random colon; B9 -. appendix; B10-B15 - lymph nodes, with multiple lymph nodes per. block, except block B15 which contains one bisected lymph node. MICROSCOPIC DESCRIPTION. The following template summarizes the findings in this case: Histologic type: Adenocarcinoma, comprising the mass lesion in the. colon in part B. Histologic grade: Moderately to focally poorly differentiated. Primary tumor (pT) : pT3. Carcinoma invades through the full. thickness of the bowel wall and into the surrounding soft tissue. Proximal margin: Negative. Distal margin: Negative. Circumferential (radial) margin: Negative. Distance of tumor from closest margin: See gross description. Vascular invasion: Not definitively identified. Regional lymph nodes (pN) : pN1. There is one lymph node with. metastatic carcinoma, with this lymph node identified in block B5,. a. section of the main tumor, with this lymph node in surrounding. adipose tissue, with much of this lymph node replaced by tumor. All other lymph nodes are negative for tumor. Overall, in part B. there is metastatic carcinoma in one of forty-two (1/42) lymph. nodes. The separately submitted apical lymph node in part A is. negative for tumor. Non-lymph node pericolonic tumor: Not identified. Distant metastasis (pM) : pMX. Other findings The appendix is without specific diagnostic. abnormalities. 3,5. DIAGNOSIS. A. Lymph node, apical, excision. - Negative for malignancy. B. Terminal ileum, appendix, and extended right colon, excision. - Moderately to focally poorly differentiated adenocarcinoma. of. the colon, invading through the full thickness of the. muscularis propria and into surrounding soft tissue (see. microscopic description) . - Metastatic adenocarcinoma in one of forty-two (1/42) lymph. nodes. - Margins negative for malignancy. - Appendix without specific diagnostic abnormalities. End Of Report ---.\n",
+    "entities": [
+      {
+        "entity_type": "T_STAGE",
+        "value": "pT3",
+        "char_start": 2402,
+        "char_end": 2405,
+        "surface": "pT3"
+      },
+      {
+        "entity_type": "M_STAGE",
+        "value": "pMX",
+        "char_start": 3266,
+        "char_end": 3269,
+        "surface": "pMX"
+      },
+      {
+        "entity_type": "MARGIN",
+        "value": "margin: Negative",
+        "char_start": 2518,
+        "char_end": 2534,
+        "surface": "margin: Negative"
+      }
+    ],
+    "tcga242_file": "tcga2_24.txt"
+  },
+  {
+    "source_corpus": "clinicalbert_corpus_v51/test_breast_crc.jsonl",
+    "source_index": 16,
+    "cancer": "breast_crc",
+    "text": "Specimen #: Race: WHITE. Physician (s) : SPECIMEN: WUID:161E2817-7082-46F8-BFEB-256DBBEFE633. A: RIGHT BREAST B: RIGHT AXILLARY CONTENTS. FINAL DIAGNOSIS: A. RIGHT BREAST, MASTECTOMY: TUMOR TYPE: INFILTRATING DUCTAL CARCINOMA, NO SPECIAL TYPE. NOTTINGHAM GRADE: POORLY DIFFERENTIATED (G3). NOTTINGHAM SCORE: 9/9. (Tubules= 3, Nuclei= 3, Mitoses= 3 mitotic count 14 per 10 HPF at. 40x power). TUMOR SIZE (GREATEST DIMENSION) : 4.5 CM (MEASURED GROSSLY). TUMOR NECROSIS: PRESENT, IN INFILTRATING COMPONENT AND DCIS. MICROCALCIFICATIONS: PRESENT IN INFILTRATING COMPONENT AND BENIGN. PROCESSES. VENOUS / LYMPHATIC INVASION: PRESENT; EXTENSIVE. MARGINS : DEEP MARGIN POSITIVE FOR TUMOR IN TISSUE AND LYMPHATICS. INTRADUCTAL COMPONENT: PRESENT; MINIMAL. NIPPLE INVOLVEMENT: PRESENT (without Pagetoid spread) . SKIN INVOLVEMENT: PRESENT. MULTICENTRICITY: PRESENT; MULTIPLE SEPARATE MICROSCOPIC FOCI IN OTHER. QUADRANTS (SEE COMMENT). ESTROGEN RECEPTORS: Previously ordered and positive. PROGESTERONE RECEPTORS: Previously ordered and positive. HER 2 NEU by IHC: Previously ordered; weakly positive. HER 2 Neu BY FISH: Previously ordered and pending. PATHOLOGIC STAGE: pT4d N2a MX. ADDITIONAL PATHOLOGIC CHANGES. -DUCTAL CARCINOMA IN-SITU, HIGH GRADE. - -CYSTIC CHANGE WITH APOCRINE METAPLASIA. B. LYMPH NODES, RIGHT AXILLA, DISSECTION: EIGHT LYMPH NODES POSITIVE FOR TUMOR, WITH EXTENSIVE EXTRACAPSULAR. EXTENSION IDENTIFIED, AND DEPOSITS LARGER THAN 2 MM. COMMENT: ER, PR, and Her2Neu are performed on the patient's prior material. collected by mammotome biopsy,. and will not be. repeated. This tumor shows satellite nodules throughout all quadrants. Specimen #: FINAL DIAGNOSIS (continued) : sampled except the lower outer quadrant. These nodules are not measured. separately as separate primary tumors; they appear to have arisen from. intramammary lymphatic spread. It is likewise difficult to measure the. degree of extranodal extension of tumor from the lymph nodes due to the. extensive perinodal tumor deposits. CLINICAL DIAGNOSIS AND HISTORY: yo white female with right nipple inversion, right breast. Prior. mammotome biopsy with ductal carcinoma. A. Right breast, Long stitch lateral, short stitch superior (fresh). B. Right axillary contents including thoraco bundle (fresh). GROSS DESCRIPTION: A. Specimen received in formalin labeled with patient's name. consists of a 627 gram right mastectomy specimen oriented with short. stitch superior and long stitch lateral. Specimen measures 24 cm superior. to inferior, 23 cm medial to lateral, 4 cm anterior to posterior. Superficial skin ellipse measures 9.5 x 4 cm and displays a centrally. located inverted nipple. No scar is noted. No discharge is noted. Deep. resection margin shows scant portions of muscular tissue. Deep margin. inked black and superficial margin is inked blue. Serial sections reveal a. centrally located poorly defined firm pink white mass measuring 4.5 x 4.5. x. 2.0. cm. Periphery of the mass shows hemorrhage consistent with previous. biopsy. Mass abuts deep margin. Fibrous parenchyma surrounding mass is. nodular and cystic suggestive of additional foci. Located in the deep. margin of mid inner quadrant is a 0.4 cm firm tan ill defined nodule. consistent with possible additional lesion (located approximately 2 cm. from central lesion) . Sectioning of nipple shows dense fibrous tissue. with possible lesion involvement. Remainder of parenchyma is lobulated. yellow tan and fatty with scant fibrous tissue. No lymph nodes identified. Representative sections: A1: skin. A2: nipple. A3: mass (lateral portion). A4: mass and adjacent fibrous tissue (medial portion). Specimen #: GROSS DESCRIPTION (continued). A5: mid inner quadrant nodule with margins. A6: mass with deep margin (central). A7: upper outer quadrant. A8: lower outer quadrant. A9: lower inner quadrant. A10: upper inner quadrant . Matched sections of A1-A4 and A7-A10 are. submitted. for CBCP protocol. A11-A20 represent additional sections of mass. Remaining breast tissue is. unoriented, no sutures remain in tissue. Representative samples of lesion. beneath elliptical wedge of skin and nipple are represented. A13-A14. represent one match set. Specimen submitted. B. Received in formalin labeled with patient's name. labeled. \"RIGHT AXILLARY CONTENTS INCLUDING SARCO BUNDLE\" consists of an 11 x 6 x 3. cm irregular unoriented portion of fatty tissue. Sectioning reveals two. matted portions of soft tissue measuring 4 x 3.5 x 1.5 cm and 8 x 4 x 1.2. cm. On sectioing the cut surfaces show dense indurated fibrotic tissue. with red tan lymphoid tissue noted along periphery of the smaller portion. tissue. Single intact discrete lymph node is identified and remaining. tissue which measures 0.6 cm. Exact number of lymph nodes cannot be. determined. Representative sections are as follows: B1-B3: smaller portion of tissue. B4-B6: larger portion of tissue. B7: one bisected lymph node.\n",
+    "entities": [
+      {
+        "entity_type": "TUMOR_SIZE_MM",
+        "value": "4.5 CM",
+        "char_start": 426,
+        "char_end": 432,
+        "surface": "4.5 CM"
+      },
+      {
+        "entity_type": "GRADE",
+        "value": "G3",
+        "char_start": 285,
+        "char_end": 287,
+        "surface": "G3"
+      },
+      {
+        "entity_type": "N_STAGE",
+        "value": "N2a",
+        "char_start": 1167,
+        "char_end": 1170,
+        "surface": "N2a"
+      },
+      {
+        "entity_type": "M_STAGE",
+        "value": "MX",
+        "char_start": 1171,
+        "char_end": 1173,
+        "surface": "MX"
+      },
+      {
+        "entity_type": "MARGIN",
+        "value": "MARGINS : DEEP MARGIN POSITIVE",
+        "char_start": 641,
+        "char_end": 671,
+        "surface": "MARGINS : DEEP MARGIN POSITIVE"
+      },
+      {
+        "entity_type": "ER_VALUE",
+        "value": "ESTROGEN RECEPTORS: Previously ordered and positive",
+        "char_start": 928,
+        "char_end": 979,
+        "surface": "ESTROGEN RECEPTORS: Previously ordered and positive"
+      },
+      {
+        "entity_type": "PR_VALUE",
+        "value": "PROGESTERONE RECEPTORS: Previously ordered and positive",
+        "char_start": 981,
+        "char_end": 1036,
+        "surface": "PROGESTERONE RECEPTORS: Previously ordered and positive"
+      },
+      {
+        "entity_type": "HER2_VALUE",
+        "value": "HER 2 NEU by IHC: Previously ordered; weakly positive",
+        "char_start": 1038,
+        "char_end": 1091,
+        "surface": "HER 2 NEU by IHC: Previously ordered; weakly positive"
+      }
+    ],
+    "tcga242_file": "tcga1_46.txt"
+  },
+  {
+    "source_corpus": "clinicalbert_corpus_v51/test_breast_crc.jsonl",
+    "source_index": 35,
+    "cancer": "breast_crc",
+    "text": "LOGY REPORT. Specimen # : (Age. F. Race: WHITE. AMENDED ICD-0-3. SPECIMEN: A: RIGHT BREAST AND AXILLARY CONTENTS. B: ADDITIONAL RIGHT BREAST TISSUE. FINAL DIAGNOSIS: A & B. BREAST, RIGHT, MODIFIED RADICAL MASTECTOMY WITH AXILLARY LYMPH. NODES, EXCISION: TUMOR TYPE: APOCRINE CARCINOMA, INFILTRATING (A2,A3,A14, A15). (HISTIOCYTOID SUBTYPE) (SEE COMMENT). NOTTINGHAM GRADE: MODERATELY DIFFERENTIATED (G2). NOTTINGHAM SCORE: 7/9. (Tubules= 3, Nuclei= 3, Mitoses= 1i mitotic count 3 per 10 HPF at. 40x power). TUMOR SIZE (GREATEST DIMENSION) : 4.5 CM (MEASURED GROSSLY; See. comment). TUMOR NECROSIS: ABSENT IN INFILTRATING COMPONENT, PRESENT (COMEDO,. N-SITU TYPE) IN DCIS. MICROCALCIFICATIONS PRESENT IN STROMA. VENOUS / LYMPHATIC INVASION: PRESENT (A10,A14). MARGINS : NEGATIVE. -DISTANCE OF TUMOR FROM NEAREST MARGIN IS 1.1 CM, FROM DEEP MARGIN. (A3). INTRADUCTAL COMPONENT: EXTENSIVE. LYMPH NODES: ONE OF 18 POSITIVE FOR TUMOR BY IHC ONLY (SEE COMMENT). NIPPLE INVOLVEMENT: ABSENT. SKIN INVOLVEMENT : ABSENT. MULTICENTRICITY ABSENT. ESTROGEN RECEPTORS: NEGATIVE (PREVIOUSLY EVALUATED FROM. PROGESTERONE RECEPTORS: NEGATIVE (PREVIOUSLY EVALUATED FROM. HER 2 NEU by IHC: POSITIVE (3+) (PREVIOUSLY EVALUATED FROM. $05-12958). PATHOLOGIC STAGE: pT2 NO (i+) MX (AJCC Stage II). ADDITIONAL PATHOLOGIC CHANGES CYSTIC CHANGE, SCLEROSING ADENOSIS,. FIBROADENOMATOID CHANGE, APOCRINE METAPLASIA. COMMENT: COMMENT #2 (. Specimen #: FINAL DIAGNOSIS (continued) : This case is amended to change the lymph node assessment to the above from. a prior assessment of. \"LYMPH NODES: 18 NEGATIVE FOR TUMOR. \", and to change the stage to. T2 NO (i+) from T2 NO. Dr. requested additional evaluation of the. lymph nodes on this patient to collaborate with the PET findings of a. positive node, so the nodes in A10, A11, A12, A19 and A20 were evaluated. with keratin. In A10, the node originally showing pericapsular lymphatic. involvement, the keratin shows individual cells and one subcapsular. cluster of tumor cells less than 0.2 mm in diameter. Dr. was informed of this change in report today by email. ORIGINAL COMMENT: The tumor was too large for microscopic measurement, so exact. measurement is not possible. Some of the DCIS component may have been. included in the gross measurement, but the bulk of tumor is infiltrative. and represents at least a T2 lesion. Slide A10 contains a lymph node with lymphvascular space invasion just. outside of the capsule. We are interpreting this as a negative node. This report was amended. due to a typographical error in the. patient history listing her age incorrected as years. Additionally, the. pathologic stage was changed from N1 to NO, another typographical error. CLINICAL DIAGNOSIS AND HISTORY: year old female with invasive ductal carcinoma of right breast and. positive for axillary lymph nodes. Presents for modified radical. mastectomy. PRE-OPERATIVE DIAGNOSIS: Right breast cancer. POST-OPERATIVE DIAGNOSIS: Right breast cancer. GROSS DESCRIPTION. A. Received fresh consists of a 504 gram right mastectomy specimen single. stitch medial and double stitch superior. Specimen measures 24 cm superior. to inferior, 21 cm medial to lateral, and 3 cm anterior to posterior. The. jightly pigmented skin ellipse measures 12 x 5 cm, centrally located. 3. Specimen #: GROSS DESCRIPTION (continued) : everted nipple measuring 1.5 x 1.5 x 1.2 cm with no discharge. No scars. inked black. Specimen serially sectioned to reveal fairly well. identified. Superficial upper outer quadrant is inked blue and deep margin. circumscribed pink firm mass measuring 4.5 x 2.5 x 2.0 cm. The mass. focal hemorrhage and lies within a bed of dense, diffusely nodular,. shows. and 0.5 cm from blue superficial margin. Remaining tissue shows scattered margin. focally necrotic fibrous tissue. The mass is located 1 cm from deep. cysts measuring up to 0.4 cm. Multiple indurated foci are also seen. node is seen within the upper outer quadrant. within the upper inner quadrant and lower inner quadrant. A 0.7 cm lymph. A separately received portion of axillary tail measures 10 x 3 x 1. 0 cm. and oriented with stitch on high end. Five lymph nodes are identified. measuring 0.7 to 1.0 cm. The specimen is submitted as follows: A1: skin. A2 mass, central. A3 : margin. A4: lateral mass. A5: upper outer quadrant. A6: lower outer quadrant. A7: lower inner quadrant. A8: upper inner quadrant. A9: intramammary lymph node. A10: two high axillary lymph nodes bisected. All: two mid axillary lymph nodes bisected. A12: one low axillary lymph node. A13: nipple. A14-A17: upper outer quadrant mass lateral to medial. A18: high axillary lymph node. A19: middle axillary lymph node. A20: low axillary lymph node. 20CF. B. Received in formalin labeled with patient's name. designated \"RIGHT BREAST TISSUE WITH AXILLARY CONTENTS\" consists of a 1.0. x 1.0 x 0.4 cm piece of red and yellow soft tissue. Specimen submitted. entirely in one cassette.\n",
+    "entities": [
+      {
+        "entity_type": "TUMOR_SIZE_MM",
+        "value": "4.5 CM",
+        "char_start": 541,
+        "char_end": 547,
+        "surface": "4.5 CM"
+      },
+      {
+        "entity_type": "GRADE",
+        "value": "G2",
+        "char_start": 400,
+        "char_end": 402,
+        "surface": "G2"
+      },
+      {
+        "entity_type": "T_STAGE",
+        "value": "pT2",
+        "char_start": 1243,
+        "char_end": 1246,
+        "surface": "pT2"
+      },
+      {
+        "entity_type": "M_STAGE",
+        "value": "MX",
+        "char_start": 1255,
+        "char_end": 1257,
+        "surface": "MX"
+      },
+      {
+        "entity_type": "MARGIN",
+        "value": "MARGINS : NEGATIVE",
+        "char_start": 759,
+        "char_end": 777,
+        "surface": "MARGINS : NEGATIVE"
+      },
+      {
+        "entity_type": "ER_VALUE",
+        "value": "ESTROGEN RECEPTORS: NEGATIVE",
+        "char_start": 1035,
+        "char_end": 1063,
+        "surface": "ESTROGEN RECEPTORS: NEGATIVE"
+      },
+      {
+        "entity_type": "PR_VALUE",
+        "value": "PROGESTERONE RECEPTORS: NEGATIVE",
+        "char_start": 1092,
+        "char_end": 1124,
+        "surface": "PROGESTERONE RECEPTORS: NEGATIVE"
+      }
+    ],
+    "tcga242_file": "tcga1_8.txt"
+  },
+  {
+    "source_corpus": "clinicalbert_corpus_v51/test_nsclc.jsonl",
+    "source_index": 70,
+    "cancer": "nsclc",
+    "text": "Case ID Gross Description. Microscopic. Diagnosis. Description. Details. Comments. ICA ID. LUNG TISSUE CHECKLIST. Specimen type: Lobectomy. Tumor site: Lung. Tumor size: 3 X 2.5 X 2 cm. Histologic type: Bronchiolo-. alveolar carcinoma, mucinous. Histologic grade: Moderately. differentiated. Tumor extent: Not specified. Other tumor nodules: Not. specified. Lymph nodes: Not specified. Lymphatic invasion: Not specified. Venous invasion: Not specified. Margins: Not specified. Evidence of neo-adjuvant. treatment: Not specified. Additional pathologic findings: Not. specified. Comments: Left, lower.",
+    "entities": [
+      {
+        "entity_type": "TUMOR_SIZE_MM",
+        "value": "3 X 2.5 X 2 cm",
+        "char_start": 170,
+        "char_end": 184,
+        "surface": "3 X 2.5 X 2 cm"
+      }
+    ],
+    "tcga242_file": null
+  },
+  {
+    "source_corpus": "clinicalbert_corpus_v51/test_nsclc.jsonl",
+    "source_index": 167,
+    "cancer": "nsclc",
+    "text": "Final Surgical Pathology Report. Procedure. Diagnosis. A. Right upper lobe, wedge resection: Squamous cell carcinoma, moderately differentiated, 2.1 cm, margins. uninvolved. B. Level 10 lymph node, resection: No metastasis identified in one lymph node (0/1). C. Lung, right upper lobe, lobectomy: No carcinoma identified. No evidence of metastasis in 3 lymph nodes (0/3). D. R4 lymph nodes, resection: No metastasis identified in 7 lymph nodes (0/7). E. Subcarinal lymph nodes, resection: No metastasis identified in 4 lymph nodes (0/4). Microscopic Description: Microscopic examination performed. A. Histologic type: Squamous cell carcinoma. Histologic grade: Moderately differentiated. Primary tumor (pT): 2.1 cm, pT1. Margins of resection: Uninvolved. Direct extension of tumor: Not identified. Venous (large vessel) invasion: Not identified. Arterial (large vessel) invasion: Not identified. Lymphatic (small vessel) invasion: Not identified. Regional lymph nodes (pN): Negative, pNO. Distant metastasis (pM): Cannot be evaluated by this specimen, pMX. Other findings: None. B. Level 10 lymph node demonstrates no evidence of metastasis in one. lymph node. C. The remainder of the right upper lobe demonstrates no evidence of. malignancy. 3 lymph nodes are negative for metastatic disease. D. The R4 lymph nodes demonstrate 7 lymph nodes with no evidence of. metastasis. E. The subcarinal lymph nodes demonstrate 4 lymph nodes with no. evidence of metastasis. Specimen. A. Right upper lobe wedge. B. Level 10. C. Right upper lobe. D. R. 4. E. Subcarinal. Clinical Information. Right lung mass. Intraoperative Consultation. AFS1, AFS2: Lung mass, excision: Non-small cell carcinoma, favor. squamous cell carcinoma. Gross Description. gross A. Container \"A\" is labeled with the patient's name, medical. record number and \"right upper lobe wedge\". The specimen consists of a. single pink to tan piece of wedge-shaped lung tissue measuring 12.2 X. 6.5 X 2.5 cm in greatest dimensions. There is a 12 cm staple line. present. The pleural surface is puckered. This region is inked and. sectioned. On cut section there is a soft necrotic appearing tan. black mass which measures 2.1-1.5 X 1.5 cm in greatest dimensions. A. portion is submitted for tissue procurement. The staple line is. greater than 1.5 cm from the mass. Representative sections submitted. AFS1, FS2, A1 - A3: lung mass entirely submitted; A4 - surgical margin;. A5 - non-neoplastic lung. B. Received fresh labeled \"level 10\" is a 0.8 cm soft tan to gray. tissue which is bisected and entirely submitted in one block. C. Received fresh labeled \"right upper lobe\" is a 156 g, 17.0 X 7.8 X. 3.2 cm lobectomy specimen with attached 1.2 cm in length, 1.8x1 1.0 cm. in diameter bronchial stump. Several staple lines are present. The. staple line along the lateral aspect of the specimen is removed and the. underlying surface is inked blue. On sectioning, the parenchyma. throughout the specimen is spongiform tan-red and no residual lesion or. abnormality is identified grossly. 3 soft tan-gray tissues in keeping. with lymph nodes ranging from 0.5-0.9 cm are recovered from the hilum. Summary: 1 - bronchial margin; 2 - vascular margins; 3 through 6 - site. of staple line; 7 through 9 - random parenchyma; 10 - 3 lymph nodes. D. Received fresh labeled \"R 4\" is a 2.1 X 1.5 X 0.5 cm aggregate of. fragmented soft tan-gray tissue admixed with a scant amount of adipose. tissue. E. Received fresh labeled \"subcarinal\" are 4 soft tan-gray tissues. ranging from 0.5-0.7 cm.",
+    "entities": [
+      {
+        "entity_type": "GRADE",
+        "value": "moderately differentiated",
+        "char_start": 118,
+        "char_end": 143,
+        "surface": "moderately differentiated"
+      },
+      {
+        "entity_type": "TUMOR_SIZE_MM",
+        "value": "2.1 cm",
+        "char_start": 145,
+        "char_end": 151,
+        "surface": "2.1 cm"
+      },
+      {
+        "entity_type": "MARGIN",
+        "value": "uninvolved",
+        "char_start": 162,
+        "char_end": 172,
+        "surface": "uninvolved"
+      },
+      {
+        "entity_type": "GRADE",
+        "value": "Moderately differentiated",
+        "char_start": 661,
+        "char_end": 686,
+        "surface": "Moderately differentiated"
+      },
+      {
+        "entity_type": "TUMOR_SIZE_MM",
+        "value": "2.1 cm",
+        "char_start": 708,
+        "char_end": 714,
+        "surface": "2.1 cm"
+      },
+      {
+        "entity_type": "T_STAGE",
+        "value": "pT1",
+        "char_start": 716,
+        "char_end": 719,
+        "surface": "pT1"
+      },
+      {
+        "entity_type": "MARGIN",
+        "value": "Uninvolved",
+        "char_start": 743,
+        "char_end": 753,
+        "surface": "Uninvolved"
+      },
+      {
+        "entity_type": "LVI",
+        "value": "Not identified",
+        "char_start": 782,
+        "char_end": 796,
+        "surface": "Not identified"
+      },
+      {
+        "entity_type": "LVI",
+        "value": "Not identified",
+        "char_start": 830,
+        "char_end": 844,
+        "surface": "Not identified"
+      },
+      {
+        "entity_type": "LVI",
+        "value": "Not identified",
+        "char_start": 880,
+        "char_end": 894,
+        "surface": "Not identified"
+      },
+      {
+        "entity_type": "N_STAGE",
+        "value": "pNO",
+        "char_start": 984,
+        "char_end": 987,
+        "surface": "pNO"
+      },
+      {
+        "entity_type": "M_STAGE",
+        "value": "pMX",
+        "char_start": 1052,
+        "char_end": 1055,
+        "surface": "pMX"
+      },
+      {
+        "entity_type": "TUMOR_SIZE_MM",
+        "value": "2.1-1.5 X 1.5 cm",
+        "char_start": 2175,
+        "char_end": 2191,
+        "surface": "2.1-1.5 X 1.5 cm"
+      },
+      {
+        "entity_type": "TUMOR_SIZE_MM",
+        "value": "2.1 X 1.5 X 0.5 cm",
+        "char_start": 3325,
+        "char_end": 3343,
+        "surface": "2.1 X 1.5 X 0.5 cm"
+      }
+    ],
+    "tcga242_file": null
+  },
+  {
+    "source_corpus": "clinicalbert_corpus_v51/test_nsclc.jsonl",
+    "source_index": 110,
+    "cancer": "nsclc",
+    "text": "FINAL DIAGNOSIS: SUMMARY STATEMENT: The angiolymphatic and visceral pleural invasion unassociated with lymph node metastasis. Pathologic stage;. right upper lobe apical segmentectomy shows a poorly differentiated adenocarcinoma, 3,4 cm in diameter, T2 NO with Mx. PART 1: BONE, \"PORTION 3RD RIB\", RESECTION -. PORTIONS OF UNREMARKABLE BONE WITH BONE MARROW SHOWING TRILINEAGE REPRESENTATION AND. MATURATION. NO EVIDENCE OF MALIGNANCY. PART 2: LUNG, RIGHT UPPER LOBE APICAL SEGMENT, SEGMENTECTOMY -. A. POORLY DIFFERENTIATED ADENOCARCINOMA, ACINAR AND SOLID TYPE, ARISING IN PULMONARY. PARENCHYMAL SCAR ASSOCIATED WITH ANGIOLYMPHATIC AND VISCERAL PLEURAL INVASION. DIAMETER. 3.4 CM. ALL MARGINS FREE. MILD HOST LYMPHOCYTIC RESPONSE. PATHOLOGIO STAGE; T2 NO MX. B. FOUR (4) SEGMENTAL LYMPH NODES WITH ANTHRACOSILICOTIC NODULES AND NO EVIDENCE OF. METASTATIC CARCINOMA. C. MULTIPLE PULMONARY APICAL CAPS. D. MULTIFOCAL ATYPICAL ADENOMATOUS HYPERPLASIA. E. RESPIRATORY BRONCHIOLITIS WITH EMPHYSEMATOUS CHANGE. PART 3: LYMPH NODES, RIGHT LEVEL FOUR LYMPH NODES, BIOPSY-. TWO LYMPH NODES WITH NO EVIDENCE OF METASTATIC CARCINOMA. COMMENT;. The adenocarcinoma shows a variety of cytologic features, including mucinous differentiation and clear cell change. ADDENDA: Addendum. Molecular Anatomic Pathology Testing: Block 2C: A. KRAS codon 12/13 mutation NOT identified. B. EGFR Exon 19 mutation NOT identified. C. EGFR Exon 21 mutation NOT identified. D. EGFR amplification IDENTIFIED (see In Situ Procedure). Note: KRAS codon 12/13 mutations are found in approximately 10-30% lung adenocarcinomas and associated with history. of. smoking (1). EGFR exon 19 and 21 mutations are present in about 10% of. s and up to 40% in the. population, common in non-smokers and associated with the tumor response to treatment with EGFR inhibitors (2). These mutations are mutually exclusive and their presence may have prognostic and/or therapeutic implications (3,4). Clinical studies show high EGFR gene copy number by FISH analysis (amplification) to be associated with favorable. clinical benefit (clinical response, stable disease, time to progression, and survival) in patients with advanced non-small. cell lung cancer treated with EGFR tyrosine kinase inhibitors. Sample Preparation and Gene Sequencing Analysis. For cytology samples, extraction of DNA was performed from the fluid or sample provided. For surgical specimens, manual microdissection was. performed. Specimens with the minimum of 50% of tumor calls in a microdissection target are accepted for the analysis. DNA was isolated using. standard laboratory procedure. Optical density readings were obtained. For the detection of mutation, DNA was amplified with primers for the. KRAS gene and exons 19 and 21 of the EGFR gene. Then. forward and reverse sequencing was performed using the. on. AB/3130. ). The known hotspots were analyzed for the presence of mutations with Mutation Surveyor V3.07. For. specimens with low quality and quantity of DNA, an alternative method (real-time PCR on LightCycler (Roche)) was applied for detection of KRAS. mutations. SPECIAL PROCEDURES: In Situ Procedure. Interpretation. PROBE: Vysis LSI EGFR SpectrumOrange/ CEP 7 SpectrumGreer TM Probe. Fluorescence in-situ hybridization studies performed on the adenocarcinoma shows a ratio of EGFR gene to the centromere of. chromosome 7 of 2.65 indicating EGFR amplification in the targeted region. The rate of hyperploidy for the centromere of. chromosome 7 was 25.8%, and the monosomy rate was 36.4% in the analyzed cells. The signal to nucleus ratio (SNR) for the. EGFR gene was 5.7. 66 cells were analyzed In the targeted region. Interpretation guidelines for EGFR Gene Copy Number by FISH: Ratio of EGFR to the centromere of chromosome 7: Less than 2,0: No EGFR amplification. Greater than 2.0: EGFR amplification. Hyperploidy: Greater than two centromere copies/cell. SNR. The average number of EGFR signals per analyzed cell within the targeted region. Clinical studies show high EGFR gene copy number by FISH analysis to be associated with favorable clinical benefit (clinical. response, stable disease, time to progression, and survival) in patients with advanced non-small cell lung cancer treated with. EGFR tyrosine kinase inhibitors. CASE SYNOPSIS: SYNOPTIC DATA - PRIMARY LUNG TUMORS. TUMOR LOCATION: Right Upper Lobe. LUNG SEGMENT(S) INVOLVED: Apical. PROCEDURE: Segmental. TUMOR SIZE: Maximum dimension; 3.4 cm. Minor dimension: 1.9 cm. GROSS SATELLITES: Number of gross satellite lesions: 0. TUMOR TYPE: Invasive adenocarcinoma. HISTOLOGIC GRADE: G3, Poorly differentiated. MICROSCOPIC SATELLITES: Number of microscopic satellite lesions: 0. EXTRAPULMONARY PARENCHYMAL. EXTENSION/INVASION OF TUMOR: Visceral pleura. ANGIOLYMPHATIC INVASION: TUMOR NECROSIS: < or = to 50%. SURGICAL MARGIN INVOLVEMENT: No. SURGICAL MARGIN SITE: Distance of invasive tumor to closest margin: 12 mm, Bronchial margin. INFLAMMATORY(DESMOPLASTIC) REACTION: Mild. N1 LYMPH NODES: Number of N1 lymph nodes positive: 0. Number of N1 lymph nodes examined: 4. N2 LYMPH NODES: Number of N2 lymph nodes positive: 0. Number of N2 lymph nodes examined: 2. UNDERLYING DISEASE(S): Atypical alveolar hyperplasia, Emphysema, Parenchymal scar, Smokers bronchiolitis. T STAGE, PATHOLOGIC: pT3. N STAGE, PATHOLOGIC: pNO. M STAGE, PATHOLOGIC: pMX. ANCILLARY STUDIES: Histochemical stains, FISH studies, Molecular studies. Comment: PAS/PAS-D and mucicarmine stains are positive. Elastic tissue stains confirms. visceral pleural invasion.",
+    "entities": [
+      {
+        "entity_type": "LVI",
+        "value": "unassociated",
+        "char_start": 85,
+        "char_end": 97,
+        "surface": "unassociated"
+      },
+      {
+        "entity_type": "GRADE",
+        "value": "poorly differentiated",
+        "char_start": 191,
+        "char_end": 212,
+        "surface": "poorly differentiated"
+      },
+      {
+        "entity_type": "TUMOR_SIZE_MM",
+        "value": "3,4 cm",
+        "char_start": 229,
+        "char_end": 235,
+        "surface": "3,4 cm"
+      },
+      {
+        "entity_type": "T_STAGE",
+        "value": "T2",
+        "char_start": 249,
+        "char_end": 251,
+        "surface": "T2"
+      },
+      {
+        "entity_type": "N_STAGE",
+        "value": "NO",
+        "char_start": 252,
+        "char_end": 254,
+        "surface": "NO"
+      },
+      {
+        "entity_type": "M_STAGE",
+        "value": "Mx",
+        "char_start": 260,
+        "char_end": 262,
+        "surface": "Mx"
+      },
+      {
+        "entity_type": "GRADE",
+        "value": "POORLY DIFFERENTIATED",
+        "char_start": 502,
+        "char_end": 523,
+        "surface": "POORLY DIFFERENTIATED"
+      },
+      {
+        "entity_type": "TUMOR_SIZE_MM",
+        "value": "3.4 CM",
+        "char_start": 674,
+        "char_end": 680,
+        "surface": "3.4 CM"
+      },
+      {
+        "entity_type": "MARGIN",
+        "value": "FREE",
+        "char_start": 694,
+        "char_end": 698,
+        "surface": "FREE"
+      },
+      {
+        "entity_type": "T_STAGE",
+        "value": "T2",
+        "char_start": 750,
+        "char_end": 752,
+        "surface": "T2"
+      },
+      {
+        "entity_type": "N_STAGE",
+        "value": "NO",
+        "char_start": 753,
+        "char_end": 755,
+        "surface": "NO"
+      },
+      {
+        "entity_type": "M_STAGE",
+        "value": "MX",
+        "char_start": 756,
+        "char_end": 758,
+        "surface": "MX"
+      },
+      {
+        "entity_type": "KRAS",
+        "value": "NOT identified",
+        "char_start": 1346,
+        "char_end": 1360,
+        "surface": "NOT identified"
+      },
+      {
+        "entity_type": "EGFR",
+        "value": "NOT identified",
+        "char_start": 1387,
+        "char_end": 1401,
+        "surface": "NOT identified"
+      },
+      {
+        "entity_type": "EGFR",
+        "value": "NOT identified",
+        "char_start": 1428,
+        "char_end": 1442,
+        "surface": "NOT identified"
+      },
+      {
+        "entity_type": "EGFR",
+        "value": "IDENTIFIED",
+        "char_start": 1466,
+        "char_end": 1476,
+        "surface": "IDENTIFIED"
+      },
+      {
+        "entity_type": "EGFR",
+        "value": "amplification",
+        "char_start": 2015,
+        "char_end": 2028,
+        "surface": "amplification"
+      },
+      {
+        "entity_type": "TUMOR_SIZE_MM",
+        "value": "3.4 cm",
+        "char_start": 4448,
+        "char_end": 4454,
+        "surface": "3.4 cm"
+      },
+      {
+        "entity_type": "TUMOR_SIZE_MM",
+        "value": "1.9 cm",
+        "char_start": 4473,
+        "char_end": 4479,
+        "surface": "1.9 cm"
+      },
+      {
+        "entity_type": "GRADE",
+        "value": "G3",
+        "char_start": 4592,
+        "char_end": 4594,
+        "surface": "G3"
+      },
+      {
+        "entity_type": "GRADE",
+        "value": "Poorly differentiated",
+        "char_start": 4596,
+        "char_end": 4617,
+        "surface": "Poorly differentiated"
+      },
+      {
+        "entity_type": "MARGIN",
+        "value": "No",
+        "char_start": 4846,
+        "char_end": 4848,
+        "surface": "No"
+      },
+      {
+        "entity_type": "TUMOR_SIZE_MM",
+        "value": "12 mm",
+        "char_start": 4918,
+        "char_end": 4923,
+        "surface": "12 mm"
+      },
+      {
+        "entity_type": "T_STAGE",
+        "value": "pT3",
+        "char_start": 5297,
+        "char_end": 5300,
+        "surface": "pT3"
+      },
+      {
+        "entity_type": "N_STAGE",
+        "value": "pNO",
+        "char_start": 5323,
+        "char_end": 5326,
+        "surface": "pNO"
+      },
+      {
+        "entity_type": "M_STAGE",
+        "value": "pMX",
+        "char_start": 5349,
+        "char_end": 5352,
+        "surface": "pMX"
+      }
+    ],
+    "tcga242_file": null
+  },
+  {
+    "source_corpus": "clinicalbert_corpus_v51/test_nsclc.jsonl",
+    "source_index": 93,
+    "cancer": "nsclc",
+    "text": "This information is subject to all Federal and State laws regarding confidentiality and privacy and to the policies and procedures of. ;arding. patient information. Any unauthorized use, disclosure. or reproduction of this information is strictly prohibited. Anat Path Reports. Document Date: APRPT (Verified). Acc #: Pulmonary Big. Gender: M. Client: Submitting. Phys: Final Surgical Pathology Report. Final Pathologic Diagnosis. A. LYMPH NODE, 11L, EXCISION, A1FS: - ONE BENIGN LYMPH NODE (0/1). B. LYMPH NODE, #7, EXCISION, B1FS: - ONE BENIGN LYMPH NODE (0/1). C. LYMPH NODE, ANTERIOR 11L, EXCISION, C1FS: - ONE BENIGN LYMPH NODE (0/1). D. LUNG, LEFT LOWER LOBE, LOBECTOMY, D1FS: - SQUAMOUS CELL CARCINOMA, MODERATELY DIFFERENTIATED (7.2 X 6.2 X 4.2 CM). - CARCINOMA IS LIMITED TO THE LUNG. - LYMPH-VASCULAR AND PERINEURAL INVASION ARE NOT IDENTIFIED. - ALL SURGICAL MARGINS ARE NEGATIVE FOR CARCINOMA. This information is subject to all Federal and State laws regarding confidentiality and privacy and to the policies and procedures of. :garding. patient information. Any unauthorized use, disclosure, or reproduction of this information is strictly prohibited. Anat Path Reports. - CARCINOMA IS 1.5 CM FROM THE BRONCHIAL MARGIN. . THREE BENIGN LYMPH NODES NEGATIVE FOR CARCINOMA (0/3). - SEE SYNOPTIC REPORT. E. LYMPH NODE, #6, EXCISION: - ONE BENIGN LYMPH NODE (0/1). Comment. Elastic stain performed on block D7 - no pleural invasion by the tumor is identified. Synoptic Worksheet. D. Left lower lobe; please freeze bronchus margin: Specimen: Lobe(s) of lung: Left Lower tobe. Procedure: Lobectomy. Specimen Integrity: Intact. Specimen Laterality: Left. Tumor Site: Lower lobe. Tumor Focality: Unifocal. Histologic Type: Squamous cell carcinoma. Histologic Grade: G2: Moderately differentiated. Tumor Size: Greatest dimension: 7.2 cm. Additional dimension: 6.2 cm. Additional dimension: 4.2 cm. Visceral Pleura Invasion: Not identified. Tumor Extension: Not identified. Bronchial Margin: Uninvolved by invasive carcinoma. Squamous cell carcinoma in situ (CIS) not identified at bronchial margin. Vascular Margin: Uninvolved by invasive carcinoma. Parenchymal Margin: Not applicable. Parietal Pleural Margin: Not applicable. Chest Wall Margin: Not applicable. Other Attached Tissue Margin: Not applicable. All Margins Uninvolved By Invasive Carcinoma: Distance of invasive carcinoma from closest margin: 15 mm. Margin closest to invasive carcinoma:: Bronchial. Treatment Effect: Not applicable. Lymph-Vascular Invasion: Not identified. Extranodal Extension: Not identified. This information is subject to all Federal and State laws regarding confidentiality and privacy and to the policies and procedures of. regarding. patient information. Any unauthorized use, disclosure, or reproduction of this information is strictly prohibited. Anat Path Reports. TNM Descriptors: Not applicable. Primary Tumor (pT): pT3: Tumor greater than 7 cm in greatest dimension; or Tumor of any size. that directly invades any of the following: chest wall (including superior sulcus. tumors), diaphragm, phrenic nerve, mediastinal pleura, parietal pericardium;. or Tumor of any size in the main bronchus less than 2 cm distal to the carina. but without involvement of the carina; or Tumor of any size associated with. atelectasis or obstructive pneumonitis of the entire lung; or Tumors of any. size with separate tumor nodule(s) in same lobe. Regional Lymph Nodes (pN): pNO: No regional lymph node metastasis. Nodes examined: 7. Nodes involved: 0. Distant Metastasis (pM): Not applicable. Additional Pathologic Findings: None identified. Clinical History. Left Video-assisted thorascopic surgery, left lower lobectomy. Lung ca. Specimen(s) Received. A: 11L Lymph node. B: #7 Lymph node. C: Anterior 11L Lymph node. D: Left lower lobe; please freeze bronchus margin. E: #6 Lymph node. Gross Description. Specimens A through F are received, each is labeled with the patient's name and medical record number. Specimen A is received fresh for intraoperative consultation and further labeled \"11L lymph node\" and consists of a lymph node. measuring 2.0 x 1.0 x 0.7 cm along with multiple fragments of soft tissue measuring 2.0 x 0.7 x 0.4 cm in aggregate. The soft. tissue fragments are submitted for frozen section in \"A1FS.\" The lymph node is bisected and submitted for frozen section in. cassette \"A2FS.\". Specimen B is received fresh for intraoperative consultation and further labeled \"#7 lymph node\" and consists of one lymph node. measuring 2.7 x 1.8 x 0.8 cm. The specimen is bisected and entirely submitted for frozen section in cassette \"B1FS.' (Dictated. Specimen C is received fresh for intraoperative consultation and further labeled \"anterior 11L lymph node\" and consists of. multiple fragmented lymph nodes measuring 2.7 x 2.0 x 0.4 cm in aggregate. The specimen is entirely submitted for frozen. section in cassette \"C1FS.\". Specimen D is received fresh for intraoperative consultation and further labeled \"left lower lobe\" and consists of a lobe of lung. weighing (fixed weight) 258.3 grams and measuring 18.0 x 13.2 x 4.9 cm. The pleura is red-purple to pink, and wrinkled with. This information is subject to all Federal and State laws regarding confidentiality and privacy and to the policies and procedures of. garding. patient information. Any unauthorized use. disclosure, or reproduction of this information is strictly prohibited. Anat Path Reports. moderate carbonaceous pigmentation. There is a staple line measuring 5.1 cm, just above the hilum. The pleura about the hilum. is ragged. There is a firm palpable mass with overlying retracted pleura measuring 7.2 x 6.2 x 4.2 cm. The mass is 1.5 cm from. the bronchial margin. The mass upon sectioning has a firm gritty cut surface with areas of necrosis and black pigmentation. The. mass abuts, and possibly involves airway, more distal. The mass is 2.2 cm from the stapled margin. The uninvolved. parenchyma is red-pink, soft and hemorrhagic, with diffuse mild carbonaceous pigmentation. A small slightly elevated. subpleural nodule is identified along the distal medial aspect measuring 0.3 x 0.2 x 0.2 cm. Three peribronchial lymph nodes. are identified measuring up to 0.8 x 0.7 x 0.7 cm. The staple line is removed and the parenchymal margin is inked green. The. pleural overlying the mass is inked blue. Representative sections are submitted for frozen and permanent sections as stated. below in the block summary. Specimen E is received in formalin, labeled with the patient's name, medical record number and \"#6 lymph node\" and consists of. a black lymph node with attached soft tissue measuring 1.5 x 1.0 x 0.5 cm. The specimen is sectioned and entirely submitted in. cassette \"E1. CASSETTE SUMMARY: D1FS: Bronchial margin, shave. D2: Vascular margins, shave. D3-5: Tumor in relation to airway. D6: Tumor in relation to adjacent uninvolved parenchyma. D7: Additional representative tumor in relation to overlying pleura. D8: Uninvolved lung proximal to mass. D9: Uninvolved lung distal to mass. D10: Smaller subpleural nodule, entirely submitted. D11: Three lymph nodes, whole. Intraoperative Consult Diagnosis. A1FS,A2FS: 11L LYMPH NODE (FROZEN SECTION): ONE BENIGN LYMPH NODE, BISECTED. MULTIPLE LYMPH. NODE FRAGMENTS NEGATIVE FOR CARCINOMA. Frozen section results were communicated to the surgical team and were repeated back by. and the specimen was received at. B1FS: #7 LYMPH NODE (FROZEN SECTION): ONE BISECTED LYMPH NODE, NEGATIVE FOR CARCINOMA. Frozen section results were communicated to the surgical team and were repeated back by. and the specimen was received at. C1FS: ANTERIOR 11L LYMPH NODE (FROZEN SECTION): FRAGMENTED LYMPH NODE, NEGATIVE. FOR CARCINOMA. Frozen section results were communicated to the surgical team and were repeated back by. and the specimen was received at. D1FS: LEFT LOWER LOBE, FREEZE BRONCHIAL MARGIN (FROZEN SECTION): BRONCHIAL MARGIN. NEGATIVE FOR CARCINOMA. Frozen section results were communicated to the surgical team and were repeated back by -. ind the specimen was received at. This information is subject to all Federal and State laws regarding confidentiality and privacy and to the policies and procedures of. regarding. patient information. Any unauthorized use. disclosure, or reproduction of this information is strictly prohibited. Anat Path Reports. Microscopic Description. Microscopic examination performed.",
+    "entities": [
+      {
+        "entity_type": "GRADE",
+        "value": "MODERATELY DIFFERENTIATED",
+        "char_start": 710,
+        "char_end": 735,
+        "surface": "MODERATELY DIFFERENTIATED"
+      },
+      {
+        "entity_type": "TUMOR_SIZE_MM",
+        "value": "7.2 X 6.2 X 4.2 CM",
+        "char_start": 737,
+        "char_end": 755,
+        "surface": "7.2 X 6.2 X 4.2 CM"
+      },
+      {
+        "entity_type": "LVI",
+        "value": "NOT IDENTIFIED",
+        "char_start": 839,
+        "char_end": 853,
+        "surface": "NOT IDENTIFIED"
+      },
+      {
+        "entity_type": "MARGIN",
+        "value": "NEGATIVE",
+        "char_start": 882,
+        "char_end": 890,
+        "surface": "NEGATIVE"
+      },
+      {
+        "entity_type": "TUMOR_SIZE_MM",
+        "value": "1.5 CM",
+        "char_start": 1200,
+        "char_end": 1206,
+        "surface": "1.5 CM"
+      },
+      {
+        "entity_type": "GRADE",
+        "value": "G2",
+        "char_start": 1771,
+        "char_end": 1773,
+        "surface": "G2"
+      },
+      {
+        "entity_type": "TUMOR_SIZE_MM",
+        "value": "7.2 cm",
+        "char_start": 1834,
+        "char_end": 1840,
+        "surface": "7.2 cm"
+      },
+      {
+        "entity_type": "TUMOR_SIZE_MM",
+        "value": "6.2 cm",
+        "char_start": 1864,
+        "char_end": 1870,
+        "surface": "6.2 cm"
+      },
+      {
+        "entity_type": "TUMOR_SIZE_MM",
+        "value": "4.2 cm",
+        "char_start": 1894,
+        "char_end": 1900,
+        "surface": "4.2 cm"
+      },
+      {
+        "entity_type": "TUMOR_SIZE_MM",
+        "value": "15 mm",
+        "char_start": 2410,
+        "char_end": 2415,
+        "surface": "15 mm"
+      },
+      {
+        "entity_type": "T_STAGE",
+        "value": "pT3",
+        "char_start": 2913,
+        "char_end": 2916,
+        "surface": "pT3"
+      },
+      {
+        "entity_type": "N_STAGE",
+        "value": "pNO",
+        "char_start": 3457,
+        "char_end": 3460,
+        "surface": "pNO"
+      },
+      {
+        "entity_type": "LVI",
+        "value": "Not identified",
+        "char_start": 1928,
+        "char_end": 1942,
+        "surface": "Not identified"
+      },
+      {
+        "entity_type": "TUMOR_SIZE_MM",
+        "value": "2.0 x 1.0 x 0.7 cm",
+        "char_start": 4131,
+        "char_end": 4149,
+        "surface": "2.0 x 1.0 x 0.7 cm"
+      },
+      {
+        "entity_type": "TUMOR_SIZE_MM",
+        "value": "2.7 x 1.8 x 0.8 cm",
+        "char_start": 4530,
+        "char_end": 4548,
+        "surface": "2.7 x 1.8 x 0.8 cm"
+      },
+      {
+        "entity_type": "TUMOR_SIZE_MM",
+        "value": "2.7 x 2.0 x 0.4 cm",
+        "char_start": 4814,
+        "char_end": 4832,
+        "surface": "2.7 x 2.0 x 0.4 cm"
+      },
+      {
+        "entity_type": "TUMOR_SIZE_MM",
+        "value": "18.0 x 13.2 x 4.9 cm",
+        "char_start": 5104,
+        "char_end": 5124,
+        "surface": "18.0 x 13.2 x 4.9 cm"
+      },
+      {
+        "entity_type": "TUMOR_SIZE_MM",
+        "value": "5.1 cm",
+        "char_start": 5526,
+        "char_end": 5532,
+        "surface": "5.1 cm"
+      },
+      {
+        "entity_type": "TUMOR_SIZE_MM",
+        "value": "7.2 x 6.2 x 4.2 cm",
+        "char_start": 5667,
+        "char_end": 5685,
+        "surface": "7.2 x 6.2 x 4.2 cm"
+      },
+      {
+        "entity_type": "TUMOR_SIZE_MM",
+        "value": "1.5 cm",
+        "char_start": 5699,
+        "char_end": 5705,
+        "surface": "1.5 cm"
+      },
+      {
+        "entity_type": "TUMOR_SIZE_MM",
+        "value": "0.3 x 0.2 x 0.2 cm",
+        "char_start": 6147,
+        "char_end": 6165,
+        "surface": "0.3 x 0.2 x 0.2 cm"
+      },
+      {
+        "entity_type": "TUMOR_SIZE_MM",
+        "value": "0.8 x 0.7 x 0.7 cm",
+        "char_start": 6231,
+        "char_end": 6249,
+        "surface": "0.8 x 0.7 x 0.7 cm"
+      },
+      {
+        "entity_type": "TUMOR_SIZE_MM",
+        "value": "1.5 x 1.0 x 0.5 cm",
+        "char_start": 6662,
+        "char_end": 6680,
+        "surface": "1.5 x 1.0 x 0.5 cm"
+      }
+    ],
+    "tcga242_file": null
+  }
+]

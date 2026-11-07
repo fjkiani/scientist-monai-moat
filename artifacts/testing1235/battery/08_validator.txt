@@ -1,0 +1,11 @@
+TONIGHT DELIVERY GATE: PASS
+- biopsy-probe: trained_wired_tested
+- cbis-medsiglip: trained_wired_tested
+- clinicalbert: trained_wired_tested
+- luna16: trained_wired_tested
+- mammo-retinanet: trained_wired_tested
+- medgemma: trained_wired_tested
+- phikon: trained_wired_tested
+- stage-biopsy: trained_wired_tested
+- stage-screening: trained_wired_tested
+- stage-therapy: trained_wired_tested

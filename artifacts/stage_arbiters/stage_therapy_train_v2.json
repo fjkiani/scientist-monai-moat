@@ -1,0 +1,308 @@
+{
+  "capability": "stage-therapy",
+  "command": "/workspace/.venv/bin/python scripts/train_stage_arbiters_v1.py --seed 20260928 --out-dir /workspace/stage-arbiters-full --repo-root /workspace/smm-ten-delivery --write-repo",
+  "completed_at": "2026-09-29T03:51:33.122912Z",
+  "dataset": "METABRIC patient clinical cohort (observed chemotherapy receipt)",
+  "dataset_manifest_path": "artifacts/stage_arbiters/stage_therapy_dataset_v2.json",
+  "dataset_sha256": "02d4bec415b8ed342daaba2b08d316423c86674e8f8801605e1110df342756bf",
+  "n_test": 297,
+  "n_training": 1386,
+  "n_training_synthetic": false,
+  "n_validation": 297,
+  "nested_grouped_cv": [
+    {
+      "fold": 0,
+      "inner_mean_auroc_by_c": {
+        "0.01": 0.8580904142521928,
+        "0.1": 0.8855352937939078,
+        "1.0": 0.9127829807679757,
+        "10.0": 0.9189780354369473
+      },
+      "n_train": 1109,
+      "n_valid": 277,
+      "outer_auroc": 0.9257575757575758,
+      "selected_c": 10.0
+    },
+    {
+      "fold": 1,
+      "inner_mean_auroc_by_c": {
+        "0.01": 0.8671840616184459,
+        "0.1": 0.8834780871834415,
+        "1.0": 0.9056994947005105,
+        "10.0": 0.9118410728929248
+      },
+      "n_train": 1108,
+      "n_valid": 278,
+      "outer_auroc": 0.9189536878216124,
+      "selected_c": 10.0
+    },
+    {
+      "fold": 2,
+      "inner_mean_auroc_by_c": {
+        "0.01": 0.8616814766143625,
+        "0.1": 0.884042192684862,
+        "1.0": 0.9119152045015188,
+        "10.0": 0.9180913469728941
+      },
+      "n_train": 1109,
+      "n_valid": 277,
+      "outer_auroc": 0.9184520843713669,
+      "selected_c": 10.0
+    },
+    {
+      "fold": 3,
+      "inner_mean_auroc_by_c": {
+        "0.01": 0.8627799997378706,
+        "0.1": 0.88265127910174,
+        "1.0": 0.9096267245638247,
+        "10.0": 0.9166481871332203
+      },
+      "n_train": 1109,
+      "n_valid": 277,
+      "outer_auroc": 0.9107289107289107,
+      "selected_c": 10.0
+    },
+    {
+      "fold": 4,
+      "inner_mean_auroc_by_c": {
+        "0.01": 0.8594542502363468,
+        "0.1": 0.8820975621775585,
+        "1.0": 0.9019368161655837,
+        "10.0": 0.9079933757096733
+      },
+      "n_train": 1109,
+      "n_valid": 277,
+      "outer_auroc": 0.9197640594699419,
+      "selected_c": 10.0
+    }
+  ],
+  "patient_disjoint": true,
+  "schema_version": 2,
+  "secondary_evaluation_summary": {
+    "purpose": "Mathematically interrogate weak/null signals using test-stratified AUROC, within-stratum regressions, and leave-stratum-out cross-cohort validation.",
+    "selected_c_fixed_before_test": 10.0,
+    "strata": {
+      "1": {
+        "final_model_test": {
+          "auroc": 0.9461914744933613,
+          "auroc_ci": [
+            0.8767569444444444,
+            0.9895194575471699
+          ],
+          "n": 80,
+          "n_negative": 53,
+          "n_patients": 80,
+          "n_positive": 27,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        },
+        "leave_stratum_out_validation": {
+          "auroc": 0.9371069182389937,
+          "auroc_ci": [
+            0.8666300940438871,
+            0.9847313436563437
+          ],
+          "n": 80,
+          "n_negative": 53,
+          "n_patients": 80,
+          "n_positive": 27,
+          "n_training": 1027,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        },
+        "within_stratum_regression": {
+          "auroc": 0.9385045422781272,
+          "auroc_ci": [
+            0.8639257019576168,
+            0.9893163615560641
+          ],
+          "n": 80,
+          "n_negative": 53,
+          "n_patients": 80,
+          "n_positive": 27,
+          "n_training": 359,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        }
+      },
+      "2": {
+        "final_model_test": {
+          "auroc": 1.0,
+          "auroc_ci": [
+            0.9999999999999999,
+            1.0
+          ],
+          "n": 49,
+          "n_negative": 39,
+          "n_patients": 49,
+          "n_positive": 10,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        },
+        "leave_stratum_out_validation": {
+          "auroc": 1.0,
+          "auroc_ci": [
+            0.9999999999999999,
+            1.0
+          ],
+          "n": 49,
+          "n_negative": 39,
+          "n_patients": 49,
+          "n_positive": 10,
+          "n_training": 1197,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        },
+        "within_stratum_regression": {
+          "auroc": 1.0,
+          "auroc_ci": [
+            0.9999999999999999,
+            1.0
+          ],
+          "n": 49,
+          "n_negative": 39,
+          "n_patients": 49,
+          "n_positive": 10,
+          "n_training": 189,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        }
+      },
+      "3": {
+        "final_model_test": {
+          "auroc": 0.9975961538461539,
+          "auroc_ci": [
+            0.9887113617376776,
+            1.0
+          ],
+          "n": 109,
+          "n_negative": 96,
+          "n_patients": 109,
+          "n_positive": 13,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        },
+        "leave_stratum_out_validation": {
+          "auroc": 0.9935897435897436,
+          "auroc_ci": [
+            0.9796925825201301,
+            1.0
+          ],
+          "n": 109,
+          "n_negative": 96,
+          "n_patients": 109,
+          "n_positive": 13,
+          "n_training": 859,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        },
+        "within_stratum_regression": {
+          "auroc": 1.0,
+          "auroc_ci": [
+            0.9999999999999999,
+            1.0
+          ],
+          "n": 109,
+          "n_negative": 96,
+          "n_patients": 109,
+          "n_positive": 13,
+          "n_training": 527,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        }
+      },
+      "4": {
+        "final_model_test": {
+          "auroc": 0.8933333333333333,
+          "auroc_ci": [
+            0.7691699604743082,
+            1.0
+          ],
+          "n": 34,
+          "n_negative": 25,
+          "n_patients": 34,
+          "n_positive": 9,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        },
+        "leave_stratum_out_validation": {
+          "auroc": 0.8800000000000001,
+          "auroc_ci": [
+            0.7331818181818182,
+            0.9807692307692308
+          ],
+          "n": 34,
+          "n_negative": 25,
+          "n_patients": 34,
+          "n_positive": 9,
+          "n_training": 1207,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        },
+        "within_stratum_regression": {
+          "auroc": 0.8711111111111112,
+          "auroc_ci": [
+            0.6977612179487179,
+            0.9881741849133153
+          ],
+          "n": 34,
+          "n_negative": 25,
+          "n_patients": 34,
+          "n_positive": 9,
+          "n_training": 179,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        }
+      },
+      "5": {
+        "final_model_test": {
+          "auroc": 0.9696969696969697,
+          "auroc_ci": [
+            0.8695652173913043,
+            1.0
+          ],
+          "n": 25,
+          "n_negative": 22,
+          "n_patients": 25,
+          "n_positive": 3,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        },
+        "leave_stratum_out_validation": {
+          "auroc": 0.9696969696969697,
+          "auroc_ci": [
+            0.8695652173913043,
+            1.0
+          ],
+          "n": 25,
+          "n_negative": 22,
+          "n_patients": 25,
+          "n_positive": 3,
+          "n_training": 1254,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        },
+        "within_stratum_regression": {
+          "auroc": 1.0,
+          "auroc_ci": [
+            0.9999999999999999,
+            1.0
+          ],
+          "n": 25,
+          "n_negative": 22,
+          "n_patients": 25,
+          "n_positive": 3,
+          "n_training": 132,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        }
+      }
+    }
+  },
+  "seed": 20260930,
+  "selected_c": 10.0,
+  "source_commit": "55fc3a8fd4e5d8e7db87613b948e51974664790a",
+  "split_manifest_path": "artifacts/stage_arbiters/stage_therapy_split_v2.json",
+  "split_sha256": "e40a29af7d29a9b94b4c94de2e435d2a9ffa90414dd11ea7f37984a977fa282b",
+  "started_at": "2026-09-29T03:51:24.719237Z"
+}

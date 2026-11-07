@@ -1,0 +1,11 @@
+{
+  "status": "unzip_partial_images_present",
+  "volume": "rsna-mammo-png",
+  "extracted_root": "vindr_extracted/.../1.0.0",
+  "breast_annotations_rows": 20000,
+  "images_dirs_listed_approx": 2880,
+  "format": "dicom",
+  "band": "24-48",
+  "ts": "2026-10-05T04:45:37Z",
+  "next": "Modal DICOM\u2192PNG sample convert + MedSigLIP embed"
+}

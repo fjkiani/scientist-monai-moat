@@ -1,0 +1,31 @@
+{
+  "status": "ok",
+  "returncode": 0,
+  "request_id": "gateD-fjkiani-20261003T0435Z-zo",
+  "app_version": "luna16-fullfit-v0.1.2-empty-box-patch",
+  "elapsed_seconds": 2073.617,
+  "monai_run_id": "run",
+  "epochs": 5,
+  "learning_rate": 0.001,
+  "batch_size": 2,
+  "n_training": 482,
+  "n_validation": 60,
+  "nifti_prefix": "/vol/luna16/nifti_v3",
+  "dataset_sha256": "d20b94a15315b830b99d29e429b0daf5380b7fa5bf157fecf733c2af354944ff",
+  "split_sha256": "3602f34c4b3e65024e6a7ef3fc7185577ee1f39e54d2c9f5c35baffc2d0cd1d9",
+  "datalist_sha256": "c5f6adf3fe79b787e8b038862220c8aed16964f36cd8b642dbaa4ccfc10a73c3",
+  "baseline_sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01",
+  "start_ckpt_sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01",
+  "end_ckpt_sha256": "90e733f34c6a6806fff70f2847f07c061481a0465222dbd38e81045bf0283b0a",
+  "weights_moved": true,
+  "checkpoints": [
+    {
+      "path": "/vol/output/fullfit-v0.1/gateD-fjkiani-20261003T0435Z-zo/train/checkpoints/model.pt",
+      "sha256": "90e733f34c6a6806fff70f2847f07c061481a0465222dbd38e81045bf0283b0a",
+      "bytes": 83709810
+    }
+  ],
+  "log_path": "/vol/output/fullfit-v0.1/gateD-fjkiani-20261003T0435Z-zo/train/training.log",
+  "cuda_available": true,
+  "gpu_name": "NVIDIA A100-SXM4-40GB"
+}

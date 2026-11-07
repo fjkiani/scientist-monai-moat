@@ -1,0 +1,76 @@
+{
+  "clinical_meter": "patient-disjoint test AUROC (Track-3 fusion, full RSNA)",
+  "n_embedded": 54706,
+  "emb_dim": 1152,
+  "n_train": 43744,
+  "n_test": 10962,
+  "rows": [
+    {
+      "model": "Metadata alone",
+      "n_test": 10962,
+      "test_cancers": 192,
+      "auroc": 0.6190742513927576,
+      "auroc_ci_lo": 0.5767542785832527,
+      "auroc_ci_hi": 0.6572371248475807,
+      "avg_precision": 0.034932878578600224,
+      "brier": 0.017179484456893282,
+      "nb_15": 0.0
+    },
+    {
+      "model": "MedSigLIP alone",
+      "n_test": 10962,
+      "test_cancers": 192,
+      "auroc": 0.6649532845868152,
+      "auroc_ci_lo": 0.6282138795589673,
+      "auroc_ci_hi": 0.7047882559713611,
+      "avg_precision": 0.047402865554471714,
+      "brier": 0.0172890592366457,
+      "nb_15": -0.0004239243590156369
+    },
+    {
+      "model": "Fused (MedSigLIP + metadata)",
+      "n_test": 10962,
+      "test_cancers": 192,
+      "auroc": 0.6897704851439184,
+      "auroc_ci_lo": 0.6486846335954088,
+      "auroc_ci_hi": 0.7281252716951695,
+      "avg_precision": 0.06516015346524173,
+      "brier": 0.017103376100720522,
+      "nb_15": -0.000547345374931582
+    }
+  ],
+  "paired_bootstrap": {
+    "fused_minus_meta": {
+      "B": 2000,
+      "skipped": 0,
+      "delta_mean": 0.07090653620084154,
+      "delta_ci_lo": 0.025093093675335916,
+      "delta_ci_hi": 0.11736631379336844,
+      "p_delta_le_zero": 0.0
+    },
+    "fused_minus_vision": {
+      "B": 2000,
+      "skipped": 0,
+      "delta_mean": 0.024878058947461645,
+      "delta_ci_lo": 0.007724901711824867,
+      "delta_ci_hi": 0.04191469391090016,
+      "p_delta_le_zero": 0.002
+    }
+  },
+  "embed_status": {
+    "phase": "DONE",
+    "images_embedded": 54706,
+    "n_rows": 54706,
+    "dim": 1152,
+    "elapsed": 9363.4,
+    "cohort_csv": "/emb/cohort_full/cohort.csv",
+    "embeddings_npy": "/emb/cohort_full/embeddings_54706.npy",
+    "cancer_pos": 1158,
+    "n_train": 43744,
+    "n_test": 10962,
+    "model_repo": "google/medsiglip-448",
+    "model_sha": "9cea28a1a1195f665105faa6e8544c112fd960a4",
+    "DONE": true
+  },
+  "RUO": true
+}

@@ -1,0 +1,25 @@
+{
+  "status": "ok",
+  "returncode": 0,
+  "request_id": "gateE-crispro-ephemeral-20261005T061423Z-zo",
+  "ckpt_request_id": "gateD-crispro-ephemeral-20261005T014000Z-zo",
+  "ckpt_sha256": "327306f1cc8d500e34cc7352d14bb1a4959fb1643123b4ce31ebc360cb51c2d5",
+  "app_version": "luna16-fullfit-v0.1.3-posneg-1to1",
+  "elapsed_seconds": 867.962,
+  "n_test": 88,
+  "monai_run_key": "run",
+  "config_file": "['/tmp/gateE-crispro-ephemeral-20261005T061423Z-zo/bundle/configs/train.json','/tmp/gateE-crispro-ephemeral-20261005T061423Z-zo/bundle/configs/evaluate.json','/tmp/gateE-crispro-ephemeral-20261005T061423Z-zo/bundle/configs/evaluate_heldout_overlay.json']",
+  "artifacts": [
+    "/vol/output/fullfit-v0.1/gateE-crispro-ephemeral-20261005T061423Z-zo/heldout/eval/metrics.csv"
+  ],
+  "log_path": "/vol/output/fullfit-v0.1/gateE-crispro-ephemeral-20261005T061423Z-zo/heldout/evaluate.log",
+  "froc_at_2": null,
+  "refined": {},
+  "baseline": {
+    "returncode": 0,
+    "ckpt_sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01"
+  },
+  "delta": null,
+  "verdict": "UNPROVEN",
+  "verdict_note": "Held-out bundle evaluate completed; FROC parsed from log when present. +0.05 floor is reference only, not automatic promotion."
+}

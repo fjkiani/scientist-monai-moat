@@ -1,0 +1,147 @@
+{
+  "acceptance_checks": {
+    "age_only_oof_auroc": true,
+    "age_plus_figo_oof_auroc": true,
+    "delta_oof_auroc": true,
+    "events": true,
+    "frozen_input_sha256": true,
+    "n": true,
+    "saved_artifact_matches_reanalysis": true
+  },
+  "cohort": {
+    "corrected_events": 69,
+    "corrected_n": 271,
+    "initial_drop_no_age": 8,
+    "initial_drop_no_figo": 150,
+    "initial_drop_no_label": 85,
+    "secondary_drop_censored_before_horizon": 93,
+    "secondary_drop_death_untimed": 1,
+    "source_cases": 608,
+    "v1_events": 289,
+    "v1_n": 365
+  },
+  "external_validation": {
+    "interpretation": "absence of external validation is recorded, not replaced by a synthetic or same-cohort validation",
+    "reason": "no_feature_compatible_external_cohort_available",
+    "status": "not_performed"
+  },
+  "input": {
+    "row_order_preserved": true,
+    "sha256": "a87eaa72d929aba00f6673a625798219c63cd49d68aad66a0f60852624518942",
+    "source": "GDC TCGA-OV /cases response"
+  },
+  "oof_auroc": {
+    "age_only": 0.658057110058832,
+    "age_plus_figo": 0.6828095853063567,
+    "figo_only": 0.5690558186253408
+  },
+  "paired_increment_age_plus_figo_over_age": {
+    "ci95": [
+      -0.04122902029664334,
+      0.09544478342196283
+    ],
+    "n_bootstrap": 2000,
+    "p_delta_le_zero": 0.228,
+    "seed": 42,
+    "value": 0.024752475247524663
+  },
+  "patient_level_outputs_permitted": false,
+  "refreshed_snapshot_sensitivity": {
+    "common_cases": 608,
+    "input_sha256": "c439ab46cde6afd669afd3579dbf8bf6f7f57ab1c72e6af054b862c6ed168e3a",
+    "interpretation": "The corrected cohort membership is stable, but first-diagnosis follow-up fields and API row order changed. Seeded StratifiedKFold assignments therefore changed; the retirement verdict remains unchanged.",
+    "oof_auroc": {
+      "age_only": 0.6592767972449418,
+      "age_plus_figo": 0.6696082651743435,
+      "figo_only": 0.5694504233032
+    },
+    "selected_field_changes": {
+      "days_to_birth": 0,
+      "days_to_death": 0,
+      "days_to_follow_up": 201,
+      "figo": 0,
+      "vital": 0
+    }
+  },
+  "secondary_regressions": {
+    "age_adjusted_figo_terms": [
+      {
+        "ci95": [
+          1.344936473812659,
+          2.329218281226341
+        ],
+        "odds_ratio": 1.7699295528050085,
+        "p_value": 4.595996064847054e-05,
+        "term": "age_per_decade"
+      },
+      {
+        "ci95": [
+          0.6159390264597883,
+          13.234104582578752
+        ],
+        "odds_ratio": 2.855065934905984,
+        "p_value": 0.18001967827505816,
+        "term": "figo_III_vs_I_II"
+      },
+      {
+        "ci95": [
+          1.5380509605806747,
+          39.799882793339364
+        ],
+        "odds_ratio": 7.823953473870731,
+        "p_value": 0.013184953286211163,
+        "term": "figo_IV_vs_I_II"
+      }
+    ],
+    "age_only_vs_age_plus_figo_likelihood_ratio": {
+      "degrees_of_freedom": 2,
+      "p_value": 0.004109400346244457,
+      "statistic": 10.988956324551339
+    },
+    "figo_stratified_age_regressions": {
+      "III": {
+        "age_auroc": 0.6680021367521368,
+        "age_per_decade": {
+          "ci95": [
+            1.261041505202254,
+            2.3901705192570457
+          ],
+          "odds_ratio": 1.7361175735801877,
+          "p_value": 0.000719879979803244,
+          "term": "age_per_decade"
+        },
+        "events": 48,
+        "n": 204
+      },
+      "IV": {
+        "age_auroc": 0.6898496240601504,
+        "age_per_decade": {
+          "ci95": [
+            1.029454258139299,
+            3.3613515722217584
+          ],
+          "odds_ratio": 1.8602036687220345,
+          "p_value": 0.03976665263850408,
+          "term": "age_per_decade"
+        },
+        "events": 19,
+        "n": 47
+      },
+      "I_II": {
+        "age_auroc": 0.6944444444444444,
+        "age_per_decade": {
+          "ci95": [
+            0.5227302541804469,
+            6.8953762512710055
+          ],
+          "odds_ratio": 1.8985314799857047,
+          "p_value": 0.32994807788986946,
+          "term": "age_per_decade"
+        },
+        "events": 2,
+        "n": 20
+      }
+    }
+  },
+  "verdict": "retire_patient_level_ovarian_scoring"
+}

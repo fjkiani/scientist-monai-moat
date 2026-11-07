@@ -1,0 +1,14 @@
+{
+  "status": "ok",
+  "band": "24-48",
+  "dataset": "rsna_kaggle_official_v1",
+  "backbone": "MedSigLIP-1152",
+  "modal_embed_url": "https://crispro-test--medsiglip",
+  "n_total": 858,
+  "test_auc": 1.0,
+  "joblib": "artifacts/rsna_mammo/probe_official_v1/rsna_medsiglip_logreg_official_v1.joblib",
+  "joblib_sha256": "8b29494767bcefc95f69a49bce0ed039cea3cb24f4b872377fb69ebf8732a929",
+  "evaluation": "artifacts/rsna_mammo/probe_official_v1/evaluation_v2.json",
+  "note": "Official Kaggle PNG tree embed via crispro-test MedSigLIP after testing-123 HF secret was offline placeholder (401 gated). testing-123 medsiglip-hf-token repaired.",
+  "ts": "2026-10-05T12:03:53.597827+00:00"
+}

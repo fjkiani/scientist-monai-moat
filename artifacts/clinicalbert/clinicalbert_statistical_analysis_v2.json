@@ -1,0 +1,1420 @@
+{
+  "analysis_seed": 20260929,
+  "artifact_sha256": "429f804d7f348d7c4eeb27821f766cc2de65c4072f20db0c3b3afaefa9068e50",
+  "capability": "clinicalbert",
+  "causal_methods": "N/A \u2014 supervised extraction evaluation has no treatment assignment or single-arm causal estimand; propensity matching and synthetic controls are not scientifically applicable",
+  "cross_cohort_by_entity": {
+    "ER_VALUE": {
+      "external_f1": 0.0,
+      "external_gold_mentions": 0,
+      "external_tp": 0,
+      "primary_f1": 0.1686746987951807,
+      "primary_gold_mentions": 17,
+      "primary_tp": 7,
+      "status": "primary_only_no_external_gold",
+      "training_mentions": 484
+    },
+    "GRADE": {
+      "external_f1": 0.21008403361344538,
+      "external_gold_mentions": 82,
+      "external_tp": 25,
+      "primary_f1": 0.1276595744680851,
+      "primary_gold_mentions": 34,
+      "primary_tp": 15,
+      "status": "nonzero_signal_in_both_cohorts",
+      "training_mentions": 1721
+    },
+    "HER2_AMP": {
+      "external_f1": 0.0,
+      "external_gold_mentions": 0,
+      "external_tp": 0,
+      "primary_f1": 0.0,
+      "primary_gold_mentions": 0,
+      "primary_tp": 0,
+      "status": "no_gold_mentions",
+      "training_mentions": 74
+    },
+    "HER2_VALUE": {
+      "external_f1": 0.0,
+      "external_gold_mentions": 0,
+      "external_tp": 0,
+      "primary_f1": 0.0,
+      "primary_gold_mentions": 1,
+      "primary_tp": 0,
+      "status": "primary_only_no_external_gold",
+      "training_mentions": 400
+    },
+    "KI67_PCT": {
+      "external_f1": 0.0,
+      "external_gold_mentions": 0,
+      "external_tp": 0,
+      "primary_f1": 0.0,
+      "primary_gold_mentions": 0,
+      "primary_tp": 0,
+      "status": "no_gold_mentions",
+      "training_mentions": 48
+    },
+    "LVI": {
+      "external_f1": 0.0449438202247191,
+      "external_gold_mentions": 6,
+      "external_tp": 4,
+      "primary_f1": 0.112,
+      "primary_gold_mentions": 12,
+      "primary_tp": 7,
+      "status": "nonzero_signal_in_both_cohorts",
+      "training_mentions": 406
+    },
+    "MARGIN": {
+      "external_f1": 0.1192982456140351,
+      "external_gold_mentions": 55,
+      "external_tp": 34,
+      "primary_f1": 0.21343873517786563,
+      "primary_gold_mentions": 66,
+      "primary_tp": 54,
+      "status": "nonzero_signal_in_both_cohorts",
+      "training_mentions": 2071
+    },
+    "M_STAGE": {
+      "external_f1": 0.7924528301886793,
+      "external_gold_mentions": 21,
+      "external_tp": 21,
+      "primary_f1": 0.831858407079646,
+      "primary_gold_mentions": 49,
+      "primary_tp": 47,
+      "status": "nonzero_signal_in_both_cohorts",
+      "training_mentions": 876
+    },
+    "N_STAGE": {
+      "external_f1": 0.5666666666666667,
+      "external_gold_mentions": 43,
+      "external_tp": 34,
+      "primary_f1": 0.3636363636363636,
+      "primary_gold_mentions": 18,
+      "primary_tp": 18,
+      "status": "nonzero_signal_in_both_cohorts",
+      "training_mentions": 1300
+    },
+    "PR_VALUE": {
+      "external_f1": 0.0,
+      "external_gold_mentions": 0,
+      "external_tp": 0,
+      "primary_f1": 0.26865671641791045,
+      "primary_gold_mentions": 15,
+      "primary_tp": 9,
+      "status": "primary_only_no_external_gold",
+      "training_mentions": 358
+    },
+    "TUMOR_SIZE_MM": {
+      "external_f1": 0.0,
+      "external_gold_mentions": 14,
+      "external_tp": 0,
+      "primary_f1": 0.007398273736128237,
+      "primary_gold_mentions": 39,
+      "primary_tp": 3,
+      "status": "primary_signal_not_replicated_external_null",
+      "training_mentions": 3447
+    },
+    "T_STAGE": {
+      "external_f1": 0.6188340807174888,
+      "external_gold_mentions": 70,
+      "external_tp": 69,
+      "primary_f1": 0.6108374384236454,
+      "primary_gold_mentions": 62,
+      "primary_tp": 62,
+      "status": "nonzero_signal_in_both_cohorts",
+      "training_mentions": 2009
+    }
+  },
+  "dataset_sha256": "13fd452d103da8c97634ba089ceabfa72e905a9365524699f7aefefac5ca62c2",
+  "independent_external_validation": {
+    "entity_type_fixed_effect_sensitivity": {
+      "converged": true,
+      "covariance": "patient-cluster robust",
+      "family": "binomial logit",
+      "formula": "detected ~ z_log_length + C(tumor_source) + C(entity_type) + z_log_negation + z_log_uncertainty",
+      "n_entity_mentions": 291,
+      "n_patient_clusters": 123,
+      "status": "fit",
+      "terms": {
+        "C(entity_type)[T.LVI]": {
+          "ci_95_log_odds": [
+            -1.0184809647676107,
+            2.743006184967223
+          ],
+          "cluster_robust_se": 0.9595806809219366,
+          "coefficient_log_odds": 0.8622626100998063,
+          "odds_ratio": 2.3685136585112896,
+          "p_value_wald": 0.36887497084994214
+        },
+        "C(entity_type)[T.MARGIN]": {
+          "ci_95_log_odds": [
+            0.12124200020250131,
+            2.0657713100477033
+          ],
+          "cluster_robust_se": 0.496062510633716,
+          "coefficient_log_odds": 1.0935066551251023,
+          "odds_ratio": 2.984722134151108,
+          "p_value_wald": 0.027498144088010077
+        },
+        "C(entity_type)[T.M_STAGE]": {
+          "ci_95_log_odds": [
+            23.24619890162674,
+            25.040746705321638
+          ],
+          "cluster_robust_se": 0.45780121926985984,
+          "coefficient_log_odds": 24.14347280347419,
+          "odds_ratio": 30575742521.501144,
+          "p_value_wald": 0.0
+        },
+        "C(entity_type)[T.N_STAGE]": {
+          "ci_95_log_odds": [
+            1.3530678704637118,
+            3.379326782849404
+          ],
+          "cluster_robust_se": 0.5169122821563468,
+          "coefficient_log_odds": 2.366197326656558,
+          "odds_ratio": 10.656790841565382,
+          "p_value_wald": 4.7042940251315246e-06
+        },
+        "C(entity_type)[T.TUMOR_SIZE_MM]": {
+          "ci_95_log_odds": [
+            -23.594861621866436,
+            -21.45433072909011
+          ],
+          "cluster_robust_se": 0.5460638332287127,
+          "coefficient_log_odds": -22.524596175478273,
+          "odds_ratio": 1.650791309495054e-10,
+          "p_value_wald": 0.0
+        },
+        "C(entity_type)[T.T_STAGE]": {
+          "ci_95_log_odds": [
+            3.128289341036586,
+            7.298749198481591
+          ],
+          "cluster_robust_se": 1.0639123704162576,
+          "coefficient_log_odds": 5.213519269759089,
+          "odds_ratio": 183.7395507407725,
+          "p_value_wald": 9.56769292340294e-07
+        },
+        "C(tumor_source)[T.liver]": {
+          "ci_95_log_odds": [
+            -1.9125290156542238,
+            0.17429976976101802
+          ],
+          "cluster_robust_se": 0.5323640643082937,
+          "coefficient_log_odds": -0.8691146229466029,
+          "odds_ratio": 0.4193226435907945,
+          "p_value_wald": 0.10256222358373467
+        },
+        "C(tumor_source)[T.stomach]": {
+          "ci_95_log_odds": [
+            -2.6980333850954885,
+            -0.46983949355004273
+          ],
+          "cluster_robust_se": 0.5684272540518996,
+          "coefficient_log_odds": -1.5839364393227655,
+          "odds_ratio": 0.20516588348605477,
+          "p_value_wald": 0.005327659944914481
+        },
+        "Intercept": {
+          "ci_95_log_odds": [
+            -0.8072910705401791,
+            0.7046034306566961
+          ],
+          "cluster_robust_se": 0.38569445998051655,
+          "coefficient_log_odds": -0.05134381994174156,
+          "odds_ratio": 0.9499520019360931,
+          "p_value_wald": 0.894098122595755
+        },
+        "z_log_length": {
+          "ci_95_log_odds": [
+            -1.1571666858706369,
+            0.09159084485033886
+          ],
+          "cluster_robust_se": 0.31856644830492187,
+          "coefficient_log_odds": -0.532787920510149,
+          "odds_ratio": 0.5869662711530262,
+          "p_value_wald": 0.09443471402900895
+        },
+        "z_log_negation": {
+          "ci_95_log_odds": [
+            -0.3902892178042251,
+            0.7146329457878059
+          ],
+          "cluster_robust_se": 0.28187307835947906,
+          "coefficient_log_odds": 0.16217186399179043,
+          "odds_ratio": 1.1760623467226838,
+          "p_value_wald": 0.5650637559741135
+        },
+        "z_log_uncertainty": {
+          "ci_95_log_odds": [
+            -0.35257291834318105,
+            0.4793541736815624
+          ],
+          "cluster_robust_se": 0.21223019876560953,
+          "coefficient_log_odds": 0.06339062766919071,
+          "odds_ratio": 1.0654429494499311,
+          "p_value_wald": 0.765178063384529
+        }
+      },
+      "warnings": []
+    },
+    "n_patients": 123,
+    "n_reports": 128,
+    "per_entity": {
+      "ER_VALUE": {
+        "f1": 0.0,
+        "fn": 0,
+        "fp": 4,
+        "precision": 0.0,
+        "precision_ci_95_exact": [
+          0.0,
+          0.6023646356164746
+        ],
+        "recall": 0.0,
+        "recall_ci_95_exact": null,
+        "tp": 0
+      },
+      "GRADE": {
+        "f1": 0.21008403361344538,
+        "fn": 57,
+        "fp": 131,
+        "precision": 0.16025641025641027,
+        "precision_ci_95_exact": [
+          0.10647536531999566,
+          0.227414967912308
+        ],
+        "recall": 0.3048780487804878,
+        "recall_ci_95_exact": [
+          0.2079625290274248,
+          0.41637757562336314
+        ],
+        "tp": 25
+      },
+      "HER2_AMP": {
+        "f1": 0.0,
+        "fn": 0,
+        "fp": 5,
+        "precision": 0.0,
+        "precision_ci_95_exact": [
+          0.0,
+          0.5218237501049814
+        ],
+        "recall": 0.0,
+        "recall_ci_95_exact": null,
+        "tp": 0
+      },
+      "HER2_VALUE": {
+        "f1": 0.0,
+        "fn": 0,
+        "fp": 24,
+        "precision": 0.0,
+        "precision_ci_95_exact": [
+          0.0,
+          0.14247359772252563
+        ],
+        "recall": 0.0,
+        "recall_ci_95_exact": null,
+        "tp": 0
+      },
+      "LVI": {
+        "f1": 0.0449438202247191,
+        "fn": 2,
+        "fp": 168,
+        "precision": 0.023255813953488372,
+        "precision_ci_95_exact": [
+          0.006371952134460504,
+          0.05847114447025437
+        ],
+        "recall": 0.6666666666666666,
+        "recall_ci_95_exact": [
+          0.22277809550351213,
+          0.9567281317072583
+        ],
+        "tp": 4
+      },
+      "MARGIN": {
+        "f1": 0.1192982456140351,
+        "fn": 21,
+        "fp": 481,
+        "precision": 0.06601941747572816,
+        "precision_ci_95_exact": [
+          0.04615012931401178,
+          0.09103651197405456
+        ],
+        "recall": 0.6181818181818182,
+        "recall_ci_95_exact": [
+          0.4772622549605021,
+          0.7459083516774546
+        ],
+        "tp": 34
+      },
+      "M_STAGE": {
+        "f1": 0.7924528301886793,
+        "fn": 0,
+        "fp": 11,
+        "precision": 0.65625,
+        "precision_ci_95_exact": [
+          0.4680689637197313,
+          0.8142809082834338
+        ],
+        "recall": 1.0,
+        "recall_ci_95_exact": [
+          0.8389023847809204,
+          1.0
+        ],
+        "tp": 21
+      },
+      "N_STAGE": {
+        "f1": 0.5666666666666667,
+        "fn": 9,
+        "fp": 43,
+        "precision": 0.44155844155844154,
+        "precision_ci_95_exact": [
+          0.3284198089300088,
+          0.5593297793875318
+        ],
+        "recall": 0.7906976744186046,
+        "recall_ci_95_exact": [
+          0.6395752479058332,
+          0.8995588533220705
+        ],
+        "tp": 34
+      },
+      "PR_VALUE": {
+        "f1": 0.0,
+        "fn": 0,
+        "fp": 6,
+        "precision": 0.0,
+        "precision_ci_95_exact": [
+          0.0,
+          0.4592581264399005
+        ],
+        "recall": 0.0,
+        "recall_ci_95_exact": null,
+        "tp": 0
+      },
+      "TUMOR_SIZE_MM": {
+        "f1": 0.0,
+        "fn": 14,
+        "fp": 718,
+        "precision": 0.0,
+        "precision_ci_95_exact": [
+          0.0,
+          0.0051245396324574154
+        ],
+        "recall": 0.0,
+        "recall_ci_95_exact": [
+          0.0,
+          0.23163576165011648
+        ],
+        "tp": 0
+      },
+      "T_STAGE": {
+        "f1": 0.6188340807174888,
+        "fn": 1,
+        "fp": 84,
+        "precision": 0.45098039215686275,
+        "precision_ci_95_exact": [
+          0.3705135325280829,
+          0.5333827429938678
+        ],
+        "recall": 0.9857142857142858,
+        "recall_ci_95_exact": [
+          0.9229562376632335,
+          0.9996383824281968
+        ],
+        "tp": 69
+      }
+    },
+    "permutation_null": {
+      "method": "prediction-set permutation within tumor-source and report-length quartile",
+      "permutations": 10000,
+      "seed": 20261030,
+      "span_micro_f1": {
+        "null_ci_95": [
+          0.006502554575011612,
+          0.02879702740362285
+        ],
+        "null_mean": 0.016992196934509988,
+        "observed": 0.17371110078959592,
+        "p_one_sided_greater": 9.999000099990002e-05,
+        "z_vs_null": 27.545430490609846
+      },
+      "strict_report_exact_match": {
+        "null_ci_95": [
+          0.0,
+          0.0
+        ],
+        "null_mean": 0.0,
+        "observed": 0.0,
+        "p_one_sided_greater": 1.0
+      }
+    },
+    "prediction_burden": {
+      "gold_entities": 291,
+      "median_gold_entities_per_report": 2.0,
+      "median_predicted_entities_per_report": 9.5,
+      "predicted_entities": 1862,
+      "predicted_to_gold_ratio": 6.398625429553265
+    },
+    "reports_with_any_exact_span": {
+      "ci_95_exact": [
+        0.7602123810412595,
+        0.895479901752221
+      ],
+      "rate": 0.8359375,
+      "successes": 107,
+      "trials": 128
+    },
+    "span_micro": {
+      "f1": 0.17371110078959592,
+      "fn": 104,
+      "fp": 1675,
+      "precision": 0.1004296455424275,
+      "recall": 0.6426116838487973,
+      "tp": 187
+    },
+    "span_micro_cluster_bootstrap": {
+      "f1": {
+        "ci_95": [
+          0.1512230226669882,
+          0.19923053149968578
+        ],
+        "estimate": 0.17371110078959592
+      },
+      "method": "patient-cluster percentile bootstrap",
+      "n_patient_clusters": 123,
+      "precision": {
+        "ci_95": [
+          0.08623275542807621,
+          0.11718784165451894
+        ],
+        "estimate": 0.1004296455424275
+      },
+      "recall": {
+        "ci_95": [
+          0.5912124431132163,
+          0.6920529801324503
+        ],
+        "estimate": 0.6426116838487973
+      },
+      "replicates": 10000,
+      "seed": 20261029
+    },
+    "span_precision_ci_95_exact": [
+      0.08714630773725564,
+      0.11498623875867786
+    ],
+    "span_recall_ci_95_exact": [
+      0.5845981103208092,
+      0.6976878040132877
+    ],
+    "stratified_detection": {
+      "entity_frequency_tercile": {
+        "high": {
+          "detected": 62,
+          "gold_mentions": 97,
+          "recall": 0.6391752577319587,
+          "recall_ci_95_exact": [
+            0.535359602392371,
+            0.7342446501266411
+          ]
+        },
+        "low": {
+          "detected": 68,
+          "gold_mentions": 97,
+          "recall": 0.7010309278350515,
+          "recall_ci_95_exact": [
+            0.599599603198665,
+            0.7897909117181467
+          ]
+        },
+        "middle": {
+          "detected": 57,
+          "gold_mentions": 97,
+          "recall": 0.5876288659793815,
+          "recall_ci_95_exact": [
+            0.4831064277329184,
+            0.6866526536841722
+          ]
+        }
+      },
+      "negation_stratum": {
+        "above_median": {
+          "detected": 74,
+          "gold_mentions": 117,
+          "recall": 0.6324786324786325,
+          "recall_ci_95_exact": [
+            0.5383698311855671,
+            0.7197072018020187
+          ]
+        },
+        "at_or_below_median": {
+          "detected": 113,
+          "gold_mentions": 174,
+          "recall": 0.6494252873563219,
+          "recall_ci_95_exact": [
+            0.5735733270524241,
+            0.7200891134292903
+          ]
+        }
+      },
+      "report_length_quartile": {
+        "Q1": {
+          "detected": 45,
+          "gold_mentions": 73,
+          "recall": 0.6164383561643836,
+          "recall_ci_95_exact": [
+            0.49520622873065556,
+            0.7279136164543794
+          ]
+        },
+        "Q2": {
+          "detected": 41,
+          "gold_mentions": 73,
+          "recall": 0.5616438356164384,
+          "recall_ci_95_exact": [
+            0.4405098298699493,
+            0.6776194826936378
+          ]
+        },
+        "Q3": {
+          "detected": 51,
+          "gold_mentions": 72,
+          "recall": 0.7083333333333334,
+          "recall_ci_95_exact": [
+            0.5893328452455984,
+            0.8095467017599334
+          ]
+        },
+        "Q4": {
+          "detected": 50,
+          "gold_mentions": 73,
+          "recall": 0.684931506849315,
+          "recall_ci_95_exact": [
+            0.5656134034077358,
+            0.788704312343184
+          ]
+        }
+      },
+      "tumor_source": {
+        "esophagus": {
+          "detected": 93,
+          "gold_mentions": 118,
+          "recall": 0.788135593220339,
+          "recall_ci_95_exact": [
+            0.7033339173870758,
+            0.8579528526868068
+          ]
+        },
+        "liver": {
+          "detected": 42,
+          "gold_mentions": 82,
+          "recall": 0.5121951219512195,
+          "recall_ci_95_exact": [
+            0.39924790223480777,
+            0.6242357554969613
+          ]
+        },
+        "stomach": {
+          "detected": 52,
+          "gold_mentions": 91,
+          "recall": 0.5714285714285714,
+          "recall_ci_95_exact": [
+            0.4633651877296364,
+            0.6747113164200749
+          ]
+        }
+      },
+      "uncertainty_stratum": {
+        "absent": {
+          "detected": 138,
+          "gold_mentions": 224,
+          "recall": 0.6160714285714286,
+          "recall_ci_95_exact": [
+            0.5489535160322982,
+            0.6800735551703286
+          ]
+        },
+        "present": {
+          "detected": 49,
+          "gold_mentions": 67,
+          "recall": 0.7313432835820896,
+          "recall_ci_95_exact": [
+            0.609037778354228,
+            0.8323593055236712
+          ]
+        }
+      }
+    },
+    "stratified_regression": {
+      "converged": true,
+      "covariance": "patient-cluster robust",
+      "family": "binomial logit",
+      "formula": "detected ~ z_log_length + C(tumor_source) + z_log_train_frequency + z_log_negation + z_log_uncertainty",
+      "n_entity_mentions": 291,
+      "n_patient_clusters": 123,
+      "status": "fit",
+      "terms": {
+        "C(tumor_source)[T.liver]": {
+          "ci_95_log_odds": [
+            -1.7598872101628515,
+            -0.3903283878605529
+          ],
+          "cluster_robust_se": 0.3493836705942568,
+          "coefficient_log_odds": -1.0751077990117022,
+          "odds_ratio": 0.34126096572325176,
+          "p_value_wald": 0.002089864190333615
+        },
+        "C(tumor_source)[T.stomach]": {
+          "ci_95_log_odds": [
+            -1.8331209200138223,
+            -0.2542721967387369
+          ],
+          "cluster_robust_se": 0.4027749325316288,
+          "coefficient_log_odds": -1.0436965583762796,
+          "odds_ratio": 0.3521505280191902,
+          "p_value_wald": 0.009562384437820686
+        },
+        "Intercept": {
+          "ci_95_log_odds": [
+            0.7645481835080445,
+            1.8389559238673987
+          ],
+          "cluster_robust_se": 0.27408864367767605,
+          "coefficient_log_odds": 1.3017520536877216,
+          "odds_ratio": 3.6757311074731494,
+          "p_value_wald": 2.0403779915704312e-06
+        },
+        "z_log_length": {
+          "ci_95_log_odds": [
+            -0.5196664914202032,
+            0.3593908846128686
+          ],
+          "cluster_robust_se": 0.2242534513304745,
+          "coefficient_log_odds": -0.08013780340366726,
+          "odds_ratio": 0.9229891465766075,
+          "p_value_wald": 0.7208270240115644
+        },
+        "z_log_negation": {
+          "ci_95_log_odds": [
+            -0.42877052004852917,
+            0.3197013031756594
+          ],
+          "cluster_robust_se": 0.19094019816895588,
+          "coefficient_log_odds": -0.05453460843643489,
+          "odds_ratio": 0.9469257366715651,
+          "p_value_wald": 0.7751761276428832
+        },
+        "z_log_train_frequency": {
+          "ci_95_log_odds": [
+            -0.8044357258300743,
+            -0.06870247148434888
+          ],
+          "cluster_robust_se": 0.1876905035370791,
+          "coefficient_log_odds": -0.43656909865721155,
+          "odds_ratio": 0.6462498413471222,
+          "p_value_wald": 0.020018270025366942
+        },
+        "z_log_uncertainty": {
+          "ci_95_log_odds": [
+            -0.17360431039839258,
+            0.41983211190706954
+          ],
+          "cluster_robust_se": 0.15138962424473432,
+          "coefficient_log_odds": 0.12311390075433847,
+          "odds_ratio": 1.131013236872081,
+          "p_value_wald": 0.4160887897966481
+        }
+      },
+      "warnings": []
+    },
+    "strict_report_exact_match": {
+      "ci_95_exact": [
+        0.0,
+        0.028408053443543906
+      ],
+      "rate": 0.0,
+      "successes": 0,
+      "trials": 128
+    }
+  },
+  "leakage_audit": {
+    "test_sample_ids__external_validation_sample_ids": {
+      "patient_overlap": 0,
+      "sample_overlap": 0
+    },
+    "train_sample_ids__external_validation_sample_ids": {
+      "patient_overlap": 0,
+      "sample_overlap": 0
+    },
+    "train_sample_ids__test_sample_ids": {
+      "patient_overlap": 0,
+      "sample_overlap": 0
+    },
+    "train_sample_ids__validation_sample_ids": {
+      "patient_overlap": 0,
+      "sample_overlap": 0
+    },
+    "validation_sample_ids__external_validation_sample_ids": {
+      "patient_overlap": 0,
+      "sample_overlap": 0
+    },
+    "validation_sample_ids__test_sample_ids": {
+      "patient_overlap": 0,
+      "sample_overlap": 0
+    }
+  },
+  "null_interpretation": {
+    "entity_rule": "zero-TP entities are cross-checked only where the entity has gold mentions in both cohorts",
+    "strict_report_exact_match": "unresolved null when the exact binomial interval includes nontrivial success; span-level signal is assessed separately"
+  },
+  "prediction_file_hashes": {
+    "external": "f3d0935f5b121c0fc1f61c437f694f020f5febd580100f378af00c3a968b8dc9",
+    "primary_test": "dfa3125bdf93068e5b444b97c67dea78d314d90b45d34e35fe2407f6219334c4"
+  },
+  "primary_pathologist_gold": {
+    "entity_type_fixed_effect_sensitivity": {
+      "converged": true,
+      "covariance": "patient-cluster robust",
+      "family": "binomial logit",
+      "formula": "detected ~ z_log_length + C(tumor_source) + C(entity_type) + z_log_negation + z_log_uncertainty",
+      "n_entity_mentions": 313,
+      "n_patient_clusters": 96,
+      "status": "fit",
+      "terms": {
+        "C(entity_type)[T.GRADE]": {
+          "ci_95_log_odds": [
+            -1.194979142650551,
+            1.3678596454733016
+          ],
+          "cluster_robust_se": 0.6537974188146308,
+          "coefficient_log_odds": 0.08644025141137539,
+          "odds_ratio": 1.0902862227086338,
+          "p_value_wald": 0.8948161415469297
+        },
+        "C(entity_type)[T.HER2_VALUE]": {
+          "ci_95_log_odds": [
+            -25.933792695380454,
+            -21.638188263641602
+          ],
+          "cluster_robust_se": 1.0958375933491706,
+          "coefficient_log_odds": -23.785990479511028,
+          "odds_ratio": 4.6760116891432485e-11,
+          "p_value_wald": 1.8099650211833964e-104
+        },
+        "C(entity_type)[T.LVI]": {
+          "ci_95_log_odds": [
+            -0.8667797365311506,
+            2.4363598146398364
+          ],
+          "cluster_robust_se": 0.8426531245537495,
+          "coefficient_log_odds": 0.7847900390543429,
+          "odds_ratio": 2.191946669219886,
+          "p_value_wald": 0.35168171934770565
+        },
+        "C(entity_type)[T.MARGIN]": {
+          "ci_95_log_odds": [
+            -0.11143970687692129,
+            2.7512766021304316
+          ],
+          "cluster_robust_se": 0.7302981921066137,
+          "coefficient_log_odds": 1.3199184476267551,
+          "odds_ratio": 3.743116104811507,
+          "p_value_wald": 0.07070473542054222
+        },
+        "C(entity_type)[T.M_STAGE]": {
+          "ci_95_log_odds": [
+            1.1748953940402447,
+            5.219249953540038
+          ],
+          "cluster_robust_se": 1.0317420604156875,
+          "coefficient_log_odds": 3.197072673790141,
+          "odds_ratio": 24.46082048853203,
+          "p_value_wald": 0.0019436311321829542
+        },
+        "C(entity_type)[T.N_STAGE]": {
+          "ci_95_log_odds": [
+            23.194021676602407,
+            25.702577798987843
+          ],
+          "cluster_robust_se": 0.6399495455458895,
+          "coefficient_log_odds": 24.448299737795125,
+          "odds_ratio": 41472638678.649055,
+          "p_value_wald": 0.0
+        },
+        "C(entity_type)[T.PR_VALUE]": {
+          "ci_95_log_odds": [
+            -0.5758264589459869,
+            2.23166114360398
+          ],
+          "cluster_robust_se": 0.7162089774850637,
+          "coefficient_log_odds": 0.8279173423289965,
+          "odds_ratio": 2.2885475125393113,
+          "p_value_wald": 0.24769271392344083
+        },
+        "C(entity_type)[T.TUMOR_SIZE_MM]": {
+          "ci_95_log_odds": [
+            -3.679379480434597,
+            -0.3309396093678243
+          ],
+          "cluster_robust_se": 0.8542095409606604,
+          "coefficient_log_odds": -2.0051595449012107,
+          "odds_ratio": 0.1346388130457013,
+          "p_value_wald": 0.01890565591877698
+        },
+        "C(entity_type)[T.T_STAGE]": {
+          "ci_95_log_odds": [
+            23.1658707480823,
+            25.65891010107137
+          ],
+          "cluster_robust_se": 0.6359911132688792,
+          "coefficient_log_odds": 24.412390424576834,
+          "odds_ratio": 40009806542.566505,
+          "p_value_wald": 0.0
+        },
+        "C(tumor_source)[T.colorectal]": {
+          "ci_95_log_odds": [
+            -0.186372914044187,
+            2.29444127598265
+          ],
+          "cluster_robust_se": 0.6328723919406639,
+          "coefficient_log_odds": 1.0540341809692315,
+          "odds_ratio": 2.869202684709083,
+          "p_value_wald": 0.09581770156515136
+        },
+        "Intercept": {
+          "ci_95_log_odds": [
+            -1.4941266581135586,
+            0.5952174617323325
+          ],
+          "cluster_robust_se": 0.5330057430458853,
+          "coefficient_log_odds": -0.4494545981906131,
+          "odds_ratio": 0.6379760100220614,
+          "p_value_wald": 0.3990912570699926
+        },
+        "z_log_length": {
+          "ci_95_log_odds": [
+            -0.5019215763817959,
+            0.47281310896026224
+          ],
+          "cluster_robust_se": 0.24866137669636815,
+          "coefficient_log_odds": -0.014554233710766813,
+          "odds_ratio": 0.9855511671860105,
+          "p_value_wald": 0.9533261999701224
+        },
+        "z_log_negation": {
+          "ci_95_log_odds": [
+            -0.06076070807990047,
+            0.7320991218431874
+          ],
+          "cluster_robust_se": 0.20226387734087595,
+          "coefficient_log_odds": 0.3356692068816435,
+          "odds_ratio": 1.3988762096435317,
+          "p_value_wald": 0.0970028350447136
+        },
+        "z_log_uncertainty": {
+          "ci_95_log_odds": [
+            -0.647567199494768,
+            0.1448343715413088
+          ],
+          "cluster_robust_se": 0.20214697241542173,
+          "coefficient_log_odds": -0.2513664139767296,
+          "odds_ratio": 0.7777373455097628,
+          "p_value_wald": 0.21368973715067274
+        }
+      },
+      "warnings": []
+    },
+    "n_patients": 96,
+    "n_reports": 96,
+    "per_entity": {
+      "ER_VALUE": {
+        "f1": 0.1686746987951807,
+        "fn": 10,
+        "fp": 59,
+        "precision": 0.10606060606060606,
+        "precision_ci_95_exact": [
+          0.04371844909859294,
+          0.20639348213238695
+        ],
+        "recall": 0.4117647058823529,
+        "recall_ci_95_exact": [
+          0.18443696178394667,
+          0.6707528460532426
+        ],
+        "tp": 7
+      },
+      "GRADE": {
+        "f1": 0.1276595744680851,
+        "fn": 19,
+        "fp": 186,
+        "precision": 0.07462686567164178,
+        "precision_ci_95_exact": [
+          0.04236785884955911,
+          0.12009876899746559
+        ],
+        "recall": 0.4411764705882353,
+        "recall_ci_95_exact": [
+          0.2718501964148669,
+          0.6211423560429286
+        ],
+        "tp": 15
+      },
+      "HER2_AMP": {
+        "f1": 0.0,
+        "fn": 0,
+        "fp": 5,
+        "precision": 0.0,
+        "precision_ci_95_exact": [
+          0.0,
+          0.5218237501049814
+        ],
+        "recall": 0.0,
+        "recall_ci_95_exact": null,
+        "tp": 0
+      },
+      "HER2_VALUE": {
+        "f1": 0.0,
+        "fn": 1,
+        "fp": 68,
+        "precision": 0.0,
+        "precision_ci_95_exact": [
+          0.0,
+          0.05280304279363979
+        ],
+        "recall": 0.0,
+        "recall_ci_95_exact": [
+          0.0,
+          0.975
+        ],
+        "tp": 0
+      },
+      "KI67_PCT": {
+        "f1": 0.0,
+        "fn": 0,
+        "fp": 1,
+        "precision": 0.0,
+        "precision_ci_95_exact": [
+          0.0,
+          0.975
+        ],
+        "recall": 0.0,
+        "recall_ci_95_exact": null,
+        "tp": 0
+      },
+      "LVI": {
+        "f1": 0.112,
+        "fn": 5,
+        "fp": 106,
+        "precision": 0.061946902654867256,
+        "precision_ci_95_exact": [
+          0.02526616776026377,
+          0.12347411612011558
+        ],
+        "recall": 0.5833333333333334,
+        "recall_ci_95_exact": [
+          0.2766696856821058,
+          0.8483477701915698
+        ],
+        "tp": 7
+      },
+      "MARGIN": {
+        "f1": 0.21343873517786563,
+        "fn": 12,
+        "fp": 386,
+        "precision": 0.12272727272727273,
+        "precision_ci_95_exact": [
+          0.09355640833702726,
+          0.15708283708613016
+        ],
+        "recall": 0.8181818181818182,
+        "recall_ci_95_exact": [
+          0.7039345441700697,
+          0.9023647979841516
+        ],
+        "tp": 54
+      },
+      "M_STAGE": {
+        "f1": 0.831858407079646,
+        "fn": 2,
+        "fp": 17,
+        "precision": 0.734375,
+        "precision_ci_95_exact": [
+          0.6091238708465891,
+          0.837023948531489
+        ],
+        "recall": 0.9591836734693877,
+        "recall_ci_95_exact": [
+          0.8602128129775362,
+          0.9950181581650287
+        ],
+        "tp": 47
+      },
+      "N_STAGE": {
+        "f1": 0.3636363636363636,
+        "fn": 0,
+        "fp": 63,
+        "precision": 0.2222222222222222,
+        "precision_ci_95_exact": [
+          0.13734189202394653,
+          0.3282777537974119
+        ],
+        "recall": 1.0,
+        "recall_ci_95_exact": [
+          0.8146980318621477,
+          1.0
+        ],
+        "tp": 18
+      },
+      "PR_VALUE": {
+        "f1": 0.26865671641791045,
+        "fn": 6,
+        "fp": 43,
+        "precision": 0.17307692307692307,
+        "precision_ci_95_exact": [
+          0.08232568544209289,
+          0.30328010610313305
+        ],
+        "recall": 0.6,
+        "recall_ci_95_exact": [
+          0.3228697662062816,
+          0.8366356761404865
+        ],
+        "tp": 9
+      },
+      "TUMOR_SIZE_MM": {
+        "f1": 0.007398273736128237,
+        "fn": 36,
+        "fp": 769,
+        "precision": 0.0038860103626943004,
+        "precision_ci_95_exact": [
+          0.0008021068347103297,
+          0.011314220442565092
+        ],
+        "recall": 0.07692307692307693,
+        "recall_ci_95_exact": [
+          0.01615330031065837,
+          0.20870192122644315
+        ],
+        "tp": 3
+      },
+      "T_STAGE": {
+        "f1": 0.6108374384236454,
+        "fn": 0,
+        "fp": 79,
+        "precision": 0.4397163120567376,
+        "precision_ci_95_exact": [
+          0.356301945300743,
+          0.525717013946019
+        ],
+        "recall": 1.0,
+        "recall_ci_95_exact": [
+          0.942237365570709,
+          1.0
+        ],
+        "tp": 62
+      }
+    },
+    "permutation_null": {
+      "method": "prediction-set permutation within tumor-source and report-length quartile",
+      "permutations": 10000,
+      "seed": 20260930,
+      "span_micro_f1": {
+        "null_ci_95": [
+          0.0043159257660768235,
+          0.030211480362537766
+        ],
+        "null_mean": 0.016086491152352177,
+        "observed": 0.19162710401381094,
+        "p_one_sided_greater": 9.999000099990002e-05,
+        "z_vs_null": 27.185233422389498
+      },
+      "strict_report_exact_match": {
+        "null_ci_95": [
+          0.0,
+          0.0
+        ],
+        "null_mean": 0.0,
+        "observed": 0.0,
+        "p_one_sided_greater": 1.0
+      }
+    },
+    "prediction_burden": {
+      "gold_entities": 313,
+      "median_gold_entities_per_report": 3.0,
+      "median_predicted_entities_per_report": 19.0,
+      "predicted_entities": 2004,
+      "predicted_to_gold_ratio": 6.402555910543131
+    },
+    "reports_with_any_exact_span": {
+      "ci_95_exact": [
+        0.8294814556587637,
+        0.9562296167372899
+      ],
+      "rate": 0.90625,
+      "successes": 87,
+      "trials": 96
+    },
+    "span_micro": {
+      "f1": 0.19162710401381094,
+      "fn": 91,
+      "fp": 1782,
+      "precision": 0.11077844311377245,
+      "recall": 0.7092651757188498,
+      "tp": 222
+    },
+    "span_micro_cluster_bootstrap": {
+      "f1": {
+        "ci_95": [
+          0.1731858756049471,
+          0.20999152523585238
+        ],
+        "estimate": 0.19162710401381094
+      },
+      "method": "patient-cluster percentile bootstrap",
+      "n_patient_clusters": 96,
+      "precision": {
+        "ci_95": [
+          0.09952147359219728,
+          0.12208461299379966
+        ],
+        "estimate": 0.11077844311377245
+      },
+      "recall": {
+        "ci_95": [
+          0.6531952174809318,
+          0.7647058823529411
+        ],
+        "estimate": 0.7092651757188498
+      },
+      "replicates": 10000,
+      "seed": 20260929
+    },
+    "span_precision_ci_95_exact": [
+      0.0973644653388822,
+      0.1253426763555942
+    ],
+    "span_recall_ci_95_exact": [
+      0.6555417305332698,
+      0.7589771518742044
+    ],
+    "stratified_detection": {
+      "entity_frequency_tercile": {
+        "high": {
+          "detected": 57,
+          "gold_mentions": 105,
+          "recall": 0.5428571428571428,
+          "recall_ci_95_exact": [
+            0.4427861709445313,
+            0.6404484511437144
+          ]
+        },
+        "low": {
+          "detected": 80,
+          "gold_mentions": 104,
+          "recall": 0.7692307692307693,
+          "recall_ci_95_exact": [
+            0.6763673915356427,
+            0.8462005533239677
+          ]
+        },
+        "middle": {
+          "detected": 85,
+          "gold_mentions": 104,
+          "recall": 0.8173076923076923,
+          "recall_ci_95_exact": [
+            0.7294981415917816,
+            0.8862738930040627
+          ]
+        }
+      },
+      "negation_stratum": {
+        "above_median": {
+          "detected": 105,
+          "gold_mentions": 129,
+          "recall": 0.813953488372093,
+          "recall_ci_95_exact": [
+            0.735944127291223,
+            0.8770081552640169
+          ]
+        },
+        "at_or_below_median": {
+          "detected": 117,
+          "gold_mentions": 184,
+          "recall": 0.6358695652173914,
+          "recall_ci_95_exact": [
+            0.5618762470712442,
+            0.7054074599174549
+          ]
+        }
+      },
+      "report_length_quartile": {
+        "Q1": {
+          "detected": 69,
+          "gold_mentions": 79,
+          "recall": 0.8734177215189873,
+          "recall_ci_95_exact": [
+            0.7795057785187525,
+            0.9375956777792424
+          ]
+        },
+        "Q2": {
+          "detected": 56,
+          "gold_mentions": 78,
+          "recall": 0.717948717948718,
+          "recall_ci_95_exact": [
+            0.6046688186412648,
+            0.8140620069047784
+          ]
+        },
+        "Q3": {
+          "detected": 49,
+          "gold_mentions": 78,
+          "recall": 0.6282051282051282,
+          "recall_ci_95_exact": [
+            0.5113388147427143,
+            0.7350226896879853
+          ]
+        },
+        "Q4": {
+          "detected": 48,
+          "gold_mentions": 78,
+          "recall": 0.6153846153846154,
+          "recall_ci_95_exact": [
+            0.49833097115309466,
+            0.7233983705111664
+          ]
+        }
+      },
+      "tumor_source": {
+        "breast": {
+          "detected": 92,
+          "gold_mentions": 174,
+          "recall": 0.5287356321839081,
+          "recall_ci_95_exact": [
+            0.4517549029500332,
+            0.6047207646452645
+          ]
+        },
+        "colorectal": {
+          "detected": 130,
+          "gold_mentions": 139,
+          "recall": 0.935251798561151,
+          "recall_ci_95_exact": [
+            0.88064685221905,
+            0.9699680761529043
+          ]
+        }
+      },
+      "uncertainty_stratum": {
+        "absent": {
+          "detected": 151,
+          "gold_mentions": 203,
+          "recall": 0.7438423645320197,
+          "recall_ci_95_exact": [
+            0.678029399317736,
+            0.8023856348698091
+          ]
+        },
+        "present": {
+          "detected": 71,
+          "gold_mentions": 110,
+          "recall": 0.6454545454545455,
+          "recall_ci_95_exact": [
+            0.5485362599798937,
+            0.7343264528896944
+          ]
+        }
+      }
+    },
+    "stratified_regression": {
+      "converged": true,
+      "covariance": "patient-cluster robust",
+      "family": "binomial logit",
+      "formula": "detected ~ z_log_length + C(tumor_source) + z_log_train_frequency + z_log_negation + z_log_uncertainty",
+      "n_entity_mentions": 313,
+      "n_patient_clusters": 96,
+      "status": "fit",
+      "terms": {
+        "C(tumor_source)[T.colorectal]": {
+          "ci_95_log_odds": [
+            2.149758069212007,
+            3.899369440079748
+          ],
+          "cluster_robust_se": 0.4463376329025563,
+          "coefficient_log_odds": 3.0245637546458775,
+          "odds_ratio": 20.585022631655676,
+          "p_value_wald": 1.2320455916875015e-11
+        },
+        "Intercept": {
+          "ci_95_log_odds": [
+            -0.37074245999961836,
+            0.2704555891506473
+          ],
+          "cluster_robust_se": 0.16357393661515063,
+          "coefficient_log_odds": -0.05014343542448554,
+          "odds_ratio": 0.9510929942891242,
+          "p_value_wald": 0.7591866370827025
+        },
+        "z_log_length": {
+          "ci_95_log_odds": [
+            -0.060016339966335985,
+            0.5913130839299254
+          ],
+          "cluster_robust_se": 0.1661585184814274,
+          "coefficient_log_odds": 0.2656483719817947,
+          "odds_ratio": 1.3042763579347032,
+          "p_value_wald": 0.10987289797648189
+        },
+        "z_log_negation": {
+          "ci_95_log_odds": [
+            -0.08914409104076051,
+            0.3522154686849662
+          ],
+          "cluster_robust_se": 0.11259379335720317,
+          "coefficient_log_odds": 0.13153568882210287,
+          "odds_ratio": 1.1405786129032172,
+          "p_value_wald": 0.24271313713463294
+        },
+        "z_log_train_frequency": {
+          "ci_95_log_odds": [
+            -0.6865422949416335,
+            -0.1252875263033561
+          ],
+          "cluster_robust_se": 0.1431798678611912,
+          "coefficient_log_odds": -0.4059149106224948,
+          "odds_ratio": 0.6663668657544365,
+          "p_value_wald": 0.004582570046540464
+        },
+        "z_log_uncertainty": {
+          "ci_95_log_odds": [
+            -0.5278948195533566,
+            0.14793024404118496
+          ],
+          "cluster_robust_se": 0.17240752098644757,
+          "coefficient_log_odds": -0.1899822877560858,
+          "odds_ratio": 0.8269737813749688,
+          "p_value_wald": 0.2704889069666049
+        }
+      },
+      "warnings": []
+    },
+    "strict_report_exact_match": {
+      "ci_95_exact": [
+        0.0,
+        0.03769692162358756
+      ],
+      "rate": 0.0,
+      "successes": 0,
+      "trials": 96
+    }
+  },
+  "schema_version": 2,
+  "split_sha256": "0d7f3f754adf9305dadbcc628786217a329b5050e802b7968bc4a5c2ccf5b888",
+  "training_output_hashes": {
+    "metrics": "6930e543cc0162f300f24231c85c4bb96738a7536879ff176e1f876c809fa193",
+    "summary": "d7979a3d59a30741a0bb19c16f629a671d808fefd0bf2f8cb990f8d29dafbb7a"
+  }
+}

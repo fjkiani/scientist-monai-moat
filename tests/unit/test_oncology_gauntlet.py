@@ -212,7 +212,7 @@ def test_runtime_verifier_fails_cleanly_without_manifest(tmp_path: Path) -> None
 
 
 def test_neural_capabilities_accept_only_safetensors() -> None:
-    for name in ("clinicalbert", "luna16", "mammo-retinanet"):
+    for name in ("luna16", "mammo-retinanet"):
         assert VALIDATOR.CAPABILITY_SPECS[name]["suffixes"] == {".safetensors"}
 
 

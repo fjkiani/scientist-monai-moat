@@ -1,0 +1,105 @@
+{
+  "cohort": {
+    "name": "CBIS-DDSM canonical NBIA DICOM test split",
+    "source": "TCIA/NBIA getImage (canonical DICOM, NOT the dbaek111 HF-PNG mirror)",
+    "n_series": 645,
+    "n_malignant": 264,
+    "n_benign": 381,
+    "manifest_path": "/mnt/shared-workspace/cbis_ddsm/nbia_test_subset/manifest.csv"
+  },
+  "features": {
+    "source_model": "google/medsiglip-448",
+    "modal_endpoint": "https://crispro-test--medsiglip-embed-batch.modal.run",
+    "modal_app_version_confirmed_live": "medsiglip-modal-v0.3.0",
+    "embedding_dim": 1152,
+    "input_format": "dicom",
+    "preprocessing_provenance": "raw NBIA DICOM bytes -> pydicom.dcmread -> RescaleSlope/Intercept Modality LUT -> MONOCHROME1 invert (if applicable) -> percentile [1,99] windowing -> 8-bit -> PIL RGB replicate -> SiglipImageProcessor.resize(448) -> vision_model.forward -> pooler_output (1152-d). See deploy/modal/medsiglip_app.py:_dicom_bytes_to_pil."
+  },
+  "probe": {
+    "artifact": "models/cbis_ddsm_logreg_v1.joblib",
+    "version": "cbis_ddsm_logreg_v1",
+    "frozen_not_retrained": true,
+    "trained_and_scored_on": "dbaek111/CBIS-DDSM_1024 HF-PNG mirror (input_format=pixels)"
+  },
+  "test_canonical_dicom": {
+    "auc": 0.7299918476099578,
+    "pr_auc": 0.6518384101612431,
+    "brier": 0.21206422141574677,
+    "at_threshold_0.5": {
+      "threshold": 0.5,
+      "threshold_label": "0.5",
+      "accuracy": 0.6713178294573643,
+      "f1": 0.6102941176470589,
+      "precision": 0.5928571428571429,
+      "recall": 0.6287878787878788,
+      "confusion_matrix": [
+        [
+          267,
+          114
+        ],
+        [
+          98,
+          166
+        ]
+      ]
+    },
+    "at_youden_j_optimal_FROZEN_FROM_TRAINING": {
+      "threshold": 0.554904,
+      "threshold_label": "youden_frozen",
+      "accuracy": 0.7023255813953488,
+      "f1": 0.6190476190476191,
+      "precision": 0.65,
+      "recall": 0.5909090909090909,
+      "confusion_matrix": [
+        [
+          297,
+          84
+        ],
+        [
+          108,
+          156
+        ]
+      ]
+    },
+    "at_recall_0.85_FROZEN_FROM_TRAINING": {
+      "threshold": 0.283617,
+      "threshold_label": "recall_0.85_frozen",
+      "accuracy": 0.5813953488372093,
+      "f1": 0.6153846153846154,
+      "precision": 0.4931506849315068,
+      "recall": 0.8181818181818182,
+      "confusion_matrix": [
+        [
+          159,
+          222
+        ],
+        [
+          48,
+          216
+        ]
+      ]
+    }
+  },
+  "comparison_to_original_hf_png_test": {
+    "original_test_auc": 0.752584,
+    "original_test_pr_auc": 0.681633,
+    "original_test_brier": 0.198746,
+    "original_n": 641,
+    "delta_auc": -0.022592152390042197
+  },
+  "ship_gate": {
+    "rule": "AUC >= 0.85 required to use the word 'screening'; else report BELOW_SHIP_GATE_SCREENING",
+    "threshold": 0.85,
+    "status": "BELOW_SHIP_GATE_SCREENING"
+  },
+  "honesty_caveats": [
+    "This is a SAME-COHORT (same official CBIS-DDSM test-split patients), DIFFERENT-INPUT-PIPELINE check -- canonical NBIA DICOM vs. the third-party dbaek111 HF-PNG derivative used for training/original scoring. It is NOT a novel-population domain-shift study. See docs/gate_findings for the measured series-count / patient overlap.",
+    "Embeddings use the dicom_b64 server code path (percentile windowing + Modality LUT); training embeddings used the pixels_b64 path (PNG bytes, no DICOM windowing). Both hit the same live app_version=medsiglip-modal-v0.3.0 container (confirmed by live /embed smoke call immediately before this run) -- so any AUC delta reflects the input pipeline difference, not a different model or a redeployed server.",
+    "Thresholds 0.5 / 0.554904 / 0.283617 are FROZEN from the original training-set metrics dossier and applied as-is (not re-tuned on this set) to keep this an honest out-of-sample comparison.",
+    "MedSigLipModalClient.preflight()'s EXPECTED_APP_VERSION constant (v0.4.0-alpha) does not match the live deployment (v0.3.0); this script bypasses preflight() and calls embed_dicoms()/the live /embed_batch endpoint directly. See finding G_medsiglip_app_version_deploy_drift."
+  ],
+  "software": {
+    "python": "3.11.13"
+  },
+  "generated_utc": "2026-09-27T21:11:49Z"
+}

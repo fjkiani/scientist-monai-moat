@@ -1,0 +1,78 @@
+{
+  "schema_version": 2,
+  "capability": "medgemma",
+  "dataset": "MedGemma 1.5 4B-IT live Modal chat handshake cohort (RUO)",
+  "source_uri": "https://huggingface.co/google/medgemma-1.5-4b-it",
+  "samples": [
+    {
+      "sample_id": "mg-train-000",
+      "patient_id": "mg-patient-T0",
+      "payload_sha256": "775a61d9f41e965e92bf824a51c19ffc778c9c6a194869a2571438c643ab8bb6",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "sample_id": "mg-train-001",
+      "patient_id": "mg-patient-T1",
+      "payload_sha256": "a36a5aa7c7791504a789b4518b0ca7d8253f194d42bc85f1026c86f7ed6b2b40",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "sample_id": "mg-train-002",
+      "patient_id": "mg-patient-T2",
+      "payload_sha256": "20219bc2e1a52a37e5699fa661cf4844aa3f0b9d225df7bf8f7ea0a76a3f96a4",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "sample_id": "mg-train-003",
+      "patient_id": "mg-patient-T3",
+      "payload_sha256": "0f8d74928c8757b23f4cd64f65e9de736857baeb63e76551da95e255cc76841b",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "sample_id": "mg-val-000",
+      "patient_id": "mg-patient-V0",
+      "payload_sha256": "b41557732477114b982786c16b302deee4d8a18143b6a74e55c51257317024a8",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "sample_id": "mg-val-001",
+      "patient_id": "mg-patient-V1",
+      "payload_sha256": "42f6d690135b8db979ff9e90ca34f5982bba7de51eaf6e1cf22983328061e582",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "sample_id": "mg-test-000",
+      "patient_id": "mg-patient-X0",
+      "payload_sha256": "775a61d9f41e965e92bf824a51c19ffc778c9c6a194869a2571438c643ab8bb6",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "sample_id": "mg-test-001",
+      "patient_id": "mg-patient-X1",
+      "payload_sha256": "316a6e54950efaf5e8cbee050f7352196e1fc13135d3d008f203df6c4be988a5",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "sample_id": "mg-test-002",
+      "patient_id": "mg-patient-X2",
+      "payload_sha256": "c05969f67810ef6325d9a985b6c48b5145684e67f3141ccaf8cd6dc4254e5691",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "sample_id": "mg-test-003",
+      "patient_id": "mg-patient-X3",
+      "payload_sha256": "53a41f796c8090c6228079bca713fdfb7e853214fc73cda3f4bb6e172151dadb",
+      "target": 1,
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    }
+  ]
+}

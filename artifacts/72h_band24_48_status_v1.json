@@ -1,0 +1,86 @@
+{
+  "status": "closed_band24_48",
+  "band": "24-48\u219248-72",
+  "clock": "72h clinical hardening",
+  "git": {
+    "branch": "feat/ten-capability-delivery-20260928",
+    "head": "56ff5c919fba9c574673a02a299395ebf0c0ebc1"
+  },
+  "matrix": {
+    "1_medgemma_pathology": "DONE (smoke ok after redeploy)",
+    "2_phikon": "DONE",
+    "3_stratum_422": "DONE",
+    "4_mammo_rsna_vindr": "DONE \u2014 locked theoviel 12k meets_10k_floor=true; official Kaggle n=826 probe kept as secondary (honest AUC 0.607); 429 per-file loop TERMINATED",
+    "5_luna_froc": "DONE baseline lock (no promote)",
+    "6_ghost_500": "DONE",
+    "7_docker": "DONE"
+  },
+  "official_probe": {
+    "n": 826,
+    "test_auc": 0.6074137931034482,
+    "cv_auc_mean": 0.6145624303232999,
+    "joblib_sha256": "f3c7ed59a264f6abc952425cf73a093db8d319e232f861f072945dcebbd1175d"
+  },
+  "ingest_last": {
+    "written": 826,
+    "errors": 1674,
+    "selected": 2500,
+    "status": "ok"
+  },
+  "medsiglip": "https://testing-123--medsiglip (HF secret repaired, timeout 900s)",
+  "medgemma": "https://testing-123--medgemma-1-5-4b (redeployed)",
+  "ts": "2026-10-05T23:51:34.165176+00:00",
+  "official_kaggle_scale": {
+    "status": "TERMINATED_NO_BRUTE_FORCE",
+    "written_locked": 826,
+    "retry5": "killed per Alpha directive \u2014 no more per-file 429 burn",
+    "band4_10k_authority": "artifacts/rsna_mammo/probe_v2_12k (theoviel) meets_10k_floor=true",
+    "official_probe": "artifacts/rsna_mammo/probe_official_v1_resplit test_auc\u22480.607 n=826"
+  },
+  "mammo_scale_lock": {
+    "dataset_id": "rsna_theoviel_256_png_tree_12k",
+    "n_total": 12000,
+    "test_auc": 0.676880875702046,
+    "meets_10k_floor": true,
+    "joblib_sha256": "9aa35cc30c22b2dbf58d91e039c91e36c897d7364ccc5efc9d792f69ee3688b6",
+    "evaluation": "artifacts/rsna_mammo/probe_v2_12k/evaluation_v2.json"
+  },
+  "ghost_trial_summary": {
+    "source_ledger": "artifacts/ghost_trial/ledger_v5_n500_retried.json",
+    "source_summary": "artifacts/ghost_trial/ledger_v5_n500_summary.json",
+    "n_cases": 500,
+    "n_ok": 500,
+    "ok_rate": 1.0,
+    "elapsed_s_total": 6059.639,
+    "mean_wall_s_per_case": 12.119,
+    "workers": 4,
+    "modalities_exercised": [
+      "medgemma_pathology",
+      "stage_therapy",
+      "mammo_rsna",
+      "phikon_wsi"
+    ],
+    "modalities_absent": [
+      "luna16_ct"
+    ],
+    "stage_therapy": {
+      "n_ok": 500,
+      "n_total": 500,
+      "execution_ok_rate": 1.0,
+      "mean_wall_s_per_case_proxy": 12.119,
+      "risk_bucket_hist": {
+        "HIGH": 469,
+        "MID": 31
+      },
+      "note": "No per-call stage-arbiter latency field in ledger; mean wall = total_elapsed/n_cases under workers=4"
+    },
+    "clinical_concordance": {
+      "historical_tumor_board_agreement": null,
+      "historical_tumor_board_agreement_status": "NOT_IN_LEDGER",
+      "mammo_label_concordance_rate": 0.8937875751503006,
+      "mammo_label_concordance_n": 499,
+      "mammo_label_concordance_correct": 446,
+      "honesty": "Ledger has no historical treatment concordance field. Reported mammo p_cancer vs folder label_true agreement as available proxy. RUO \u2014 not clinical validation."
+    }
+  }
+}

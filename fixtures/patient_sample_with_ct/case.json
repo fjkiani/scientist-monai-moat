@@ -1,0 +1,31 @@
+{
+  "patient_id": "patient_sample_with_ct",
+  "age_years": 54,
+  "size_mm": 22,
+  "ki67_pct": 35,
+  "histology": "invasive_ductal",
+  "grade": "3",
+  "er_status_positive": true,
+  "pr_status_positive": true,
+  "her2_status_positive": true,
+  "node_status_positive": false,
+  "brca_status_known_pathogenic": false,
+  "mammogram_path": "mammogram.png",
+  "pathology_note_path": "pathology_note.txt",
+  "ct_path": null,
+  "source_mammogram": "data/cbis_ddsm/hf_png/CBIS-DDSM_1024/test/cancer/1.3.6.1.4.1.9590.100.1.2.100742355113831624803390319643765691480_1-1.png",
+  "source_report_index": 16,
+  "honesty": "RUO demo fixture: CBIS mammo PNG + pathology note + real LUNA16 chest CT (case_id 892531e5e4dde1e8 / series \u2026153985\u2026). CT bytes live on Modal volume, not in git.",
+  "luna16_case_id": "892531e5e4dde1e8",
+  "luna16_series_uid": "1.3.6.1.4.1.14519.5.2.1.6279.6001.153985109349433321657655488650",
+  "luna16_detect_url": "https://testing1235--luna16-detect.modal.run",
+  "ct_provenance": {
+    "source": "LUNA16/LIDC-IDRI held-out nifti_v3 + durable case-storage series",
+    "case_id": "892531e5e4dde1e8",
+    "series_uid": "1.3.6.1.4.1.14519.5.2.1.6279.6001.153985109349433321657655488650",
+    "n_slices": 121,
+    "modal_volume": "oncology-arbiter-cases@testing1235",
+    "seeded_from": "crispro oncology-arbiter-cases",
+    "note": "RUO. Real chest CT DICOM series; detector runs via testing1235 luna16-detect case_id path."
+  }
+}
