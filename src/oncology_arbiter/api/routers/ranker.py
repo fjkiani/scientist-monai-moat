@@ -9,6 +9,7 @@ from pydantic import BaseModel, ConfigDict
 from oncology_arbiter.api.audit import log_event, new_request_id
 from oncology_arbiter.arbiter.ml_8d_trial_decoder import (
     BilinearDecoderInputError,
+    rank_42_trials_bilinear_ml,
     score_bilinear_ml_loto,
 )
 from oncology_arbiter.arbiter.pathway_8d_ranker import (
@@ -154,3 +155,52 @@ def ranker_8d_score(
         tenant_id=tenant.tenant_id,
     )
     return body
+
+
+class Ranker8DBilinearRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    patient_id: str | None = None
+    domain: str | None = "pan_solid"
+    p_signed_8d: list[Any] | None = None
+    clinical_features: dict[str, Any] | None = None
+    moa_weights: dict[str, Any] | None = None
+    patient_vector: list[Any] | None = None
+
+
+@router.post("/8d/bilinear")
+def ranker_8d_bilinear(
+    req: Ranker8DBilinearRequest,
+    tenant: APIKey = Depends(require_api_key),
+) -> dict[str, Any]:
+    request_id = new_request_id()
+    payload = req.model_dump(exclude_unset=True)
+    try:
+        body = rank_42_trials_bilinear_ml(payload)
+    except BilinearDecoderInputError as exc:
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "error": exc.code,
+                "engine": "bilinear_ml_loto",
+                "missing": exc.missing,
+                "message": str(exc),
+                "fallback": False,
+            },
+        ) from exc
+    body["request_id"] = request_id
+    log_event(
+        request_id,
+        "/v1/ranker/8d/bilinear",
+        model_state="loaded",
+        patient_id_hash=None,
+        extra={
+            "engine": "bilinear_ml_loto",
+            "input_mode": body.get("input_mode"),
+            "top_trial_id": (body.get("top_trial") or {}).get("id"),
+            "calibrated_loto_probability": body.get("calibrated_loto_probability"),
+        },
+        tenant_id=tenant.tenant_id,
+    )
+    return body
+

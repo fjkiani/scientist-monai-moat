@@ -959,8 +959,391 @@ _CLINICAL_FEATURE_KEYS: frozenset[str] = frozenset(
         "APM_intact",
         "b2m_truncating_lof",
         "profile_id",
+        "zeb1_or_mesenchymal_high",
+        "mesenchymal_4_z",
+        "h_clean_z",
+        "s_sen_z",
+        "ddr_proxy_z",
+        "vdr_z",
+        "epha2_z",
+        "bace1_high",
+        "myeloid_wall_high",
+        "lrp1_cuff_sinking_high",
+        "mmp2_cuff_high",
     }
 )
+
+
+# ---------------------------------------------------------------------------
+# 6b. Two-Door BrM / GBM Drug, Resistance, Myeloid & Nanocarrier Arbiter
+# ---------------------------------------------------------------------------
+
+U6_CLOSURE_VERDICT: dict[str, Any] = {
+    "claim_id": "U6",
+    "formal_verdict": (
+        "REPRODUCED_IN_NSCLC_FALSIFIED_FOR_SINGLE_GENE_ZEB1_IN_GBM_"
+        "RESCUED_BY_TWO_DOOR_S_SEN_AND_H_CLEAN"
+    ),
+    "summary": (
+        "caspro U6 (Delta = -0.72, FDR = 0.001) is REPRODUCED in NSCLC "
+        "(n=95: ZEB1 -> ITGAV rho = -0.6238, p = 1.45e-11, Tertile DeltaChronos = -0.7341, "
+        "Quartile DeltaChronos = -0.7650), FALSIFIED for single-gene ZEB1 in GBM "
+        "(n=45: rho = +0.0846, p = 0.5806, Tertile Delta = +0.0358), and RESCUED in GBM/CNS "
+        "by Two-Door S_sen & H_clean (GBM S_sen -> ITGAV rho = -0.3415, p = 0.0217, Delta = -0.3638; "
+        "GBM S_sen -> ITGB5 rho = -0.3657, p = 0.0135; GBM H_clean -> FERMT2 rho = -0.4839, "
+        "p = 0.00076, Delta = -0.6546; GBM H_clean -> PTK2 rho = -0.4094, p = 0.0052, Delta = -0.5382; "
+        "CNS H_clean -> ITGAV rho = -0.3594, p = 0.0011, q = 0.0056; "
+        "CNS H_clean -> ITGB5 rho = -0.3724, p = 0.0007, q = 0.0047)."
+    ),
+    "nsclc_reproduction": {
+        "n": 95,
+        "predictor": "ZEB1_expr",
+        "target": "ITGAV",
+        "spearman_rho": -0.6238,
+        "p_value": 1.45e-11,
+        "tertile_delta_chronos": -0.7341,
+        "quartile_delta_chronos": -0.7650,
+    },
+    "gbm_single_gene_zeb1_falsification": {
+        "n": 45,
+        "predictor": "ZEB1_expr",
+        "target": "ITGAV",
+        "spearman_rho": 0.0846,
+        "p_value": 0.5806,
+        "tertile_delta_chronos": 0.0358,
+    },
+    "gbm_cns_two_door_rescue": {
+        "GBM_S_sen_to_ITGAV": {"n": 45, "rho": -0.3415, "p_value": 0.0217, "delta": -0.3638},
+        "GBM_S_sen_to_ITGB5": {"n": 45, "rho": -0.3657, "p_value": 0.0135, "delta": -0.3600},
+        "GBM_H_clean_to_FERMT2": {"n": 45, "rho": -0.4839, "p_value": 0.00076, "delta": -0.6546},
+        "GBM_H_clean_to_PTK2": {"n": 45, "rho": -0.4094, "p_value": 0.0052, "delta": -0.5382},
+        "CNS_H_clean_to_ITGAV": {"n": 80, "rho": -0.3594, "p_value": 0.0011, "q_value": 0.0056},
+        "CNS_H_clean_to_ITGB5": {"n": 80, "rho": -0.3724, "p_value": 0.0007, "q_value": 0.0047},
+    },
+}
+
+BRM_GBM_STAGE3_CORE_ANTIGENS: dict[str, dict[str, Any]] = {
+    "MUC1": {"time_b_vs_lb_log2fc": -2.8948, "lb_fold_enrichment": 7.44, "q_value": 0.000236},
+    "CLDN7": {"time_b_vs_lb_log2fc": -2.3278, "lb_fold_enrichment": 5.02, "q_value": 2.11e-07},
+    "CLDN4": {"time_b_vs_lb_log2fc": -2.2251, "lb_fold_enrichment": 4.68, "q_value": 5.06e-05},
+    "ITGA3": {"time_b_vs_lb_log2fc": -2.0473, "lb_fold_enrichment": 4.13, "q_value": 0.002778},
+    "EPCAM": {"time_b_vs_lb_log2fc": -2.0108, "lb_fold_enrichment": 4.03, "q_value": 7.89e-06},
+    "DSG2": {"time_b_vs_lb_log2fc": -1.7965, "lb_fold_enrichment": 3.47, "q_value": 0.00119, "lb_specific": True},
+    "RAB25": {"time_b_vs_lb_log2fc": -1.5399, "lb_fold_enrichment": 2.91, "q_value": 0.000185, "lb_specific": True},
+}
+
+
+def evaluate_brm_gbm_two_door_arbiter(
+    *,
+    profile_id: Optional[str] = None,
+    ddr_proxy_z: float = 0.0,
+    h_clean_z: Optional[float] = None,
+    s_sen_z: Optional[float] = None,
+    zeb1_or_mesenchymal_high: Optional[bool] = None,
+    mesenchymal_4_z: Optional[float] = None,
+    egfr_mut: Optional[bool] = None,
+    kras_mut: Optional[bool] = None,
+    pten_null: Optional[bool] = None,
+    vdr_z: float = 0.0,
+    epha2_z: float = 0.0,
+    bace1_high: Optional[bool] = None,
+    myeloid_wall_high: bool = True,
+    lrp1_cuff_sinking_high: bool = True,
+    mmp2_cuff_high: bool = True,
+    secondary_core_antigens: Sequence[str] = ("MUC1", "CLDN7", "EPCAM", "DSG2"),
+) -> dict[str, Any]:
+    """Deterministic Two-Door BrM / GBM Drug, Resistance, Myeloid & Nanocarrier Arbiter.
+
+    Routes BrM/GBM profiles into:
+      1. Door 1 (Proliferative / DDR / EGFR driver) vs Door 2 (Hibernating / Senolytic /
+         Mesenchymal / PI3K-mTORC1/2 / FAK1-SRC-Integrin), with Subtype 2A (BCL-xL
+         senolytic) vs Subtype 2B (Dasatinib SRC/EPHA2/FAK + dual mTORC1/2 AZD2014/AZD8055
+         + CNS PI3K/mTOR GNE-317 + CNS FAK1 GSK2256098C).
+      2. Door 1 CNS Resistance & Decoy Contraindication Flags:
+         - Flags ``Osimertinib`` (p=0.0038, Delta_LN_IC50=+1.192 [3.29x]) and
+           ``Zorifertinib / AZD3759`` (p=0.0086, Delta_LN_IC50=+0.974 [2.65x]) EMT
+           resistance when ``zeb1_or_mesenchymal_high=True``.
+         - Contraindicates ``Venetoclax`` (BCL-2 decoy: rho=+0.215, p=0.0418 resistant)
+           and ``AZD5991`` (MCL-1 control: rho=+0.318, p=0.0082, Delta=+2.055 resistant),
+           plus flags ``Temozolomide`` and ``Niraparib/Talazoparib/Ceralasertib/Adavosertib/Berzosertib``
+           resistance in ``S_sen``-high Door 2.
+      3. Myeloid ``BACE1 / VSIG4 / CD163 / LRP1 / APOE`` Peritumoral Firewall.
+      4. 3-Stage BTB Nanocarrier Delivery Lock (Stage 1 LRP1/TFRC shuttle + Stage 2
+         ``MMP2``-cleavable stealth corona + Stage 3 ``MUC1/CLDN7/CLDN4/ITGA3/EPCAM/DSG2/RAB25``
+         secondary tumor-core lock).
+    """
+    # Apply profile defaults if profile_id is supplied
+    eff_egfr = bool(egfr_mut) if egfr_mut is not None else (profile_id == "EGFR_mut_BrM")
+    eff_kras = bool(kras_mut) if kras_mut is not None else (profile_id == "ZEB1_high_KRAS_mut")
+    eff_pten = bool(pten_null) if pten_null is not None else (profile_id == "PTEN_null_ZEB1_high")
+
+    if zeb1_or_mesenchymal_high is not None:
+        eff_zeb1_mes = bool(zeb1_or_mesenchymal_high)
+    elif mesenchymal_4_z is not None:
+        eff_zeb1_mes = float(mesenchymal_4_z) > 0.0
+    else:
+        eff_zeb1_mes = profile_id in {"ZEB1_high_KRAS_mut", "PTEN_null_ZEB1_high"}
+
+    if h_clean_z is not None:
+        eff_h_clean = float(h_clean_z)
+    elif profile_id == "ZEB1_high_KRAS_mut":
+        eff_h_clean = 0.80
+    elif profile_id == "PTEN_null_ZEB1_high":
+        eff_h_clean = 1.00
+    else:
+        eff_h_clean = 0.0
+
+    if s_sen_z is not None:
+        eff_s_sen = float(s_sen_z)
+    elif profile_id == "ZEB1_high_KRAS_mut":
+        eff_s_sen = 1.20
+    elif profile_id == "PTEN_null_ZEB1_high":
+        eff_s_sen = 0.90
+    else:
+        eff_s_sen = 0.0
+
+    eff_bace1 = (
+        bool(bace1_high)
+        if bace1_high is not None
+        else (eff_egfr or eff_zeb1_mes or myeloid_wall_high)
+    )
+
+    is_door2 = bool((eff_h_clean > 0.0) or (eff_s_sen > 0.0) or eff_zeb1_mes or eff_pten)
+    is_s_sen_high = bool(eff_s_sen > 0.0)
+    is_subtype_2b = bool(
+        is_door2
+        and (
+            (eff_s_sen - eff_h_clean < 0.0)
+            or (float(vdr_z) > 0.0)
+            or (float(epha2_z) > 0.0)
+            or eff_zeb1_mes
+        )
+    )
+    is_subtype_2a = bool(is_door2 and is_s_sen_high and (eff_s_sen - eff_h_clean >= 0.0))
+
+    if not is_door2:
+        primary_door = "DOOR_1_PROLIFERATIVE_DDR_EGFR"
+        subtype_stratum = "DOOR_1_PROLIFERATIVE_DRIVER"
+    elif is_subtype_2a and is_subtype_2b:
+        primary_door = "DOOR_2_HIBERNATING_COLONIZATION_SENOLYTIC_FAK_MTOR"
+        subtype_stratum = "DOOR_2_HYBRID_2A_SENOLYTIC_AND_2B_MESENCHYMAL_FAK_MTOR"
+    elif is_subtype_2b:
+        primary_door = "DOOR_2_HIBERNATING_COLONIZATION_SENOLYTIC_FAK_MTOR"
+        subtype_stratum = "DOOR_2_SUBTYPE_2B_VDR_EPHA2_MESENCHYMAL_FAK_MTOR"
+    else:
+        primary_door = "DOOR_2_HIBERNATING_COLONIZATION_SENOLYTIC_FAK_MTOR"
+        subtype_stratum = "DOOR_2_SUBTYPE_2A_BCLXL_SENOLYTIC"
+
+    prioritized_drugs: list[dict[str, Any]] = []
+    if is_door2:
+        prioritized_drugs.extend(
+            [
+                {
+                    "drug_id": "AZD2014",
+                    "drug_name": "AZD2014 (Vistusertib)",
+                    "mechanism": "Dual mTORC1/2 inhibitor",
+                    "evidence": "GBM ZEB1 rho(LN_IC50)=-0.779, p=0.0004, Tertile Delta_LN_IC50=-2.120 (8.33x lower IC50)",
+                },
+                {
+                    "drug_id": "AZD8055",
+                    "drug_name": "AZD8055",
+                    "mechanism": "Dual mTORC1/2 inhibitor",
+                    "evidence": "GBM ZEB1 rho(LN_IC50)=-0.732, p=0.0013, q=0.0439, Tertile Delta_LN_IC50=-1.698 (5.46x)",
+                },
+                {
+                    "drug_id": "GNE-317",
+                    "drug_name": "GNE-317",
+                    "mechanism": "BBB-penetrant CNS PI3K/mTOR inhibitor",
+                    "evidence": "Diffuse Glioma rho=-0.556, p=0.0012, Delta=-1.579; GBM rho=-0.429, p=0.0412, Delta=-1.232",
+                },
+                {
+                    "drug_id": "GSK2256098C",
+                    "drug_name": "GSK2256098C",
+                    "mechanism": "Clinical CNS FAK1 / PTK2 inhibitor",
+                    "evidence": "GBM ZEB1 rho=-0.474, Tertile Delta_LN_IC50=-1.024 (2.78x lower IC50, MWU p=0.0411)",
+                },
+                {
+                    "drug_id": "Dasatinib",
+                    "drug_name": "Dasatinib",
+                    "mechanism": "SRC / EPHA2 / FAK inhibitor",
+                    "evidence": (
+                        "GBM H_clean rho(sens)=+0.6571, p=0.000658, q=0.0130, Delta=+2.6756 (14.5x); "
+                        "GBM ZEB1 Delta_LN_IC50=-2.312, p=0.0104 (10.1x); NSCLC Mes_4 p=0.0005, Delta=-1.839; "
+                        "Breast p=4.6e-5, Delta=-2.277; Melanoma p=0.0084, Delta=-1.758"
+                    ),
+                },
+            ]
+        )
+        if is_s_sen_high:
+            prioritized_drugs.append(
+                {
+                    "drug_id": "WEHI-539_Navitoclax_ABT-737",
+                    "drug_name": "WEHI-539 / Navitoclax / ABT-737",
+                    "mechanism": "BCL-xL (BCL2L1) selective senolytics",
+                    "evidence": (
+                        "NSCLC S_sen WEHI-539 p=0.0007, q=0.0043, Delta=-1.260; "
+                        "Navitoclax p=0.0059, q=0.0232, Delta=-1.064; ABT-737 p=0.0160; "
+                        "Breast ABT-737 p=0.021, Navitoclax p=0.037"
+                    ),
+                }
+            )
+    else:
+        if eff_egfr and not (eff_kras or eff_pten):
+            prioritized_drugs.append(
+                {
+                    "drug_id": "Osimertinib_or_Zorifertinib",
+                    "drug_name": "Osimertinib / Zorifertinib (AZD3759)",
+                    "mechanism": "CNS-penetrant EGFR TKI (Door 1 EGFR-mutant driver with low ZEB1/EMT)",
+                    "evidence": "GBM_PROFILE_VECTORS_8D EGFR_mut_BrM PATH A fit=0.9625 (#1)",
+                }
+            )
+        if float(ddr_proxy_z) >= 0.0:
+            prioritized_drugs.append(
+                {
+                    "drug_id": "Door1_DDR_Replication_Stress",
+                    "drug_name": "Temozolomide / Ceralasertib (AZD6738) / Adavosertib (MK-1775) / Niraparib",
+                    "mechanism": "Door 1 Mitotic & DDR Replication-Stress Targeting (NOM1/FAM72A/DDR_proxy_4 high)",
+                    "evidence": "GSE223499 NOM1 LFC=+0.5152 (padj=0.003428), FAM72A LFC=+1.0536 (padj=0.0605)",
+                }
+            )
+
+    if eff_bace1 or myeloid_wall_high:
+        prioritized_drugs.append(
+            {
+                "drug_id": "Verubecestat_Anti_VSIG4_Myeloid_Reprogramming",
+                "drug_name": "Verubecestat (MK-8931) + Anti-VSIG4 / Myeloid Reprogramming",
+                "mechanism": "BACE1 colonization blockade + Peritumoral M2/Complement/VSIG4/CD163/LRP1 firewall reversal",
+                "evidence": (
+                    "GSE223499 BACE1 tumor_like LFC=+1.0688 (p=0.0158) + immune_aggregate LFC=+1.8268 (padj=0.0161); "
+                    "Zhang 2022 TIME-B VSIG4 +2.1959 (4.58x, q=9.42e-6), CD163 +2.6753 (6.39x, q=2.86e-10), "
+                    "LRP1 +1.8066 (3.50x, q=1.48e-6), APOE +3.3511 (10.21x, q=5.84e-8)"
+                ),
+            }
+        )
+
+    resistance_flags: list[str] = []
+    contraindicated_drugs: list[dict[str, str]] = []
+    emt_resistant_egfr_tkis: list[str] = []
+
+    if eff_zeb1_mes:
+        emt_resistant_egfr_tkis.extend(["Osimertinib", "Zorifertinib (AZD3759)"])
+        resistance_flags.append(
+            "OSIMERTINIB_EMT_MESENCHYMAL_RESISTANCE "
+            "(NSCLC ZEB1/Mesenchymal_4 p=0.0038, Delta_LN_IC50=+1.192 [3.29x higher IC50]; "
+            "Breast p=0.0006, Delta=+1.861)"
+        )
+        resistance_flags.append(
+            "ZORIFERTINIB_AZD3759_EMT_MESENCHYMAL_RESISTANCE "
+            "(NSCLC ZEB1/Mesenchymal_4 p=0.0086, Delta_LN_IC50=+0.974 [2.65x higher IC50])"
+        )
+        contraindicated_drugs.extend(
+            [
+                {
+                    "drug_name": "Osimertinib",
+                    "reason": (
+                        "Resistant in ZEB1/Mesenchymal_4-high NSCLC (p=0.0038, Delta_LN_IC50=+1.192 [3.29x]) "
+                        "and Breast (p=0.0006, Delta=+1.861)"
+                    ),
+                },
+                {
+                    "drug_name": "Zorifertinib (AZD3759)",
+                    "reason": "Resistant in ZEB1/Mesenchymal_4-high NSCLC (p=0.0086, Delta_LN_IC50=+0.974 [2.65x])",
+                },
+            ]
+        )
+
+    if is_s_sen_high:
+        resistance_flags.append(
+            "VENETOCLAX_BCL2_DECOY_CONTRAINDICATED_IN_S_SEN_HIGH "
+            "(NSCLC S_sen rho(LN_IC50)=+0.215, p=0.0418 RESISTANT — S_sen depends on BCL-xL/BCL2L1, not BCL-2)"
+        )
+        resistance_flags.append(
+            "AZD5991_MCL1_CONTROL_CONTRAINDICATED_IN_S_SEN_HIGH "
+            "(NSCLC S_sen rho(LN_IC50)=+0.318, p=0.0082, Delta_LN_IC50=+2.055 RESISTANT)"
+        )
+        resistance_flags.append(
+            "TEMOZOLOMIDE_AND_DOOR1_DDR_RESISTANT_IN_S_SEN_HIGH "
+            "(Temozolomide NSCLC p=0.0003, CNS p=0.0280 Delta_LN_IC50=+0.934; "
+            "Niraparib, Talazoparib, Ceralasertib/AZD6738, Adavosertib/MK-1775, Berzosertib/VE-822 resistant)"
+        )
+        contraindicated_drugs.extend(
+            [
+                {
+                    "drug_name": "Venetoclax",
+                    "reason": "BCL-2 decoy: rho(LN_IC50)=+0.215, p=0.0418 RESISTANT in high S_sen NSCLC",
+                },
+                {
+                    "drug_name": "AZD5991",
+                    "reason": "MCL-1 control: rho(LN_IC50)=+0.318, p=0.0082, Delta_LN_IC50=+2.055 RESISTANT in high S_sen NSCLC",
+                },
+                {
+                    "drug_name": "Temozolomide",
+                    "reason": "Door 1 alkylator resistant in high S_sen NSCLC (p=0.0003) and CNS (p=0.0280, Delta=+0.934)",
+                },
+                {
+                    "drug_name": "Niraparib / Talazoparib / Ceralasertib (AZD6738) / Adavosertib (MK-1775) / Berzosertib (VE-822)",
+                    "reason": "Door 1 PARPi/ATRi/CHK1i/WEE1i class resistant in high S_sen GBM & NSCLC",
+                },
+            ]
+        )
+
+    selected_antigens = [
+        a for a in secondary_core_antigens if a in BRM_GBM_STAGE3_CORE_ANTIGENS
+    ] or ["MUC1", "CLDN7", "EPCAM", "DSG2"]
+
+    return {
+        "ruo": True,
+        "contract_status": CONTRACT_STATUS,
+        "contract_id": "brm_gbm_two_door_contract_v1",
+        "profile_id": profile_id,
+        "primary_door": primary_door,
+        "subtype_stratum": subtype_stratum,
+        "is_door2": is_door2,
+        "is_s_sen_high": is_s_sen_high,
+        "is_subtype_2a_senolytic": is_subtype_2a,
+        "is_subtype_2b_mesenchymal_fak_mtor": is_subtype_2b,
+        "zeb1_or_mesenchymal_high": eff_zeb1_mes,
+        "scores": {
+            "ddr_proxy_z": float(ddr_proxy_z),
+            "h_clean_z": eff_h_clean,
+            "s_sen_z": eff_s_sen,
+            "vdr_z": float(vdr_z),
+            "epha2_z": float(epha2_z),
+        },
+        "prioritized_drugs": prioritized_drugs,
+        "emt_resistant_egfr_tkis": emt_resistant_egfr_tkis,
+        "contraindicated_drugs": contraindicated_drugs,
+        "resistance_and_contraindication_flags": resistance_flags,
+        "myeloid_firewall": {
+            "active": bool(myeloid_wall_high or eff_bace1),
+            "bace1_high": eff_bace1,
+            "myeloid_wall_high": bool(myeloid_wall_high),
+            "firewall_targets": ["BACE1", "VSIG4", "CD163", "LRP1", "APOE"],
+            "recommended_regimen": "Verubecestat (MK-8931) + Anti-VSIG4 / Myeloid Reprogramming",
+            "zhang2022_time_b_vs_lb_log2fc": {
+                "APOE": 3.3511,
+                "CD163": 2.6753,
+                "VSIG4": 2.1959,
+                "LRP1": 1.8066,
+                "PTPRC_cuff_trapping": 1.9918,
+            },
+        },
+        "nanocarrier_3stage_lock": {
+            "and_gate_triggered": bool(lrp1_cuff_sinking_high),
+            "unshielded_lrp1_monoligand_allowed": not bool(lrp1_cuff_sinking_high),
+            "stage1_btb_shuttle": "LRP1 / TFRC Blood-Tumor-Barrier Transcytosis Shuttle",
+            "stage2_cuff_corona": (
+                "MMP2-Cleavable Stealth Corona (TIME-B MMP2 log2FC=+1.8698)"
+                if mmp2_cuff_high
+                else "Standard Stealth Corona"
+            ),
+            "stage3_tumor_core_lock_antigens": selected_antigens,
+            "stage3_antigen_evidence": {
+                ag: BRM_GBM_STAGE3_CORE_ANTIGENS[ag] for ag in selected_antigens
+            },
+        },
+        "u6_closure_verdict": U6_CLOSURE_VERDICT,
+    }
 
 
 def _require_bool(val: Any, key: str) -> bool:
@@ -1485,6 +1868,70 @@ def score_pathway_8d_case(payload: Mapping[str, Any]) -> dict[str, Any]:
         )
         stc_1010_rank_1 = bool(stc_fit > best_comp and stc_fit > 0.0)
 
+    brm_gbm_arbiter: Optional[dict[str, Any]] = None
+    if norm_domain == "gbm":
+        brm_gbm_arbiter = evaluate_brm_gbm_two_door_arbiter(
+            profile_id=resolved_profile_id,
+            ddr_proxy_z=(
+                float(eff_features["ddr_proxy_z"])
+                if eff_features.get("ddr_proxy_z") is not None
+                else 0.0
+            ),
+            h_clean_z=(
+                float(eff_features["h_clean_z"])
+                if eff_features.get("h_clean_z") is not None
+                else None
+            ),
+            s_sen_z=(
+                float(eff_features["s_sen_z"])
+                if eff_features.get("s_sen_z") is not None
+                else None
+            ),
+            zeb1_or_mesenchymal_high=(
+                bool(eff_features["zeb1_or_mesenchymal_high"])
+                if eff_features.get("zeb1_or_mesenchymal_high") is not None
+                else None
+            ),
+            mesenchymal_4_z=(
+                float(eff_features["mesenchymal_4_z"])
+                if eff_features.get("mesenchymal_4_z") is not None
+                else None
+            ),
+            egfr_mut=egfr_mut,
+            kras_mut=kras_mut,
+            pten_null=pten_null,
+            vdr_z=(
+                float(eff_features["vdr_z"])
+                if eff_features.get("vdr_z") is not None
+                else 0.0
+            ),
+            epha2_z=(
+                float(eff_features["epha2_z"])
+                if eff_features.get("epha2_z") is not None
+                else 0.0
+            ),
+            bace1_high=(
+                bool(eff_features["bace1_high"])
+                if eff_features.get("bace1_high") is not None
+                else None
+            ),
+            myeloid_wall_high=(
+                bool(eff_features["myeloid_wall_high"])
+                if eff_features.get("myeloid_wall_high") is not None
+                else True
+            ),
+            lrp1_cuff_sinking_high=(
+                bool(eff_features["lrp1_cuff_sinking_high"])
+                if eff_features.get("lrp1_cuff_sinking_high") is not None
+                else True
+            ),
+            mmp2_cuff_high=(
+                bool(eff_features["mmp2_cuff_high"])
+                if eff_features.get("mmp2_cuff_high") is not None
+                else True
+            ),
+        )
+
     return {
         "ruo": True,
         "ruo_disclaimer": RUO_DISCLAIMER_8D,
@@ -1519,6 +1966,7 @@ def score_pathway_8d_case(payload: Mapping[str, Any]) -> dict[str, Any]:
         "recommended_trial_id": top_gated_trial_id,
         "top_gated_trial_id": top_gated_trial_id,
         "stc_1010_rank_1": stc_1010_rank_1,
+        "brm_gbm_two_door_arbiter": brm_gbm_arbiter,
         "rankings": rankings_out,
         "ranked_trials": rankings_out,
     }
@@ -1527,6 +1975,7 @@ def score_pathway_8d_case(payload: Mapping[str, Any]) -> dict[str, Any]:
 __all__ = [
     "AXES_7D",
     "AXES_8D",
+    "BRM_GBM_STAGE3_CORE_ANTIGENS",
     "CONTRACT_STATUS",
     "CRC_TRIAL_VECTORS_8D",
     "ContraindicationContext",
@@ -1544,8 +1993,10 @@ __all__ = [
     "Pathway8DRankerInputError",
     "RUO_DISCLAIMER_8D",
     "TrialFitResult",
+    "U6_CLOSURE_VERDICT",
     "build_crc_patient_vector_8d",
     "compute_combined_score",
+    "evaluate_brm_gbm_two_door_arbiter",
     "evaluate_contraindication_gate",
     "evaluate_trial_path_a",
     "fit",

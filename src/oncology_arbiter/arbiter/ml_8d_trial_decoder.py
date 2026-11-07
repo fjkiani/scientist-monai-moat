@@ -411,6 +411,15 @@ def signed_fit_score(p: np.ndarray, t: np.ndarray) -> float:
     return float(np.dot(p, t) / norm_t)
 
 
+def signed_cosine_similarity(p: np.ndarray, t: np.ndarray) -> float:
+    """Signed cosine of patient and trial vectors in [-1, +1]."""
+    norm_p = float(np.linalg.norm(p))
+    norm_t = float(np.linalg.norm(t))
+    if norm_p <= 1e-12 or norm_t <= 1e-12:
+        return 0.0
+    return float(np.dot(p, t) / (norm_p * norm_t))
+
+
 def signed_fit_batch(P: np.ndarray, t: np.ndarray) -> np.ndarray:
     """Vectorized signed normalized projection for patient matrix P in R^(N x 8)."""
     norm_t = float(np.linalg.norm(t))
@@ -566,6 +575,284 @@ def score_bilinear_ml_loto(
         "p_signed_8d": [float(x) for x in p],
         "moa_weights": weights,
         "loto_validation_summary_loaded": contract.get("loto_validation_summary"),
+    }
+
+
+RECOGNIZED_CLINICAL_FEATURE_KEYS: frozenset[str] = frozenset({
+    "p_signed_8d",
+    "d1_ddr_rs",
+    "d2_hibernation_sen",
+    "d3_rtk_egfr_addiction",
+    "d4_ras_raf_oncogenic",
+    "d5_io_effector",
+    "d6_stroma_myeloid_barrier",
+    "d7_surface_adc_payload",
+    "d8_angio_metabolic_safety",
+    "fga",
+    "fraction_genome_altered",
+    "hrd_proxy",
+    "mbd4_lof",
+    "brca_mut",
+    "brca_somatic",
+    "brca_lof",
+    "atm_lof",
+    "s3_z",
+    "post_ddr_z",
+    "post_parpi_efflux",
+    "s_sen",
+    "post_S_sen",
+    "h_clean",
+    "post_H_clean",
+    "d2_default",
+    "kras_mut",
+    "nras_mut",
+    "braf_mut",
+    "ras_raf_mut",
+    "pten_loss",
+    "pten_null",
+    "egfr_mut",
+    "erbb2_amp",
+    "triple_wt",
+    "tp53_mut",
+    "tmb",
+    "msi_h",
+    "e_effector",
+    "bag_index_3",
+    "gate2_z",
+    "immune_score_rna",
+    "s_triad",
+    "mfap4_z",
+    "liver_met",
+    "liver_metastasis",
+    "cms_label",
+    "tgfb_high",
+    "tgfb_barrier_high",
+    "ceacam5_ihc_ge_80",
+    "prior_irinotecan_refractory",
+    "p_efflux",
+    "dpyd_ugt1a1_high_risk",
+    "regulatory_hold",
+    "p_vegf",
+})
+
+
+def rank_42_trials_bilinear_ml(
+    payload: Mapping[str, Any],
+    *,
+    contract_path: Path | None = None,
+) -> dict[str, Any]:
+    """Rank all 42 decoded trials (and adjudicated comparators) for a patient using frozen W_MoA.
+
+    Accepts either:
+      - p_signed_8d: list of 8 floats in [-1, 1]
+      - clinical_features: non-empty dict of recognized biomarker/genomic features
+    Fail-closed on empty, malformed, or PATH A patient_vector inputs.
+    """
+    if not isinstance(payload, Mapping) or len(payload) == 0:
+        raise BilinearDecoderInputError(
+            "POST /v1/ranker/8d/bilinear requires p_signed_8d or clinical_features",
+            code="missing_features",
+            missing=["p_signed_8d", "clinical_features"],
+        )
+
+    if (
+        payload.get("patient_vector") is not None
+        and payload.get("p_signed_8d") is None
+        and payload.get("clinical_features") is None
+    ):
+        raise BilinearDecoderInputError(
+            "PATH A patient_vector is a different coordinate system and is rejected; "
+            "provide p_signed_8d or clinical_features.",
+            code="coordinate_system_mismatch",
+            missing=["p_signed_8d"],
+        )
+
+    raw_p = payload.get("p_signed_8d")
+    raw_cf = payload.get("clinical_features")
+
+    if raw_p is not None:
+        if not isinstance(raw_p, (list, tuple)) or len(raw_p) != 8:
+            raise BilinearDecoderInputError(
+                "p_signed_8d must be a length-8 list",
+                code="shape_mismatch",
+                missing=["p_signed_8d"],
+            )
+        try:
+            p = np.asarray([float(x) for x in raw_p], dtype=float)
+        except (TypeError, ValueError) as exc:
+            raise BilinearDecoderInputError(
+                "p_signed_8d contains non-numeric values",
+                code="shape_mismatch",
+            ) from exc
+        if not bool(np.all(np.isfinite(p))):
+            raise BilinearDecoderInputError(
+                "p_signed_8d contains non-finite values",
+                code="shape_mismatch",
+            )
+        if bool(np.any(np.abs(p) > 1.0 + 1e-6)):
+            raise BilinearDecoderInputError(
+                "p_signed_8d values must lie in [-1, 1]",
+                code="shape_mismatch",
+            )
+        input_mode = "p_signed_8d"
+    elif raw_cf is not None:
+        if not isinstance(raw_cf, Mapping) or len(raw_cf) == 0:
+            raise BilinearDecoderInputError(
+                "clinical_features must be a non-empty object",
+                code="missing_features",
+                missing=["clinical_features"],
+            )
+        recognized = set(raw_cf.keys()) & RECOGNIZED_CLINICAL_FEATURE_KEYS
+        if not recognized:
+            raise BilinearDecoderInputError(
+                "clinical_features contains no recognized 8D biomarker keys",
+                code="missing_features",
+                missing=["clinical_features"],
+            )
+        try:
+            p = build_signed_8d_patient_vector(raw_cf)
+        except (TypeError, ValueError) as exc:
+            raise BilinearDecoderInputError(
+                f"clinical_features contains malformed values: {exc}",
+                code="shape_mismatch",
+            ) from exc
+        if not bool(np.all(np.isfinite(p))):
+            raise BilinearDecoderInputError(
+                "constructed p_signed_8d contains non-finite values",
+                code="shape_mismatch",
+            )
+        input_mode = "clinical_features"
+    else:
+        raise BilinearDecoderInputError(
+            "POST /v1/ranker/8d/bilinear requires either p_signed_8d or clinical_features",
+            code="missing_features",
+            missing=["p_signed_8d", "clinical_features"],
+        )
+
+    contract = load_bilinear_contract(contract_path)
+    w_moa = np.asarray(contract["W_MoA_matrix"], dtype=float)
+
+    def _score_spec_entry(spec: Mapping[str, Any]) -> dict[str, Any]:
+        moa_map = {str(k): float(v) for k, v in spec["moa"].items()}
+        m_j = _moa_vec(**moa_map)
+        t_raw = w_moa @ m_j
+        norm_t = float(np.linalg.norm(t_raw))
+        max_abs = float(np.max(np.abs(t_raw)))
+        t_signed = (t_raw / max_abs) if max_abs > 1e-12 else np.zeros(8, dtype=float)
+        fit_score = signed_fit_score(p, t_raw)
+        cos_sim = signed_cosine_similarity(p, t_raw)
+        calibrated_prob = float(1.0 / (1.0 + math.exp(-2.2 * fit_score)))
+        axis_contribs = {
+            SIGNED_AXES_8D[i]: round(float(p[i] * t_signed[i]), 6) for i in range(8)
+        }
+        reasons: list[str] = []
+        if p[2] <= -0.50 and (moa_map.get("Anti_EGFR", 0.0) >= 0.50 or t_signed[2] >= 0.35):
+            reasons.append("RAS_RAF_MUTANT_ANTI_EGFR_REPULSION")
+        if p[1] >= 0.45 and (
+            moa_map.get("PARP_Inhibitor", 0.0) >= 0.50
+            or moa_map.get("ATR_WEE1_Inhibitor", 0.0) >= 0.50
+        ):
+            reasons.append("DOOR2_HIBERNATION_REPELS_DIVIDING_DDR")
+        if (
+            p[5] >= 0.55
+            and p[4] <= -0.25
+            and moa_map.get("Anti_PD1_PDL1", 0.0) >= 0.65
+            and moa_map.get("Vaccine_STC1010", 0.0) == 0.0
+            and moa_map.get("Anti_VEGF_Bev", 0.0) == 0.0
+        ):
+            reasons.append("STROMAL_MYELOID_BARRIER_IO_MONOTHERAPY_EXCLUSION")
+        if p[7] <= -0.50:
+            reasons.append("GATE0_SAFETY_OR_REGULATORY_HOLD")
+
+        contraindicated = len(reasons) > 0 or fit_score < -0.25
+        return {
+            "registry_index": spec.get("idx"),
+            "id": str(spec["id"]),
+            "trial_name": str(spec["name"]),
+            "program": str(spec["program"]),
+            "moa_design_weights": moa_map,
+            "learned_8d_vector_raw": [round(float(x), 6) for x in t_raw],
+            "learned_8d_vector_signed": [round(float(x), 6) for x in t_signed],
+            "learned_8d_by_axis": {
+                SIGNED_AXES_8D[i]: round(float(t_signed[i]), 6) for i in range(8)
+            },
+            "bilinear_score": round(float(fit_score), 6),
+            "cosine_similarity": round(float(cos_sim), 6),
+            "calibrated_loto_probability": round(float(calibrated_prob), 6),
+            "axis_contributions_8d": axis_contribs,
+            "contraindicated": bool(contraindicated),
+            "contraindication_reasons": reasons,
+        }
+
+    scored_42 = [_score_spec_entry(spec) for spec in REGISTRY_42_MOA_SPECS]
+    scored_42.sort(key=lambda r: (not r["contraindicated"], r["bilinear_score"]), reverse=True)
+    for rank_idx, row in enumerate(scored_42, start=1):
+        row["rank"] = rank_idx
+
+    scored_comparators = [_score_spec_entry(cspec) for cspec in COMPARATOR_MOA_SPECS]
+    scored_comparators.sort(key=lambda r: (not r["contraindicated"], r["bilinear_score"]), reverse=True)
+    for rank_idx, row in enumerate(scored_comparators, start=1):
+        row["rank"] = rank_idx
+
+    blacklist = [
+        {
+            "id": r["id"],
+            "trial_name": r["trial_name"],
+            "program": r["program"],
+            "bilinear_score": r["bilinear_score"],
+            "contraindication_reasons": r["contraindication_reasons"],
+        }
+        for r in (scored_42 + scored_comparators)
+        if r["contraindicated"]
+    ]
+
+    custom_moa_eval = None
+    if payload.get("moa_weights") is not None:
+        single_res = score_bilinear_ml_loto(
+            {"p_signed_8d": [float(x) for x in p], "moa_weights": payload["moa_weights"]},
+            contract_path=contract_path,
+        )
+        custom_moa_eval = {
+            "score": single_res["score"],
+            "calibrated_loto_probability": round(
+                float(1.0 / (1.0 + math.exp(-2.2 * float(single_res["score"])))), 6
+            ),
+            "trial_vector_raw": single_res["trial_vector_raw"],
+            "l2_norm_trial": single_res["l2_norm_trial"],
+            "moa_weights": single_res["moa_weights"],
+        }
+
+    top_trial = scored_42[0]
+    return {
+        "engine": "bilinear_ml_loto",
+        "model_id": contract.get("model_id"),
+        "coordinate_system": "signed_bilinear_8d",
+        "input_mode": input_mode,
+        "signed_axes_8d": list(SIGNED_AXES_8D),
+        "distinct_from_path_a_axes": True,
+        "refit_on_query": False,
+        "weights_source": "crispro_8d_bilinear_decoder_v1.json",
+        "fallback_to_path_a": False,
+        "ruo": True,
+        "ruo_disclaimer": contract.get("ruo_disclaimer"),
+        "contract_status": contract.get("contract_status"),
+        "p_signed_8d": [round(float(x), 6) for x in p],
+        "p_signed_8d_named": {
+            SIGNED_AXES_8D[i]: round(float(p[i]), 6) for i in range(8)
+        },
+        "top_trial": top_trial,
+        "calibrated_loto_probability": top_trial["calibrated_loto_probability"],
+        "top_bilinear_score": top_trial["bilinear_score"],
+        "ranked_trials_42": scored_42,
+        "ranked_comparator_trials": scored_comparators,
+        "contraindication_gate_status": {
+            "gate_active": True,
+            "n_contraindicated_trials": len(blacklist),
+            "repelled_trial_ids": [b["id"] for b in blacklist],
+        },
+        "contraindicated_blacklist": blacklist,
+        "custom_moa_eval": custom_moa_eval,
+        "loto_validation_summary": contract.get("loto_validation_summary"),
     }
 
 

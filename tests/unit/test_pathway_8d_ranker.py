@@ -43,6 +43,7 @@ from oncology_arbiter.arbiter.pathway_8d_ranker import (
     IO_CORE_PATIENT_P_B_7D,
     IO_CORE_TRIAL_VECTORS_7D,
     build_crc_patient_vector_8d,
+    evaluate_brm_gbm_two_door_arbiter,
     evaluate_contraindication_gate,
     evaluate_trial_path_a,
     fit_axis_masked,
@@ -50,6 +51,7 @@ from oncology_arbiter.arbiter.pathway_8d_ranker import (
     l2_norm,
     load_tcga_coadread_mss_485_cohort,
     rank_trials_path_a,
+    U6_CLOSURE_VERDICT,
 )
 
 
@@ -644,5 +646,97 @@ def test_fastapi_ranker_8d_fail_closed_422_validation(client: TestClient) -> Non
         },
     )
     assert r_bad_mode.status_code == 422
+
+
+def test_evaluate_brm_gbm_two_door_arbiter_door1_door2_myeloid_and_nanocarrier_lock(
+    client: TestClient,
+) -> None:
+    """Test 10: Verify Two-Door BrM/GBM drug, resistance, myeloid firewall, and 3-Stage nanocarrier lock."""
+    # 1. Door 1 EGFR-mutant BrM (low ZEB1/EMT, S_sen=0.0)
+    res_d1 = evaluate_brm_gbm_two_door_arbiter(
+        profile_id="EGFR_mut_BrM",
+        zeb1_or_mesenchymal_high=False,
+        h_clean_z=-0.5,
+        s_sen_z=-0.5,
+    )
+    assert res_d1["ruo"] is True
+    assert res_d1["primary_door"] == "DOOR_1_PROLIFERATIVE_DDR_EGFR"
+    assert res_d1["is_door2"] is False
+    assert res_d1["emt_resistant_egfr_tkis"] == []
+    assert res_d1["myeloid_firewall"]["active"] is True
+    assert res_d1["nanocarrier_3stage_lock"]["and_gate_triggered"] is True
+    assert res_d1["nanocarrier_3stage_lock"]["unshielded_lrp1_monoligand_allowed"] is False
+    assert res_d1["nanocarrier_3stage_lock"]["stage3_tumor_core_lock_antigens"] == [
+        "MUC1",
+        "CLDN7",
+        "EPCAM",
+        "DSG2",
+    ]
+    assert res_d1["u6_closure_verdict"]["claim_id"] == "U6"
+    assert res_d1["u6_closure_verdict"]["nsclc_reproduction"]["spearman_rho"] == -0.6238
+    assert res_d1["u6_closure_verdict"]["gbm_single_gene_zeb1_falsification"]["spearman_rho"] == 0.0846
+    assert (
+        res_d1["u6_closure_verdict"]["gbm_cns_two_door_rescue"]["GBM_S_sen_to_ITGAV"]["rho"]
+        == -0.3415
+    )
+
+    # 2. Door 2 ZEB1-high / S_sen-high BrM/GBM -> AZD2014, AZD8055, GNE-317, GSK2256098C, Dasatinib,
+    #    BCL-xL senolytics, Verubecestat+Anti-VSIG4 prioritized; Osimertinib/Zorifertinib EMT-resistant;
+    #    Venetoclax & AZD5991 contraindicated!
+    res_d2 = evaluate_brm_gbm_two_door_arbiter(
+        profile_id="ZEB1_high_KRAS_mut",
+        zeb1_or_mesenchymal_high=True,
+        h_clean_z=0.80,
+        s_sen_z=1.50,
+    )
+    assert res_d2["is_door2"] is True
+    assert res_d2["is_s_sen_high"] is True
+    assert res_d2["zeb1_or_mesenchymal_high"] is True
+    assert res_d2["primary_door"] == "DOOR_2_HIBERNATING_COLONIZATION_SENOLYTIC_FAK_MTOR"
+    assert "Osimertinib" in res_d2["emt_resistant_egfr_tkis"]
+    assert "Zorifertinib (AZD3759)" in res_d2["emt_resistant_egfr_tkis"]
+
+    drug_ids = {d["drug_id"] for d in res_d2["prioritized_drugs"]}
+    assert {
+        "AZD2014",
+        "AZD8055",
+        "GNE-317",
+        "GSK2256098C",
+        "Dasatinib",
+        "WEHI-539_Navitoclax_ABT-737",
+        "Verubecestat_Anti_VSIG4_Myeloid_Reprogramming",
+    }.issubset(drug_ids)
+
+    contra_names = {c["drug_name"] for c in res_d2["contraindicated_drugs"]}
+    assert "Venetoclax" in contra_names
+    assert "AZD5991" in contra_names
+    assert "Osimertinib" in contra_names
+    assert "Zorifertinib (AZD3759)" in contra_names
+    assert "Temozolomide" in contra_names
+
+    # 3. Verify POST /v1/ranker/8d/score for domain='gbm' surfaces brm_gbm_two_door_arbiter
+    resp_gbm = client.post(
+        "/v1/ranker/8d/score",
+        json={
+            "domain": "gbm",
+            "profile_id": "PTEN_null_ZEB1_high",
+            "clinical_features": {
+                "zeb1_or_mesenchymal_high": True,
+                "h_clean_z": 1.1,
+                "s_sen_z": 1.3,
+            },
+        },
+    )
+    assert resp_gbm.status_code == 200, resp_gbm.text
+    body = resp_gbm.json()
+    arb = body["brm_gbm_two_door_arbiter"]
+    assert arb is not None
+    assert arb["is_door2"] is True
+    assert arb["is_s_sen_high"] is True
+    assert "Osimertinib" in arb["emt_resistant_egfr_tkis"]
+    assert any(c["drug_name"] == "Venetoclax" for c in arb["contraindicated_drugs"])
+    assert any(c["drug_name"] == "AZD5991" for c in arb["contraindicated_drugs"])
+    assert U6_CLOSURE_VERDICT["claim_id"] == "U6"
+
 
 
