@@ -1,0 +1,129 @@
+{
+  "created_by": "scripts/export_phylo_v11_inputs.py",
+  "alias_notes": {
+    "ovarian_expression.parquet": "copy of ovarian_expression_all_genes.parquet",
+    "ovarian_expression.csv": "copy of ovarian_expression_key_panel.csv",
+    "ovarian_crispr.parquet": "copy of ovarian_crispr_all_genes.parquet",
+    "ovarian_crispr.csv": "copy of ovarian_crispr_key_panel.csv"
+  },
+  "export_counts": {
+    "n_expr_models": 67,
+    "n_expr_genes_all": 19193,
+    "n_key_genes": 138,
+    "n_donors": 64,
+    "n_reference_donors_single_model": 61,
+    "source": "/Users/fahadkiani/Desktop/development/crispr-assistant-main/OmicsExpression.parquet",
+    "n_crispr_models": 59,
+    "n_crispr_genes_all": 17916,
+    "n_mut_cna_models": 72,
+    "n_mut_cna_genes": 13,
+    "n_gse_rows": 66,
+    "n_gse_patients": 11,
+    "n_gse_genes_exported": 148,
+    "n_gse_genes_missing": 0
+  },
+  "files": [
+    {
+      "path": "MANIFEST_SHA256.json",
+      "bytes": 4161,
+      "sha256": "465ddee879b00eaa2ead81a21324677c95f9715b9648d67d88b1aff19cb021c0"
+    },
+    {
+      "path": "gse165897_human_paired_compartments.csv",
+      "bytes": 167240,
+      "sha256": "06b5949f236ab407b24520727eeca379c8b4ba9f10cb90630a3666fe4e2af465",
+      "rows": 66,
+      "cols": 155
+    },
+    {
+      "path": "ovarian_crispr.csv",
+      "bytes": 160919,
+      "sha256": "48473d546f396cf135db0079bbed589824bd42dcfd0c4bafed82c195785cc6c3",
+      "rows": 59,
+      "cols": 139
+    },
+    {
+      "path": "ovarian_crispr.parquet",
+      "bytes": 15488959,
+      "sha256": "4ecb960d753c313928d2b6dd5858cb60a0739911eab7d0b04beedfb43caabdab",
+      "rows": 59,
+      "cols": 17916
+    },
+    {
+      "path": "ovarian_crispr_all_genes.parquet",
+      "bytes": 15488959,
+      "sha256": "4ecb960d753c313928d2b6dd5858cb60a0739911eab7d0b04beedfb43caabdab",
+      "rows": 59,
+      "cols": 17916
+    },
+    {
+      "path": "ovarian_crispr_key_panel.csv",
+      "bytes": 160919,
+      "sha256": "48473d546f396cf135db0079bbed589824bd42dcfd0c4bafed82c195785cc6c3",
+      "rows": 59,
+      "cols": 139
+    },
+    {
+      "path": "ovarian_expression.csv",
+      "bytes": 167620,
+      "sha256": "13d7313d0fe527580c3f0ac0cc9920486c161d42c27c42aa6e6f08db53f07cd4",
+      "rows": 67,
+      "cols": 139
+    },
+    {
+      "path": "ovarian_expression.parquet",
+      "bytes": 16171228,
+      "sha256": "505fecca7d7ef017346fa9be566843428c28598ed6013d8ab361faf0298b5c9c",
+      "rows": 67,
+      "cols": 19193
+    },
+    {
+      "path": "ovarian_expression_all_genes.parquet",
+      "bytes": 16171228,
+      "sha256": "505fecca7d7ef017346fa9be566843428c28598ed6013d8ab361faf0298b5c9c",
+      "rows": 67,
+      "cols": 19193
+    },
+    {
+      "path": "ovarian_expression_key_panel.csv",
+      "bytes": 167620,
+      "sha256": "13d7313d0fe527580c3f0ac0cc9920486c161d42c27c42aa6e6f08db53f07cd4",
+      "rows": 67,
+      "cols": 139
+    },
+    {
+      "path": "ovarian_mutations_and_cna.csv",
+      "bytes": 24786,
+      "sha256": "916c683dac0818849fb29e446cd348a43c28acd75342807372d9e44c7f82f255",
+      "rows": 72,
+      "cols": 53
+    }
+  ],
+  "phylo_upload_tarball": {
+    "filename": "phylo_v11_ovarian_inputs.tar.gz",
+    "bytes": 207997,
+    "sha256": "be338169300e4d0e9bfd79daab732e1da9ebc97f8551e9b73d6972ccf75b69aa",
+    "members": [
+      "MANIFEST_SHA256.json",
+      "ovarian_expression_key_panel.csv",
+      "ovarian_crispr_key_panel.csv",
+      "ovarian_mutations_and_cna.csv",
+      "gse165897_human_paired_compartments.csv"
+    ],
+    "omitted_from_tarball": [
+      "ovarian_expression_all_genes.parquet (folder-only; too large for Git tarball)",
+      "ovarian_crispr_all_genes.parquet (folder-only; too large for Git tarball)",
+      "ovarian_expression.parquet (folder-only; too large for Git tarball)",
+      "ovarian_crispr.parquet (folder-only; too large for Git tarball)",
+      "ovarian_expression.csv (folder-only; too large for Git tarball)",
+      "ovarian_crispr.csv (folder-only; too large for Git tarball)"
+    ],
+    "max_mb": 10.0,
+    "skip_aliases": [
+      "ovarian_crispr.csv",
+      "ovarian_crispr.parquet",
+      "ovarian_expression.csv",
+      "ovarian_expression.parquet"
+    ]
+  }
+}
