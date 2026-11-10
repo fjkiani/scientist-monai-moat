@@ -14,8 +14,31 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 
 
+THERAPY_PROGNOSIS_MODEL_NAME = "therapy_prognosis_metabric_v1"
+LEGACY_THERAPY_BENEFIT_MODEL_NAME = "therapy_benefit_metabric_v1"
+THERAPY_PROGNOSIS_UNCERTAINTY = (
+    "Single-arm METABRIC prognosis under the cohort's treatment mix; this "
+    "design cannot identify a causal treatment effect. Not externally "
+    "calibrated for contemporary care."
+)
+
+
 # --------------------------------------------------------------------------- #
 # Shared
+
+# Wire values that appear in audit envelopes written before the proxy surface
+# was retired. They are deliberately NOT members of :class:`ModelState`, so no
+# route can emit one; the frozen set exists only so an auditor reading an
+# archived receipt can still resolve the string. Each of these labelled a
+# substitute standing in for a required specialist stage.
+RETIRED_MODEL_STATE_VALUES: frozenset[str] = frozenset({
+    "proxy_siglip",              # google/siglip-base-patch16-224, general-domain
+    "proxy_monai_heuristic",     # mask-gradient heuristic, not a detector
+    "proxy_lung_heuristic",      # HU threshold + connected components
+    "proxy_rules_lite",          # NCCN-lite static rules
+    "proxy_regex_v0",            # regex pathology parser
+    "fused_regex_clinicalbert",  # regex AND ClinicalBERT fusion
+})
 
 
 class ModelState(str, Enum):
@@ -25,20 +48,27 @@ class ModelState(str, Enum):
     UNAVAILABLE = "unavailable"       # model failed to load; error path
     CACHED = "cached"                 # result served from cache
     GATED = "gated"                   # HAI-DEF access denied (401/403)
-    PROXY_SIGLIP = "proxy_siglip"     # ungated general-domain SigLIP fallback (NOT MedSigLIP output)
     LOADED_MEDSIGLIP = "loaded_medsiglip"  # HAI-DEF MedSigLIP-448 inference (medical but off-label for mammography)
-    LOADED_BIOPSY_PROBE = "loaded_biopsy_probe"  # L4b MedSigLIP embed + synthetic linear probe (RUO, off-label)
+    LOADED_BIOPSY_PROBE = "loaded_biopsy_probe"  # L4b pinned MedSigLIP pooled embed + real BACH v1 head (RUO)
     LOADED_MONAI_DETECTOR = "loaded_monai_detector"  # L4a MONAI detector with trained weights (unreachable until weights ship)
-    PROXY_MONAI_HEURISTIC = "proxy_monai_heuristic"  # L4a MONAI mask-gradient heuristic when weights unavailable
-    PROXY_LUNG_HEURISTIC = "proxy_lung_heuristic"  # NSCLC HU-threshold + CC blobs (LIDC-IDRI) — not a trained detector
     LOADED_LUNA16_RETINANET = "loaded_luna16_retinanet"  # v0.3.0 MONAI Model Zoo lung_nodule_ct_detection@0.6.9 (LUNA16-trained)
-    PROXY_RULES_LITE = "proxy_rules_lite"  # L4c NCCN-lite rules fallback when TxGemma gated
     LOADED_TXGEMMA = "loaded_txgemma"  # L4c HAI-DEF TxGemma inference (never reachable under current token)
     TEMPLATE = "template"             # L3 arbiter JSON templates loaded from disk (n_training=0)
-    PROXY_REGEX_V0 = "proxy_regex_v0" # v0.2.1 pathology-report regex parser (stateless code, always available)
-    LOADED_CLINICALBERT_PARSER = "loaded_clinicalbert_parser"  # v0.3.0 Bio_ClinicalBERT fine-tuned on synthetic corpus
-    FUSED_REGEX_CLINICALBERT = "fused_regex_clinicalbert"  # v0.3.0 regex ∧ ClinicalBERT fusion
-    PROXY_CO_SCIENTIST = "proxy_co_scientist"  # L5 orchestrator: literature-derived Elo tournament (deterministic scoring)
+    LOADED_CLINICALBERT_PARSER = "loaded_clinicalbert_parser"  # retired wire value; new parses use LOADED_MEDGEMMA_PATHOLOGY
+    LOADED_MEDGEMMA_PATHOLOGY = "loaded_medgemma_1_5_4b_pathology"
+    LOADED_MEDGEMMA_THERAPY = "loaded_medgemma_1_5_4b_therapy"
+    LOADED_MEDGEMMA_1P5_4B = "loaded_medgemma_1p5_4b"  # identity-locked Co-Scientist Elo path
+    LOADED_GEMINI_ARGON = "loaded_gemini_argon"  # Gemini Argon L5 swarm backend (RUO)
+    PROXY_CO_SCIENTIST = "proxy_co_scientist"  # offline deterministic ranker; never an LLM result
+    LOADED_CASE_STORAGE = "loaded_case_storage"
+    LOADED_PHIKON = "loaded_phikon"
+    LOADED_MEDGEMMA_27B = "loaded_medgemma_27b"
+    RETIRED = "retired"
+    CONFIGURED_UNVERIFIED = "configured_unverified"  # endpoint configured; successful inference not yet proven
+    # NOTE: the six substitute states (proxy_siglip, proxy_monai_heuristic,
+    # proxy_lung_heuristic, proxy_rules_lite, proxy_regex_v0,
+    # fused_regex_clinicalbert) were removed from this enum. See
+    # RETIRED_MODEL_STATE_VALUES, defined above this class.
 
     # v0.4.0-alpha additions (PLAN §2A):
     LOADED_LUNA16_REFINED = "loaded_luna16_refined"        # fjkiani-luna16-refine-v1 (LUNA16+LIDC-IDRI fine-tune, target ΔFROC@2 ≥ +5% over 0.6.9)
@@ -48,6 +78,7 @@ class ModelState(str, Enum):
     LOADED_AK_BUNDLE = "loaded_ak_bundle"                  # AK MBD4-LOF tumor board bundle (crispro-backend-v2 bfd6d11f, manuscript d33f6403)
     LOADED_MBD4_EVIDENCE_MATRIX = "loaded_mbd4_evidence_matrix"  # PR #11 evidence matrix (manuscript_claim_type + falsification_narrative + auxiliary_evidence)
     LOADED_SL_THERAPY_BRIDGE = "loaded_sl_therapy_bridge"  # crispro-backend-v2 api/services/sl_therapy_bridge/ mirror
+    LOADED_SL_AGENT = "loaded_sl_agent"  # vendored Synthetic-Lethality@488da52 under vendor/synthetic-lethality/sl_agent
     LOADED_HIPAA_REDACTOR = "loaded_hipaa_redactor"        # HIPAAPIIMiddleware log-redaction (mirror of backend v2 api/middleware/hipaa_pii.py)
 
 
@@ -61,6 +92,39 @@ class EvidenceRecord(BaseModel):
                         description="Source module (pubmed, arxiv, europe_pmc, web_fetch)")
 
 
+class StageError(BaseModel):
+    code: str
+    message: str
+
+
+class StageReceipt(BaseModel):
+    """Additive receipt for one specialist stage; never contains raw PHI."""
+
+    stage: str
+    required: bool
+    status: Literal[
+        "succeeded",
+        "failed_required",
+        "failed_optional",
+        "skipped_not_applicable",
+        "retired",
+    ]
+    request_id: str
+    service_name: str | None = None
+    endpoint_label: str | None = None
+    app_version: str | None = None
+    model_name: str | None = None
+    model_version: str | None = None
+    artifact_sha256: str | None = Field(default=None, min_length=64, max_length=64)
+    input_reference: str | None = Field(
+        default=None,
+        description="Content hash, case identifier, or manifest hash; never raw patient data.",
+    )
+    latency_ms: float | None = Field(default=None, ge=0.0)
+    warnings: list[str] = Field(default_factory=list)
+    error: StageError | None = None
+
+
 class HonestyGateReport(BaseModel):
     seen_urls_count: int = Field(..., ge=0)
     evidence_kept: int = Field(..., ge=0)
@@ -70,6 +134,45 @@ class HonestyGateReport(BaseModel):
     # reflection.py drops the hypothesis (not just the evidence). Distinct from
     # evidence_dropped because a single hostile URL fabricates the whole hypothesis.
     hypotheses_dropped: int = Field(default=0, ge=0)
+
+
+class ManskiBoundsBlock(BaseModel):
+    """The identified set for a stage probability, attached to every point estimate.
+
+    These are assumption-free (Manski) bounds: each feature the caller did not
+    supply is ranged over its *entire* admissible support and the endpoints are
+    the resulting extremes of the sigmoid. They are NOT a confidence interval —
+    there is no sampling model here, only the logical consequence of not knowing
+    a covariate.
+
+    `width == 0.0` means the panel was complete and the estimate is
+    point-identified. On every public route `identified == False` is
+    unreachable in a 200 response: the gate raises HTTP 422 first, and no
+    header, query parameter or environment variable relaxes it. The only
+    way to see `identified == False` is the authenticated research route
+    `/v1/research/arbiter/identified_set`, which requires the privileged
+    `research:blind_inference` scope and stamps every release with an audit
+    receipt.
+    """
+    model_config = ConfigDict(str_strip_whitespace=True)
+    stage: str
+    model_name: str
+    lower: float = Field(..., ge=0.0, le=1.0)
+    upper: float = Field(..., ge=0.0, le=1.0)
+    width: float = Field(..., ge=0.0, le=1.0)
+    max_width: float = Field(..., gt=0.0)
+    identified: bool = Field(
+        ..., description="True when width <= max_width and a point estimate is admissible.",
+    )
+    missing_features: list[str] = Field(
+        default_factory=list,
+        description="Declared features the caller did not supply, from the artefact schema — not only the booleans.",
+    )
+    unobserved_unbounded: list[str] = Field(
+        default_factory=list,
+        description="Unobserved continuous covariates with no declared support; each forces the interval to [0, 1].",
+    )
+    interval_semantics: str
 
 
 class ArbiterScore(BaseModel):
@@ -99,6 +202,20 @@ class ArbiterScore(BaseModel):
         description="'template' when n_training==0 (illustrative), 'frozen' after Phase 3 fit.",
     )
     caveat: str = Field(..., description="AUROC caveat from the frozen JSON")
+    manski: ManskiBoundsBlock | None = Field(
+        default=None,
+        description=(
+            "Identified set for `p_positive` given the unobserved part of the feature "
+            "panel. Absent only on legacy paths that predate the gate."
+        ),
+    )
+    provenance_warnings: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Non-empty only when the Manski gate was bypassed via "
+            "X-Allow-Blind-Inference; the first entry is PROVISIONAL_UNOBSERVED_WARNING."
+        ),
+    )
 
 
 class GateReport(BaseModel):
@@ -171,8 +288,11 @@ class ApiEnvelope(BaseModel):
         default_factory=list,
         description=(
             "Non-fatal honesty warnings for this response — e.g. "
-            "`medsiglip_gated:<level>:<reason>`, out-of-distribution warnings, "
-            "or proxy_siglip fallback notes. Callers MUST surface these."
+            "`medsiglip_gated:<level>:<reason>` or out-of-distribution "
+            "warnings. Callers MUST surface these. A warning never "
+            "accompanies a substituted result: the substitute surface was "
+            "retired, so a gated or failed specialist yields a failed "
+            "required stage, not a warned fallback."
         ),
     )
 
@@ -203,6 +323,43 @@ class ScreeningRequest(BaseModel):
     )
 
 
+class ScreeningFusionMetadata(BaseModel):
+    """Clinical metadata required for RSNA MedSigLIP fusion head (RUO).
+
+    This mirrors the fields used in the retrospective RSNA training run.
+    Callers must at minimum provide age and density.
+    """
+
+    age: float = Field(..., ge=18.0, le=120.0, description="Patient age in years.")
+    density: Literal["A", "B", "C", "D"] = Field(
+        ...,
+        description="BI-RADS breast density category (A..D).",
+    )
+    laterality: Literal["L", "R"] | None = Field(default=None)
+    view: Literal["CC", "MLO"] | None = Field(default=None)
+    implant: Literal["0", "1"] | None = Field(default=None, description="0/1; optional.")
+    site_id: str | None = Field(default=None, description="Optional site identifier (stringified).")
+    machine_id: str | None = Field(default=None, description="Optional machine identifier (stringified).")
+
+
+class ScreeningFusionRequest(BaseModel):
+    """Input for /v1/screening/fusion (RUO).
+
+    Strictly requires DICOM bytes + clinical metadata. URL ingestion is not accepted.
+    """
+
+    dicom_bytes_b64: str = Field(..., description="base64-encoded DICOM bytes")
+    laterality_hint: Literal["L", "R"] | None = None
+    view_hint: Literal["CC", "MLO"] | None = None
+    patient_id_hash: str | None = Field(
+        default=None,
+        description="SHA256 hex of patient MRN or study UID (never the raw id)",
+        min_length=64,
+        max_length=64,
+    )
+    clinical_metadata: ScreeningFusionMetadata
+
+
 class ScreeningFinding(BaseModel):
     label: str
     score: float = Field(..., ge=0.0, le=1.0)
@@ -213,6 +370,8 @@ class ScreeningFinding(BaseModel):
 
 
 class ScreeningResponse(ApiEnvelope):
+    pipeline_status: Literal["complete", "partial_failure", "failed_required_stage"] = "complete"
+    stage_receipts: list[StageReceipt] = Field(default_factory=list)
     laterality: Literal["L", "R", "U"]
     view: Literal["CC", "MLO", "U"]
     orientation_flipped: bool
@@ -220,11 +379,32 @@ class ScreeningResponse(ApiEnvelope):
     findings: list[ScreeningFinding] = Field(default_factory=list)
     overall_score: float | None = Field(
         default=None, ge=0.0, le=1.0,
-        description="Overall malignancy suspicion score; None if model not wired.",
+        description="Uncalibrated off-label MedSigLIP zero-shot score; null on required-stage failure.",
+    )
+    medsiglip: dict[str, Any] | None = Field(
+        default=None,
+        description="Strict production MedSigLIP-448 inference provenance and embedding receipt.",
     )
     arbiter_score: ArbiterScore | None = Field(
         default=None,
-        description="L3 screening arbiter output (recall vs. routine follow-up).",
+        description="Optional downstream arbiter output; never calculated from a missing MedSigLIP stage.",
+    )
+    fusion_score: float | None = Field(
+        default=None,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "RUO: supervised fusion probability (MedSigLIP embedding + clinical metadata) "
+            "from rsna_medsiglip_fusion_logreg_v1; null when not computed."
+        ),
+    )
+    fusion_model_name: str | None = Field(
+        default=None,
+        description="RUO: name of the fused head used to compute fusion_score.",
+    )
+    fusion_warning: str | None = Field(
+        default=None,
+        description="RUO warning string for fusion_score; callers MUST surface this.",
     )
 
 
@@ -232,12 +412,62 @@ class ScreeningResponse(ApiEnvelope):
 # /v1/biopsy/analyze
 
 
+class BreastDssFeatures(BaseModel):
+    """Complete feature vector for the frozen METABRIC DSS model.
+
+    Every field is required. Report-parser values are never silently used to
+    fill missing clinical inputs because age and positive-node count are not
+    reliably recoverable from a pathology report.
+    """
+
+    age: float = Field(..., ge=18.0, le=120.0)
+    tumor_size_mm: float = Field(..., gt=0.0, le=500.0)
+    nodes_positive: int = Field(..., ge=0, le=100)
+    grade: int = Field(..., ge=1, le=3)
+    er_positive: bool
+    pr_positive: bool
+    her2_positive: bool
+
+
+class BreastDssPrognosis(BaseModel):
+    """Frozen disease-specific prognostic score with auditable decomposition."""
+
+    model_name: Literal["breast_dss_arbiter_v3_metabric"]
+    disease_specific_mortality_score: float = Field(..., ge=0.0, le=1.0)
+    logit: float
+    term_contributions: dict[str, float]
+    artifact_sha256: str = Field(..., min_length=64, max_length=64)
+    n_training: int = Field(..., ge=1)
+    events: int = Field(..., ge=1)
+    oof_auroc: float = Field(..., ge=0.0, le=1.0)
+    endpoint_label: Literal["disease-specific mortality"] = "disease-specific mortality"
+    model_state: Literal["frozen"] = "frozen"
+    caveats: list[str] = Field(default_factory=list)
+
+
 class BiopsyRequest(BaseModel):
     wsi_url: HttpUrl | None = None
     wsi_bytes_b64: str | None = None
     report_text: str | None = Field(
         default=None,
-        description="Free-text pathology report; TxGemma will read this alongside the WSI.",
+        description=(
+            "Free-text pathology report; MedGemma 1.5 4B extracts receptor panel "
+            "(PathologyExtraction). Optional Phikon image/embedding for tissue class."
+        ),
+    )
+    phikon_embedding: list[float] | None = Field(
+        default=None,
+        description=(
+            "Precomputed 768-d Phikon tissue embedding. When provided, "
+            "models/phikon_probe_v1.joblib runs without requiring image bytes."
+        ),
+    )
+    dss_features: BreastDssFeatures | None = Field(
+        default=None,
+        description=(
+            "Complete seven-feature vector for breast_dss_arbiter_v3_metabric. "
+            "When absent, the endpoint does not fabricate or impute a DSS score."
+        ),
     )
     patient_id_hash: str | None = Field(default=None, min_length=64, max_length=64)
 
@@ -245,11 +475,11 @@ class BiopsyRequest(BaseModel):
 class BiopsyReceptorPanel(BaseModel):
     """Standard breast biopsy receptor panel.
 
-    ``parse_state`` (v0.2.1) surfaces per-field provenance to the UI so the
-    clinician can see whether each value came from a confident regex match,
-    an ambiguous mention that needs review, or was never mentioned in the
-    report at all. When the UI submits an override, the state becomes
-    ``user_supplied``.
+    ``parse_state`` surfaces per-field provenance to the UI so the clinician
+    can see whether each value came from a confident ClinicalBERT span, an
+    ambiguous mention that needs review, or was never mentioned in the report
+    at all. When the UI submits an override, the state becomes
+    ``user_supplied``. No regex parser is wired on any route.
     """
     er_positive: bool | None = None
     pr_positive: bool | None = None
@@ -260,15 +490,16 @@ class BiopsyReceptorPanel(BaseModel):
         Literal["matched", "ambiguous", "no_match", "user_supplied"],
     ] | None = Field(
         default=None,
-        description="Per-field provenance from the report parser (proxy_regex_v0). "
-                    "Absent when biopsy analysis did not run a text parser.",
+        description="Per-field provenance from the ClinicalBERT v0.5.2 "
+                    "sliding-window pathology parser. Absent when biopsy "
+                    "analysis did not run a text parser.",
     )
 
 
 class ExtendedReceptorField(BaseModel):
-    """One field parsed by the v0.3.0 fused (regex + ClinicalBERT) parser.
+    """One extended field parsed by the ClinicalBERT v0.5.2 pathology parser.
 
-    Only used for extended fields the v0.2.1 regex parser could not produce:
+    Carries the extended entities beyond the receptor core:
     ki67_pct, tumor_size_mm, T/N/M stage, margin, LVI. The four core fields
     (er/pr/her2/grade) remain on ``BiopsyReceptorPanel`` for
     backwards-compatibility with existing frontends.
@@ -279,7 +510,9 @@ class ExtendedReceptorField(BaseModel):
     matched_text: str | None = None
     span: tuple[int, int] | None = None
     confidence: float = Field(default=0.0, ge=0.0, le=1.0)
-    source: Literal["regex", "clinicalbert", "fused", "disagreement", "none"] = "none"
+    source: Literal[
+        "regex", "clinicalbert", "fused", "disagreement", "none", "medgemma_pathology"
+    ] = "none"
 
 
 class ReportParseBlock(BaseModel):
@@ -291,31 +524,56 @@ class ReportParseBlock(BaseModel):
     """
     parser_id: str = Field(
         ...,
-        description="e.g. proxy_regex_v0, clinicalbert_v1, clinicalbert_v1+regex_v0",
+        description="Always clinicalbert_v0.5.2_sliding_window; no regex or "
+                    "fused parser is wired on any route.",
     )
-    fusion_mode: Literal["regex", "bert", "fused"] = "regex"
+    fusion_mode: Literal["clinicalbert", "medgemma_pathology"] = "clinicalbert"
     per_field_confidence: dict[str, float] = Field(
         default_factory=dict,
         description="Confidence per field (0..1) as reported by the parser.",
     )
     per_field_source: dict[
         str,
-        Literal["regex", "clinicalbert", "fused", "disagreement", "none"],
+        Literal[
+            "regex", "clinicalbert", "fused", "disagreement", "none", "medgemma_pathology"
+        ],
     ] = Field(default_factory=dict)
-    extended_fields: dict[str, ExtendedReceptorField] = Field(
+    extended_fields: dict[str, ExtendedReceptorField] = Field(default_factory=dict)
+    parsed_entities: dict[str, Any] = Field(
         default_factory=dict,
-        description=(
-            "Fields the regex parser could not produce: ki67_pct, tumor_size_mm, "
-            "t_stage, n_stage, m_stage, margin, lvi. Only populated when a BERT "
-            "or fused parser ran."
-        ),
+        description="Canonical ClinicalBERT entity output, without regex fusion.",
     )
+    spans: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description="Raw ClinicalBERT spans. Runtime key is spans, not a fused view.",
+    )
+    report_sha256: str | None = Field(default=None, min_length=64, max_length=64)
+    n_tokens: int | None = Field(default=None, ge=0)
+    n_windows: int | None = Field(default=None, ge=0)
+    window_count: int | None = Field(
+        default=None,
+        ge=0,
+        description="Sliding-window count from the ClinicalBERT runtime (window_count).",
+    )
+    window_tokens: int | None = Field(default=None, ge=1)
+    overlap_tokens: int | None = Field(default=None, ge=0)
+    window_aggregation: str | None = None
+    app_version: str | None = None
+    model_sha256: str | None = Field(default=None, min_length=64, max_length=64)
+    metrics_sha256: str | None = Field(default=None, min_length=64, max_length=64)
 
 
 class BiopsyResponse(ApiEnvelope):
+    pipeline_status: Literal["complete", "partial_failure", "failed_required_stage"] = "complete"
+    stage_receipts: list[StageReceipt] = Field(default_factory=list)
+    phikon_embedding: dict[str, Any] | None = None
     subtype_prediction: str | None = Field(
         default=None,
-        description="One of: DCIS, IDC, ILC, mucinous, tubular, other. None if model not wired.",
+        description=(
+            "BACH probe labels: benign_or_normal, in_situ_carcinoma, or "
+            "invasive_carcinoma. Legacy caller-provided pathology subtypes may "
+            "still appear; broad BACH classes must not be interpreted as DCIS/IDC."
+        ),
     )
     receptor_panel: BiopsyReceptorPanel = Field(default_factory=BiopsyReceptorPanel)
     grade: int | None = Field(default=None, ge=1, le=3, description="Nottingham grade 1-3")
@@ -330,6 +588,13 @@ class BiopsyResponse(ApiEnvelope):
             "v0.3.0: describes which parser produced the receptor panel + any "
             "extended fields (ki67_pct, tumor_size_mm, T/N/M, margin, LVI). "
             "Absent for requests that did not include free-text report_text."
+        ),
+    )
+    dss_prognosis: BreastDssPrognosis | None = Field(
+        default=None,
+        description=(
+            "Frozen METABRIC disease-specific mortality prognosis. Populated "
+            "only when all seven explicit dss_features were supplied; never imputed."
         ),
     )
 
@@ -347,6 +612,15 @@ class TherapyPatientContext(BaseModel):
 
 
 class TherapyRequest(BaseModel):
+    legacy_therapy_benefit_model_name: Literal["therapy_benefit_metabric_v1"] | None = Field(
+        default=None,
+        deprecated=True,
+        exclude=True,
+        description=(
+            "Deprecated input alias accepted for one release and remapped to "
+            "therapy_prognosis_metabric_v1. It is never emitted in a response."
+        ),
+    )
     biopsy_output: BiopsyResponse | None = Field(
         default=None,
         description="If provided, we skip re-running biopsy analysis and use this directly.",
@@ -367,11 +641,15 @@ class TherapyRequest(BaseModel):
     # When true and the rules-lite fallback fires, receptor_status / grade /
     # stage / menopausal_status are validated and 400 is returned on drift.
     # Default false to preserve the existing wire contract.
-    strict: bool = Field(
-        default=False,
-        description="If true, rules-lite branch runs strict input validation "
-                    "and returns HTTP 400 on receptor_status / grade / stage / "
-                    "menopausal_status drift. Default false (permissive).",
+    strict: bool = Field(default=False, deprecated=True)
+    disease: str = Field(default="breast cancer", min_length=1, max_length=128)
+    cancer_type: str = Field(default="breast", min_length=1, max_length=64)
+    mutations: list[dict[str, Any]] = Field(default_factory=list, max_length=64)
+    germline_mutations: list[dict[str, Any]] = Field(default_factory=list, max_length=64)
+    ranked_drugs: list[dict[str, Any]] = Field(default_factory=list, max_length=100)
+    therapy_features: dict[str, Any] | None = Field(
+        default=None,
+        description="Explicit patient features for the research triage decomposition.",
     )
 
 
@@ -384,8 +662,29 @@ class TherapyOption(BaseModel):
 
 
 class TherapyResponse(ApiEnvelope):
+    pipeline_status: Literal["complete", "partial_failure", "failed_required_stage"] = "complete"
+    stage_receipts: list[StageReceipt] = Field(default_factory=list)
+    therapy_bridge: dict[str, Any] | None = None
+    therapy_triage: ArbiterScore | None = None
     recommended_options: list[TherapyOption] = Field(default_factory=list)
     not_recommended: list[TherapyOption] = Field(default_factory=list)
+    prognostic_model_name: Literal["therapy_prognosis_metabric_v1"] = (
+        THERAPY_PROGNOSIS_MODEL_NAME
+    )
+    prognostic_model_executed: bool = Field(
+        default=False,
+        description=(
+            "False until a complete METABRIC prognosis feature vector is wired "
+            "to this therapy route; prevents the model name from implying inference."
+        ),
+    )
+    prognostic_score: float | None = Field(
+        default=None,
+        ge=0.0,
+        le=1.0,
+        description="Null unless the canonical prognosis model actually executed.",
+    )
+    prognostic_uncertainty: str = THERAPY_PROGNOSIS_UNCERTAINTY
     arbiter_score: ArbiterScore | None = Field(
         default=None,
         description="L3 therapy arbiter output (escalate to neoadjuvant chemo vs. surgery-first).",
@@ -448,24 +747,10 @@ class ArtifactCategory(str, Enum):
 # --------------------------------------------------------------------------- #
 # NSCLC-specific inputs / outputs
 #
-# `NsclcCTInput.series_dir` points at a LIDC-IDRI CT series directory on the
-# server (e.g. `/workspace/lidc_cohort/lidc_idri/LIDC-IDRI-0001/<StudyUID>/CT_<SeriesUID>`).
-# Real pipeline execution is gated behind the `ONCOLOGY_ARBITER_ALLOW_SERIES_DIR=1`
-# env var so untrusted deployments never trust a client-controlled filesystem
-# path. When gated off, the branch falls back to shape-only placeholder.
-
-
-class NsclcCTInput(BaseModel):
-    """Point at a CT series on disk for the real lung heuristic + NCCN rules.
-
-    Only honored when `ONCOLOGY_ARBITER_ALLOW_SERIES_DIR=1` is set on the server;
-    otherwise ignored to avoid client-controlled path traversal in shared
-    deployments.
-    """
-    model_config = ConfigDict(extra="forbid")
-    series_dir: str = Field(..., description="Absolute path to a CT_<SeriesUID> directory")
-    patient_id: str | None = Field(default=None, description="LIDC patient id if known")
-    top_n: int = Field(default=10, ge=1, le=100, description="Max candidate blobs to summarize")
+# NSCLC CT input by client-supplied server path (`NsclcCTInput.series_dir`,
+# gated behind ONCOLOGY_ARBITER_ALLOW_SERIES_DIR) is RETIRED. Production NSCLC
+# consumes a verified case-storage `case_id` only, so the detector runs on an
+# uploaded, hash-receipted series rather than a path the caller chose.
 
 
 class NsclcCandidate(BaseModel):
@@ -571,11 +856,10 @@ class NsclcResponse(BaseModel):
     # Therapy block
     therapy_recommended: list[NsclcTherapyOption] = Field(default_factory=list)
     therapy_not_recommended: list[NsclcTherapyOption] = Field(default_factory=list)
-    # Provenance
-    series_dir: str | None = None
+    # Provenance. n_slices comes from the verified case manifest, not from a
+    # local read; series_dir/read_seconds/heuristic_seconds belonged to the
+    # retired local-CT + HU-heuristic path and were never set on this route.
     n_slices: int | None = None
-    read_seconds: float | None = None
-    heuristic_seconds: float | None = None
     # v0.4.1: fine-tuned Bio_ClinicalBERT report parser (Modal-backed).
     # Present only when CLINICALBERT_BACKEND=modal AND the request
     # carried biopsy_input.report_text. Shape mirrors the Modal
@@ -611,21 +895,128 @@ class FullCaseRequest(BaseModel):
         description="User-confirmed receptor panel from Case View Confirm gate. "
                     "Overrides biopsy receptor extraction for therapy branch selection.",
     )
-    # NSCLC track: point at a CT series on disk (LIDC-IDRI layout). Real
-    # pipeline is only invoked when ONCOLOGY_ARBITER_ALLOW_SERIES_DIR=1 is
-    # set on the server; otherwise the request falls back to shape-only.
-    nsclc_ct_input: "NsclcCTInput | None" = None
+    case_id: str | None = Field(
+        default=None,
+        pattern=r"^[0-9a-f]{16}$",
+        description="Verified case-storage identifier for production CT ingress.",
+    )
+    therapy_features: "TherapyTriageFeatures | None" = None
+    mutations: list["PatientMutation"] = Field(default_factory=list, max_length=64)
+    germline_mutations: list["PatientMutation"] = Field(default_factory=list, max_length=64)
+    ranked_drugs: list["RankedDrug"] = Field(default_factory=list, max_length=100)
+    run_co_scientist: bool = True
+    resistance_features: dict[str, float] | None = Field(
+        default=None,
+        description=(
+            "HGSOC platinum-resistance panel for ovarian_resistance_multivariate_v2 "
+            "(EMT_*, DDR_*, ratio_mes_epi, grade_ord, figo_ord, residual_ord, "
+            "brca1_mut, hist_serous, hist_undiff). Missing keys imputed."
+        ),
+    )
+    ovarian_two_door: dict[str, Any] | None = Field(
+        default=None,
+        description=(
+            "Optional post-NACT or pre-treatment payload for the two-door v3 scorer. "
+            "Attached on /v1/case/full?cancer=hgsoc without replacing ovarian_arbiter."
+        ),
+    )
 
 
 class FullCaseResponse(ApiEnvelope):
+    pipeline_status: Literal["complete", "partial_failure", "failed_required_stage"] = "complete"
+    cancer: Literal["breast", "nsclc", "hgsoc"] | None = None
+    stage_receipts: list[StageReceipt] = Field(default_factory=list)
+    ovarian_arbiter: dict[str, Any] | None = None
+    ovarian_two_door: dict[str, Any] | None = None
+    case_manifest: dict[str, Any] | None = None
+    report_parse: ReportParseBlock | None = None
+    phikon_embedding: dict[str, Any] | None = None
+    luna16_detection: dict[str, Any] | None = None
+    dss_prognosis: BreastDssPrognosis | None = None
+    therapy_bridge: dict[str, Any] | None = None
+    therapy_triage: ArbiterScore | None = None
+    co_scientist: dict[str, Any] | None = None
     screening: ScreeningResponse | None = None
     biopsy: BiopsyResponse | None = None
     therapy: TherapyResponse | None = None
     nsclc: "NsclcResponse | None" = None
     elo_ranked_hypotheses: list[dict[str, Any]] = Field(
         default_factory=list,
-        description="Co-Scientist Elo tournament output over all stage hypotheses.",
+        description="Offline deterministic Elo output, never labelled as an LLM result.",
     )
+
+
+class PatientMutation(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    gene: str = Field(..., min_length=1, max_length=32)
+    hgvs_p: str | None = Field(default=None, max_length=128)
+    hgvs_c: str | None = Field(default=None, max_length=128)
+    chrom: str | None = Field(default=None, max_length=16)
+    pos: int | None = Field(default=None, ge=1)
+    ref: str | None = Field(default=None, max_length=512)
+    alt: str | None = Field(default=None, max_length=512)
+
+
+class RankedDrug(BaseModel):
+    model_config = ConfigDict(extra="allow", str_strip_whitespace=True)
+    name: str = Field(..., min_length=1, max_length=128)
+    moa: str | None = Field(default=None, max_length=256)
+    therapy_class: str | None = Field(default=None, max_length=128)
+    efficacy_score: float | None = Field(default=None, ge=0.0, le=1.0)
+
+
+class TherapyTriageFeatures(BaseModel):
+    """Explicit complete inputs for the illustrative therapy triage decomposition."""
+
+    histology: Literal[
+        "invasive_ductal",
+        "invasive_lobular",
+        "ductal_carcinoma_in_situ",
+        "lobular_carcinoma_in_situ",
+        "OTHER_OR_UNCLEAR",
+    ] | None = None
+    grade: Literal[1, 2, 3] | None = None
+    er_positive: bool | None = None
+    pr_positive: bool | None = None
+    her2_positive: bool | None = None
+    ki67_pct: float | None = Field(default=None, ge=0.0, le=100.0)
+    tumor_size_mm: float | None = Field(default=None, gt=0.0, le=500.0)
+    lymph_nodes_pos: int | None = Field(default=None, ge=0, le=100)
+    brca_pathogenic: bool | None = None
+    age_years: float | None = Field(default=None, ge=18.0, le=120.0)
+
+
+class DynamicTumorBoardRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    cancer: Literal["breast", "hgsoc"]
+    case_id: str | None = Field(default=None, pattern=r"^[0-9a-f]{16}$")
+    report_text: str | None = Field(default=None, min_length=1, max_length=20_000)
+    pathology_image_b64: str | None = None
+    dss_features: BreastDssFeatures | None = None
+    therapy_features: TherapyTriageFeatures | None = None
+    mutations: list[PatientMutation] = Field(default_factory=list, max_length=64)
+    germline_mutations: list[PatientMutation] = Field(default_factory=list, max_length=64)
+    ranked_drugs: list[RankedDrug] = Field(default_factory=list, max_length=100)
+    clinical_baseline: dict[str, Any] = Field(default_factory=dict)
+    run_co_scientist: bool = True
+    resistance_features: dict[str, float] | None = Field(
+        default=None,
+        description="HGSOC multivariate platinum-resistance feature panel.",
+    )
+
+
+class DynamicTumorBoardResponse(ApiEnvelope):
+    pipeline_status: Literal["complete", "partial_failure", "failed_required_stage"]
+    cancer: Literal["breast", "hgsoc"]
+    stage_receipts: list[StageReceipt] = Field(default_factory=list)
+    ovarian_arbiter: dict[str, Any] | None = None
+    report_parse: ReportParseBlock | None = None
+    phikon_embedding: dict[str, Any] | None = None
+    case_manifest: dict[str, Any] | None = None
+    dss_prognosis: BreastDssPrognosis | None = None
+    therapy_bridge: dict[str, Any] | None = None
+    therapy_triage: ArbiterScore | None = None
+    co_scientist: dict[str, Any] | None = None
 
 
 # --------------------------------------------------------------------------- #
@@ -899,6 +1290,7 @@ class TumorBoardBundle(BaseModel):
         "tumor_board.v3.multimodal-with-manuscript-claims"
     ]
     patient_id: str
+    name: str | None = None
     generated_at: str
     demo_disclaimer: str | None = None
     patient_context: PatientContext
@@ -1213,12 +1605,14 @@ class EloRankResponse(ApiEnvelope):
 
 
 class CoScientistRunRequest(BaseModel):
-    """Input for POST /v1/co_scientist/run.
+    """Input for POST /v1/offline_ranker/run.
 
-    Callers pass whatever stage envelopes they already have (screening,
-    biopsy, therapy), plus the union of URLs their tool-loop actually
-    fetched. Anything the model returns citing an unseen URL will be
-    dropped by REFLECT.
+    The wired endpoint is an OFFLINE DETERMINISTIC RANKER: a fixed Elo-style
+    ordering over caller-supplied stage envelopes. It performs no LLM call and
+    its output must never be labelled as model-generated reasoning. Callers
+    pass whatever stage envelopes they already have (screening, biopsy,
+    therapy) plus the union of URLs their own tool loop fetched; any citation
+    to an unseen URL is dropped.
     """
 
     screening: dict[str, Any] | None = Field(
@@ -1321,3 +1715,228 @@ class CoScientistRunResponse(ApiEnvelope):
             "in `hypotheses[]` but a caller SHOULD treat them as untrusted."
         ),
     )
+    engine: str | None = Field(
+        default=None,
+        description=(
+            "medgemma_clinical_reasoning_swarm for live /v1/co_scientist/run; "
+            "offline_scalar_ranker for /v1/offline_ranker/run."
+        ),
+    )
+    tournament_transcript: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description="Per-match MedGemma judge receipts (live mode) or empty offline.",
+    )
+    patient_context: dict[str, Any] | None = Field(
+        default=None,
+        description="Patient context supplied to the live MedGemma judge.",
+    )
+
+
+# --------------------------------------------------------------------------- #
+# POST /v1/co-scientist/run — identity-locked MedGemma GENERATE→REFLECT→Elo
+
+
+class RealCoScientistRequest(BaseModel):
+    """Clinical context for the identity-locked MedGemma Co-Scientist loop."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    stage: Literal["screening", "biopsy", "therapy", "case_full"]
+    context: dict[str, Any] = Field(
+        ...,
+        min_length=1,
+        description="De-identified clinical context supplied to GENERATE.",
+    )
+    seed_urls: list[HttpUrl] = Field(
+        default_factory=list,
+        max_length=10,
+        description="Optional URLs already fetched by the authenticated caller.",
+    )
+    n_hypotheses: int = Field(default=3, ge=2, le=8)
+    n_evidence_top_k: int = Field(
+        default=3,
+        ge=1,
+        le=6,
+        description="Max literature hits retrieved per generated hypothesis.",
+    )
+
+
+class CoScientistHypothesis(BaseModel):
+    """One reflected hypothesis after pairwise Elo ranking."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    hypothesis_id: str
+    claim: str
+    rationale: str
+    source_scope: str
+    initial_confidence: float
+    reflection: str
+    evidence_alignment: str
+    evidence_urls: list[str] = Field(default_factory=list)
+    elo: float
+    tournament_wins: int
+    tournament_losses: int
+    tournament_ties: int = 0
+
+
+class ReflectionReceipt(BaseModel):
+    """Auditable receipt for one evidence-grounded MedGemma reflection."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    hypothesis_id: str
+    model_request_id: str | None = None
+    model_response_sha256: str | None = None
+    model_response_chars: int
+    evidence_alignment: str
+    completed: bool
+
+
+class EloTournamentMatch(BaseModel):
+    """Auditable receipt for one MedGemma pairwise judgment."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    hypothesis_a_id: str
+    hypothesis_b_id: str
+    hypothesis_a_claim: str
+    hypothesis_b_claim: str
+    winner: Literal["A", "B", "TIE", "tie"]
+    margin: str = Field(min_length=1)
+    reason: str = Field(min_length=1)
+    model_request_id: str | None = None
+    model_response_sha256: str | None = None
+    model_response_chars: int
+    completed: bool
+    elo_a_before: float
+    elo_b_before: float
+    elo_a_after: float
+    elo_b_after: float
+
+
+class RealCoScientistResponse(ApiEnvelope):
+    """Evidence-grounded MedGemma Co-Scientist result with Elo receipts."""
+
+    stage: Literal["screening", "biopsy", "therapy", "case_full"]
+    supervisor_version: str
+    hypotheses: list[CoScientistHypothesis] = Field(default_factory=list)
+    meta_review: str
+    seen_urls: list[str] = Field(default_factory=list)
+    reflection_calls_expected: int
+    reflection_calls_completed: int
+    reflection_receipts: list[ReflectionReceipt] = Field(default_factory=list)
+    tournament_pairs_expected: int
+    tournament_pairs_completed: int
+    tournament_matches: list[EloTournamentMatch] = Field(default_factory=list)
+    llm_calls: int
+    tokens_in: int
+    tokens_out: int
+    cost_usd: float
+    provider: str
+    provider_chain: list[str] = Field(default_factory=list)
+    model_id: str
+    app_name: str
+    model_revision: str
+    model_request_ids: list[str] = Field(default_factory=list)
+    meta_review_request_id: str
+    meta_review_response_sha256: str
+    latency_s: float
+
+
+# --------------------------------------------------------------------------- #
+# /v1/stage/biopsy/score — explicit L2 biopsy arbiter (stage-biopsy capability)
+
+
+class StageBiopsyScoreRequest(BaseModel):
+    """Caller-supplied feature panel for biopsy_arbiter_v1 (RUO)."""
+
+    model_config = ConfigDict(extra="forbid")
+    features: dict[str, Any] = Field(
+        ...,
+        description=(
+            "Observed feature panel for the stage route. An empty object and "
+            "any omitted declared input are HTTP 422. Missing values are not "
+            "filled with false, zero, or the reference class. "
+            "Calcification-only biopsy morphology is HTTP 422 "
+            "(unvalidated lesion stratum)."
+        ),
+    )
+    patient_id_hash: str | None = Field(default=None, min_length=64, max_length=64)
+
+
+class StageBiopsyScoreResponse(ApiEnvelope):
+    arbiter_score: ArbiterScore
+
+
+# --------------------------------------------------------------------------- #
+# Research-only blind inference (authenticated, privileged scope)
+#
+# These models back `/v1/research/arbiter/identified_set`, the ONLY route in
+# the API that may return a point estimate whose Manski interval is wider than
+# `MANSKI_MAX_WIDTH`. It is not a bypass of the public gate: it is a different
+# contract. The caller must hold the `research:blind_inference` scope, the
+# response carries the raw bounds and the full unobserved-feature list rather
+# than hiding them, and every release writes an audit receipt naming the
+# tenant. `not_for_clinical_use` is a literal True and cannot be negotiated.
+
+
+class ResearchIdentifiedSetRequest(BaseModel):
+    """Ask for the identified set of a stage probability under an incomplete panel."""
+    model_config = ConfigDict(extra="forbid")
+    arbiter: Literal["screening", "biopsy", "therapy"] = Field(
+        ...,
+        description="Which frozen L2 arbiter to interrogate.",
+    )
+    features: dict[str, Any] = Field(
+        default_factory=dict,
+        description=(
+            "Partial feature panel. Any declared feature omitted here is "
+            "ranged over its entire admissible support to build the bounds."
+        ),
+    )
+    acknowledge_not_for_clinical_use: Literal[True] = Field(
+        ...,
+        description=(
+            "Must be literal true. A research release is only meaningful if "
+            "the caller has stated in the request that it is not clinical."
+        ),
+    )
+
+
+class ResearchIdentifiedSetResponse(BaseModel):
+    """Raw bounds plus the point estimate the public gate would have refused."""
+    model_config = ConfigDict(extra="forbid")
+    request_id: str
+    arbiter: str
+    model_name: str
+    point_estimate: float = Field(
+        ...,
+        ge=0.0, le=1.0,
+        description=(
+            "One coordinate inside `bounds`. When `identified` is False this "
+            "number is NOT an estimate of anything; it is the value the "
+            "encoder happens to produce when unobserved covariates are pinned "
+            "at their reference level."
+        ),
+    )
+    bounds: ManskiBoundsBlock
+    would_have_been_rejected: bool = Field(
+        ...,
+        description="True when a public route would have answered HTTP 422 for this exact panel.",
+    )
+    public_route_error_code: str | None = Field(
+        None,
+        description="`ManskiBoundsExceeded`, `IDENTIFIED_SET_UNBOUNDED`, or null when the panel is identified.",
+    )
+    missing_features: list[str] = Field(default_factory=list)
+    unobserved_unbounded: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(
+        default_factory=list,
+        description="Mandatory provenance warnings. Never empty when `identified` is False.",
+    )
+    audit_receipt: dict[str, Any] = Field(
+        ...,
+        description="Receipt written to the tenant audit ledger for this release.",
+    )
+    not_for_clinical_use: Literal[True] = True

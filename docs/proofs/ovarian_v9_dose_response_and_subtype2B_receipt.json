@@ -1,0 +1,1266 @@
+{
+  "receipt": "ovarian_v9_dose_response_and_subtype2B",
+  "ruo": true,
+  "clinical_use": false,
+  "contract_status": "evidence_bound_exploratory_prioritization",
+  "generated_utc": "2026-11-01T15:34:32.034525+00:00",
+  "git_head_parent_expected": "08dd9b1937f076855c2202224805c79218cf278b",
+  "archive": {
+    "filename": "MASTER_OVARIAN_HIBERNATION_V1_TO_V9_FINAL.tar.gz",
+    "sha256": "bba6304005e8291b61eb2e5f840cba5e48daa8462fac00340e8d52b98dac9c0b",
+    "verified_file_count": 398
+  },
+  "standalone_module": {
+    "path": "src/oncology_arbiter/ovarian/ovarian_two_door_standalone_v9.py",
+    "sha256": "dd5f2ef197efef7afce320aad0f3c436936c306f67c582534e3c4cd155a00c92",
+    "lines": 71,
+    "clinical_use": false,
+    "caveats": [
+      "Post-hoc families; no independent validation.",
+      "Percentile OR coverage is not rescue, synergy or efficacy.",
+      "ONC201 and TIC10 cache identities are not collapsed.",
+      "Primary-only TIC10 and 10-DEBC have no dose-response consensus.",
+      "Expression subtype data: 8 of 8 2A and 2 of 3 2B.",
+      "CRISPR subtype data: 6 of 8 2A and 2 of 3 2B."
+    ]
+  },
+  "source_members": {
+    "standalone_v9_py": {
+      "member": "ovarian_hibernation_v9_subtype2A_2B_and_dose_response_lock/ovarian_two_door_standalone_v9.py",
+      "sha256": "dd5f2ef197efef7afce320aad0f3c436936c306f67c582534e3c4cd155a00c92",
+      "bytes": 12131
+    },
+    "fdr_ledger_csv": {
+      "member": "ovarian_hibernation_v9_subtype2A_2B_and_dose_response_lock/FDR_passing_drug_ledger_v8_v9.csv",
+      "sha256": "42f922f8eea97833c5df8723b659330360cf711fcef32623a4d174ac5930ce0e",
+      "bytes": 2988
+    },
+    "dose_response_consensus_csv": {
+      "member": "ovarian_hibernation_v9_subtype2A_2B_and_dose_response_lock/dose_response_consensus_results.csv",
+      "sha256": "e88391140e48709b7683e127f397a48299814161a41dc4e7e21c26fd7197b968",
+      "bytes": 15366
+    },
+    "subtype_molecular_csv": {
+      "member": "ovarian_hibernation_v9_subtype2A_2B_and_dose_response_lock/subtype_molecular_comparisons.csv",
+      "sha256": "f9e5d50a9771f439aeb567ed6b7145e8162c8d3e29feee61c594e32d643e7f41",
+      "bytes": 3131
+    },
+    "crispr_clpp_csv": {
+      "member": "ovarian_hibernation_v9_subtype2A_2B_and_dose_response_lock/CRISPR_CLPP_pathway_results.csv",
+      "sha256": "50648186193f319540c47e4bddb682f89a7c28d3685fb56f671cf766d3d6e375",
+      "bytes": 1268
+    },
+    "door2_or_coverage_csv": {
+      "member": "ovarian_hibernation_v9_subtype2A_2B_and_dose_response_lock/Door2_observed_OR_coverage.csv",
+      "sha256": "051dc697c68a257865cfc4934361513645d0083819d3e8cc2ec2a9844a661fd3",
+      "bytes": 2035
+    },
+    "door2_11_donors_csv": {
+      "member": "ovarian_hibernation_v9_subtype2A_2B_and_dose_response_lock/Door2_11_donor_activity_and_subtypes.csv",
+      "sha256": "c98a5e9f7491c9ac53387ff9a2bd91871b7c8ab5c6ec34984a26e4604f5d6bf3",
+      "bytes": 15511
+    },
+    "analysis_contract_v9_json": {
+      "member": "ovarian_hibernation_v9_subtype2A_2B_and_dose_response_lock/analysis_contract_v9.json",
+      "sha256": "0a11c4225c01bbac778672881ea97853271edcb057bd5a2409489167c1b12bdf",
+      "bytes": 2002
+    }
+  },
+  "dose_response_consensus_z_13drug_family_winners": {
+    "family": "original13|DoseResponse_Consensus_Z|S_sen",
+    "family_size": 13,
+    "consensus_screens": [
+      "GDSC2_IC50",
+      "CTRPv2",
+      "PRISM_secondary"
+    ],
+    "primary_1point_lfc_excluded": true,
+    "simultaneous_bh_q": 0.04724152758472415,
+    "simultaneous_bh_q_6dec": 0.047242,
+    "winners": [
+      {
+        "drug": "doxercalciferol",
+        "panel": "original13",
+        "family": "original13|DoseResponse_Consensus_Z|S_sen",
+        "n": 22,
+        "rho": 0.4635798983625071,
+        "ci_95": [
+          0.052749175667993184,
+          0.7611023251216633
+        ],
+        "p_positive": 0.015339846601533985,
+        "p_two_sided": 0.03067969320306797,
+        "q_positive_bh": 0.04724152758472415
+      },
+      {
+        "drug": "azithromycin",
+        "panel": "original13",
+        "family": "original13|DoseResponse_Consensus_Z|S_sen",
+        "n": 26,
+        "rho": 0.4468376068376068,
+        "ci_95": [
+          0.0971705058714018,
+          0.7007010888203017
+        ],
+        "p_positive": 0.011499885001149988,
+        "p_two_sided": 0.022999770002299975,
+        "q_positive_bh": 0.04724152758472415
+      },
+      {
+        "drug": "dasatinib",
+        "panel": "original13",
+        "family": "original13|DoseResponse_Consensus_Z|S_sen",
+        "n": 45,
+        "rho": 0.3694334650856389,
+        "ci_95": [
+          0.08091379150830548,
+          0.5969158200290275
+        ],
+        "p_positive": 0.018169818301816982,
+        "p_two_sided": 0.036339636603633964,
+        "q_positive_bh": 0.04724152758472415
+      },
+      {
+        "drug": "navitoclax",
+        "panel": "original13",
+        "family": "original13|DoseResponse_Consensus_Z|S_sen",
+        "n": 45,
+        "rho": 0.3396574440052701,
+        "ci_95": [
+          0.03739423827672236,
+          0.5945661345769945
+        ],
+        "p_positive": 0.011389886101138988,
+        "p_two_sided": 0.022779772202277976,
+        "q_positive_bh": 0.04724152758472415
+      },
+      {
+        "drug": "abt-737",
+        "panel": "original13",
+        "family": "original13|DoseResponse_Consensus_Z|S_sen",
+        "n": 45,
+        "rho": 0.3266139657444005,
+        "ci_95": [
+          0.026169643525219704,
+          0.568957029387241
+        ],
+        "p_positive": 0.00996990030099699,
+        "p_two_sided": 0.01993980060199398,
+        "q_positive_bh": 0.04724152758472415
+      }
+    ]
+  },
+  "additional_v9_and_v8_signals": {
+    "vismodegib_prism_secondary": {
+      "version": "v9",
+      "drug": "vismodegib",
+      "endpoint": "PRISM_secondary",
+      "score": "S_sen",
+      "family": "original13|PRISM_secondary|S_sen",
+      "n": 26,
+      "rho": 0.4326819561914677,
+      "p": 0.013631058691338759,
+      "q_bh": 0.03573385108929178
+    },
+    "omipalisib_dose_response_consensus": {
+      "drug": "omipalisib",
+      "panel": "mechanistic11",
+      "family": "mechanistic11|DoseResponse_Consensus_Z|S_sen",
+      "n": 23,
+      "rho": 0.37055335968379455,
+      "ci_95": [
+        0.004417695147509193,
+        0.6404650266857098
+      ],
+      "p_positive": 0.042239577604223956,
+      "p_two_sided": 0.08447915520844791,
+      "q_positive_bh": 0.21119788802111977
+    },
+    "wye_125132_dose_response_consensus": {
+      "drug": "wye-125132",
+      "panel": "mechanistic11",
+      "family": "mechanistic11|DoseResponse_Consensus_Z|S_sen",
+      "n": 27,
+      "rho": 0.3528693528693529,
+      "ci_95": [
+        -0.07775436445193269,
+        0.6933626356190878
+      ],
+      "p_positive": 0.03594964050359496,
+      "p_two_sided": 0.07189928100718992,
+      "q_positive_bh": 0.21119788802111977
+    },
+    "v8_composites": [
+      {
+        "composite": "dasatinib+navitoclax",
+        "predictor": "H_clean",
+        "n": 45,
+        "rho": 0.268906,
+        "p_positive": 0.01424,
+        "p_two_sided": 0.02848,
+        "ci_low": -0.039512,
+        "ci_high": 0.500247,
+        "permutations": 100000,
+        "bootstrap": 2000,
+        "q_positive": 0.018986
+      },
+      {
+        "composite": "dasatinib+navitoclax",
+        "predictor": "S_sen",
+        "n": 45,
+        "rho": 0.527931,
+        "p_positive": 0.00015,
+        "p_two_sided": 0.0003,
+        "ci_low": 0.224457,
+        "ci_high": 0.719325,
+        "permutations": 100000,
+        "bootstrap": 2000,
+        "q_positive": 0.0006
+      },
+      {
+        "composite": "dasatinib+abt-737",
+        "predictor": "H_clean",
+        "n": 45,
+        "rho": 0.327273,
+        "p_positive": 0.03122,
+        "p_two_sided": 0.062439,
+        "ci_low": 0.033294,
+        "ci_high": 0.564548,
+        "permutations": 100000,
+        "bootstrap": 2000,
+        "q_positive": 0.03122
+      },
+      {
+        "composite": "dasatinib+abt-737",
+        "predictor": "S_sen",
+        "n": 45,
+        "rho": 0.479578,
+        "p_positive": 0.00297,
+        "p_two_sided": 0.00594,
+        "ci_low": 0.192123,
+        "ci_high": 0.68353,
+        "permutations": 100000,
+        "bootstrap": 2000,
+        "q_positive": 0.00594
+      }
+    ],
+    "v8_seven_gene_crispr_vulnerability": [
+      {
+        "index": "seven_gene_vulnerability",
+        "predictor": "H_clean",
+        "raw_negative_dependency": true,
+        "n": 51,
+        "rho": -0.498552,
+        "p_positive": 0.0001,
+        "p_two_sided": 0.0002,
+        "ci_low": -0.707548,
+        "ci_high": -0.22935,
+        "permutations": 100000,
+        "bootstrap": 2000,
+        "q_two_sided": 0.0006
+      },
+      {
+        "index": "seven_gene_vulnerability",
+        "predictor": "S_sen",
+        "raw_negative_dependency": true,
+        "n": 51,
+        "rho": -0.664525,
+        "p_positive": 1e-05,
+        "p_two_sided": 2e-05,
+        "ci_low": -0.79275,
+        "ci_high": -0.463334,
+        "permutations": 100000,
+        "bootstrap": 2000,
+        "q_two_sided": 0.00012
+      }
+    ],
+    "crispr_standardizers_7gene": {
+      "SRC": [
+        -0.04431320654006006,
+        0.13523309695684188
+      ],
+      "YES1": [
+        0.017572078872620245,
+        0.1519428992424816
+      ],
+      "BCL2L1": [
+        -1.2655787932680864,
+        0.6186291608658663
+      ],
+      "RICTOR": [
+        -0.41514941774116426,
+        0.2643878955551146
+      ],
+      "STAT3": [
+        -0.06873868319136048,
+        0.12132418186629806
+      ],
+      "CPEB4": [
+        0.010088965647040657,
+        0.14474796007935972
+      ],
+      "WASHC4": [
+        -0.14727245286307036,
+        0.14703915164241624
+      ]
+    },
+    "clpp_mitochondrial_protease_s_sen": {
+      "gene": "CLPP",
+      "predictor": "S_sen",
+      "n": 51,
+      "rho": -0.3361990950226244,
+      "ci_95": [
+        -0.6015479805003172,
+        -0.04342950541459935
+      ],
+      "p_two_sided": 0.016799832001679983,
+      "q_two_sided": 0.13439865601343987,
+      "permutations": 100000,
+      "bootstrap": 2000
+    }
+  },
+  "subtype_2A_vs_2B_molecular_split": {
+    "subtype_2B_donors": [
+      "COV362",
+      "SNU-840",
+      "EFO-21"
+    ],
+    "observed_or_coverage_bcl_or_dasatinib_or_vdr_t05": {
+      "v9_dose_response": {
+        "active": 10,
+        "inactive": 0,
+        "unknown": 1
+      },
+      "v8_four_screen": {
+        "active": 11,
+        "inactive": 0,
+        "unknown": 0
+      }
+    },
+    "key_molecular_contrasts": {
+      "buffer_S_sen_minus_H_clean": {
+        "feature": "buffer",
+        "n_2A": 8,
+        "n_2B": 3,
+        "mean_2A": 0.12037326975807144,
+        "mean_2B": -0.5602595738135968,
+        "median_2A": -0.28891660750131043,
+        "median_2B": -0.7314559322343939,
+        "difference_2B_minus_2A": -0.6806328435716682,
+        "exact_p_two_sided": 0.5636363636363636,
+        "exact_assignments": 165,
+        "q_two_sided": 0.8351648351648351
+      },
+      "VDR_expression": {
+        "feature": "expression|VDR",
+        "n_2A": 8,
+        "n_2B": 2,
+        "mean_2A": 1.4267765310938791,
+        "mean_2B": 3.369371107316472,
+        "median_2A": 1.006392962772285,
+        "median_2B": 3.369371107316472,
+        "difference_2B_minus_2A": 1.9425945762225927,
+        "exact_p_two_sided": 0.044444444444444446,
+        "exact_assignments": 45,
+        "q_two_sided": 0.4222222222222222
+      },
+      "EPHA2_expression": {
+        "feature": "expression|EPHA2",
+        "n_2A": 8,
+        "n_2B": 2,
+        "mean_2A": 6.226977334125634,
+        "mean_2B": 7.566443079742616,
+        "median_2A": 6.37183682064393,
+        "median_2B": 7.566443079742616,
+        "difference_2B_minus_2A": 1.339465745616982,
+        "exact_p_two_sided": 0.044444444444444446,
+        "exact_assignments": 45,
+        "q_two_sided": 0.4222222222222222
+      },
+      "PMAIP1_expression": {
+        "feature": "expression|PMAIP1",
+        "n_2A": 8,
+        "n_2B": 2,
+        "mean_2A": 4.447424717274658,
+        "mean_2B": 6.173151392684437,
+        "median_2A": 4.362286902991369,
+        "median_2B": 6.173151392684437,
+        "difference_2B_minus_2A": 1.7257266754097786,
+        "exact_p_two_sided": 0.1111111111111111,
+        "exact_assignments": 45,
+        "q_two_sided": 0.5428571428571428
+      },
+      "MCL1_expression": {
+        "feature": "expression|MCL1",
+        "n_2A": 8,
+        "n_2B": 2,
+        "mean_2A": 6.968264501594777,
+        "mean_2B": 7.827090828417667,
+        "median_2A": 6.958189107083135,
+        "median_2B": 7.827090828417667,
+        "difference_2B_minus_2A": 0.8588263268228902,
+        "exact_p_two_sided": 0.3333333333333333,
+        "exact_assignments": 45,
+        "q_two_sided": 0.8351648351648351
+      },
+      "BCL2L1_expression": {
+        "feature": "expression|BCL2L1",
+        "n_2A": 8,
+        "n_2B": 2,
+        "mean_2A": 6.940778431507965,
+        "mean_2B": 7.005198007634686,
+        "median_2A": 6.96859127315976,
+        "median_2B": 7.005198007634686,
+        "difference_2B_minus_2A": 0.06441957612672056,
+        "exact_p_two_sided": 0.8888888888888888,
+        "exact_assignments": 45,
+        "q_two_sided": 0.9333333333333333
+      }
+    },
+    "routing_rule_exploratory": {
+      "condition": "Door 2 active (Hcleanonly or Both, no Gate 0) AND (S_sen - H_clean < 0 OR VDR elevated OR EPHA2 elevated)",
+      "subtype_2A_default": "Navitoclax / ABT-737 (BCL-xL) primary + Dasatinib + Doxercalciferol + Azithromycin + Vismodegib",
+      "subtype_2B_highlight": "Subtype 2B (Dasatinib + Doxercalciferol/Paricalcitol) highlighted alongside BCL-xL (Navitoclax/ABT-737)"
+    },
+    "door2_11_donors": [
+      {
+        "cell": "KURAMOCHI",
+        "donor": "PT-6ZFCGi",
+        "model": "ACH-000524",
+        "subtype": "2A",
+        "dr_subtype": "2B",
+        "H": 1.707732,
+        "S": 1.432597,
+        "buffer": -0.275135,
+        "v8": {
+          "abt-737": 0.622222,
+          "navitoclax": 0.266667,
+          "dasatinib": 0.6,
+          "paricalcitol": 0.771429,
+          "doxercalciferol": 0.971429,
+          "omipalisib": 0.742857,
+          "wye-125132": 0.8,
+          "way-600": 0.314286,
+          "torin-1": 0.742857,
+          "everolimus": 0.514286,
+          "temsirolimus": 0.266667,
+          "onc201": 0.205882,
+          "10-debc": 0.628571,
+          "mk-2206": 0.8,
+          "afuresertib": 0.666667,
+          "ipatasertib": 0.595238,
+          "tic10": 0.971429
+        },
+        "dr": {
+          "abt-737": 0.422222,
+          "navitoclax": 0.422222,
+          "dasatinib": 0.533333,
+          "paricalcitol": null,
+          "doxercalciferol": 0.272727,
+          "omipalisib": 0.565217,
+          "wye-125132": 0.740741,
+          "way-600": 0.428571,
+          "torin-1": 0.653846,
+          "everolimus": null,
+          "temsirolimus": 0.136364,
+          "onc201": null,
+          "10-debc": null,
+          "mk-2206": 0.711111,
+          "afuresertib": 0.487805,
+          "ipatasertib": 0.575,
+          "tic10": null
+        },
+        "primary_pct": {
+          "onc201": 0.294118,
+          "tic10": 0.971429,
+          "10-debc": 0.628571
+        }
+      },
+      {
+        "cell": "OVKATE",
+        "donor": "PT-9fFef6",
+        "model": "ACH-000443",
+        "subtype": "2A",
+        "dr_subtype": "2B",
+        "H": 1.336345,
+        "S": 1.001592,
+        "buffer": -0.334753,
+        "v8": {
+          "abt-737": 0.777778,
+          "navitoclax": 0.2,
+          "dasatinib": 0.2,
+          "paricalcitol": 0.485714,
+          "doxercalciferol": 0.371429,
+          "omipalisib": 0.057143,
+          "wye-125132": 0.114286,
+          "way-600": 0.342857,
+          "torin-1": 0.085714,
+          "everolimus": 0.857143,
+          "temsirolimus": 0.088889,
+          "onc201": 0.5,
+          "10-debc": 0.2,
+          "mk-2206": 0.088889,
+          "afuresertib": 0.047619,
+          "ipatasertib": 0.071429,
+          "tic10": 0.542857
+        },
+        "dr": {
+          "abt-737": 0.377778,
+          "navitoclax": 0.266667,
+          "dasatinib": 0.244444,
+          "paricalcitol": null,
+          "doxercalciferol": null,
+          "omipalisib": null,
+          "wye-125132": null,
+          "way-600": null,
+          "torin-1": null,
+          "everolimus": null,
+          "temsirolimus": 0.022727,
+          "onc201": null,
+          "10-debc": null,
+          "mk-2206": 0.111111,
+          "afuresertib": 0.04878,
+          "ipatasertib": 0.075,
+          "tic10": null
+        },
+        "primary_pct": {
+          "onc201": 0.558824,
+          "tic10": 0.542857,
+          "10-debc": 0.2
+        }
+      },
+      {
+        "cell": "OAW42",
+        "donor": "PT-9pirK7",
+        "model": "ACH-000704",
+        "subtype": "2A",
+        "dr_subtype": "2A",
+        "H": 0.815292,
+        "S": 1.954013,
+        "buffer": 1.138721,
+        "v8": {
+          "abt-737": 0.755556,
+          "navitoclax": 0.688889,
+          "dasatinib": 0.466667,
+          "paricalcitol": 0.2,
+          "doxercalciferol": 0.285714,
+          "omipalisib": 0.657143,
+          "wye-125132": 0.685714,
+          "way-600": 0.428571,
+          "torin-1": 0.428571,
+          "everolimus": 0.628571,
+          "temsirolimus": 0.044444,
+          "onc201": 0.588235,
+          "10-debc": 0.285714,
+          "mk-2206": 0.733333,
+          "afuresertib": 0.690476,
+          "ipatasertib": 0.309524,
+          "tic10": 0.485714
+        },
+        "dr": {
+          "abt-737": 0.688889,
+          "navitoclax": 0.777778,
+          "dasatinib": 0.444444,
+          "paricalcitol": 0.318182,
+          "doxercalciferol": null,
+          "omipalisib": 0.869565,
+          "wye-125132": 0.925926,
+          "way-600": 0.321429,
+          "torin-1": 0.807692,
+          "everolimus": 0.85,
+          "temsirolimus": 0.522727,
+          "onc201": 0.692308,
+          "10-debc": null,
+          "mk-2206": 0.866667,
+          "afuresertib": 0.780488,
+          "ipatasertib": 0.275,
+          "tic10": null
+        },
+        "primary_pct": {
+          "onc201": 0.470588,
+          "tic10": 0.485714,
+          "10-debc": 0.285714
+        }
+      },
+      {
+        "cell": "COV362",
+        "donor": "PT-BexFYH",
+        "model": "ACH-000278",
+        "subtype": "2B",
+        "dr_subtype": "2B",
+        "H": 1.115709,
+        "S": 0.384253,
+        "buffer": -0.731456,
+        "v8": {
+          "abt-737": 0.4,
+          "navitoclax": 0.155556,
+          "dasatinib": 0.733333,
+          "paricalcitol": 0.571429,
+          "doxercalciferol": 0.685714,
+          "omipalisib": 0.457143,
+          "wye-125132": 0.742857,
+          "way-600": 0.028571,
+          "torin-1": 0.542857,
+          "everolimus": 0.2,
+          "temsirolimus": 0.133333,
+          "onc201": 0.382353,
+          "10-debc": 0.457143,
+          "mk-2206": 0.222222,
+          "afuresertib": 0.285714,
+          "ipatasertib": 0.166667,
+          "tic10": 0.342857
+        },
+        "dr": {
+          "abt-737": 0.444444,
+          "navitoclax": 0.311111,
+          "dasatinib": 0.711111,
+          "paricalcitol": 0.727273,
+          "doxercalciferol": 0.909091,
+          "omipalisib": 0.173913,
+          "wye-125132": 0.37037,
+          "way-600": 0.035714,
+          "torin-1": 0.192308,
+          "everolimus": 0.4,
+          "temsirolimus": 0.113636,
+          "onc201": 0.461538,
+          "10-debc": null,
+          "mk-2206": 0.266667,
+          "afuresertib": 0.414634,
+          "ipatasertib": 0.2,
+          "tic10": null
+        },
+        "primary_pct": {
+          "onc201": 0.352941,
+          "tic10": 0.342857,
+          "10-debc": 0.457143
+        }
+      },
+      {
+        "cell": "JHOS-2",
+        "donor": "PT-F6NvL5",
+        "model": "ACH-000132",
+        "subtype": "2A",
+        "dr_subtype": "2A",
+        "H": 1.437536,
+        "S": 1.134838,
+        "buffer": -0.302698,
+        "v8": {
+          "abt-737": 0.288889,
+          "navitoclax": 0.666667,
+          "dasatinib": 0.222222,
+          "paricalcitol": 0.057143,
+          "doxercalciferol": 0.057143,
+          "omipalisib": 0.371429,
+          "wye-125132": 0.228571,
+          "way-600": 0.085714,
+          "torin-1": 0.514286,
+          "everolimus": 0.285714,
+          "temsirolimus": 0.177778,
+          "onc201": 0.529412,
+          "10-debc": 0.685714,
+          "mk-2206": 0.133333,
+          "afuresertib": 0.261905,
+          "ipatasertib": 0.142857,
+          "tic10": 0.171429
+        },
+        "dr": {
+          "abt-737": 0.4,
+          "navitoclax": 0.666667,
+          "dasatinib": 0.266667,
+          "paricalcitol": 0.227273,
+          "doxercalciferol": 0.181818,
+          "omipalisib": 0.086957,
+          "wye-125132": 0.148148,
+          "way-600": 0.071429,
+          "torin-1": 0.230769,
+          "everolimus": 0.2,
+          "temsirolimus": 0.181818,
+          "onc201": 0.576923,
+          "10-debc": null,
+          "mk-2206": 0.2,
+          "afuresertib": 0.317073,
+          "ipatasertib": 0.225,
+          "tic10": null
+        },
+        "primary_pct": {
+          "onc201": 0.588235,
+          "tic10": 0.171429,
+          "10-debc": 0.685714
+        }
+      },
+      {
+        "cell": "SNU-840",
+        "donor": "PT-S0isOw",
+        "model": "ACH-000280",
+        "subtype": "2B",
+        "dr_subtype": "2A",
+        "H": 1.063988,
+        "S": -0.973136,
+        "buffer": -2.037124,
+        "v8": {
+          "abt-737": 0.466667,
+          "navitoclax": 0.133333,
+          "dasatinib": 0.822222,
+          "paricalcitol": 1.0,
+          "doxercalciferol": 0.4,
+          "omipalisib": 0.6,
+          "wye-125132": 0.628571,
+          "way-600": 0.771429,
+          "torin-1": 0.914286,
+          "everolimus": 0.371429,
+          "temsirolimus": 0.688889,
+          "onc201": 0.235294,
+          "10-debc": 0.514286,
+          "mk-2206": 0.822222,
+          "afuresertib": 0.5,
+          "ipatasertib": 0.571429,
+          "tic10": 0.085714
+        },
+        "dr": {
+          "abt-737": 0.644444,
+          "navitoclax": 0.177778,
+          "dasatinib": 0.666667,
+          "paricalcitol": 0.636364,
+          "doxercalciferol": 0.227273,
+          "omipalisib": 0.826087,
+          "wye-125132": 0.407407,
+          "way-600": 0.535714,
+          "torin-1": 0.615385,
+          "everolimus": null,
+          "temsirolimus": 0.727273,
+          "onc201": 0.384615,
+          "10-debc": null,
+          "mk-2206": 0.777778,
+          "afuresertib": 0.585366,
+          "ipatasertib": 0.625,
+          "tic10": null
+        },
+        "primary_pct": {
+          "onc201": 0.205882,
+          "tic10": 0.085714,
+          "10-debc": 0.514286
+        }
+      },
+      {
+        "cell": "RMG-I",
+        "donor": "PT-bnZfQQ",
+        "model": "ACH-000719",
+        "subtype": "2A",
+        "dr_subtype": "2A",
+        "H": 2.168039,
+        "S": 5.575772,
+        "buffer": 3.407733,
+        "v8": {
+          "abt-737": 0.866667,
+          "navitoclax": 0.888889,
+          "dasatinib": 0.711111,
+          "paricalcitol": 0.942857,
+          "doxercalciferol": 0.857143,
+          "omipalisib": 0.514286,
+          "wye-125132": 0.4,
+          "way-600": 0.628571,
+          "torin-1": 0.457143,
+          "everolimus": 0.714286,
+          "temsirolimus": 0.644444,
+          "onc201": 0.294118,
+          "10-debc": 0.314286,
+          "mk-2206": 0.622222,
+          "afuresertib": 0.52381,
+          "ipatasertib": 0.714286,
+          "tic10": 0.571429
+        },
+        "dr": {
+          "abt-737": 0.844444,
+          "navitoclax": 0.888889,
+          "dasatinib": 0.688889,
+          "paricalcitol": 1.0,
+          "doxercalciferol": 0.954545,
+          "omipalisib": 0.782609,
+          "wye-125132": 0.851852,
+          "way-600": 0.464286,
+          "torin-1": 0.923077,
+          "everolimus": 0.75,
+          "temsirolimus": 0.704545,
+          "onc201": 0.423077,
+          "10-debc": null,
+          "mk-2206": 0.555556,
+          "afuresertib": 0.268293,
+          "ipatasertib": 0.55,
+          "tic10": null
+        },
+        "primary_pct": {
+          "onc201": 0.323529,
+          "tic10": 0.571429,
+          "10-debc": 0.314286
+        }
+      },
+      {
+        "cell": "EFO-21",
+        "donor": "PT-cdCVJ4",
+        "model": "ACH-000308",
+        "subtype": "2B",
+        "dr_subtype": "2B",
+        "H": 2.996812,
+        "S": 4.084614,
+        "buffer": 1.087802,
+        "v8": {
+          "abt-737": 0.244444,
+          "navitoclax": 0.022222,
+          "dasatinib": 0.533333,
+          "paricalcitol": 0.857143,
+          "doxercalciferol": 0.628571,
+          "omipalisib": 0.142857,
+          "wye-125132": 0.714286,
+          "way-600": 0.2,
+          "torin-1": 0.028571,
+          "everolimus": 0.085714,
+          "temsirolimus": 0.111111,
+          "onc201": 0.441176,
+          "10-debc": 1.0,
+          "mk-2206": 0.2,
+          "afuresertib": 0.214286,
+          "ipatasertib": 0.285714,
+          "tic10": 1.0
+        },
+        "dr": {
+          "abt-737": 0.355556,
+          "navitoclax": 0.022222,
+          "dasatinib": 0.355556,
+          "paricalcitol": 0.818182,
+          "doxercalciferol": 0.363636,
+          "omipalisib": null,
+          "wye-125132": 0.259259,
+          "way-600": 0.214286,
+          "torin-1": null,
+          "everolimus": 0.2,
+          "temsirolimus": 0.090909,
+          "onc201": 0.730769,
+          "10-debc": null,
+          "mk-2206": 0.088889,
+          "afuresertib": 0.243902,
+          "ipatasertib": 0.325,
+          "tic10": null
+        },
+        "primary_pct": {
+          "onc201": 0.264706,
+          "tic10": 1.0,
+          "10-debc": 1.0
+        }
+      },
+      {
+        "cell": "Caov-4",
+        "donor": "PT-gCHPXX",
+        "model": "ACH-000103",
+        "subtype": "2A",
+        "dr_subtype": "2A",
+        "H": 1.052132,
+        "S": -2.436435,
+        "buffer": -3.488567,
+        "v8": {
+          "abt-737": 0.822222,
+          "navitoclax": 0.6,
+          "dasatinib": 0.022222,
+          "paricalcitol": null,
+          "doxercalciferol": null,
+          "omipalisib": null,
+          "wye-125132": null,
+          "way-600": null,
+          "torin-1": null,
+          "everolimus": null,
+          "temsirolimus": 0.488889,
+          "onc201": null,
+          "10-debc": null,
+          "mk-2206": 0.911111,
+          "afuresertib": 0.309524,
+          "ipatasertib": 0.47619,
+          "tic10": null
+        },
+        "dr": {
+          "abt-737": 0.8,
+          "navitoclax": 0.644444,
+          "dasatinib": 0.022222,
+          "paricalcitol": null,
+          "doxercalciferol": null,
+          "omipalisib": null,
+          "wye-125132": null,
+          "way-600": null,
+          "torin-1": null,
+          "everolimus": null,
+          "temsirolimus": 0.5,
+          "onc201": null,
+          "10-debc": null,
+          "mk-2206": 0.888889,
+          "afuresertib": 0.219512,
+          "ipatasertib": 0.425,
+          "tic10": null
+        },
+        "primary_pct": {
+          "onc201": null,
+          "tic10": null,
+          "10-debc": null
+        }
+      },
+      {
+        "cell": "OV56",
+        "donor": "PT-kmyeHR",
+        "model": "ACH-000091",
+        "subtype": "2A",
+        "dr_subtype": "2A",
+        "H": 5.089128,
+        "S": 4.528038,
+        "buffer": -0.56109,
+        "v8": {
+          "abt-737": 0.644444,
+          "navitoclax": 0.711111,
+          "dasatinib": 0.644444,
+          "paricalcitol": 0.257143,
+          "doxercalciferol": 0.314286,
+          "omipalisib": 0.771429,
+          "wye-125132": 0.457143,
+          "way-600": 0.257143,
+          "torin-1": 0.628571,
+          "everolimus": 0.742857,
+          "temsirolimus": 0.422222,
+          "onc201": 0.735294,
+          "10-debc": 0.714286,
+          "mk-2206": 0.288889,
+          "afuresertib": 0.571429,
+          "ipatasertib": 0.238095,
+          "tic10": 0.771429
+        },
+        "dr": {
+          "abt-737": 0.6,
+          "navitoclax": 0.577778,
+          "dasatinib": 0.555556,
+          "paricalcitol": 0.272727,
+          "doxercalciferol": null,
+          "omipalisib": null,
+          "wye-125132": 0.444444,
+          "way-600": 0.821429,
+          "torin-1": 0.346154,
+          "everolimus": 0.95,
+          "temsirolimus": 0.636364,
+          "onc201": 0.538462,
+          "10-debc": null,
+          "mk-2206": 0.422222,
+          "afuresertib": 0.658537,
+          "ipatasertib": 0.35,
+          "tic10": null
+        },
+        "primary_pct": {
+          "onc201": 0.735294,
+          "tic10": 0.771429,
+          "10-debc": 0.714286
+        }
+      },
+      {
+        "cell": "OVISE",
+        "donor": "PT-oYazft",
+        "model": "ACH-000527",
+        "subtype": "2A",
+        "dr_subtype": "2A",
+        "H": 2.088325,
+        "S": 3.4671,
+        "buffer": 1.378775,
+        "v8": {
+          "abt-737": 0.955556,
+          "navitoclax": 0.866667,
+          "dasatinib": 0.622222,
+          "paricalcitol": 0.685714,
+          "doxercalciferol": 0.942857,
+          "omipalisib": 0.4,
+          "wye-125132": 0.885714,
+          "way-600": 0.828571,
+          "torin-1": 0.4,
+          "everolimus": 0.142857,
+          "temsirolimus": 0.222222,
+          "onc201": 0.352941,
+          "10-debc": 0.942857,
+          "mk-2206": 0.711111,
+          "afuresertib": 0.642857,
+          "ipatasertib": 0.619048,
+          "tic10": 0.657143
+        },
+        "dr": {
+          "abt-737": 0.888889,
+          "navitoclax": 0.866667,
+          "dasatinib": 0.755556,
+          "paricalcitol": 0.863636,
+          "doxercalciferol": 0.772727,
+          "omipalisib": 0.347826,
+          "wye-125132": 0.962963,
+          "way-600": 0.892857,
+          "torin-1": 0.307692,
+          "everolimus": 0.2,
+          "temsirolimus": 0.295455,
+          "onc201": 0.153846,
+          "10-debc": null,
+          "mk-2206": 0.666667,
+          "afuresertib": 0.609756,
+          "ipatasertib": 0.475,
+          "tic10": null
+        },
+        "primary_pct": {
+          "onc201": 0.5,
+          "tic10": 0.657143,
+          "10-debc": 0.942857
+        }
+      }
+    ]
+  },
+  "fdr_passing_ledger_v8_v9": [
+    {
+      "version": "v8",
+      "drug": "abt-737",
+      "endpoint": "Fisher",
+      "score": "S_sen",
+      "family": "panel13_Fisher_S_sen",
+      "n": 45,
+      "rho": 0.328568,
+      "p": 0.00208,
+      "q": 0.02704
+    },
+    {
+      "version": "v8",
+      "drug": "abt-737",
+      "endpoint": "Consensus_Z",
+      "score": "H_clean",
+      "family": "panel13_Consensus_Z_H_clean",
+      "n": 45,
+      "rho": 0.352174,
+      "p": 0.00252,
+      "q": 0.03276
+    },
+    {
+      "version": "v8",
+      "drug": "abt-737",
+      "endpoint": "Consensus_Z",
+      "score": "S_sen",
+      "family": "panel13_Consensus_Z_S_sen",
+      "n": 45,
+      "rho": 0.350198,
+      "p": 0.00934,
+      "q": 0.048186
+    },
+    {
+      "version": "v8",
+      "drug": "navitoclax",
+      "endpoint": "Fisher",
+      "score": "S_sen",
+      "family": "panel13_Fisher_S_sen",
+      "n": 45,
+      "rho": 0.307477,
+      "p": 0.01007,
+      "q": 0.049833
+    },
+    {
+      "version": "v8",
+      "drug": "navitoclax",
+      "endpoint": "Consensus_Z",
+      "score": "S_sen",
+      "family": "panel13_Consensus_Z_S_sen",
+      "n": 45,
+      "rho": 0.368643,
+      "p": 0.003,
+      "q": 0.039
+    },
+    {
+      "version": "v8",
+      "drug": "dasatinib",
+      "endpoint": "Consensus_Z",
+      "score": "S_sen",
+      "family": "panel13_Consensus_Z_S_sen",
+      "n": 45,
+      "rho": 0.411067,
+      "p": 0.01112,
+      "q": 0.048186
+    },
+    {
+      "version": "v8",
+      "drug": "doxercalciferol",
+      "endpoint": "Fisher",
+      "score": "S_sen",
+      "family": "panel13_Fisher_S_sen",
+      "n": 22,
+      "rho": 0.46358,
+      "p": 0.01534,
+      "q": 0.049855
+    },
+    {
+      "version": "v8",
+      "drug": "azithromycin",
+      "endpoint": "Fisher",
+      "score": "S_sen",
+      "family": "panel13_Fisher_S_sen",
+      "n": 26,
+      "rho": 0.446838,
+      "p": 0.0115,
+      "q": 0.049833
+    },
+    {
+      "version": "v9",
+      "drug": "abt-737",
+      "endpoint": "PRISM_secondary",
+      "score": "S_sen",
+      "family": "original13|PRISM_secondary|S_sen",
+      "n": 27,
+      "rho": 0.431624,
+      "p": 0.012286,
+      "q": 0.035734
+    },
+    {
+      "version": "v9",
+      "drug": "navitoclax",
+      "endpoint": "PRISM_secondary",
+      "score": "S_sen",
+      "family": "original13|PRISM_secondary|S_sen",
+      "n": 23,
+      "rho": 0.473995,
+      "p": 0.011159,
+      "q": 0.035734
+    },
+    {
+      "version": "v9",
+      "drug": "doxercalciferol",
+      "endpoint": "PRISM_secondary",
+      "score": "S_sen",
+      "family": "original13|PRISM_secondary|S_sen",
+      "n": 22,
+      "rho": 0.46358,
+      "p": 0.014889,
+      "q": 0.035734
+    },
+    {
+      "version": "v9",
+      "drug": "azithromycin",
+      "endpoint": "PRISM_secondary",
+      "score": "S_sen",
+      "family": "original13|PRISM_secondary|S_sen",
+      "n": 26,
+      "rho": 0.446838,
+      "p": 0.011054,
+      "q": 0.035734
+    },
+    {
+      "version": "v9",
+      "drug": "vismodegib",
+      "endpoint": "PRISM_secondary",
+      "score": "S_sen",
+      "family": "original13|PRISM_secondary|S_sen",
+      "n": 26,
+      "rho": 0.432682,
+      "p": 0.013631,
+      "q": 0.035734
+    },
+    {
+      "version": "v9",
+      "drug": "navitoclax",
+      "endpoint": "PRISM_primary",
+      "score": "S_sen",
+      "family": "original13|PRISM_primary|S_sen",
+      "n": 34,
+      "rho": 0.472574,
+      "p": 0.002385,
+      "q": 0.028617
+    },
+    {
+      "version": "v9",
+      "drug": "abt-737",
+      "endpoint": "Fisher",
+      "score": "S_sen",
+      "family": "original13|Fisher|S_sen",
+      "n": 45,
+      "rho": 0.328568,
+      "p": 0.00208,
+      "q": 0.02704
+    },
+    {
+      "version": "v9",
+      "drug": "navitoclax",
+      "endpoint": "Fisher",
+      "score": "S_sen",
+      "family": "original13|Fisher|S_sen",
+      "n": 45,
+      "rho": 0.307477,
+      "p": 0.01007,
+      "q": 0.049833
+    },
+    {
+      "version": "v9",
+      "drug": "doxercalciferol",
+      "endpoint": "Fisher",
+      "score": "S_sen",
+      "family": "original13|Fisher|S_sen",
+      "n": 22,
+      "rho": 0.46358,
+      "p": 0.01534,
+      "q": 0.049855
+    },
+    {
+      "version": "v9",
+      "drug": "azithromycin",
+      "endpoint": "Fisher",
+      "score": "S_sen",
+      "family": "original13|Fisher|S_sen",
+      "n": 26,
+      "rho": 0.446838,
+      "p": 0.0115,
+      "q": 0.049833
+    },
+    {
+      "version": "v9",
+      "drug": "abt-737",
+      "endpoint": "DoseResponse_Consensus_Z",
+      "score": "S_sen",
+      "family": "original13|DoseResponse_Consensus_Z|S_sen",
+      "n": 45,
+      "rho": 0.326614,
+      "p": 0.00997,
+      "q": 0.047242
+    },
+    {
+      "version": "v9",
+      "drug": "navitoclax",
+      "endpoint": "DoseResponse_Consensus_Z",
+      "score": "S_sen",
+      "family": "original13|DoseResponse_Consensus_Z|S_sen",
+      "n": 45,
+      "rho": 0.339657,
+      "p": 0.01139,
+      "q": 0.047242
+    },
+    {
+      "version": "v9",
+      "drug": "dasatinib",
+      "endpoint": "DoseResponse_Consensus_Z",
+      "score": "S_sen",
+      "family": "original13|DoseResponse_Consensus_Z|S_sen",
+      "n": 45,
+      "rho": 0.369433,
+      "p": 0.01817,
+      "q": 0.047242
+    },
+    {
+      "version": "v9",
+      "drug": "doxercalciferol",
+      "endpoint": "DoseResponse_Consensus_Z",
+      "score": "S_sen",
+      "family": "original13|DoseResponse_Consensus_Z|S_sen",
+      "n": 22,
+      "rho": 0.46358,
+      "p": 0.01534,
+      "q": 0.047242
+    },
+    {
+      "version": "v9",
+      "drug": "azithromycin",
+      "endpoint": "DoseResponse_Consensus_Z",
+      "score": "S_sen",
+      "family": "original13|DoseResponse_Consensus_Z|S_sen",
+      "n": 26,
+      "rho": 0.446838,
+      "p": 0.0115,
+      "q": 0.047242
+    }
+  ]
+}

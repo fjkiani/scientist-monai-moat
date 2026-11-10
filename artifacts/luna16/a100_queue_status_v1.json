@@ -1,0 +1,11 @@
+{
+  "status": "A100_QUEUE_PENDING",
+  "call_id": "fc-01M4550THFYYFPD1E8VD77V4YJ",
+  "request_id": "gateD-fjkiani-posneg-lr1e6-20261005T002644Z-zo",
+  "observed_at": "2026-10-05T04:27:46Z",
+  "clinical_meter": "FROC@2 held-out 88 UNPROVEN until train+heldout complete",
+  "production_lock": "artifacts/luna16/baseline_lock_72h.json",
+  "froc_at_2_baseline": 0.8267399271674979,
+  "promote_candidate": false,
+  "note": "PENDING after cancel+redeploy; A100 capacity UNCLEAR \u2014 keep baseline locked"
+}

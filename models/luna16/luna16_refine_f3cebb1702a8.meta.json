@@ -1,0 +1,17 @@
+{
+  "ckpt_path": "models/luna16/luna16_refine_f3cebb1702a8.pt",
+  "ckpt_sha256": "f3cebb1702a8041b1cad2d7406eb5a3b2287160ff52d54843f3e68b9dd3e2c08",
+  "request_id": "clinical-fullfit-20261011T041944Z",
+  "baseline_sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01",
+  "epochs": 5,
+  "n_training": 482,
+  "n_validation": 60,
+  "elapsed_seconds": 2020.111,
+  "status": "trained",
+  "promotion": "REJECTED_COLLAPSE",
+  "floor": "\u0394FROC@2 +0.05 vs baseline 0.8267",
+  "bundle_heldout_request_id": "clinical-heldout-20261011T045411Z",
+  "cad_froc_request_id": "clinical-froc-cad-20261011T050956Z",
+  "cad_froc_at_2": null,
+  "cad_n_candidates": 8800
+}

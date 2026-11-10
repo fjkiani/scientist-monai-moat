@@ -1,0 +1,105 @@
+{
+  "coefficients": [
+    -0.4918493501748682,
+    0.0,
+    -1.7434787700227505,
+    -0.6854804292304134,
+    0.23157523331841753,
+    2.691632042385666,
+    -0.02584760875285945,
+    0.10804423348603298,
+    0.09216456253099105,
+    -0.1719624609881136
+  ],
+  "disclaimer": "RESEARCH USE ONLY — not validated for clinical decision-making. Not FDA-cleared. Not CE-marked.",
+  "feature_encodings": {
+    "age_norm": "raw_age_years / 100.0",
+    "birads": {
+      "ONE_HOT": [
+        "BI_RADS_0",
+        "BI_RADS_1",
+        "BI_RADS_2",
+        "BI_RADS_3",
+        "BI_RADS_4",
+        "BI_RADS_5"
+      ],
+      "REFERENCE": "BI_RADS_6"
+    },
+    "brca_status_known_pathogenic": {
+      "false": 0.0,
+      "true": 1.0,
+      "unknown": 0.5
+    },
+    "density": {
+      "ONE_HOT": [
+        "A_almost_entirely_fatty",
+        "B_scattered_fibroglandular",
+        "C_heterogeneously_dense",
+        "D_extremely_dense"
+      ],
+      "REFERENCE": "UNKNOWN"
+    },
+    "family_history_first_degree": {
+      "false": 0.0,
+      "true": 1.0,
+      "unknown": 0.5
+    },
+    "prior_biopsy_history": {
+      "false": 0.0,
+      "true": 1.0,
+      "unknown": 0.5
+    },
+    "years_since_last_mammo_norm": "raw_years / 5.0"
+  },
+  "features": [
+    "birads_BI_RADS_0",
+    "birads_BI_RADS_1",
+    "birads_BI_RADS_2",
+    "birads_BI_RADS_3",
+    "birads_BI_RADS_4",
+    "birads_BI_RADS_5",
+    "density_A_almost_entirely_fatty",
+    "density_B_scattered_fibroglandular",
+    "density_C_heterogeneously_dense",
+    "density_D_extremely_dense"
+  ],
+  "intercept": -0.4424389696592994,
+  "lambda": 10.0,
+  "model_name": "screening_arbiter_v1",
+  "model_type": "L2_regularized_logistic_regression",
+  "n_negative": 1180,
+  "n_positive": 826,
+  "n_training": 2006,
+  "n_training_synthetic": false,
+  "oof_auroc": 0.8394185784052203,
+  "oof_auroc_ci": [
+    0.810253489824146,
+    0.8646395316468012
+  ],
+  "performance": {
+    "AUROC_CAVEAT": "Real-patient retrospective grouped training and held-out evaluation; research use only. The score is not prospectively validated.",
+    "held_out_test_auroc": 0.7933590770404272,
+    "held_out_test_auroc_ci": [
+      0.7134819569956914,
+      0.8567516958237713
+    ],
+    "oof_auroc": 0.8394185784052203,
+    "oof_auroc_ci": [
+      0.810253489824146,
+      0.8646395316468012
+    ],
+    "validation_auroc": 0.8084635832004253
+  },
+  "positive_class": "malignant_pathology",
+  "recommendations": {
+    "HIGH": "RECALL_FOR_DIAGNOSTIC_WORKUP",
+    "LOW": "ROUTINE_1YR_FOLLOWUP",
+    "MID": "SHORT_INTERVAL_6MO_FOLLOWUP"
+  },
+  "schema_version": 1,
+  "seed": 20260928,
+  "selected_c": 0.1,
+  "target_definition": "pathology equals MALIGNANT",
+  "trained_on_real_patient_data": true,
+  "training_dataset": "CBIS-DDSM official training case descriptions (screening malignancy-risk proxy)"
+}

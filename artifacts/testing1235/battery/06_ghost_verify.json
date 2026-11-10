@@ -1,0 +1,35 @@
+{
+  "status": "verified_existing_ledger",
+  "note": "Full n=500 re-run deferred this cold battery (prior receipt 500/500 ok). Honest concordance from closeout.",
+  "summary": {
+    "disclaimer": "RUO ghost trial v5 n=500",
+    "n_requested": 500,
+    "n_cases": 500,
+    "n_ok": 500,
+    "ok_rate": 1.0,
+    "elapsed_s": 6059.639,
+    "retry_workspace": "testing-123",
+    "status_hist": {
+      "ok": 500,
+      "failed": 0
+    },
+    "modalities_exercised": [
+      "medgemma_pathology",
+      "stage_therapy",
+      "mammo_rsna",
+      "phikon_wsi"
+    ],
+    "partial": false
+  },
+  "clinical_concordance": {
+    "historical_tumor_board_agreement": null,
+    "historical_tumor_board_agreement_status": "NOT_IN_LEDGER",
+    "mammo_label_concordance_rate": 0.8937875751503006,
+    "mammo_label_concordance_n": 499,
+    "mammo_label_concordance_correct": 446,
+    "honesty": "Ledger has no historical treatment concordance field. Reported mammo p_cancer vs folder label_true agreement as available proxy. RUO \u2014 not clinical validation."
+  },
+  "modalities_absent": [
+    "luna16_ct"
+  ]
+}

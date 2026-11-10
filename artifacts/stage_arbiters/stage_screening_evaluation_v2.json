@@ -1,0 +1,3406 @@
+{
+  "artifact_sha256": "4edab6f35cd09835656c0e2ad5407c221a7f737f06c921e069955682a2d6f65f",
+  "bootstrap_patient_auroc_ci": [
+    0.7134819569956914,
+    0.8567516958237713
+  ],
+  "capability": "stage-screening",
+  "dataset_sha256": "4360985fdd110aff22293e4b79927ee7b4f55da974c7865875f580e3c971a155",
+  "metric": {
+    "n": 412,
+    "name": "auroc",
+    "value": 0.7933590770404272
+  },
+  "rows": [
+    {
+      "patient_id": "P_00021",
+      "sample_id": "cbis-train-mass-00010",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.23980169650849384,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00021",
+      "sample_id": "cbis-train-mass-00011",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.23980169650849384,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00021",
+      "sample_id": "cbis-train-mass-00012",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.23980169650849384,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00021",
+      "sample_id": "cbis-train-mass-00013",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.23980169650849384,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00034",
+      "sample_id": "cbis-train-mass-00020",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.912244830420469,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00034",
+      "sample_id": "cbis-train-mass-00021",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.912244830420469,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00092",
+      "sample_id": "cbis-train-mass-00066",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00092",
+      "sample_id": "cbis-train-mass-00067",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9135077706318514,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00092",
+      "sample_id": "cbis-train-mass-00068",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00092",
+      "sample_id": "cbis-train-mass-00069",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00092",
+      "sample_id": "cbis-train-mass-00070",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00092",
+      "sample_id": "cbis-train-mass-00071",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00119",
+      "sample_id": "cbis-train-mass-00100",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2650517175127883,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00119",
+      "sample_id": "cbis-train-mass-00101",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2650517175127883,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00122",
+      "sample_id": "cbis-train-mass-00104",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2650517175127883,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00134",
+      "sample_id": "cbis-train-mass-00108",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.47035999942862755,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00134",
+      "sample_id": "cbis-train-mass-00109",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.47035999942862755,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00149",
+      "sample_id": "cbis-train-mass-00116",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9023264400504859,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00149",
+      "sample_id": "cbis-train-mass-00117",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.23980169650849384,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00166",
+      "sample_id": "cbis-train-mass-00122",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00166",
+      "sample_id": "cbis-train-mass-00123",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00205",
+      "sample_id": "cbis-train-mass-00136",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00205",
+      "sample_id": "cbis-train-mass-00137",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00206",
+      "sample_id": "cbis-train-mass-00138",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2619699312542272,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00207",
+      "sample_id": "cbis-train-mass-00139",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.44109694648937064,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00207",
+      "sample_id": "cbis-train-mass-00140",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.44109694648937064,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00207",
+      "sample_id": "cbis-train-mass-00141",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.44109694648937064,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00207",
+      "sample_id": "cbis-train-mass-00142",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.44109694648937064,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00207",
+      "sample_id": "cbis-train-mass-00143",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.44109694648937064,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00207",
+      "sample_id": "cbis-train-mass-00144",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.44109694648937064,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00218",
+      "sample_id": "cbis-train-mass-00148",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.47035999942862755,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00218",
+      "sample_id": "cbis-train-mass-00149",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.47035999942862755,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00225",
+      "sample_id": "cbis-train-mass-00156",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.44109694648937064,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00225",
+      "sample_id": "cbis-train-mass-00157",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.44109694648937064,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00231",
+      "sample_id": "cbis-train-mass-00162",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2619699312542272,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00231",
+      "sample_id": "cbis-train-mass-00163",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2619699312542272,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00273",
+      "sample_id": "cbis-train-mass-00187",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00279",
+      "sample_id": "cbis-train-mass-00188",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.3010876847797162,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00294",
+      "sample_id": "cbis-train-mass-00196",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00294",
+      "sample_id": "cbis-train-mass-00197",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00334",
+      "sample_id": "cbis-train-mass-00231",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2619699312542272,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00356",
+      "sample_id": "cbis-train-mass-00243",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00366",
+      "sample_id": "cbis-train-mass-00247",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2650517175127883,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00366",
+      "sample_id": "cbis-train-mass-00248",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2650517175127883,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00386",
+      "sample_id": "cbis-train-mass-00261",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9023264400504859,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00386",
+      "sample_id": "cbis-train-mass-00262",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9023264400504859,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00401",
+      "sample_id": "cbis-train-mass-00268",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2650517175127883,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00401",
+      "sample_id": "cbis-train-mass-00269",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2650517175127883,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00419",
+      "sample_id": "cbis-train-mass-00286",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2650517175127883,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00419",
+      "sample_id": "cbis-train-mass-00287",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9135077706318514,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00419",
+      "sample_id": "cbis-train-mass-00288",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9135077706318514,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00419",
+      "sample_id": "cbis-train-mass-00289",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2650517175127883,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00419",
+      "sample_id": "cbis-train-mass-00290",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2650517175127883,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00419",
+      "sample_id": "cbis-train-mass-00291",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2650517175127883,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00427",
+      "sample_id": "cbis-train-mass-00301",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00431",
+      "sample_id": "cbis-train-mass-00305",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.47035999942862755,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00431",
+      "sample_id": "cbis-train-mass-00306",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.47035999942862755,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00441",
+      "sample_id": "cbis-train-mass-00319",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00454",
+      "sample_id": "cbis-train-mass-00330",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.3044398235576061,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00454",
+      "sample_id": "cbis-train-mass-00331",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.3044398235576061,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00468",
+      "sample_id": "cbis-train-mass-00336",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.09869892100215676,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00468",
+      "sample_id": "cbis-train-mass-00337",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.09869892100215676,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00496",
+      "sample_id": "cbis-train-mass-00350",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.3010876847797162,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00496",
+      "sample_id": "cbis-train-mass-00351",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.3010876847797162,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00504",
+      "sample_id": "cbis-train-mass-00354",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00540",
+      "sample_id": "cbis-train-mass-00382",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9135077706318514,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00540",
+      "sample_id": "cbis-train-mass-00383",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9135077706318514,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00543",
+      "sample_id": "cbis-train-mass-00384",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00543",
+      "sample_id": "cbis-train-mass-00385",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00564",
+      "sample_id": "cbis-train-mass-00397",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.8886703376151797,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00577",
+      "sample_id": "cbis-train-mass-00409",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.47035999942862755,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00577",
+      "sample_id": "cbis-train-mass-00410",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.47035999942862755,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00592",
+      "sample_id": "cbis-train-mass-00416",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.27685098053332213,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00592",
+      "sample_id": "cbis-train-mass-00417",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.27685098053332213,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00611",
+      "sample_id": "cbis-train-mass-00428",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2650517175127883,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00611",
+      "sample_id": "cbis-train-mass-00429",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2650517175127883,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00616",
+      "sample_id": "cbis-train-mass-00430",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.912244830420469,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00622",
+      "sample_id": "cbis-train-mass-00432",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.47035999942862755,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00626",
+      "sample_id": "cbis-train-mass-00433",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.3044398235576061,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00626",
+      "sample_id": "cbis-train-mass-00434",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.3044398235576061,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00648",
+      "sample_id": "cbis-train-mass-00447",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.3044398235576061,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00648",
+      "sample_id": "cbis-train-mass-00448",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.3044398235576061,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00659",
+      "sample_id": "cbis-train-mass-00452",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4054454338835628,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00703",
+      "sample_id": "cbis-train-mass-00483",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.3044398235576061,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00703",
+      "sample_id": "cbis-train-mass-00484",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.3044398235576061,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00706",
+      "sample_id": "cbis-train-mass-00485",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.8886703376151797,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00706",
+      "sample_id": "cbis-train-mass-00486",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.8886703376151797,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00720",
+      "sample_id": "cbis-train-mass-00505",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4054454338835628,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00730",
+      "sample_id": "cbis-train-mass-00511",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.47035999942862755,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00778",
+      "sample_id": "cbis-train-mass-00542",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1097054635646866,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00778",
+      "sample_id": "cbis-train-mass-00543",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1097054635646866,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00778",
+      "sample_id": "cbis-train-mass-00544",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1097054635646866,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00778",
+      "sample_id": "cbis-train-mass-00545",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1097054635646866,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00781",
+      "sample_id": "cbis-train-mass-00548",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2650517175127883,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00781",
+      "sample_id": "cbis-train-mass-00549",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2650517175127883,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00810",
+      "sample_id": "cbis-train-mass-00568",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00816",
+      "sample_id": "cbis-train-mass-00573",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00816",
+      "sample_id": "cbis-train-mass-00574",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00848",
+      "sample_id": "cbis-train-mass-00593",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.47035999942862755,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00848",
+      "sample_id": "cbis-train-mass-00594",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.47035999942862755,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00849",
+      "sample_id": "cbis-train-mass-00595",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9023264400504859,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00849",
+      "sample_id": "cbis-train-mass-00596",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9023264400504859,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00859",
+      "sample_id": "cbis-train-mass-00600",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.3044398235576061,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00859",
+      "sample_id": "cbis-train-mass-00601",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.3044398235576061,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00870",
+      "sample_id": "cbis-train-mass-00608",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.912244830420469,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00870",
+      "sample_id": "cbis-train-mass-00609",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.912244830420469,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00891",
+      "sample_id": "cbis-train-mass-00619",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9023264400504859,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00891",
+      "sample_id": "cbis-train-mass-00620",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9023264400504859,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00902",
+      "sample_id": "cbis-train-mass-00629",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.47035999942862755,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00902",
+      "sample_id": "cbis-train-mass-00630",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.47035999942862755,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00913",
+      "sample_id": "cbis-train-mass-00635",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.3010876847797162,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00913",
+      "sample_id": "cbis-train-mass-00636",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.3010876847797162,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00929",
+      "sample_id": "cbis-train-mass-00651",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9135077706318514,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00929",
+      "sample_id": "cbis-train-mass-00652",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9135077706318514,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00931",
+      "sample_id": "cbis-train-mass-00653",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00931",
+      "sample_id": "cbis-train-mass-00654",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00935",
+      "sample_id": "cbis-train-mass-00655",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00935",
+      "sample_id": "cbis-train-mass-00656",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00949",
+      "sample_id": "cbis-train-mass-00660",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.3010876847797162,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00949",
+      "sample_id": "cbis-train-mass-00661",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.3010876847797162,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00990",
+      "sample_id": "cbis-train-mass-00686",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9135077706318514,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00990",
+      "sample_id": "cbis-train-mass-00687",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9135077706318514,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01000",
+      "sample_id": "cbis-train-mass-00696",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9135077706318514,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01000",
+      "sample_id": "cbis-train-mass-00697",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9135077706318514,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01082",
+      "sample_id": "cbis-train-mass-00744",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.44109694648937064,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01163",
+      "sample_id": "cbis-train-mass-00806",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01163",
+      "sample_id": "cbis-train-mass-00807",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01209",
+      "sample_id": "cbis-train-mass-00842",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01215",
+      "sample_id": "cbis-train-mass-00845",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.47035999942862755,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01215",
+      "sample_id": "cbis-train-mass-00846",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.47035999942862755,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01232",
+      "sample_id": "cbis-train-mass-00860",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9135077706318514,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01232",
+      "sample_id": "cbis-train-mass-00861",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9135077706318514,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01261",
+      "sample_id": "cbis-train-mass-00878",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9135077706318514,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01261",
+      "sample_id": "cbis-train-mass-00879",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9135077706318514,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01280",
+      "sample_id": "cbis-train-mass-00904",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01280",
+      "sample_id": "cbis-train-mass-00905",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01285",
+      "sample_id": "cbis-train-mass-00908",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.3044398235576061,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01285",
+      "sample_id": "cbis-train-mass-00909",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.3044398235576061,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01302",
+      "sample_id": "cbis-train-mass-00916",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9135077706318514,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01302",
+      "sample_id": "cbis-train-mass-00917",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9135077706318514,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01304",
+      "sample_id": "cbis-train-mass-00918",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.47035999942862755,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01304",
+      "sample_id": "cbis-train-mass-00919",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.47035999942862755,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01343",
+      "sample_id": "cbis-train-mass-00936",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9135077706318514,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01343",
+      "sample_id": "cbis-train-mass-00937",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01343",
+      "sample_id": "cbis-train-mass-00938",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9135077706318514,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01343",
+      "sample_id": "cbis-train-mass-00939",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01349",
+      "sample_id": "cbis-train-mass-00940",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.47035999942862755,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01373",
+      "sample_id": "cbis-train-mass-00958",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.47035999942862755,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01373",
+      "sample_id": "cbis-train-mass-00959",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.47035999942862755,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01391",
+      "sample_id": "cbis-train-mass-00973",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.47035999942862755,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01426",
+      "sample_id": "cbis-train-mass-00996",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9135077706318514,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01426",
+      "sample_id": "cbis-train-mass-00997",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9135077706318514,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01482",
+      "sample_id": "cbis-train-mass-01029",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2141849004179582,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01482",
+      "sample_id": "cbis-train-mass-01030",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2141849004179582,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01486",
+      "sample_id": "cbis-train-mass-01034",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.3044398235576061,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01486",
+      "sample_id": "cbis-train-mass-01035",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.3044398235576061,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01508",
+      "sample_id": "cbis-train-mass-01053",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.44109694648937064,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01567",
+      "sample_id": "cbis-train-mass-01083",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2619699312542272,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01593",
+      "sample_id": "cbis-train-mass-01095",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9135077706318514,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01593",
+      "sample_id": "cbis-train-mass-01096",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9135077706318514,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01630",
+      "sample_id": "cbis-train-mass-01119",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01636",
+      "sample_id": "cbis-train-mass-01134",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9135077706318514,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01680",
+      "sample_id": "cbis-train-mass-01172",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01682",
+      "sample_id": "cbis-train-mass-01173",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.912244830420469,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01682",
+      "sample_id": "cbis-train-mass-01174",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.912244830420469,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01710",
+      "sample_id": "cbis-train-mass-01190",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.3044398235576061,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01710",
+      "sample_id": "cbis-train-mass-01191",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.3044398235576061,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01712",
+      "sample_id": "cbis-train-mass-01192",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.44109694648937064,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01712",
+      "sample_id": "cbis-train-mass-01193",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.44109694648937064,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01712",
+      "sample_id": "cbis-train-mass-01194",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.44109694648937064,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01712",
+      "sample_id": "cbis-train-mass-01195",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.44109694648937064,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01737",
+      "sample_id": "cbis-train-mass-01209",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01737",
+      "sample_id": "cbis-train-mass-01210",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01775",
+      "sample_id": "cbis-train-mass-01233",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9135077706318514,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01780",
+      "sample_id": "cbis-train-mass-01236",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9023264400504859,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01780",
+      "sample_id": "cbis-train-mass-01237",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9023264400504859,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01798",
+      "sample_id": "cbis-train-mass-01245",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2650517175127883,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01798",
+      "sample_id": "cbis-train-mass-01246",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2650517175127883,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01799",
+      "sample_id": "cbis-train-mass-01247",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01799",
+      "sample_id": "cbis-train-mass-01248",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01814",
+      "sample_id": "cbis-train-mass-01258",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.8886703376151797,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01831",
+      "sample_id": "cbis-train-mass-01273",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.3044398235576061,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01831",
+      "sample_id": "cbis-train-mass-01274",
+      "stratum": "mass",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.3044398235576061,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01946",
+      "sample_id": "cbis-train-mass-01307",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.2650517175127883,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01946",
+      "sample_id": "cbis-train-mass-01308",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.2650517175127883,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01981",
+      "sample_id": "cbis-train-mass-01309",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.2650517175127883,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01981",
+      "sample_id": "cbis-train-mass-01310",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.2650517175127883,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01983",
+      "sample_id": "cbis-train-mass-01311",
+      "stratum": "mass",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.2650517175127883,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00005",
+      "sample_id": "cbis-train-calc-00000",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.2619699312542272,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00005",
+      "sample_id": "cbis-train-calc-00001",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.2619699312542272,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00024",
+      "sample_id": "cbis-train-calc-00037",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4054454338835628,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00024",
+      "sample_id": "cbis-train-calc-00038",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4054454338835628,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00028",
+      "sample_id": "cbis-train-calc-00039",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4054454338835628,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00030",
+      "sample_id": "cbis-train-calc-00042",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00030",
+      "sample_id": "cbis-train-calc-00043",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00030",
+      "sample_id": "cbis-train-calc-00044",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00030",
+      "sample_id": "cbis-train-calc-00045",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00030",
+      "sample_id": "cbis-train-calc-00046",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00030",
+      "sample_id": "cbis-train-calc-00047",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00034",
+      "sample_id": "cbis-train-calc-00049",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.47035999942862755,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00034",
+      "sample_id": "cbis-train-calc-00050",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.47035999942862755,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00047",
+      "sample_id": "cbis-train-calc-00052",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00047",
+      "sample_id": "cbis-train-calc-00053",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00047",
+      "sample_id": "cbis-train-calc-00054",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00047",
+      "sample_id": "cbis-train-calc-00055",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00047",
+      "sample_id": "cbis-train-calc-00056",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00047",
+      "sample_id": "cbis-train-calc-00057",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00121",
+      "sample_id": "cbis-train-calc-00118",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00121",
+      "sample_id": "cbis-train-calc-00119",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00123",
+      "sample_id": "cbis-train-calc-00120",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.47035999942862755,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00123",
+      "sample_id": "cbis-train-calc-00121",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.47035999942862755,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00189",
+      "sample_id": "cbis-train-calc-00148",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4054454338835628,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00189",
+      "sample_id": "cbis-train-calc-00149",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4054454338835628,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00197",
+      "sample_id": "cbis-train-calc-00152",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.44109694648937064,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00197",
+      "sample_id": "cbis-train-calc-00153",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.44109694648937064,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00250",
+      "sample_id": "cbis-train-calc-00168",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4054454338835628,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00268",
+      "sample_id": "cbis-train-calc-00180",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.2650517175127883,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00268",
+      "sample_id": "cbis-train-calc-00181",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.2650517175127883,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00293",
+      "sample_id": "cbis-train-calc-00210",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4054454338835628,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00293",
+      "sample_id": "cbis-train-calc-00211",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4054454338835628,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00302",
+      "sample_id": "cbis-train-calc-00214",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00302",
+      "sample_id": "cbis-train-calc-00215",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00302",
+      "sample_id": "cbis-train-calc-00216",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00302",
+      "sample_id": "cbis-train-calc-00217",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00302",
+      "sample_id": "cbis-train-calc-00218",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00302",
+      "sample_id": "cbis-train-calc-00219",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00307",
+      "sample_id": "cbis-train-calc-00220",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9135077706318514,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00307",
+      "sample_id": "cbis-train-calc-00221",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00337",
+      "sample_id": "cbis-train-calc-00236",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4054454338835628,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00337",
+      "sample_id": "cbis-train-calc-00237",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4054454338835628,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00357",
+      "sample_id": "cbis-train-calc-00246",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.47035999942862755,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00364",
+      "sample_id": "cbis-train-calc-00249",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.44109694648937064,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00364",
+      "sample_id": "cbis-train-calc-00250",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.44109694648937064,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00380",
+      "sample_id": "cbis-train-calc-00258",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00380",
+      "sample_id": "cbis-train-calc-00259",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00392",
+      "sample_id": "cbis-train-calc-00272",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.47035999942862755,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00392",
+      "sample_id": "cbis-train-calc-00273",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.47035999942862755,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00425",
+      "sample_id": "cbis-train-calc-00296",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.09869892100215676,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00425",
+      "sample_id": "cbis-train-calc-00297",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.09869892100215676,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00445",
+      "sample_id": "cbis-train-calc-00305",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9135077706318514,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00447",
+      "sample_id": "cbis-train-calc-00306",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.47035999942862755,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00447",
+      "sample_id": "cbis-train-calc-00307",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.47035999942862755,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00473",
+      "sample_id": "cbis-train-calc-00341",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4054454338835628,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00473",
+      "sample_id": "cbis-train-calc-00342",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4054454338835628,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00476",
+      "sample_id": "cbis-train-calc-00345",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00476",
+      "sample_id": "cbis-train-calc-00346",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00476",
+      "sample_id": "cbis-train-calc-00347",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00476",
+      "sample_id": "cbis-train-calc-00348",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00476",
+      "sample_id": "cbis-train-calc-00349",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00476",
+      "sample_id": "cbis-train-calc-00350",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00476",
+      "sample_id": "cbis-train-calc-00351",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00476",
+      "sample_id": "cbis-train-calc-00352",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00480",
+      "sample_id": "cbis-train-calc-00355",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00480",
+      "sample_id": "cbis-train-calc-00356",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00480",
+      "sample_id": "cbis-train-calc-00357",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00480",
+      "sample_id": "cbis-train-calc-00358",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00480",
+      "sample_id": "cbis-train-calc-00359",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00480",
+      "sample_id": "cbis-train-calc-00360",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00503",
+      "sample_id": "cbis-train-calc-00368",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4054454338835628,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00503",
+      "sample_id": "cbis-train-calc-00369",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4054454338835628,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00510",
+      "sample_id": "cbis-train-calc-00381",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00510",
+      "sample_id": "cbis-train-calc-00382",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00510",
+      "sample_id": "cbis-train-calc-00383",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00510",
+      "sample_id": "cbis-train-calc-00384",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00510",
+      "sample_id": "cbis-train-calc-00385",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00510",
+      "sample_id": "cbis-train-calc-00386",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00510",
+      "sample_id": "cbis-train-calc-00387",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00510",
+      "sample_id": "cbis-train-calc-00388",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00510",
+      "sample_id": "cbis-train-calc-00389",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00510",
+      "sample_id": "cbis-train-calc-00390",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00510",
+      "sample_id": "cbis-train-calc-00391",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00510",
+      "sample_id": "cbis-train-calc-00392",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00520",
+      "sample_id": "cbis-train-calc-00395",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00520",
+      "sample_id": "cbis-train-calc-00396",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00531",
+      "sample_id": "cbis-train-calc-00409",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00531",
+      "sample_id": "cbis-train-calc-00410",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00551",
+      "sample_id": "cbis-train-calc-00430",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00551",
+      "sample_id": "cbis-train-calc-00431",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00556",
+      "sample_id": "cbis-train-calc-00437",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4054454338835628,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00556",
+      "sample_id": "cbis-train-calc-00438",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4054454338835628,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00563",
+      "sample_id": "cbis-train-calc-00455",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4054454338835628,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00593",
+      "sample_id": "cbis-train-calc-00474",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4054454338835628,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00593",
+      "sample_id": "cbis-train-calc-00475",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4054454338835628,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00633",
+      "sample_id": "cbis-train-calc-00504",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4054454338835628,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00638",
+      "sample_id": "cbis-train-calc-00511",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.47035999942862755,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00638",
+      "sample_id": "cbis-train-calc-00512",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.47035999942862755,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00667",
+      "sample_id": "cbis-train-calc-00538",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4054454338835628,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00667",
+      "sample_id": "cbis-train-calc-00539",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4054454338835628,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00674",
+      "sample_id": "cbis-train-calc-00544",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00674",
+      "sample_id": "cbis-train-calc-00545",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00683",
+      "sample_id": "cbis-train-calc-00552",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4054454338835628,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00683",
+      "sample_id": "cbis-train-calc-00553",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4054454338835628,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00685",
+      "sample_id": "cbis-train-calc-00556",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.47035999942862755,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00685",
+      "sample_id": "cbis-train-calc-00557",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.912244830420469,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00693",
+      "sample_id": "cbis-train-calc-00558",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9135077706318514,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00693",
+      "sample_id": "cbis-train-calc-00559",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9135077706318514,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00705",
+      "sample_id": "cbis-train-calc-00564",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00705",
+      "sample_id": "cbis-train-calc-00565",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00705",
+      "sample_id": "cbis-train-calc-00566",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00705",
+      "sample_id": "cbis-train-calc-00567",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.11126607327608874,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00712",
+      "sample_id": "cbis-train-calc-00572",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4054454338835628,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00712",
+      "sample_id": "cbis-train-calc-00573",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4054454338835628,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00743",
+      "sample_id": "cbis-train-calc-00585",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.47035999942862755,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00743",
+      "sample_id": "cbis-train-calc-00586",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.47035999942862755,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00759",
+      "sample_id": "cbis-train-calc-00597",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4054454338835628,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00759",
+      "sample_id": "cbis-train-calc-00598",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4054454338835628,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00759",
+      "sample_id": "cbis-train-calc-00599",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4054454338835628,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00759",
+      "sample_id": "cbis-train-calc-00600",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4054454338835628,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00771",
+      "sample_id": "cbis-train-calc-00609",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00771",
+      "sample_id": "cbis-train-calc-00610",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00778",
+      "sample_id": "cbis-train-calc-00613",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.47035999942862755,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00778",
+      "sample_id": "cbis-train-calc-00614",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.47035999942862755,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00840",
+      "sample_id": "cbis-train-calc-00665",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.08644144692793518,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00840",
+      "sample_id": "cbis-train-calc-00666",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.08644144692793518,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00855",
+      "sample_id": "cbis-train-calc-00677",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.1097054635646866,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00856",
+      "sample_id": "cbis-train-calc-00678",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00866",
+      "sample_id": "cbis-train-calc-00691",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00866",
+      "sample_id": "cbis-train-calc-00692",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_00925",
+      "sample_id": "cbis-train-calc-00727",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.912244830420469,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_00925",
+      "sample_id": "cbis-train-calc-00728",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.912244830420469,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01002",
+      "sample_id": "cbis-train-calc-00783",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.912244830420469,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01002",
+      "sample_id": "cbis-train-calc-00784",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.912244830420469,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01019",
+      "sample_id": "cbis-train-calc-00791",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.3044398235576061,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01019",
+      "sample_id": "cbis-train-calc-00792",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.3044398235576061,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01045",
+      "sample_id": "cbis-train-calc-00816",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01045",
+      "sample_id": "cbis-train-calc-00817",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4743177460457548,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01065",
+      "sample_id": "cbis-train-calc-00832",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.8886703376151797,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01065",
+      "sample_id": "cbis-train-calc-00833",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.8886703376151797,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01160",
+      "sample_id": "cbis-train-calc-00905",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01160",
+      "sample_id": "cbis-train-calc-00906",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01160",
+      "sample_id": "cbis-train-calc-00907",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01160",
+      "sample_id": "cbis-train-calc-00908",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01160",
+      "sample_id": "cbis-train-calc-00909",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01184",
+      "sample_id": "cbis-train-calc-00926",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01184",
+      "sample_id": "cbis-train-calc-00927",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01229",
+      "sample_id": "cbis-train-calc-00949",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4054454338835628,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01229",
+      "sample_id": "cbis-train-calc-00950",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4054454338835628,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01246",
+      "sample_id": "cbis-train-calc-00954",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4054454338835628,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01315",
+      "sample_id": "cbis-train-calc-01025",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4054454338835628,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01315",
+      "sample_id": "cbis-train-calc-01026",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4054454338835628,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01337",
+      "sample_id": "cbis-train-calc-01048",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.08644144692793518,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01337",
+      "sample_id": "cbis-train-calc-01049",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.08644144692793518,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01346",
+      "sample_id": "cbis-train-calc-01057",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9135077706318514,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01346",
+      "sample_id": "cbis-train-calc-01058",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9135077706318514,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01361",
+      "sample_id": "cbis-train-calc-01063",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.8886703376151797,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01361",
+      "sample_id": "cbis-train-calc-01064",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.8886703376151797,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01366",
+      "sample_id": "cbis-train-calc-01069",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2141849004179582,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01369",
+      "sample_id": "cbis-train-calc-01070",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4054454338835628,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01443",
+      "sample_id": "cbis-train-calc-01152",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.47035999942862755,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01443",
+      "sample_id": "cbis-train-calc-01153",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.47035999942862755,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01455",
+      "sample_id": "cbis-train-calc-01158",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9023264400504859,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01455",
+      "sample_id": "cbis-train-calc-01159",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.9023264400504859,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01472",
+      "sample_id": "cbis-train-calc-01178",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4054454338835628,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01522",
+      "sample_id": "cbis-train-calc-01192",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01522",
+      "sample_id": "cbis-train-calc-01193",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01537",
+      "sample_id": "cbis-train-calc-01198",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.8886703376151797,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01549",
+      "sample_id": "cbis-train-calc-01203",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.47035999942862755,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01549",
+      "sample_id": "cbis-train-calc-01204",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.47035999942862755,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01567",
+      "sample_id": "cbis-train-calc-01220",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2619699312542272,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01567",
+      "sample_id": "cbis-train-calc-01221",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.2619699312542272,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01616",
+      "sample_id": "cbis-train-calc-01255",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4054454338835628,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01616",
+      "sample_id": "cbis-train-calc-01256",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4054454338835628,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01628",
+      "sample_id": "cbis-train-calc-01261",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1097054635646866,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01628",
+      "sample_id": "cbis-train-calc-01262",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1097054635646866,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01628",
+      "sample_id": "cbis-train-calc-01263",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1097054635646866,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01628",
+      "sample_id": "cbis-train-calc-01264",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1097054635646866,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01628",
+      "sample_id": "cbis-train-calc-01265",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1097054635646866,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01628",
+      "sample_id": "cbis-train-calc-01266",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1097054635646866,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01628",
+      "sample_id": "cbis-train-calc-01267",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1097054635646866,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01628",
+      "sample_id": "cbis-train-calc-01268",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1097054635646866,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01628",
+      "sample_id": "cbis-train-calc-01269",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1097054635646866,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01628",
+      "sample_id": "cbis-train-calc-01270",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1097054635646866,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01629",
+      "sample_id": "cbis-train-calc-01271",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.47035999942862755,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01629",
+      "sample_id": "cbis-train-calc-01272",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.47035999942862755,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01647",
+      "sample_id": "cbis-train-calc-01275",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4054454338835628,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01647",
+      "sample_id": "cbis-train-calc-01276",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4054454338835628,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01659",
+      "sample_id": "cbis-train-calc-01279",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4054454338835628,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01659",
+      "sample_id": "cbis-train-calc-01280",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4054454338835628,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01664",
+      "sample_id": "cbis-train-calc-01283",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1097054635646866,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01664",
+      "sample_id": "cbis-train-calc-01284",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1097054635646866,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01664",
+      "sample_id": "cbis-train-calc-01285",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1097054635646866,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01664",
+      "sample_id": "cbis-train-calc-01286",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1097054635646866,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01664",
+      "sample_id": "cbis-train-calc-01287",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1097054635646866,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01664",
+      "sample_id": "cbis-train-calc-01288",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.1097054635646866,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01676",
+      "sample_id": "cbis-train-calc-01289",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4054454338835628,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01678",
+      "sample_id": "cbis-train-calc-01290",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4054454338835628,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01678",
+      "sample_id": "cbis-train-calc-01291",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4054454338835628,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01688",
+      "sample_id": "cbis-train-calc-01295",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.47035999942862755,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01705",
+      "sample_id": "cbis-train-calc-01307",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4054454338835628,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01705",
+      "sample_id": "cbis-train-calc-01308",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4054454338835628,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01767",
+      "sample_id": "cbis-train-calc-01349",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4054454338835628,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01767",
+      "sample_id": "cbis-train-calc-01350",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4054454338835628,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01777",
+      "sample_id": "cbis-train-calc-01363",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.47035999942862755,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01777",
+      "sample_id": "cbis-train-calc-01364",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.47035999942862755,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01777",
+      "sample_id": "cbis-train-calc-01365",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.47035999942862755,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01777",
+      "sample_id": "cbis-train-calc-01366",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.47035999942862755,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01791",
+      "sample_id": "cbis-train-calc-01372",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01791",
+      "sample_id": "cbis-train-calc-01373",
+      "stratum": "calc",
+      "target_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "y_score": 0.4743177460457548,
+      "y_true": 0
+    },
+    {
+      "patient_id": "P_01818",
+      "sample_id": "cbis-train-calc-01381",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4054454338835628,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01818",
+      "sample_id": "cbis-train-calc-01382",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4054454338835628,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01847",
+      "sample_id": "cbis-train-calc-01427",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4054454338835628,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01847",
+      "sample_id": "cbis-train-calc-01428",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.4054454338835628,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01856",
+      "sample_id": "cbis-train-calc-01429",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.47035999942862755,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_01856",
+      "sample_id": "cbis-train-calc-01430",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.47035999942862755,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_02190",
+      "sample_id": "cbis-train-calc-01465",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.2619699312542272,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_02190",
+      "sample_id": "cbis-train-calc-01466",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.2619699312542272,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_02323",
+      "sample_id": "cbis-train-calc-01491",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.3010876847797162,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_02323",
+      "sample_id": "cbis-train-calc-01492",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.3010876847797162,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_02400",
+      "sample_id": "cbis-train-calc-01501",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.23980169650849384,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_02400",
+      "sample_id": "cbis-train-calc-01502",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.23980169650849384,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_02559",
+      "sample_id": "cbis-train-calc-01536",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.2619699312542272,
+      "y_true": 1
+    },
+    {
+      "patient_id": "P_02559",
+      "sample_id": "cbis-train-calc-01537",
+      "stratum": "calc",
+      "target_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "y_score": 0.2619699312542272,
+      "y_true": 1
+    }
+  ],
+  "schema_version": 2,
+  "secondary_evaluation": {
+    "purpose": "Mathematically interrogate weak/null signals using test-stratified AUROC, within-stratum regressions, and leave-stratum-out cross-cohort validation.",
+    "selected_c_fixed_before_test": 0.1,
+    "strata": {
+      "calc": {
+        "final_model_test": {
+          "auroc": 0.724721941354904,
+          "auroc_ci": [
+            0.5890809964855176,
+            0.829893041553971
+          ],
+          "n": 224,
+          "n_negative": 138,
+          "n_patients": 93,
+          "n_positive": 86,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        },
+        "leave_stratum_out_validation": {
+          "auroc": 0.6681833501853724,
+          "auroc_ci": [
+            0.5309568890669872,
+            0.7879776598915
+          ],
+          "n": 224,
+          "n_negative": 138,
+          "n_patients": 93,
+          "n_positive": 86,
+          "n_training": 908,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        },
+        "within_stratum_regression": {
+          "auroc": 0.7489888776541961,
+          "auroc_ci": [
+            0.606647701009007,
+            0.8476747039259694
+          ],
+          "n": 224,
+          "n_negative": 138,
+          "n_patients": 93,
+          "n_positive": 86,
+          "n_training": 1098,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        }
+      },
+      "mass": {
+        "final_model_test": {
+          "auroc": 0.8521541950113378,
+          "auroc_ci": [
+            0.7666301912790535,
+            0.9147710872285936
+          ],
+          "n": 188,
+          "n_negative": 90,
+          "n_patients": 98,
+          "n_positive": 98,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        },
+        "leave_stratum_out_validation": {
+          "auroc": 0.7591836734693879,
+          "auroc_ci": [
+            0.644527998710054,
+            0.8651122146436434
+          ],
+          "n": 188,
+          "n_negative": 90,
+          "n_patients": 98,
+          "n_positive": 98,
+          "n_training": 1098,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        },
+        "within_stratum_regression": {
+          "auroc": 0.8310657596371882,
+          "auroc_ci": [
+            0.7446346546354132,
+            0.90011921886263
+          ],
+          "n": 188,
+          "n_negative": 90,
+          "n_patients": 98,
+          "n_positive": 98,
+          "n_training": 908,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        }
+      }
+    }
+  },
+  "split_sha256": "33bd7dcb3ebe1d363da8174b90b70500bc6e387b5dc36f47d21b9f1e87ff0e28"
+}

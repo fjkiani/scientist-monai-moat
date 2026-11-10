@@ -1,0 +1,11 @@
+{
+  "status": "BLOCKED_BILLING",
+  "clinical_meter": "official_FROC@2_heldout_88",
+  "attempt_request_id": "gateE-froc-crispro-ephemeral-20261005T063100Z-zo",
+  "ckpt_request_id": "gateD-crispro-ephemeral-20261005T014000Z-zo",
+  "error": "Modal billing cycle spend limit during image build for luna16_heldout_froc_app",
+  "fallback": "baseline_lock remains; candidate not promoted; prior COCO collapse evidence stands",
+  "baseline_froc_at_2": 0.8267399271674979,
+  "promote": false,
+  "ts": "2026-10-05T06:39:22Z"
+}

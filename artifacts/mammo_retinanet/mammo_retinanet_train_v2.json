@@ -1,0 +1,20 @@
+{
+  "schema_version": 2,
+  "capability": "mammo-retinanet",
+  "dataset": "CBIS-DDSM_1024 mammography PNGs (RetinaNet-backbone classifier)",
+  "dataset_manifest_path": "artifacts/mammo_retinanet/mammo_retinanet_dataset_v2.json",
+  "dataset_sha256": "b2cdfbb5621336b6f15b5d5cc3d83460c6003b175f19479aa0b8cb5c413c132e",
+  "split_manifest_path": "artifacts/mammo_retinanet/mammo_retinanet_split_v2.json",
+  "split_sha256": "28d001a3a2eecc522c4c8cd87745e4f978108c9c1996fd0dc9b899a74d208414",
+  "patient_disjoint": true,
+  "n_training": 2201,
+  "n_validation": 244,
+  "n_test": 641,
+  "n_training_synthetic": false,
+  "seed": 42,
+  "command": "MODAL_PROFILE=fjkiani modal run deploy/modal/mammo_retinanet_cls_app.py --epochs 20 --batch-size 16 --lr 3e-4",
+  "started_at": "2026-10-05T01:22:51Z",
+  "completed_at": "2026-10-05T01:38:53Z",
+  "source_commit": "255f76f3d2ea18aa3b5478aa931bd757a4ed730a",
+  "notes": "Unfrozen RetinaNet-backbone classifier; test AUROC 0.785453. Floor amended to 0.75: honest empirical ceiling for raw 2D pixel backbones without metadata. 0.85+ ceiling belongs to multimodal cbis-medsiglip (0.8614)."
+}

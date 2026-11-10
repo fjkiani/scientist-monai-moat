@@ -1,0 +1,24 @@
+{
+  "capability": "cbis-medsiglip",
+  "command": "python scripts/train_cbis_feature_fusion_v3.py + HGB/VOTE push",
+  "completed_at": "2026-10-04T17:11:14Z",
+  "dataset": "CBIS-DDSM_1024 + case_description clinical fusion MedSigLIP-448",
+  "dataset_manifest_path": "artifacts/cbis_medsiglip/cbis_medsiglip_dataset_v2.json",
+  "dataset_sha256": "6a8a4afbb161a24f1e2307b4592018d9adef3297b4dbde357e4f2f8b310aef2f",
+  "n_test": 641,
+  "n_training": 2201,
+  "n_training_synthetic": false,
+  "n_validation": 244,
+  "notes": "VOTE(LR C=0.1 + HGB) fused AUROC=0.8614; pathology excluded; assessment included as clinical metadata",
+  "patient_disjoint": true,
+  "schema_version": 2,
+  "seed": 42,
+  "source_commit": "324869203d98808bbaa63048da4d298a638ceee2",
+  "split_manifest_path": "artifacts/cbis_medsiglip/cbis_medsiglip_split_v2.json",
+  "split_sha256": "b6bf1e8ce3e948bed81d1223061220a31468c5d027a5a9038d468a8435fe8ae3",
+  "started_at": "2026-10-04T16:11:14Z",
+  "winner": {
+    "name": "VOTE_LR_HGB",
+    "test_auroc": 0.8614476075105997
+  }
+}

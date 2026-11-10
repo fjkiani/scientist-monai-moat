@@ -1,0 +1,33 @@
+{
+  "status": "ok",
+  "dataset_id": "rsna_theoviel_256_png_tree_12k",
+  "n_total": 12000,
+  "n_train": 9600,
+  "n_test": 2400,
+  "n_pos": 247,
+  "cv_auc_mean": 0.659831464717523,
+  "cv_auc_std": 0.037773457727400574,
+  "test_auc": 0.676880875702046,
+  "test_prauc": 0.054889798633570755,
+  "test_acc": 0.9129166666666667,
+  "test_f1": 0.07111111111111111,
+  "confusion_matrix": [
+    [
+      2183,
+      168
+    ],
+    [
+      41,
+      8
+    ]
+  ],
+  "joblib": "artifacts/rsna_mammo/probe_v2_12k/rsna_medsiglip_logreg_v2_12k.joblib",
+  "joblib_sha256": "9aa35cc30c22b2dbf58d91e039c91e36c897d7364ccc5efc9d792f69ee3688b6",
+  "backbone": "MedSigLIP-1152",
+  "split": "stratified_holdout_20pct_seed42",
+  "class_weight": "balanced",
+  "wall_s": 6.01,
+  "band": "24-48",
+  "meets_10k_floor": true,
+  "prior_balanced_1482_test_auc": 0.7092659644502962
+}

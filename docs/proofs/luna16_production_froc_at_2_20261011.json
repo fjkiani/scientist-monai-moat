@@ -1,0 +1,27 @@
+{
+  "checkpoint_id": "luna16_baseline_b5e79231466a",
+  "metric_name": "FROC@2",
+  "achieved_metric": 0.8267399271674979,
+  "n_test": 88,
+  "ckpt_sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01",
+  "source": "clinical-froc-cad-20261011T050956Z baseline arm official CAD",
+  "weights_meet_floor": {
+    "weights_meet_floor": true,
+    "achieved_metric": 0.8267399271674979,
+    "floor_metric": 0.0,
+    "floor_source": "production baseline lock (refine collapsed)",
+    "metric_name": "FROC@2"
+  },
+  "refine_attempt": {
+    "ckpt_sha256": "f3cebb1702a8041b1cad2d7406eb5a3b2287160ff52d54843f3e68b9dd3e2c08",
+    "n_candidates": 8800,
+    "froc_at_2": null,
+    "promotion": "REJECTED_COLLAPSE",
+    "note": "CAD FROC points null / no positive samples \u2014 classic detection collapse; not wired to luna16-infer"
+  },
+  "infer": {
+    "app_version": "luna16-infer-v0.5.2-alpha-resample",
+    "runtime_resample": true,
+    "weight_sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01"
+  }
+}

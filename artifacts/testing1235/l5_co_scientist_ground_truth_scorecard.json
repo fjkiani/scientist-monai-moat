@@ -1,0 +1,320 @@
+{
+  "n_cases": 20,
+  "n_phenotype": 15,
+  "n_landmark": 5,
+  "top1_guideline_concordance": 1.0,
+  "contraindication_violation_rate": 0.0,
+  "landmark_pairwise_accuracy": 1.0,
+  "targets": {
+    "concordance_ge": 0.9,
+    "contra_eq": 0.0,
+    "landmark_ge": 0.8
+  },
+  "pass": {
+    "concordance": true,
+    "contraindication": true,
+    "landmark": true
+  },
+  "rows": [
+    {
+      "case_id": "pheno_01_hr_pos_her2_neg_postmeno",
+      "kind": "phenotype",
+      "mode": "offline",
+      "engine": "offline_scalar_ranker",
+      "top_statement": "Therapy: Aromatase inhibitor (letrozole) (line 1)",
+      "concordant": true,
+      "contraindication_violation": false,
+      "landmark_ok": null,
+      "honesty_gate": {
+        "seen_urls_count": 1,
+        "warnings": []
+      },
+      "n_matches": 36
+    },
+    {
+      "case_id": "pheno_02_hr_pos_her2_neg_premeno",
+      "kind": "phenotype",
+      "mode": "offline",
+      "engine": "offline_scalar_ranker",
+      "top_statement": "Therapy: Tamoxifen +/- OFS (line 1)",
+      "concordant": true,
+      "contraindication_violation": false,
+      "landmark_ok": null,
+      "honesty_gate": {
+        "seen_urls_count": 1,
+        "warnings": []
+      },
+      "n_matches": 36
+    },
+    {
+      "case_id": "pheno_03_her2_pos_hr_neg",
+      "kind": "phenotype",
+      "mode": "offline",
+      "engine": "offline_scalar_ranker",
+      "top_statement": "Therapy: Trastuzumab + Pertuzumab + Taxane (line 1)",
+      "concordant": true,
+      "contraindication_violation": false,
+      "landmark_ok": null,
+      "honesty_gate": {
+        "seen_urls_count": 2,
+        "warnings": []
+      },
+      "n_matches": 36
+    },
+    {
+      "case_id": "pheno_04_her2_pos_hr_pos",
+      "kind": "phenotype",
+      "mode": "offline",
+      "engine": "offline_scalar_ranker",
+      "top_statement": "Therapy: Trastuzumab + Pertuzumab + Taxane + Endocrine (line 1)",
+      "concordant": true,
+      "contraindication_violation": false,
+      "landmark_ok": null,
+      "honesty_gate": {
+        "seen_urls_count": 2,
+        "warnings": []
+      },
+      "n_matches": 36
+    },
+    {
+      "case_id": "pheno_05_tnbc_early",
+      "kind": "phenotype",
+      "mode": "offline",
+      "engine": "offline_scalar_ranker",
+      "top_statement": "Therapy: Anthracycline/taxane chemotherapy (line 1)",
+      "concordant": true,
+      "contraindication_violation": false,
+      "landmark_ok": null,
+      "honesty_gate": {
+        "seen_urls_count": 1,
+        "warnings": []
+      },
+      "n_matches": 36
+    },
+    {
+      "case_id": "pheno_06_tnbc_advanced",
+      "kind": "phenotype",
+      "mode": "offline",
+      "engine": "offline_scalar_ranker",
+      "top_statement": "Therapy: Systemic chemotherapy (sacituzumab / taxane class) (line 1)",
+      "concordant": true,
+      "contraindication_violation": false,
+      "landmark_ok": null,
+      "honesty_gate": {
+        "seen_urls_count": 1,
+        "warnings": []
+      },
+      "n_matches": 36
+    },
+    {
+      "case_id": "pheno_07_hr_pos_node_pos_postmeno",
+      "kind": "phenotype",
+      "mode": "offline",
+      "engine": "offline_scalar_ranker",
+      "top_statement": "Therapy: Aromatase inhibitor +/- CDK4/6 (line 1)",
+      "concordant": true,
+      "contraindication_violation": false,
+      "landmark_ok": null,
+      "honesty_gate": {
+        "seen_urls_count": 2,
+        "warnings": []
+      },
+      "n_matches": 36
+    },
+    {
+      "case_id": "pheno_08_her2_low_hr_pos",
+      "kind": "phenotype",
+      "mode": "offline",
+      "engine": "offline_scalar_ranker",
+      "top_statement": "Therapy: Endocrine +/- CDK4/6 (consider T-DXd later line) (line 1)",
+      "concordant": true,
+      "contraindication_violation": false,
+      "landmark_ok": null,
+      "honesty_gate": {
+        "seen_urls_count": 2,
+        "warnings": []
+      },
+      "n_matches": 36
+    },
+    {
+      "case_id": "pheno_09_dcis_hr_pos",
+      "kind": "phenotype",
+      "mode": "offline",
+      "engine": "offline_scalar_ranker",
+      "top_statement": "Therapy: Endocrine risk-reduction (tamoxifen or AI) (line 1)",
+      "concordant": true,
+      "contraindication_violation": false,
+      "landmark_ok": null,
+      "honesty_gate": {
+        "seen_urls_count": 1,
+        "warnings": []
+      },
+      "n_matches": 36
+    },
+    {
+      "case_id": "pheno_10_elderly_hr_pos",
+      "kind": "phenotype",
+      "mode": "offline",
+      "engine": "offline_scalar_ranker",
+      "top_statement": "Therapy: Aromatase inhibitor (de-escalate chemo) (line 1)",
+      "concordant": true,
+      "contraindication_violation": false,
+      "landmark_ok": null,
+      "honesty_gate": {
+        "seen_urls_count": 1,
+        "warnings": []
+      },
+      "n_matches": 36
+    },
+    {
+      "case_id": "pheno_11_her2_pos_residual",
+      "kind": "phenotype",
+      "mode": "offline",
+      "engine": "offline_scalar_ranker",
+      "top_statement": "Therapy: T-DM1 (ado-trastuzumab emtansine) (line 1)",
+      "concordant": true,
+      "contraindication_violation": false,
+      "landmark_ok": null,
+      "honesty_gate": {
+        "seen_urls_count": 1,
+        "warnings": []
+      },
+      "n_matches": 36
+    },
+    {
+      "case_id": "pheno_12_hr_pos_high_risk_premeno",
+      "kind": "phenotype",
+      "mode": "offline",
+      "engine": "offline_scalar_ranker",
+      "top_statement": "Therapy: Chemo then endocrine +/- OFS (line 1)",
+      "concordant": true,
+      "contraindication_violation": false,
+      "landmark_ok": null,
+      "honesty_gate": {
+        "seen_urls_count": 2,
+        "warnings": []
+      },
+      "n_matches": 36
+    },
+    {
+      "case_id": "pheno_13_inflammatory_her2_pos",
+      "kind": "phenotype",
+      "mode": "offline",
+      "engine": "offline_scalar_ranker",
+      "top_statement": "Therapy: Neoadjuvant THP then surgery (line 1)",
+      "concordant": true,
+      "contraindication_violation": false,
+      "landmark_ok": null,
+      "honesty_gate": {
+        "seen_urls_count": 2,
+        "warnings": []
+      },
+      "n_matches": 36
+    },
+    {
+      "case_id": "pheno_14_brca_tnbc",
+      "kind": "phenotype",
+      "mode": "offline",
+      "engine": "offline_scalar_ranker",
+      "top_statement": "Therapy: Platinum-containing chemotherapy +/- PARP consideration (line 1)",
+      "concordant": true,
+      "contraindication_violation": false,
+      "landmark_ok": null,
+      "honesty_gate": {
+        "seen_urls_count": 1,
+        "warnings": []
+      },
+      "n_matches": 36
+    },
+    {
+      "case_id": "pheno_15_hr_pos_oligomet",
+      "kind": "phenotype",
+      "mode": "offline",
+      "engine": "offline_scalar_ranker",
+      "top_statement": "Therapy: AI + CDK4/6 inhibitor (line 1)",
+      "concordant": true,
+      "contraindication_violation": false,
+      "landmark_ok": null,
+      "honesty_gate": {
+        "seen_urls_count": 2,
+        "warnings": []
+      },
+      "n_matches": 36
+    },
+    {
+      "case_id": "landmark_16_cleopatra",
+      "kind": "landmark",
+      "mode": "offline",
+      "engine": "offline_scalar_ranker",
+      "top_statement": "Therapy: Trastuzumab + Pertuzumab + Docetaxel (THP) (line 1)",
+      "concordant": true,
+      "contraindication_violation": false,
+      "landmark_ok": true,
+      "honesty_gate": {
+        "seen_urls_count": 1,
+        "warnings": []
+      },
+      "n_matches": 25
+    },
+    {
+      "case_id": "landmark_17_katherine",
+      "kind": "landmark",
+      "mode": "offline",
+      "engine": "offline_scalar_ranker",
+      "top_statement": "Therapy: T-DM1 (line 1)",
+      "concordant": true,
+      "contraindication_violation": false,
+      "landmark_ok": true,
+      "honesty_gate": {
+        "seen_urls_count": 1,
+        "warnings": []
+      },
+      "n_matches": 25
+    },
+    {
+      "case_id": "landmark_18_destiny_breast03",
+      "kind": "landmark",
+      "mode": "offline",
+      "engine": "offline_scalar_ranker",
+      "top_statement": "Therapy: Trastuzumab deruxtecan (T-DXd) (line 1)",
+      "concordant": true,
+      "contraindication_violation": false,
+      "landmark_ok": true,
+      "honesty_gate": {
+        "seen_urls_count": 2,
+        "warnings": []
+      },
+      "n_matches": 25
+    },
+    {
+      "case_id": "landmark_19_monaleesa2",
+      "kind": "landmark",
+      "mode": "offline",
+      "engine": "offline_scalar_ranker",
+      "top_statement": "Therapy: Letrozole + Ribociclib (line 1)",
+      "concordant": true,
+      "contraindication_violation": false,
+      "landmark_ok": true,
+      "honesty_gate": {
+        "seen_urls_count": 1,
+        "warnings": []
+      },
+      "n_matches": 25
+    },
+    {
+      "case_id": "landmark_20_tailorx",
+      "kind": "landmark",
+      "mode": "offline",
+      "engine": "offline_scalar_ranker",
+      "top_statement": "Therapy: Endocrine therapy alone (line 1)",
+      "concordant": true,
+      "contraindication_violation": false,
+      "landmark_ok": true,
+      "honesty_gate": {
+        "seen_urls_count": 1,
+        "warnings": []
+      },
+      "n_matches": 25
+    }
+  ]
+}

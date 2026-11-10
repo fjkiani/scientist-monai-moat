@@ -1,0 +1,85 @@
+{
+  "model_state": "loaded_luna16_retinanet",
+  "model_name": "monai/lung_nodule_ct_detection@0.6.9",
+  "bundle_version": "0.6.9",
+  "app_version": "luna16-infer-v0.5.0-alpha",
+  "case_id": "892531e5e4dde1e8",
+  "ingest_source": "modal-volume://oncology-arbiter-cases/892531e5e4dde1e8/dicom_series/",
+  "n_detections": 4,
+  "top_score": 0.7112138867378235,
+  "detections": [
+    {
+      "center_z_mm": 222.43036270141602,
+      "center_y_mm": 202.91556451121141,
+      "center_x_mm": 297.3749489545371,
+      "width_mm": 2.317422161664581,
+      "height_mm": 3.9998150470346445,
+      "depth_mm": 12.791557312011719,
+      "diameter_mm": 12.791557312011719,
+      "score": 0.7112138867378235
+    },
+    {
+      "center_z_mm": 223.75205993652344,
+      "center_y_mm": 202.77683346498088,
+      "center_x_mm": 96.23111682156195,
+      "width_mm": 2.422830326733674,
+      "height_mm": 4.192894817475462,
+      "depth_mm": 13.85162353515625,
+      "diameter_mm": 13.85162353515625,
+      "score": 0.2374849021434784
+    },
+    {
+      "center_z_mm": 103.37517738342285,
+      "center_y_mm": 223.2776696976216,
+      "center_x_mm": 242.4481012322285,
+      "width_mm": 2.407894888194278,
+      "height_mm": 3.9445829817123013,
+      "depth_mm": 13.084144592285156,
+      "diameter_mm": 13.084144592285156,
+      "score": 0.1847762018442154
+    },
+    {
+      "center_z_mm": 142.66379356384277,
+      "center_y_mm": 268.8630921766453,
+      "center_x_mm": 255.1514995021862,
+      "width_mm": 2.836454802454682,
+      "height_mm": 4.826808294470538,
+      "depth_mm": 15.767574310302734,
+      "diameter_mm": 15.767574310302734,
+      "score": 0.03135721758008003
+    }
+  ],
+  "inference_seconds": 3.2409,
+  "total_seconds": 37.9807,
+  "input_shape": [
+    121,
+    512,
+    512
+  ],
+  "preprocessing_summary": {
+    "hu_range": [
+      -1024.0,
+      300.0
+    ],
+    "target_spacing_mm": [
+      1.25,
+      0.703125,
+      0.703125
+    ],
+    "actual_spacing_mm": [
+      2.5,
+      0.7617189884185791,
+      0.7617189884185791
+    ],
+    "roi_size": [
+      192,
+      192,
+      80
+    ],
+    "sw_overlap": 0.25,
+    "score_thresh": 0.02,
+    "nms_thresh": 0.22
+  },
+  "device": "cuda:0",
+  "disclaimer": "detector=monai/lung_nodule_ct_detection@0.6.9; trained on LUNA16 fold 0 (LIDC-IDRI subset, single-site chest CT). Not validated on screening CT, contrast CT, or pediatric CT. Nodule size range 3-30 mm. Detections are RESEARCH USE ONLY and require radiologist review."
+}

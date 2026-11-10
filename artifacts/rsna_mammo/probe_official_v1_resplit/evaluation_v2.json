@@ -1,0 +1,38 @@
+{
+  "status": "ok",
+  "dataset_id": "rsna_kaggle_official_v1_resplit",
+  "n_total": 826,
+  "n_train": 660,
+  "n_test": 166,
+  "n_pos": 248,
+  "cv_auc_mean": 0.6145624303232999,
+  "cv_auc_std": 0.03662968817951784,
+  "test_auc": 0.6074137931034482,
+  "test_prauc": 0.415780988305657,
+  "test_acc": 0.5963855421686747,
+  "test_f1": 0.3619047619047619,
+  "confusion_matrix": [
+    [
+      80,
+      36
+    ],
+    [
+      31,
+      19
+    ]
+  ],
+  "joblib": "artifacts/rsna_mammo/probe_official_v1_resplit/rsna_medsiglip_logreg_official_v1_resplit.joblib",
+  "joblib_sha256": "f3c7ed59a264f6abc952425cf73a093db8d319e232f861f072945dcebbd1175d",
+  "backbone": "MedSigLIP-1152",
+  "split": "embed_tree_train_test_folders",
+  "class_weight": "balanced",
+  "wall_s": 0.32,
+  "band": "24-48",
+  "meets_10k_floor": false,
+  "emb_dir": "artifacts/rsna_mammo/embeddings_official_v1_resplit",
+  "honesty": {
+    "test_auc_1p0_prior_artifact": "artifacts/rsna_mammo/probe_official_v1 had test_auc=1.0 on n_test=32 fixed early split; superseded by this stratified 80/20 resplit",
+    "meets_10k_floor": false,
+    "band4_10k_still_held_by": "artifacts/rsna_mammo/probe_v2_12k (theoviel) test_auc~0.677"
+  }
+}

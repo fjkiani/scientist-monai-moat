@@ -1,0 +1,9 @@
+{
+  "status": "ok",
+  "image": "crispro-oncology-ruo:72h",
+  "healthz": 200,
+  "ts": "2026-10-05T06:42:21Z",
+  "script": "deploy/docker/smoke_sovereign.sh",
+  "log": "/tmp/sovereign_smoke.txt",
+  "note": "Air-gapped-capable image smoke; healthz 200 without mock fallbacks"
+}

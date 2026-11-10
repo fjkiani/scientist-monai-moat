@@ -1,0 +1,27 @@
+{
+  "status": "ok",
+  "n_train": 474,
+  "n_test": 86,
+  "n_pos_train": 26,
+  "n_pos_test": 6,
+  "test_auc": 0.5708333333333333,
+  "test_prauc": 0.13410594130909603,
+  "test_acc": 0.8953488372093024,
+  "test_f1": 0.18181818181818182,
+  "confusion_matrix": [
+    [
+      76,
+      4
+    ],
+    [
+      5,
+      1
+    ]
+  ],
+  "wall_s": 0.05,
+  "backbone": "MedSigLIP-1152",
+  "band": "24-48",
+  "dataset_id": "vindr_birads_png_sample_560",
+  "joblib": "artifacts/vindr_mammo/probe_v1/vindr_medsiglip_logreg_v1.joblib",
+  "joblib_sha256": "8a6402fdc66ae249933eb7832f8fa7c4758d215a280317735cd517d95e1d404c"
+}

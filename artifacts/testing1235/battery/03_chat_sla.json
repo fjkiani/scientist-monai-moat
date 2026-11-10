@@ -1,0 +1,9 @@
+{
+  "status": "ok",
+  "latency_s": 0.814,
+  "sla_seconds": 120,
+  "sla_met": true,
+  "chat_url": "https://testing1235--medgemma-1-5-4b-chat.modal.run",
+  "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8",
+  "text": "<unused94>thought\nThe user wants me to reply with the word \"ok\". I"
+}

@@ -1,0 +1,21 @@
+{
+  "version": "cbis_ddsm_logreg_v3",
+  "artifact": "models/cbis_ddsm_logreg_v3.joblib",
+  "artifact_sha256": "f40f33c1cd3adfa48d1d10cc4d136795ad0642c3d1f94a543872ae1dc283aaf7",
+  "test_metrics": {
+    "auroc": 0.8614476075105997,
+    "n_test": 641,
+    "n_train": 2201
+  },
+  "floor": {
+    "auroc": 0.85,
+    "pass": true
+  },
+  "winner": {
+    "name": "VOTE_LR_HGB"
+  },
+  "honesty": {
+    "pathology_excluded": true,
+    "assessment_included": true
+  }
+}

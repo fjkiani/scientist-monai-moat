@@ -45,6 +45,12 @@ from typing import Any, Optional
 import numpy as np
 import torch
 
+from oncology_arbiter.nlp.clinicalbert_sliding_window import (
+    OVERLAP_TOKENS,
+    WINDOW_TOKENS,
+    predict_words_sliding_window,
+)
+
 # The trained model directory.  Resolution order (first hit wins):
 #   1. env var ``ONCOLOGY_ARBITER_CLINICALBERT_DIR`` — for tests / prod
 #      overrides / air-gapped mounts.
@@ -175,50 +181,35 @@ class ClinicalBertReportParser:
             cls._instance = ClinicalBertReportParser(model_dir=model_dir)
         return cls._instance
 
-    def parse(self, text: str, max_len: int = 512) -> ClinicalBertParsedReport:
-        """Tokenize, run inference, decode BIO spans, and roll them up
-        into per-field values matching the regex ParsedReport contract."""
+    def parse(self, text: str, max_len: int = WINDOW_TOKENS) -> ClinicalBertParsedReport:
+        """Parse the complete document with 192-token/32-overlap windows.
+
+        ``max_len`` remains in the signature for source compatibility, but
+        values other than the checkpoint's 192-token training horizon fail
+        closed rather than feeding un-fine-tuned positions to the head.
+        """
+        if int(max_len) != WINDOW_TOKENS:
+            raise ValueError(
+                f"max_len is locked to the trained horizon {WINDOW_TOKENS}; "
+                f"got {max_len}"
+            )
         tokens = self._whitespace_tokenize(text)
         surface_tokens = [t for t, _, _ in tokens]
 
-        enc = self._tokenizer(
-            surface_tokens,
-            is_split_into_words=True,
-            padding="max_length",
-            truncation=True,
-            max_length=max_len,
-            return_tensors="pt",
-            return_offsets_mapping=False,
-        ).to(self._device)
-
-        with torch.no_grad():
-            logits = self._model(**enc).logits
-        probs = torch.softmax(logits, dim=-1)[0].cpu().numpy()
-        pred_ids = probs.argmax(-1)
-
-        # Roll sub-token predictions back to word-level. For each source
-        # word we take the FIRST sub-token's argmax as the prediction and
-        # its softmax prob as the confidence.
-        word_ids = enc.word_ids(batch_index=0)
-        word_labels: list[str | None] = [None] * len(surface_tokens)
-        word_confs: list[float] = [0.0] * len(surface_tokens)
-        prev_wid: int | None = None
-        for i, wid in enumerate(word_ids):
-            if wid is None or wid == prev_wid:
-                continue
-            if wid < len(surface_tokens):
-                lab = self._id2label[int(pred_ids[i])]
-                word_labels[wid] = lab
-                word_confs[wid] = float(probs[i, int(pred_ids[i])])
-            prev_wid = wid
-
-        # Fill any word truncated out of the encoding with O @ 0.0 conf.
-        for i, l in enumerate(word_labels):
-            if l is None:
-                word_labels[i] = "O"
+        prediction = predict_words_sliding_window(
+            tokenizer=self._tokenizer,
+            model=self._model,
+            words=surface_tokens,
+            id2label=self._id2label,
+            device=self._device,
+            window_tokens=WINDOW_TOKENS,
+            overlap_tokens=OVERLAP_TOKENS,
+        )
 
         # Decode BIO spans and their per-span mean confidence + surface.
-        spans = self._decode_spans_with_conf(surface_tokens, word_labels, word_confs, tokens)
+        spans = self._decode_spans_with_conf(
+            surface_tokens, prediction.labels, prediction.confidences, tokens
+        )
 
         # Aggregate spans per entity type — take the highest-confidence one
         # if multiple, since last-match-wins made sense for regex but a

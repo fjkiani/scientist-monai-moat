@@ -1,0 +1,11 @@
+{
+  "status": "WORKSPACE_DISABLED",
+  "workspace_hint": "ac-4gRdNOwvIkDeUMNBaLOvVz",
+  "profile": "crispro",
+  "http": "modal-http: workspace ... is disabled",
+  "prior_failover_from": "fjkiani",
+  "billing": "spend limit hit on luna16_heldout_froc image build",
+  "ghost_v5": "228/500 ok before mid-run 404 disable cascade",
+  "luna": "baseline lock; official FROC blocked on billing",
+  "ts": "2026-10-05T06:40:15Z"
+}

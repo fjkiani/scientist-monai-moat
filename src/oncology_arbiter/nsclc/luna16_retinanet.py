@@ -48,6 +48,7 @@ each `detect` call fully owns its input tensor and postprocessing.
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
@@ -58,6 +59,34 @@ import torch
 # The MONAI bundle path. `ONCOLOGY_ARBITER_LUNA16_BUNDLE_DIR` env var
 # overrides for tests / prod deploys.
 _DEFAULT_BUNDLE_DIR = Path("/workspace/monai_bundles/lung_nodule_ct_detection")
+# Optional Gate-D candidate override (RUO). Prefer env, else repo models/luna16/.
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+_CANDIDATE_DIR = _REPO_ROOT / "models" / "luna16"
+
+
+def _resolve_weights_path(bundle_dir: Path) -> Path:
+    """Resolve RetinaNet ckpt: env override → production baseline .pt → bundle stock.
+
+    Env: ``ONCOLOGY_ARBITER_LUNA16_WEIGHTS`` (``.pt`` or ``.safetensors``).
+    Production lock: MONAI stock baseline ``luna16_baseline_b5e79231466a.pt`` only.
+    For safe validation we also ship a `.safetensors` conversion:
+    ``luna16_baseline_b5e79231466a.safetensors`` (sha256 `94bc1635...`).
+    Collapsed fine-tune candidates are never auto-selected.
+    Does **not** rewrite luna16-infer production volumes — local/API only.
+    """
+    env = (os.environ.get("ONCOLOGY_ARBITER_LUNA16_WEIGHTS") or "").strip()
+    if env:
+        p = Path(env).expanduser()
+        if not p.is_file():
+            raise FileNotFoundError(
+                f"ONCOLOGY_ARBITER_LUNA16_WEIGHTS set but missing: {p}"
+            )
+        return p
+    if _CANDIDATE_DIR.is_dir():
+        baseline = _CANDIDATE_DIR / "luna16_baseline_b5e79231466a.pt"
+        if baseline.is_file():
+            return baseline
+    return bundle_dir / "models" / "model.pt"
 
 
 LUNA16_WARNING = (
@@ -159,18 +188,25 @@ class LungNoduleDetector:
             use_list_output=False,
         )
 
-        # Load pretrained weights
-        ckpt_path = self.bundle_dir / "models" / "model.pt"
+        # Load pretrained weights (stock bundle or Gate-D candidate override).
+        ckpt_path = _resolve_weights_path(self.bundle_dir)
         if not ckpt_path.exists():
             raise FileNotFoundError(
                 f"MONAI bundle weights not found at {ckpt_path}. "
                 "Set ONCOLOGY_ARBITER_LUNA16_BUNDLE_DIR to the extracted "
-                "bundle path, or download from HuggingFace "
+                "bundle path, ONCOLOGY_ARBITER_LUNA16_WEIGHTS to a Gate-D "
+                "candidate, or download from HuggingFace "
                 "MONAI/lung_nodule_ct_detection@0.6.9."
             )
-        ckpt = torch.load(ckpt_path, map_location=self._device, weights_only=False)
+        if ckpt_path.suffix == ".safetensors":
+            from safetensors.torch import load_file
+
+            ckpt = load_file(str(ckpt_path), device=str(self._device))
+        else:
+            ckpt = torch.load(ckpt_path, map_location=self._device, weights_only=False)
         # Bundle ships state_dict directly (not wrapped in "model" key).
         net.load_state_dict(ckpt if not isinstance(ckpt, dict) or "feature_extractor.body.conv1.weight" in ckpt else ckpt["model"])
+        self.weights_path = str(ckpt_path)
 
         # Anchor generator + detector (params from inference.json)
         ag = AnchorGeneratorWithAnchorShape(
@@ -313,3 +349,6 @@ class LungNoduleDetector:
             },
             inference_seconds=dt,
         )
+
+# Delivery identity: luna16_baseline_b5e79231466a.pt b5e79231… (production_fallback; pure .pt)
+# Safe mirror: luna16_baseline_b5e79231466a.safetensors 94bc1635f55e9f7241643dc5b998a28b7f278379850f3fc38fc61a8350f9047e
