@@ -425,9 +425,16 @@ def file_stats(path: Path) -> Dict[str, Any]:
         st["rows"] = len(df)
         st["cols"] = len(df.columns)
     elif path.suffix == ".parquet":
-        df = pd.read_parquet(path)
-        st["rows"] = len(df)
-        st["cols"] = len(df.columns)
+        try:
+            import pyarrow.parquet as pq
+
+            meta = pq.read_metadata(path)
+            st["rows"] = meta.num_rows
+            st["cols"] = meta.num_columns
+        except Exception:
+            df = pd.read_parquet(path)
+            st["rows"] = len(df)
+            st["cols"] = len(df.columns)
     return st
 
 
@@ -455,12 +462,27 @@ def write_manifest(
     return manifest_path
 
 
+def _est_tarball_mb(member_paths: List[Path], manifest_path: Path) -> float:
+    """Fast upper-bound estimate (parquet/csv barely shrink in gzip)."""
+    total = 0
+    for p in member_paths:
+        if p.name in TAR_SKIP_ALIASES:
+            continue
+        total += p.stat().st_size
+    if manifest_path not in member_paths and manifest_path.is_file():
+        total += manifest_path.stat().st_size
+    # Tar headers + gzip wrapper; already-compressed parquet ~= raw bytes.
+    return (total * 1.02) / (1024 * 1024)
+
+
 def _tarball_size_mb(member_paths: List[Path], manifest_path: Path) -> float:
-    """On-disk trial packed size (gzip) for candidate members + manifest."""
+    """Exact packed size only when estimate says we might be near the cap."""
+    est = _est_tarball_mb(member_paths, manifest_path)
+    if est <= MAX_TAR_MB * 0.85:
+        return est
     members = list(member_paths)
     if manifest_path not in members and manifest_path.is_file():
         members = members + [manifest_path]
-
     with tempfile.NamedTemporaryFile(suffix=".tar.gz", delete=False) as tf:
         tpath = tf.name
     try:
