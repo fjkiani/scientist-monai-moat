@@ -25,8 +25,8 @@
   "files": [
     {
       "path": "MANIFEST_SHA256.json",
-      "bytes": 4161,
-      "sha256": "465ddee879b00eaa2ead81a21324677c95f9715b9648d67d88b1aff19cb021c0"
+      "bytes": 4055,
+      "sha256": "439a7b099c2589fdd7da1f69e467ed1b9e846cdb10d1a964ce655852788909cf"
     },
     {
       "path": "gse165897_human_paired_compartments.csv",
@@ -101,22 +101,22 @@
   ],
   "phylo_upload_tarball": {
     "filename": "phylo_v11_ovarian_inputs.tar.gz",
-    "bytes": 207997,
-    "sha256": "be338169300e4d0e9bfd79daab732e1da9ebc97f8551e9b73d6972ccf75b69aa",
+    "bytes": 5261835,
+    "sha256": "264b2adc01e5961cd0e73ba792e8b0288c054071ce0cffa9d565e340aa2c5cf9",
     "members": [
       "MANIFEST_SHA256.json",
       "ovarian_expression_key_panel.csv",
       "ovarian_crispr_key_panel.csv",
       "ovarian_mutations_and_cna.csv",
-      "gse165897_human_paired_compartments.csv"
+      "gse165897_human_paired_compartments.csv",
+      "ovarian_expression_all_genes.parquet"
     ],
     "omitted_from_tarball": [
-      "ovarian_expression_all_genes.parquet (folder-only; too large for Git tarball)",
-      "ovarian_crispr_all_genes.parquet (folder-only; too large for Git tarball)",
-      "ovarian_expression.parquet (folder-only; too large for Git tarball)",
-      "ovarian_crispr.parquet (folder-only; too large for Git tarball)",
-      "ovarian_expression.csv (folder-only; too large for Git tarball)",
-      "ovarian_crispr.csv (folder-only; too large for Git tarball)"
+      "ovarian_crispr_all_genes.parquet (exceeds 10.0 MB cap with current set)",
+      "ovarian_crispr.csv (v10 alias; folder-only)",
+      "ovarian_crispr.parquet (v10 alias; folder-only)",
+      "ovarian_expression.csv (v10 alias; folder-only)",
+      "ovarian_expression.parquet (v10 alias; folder-only)"
     ],
     "max_mb": 10.0,
     "skip_aliases": [
