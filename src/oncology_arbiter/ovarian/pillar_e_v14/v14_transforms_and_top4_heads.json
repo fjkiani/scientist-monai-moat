@@ -1,0 +1,15 @@
+{
+  "schema": "v14_transforms_and_top4_heads_receipt",
+  "note": "Derived from pillar_e_v14_model.json transforms + explainable head metadata (not a separate lock artifact).",
+  "transforms_menus": [
+    "all28",
+    "core4",
+    "core8"
+  ],
+  "explainable_heads": [
+    "v14_unified_all28_logistic_positive",
+    "v14_unified_core8_logistic_positive"
+  ],
+  "default_scoring_head": "v14_sparse_all28_logistic_q75",
+  "model_sha256": "43409b7c685f4c2b35289d4361f01b60ba9b38af68780cfbdde56ca11da0dbea"
+}

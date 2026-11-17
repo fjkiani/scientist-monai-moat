@@ -1,0 +1,10 @@
+adc,antigen,payload,clinical_name,captured_45_score_gt0,captured_45_both_gates,captured_door2_score_gt0,captured_door2_both_gates
+ADC_TOP1_Score(FOLR1),FOLR1,TOP1,mirvetuximab (DM4) / FOLR1-TOP1 combos,24,10,5,2
+ADC_TOP1_Score(CDH6),CDH6,TOP1,raludotatug,25,7,6,2
+ADC_TOP1_Score(TACSTD2),TACSTD2,TOP1,dato-dxd / sacituzumab,26,12,6,3
+ADC_TOP1_Score(ERBB2),ERBB2,TOP1,t-dxd,21,9,5,1
+ADC_TOP1_Score(ERBB3),ERBB3,TOP1,patritumab-deruxtecan,24,9,6,1
+ADC_TOP1_Score(CD276),CD276,TOP1,B7-H3 ADCs,24,11,5,2
+ADC_TOP1_Score(VTCN1),VTCN1,TOP1,B7-H4 ADCs,21,4,6,0
+ADC_TOP1_Score(EPHA2),EPHA2,TOP1,EPHA2 ADCs,22,14,6,2
+ADC_DM4_Score(FOLR1),FOLR1,DM4_taxane,mirvetuximab (DM4),26,16,9,5

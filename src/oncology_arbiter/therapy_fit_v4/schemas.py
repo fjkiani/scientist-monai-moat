@@ -63,8 +63,12 @@ class Tier2TranscriptomicInput(BaseModel):
     z_BCL2L1: Optional[float] = None
     z_PMAIP1: Optional[float] = None
     z_MCL1: Optional[float] = None
+    z_SRC: Optional[float] = Field(default=None, description="SRC expression/dependency z for Dasatinib Door 2 ranking")
+    z_YES1: Optional[float] = Field(default=None, description="YES1 expression/dependency z for Dasatinib Door 2 ranking")
+    z_VDR: Optional[float] = Field(default=None, description="VDR expression z for Doxercalciferol/Paricalcitol Door 2 ranking")
     z_FAP: Optional[float] = None
     z_CXCL10: Optional[float] = None
+    delta_sae: Optional[float] = Field(default=None, description="Door 2 delta_SAE mesenchymal/hibernation SAE feature")
     mfap4_expr: Optional[float] = Field(default=None, description="MFAP4 stroma expression")
     aacr_a065_positive: Optional[bool] = Field(default=None, description="AACR A065 z(FAP)<0 & z(CXCL10)>0")
     hobit_gnly_score: Optional[float] = Field(default=None, description="HOBIT/ZNF683 + GNLY effector score (CRC Gate-2)")
@@ -72,6 +76,22 @@ class Tier2TranscriptomicInput(BaseModel):
     top1_slfn11_score: Optional[float] = Field(default=None, description="TOP1/SLFN11 payload sensitivity z-score")
     ceacam5_top1_high: Optional[bool] = Field(default=None, description="Combined CEACAM5-Hi + TOP1/SLFN11+")
     parp1_rna_z: Optional[float] = Field(default=None, description="PARP1 RNA z-score (rho=-0.416 with Olaparib IC50)")
+    parp1_expr_log2tpm: Optional[float] = Field(
+        default=None,
+        description="Continuous PARP1 expression (log1p TPM / log2 TPM) for trapping-index rescue (not boolean proxy)",
+    )
+    rnf144a_expr_log2tpm: Optional[float] = Field(
+        default=None,
+        description="Continuous RNF144A expression (log1p TPM / log2 TPM); low values favor PARP trapping retention",
+    )
+    trapping_index: Optional[float] = Field(
+        default=None,
+        description="Optional precomputed PARP1-anchored trapping score; else derived from PARP1 expr + gated RNF144A",
+    )
+    pillar_e_molecular: Optional[Dict[str, float]] = Field(
+        default=None,
+        description="Optional per-gene expression overrides for Pillar E v14 (28-gene panel)",
+    )
     vdr_expr: Optional[float] = None
     epha2_expr: Optional[float] = None
     bace1_tmem119_high: Optional[bool] = Field(default=None, description="BrM/GBM BACE1 + TMEM119 myeloid lock")
@@ -113,6 +133,52 @@ class RankedDrugV4(BaseModel):
     pgx_status: str = "SAFE"
 
 
+class PillarEV14DrugPrediction(BaseModel):
+    drug: str
+    score: float
+    probability: float
+    probability_target: str = ""
+    active_mechanistic_gate: Optional[str] = None
+    warnings: List[str] = Field(default_factory=list)
+    feature_contributions: Optional[Dict[str, Any]] = None
+    adc_surface_payload_recommendations: Optional[List[Dict[str, Any]]] = None
+
+
+class PillarEV14HeadReceipt(BaseModel):
+    head_id: str
+    menu: str
+    explain: bool = False
+    predictions: List[PillarEV14DrugPrediction] = Field(default_factory=list)
+
+
+class PillarEV14PanelRow(BaseModel):
+    drug: str
+    q_value: float
+    bh_method: str
+    passes_q05: bool
+    passes_q10: bool
+    assay: Optional[str] = None
+    target_gene: Optional[str] = None
+
+
+class PillarEV14Receipt(BaseModel):
+    enabled: bool = False
+    skip_reason: Optional[str] = None
+    model_sha256: str = ""
+    standalone_sha256: str = ""
+    transforms_sha256: str = ""
+    heads: List[PillarEV14HeadReceipt] = Field(default_factory=list)
+    molecular_summary: Dict[str, float] = Field(default_factory=dict)
+    door2_pharmacogenomic_panel: List[PillarEV14PanelRow] = Field(default_factory=list)
+    door1_pharmacogenomic_panel: List[PillarEV14PanelRow] = Field(default_factory=list)
+    door2_panel_summary: Dict[str, Any] = Field(default_factory=dict)
+    door1_panel_summary: Dict[str, Any] = Field(default_factory=dict)
+    selective_bh_receipt: Dict[str, Any] = Field(default_factory=dict)
+    adc_2gate_flags: List[Dict[str, Any]] = Field(default_factory=list)
+    biomni_selective_claim_refuted: Dict[str, Any] = Field(default_factory=dict)
+    ruo_note: str = ""
+
+
 class PARP1FalsificationReceipt(BaseModel):
     drug_names: List[str] = Field(default_factory=lambda: ["Olaparib", "Niraparib", "Rucaparib"])
     status: Literal["GENOTYPE_FALSIFIED", "RESCUED_BY_PARP1_RNA", "RESCUED_BY_S3_DNA", "BRCA_MUT_ELIGIBLE", "HRD_ELIGIBLE"]
@@ -144,3 +210,4 @@ class TherapyFitV4Response(BaseModel):
     pan_cancer_routing: Optional[Dict[str, Any]] = None
     tier_completeness: Dict[str, Any]
     artifact_locks: Dict[str, str]
+    pillar_e_v14: Optional[PillarEV14Receipt] = None

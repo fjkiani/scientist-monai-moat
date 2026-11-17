@@ -49,6 +49,7 @@ DOOR2 = [
 ]
 for r in DOOR2:
     for ep in ('v8', 'dr'): r[ep] = dict(zip(DRUGS, r[ep]))
+OVARIAN_RNA_METH_LEDGER = DOOR2
 CAVEATS = ("Post-hoc families; no independent validation.",
            "Percentile OR coverage is not rescue, synergy or efficacy.",
            "ONC201 and TIC10 cache identities are not collapsed.",

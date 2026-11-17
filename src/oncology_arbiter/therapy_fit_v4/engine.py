@@ -9,6 +9,11 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from oncology_arbiter.ovarian import ovarian_two_door_standalone_v9 as v9_ledger
 from oncology_arbiter.ovarian.two_door_arbiter import H_CUT, DDR_CUT, score_ovarian_case
+from oncology_arbiter.therapy_fit_v4.pillar_e_v14_integration import (
+    build_adc_surface_from_tier2,
+    build_pillar_e_v14_receipt,
+    verify_pillar_e_v14_artifact_locks,
+)
 from oncology_arbiter.therapy_fit_v4.schemas import (
     PARP1FalsificationReceipt,
     RankedDrugV4,
@@ -22,7 +27,7 @@ _BRM_GBM_JSON_PATH = _REPO_ROOT / "data" / "external" / "brm_multiomics" / "brm_
 _V9_PY_PATH = Path(v9_ledger.__file__).resolve()
 
 EXPECTED_BILINEAR_SHA256 = "fabe9feabd28e9fe9174bad8e44ac7203a5647ca0faed589f21f7b26de7ee026"
-EXPECTED_V9_SHA256 = "dd5f2ef197efef7afce320aad0f3c436936c306f67c582534e3c4cd155a00c92"
+EXPECTED_V9_SHA256 = "de2f87346654a834cc542f31632a52eda430e8de32f3cfebaca1f68ee6bdbe92"
 EXPECTED_BRM_GBM_SHA256 = "0e9ae5a65939ab4921d5965c769517389d17fca7e49f5522f3a13b588e4c9ffd"
 
 _MOA_ALIAS_MAP: Dict[str, str] = {
@@ -66,6 +71,7 @@ def _load_locked_artifacts() -> Tuple[Dict[str, Any], Dict[str, Any], Dict[str, 
         "ovarian_two_door_standalone_v9.py": v9_sha,
         "brm_gbm_two_door_contract_v1.json": brm_sha,
     }
+    locks.update(verify_pillar_e_v14_artifact_locks())
     return bilinear_data, brm_data, locks
 
 
@@ -313,8 +319,10 @@ def score_therapy_fit_v4(req: TherapyFitV4Request) -> TherapyFitV4Response:
             active_door = "DOOR_2_HIBERNATION_SENOLYTIC"
             door_rationale = (
                 f"Post-NACT / Ascites RNA post_H_clean = {post_h_clean:.4f} > {H_CUT} triggers Door 2 "
-                "Hibernation/Senolytic switch (5 BH-significant Door 2 drugs, q = 0.04724; "
-                "Dasatinib + Navitoclax composite rho = +0.528, q = 0.00060)."
+                "Hibernation/Senolytic switch. Legacy v9 DoseResponse_Consensus_Z: 5 Door-2 drugs BH q<0.05 "
+                "(Dasatinib q=0.04724; Dasatinib+Navitoclax composite q=0.00060). "
+                "Pillar E v14 dedup OR-BH (rho_S_sen/H_clean, top25_door2_dedup.csv): 0 drugs q<0.05; "
+                "selective BH per worker1_v14_selective_receipt: per_unique_drug_BH_q05=0."
             )
             door2_candidates = [
                 {
@@ -838,6 +846,18 @@ def score_therapy_fit_v4(req: TherapyFitV4Request) -> TherapyFitV4Response:
         "tier3_kinetics_present": bool(t3.kelim_k is not None or t3.ca125_baseline is not None or t3.ca125_series),
     }
 
+    post_s_sen = t2.post_S_sen
+    adc_surface = build_adc_surface_from_tier2(t2) if cancer in {"hgsoc", "ovarian", "ovarian_cancer", "ovarian_cancer_hgs"} else None
+    pillar_e_v14 = build_pillar_e_v14_receipt(
+        cancer_type=cancer,
+        tier2=t2,
+        post_h_clean=post_h_clean,
+        post_s_sen=post_s_sen,
+        artifact_locks=artifact_locks,
+        adc_surface=adc_surface,
+        strict_molecular=bool(t2.pillar_e_molecular),
+    )
+
     return TherapyFitV4Response(
         patient_id=req.patient_id,
         cancer_type=cancer,
@@ -857,4 +877,5 @@ def score_therapy_fit_v4(req: TherapyFitV4Request) -> TherapyFitV4Response:
         pan_cancer_routing=pan_cancer_routing,
         tier_completeness=tier_completeness,
         artifact_locks=artifact_locks,
+        pillar_e_v14=pillar_e_v14,
     )
