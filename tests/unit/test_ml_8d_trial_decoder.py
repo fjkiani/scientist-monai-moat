@@ -10,6 +10,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from oncology_arbiter.api import create_app
+from oncology_arbiter.arbiter.ml_8d import MOA_CLASSES_24, export_bilinear_decoder_v2_contract
 from oncology_arbiter.arbiter.ml_8d_trial_decoder import (
     SIGNED_AXES_8D,
     build_signed_8d_patient_vector,
@@ -22,6 +23,7 @@ from oncology_arbiter.arbiter.ml_8d_trial_decoder import (
     route_485_tcga_coadread_mss_patients,
     run_loto_and_heldout_validation,
 )
+from oncology_arbiter.arbiter.ml_8d.decoder_io import bilinear_contract_path
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _CONTRACT = (
@@ -34,6 +36,15 @@ _CONTRACT = (
 )
 _MODELS_CONTRACT = _REPO_ROOT / "models" / "crispro_8d_bilinear_decoder_v1.json"
 _EXPECTED_CONTRACT_SHA256 = "fabe9feabd28e9fe9174bad8e44ac7203a5647ca0faed589f21f7b26de7ee026"
+_V2_CONTRACT = (
+    _REPO_ROOT
+    / "src"
+    / "oncology_arbiter"
+    / "arbiter"
+    / "models"
+    / "crispro_8d_bilinear_decoder_v2.json"
+)
+_BASELINE_MEAN_LOTO_AUROC = 0.807816
 
 
 @pytest.fixture(scope="module")
@@ -178,6 +189,31 @@ def test_mathematical_dot_product_repulsion() -> None:
     hib_comps = {c["id"]: c for c in hib_res["ranked_comparator_trials"]}
     assert hib_comps["DOOR2_SENOLYTIC"]["bilinear_score"] > 0.40
     assert hib_comps["DOOR2_SENOLYTIC"]["contraindicated"] is False
+
+
+def test_v2_contract_shape_loto_and_v1_block_preserved() -> None:
+    """v2 is 8×24 with extension-padded LOTO matching frozen v1 block AUROC."""
+    if not _V2_CONTRACT.exists():
+        export_bilinear_decoder_v2_contract()
+    v2 = load_bilinear_contract(_V2_CONTRACT)
+    assert v2["W_MoA_shape"] == [8, 24]
+    assert tuple(v2["moa_classes_24"]) == MOA_CLASSES_24
+    w = np.asarray(v2["W_MoA_matrix"], dtype=float)
+    assert w.shape == (8, 24)
+
+    v1 = load_bilinear_contract(_CONTRACT)
+    w_v1 = np.asarray(v1["W_MoA_matrix"], dtype=float)
+    np.testing.assert_allclose(w[:, :15], w_v1, rtol=0, atol=1e-6)
+
+    summary = v2["loto_validation_summary"]
+    assert summary["total_patient_cohorts_evaluated"] == 10
+    assert summary["all_patient_cohorts_direction_concordant"] is True
+    assert summary["mean_loto_cohort_auroc"] >= _BASELINE_MEAN_LOTO_AUROC - 1e-5
+    assert abs(summary["mean_loto_cohort_auroc"] - _BASELINE_MEAN_LOTO_AUROC) < 1e-4
+
+    subgroups = v2["loto_subgroup_hr_contrasts"]
+    assert len(subgroups) == 12
+    assert summary["all_subgroup_hr_contrasts_concordant"] is True
 
 
 def test_post_ranker_8d_bilinear_endpoint_and_fail_closed_422(client: TestClient) -> None:

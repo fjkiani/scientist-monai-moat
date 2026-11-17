@@ -16,7 +16,8 @@ from scipy import optimize, stats
 from sklearn.metrics import roc_auc_score
 
 from .moa import _moa_vec
-from .paths import _CASPRO_ROOT, _CRISPR_MAIN_ROOT, _DEV_ROOT, _MOAT_ROOT
+from .paths import _BRENUS_ROOT, _CASPRO_ROOT, _CRISPR_MAIN_ROOT, _DEV_ROOT, _MOAT_ROOT
+from .patient import _tanh_scale, build_signed_8d_patient_vector
 
 
 @dataclass

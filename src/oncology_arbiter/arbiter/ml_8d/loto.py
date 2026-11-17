@@ -36,8 +36,16 @@ def decode_all_trials_with_w_moa(
     raw_trials = reg_data["trials"]
 
     decoded_42: list[dict[str, Any]] = []
+    k_w = int(W_MoA.shape[1])
     for spec, raw_entry in zip(REGISTRY_42_MOA_SPECS, raw_trials):
         m_j = _moa_vec(**spec["moa"])
+        if k_w == 24:
+            m_j = pad_moa_vec_15_to_24(m_j)
+        elif k_w != 15:
+            raise BilinearDecoderInputError(
+                f"W_MoA must be 8x15 or 8x24, got columns={k_w}",
+                code="contract_shape_mismatch",
+            )
         t_raw = W_MoA @ m_j
         norm_t = float(np.linalg.norm(t_raw))
         t_unit = (t_raw / norm_t) if norm_t > 1e-12 else np.zeros(8, dtype=float)
