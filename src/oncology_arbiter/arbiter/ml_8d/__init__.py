@@ -1,7 +1,14 @@
 """Signed 8D bilinear trial decoder package (constants separated from logic)."""
 from __future__ import annotations
 
-from .constants import CONTRACT_STATUS, MOA_CLASSES_15, MOA_CLASSES_24, RUO_DISCLAIMER, SIGNED_AXES_8D
+from .constants import (
+    CONTRACT_STATUS,
+    MOA_CLASSES_9_EXT,
+    MOA_CLASSES_15,
+    MOA_CLASSES_24,
+    RUO_DISCLAIMER,
+    SIGNED_AXES_8D,
+)
 from .exceptions import BilinearDecoderInputError
 from .patient import build_signed_8d_patient_vector
 from .decoder_io import bilinear_contract_path, contract_moa_classes, load_bilinear_contract
@@ -24,6 +31,8 @@ from .loto import (
     run_loto_and_heldout_validation,
     run_loto_and_heldout_validation_v2,
 )
+
+run_ml_fit_loto_10_cohort_audit = run_loto_and_heldout_validation
 from .routing import route_485_tcga_coadread_mss_patients
 from .pipeline import export_bilinear_decoder_v2_contract, run_full_8d_bilinear_pipeline_and_export
 
@@ -31,6 +40,7 @@ __all__ = [
     "BilinearDecoderInputError",
     "CONTRACT_STATUS",
     "COMPARATOR_MOA_SPECS",
+    "MOA_CLASSES_9_EXT",
     "MOA_CLASSES_15",
     "MOA_CLASSES_24",
     "RECOGNIZED_CLINICAL_FEATURE_KEYS",
@@ -53,6 +63,7 @@ __all__ = [
     "rank_42_trials_bilinear_ml",
     "route_485_tcga_coadread_mss_patients",
     "run_full_8d_bilinear_pipeline_and_export",
+    "run_ml_fit_loto_10_cohort_audit",
     "run_loto_and_heldout_validation",
     "run_loto_and_heldout_validation_v2",
     "score_bilinear_ml_loto",
