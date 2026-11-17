@@ -182,7 +182,11 @@ def score_moa_bilinear(
 ) -> float:
     """Compute signed bilinear score s(p, m) = (p^T W_MoA m) / ||W_MoA m||_2."""
     axes = bilinear_contract.get("signed_axes_8d") or bilinear_contract["latent_axes_8d"]
-    classes = bilinear_contract.get("moa_classes_15") or bilinear_contract["moa_classes_15d"]
+    classes = (
+        bilinear_contract.get("moa_classes_24")
+        or bilinear_contract.get("moa_classes_15")
+        or bilinear_contract["moa_classes_15d"]
+    )
     w_mat = bilinear_contract.get("W_MoA_matrix") or bilinear_contract["W_MoA_matrix_8x15"]
 
     normalized_weights: Dict[str, float] = {}
@@ -192,6 +196,8 @@ def score_moa_bilinear(
 
     p_vec = [float(patient_8d.get(ax, 0.0)) for ax in axes]
     m_vec = [float(normalized_weights.get(c, 0.0)) for c in classes]
+    if len(w_mat[0]) == 24 and len(m_vec) == 15:
+        m_vec = m_vec + [0.0] * (24 - 15)
 
     t_vec = [0.0] * len(axes)
     for i in range(len(axes)):
