@@ -883,6 +883,7 @@ class NsclcResponse(BaseModel):
 
 
 class FullCaseRequest(BaseModel):
+    model_config = ConfigDict(extra="allow")
     screening_input: ScreeningRequest | None = None
     biopsy_input: BiopsyRequest | None = None
     therapy_context: TherapyPatientContext = Field(default_factory=TherapyPatientContext)
@@ -900,7 +901,7 @@ class FullCaseRequest(BaseModel):
         pattern=r"^[0-9a-f]{16}$",
         description="Verified case-storage identifier for production CT ingress.",
     )
-    therapy_features: "TherapyTriageFeatures | None" = None
+    therapy_features: TherapyTriageFeatures | None = None
     mutations: list["PatientMutation"] = Field(default_factory=list, max_length=64)
     germline_mutations: list["PatientMutation"] = Field(default_factory=list, max_length=64)
     ranked_drugs: list["RankedDrug"] = Field(default_factory=list, max_length=100)
@@ -920,14 +921,22 @@ class FullCaseRequest(BaseModel):
             "Attached on /v1/case/full?cancer=hgsoc without replacing ovarian_arbiter."
         ),
     )
+    therapy_fit_v4: dict[str, Any] | None = Field(
+        default=None,
+        description=(
+            "Optional Unified 3-Tier Input Contract (Tier 1 Genomic + PGx, Tier 2 RNA Two-Door, "
+            "Tier 3 CA-125 KELIM Kinetics) for Therapy Fit v4 Dual Scoring Engine."
+        ),
+    )
 
 
 class FullCaseResponse(ApiEnvelope):
     pipeline_status: Literal["complete", "partial_failure", "failed_required_stage"] = "complete"
-    cancer: Literal["breast", "nsclc", "hgsoc"] | None = None
+    cancer: Literal["breast", "nsclc", "hgsoc", "crc", "gbm", "brm", "melanoma", "ovarian"] | None = None
     stage_receipts: list[StageReceipt] = Field(default_factory=list)
     ovarian_arbiter: dict[str, Any] | None = None
     ovarian_two_door: dict[str, Any] | None = None
+    therapy_fit_v4: dict[str, Any] | None = None
     case_manifest: dict[str, Any] | None = None
     report_parse: ReportParseBlock | None = None
     phikon_embedding: dict[str, Any] | None = None
@@ -939,7 +948,7 @@ class FullCaseResponse(ApiEnvelope):
     screening: ScreeningResponse | None = None
     biopsy: BiopsyResponse | None = None
     therapy: TherapyResponse | None = None
-    nsclc: "NsclcResponse | None" = None
+    nsclc: NsclcResponse | None = None
     elo_ranked_hypotheses: list[dict[str, Any]] = Field(
         default_factory=list,
         description="Offline deterministic Elo output, never labelled as an LLM result.",

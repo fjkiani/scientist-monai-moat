@@ -31,8 +31,6 @@ from .loto import (
     run_loto_and_heldout_validation,
     run_loto_and_heldout_validation_v2,
 )
-
-run_ml_fit_loto_10_cohort_audit = run_loto_and_heldout_validation
 from .routing import route_485_tcga_coadread_mss_patients
 from .pipeline import export_bilinear_decoder_v2_contract, run_full_8d_bilinear_pipeline_and_export
 
@@ -63,7 +61,6 @@ __all__ = [
     "rank_42_trials_bilinear_ml",
     "route_485_tcga_coadread_mss_patients",
     "run_full_8d_bilinear_pipeline_and_export",
-    "run_ml_fit_loto_10_cohort_audit",
     "run_loto_and_heldout_validation",
     "run_loto_and_heldout_validation_v2",
     "score_bilinear_ml_loto",
