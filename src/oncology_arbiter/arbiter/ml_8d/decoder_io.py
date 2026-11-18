@@ -54,6 +54,20 @@ def bilinear_contract_path(version: str | None = None) -> Path:
     return models / f"crispro_8d_bilinear_decoder_{version}.json"
 
 
+def load_bilinear_contract_prefer_v2(*, strict_v2: bool = False) -> dict[str, Any]:
+    """Load v2 (8×24) when present on disk, else frozen v1 (8×15). Does not refit W_MoA."""
+    v2_path = bilinear_contract_path("v2")
+    if v2_path.is_file():
+        return load_bilinear_contract(v2_path)
+    if strict_v2:
+        raise BilinearDecoderInputError(
+            f"bilinear v2 contract absent: {v2_path}",
+            code="contract_missing",
+            missing=[v2_path.name],
+        )
+    return load_bilinear_contract(bilinear_contract_path("v1"))
+
+
 def load_bilinear_contract(path: Path | None = None) -> dict[str, Any]:
     """Load bilinear decoder JSON. Does not refit W_MoA."""
     contract_path = path or bilinear_contract_path()

@@ -11,7 +11,12 @@ from .constants import (
 )
 from .exceptions import BilinearDecoderInputError
 from .patient import build_signed_8d_patient_vector
-from .decoder_io import bilinear_contract_path, contract_moa_classes, load_bilinear_contract
+from .decoder_io import (
+    bilinear_contract_path,
+    contract_moa_classes,
+    load_bilinear_contract,
+    load_bilinear_contract_prefer_v2,
+)
 from .scoring import signed_cosine_similarity, signed_fit_batch, signed_fit_score
 from .registry import COMPARATOR_MOA_SPECS, RECOGNIZED_CLINICAL_FEATURE_KEYS, REGISTRY_42_MOA_SPECS
 from .trials import rank_42_trials_bilinear_ml, score_bilinear_ml_loto
@@ -57,6 +62,7 @@ __all__ = [
     "fit_bilinear_w_moa",
     "load_all_responder_cohorts",
     "load_bilinear_contract",
+    "load_bilinear_contract_prefer_v2",
     "load_published_subgroup_contrasts",
     "rank_42_trials_bilinear_ml",
     "route_485_tcga_coadread_mss_patients",
