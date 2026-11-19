@@ -59,7 +59,108 @@ def _app():
 # ----------------------------------------------------------------------- #
 # Production dynamic tumor board and full-case specialist assembly
 
-_SUPPORTED_CANCERS = {"breast", "nsclc", "hgsoc"}
+_SUPPORTED_CANCERS = {"breast", "nsclc", "hgsoc", "crc", "gbm", "brm", "melanoma", "ovarian"}
+
+def _compute_case_therapy_fit_v4(
+    req: FullCaseRequest | None = None,
+    cancer_norm: str | None = None,
+    *,
+    primary_site: str | None = None,
+    clinical_summary: str | None = None,
+    genomics_payload: dict[str, Any] | None = None,
+    ovarian_two_door_payload: dict[str, Any] | None = None,
+    **legacy_kwargs: Any,
+) -> dict[str, Any] | None:
+    """Execute Therapy Fit v4 Dual Scoring Engine (Two-Door Arbiter + 8D Bilinear Decoder)."""
+    from oncology_arbiter.therapy_fit_v4.engine import score_therapy_fit_v4
+    from oncology_arbiter.therapy_fit_v4.schemas import TherapyFitV4Request
+
+    if req is None:
+        resolved_cancer = (primary_site or cancer_norm or "ovarian").strip().lower()
+        merged_extra: dict[str, Any] = {}
+        if genomics_payload:
+            merged_extra.update(genomics_payload)
+        merged_extra.update(legacy_kwargs)
+        req = FullCaseRequest(
+            cancer="hgsoc" if resolved_cancer == "ovarian" else (resolved_cancer if resolved_cancer in {"breast", "nsclc", "hgsoc"} else "hgsoc"),
+            clinical_summary=clinical_summary or "",
+            ovarian_two_door=ovarian_two_door_payload,
+            **merged_extra,
+        )
+        cancer_norm = resolved_cancer
+    else:
+        cancer_norm = (cancer_norm or req.cancer or "ovarian").strip().lower()
+
+    if req.therapy_fit_v4 is not None:
+        payload = dict(req.therapy_fit_v4)
+        payload.setdefault("cancer_type", cancer_norm)
+        tf_req = TherapyFitV4Request.model_validate(payload)
+        return score_therapy_fit_v4(tf_req).model_dump(mode="json")
+
+    extra = dict(getattr(req, "model_extra", None) or {})
+    t2_keys = (
+        "timepoint", "post_H_clean", "post_S_sen", "post_DDR",
+        "post_BCL2A1_z", "delta_MCL1_z", "post_EMT_z",
+        "z_stress_34_clean", "z_proliferation_106",
+        "z_BCL2L1", "z_PMAIP1", "z_MCL1", "z_FAP", "z_CXCL10",
+        "mfap4_expr", "aacr_a065_positive", "hobit_gnly_score",
+        "ceacam5_expr", "top1_slfn11_score", "ceacam5_top1_high",
+        "parp1_rna_z", "vdr_expr", "epha2_expr",
+        "bace1_tmem119_high", "fak1_ptk2_high", "mtor_pi3k_brain_high",
+    )
+    t1_keys = (
+        "mbd4_lof", "mbd4_hgvs_c", "tp53_mut", "tp53_variant",
+        "brca_wt", "brca1_mut", "brca2_mut",
+        "kras_mut", "kras_variant", "nras_mut", "braf_mut", "braf_variant",
+        "egfr_activating_mut", "egfr_variant", "s3_score", "hrd_score",
+        "tmb_score", "msi_status", "ccne1_amp", "myc_amp", "pgx",
+    )
+    t3_keys = (
+        "ca125_baseline", "kelim_k", "kelim_category", "kinetics_score",
+        "platinum_sensitivity", "ca125_series",
+    )
+    has_extra_tf = any(k in extra and extra[k] is not None for k in (*t1_keys, *t2_keys, *t3_keys))
+
+    if req.mutations or req.germline_mutations or req.ovarian_two_door is not None or has_extra_tf:
+        all_muts = [m.model_dump(exclude_none=True) for m in (req.mutations + req.germline_mutations)]
+        genes_upper = {str(m.get("gene", "")).upper() for m in all_muts}
+        t2_dict: dict[str, Any] = {}
+        for k in t2_keys:
+            if k in extra and extra[k] is not None:
+                t2_dict[k] = extra[k]
+        if isinstance(req.ovarian_two_door, dict):
+            for k in t2_keys:
+                if k in req.ovarian_two_door and req.ovarian_two_door[k] is not None:
+                    t2_dict[k] = req.ovarian_two_door[k]
+        t1_dict: dict[str, Any] = {
+            "mutations": all_muts,
+            "mbd4_lof": "MBD4" in genes_upper,
+            "tp53_mut": "TP53" in genes_upper,
+            "brca_wt": not ("BRCA1" in genes_upper or "BRCA2" in genes_upper),
+            "kras_mut": bool(genes_upper & {"KRAS", "NRAS", "HRAS"}),
+            "egfr_activating_mut": "EGFR" in genes_upper,
+        }
+        for k in t1_keys:
+            if k in extra and extra[k] is not None:
+                t1_dict[k] = extra[k]
+        t3_dict: dict[str, Any] = {}
+        for k in t3_keys:
+            if k in extra and extra[k] is not None:
+                t3_dict[k] = extra[k]
+        tf_req = TherapyFitV4Request(
+            patient_id=str(extra.get("patient_id") or req.case_id or "ANONYMOUS"),
+            cancer_type=cancer_norm,
+            tier1_dna=t1_dict,
+            tier2_rna=t2_dict,
+            tier3_kinetics=t3_dict,
+        )
+        return score_therapy_fit_v4(tf_req).model_dump(mode="json")
+
+    if cancer_norm in {"crc", "gbm", "brm", "melanoma", "ovarian", "hgsoc", "nsclc", "breast"}:
+        tf_req = TherapyFitV4Request(cancer_type=cancer_norm)
+        return score_therapy_fit_v4(tf_req).model_dump(mode="json")
+
+    return None
 
 def _breast_dss_from_features(features: Any) -> BreastDssPrognosis:
     from oncology_arbiter.models.breast_dss_arbiter import score_breast_dss
@@ -385,7 +486,7 @@ def case_full(
         raise HTTPException(400, f"Unsupported cancer={cancer!r}; supported={sorted(_SUPPORTED_CANCERS)}")
     request_id = new_request_id()
 
-    if cancer_norm == "hgsoc":
+    if cancer_norm in {"hgsoc", "ovarian"}:
         two_door = None
         hgsoc_elo_ranked: list[dict[str, Any]] = []
         if req.ovarian_two_door is not None:
@@ -447,6 +548,7 @@ def case_full(
             model_name="hgsoc-platinum-resistance-multivariate-v2",
         )
         env["warnings"] = list(dynamic.warnings)
+        tf_v4 = _compute_case_therapy_fit_v4(req, cancer_norm)
         return FullCaseResponse(
             **env,
             pipeline_status=dynamic.pipeline_status,
@@ -454,6 +556,7 @@ def case_full(
             stage_receipts=dynamic.stage_receipts,
             ovarian_arbiter=dynamic.ovarian_arbiter,
             ovarian_two_door=two_door,
+            therapy_fit_v4=tf_v4,
             case_manifest=dynamic.case_manifest,
             report_parse=dynamic.report_parse,
             phikon_embedding=dynamic.phikon_embedding,
@@ -466,6 +569,30 @@ def case_full(
             therapy=None,
             nsclc=None,
             elo_ranked_hypotheses=hgsoc_elo_ranked,
+        )
+
+    if cancer_norm in {"crc", "gbm", "brm", "melanoma"}:
+        tf_v4 = _compute_case_therapy_fit_v4(req, cancer_norm)
+        env = _envelope(
+            request_id,
+            model_state=ModelState.LOADED,
+            model_name="therapy-fit-v4-dual-engine",
+        )
+        log_event(
+            request_id,
+            "/v1/case/full",
+            model_state=ModelState.LOADED.value,
+            patient_id_hash=None,
+            extra={"cancer": cancer_norm, "pipeline_status": "complete"},
+            tenant_id=tenant.tenant_id,
+        )
+        return FullCaseResponse(
+            **env,
+            pipeline_status="complete",
+            cancer=cancer_norm,
+            stage_receipts=[],
+            therapy_fit_v4=tf_v4,
+            elo_ranked_hypotheses=[],
         )
 
     if cancer_norm == "breast":
@@ -574,12 +701,14 @@ def case_full(
             )
             elo_ranked = list(cs_out.get("hypotheses") or [])
 
+        tf_v4 = _compute_case_therapy_fit_v4(req, cancer_norm)
         return FullCaseResponse(
             **env,
             pipeline_status=dynamic.pipeline_status,
             cancer=cancer_norm,
             stage_receipts=dynamic.stage_receipts,
             ovarian_arbiter=dynamic.ovarian_arbiter,
+            therapy_fit_v4=tf_v4,
             case_manifest=dynamic.case_manifest,
             report_parse=dynamic.report_parse or (biopsy.report_parse if biopsy else None),
             phikon_embedding=(
@@ -715,3 +844,18 @@ def tumor_board_bundle(
         bundle_sha256=bundle_sha,
         persisted_path=None,  # no disk persistence yet — see PR #6
     )
+
+
+@router.post("/v1/therapy-fit/score")
+@router.post("/api/v1/therapy-fit/score")
+def score_therapy_fit_v4_endpoint(
+    payload: dict[str, Any],
+    tenant: APIKey = Depends(require_api_key),
+) -> dict[str, Any]:
+    """Direct Therapy Fit v4 scoring endpoint on scientist-monai-moat."""
+    from oncology_arbiter.therapy_fit_v4.engine import score_therapy_fit_v4
+    from oncology_arbiter.therapy_fit_v4.schemas import TherapyFitV4Request
+
+    tf_req = TherapyFitV4Request.model_validate(payload)
+    return score_therapy_fit_v4(tf_req).model_dump(mode="json")
+

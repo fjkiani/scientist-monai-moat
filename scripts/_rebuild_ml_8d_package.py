@@ -19,32 +19,13 @@ def write(name: str, content: str) -> None:
     print(f"wrote {name} ({content.count(chr(10))} lines)")
 
 
-# Monolith slice 54–93 is only MOA_CLASSES_15; v2 fit.py imports MOA_CLASSES_9_EXT (see bilinear_v2_moa_column_source_map).
-_MOA_V2_EXTENSION = '''
-# v2 extension (9 cols) appended after MOA_CLASSES_15 — crispro_8d_bilinear_decoder_v2.json
-MOA_CLASSES_9_EXT: tuple[str, ...] = (
-    "VDR_Paricalcitol",
-    "FAK_ROCK_Inhibitor",
-    "mTORC2_Inhibitor",
-    "PRMT5_MAT2A_MTAP",
-    "EP300_CREBBP",
-    "CDK2_PKMYT1",
-    "MCL1_BCLxL_TW37",
-    "FOLR1_ADC",
-    "CDH6_ADC",
-)
-
-MOA_CLASSES_24: tuple[str, ...] = MOA_CLASSES_15 + MOA_CLASSES_9_EXT
-'''
-
 write(
     "constants.py",
     '''"""8D bilinear decoder constants (axes, MoA class names, RUO strings)."""
 from __future__ import annotations
 
 '''
-    + sl(54, 93)
-    + _MOA_V2_EXTENSION,
+    + sl(54, 93),
 )
 
 write(

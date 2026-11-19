@@ -26,8 +26,12 @@ sys.path.insert(0, str(ROOT / "src"))
 
 os.environ.setdefault("ONCOLOGY_ARBITER_AUTH_MODE", "off")
 os.environ.setdefault("MEDSIGLIP_BACKEND", "modal")
-os.environ.setdefault("MODAL_PROFILE", "crispro")
-os.environ.setdefault("MODAL_MEDSIGLIP_URL", "https://crispro--medsiglip")
+os.environ.setdefault("MODAL_PROFILE", "testing1235")
+os.environ.setdefault("MODAL_MEDSIGLIP_URL", "https://testing1235--medsiglip")
+os.environ.setdefault(
+    "MEDGEMMA_MODAL_URL",
+    "https://testing1235--medgemma-1-5-4b-chat.modal.run",
+)
 os.environ.setdefault("ONCOLOGY_ARBITER_ENABLE_BIOPSY_MEDSIGLIP", "0")
 
 

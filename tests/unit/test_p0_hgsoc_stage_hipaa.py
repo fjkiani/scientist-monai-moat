@@ -1,4 +1,4 @@
-"""P0: HGSOC must 501, incomplete stage panels must 422, HIPAA must redact."""
+"""P0: HGSOC case/full and dynamic board return ovarian pipeline; incomplete panels 422; HIPAA redact."""
 from __future__ import annotations
 
 import copy
@@ -49,7 +49,7 @@ def client() -> TestClient:
     return TestClient(create_app())
 
 
-def test_hgsoc_case_full_is_501_and_skips_breast_therapy(client: TestClient) -> None:
+def test_hgsoc_case_full_runs_ovarian_and_skips_breast_therapy(client: TestClient) -> None:
     response = client.post(
         "/v1/case/full?cancer=hgsoc",
         json={
@@ -62,25 +62,30 @@ def test_hgsoc_case_full_is_501_and_skips_breast_therapy(client: TestClient) -> 
             },
         },
     )
-    assert response.status_code == 501, response.text
-    detail = response.json()["detail"]
-    assert detail["error"] == "hgsoc_case_full_not_implemented"
-    assert detail["cancer"] == "hgsoc"
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["cancer"] == "hgsoc"
+    assert body.get("pipeline_status") == "complete"
+    assert body.get("dss_prognosis") is None
+    assert body.get("therapy_triage") is None
+    stages = {s["stage"]: s for s in body.get("stage_receipts") or []}
+    assert stages["breast_dss_prognosis"]["status"] == "skipped_not_applicable"
+    assert stages["therapy_research_triage"]["status"] == "skipped_not_applicable"
 
 
-def test_hgsoc_dynamic_tumor_board_is_501(client: TestClient) -> None:
+def test_hgsoc_dynamic_tumor_board_returns_200_ovarian_arbiter(client: TestClient) -> None:
     response = client.post(
         "/v1/tumor_board/dynamic",
         json={"cancer": "hgsoc", "run_co_scientist": False},
     )
-    assert response.status_code == 501, response.text
-    detail = response.json()["detail"]
-    assert detail["error"] == "hgsoc_tumor_board_dynamic_not_implemented"
-    assert detail["cancer"] == "hgsoc"
-    assert "p_positive" not in response.text
-    assert "p_positive" not in response.text
-    assert "dss_prognosis" not in response.text
-    assert "therapy_triage" not in response.text
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["cancer"] == "hgsoc"
+    assert body.get("pipeline_status") == "complete"
+    arb = body.get("ovarian_arbiter") or {}
+    assert arb.get("model_name") == "ovarian_mfap4_arbiter_v1"
+    assert body.get("dss_prognosis") is None
+    assert body.get("therapy_triage") is None
 
 
 def test_stage_empty_panel_is_422(client: TestClient) -> None:

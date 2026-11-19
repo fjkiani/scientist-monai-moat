@@ -352,16 +352,145 @@ def build_report(
     }
 
 
+def _resolve_ak_bundle_path(patient_case: Path) -> Path | None:
+    """Return path to an AK TumorBoardBundle JSON, or None for breast folders."""
+    path = patient_case.resolve()
+    candidates = [path]
+    if path.is_dir():
+        candidates.extend([
+            path / "ak_mbd4_lof_case.json",
+            path / "case.json",
+        ])
+    # Allow `--patient-case demo_samples/ak_mbd4_lof_case.json` relative to cwd
+    # or the packaged static demo path.
+    packaged = (
+        ROOT / "src/oncology_arbiter/api/static/demo_samples/ak_mbd4_lof_case.json"
+    )
+    if path.name == "ak_mbd4_lof_case.json" and not path.is_file():
+        candidates.append(packaged)
+    if str(patient_case).endswith("demo_samples/ak_mbd4_lof_case.json"):
+        candidates.append(packaged)
+    for cand in candidates:
+        if not cand.is_file():
+            continue
+        try:
+            payload = json.loads(cand.read_text())
+        except (OSError, json.JSONDecodeError):
+            continue
+        if (
+            isinstance(payload, dict)
+            and payload.get("contract_version")
+            == "tumor_board.v3.multimodal-with-manuscript-claims"
+        ):
+            return cand
+    return None
+
+
+def run_ak_l5_tournament(bundle_path: Path) -> dict[str, Any]:
+    """Live L5 Co-Scientist on the AK MBD4-LOF TumorBoardBundle (Argon/MedGemma)."""
+    import os
+
+    from oncology_arbiter.api.services.helpers import ak_bundle_to_l5_envelopes
+    from oncology_arbiter.orchestrator.co_scientist import (
+        is_live_swarm_engine,
+        resolve_backend,
+        resolve_live_available,
+        run_co_scientist,
+    )
+
+    bundle = json.loads(bundle_path.read_text())
+    mapped = ak_bundle_to_l5_envelopes(bundle)
+    if not resolve_live_available():
+        raise RuntimeError(
+            "No live LLM backend configured. Set GEMINI_API_KEY "
+            "(gemini_argon) or MEDGEMMA_MODAL_URL (medgemma)."
+        )
+    backend = resolve_backend()
+    t0 = time.time()
+    cs_out = run_co_scientist(
+        screening=mapped["screening"],
+        biopsy=mapped["biopsy"],
+        therapy=mapped["therapy"],
+        seen_urls=mapped["seed_urls"],
+        patient_context=mapped["patient_context"],
+        mode="live",
+        llm_backend=backend,
+    )
+    elapsed = round(time.time() - t0, 3)
+    if not is_live_swarm_engine(cs_out.get("engine")):
+        raise RuntimeError(
+            f"live engine did not engage swarm (got {cs_out.get('engine')!r})"
+        )
+    transcript = list(cs_out.get("tournament_transcript") or [])
+    if not transcript:
+        raise RuntimeError("empty tournament transcript")
+    if any(m.get("clinical_rationale") == "offline_scalar_score" for m in transcript):
+        raise RuntimeError("scalar score leaked into live transcript")
+
+    hyps = list(cs_out.get("hypotheses") or [])
+    top = hyps[:5]
+    out_dir = ROOT / "artifacts/live_io"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
+    receipt_path = out_dir / f"ak_mbd4_l5_live_{backend}_{stamp}.json"
+    report = {
+        "disclaimer": "RESEARCH USE ONLY — not FDA-cleared; not for clinical decision-making.",
+        "case": "ak_mbd4_lof",
+        "bundle_path": str(bundle_path.relative_to(ROOT)) if ROOT in bundle_path.parents else str(bundle_path),
+        "contract_version": bundle.get("contract_version"),
+        "patient_id": bundle.get("patient_id"),
+        "llm_backend": backend,
+        "engine": cs_out.get("engine"),
+        "elapsed_seconds": elapsed,
+        "schema_autopsy": {
+            "keys": list(bundle.keys()),
+            "schema_version": bundle.get("contract_version"),
+            "pydantic_tumor_board_bundle": "VALID",
+            "ingestion_adapter": "ak_bundle_to_l5_envelopes",
+            "mbd4_tag": mapped["patient_context"].get("mbd4_tag"),
+            "therapy_regimens": mapped["patient_context"].get("therapy_options"),
+        },
+        "patient_context": mapped["patient_context"],
+        "phases": cs_out.get("phases"),
+        "initial_count": cs_out.get("initial_count"),
+        "after_reflect": cs_out.get("after_reflect"),
+        "after_evolve": cs_out.get("after_evolve"),
+        "warnings": cs_out.get("warnings"),
+        "top_hypotheses": top,
+        "tournament_transcript": transcript,
+        "env": {
+            "CO_SCIENTIST_LLM_BACKEND": os.environ.get("CO_SCIENTIST_LLM_BACKEND"),
+            "MEDGEMMA_MODAL_URL_set": bool((os.environ.get("MEDGEMMA_MODAL_URL") or "").strip()),
+            "GEMINI_API_KEY_set": bool((os.environ.get("GEMINI_API_KEY") or "").strip()),
+        },
+        "receipt_path": str(receipt_path.relative_to(ROOT)),
+    }
+    receipt_path.write_text(json.dumps(report, indent=2, default=str))
+    latest = out_dir / "ak_mbd4_l5_live_latest.json"
+    latest.write_text(json.dumps(report, indent=2, default=str))
+    return report
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--patient-case",
         type=Path,
         default=ROOT / "fixtures/patient_sample_01",
-        help="Patient folder with case.json + modality files",
+        help=(
+            "Patient folder with case.json + modality files, OR an AK "
+            "TumorBoardBundle JSON (e.g. demo_samples/ak_mbd4_lof_case.json)"
+        ),
     )
     args = parser.parse_args()
-    case_dir = args.patient_case.resolve()
+    patient_case = args.patient_case
+    ak_path = _resolve_ak_bundle_path(patient_case)
+    if ak_path is not None:
+        report = run_ak_l5_tournament(ak_path)
+        print(json.dumps(report, indent=2, default=str))
+        return 0
+
+    case_dir = patient_case.resolve()
     case = json.loads((case_dir / "case.json").read_text())
     t0 = time.time()
 

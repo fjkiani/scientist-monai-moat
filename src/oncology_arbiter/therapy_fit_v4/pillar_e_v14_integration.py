@@ -279,6 +279,14 @@ def _rows_to_predictions(rows: List[Dict[str, Any]]) -> List[PillarEV14DrugPredi
     out: List[PillarEV14DrugPrediction] = []
     for r in rows:
         warnings = list(r.get("warnings_and_flags") or [])
+        fc = r.get("feature_contributions")
+        if isinstance(fc, list):
+            fc = {"items": fc}
+        adc = r.get("adc_surface_payload_recommendations")
+        if isinstance(adc, dict):
+            adc = [adc]
+        elif adc is not None and not isinstance(adc, list):
+            adc = [{"value": adc}]
         out.append(
             PillarEV14DrugPrediction(
                 drug=str(r["drug"]),
@@ -287,8 +295,8 @@ def _rows_to_predictions(rows: List[Dict[str, Any]]) -> List[PillarEV14DrugPredi
                 probability_target=str(r.get("probability_target") or ""),
                 active_mechanistic_gate=r.get("active_mechanistic_gate"),
                 warnings=warnings,
-                feature_contributions=r.get("feature_contributions"),
-                adc_surface_payload_recommendations=r.get("adc_surface_payload_recommendations"),
+                feature_contributions=fc,
+                adc_surface_payload_recommendations=adc,
             )
         )
     return out
@@ -411,6 +419,6 @@ def build_pillar_e_v14_receipt(
         door2_panel_summary=base.door2_panel_summary,
         door1_panel_summary=base.door1_panel_summary,
         adc_2gate_flags=base.adc_2gate_flags,
-        biomni_selective_claim_refuted=base.biomni_claim_refuted,
+        biomni_selective_claim_refuted=base.biomni_selective_claim_refuted,
         ruo_note=base.ruo_note,
     )

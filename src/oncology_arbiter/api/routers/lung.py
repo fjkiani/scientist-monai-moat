@@ -166,12 +166,15 @@ def run_nsclc_case(req: Any, *, request_id: str, tenant: Any) -> FullCaseRespons
         extra={"cancer": "nsclc", "pipeline_status": status},
         tenant_id=tenant.tenant_id,
     )
+    from .tumor_board import _compute_case_therapy_fit_v4
+    tf_v4 = _compute_case_therapy_fit_v4(req, "nsclc")
     return FullCaseResponse(
         **_envelope(request_id, model_state=state, model_name="specialist-stack-composite"),
         warnings=warnings,
         pipeline_status=status,
         cancer="nsclc",
         stage_receipts=receipts,
+        therapy_fit_v4=tf_v4,
         case_manifest=case_manifest,
         report_parse=report_parse,
         luna16_detection=luna_output,
