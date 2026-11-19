@@ -1,0 +1,11 @@
+{
+  "status": "ok",
+  "workspace": "testing-123",
+  "max_patients": 100,
+  "written": 100,
+  "errors": 0,
+  "png_root": "/vol/mammo/png_tree",
+  "modal_run": "https://modal.com/apps/testing-123/main/ap-zl4pVDK79Zeajcc4fJAB54",
+  "fix": "42b3e78 stale PK re-fetch",
+  "ts": "2026-10-05T11:29:49Z"
+}

@@ -1,356 +1,134 @@
-"""Modal app: fine-tuned Bio_ClinicalBERT report parser for OncologyArbiter.
-
-Endpoints
----------
-- `GET  /clinicalbert-healthz` → liveness (no model touch)
-- `GET  /clinicalbert-info`    → warm the model, return metadata
-                                 (base_model, provenance, entity types,
-                                 training seed, test micro-F1)
-- `POST /clinicalbert-parse`   → JSON `{"report_text": "..."}` → parsed
-                                 pathology fields extracted via BIO-tagged
-                                 token classification
-
-Design notes
-------------
-- Base: emilyalsentzer/Bio_ClinicalBERT + fine-tuned classifier head.
-- Fine-tune weights are shipped into the Modal image via
-  `modal.Image.add_local_dir()` at deploy time. The weights include
-  `config.json`, `model.safetensors`, `tokenizer.json`, `vocab.txt`,
-  `label_map.json`, `metrics.json`.
-- CPU-only. ~430 MB weights + tokenizer; loads in ~5 s. Inference on a
-  full pathology report (~500-800 tokens) is <500 ms.
-- No HF token required at inference time — the tuned weights carry
-  everything the tokenizer needs.
-- Provenance: SYNTHETIC-v0.3.1 (breast + NSCLC). This is stamped in
-  every response so callers can honor the "training data was synthetic"
-  contract in downstream UI.
-
-Deploy
-------
-    modal deploy deploy/modal/clinicalbert_app.py
-
-Env vars at deploy time (optional)
-----------------------------------
-- `CLINICALBERT_WEIGHT_DIR`: path to fine-tuned weights on the host doing
-  the deploy. Default: `/workspace/clinicalbert_best/`.
-- `CLINICALBERT_MODAL_MODE`: 'prod' → min_containers=1 (warm replica);
-  default 'staging' → min_containers=0 (zero-cost).
-"""
+"""Modal deployment for the real-report ClinicalBERT v2 sliding-window parser."""
 
 from __future__ import annotations
 
-import json
 import os
-import re
+import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 import modal
 
-APP_VERSION = "clinicalbert-modal-v0.4.1-alpha"
+APP_VERSION = "clinicalbert-modal-v2.0.0-real-tcga"
+ARTIFACT_FILENAME = "clinicalbert_head_v2.safetensors"
+ARTIFACT_SHA256 = "429f804d7f348d7c4eeb27821f766cc2de65c4072f20db0c3b3afaefa9068e50"
+BASE_MODEL = "emilyalsentzer/Bio_ClinicalBERT"
+BASE_REVISION = "d5892b39a4adaed74b92212a44081509db72f87b"
+REMOTE_BUNDLE_DIR = Path("/model")
+REMOTE_BASE_DIR = Path("/clinicalbert-base")
+REMOTE_RUNTIME = Path("/opt/clinicalbert_runtime_v2.py")
+DISCLAIMER = (
+    "Research Use Only. Not FDA-cleared. Not CE-marked. "
+    "Not intended for clinical use."
+)
 
-_MODAL_MODE = (os.environ.get("CLINICALBERT_MODAL_MODE") or "staging").lower()
-_MIN_CONTAINERS = 1 if _MODAL_MODE == "prod" else 0
-_SCALEDOWN_S = 900 if _MODAL_MODE == "prod" else 300
 
-_WEIGHT_DIR = Path(os.environ.get("CLINICALBERT_WEIGHT_DIR", "/workspace/clinicalbert_best"))
-_MOUNT_TARGET = "/model"
+def _download_base_model() -> None:
+    from huggingface_hub import snapshot_download
 
-CLINICALBERT_IMAGE = (
+    snapshot_download(
+        repo_id=BASE_MODEL,
+        revision=BASE_REVISION,
+        local_dir=str(REMOTE_BASE_DIR),
+    )
+
+
+image = (
     modal.Image.debian_slim(python_version="3.11")
     .apt_install("libgomp1")
     .pip_install(
-        "torch==2.4.1",
-        "transformers==4.44.2",
-        "safetensors==0.4.5",
-        "huggingface_hub==0.24.7",
+        "torch==2.7.1",
+        "transformers==4.54.1",
+        "safetensors==0.5.3",
+        "huggingface_hub==0.34.4",
         "fastapi==0.115.0",
-        "numpy==1.26.4",
+        "numpy==2.1.0",
     )
-    .add_local_dir(str(_WEIGHT_DIR), _MOUNT_TARGET)
+    .run_function(_download_base_model)
 )
+
+# Source mounts are resolved only by the local deploy process. Modal imports
+# this module again in the container, where repository-relative paths do not
+# exist and the already-built image contains the files below.
+if modal.is_local():
+    repo_root = Path(__file__).resolve().parents[2]
+    local_bundle = Path(os.environ.get(
+        "CLINICALBERT_WEIGHT_DIR",
+        str(repo_root / "artifacts" / "clinicalbert"),
+    )).resolve()
+    local_runtime = repo_root / "src" / "oncology_arbiter" / "nlp" / "clinicalbert_runtime_v2.py"
+    required = [
+        local_bundle / ARTIFACT_FILENAME,
+        local_bundle / "clinicalbert_head_v2_config.json",
+        local_bundle / "clinicalbert_metrics_v2.json",
+        local_runtime,
+    ]
+    missing = [str(path) for path in required if not path.is_file()]
+    if missing:
+        raise RuntimeError(f"ClinicalBERT deployment inputs missing: {missing}")
+    image = image.add_local_file(str(local_runtime), str(REMOTE_RUNTIME))
+    for path in required[:3]:
+        image = image.add_local_file(str(path), str(REMOTE_BUNDLE_DIR / path.name))
 
 app = modal.App("clinicalbert")
+health_image = modal.Image.debian_slim(python_version="3.11").pip_install("fastapi==0.115.0")
 
 
-HEALTH_IMAGE = modal.Image.debian_slim(python_version="3.11").pip_install(
-    "fastapi==0.115.0"
-)
-
-
-@app.function(image=HEALTH_IMAGE)
+@app.function(image=health_image)
 @modal.fastapi_endpoint(method="GET", label="clinicalbert-healthz")
-def healthz() -> Dict[str, str]:
+def healthz() -> Dict[str, Any]:
     return {
         "status": "ok",
         "app": "clinicalbert",
-        "version": APP_VERSION,
-        "disclaimer": (
-            "Research Use Only. Not FDA-cleared. Not CE-marked. Not intended "
-            "for clinical use."
-        ),
+        "app_version": APP_VERSION,
+        "expected_artifact_sha256": ARTIFACT_SHA256,
+        "disclaimer": DISCLAIMER,
     }
 
 
-# -- Token-classification decoder helpers ----------------------------
-
-_TOKEN_SPLIT_RE = re.compile(r"[A-Za-z]+|\d+(?:\.\d+)?%?|[^\sA-Za-z0-9]")
-
-
-def _tokenize(text: str) -> List[tuple]:
-    out: List[tuple] = []
-    for m in _TOKEN_SPLIT_RE.finditer(text):
-        out.append((m.group(0), m.start(), m.end()))
-    return out
-
-
-def _decode_bio_spans(tokens: List[str], labels: List[str]) -> List[Dict[str, Any]]:
-    out: List[Dict[str, Any]] = []
-    i = 0
-    while i < len(labels):
-        lab = labels[i]
-        if lab.startswith("B-"):
-            etype = lab[2:]
-            j = i + 1
-            while j < len(labels) and labels[j] == f"I-{etype}":
-                j += 1
-            out.append(
-                {
-                    "entity_type": etype,
-                    "surface": " ".join(tokens[i:j]),
-                    "start_tok": i,
-                    "end_tok": j,
-                }
-            )
-            i = j
-        else:
-            i += 1
-    return out
-
-
-def _canonicalize(spans: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """Collapse BIO spans into a per-entity-type parsed dict."""
-    per_type: Dict[str, Dict[str, Any]] = {}
-    for span in spans:
-        et = span["entity_type"]
-        if et not in per_type or len(span["surface"]) > len(per_type[et]["surface"]):
-            per_type[et] = span
-
-    parsed: Dict[str, Any] = {}
-    for et, span in per_type.items():
-        surface = span["surface"].strip()
-        parsed[et] = {"surface": surface, "start_tok": span["start_tok"], "end_tok": span["end_tok"]}
-
-        # Normalise tokenizer-injected whitespace around hyphens so
-        # "wild - type" (produced by our whitespace tokenizer) still
-        # matches lexicon terms written as "wild-type". Otherwise the
-        # per-entity value-decoder misclassifies wild-type genes as
-        # "mutated". Cheap; done pre-lower to preserve the substring.
-        low = re.sub(r"\s*-\s*", "-", surface.lower())
-        if et in ("KI67_PCT", "PD_L1_TPS"):
-            m = re.search(r"(\d+)\s*%?", surface)
-            parsed[et]["value"] = int(m.group(1)) if m else None
-        elif et in ("TMB", "TUMOR_SIZE_MM"):
-            m = re.search(r"(\d+(?:\.\d+)?)", surface)
-            parsed[et]["value"] = float(m.group(1)) if m else None
-        elif et == "GRADE":
-            m = re.search(r"(\d)", surface)
-            parsed[et]["value"] = int(m.group(1)) if m else None
-        elif et in ("T_STAGE", "N_STAGE", "M_STAGE"):
-            parsed[et]["value"] = surface.upper().lstrip("PC")
-        elif et in ("KRAS", "EGFR", "BRAF"):
-            if any(k in low for k in (
-                "wild-type", "wild type", "wildtype", "not detected",
-                "no mutation", "no pathogenic", "no activating",
-            )):
-                parsed[et]["value"] = "wild_type"
-            else:
-                parsed[et]["value"] = "mutated"
-        elif et in ("ALK", "ROS1"):
-            if any(k in low for k in ("no rearrangement", "not identified",
-                                       "not detected", "negative", "no staining",
-                                       "no fusion")):
-                parsed[et]["value"] = "negative"
-            else:
-                parsed[et]["value"] = "fusion_positive"
-        elif et == "MET":
-            if any(k in low for k in ("not detected", "no exon 14", "no mutation",
-                                       "not amplified", "wild-type", "negative")):
-                parsed[et]["value"] = "not_detected"
-            else:
-                parsed[et]["value"] = "mutated"
-        elif et == "HER2_AMP":
-            if any(k in low for k in ("not amplified", "not detected", "no gene amp",
-                                       "normal copy", "negative")):
-                parsed[et]["value"] = "not_amplified"
-            else:
-                parsed[et]["value"] = "amplified"
-        elif et == "MSI":
-            if any(k in low for k in ("mss", "stable")):
-                parsed[et]["value"] = "mss"
-            elif any(k in low for k in ("msi-h", "high", "unstable")):
-                parsed[et]["value"] = "msi_high"
-            else:
-                parsed[et]["value"] = "unknown"
-        elif et in ("ER_VALUE", "PR_VALUE", "HER2_VALUE"):
-            if any(k in low for k in ("no nuclear", "no staining", "negative",
-                                       "1+", " 0", "no mutation")):
-                parsed[et]["value"] = "negative"
-            elif any(k in low for k in ("equivocal", "2+", "1-5%", "weakly", "borderline")):
-                parsed[et]["value"] = "equivocal"
-            else:
-                parsed[et]["value"] = "positive"
-        elif et == "MARGIN":
-            if "close" in low:
-                parsed[et]["value"] = "close"
-            elif any(k in low for k in ("negative", "uninvolved")):
-                parsed[et]["value"] = "negative"
-            else:
-                parsed[et]["value"] = "positive"
-        elif et == "LVI":
-            if any(k in low for k in ("absent", "not identified", "not present")):
-                parsed[et]["value"] = "absent"
-            else:
-                parsed[et]["value"] = "present"
-        else:
-            parsed[et]["value"] = surface
-    return parsed
-
-
 @app.cls(
-    image=CLINICALBERT_IMAGE,
-    scaledown_window=_SCALEDOWN_S,
-    timeout=180,
-    min_containers=_MIN_CONTAINERS,
+    image=image,
+    cpu=8.0,
+    memory=16384,
+    timeout=300,
+    scaledown_window=900,
+    min_containers=0,
 )
 class ClinicalBertModal:
     @modal.enter()
     def load(self) -> None:
-        import torch
-        from transformers import AutoModelForTokenClassification, AutoTokenizer
+        sys.path.insert(0, str(REMOTE_RUNTIME.parent))
+        from clinicalbert_runtime_v2 import ClinicalBertV2Runtime
 
-        t0 = time.time()
-
-        model_path = _MOUNT_TARGET
-        self.tokenizer = AutoTokenizer.from_pretrained(model_path)
-        self.model = AutoModelForTokenClassification.from_pretrained(model_path)
-        self.model.eval()
-
-        metrics_path = Path(model_path) / "metrics.json"
-        if metrics_path.exists():
-            metrics = json.loads(metrics_path.read_text())
-            self.metrics = metrics
-            self.id2label = {
-                int(k): v for k, v in metrics.get("label_map", {}).get("id2label", {}).items()
-            }
-            self.provenance = metrics.get("provenance", "SYNTHETIC-v0.3.1")
-            self.training_seed = metrics.get("training_seed")
-            self.test_micro_f1 = metrics.get("test", {}).get("micro", {}).get("f1")
-            self.base_model = metrics.get("base_model", "emilyalsentzer/Bio_ClinicalBERT")
-        else:
-            self.metrics = None
-            self.id2label = {int(k): v for k, v in self.model.config.id2label.items()}
-            self.provenance = "SYNTHETIC-v0.3.1"
-            self.training_seed = None
-            self.test_micro_f1 = None
-            self.base_model = "emilyalsentzer/Bio_ClinicalBERT"
-
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.model.to(self.device)
-
-        self.load_seconds = round(time.time() - t0, 3)
-        self.warmed_at = time.time()
+        started = time.perf_counter()
+        self.runtime = ClinicalBertV2Runtime(
+            REMOTE_BUNDLE_DIR,
+            base_model_dir=REMOTE_BASE_DIR,
+            device="cpu",
+        )
+        self.container_load_seconds = time.perf_counter() - started
+        identity = self.runtime.identity()
+        if identity["artifact_sha256"] != ARTIFACT_SHA256:
+            raise RuntimeError("deployed ClinicalBERT head identity mismatch")
+        if identity["base_revision"] != BASE_REVISION:
+            raise RuntimeError("deployed ClinicalBERT base revision mismatch")
 
     @modal.fastapi_endpoint(method="GET", label="clinicalbert-info")
     def info(self) -> Dict[str, Any]:
         return {
             "app": "clinicalbert",
             "app_version": APP_VERSION,
-            "base_model": self.base_model,
-            "training_seed": self.training_seed,
-            "test_micro_f1": self.test_micro_f1,
-            "provenance": self.provenance,
-            "num_labels": len(self.id2label),
-            "device": self.device,
-            "load_seconds": self.load_seconds,
-            "warmed_at": self.warmed_at,
-            "disclaimer": (
-                "Research Use Only. Not FDA-cleared. Not CE-marked. Not intended "
-                "for clinical use."
-            ),
+            **self.runtime.identity(),
+            "container_load_seconds": round(self.container_load_seconds, 3),
+            "disclaimer": DISCLAIMER,
         }
 
     @modal.fastapi_endpoint(method="POST", label="clinicalbert-parse")
     def parse(self, payload: Dict[str, Any]) -> Dict[str, Any]:
-        """POST JSON: `{"report_text": "..."}`."""
-        import torch
-
-        t0 = time.time()
         report_text = payload.get("report_text")
-        if not isinstance(report_text, str) or not report_text.strip():
-            return {"error": "report_text must be a non-empty string"}
-        if len(report_text) > 20_000:
-            return {"error": "report_text too long (max 20000 chars)"}
-
-        toks = _tokenize(report_text)
-        tokens = [t for t, _, _ in toks]
-
-        common = {
-            "provenance": self.provenance,
-            "base_model": self.base_model,
-            "training_seed": self.training_seed,
-            "test_micro_f1": self.test_micro_f1,
-            "app_version": APP_VERSION,
-            "disclaimer": (
-                "Research Use Only. Not FDA-cleared. Not CE-marked. "
-                "Not intended for clinical use."
-            ),
-        }
-
-        if not tokens:
-            return {"parsed": {}, "spans": [], "n_tokens": 0,
-                    "seconds": round(time.time() - t0, 3), **common}
-
         try:
-            enc = self.tokenizer(
-                tokens,
-                is_split_into_words=True,
-                padding="max_length",
-                truncation=True,
-                max_length=512,
-                return_tensors="pt",
-            ).to(self.device)
-        except Exception as e:
-            return {"error": f"tokenize: {type(e).__name__}: {e}"}
-
-        try:
-            with torch.no_grad():
-                logits = self.model(
-                    input_ids=enc["input_ids"],
-                    attention_mask=enc["attention_mask"],
-                ).logits
-            preds = logits.argmax(-1)[0].cpu().tolist()
-        except Exception as e:
-            return {"error": f"forward: {type(e).__name__}: {e}"}
-
-        word_ids = enc.word_ids(batch_index=0)
-        pred_labels_per_word: List[str] = ["O"] * len(tokens)
-        prev = None
-        for tok_idx, wid in enumerate(word_ids):
-            if wid is None or wid == prev:
-                continue
-            if wid < len(pred_labels_per_word):
-                pred_labels_per_word[wid] = self.id2label.get(int(preds[tok_idx]), "O")
-            prev = wid
-
-        spans = _decode_bio_spans(tokens, pred_labels_per_word)
-        parsed = _canonicalize(spans)
-
-        return {
-            "parsed": parsed,
-            "spans": spans,
-            "n_tokens": len(tokens),
-            "seconds": round(time.time() - t0, 3),
-            **common,
-        }
+            result = self.runtime.parse(report_text)
+        except Exception as exc:
+            return {"error": f"{type(exc).__name__}: {exc}"}
+        return {"app": "clinicalbert", "app_version": APP_VERSION, **result}

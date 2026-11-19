@@ -1,0 +1,20 @@
+{
+  "schema_version": 2,
+  "capability": "medgemma",
+  "dataset": "MedGemma 1.5 4B-IT live Modal chat handshake cohort (RUO)",
+  "dataset_manifest_path": "artifacts/medgemma/medgemma_dataset_v2.json",
+  "dataset_sha256": "bbb4ab20debcdc3407b72d05f46f1c87655b90441284ed20915053d30b19b375",
+  "split_manifest_path": "artifacts/medgemma/medgemma_split_v2.json",
+  "split_sha256": "7686f9bf07af41ea86dc3f78f1ff0ec5a69a3d2bb58568c68a3f8da881b6fc61",
+  "patient_disjoint": true,
+  "n_training": 4,
+  "n_validation": 2,
+  "n_test": 4,
+  "n_training_synthetic": false,
+  "seed": 20261004,
+  "command": "MODAL_PROFILE=fjkiani modal run deploy/modal/medgemma_1_5_4b_app.py",
+  "started_at": "2026-10-05T02:10:02Z",
+  "completed_at": "2026-10-05T02:10:22Z",
+  "source_commit": "255f76f3d2ea18aa3b5478aa931bd757a4ed730a",
+  "notes": "Genuine google/medgemma-1.5-4b-it CausalLM deploy; live /info+/chat handshake packaging for tonight_delivery."
+}

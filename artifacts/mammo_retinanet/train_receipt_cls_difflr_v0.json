@@ -1,0 +1,132 @@
+{
+  "status": "ok",
+  "app_version": "mammo-retinanet-cls-v1.3.0-diff-lr",
+  "mode": "retinanet_backbone_cls_diff_lr",
+  "backbone_frozen": false,
+  "lr_backbone": 1e-05,
+  "lr_head": 0.0003,
+  "weight_decay": 0.0001,
+  "val_frac": 0.05,
+  "patience": 6,
+  "best_epoch": 14,
+  "dataset_root": "/vol/cbis/CBIS-DDSM_1024",
+  "dataset_note": "Full CBIS-DDSM_1024 HF-PNG pool; n_train_fit maximized via val_frac=0.05.",
+  "epochs": 25,
+  "batch_size": 16,
+  "img_size": 384,
+  "n_train_pool": 2445,
+  "n_train_fit": 2323,
+  "n_validation": 122,
+  "n_test": 641,
+  "val_auroc": 0.8534599728629579,
+  "test_auroc": 0.7244700181708056,
+  "meets_floor_0.85": false,
+  "artifact": "/vol/out/mammo_retinanet_v3_difflr/mammo_retinanet_v3_difflr.safetensors",
+  "artifact_sha256": "3ce459c5d1eef9a91b0fa3f1a5a2079b07a05e397e8867a75f6547483fd83d65",
+  "history": [
+    {
+      "epoch": 1,
+      "loss_mean": 0.6834861301395991,
+      "val_auroc": 0.7622795115332428
+    },
+    {
+      "epoch": 2,
+      "loss_mean": 0.6425216048955917,
+      "val_auroc": 0.7576662143826323
+    },
+    {
+      "epoch": 3,
+      "loss_mean": 0.6225533032253997,
+      "val_auroc": 0.8027137042062416
+    },
+    {
+      "epoch": 4,
+      "loss_mean": 0.6002915613863566,
+      "val_auroc": 0.8094979647218453
+    },
+    {
+      "epoch": 5,
+      "loss_mean": 0.5914427989149746,
+      "val_auroc": 0.8189959294436907
+    },
+    {
+      "epoch": 6,
+      "loss_mean": 0.574394185453245,
+      "val_auroc": 0.81438263229308
+    },
+    {
+      "epoch": 7,
+      "loss_mean": 0.5637485989152569,
+      "val_auroc": 0.8168249660786975
+    },
+    {
+      "epoch": 8,
+      "loss_mean": 0.5498345045194234,
+      "val_auroc": 0.8333785617367707
+    },
+    {
+      "epoch": 9,
+      "loss_mean": 0.5341773945583056,
+      "val_auroc": 0.84640434192673
+    },
+    {
+      "epoch": 10,
+      "loss_mean": 0.5129968074903096,
+      "val_auroc": 0.8453188602442334
+    },
+    {
+      "epoch": 11,
+      "loss_mean": 0.5280475904272027,
+      "val_auroc": 0.8453188602442334
+    },
+    {
+      "epoch": 12,
+      "loss_mean": 0.5104885201339853,
+      "val_auroc": 0.8382632293080055
+    },
+    {
+      "epoch": 13,
+      "loss_mean": 0.5016183012152371,
+      "val_auroc": 0.8523744911804614
+    },
+    {
+      "epoch": 14,
+      "loss_mean": 0.48298793694336123,
+      "val_auroc": 0.8534599728629579
+    },
+    {
+      "epoch": 15,
+      "loss_mean": 0.5020163361340353,
+      "val_auroc": 0.8474898236092265
+    },
+    {
+      "epoch": 16,
+      "loss_mean": 0.4852827546531207,
+      "val_auroc": 0.8496607869742199
+    },
+    {
+      "epoch": 17,
+      "loss_mean": 0.4901390113446811,
+      "val_auroc": 0.8510176390773405
+    },
+    {
+      "epoch": 18,
+      "loss_mean": 0.49372066659470126,
+      "val_auroc": 0.8512890094979647
+    },
+    {
+      "epoch": 19,
+      "loss_mean": 0.4799701830703918,
+      "val_auroc": 0.8531886024423339
+    },
+    {
+      "epoch": 20,
+      "loss_mean": 0.4649487415405169,
+      "val_auroc": 0.8521031207598372
+    }
+  ],
+  "elapsed_seconds": 862.298,
+  "gpu_name": "NVIDIA A10G",
+  "prior_unfrozen_test_auroc": 0.785453260650111,
+  "prior_frozen_test_auroc": 0.6827074500302847
+}

@@ -1,0 +1,768 @@
+{
+  "capability": "biopsy-probe",
+  "command": "/workspace/.venv/bin/python /workspace/smm-ten-delivery/scripts/train_biopsy_probe_v1.py --repo-root /workspace/smm-ten-delivery --source-table /mnt/shared-workspace/shared/ten-capability-delivery/biopsy-probe/w2/full_data/source_table.json --images-dir /mnt/shared-workspace/shared/ten-capability-delivery/biopsy-probe/w2/full_data/images_896x672_png --endpoint-base https://crispro-test--medsiglip --cache-dir /workspace/biopsy_probe_full_cache --out-dir /mnt/shared-workspace/shared/ten-capability-delivery/biopsy-probe/fit-worker/full_run --batch-size 8",
+  "completed_at": "2026-09-29T04:32:50.968491Z",
+  "dataset": "BACH breast histology microscopy (three-class biopsy probe)",
+  "dataset_manifest_path": "artifacts/biopsy_probe/biopsy_probe_dataset_v2.json",
+  "dataset_sha256": "0a7a2f0beab10329dec34bf6a04a61aaa6ea75f1c1179bdd40f1fdaebf0e7c58",
+  "model_selection": {
+    "all_candidates": [
+      {
+        "accuracy": 0.5555555555555556,
+        "c": 0.0001,
+        "class_weight": null,
+        "invasive_ovr_auroc": 0.9404761904761905,
+        "log_loss": 0.9900194750482294,
+        "macro_ovr_auroc": 0.9097222222222223,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.8958333333333333,
+          "in_situ_carcinoma": 0.8928571428571429,
+          "invasive_carcinoma": 0.9404761904761905
+        },
+        "transform": "raw"
+      },
+      {
+        "accuracy": 0.6481481481481481,
+        "c": 0.0001,
+        "class_weight": "balanced",
+        "invasive_ovr_auroc": 0.9464285714285714,
+        "log_loss": 1.0797675955667336,
+        "macro_ovr_auroc": 0.8882936507936506,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.8930555555555556,
+          "in_situ_carcinoma": 0.8253968253968254,
+          "invasive_carcinoma": 0.9464285714285714
+        },
+        "transform": "raw"
+      },
+      {
+        "accuracy": 0.6111111111111112,
+        "c": 0.001,
+        "class_weight": null,
+        "invasive_ovr_auroc": 0.9444444444444444,
+        "log_loss": 0.8826847941086666,
+        "macro_ovr_auroc": 0.9080026455026454,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.8986111111111111,
+          "in_situ_carcinoma": 0.8809523809523809,
+          "invasive_carcinoma": 0.9444444444444444
+        },
+        "transform": "raw"
+      },
+      {
+        "accuracy": 0.6481481481481481,
+        "c": 0.001,
+        "class_weight": "balanced",
+        "invasive_ovr_auroc": 0.9484126984126984,
+        "log_loss": 0.9616276245517633,
+        "macro_ovr_auroc": 0.894047619047619,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.8944444444444445,
+          "in_situ_carcinoma": 0.8392857142857143,
+          "invasive_carcinoma": 0.9484126984126984
+        },
+        "transform": "raw"
+      },
+      {
+        "accuracy": 0.6666666666666666,
+        "c": 0.01,
+        "class_weight": null,
+        "invasive_ovr_auroc": 0.9603174603174603,
+        "log_loss": 0.651773332128266,
+        "macro_ovr_auroc": 0.9130952380952381,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.9000000000000001,
+          "in_situ_carcinoma": 0.878968253968254,
+          "invasive_carcinoma": 0.9603174603174603
+        },
+        "transform": "raw"
+      },
+      {
+        "accuracy": 0.6851851851851852,
+        "c": 0.01,
+        "class_weight": "balanced",
+        "invasive_ovr_auroc": 0.9761904761904763,
+        "log_loss": 0.7273195339378303,
+        "macro_ovr_auroc": 0.9130952380952381,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.8999999999999999,
+          "in_situ_carcinoma": 0.8630952380952381,
+          "invasive_carcinoma": 0.9761904761904763
+        },
+        "transform": "raw"
+      },
+      {
+        "accuracy": 0.7592592592592593,
+        "c": 0.1,
+        "class_weight": null,
+        "invasive_ovr_auroc": 0.9742063492063493,
+        "log_loss": 0.5228962450327851,
+        "macro_ovr_auroc": 0.933531746031746,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.923611111111111,
+          "in_situ_carcinoma": 0.9027777777777777,
+          "invasive_carcinoma": 0.9742063492063493
+        },
+        "transform": "raw"
+      },
+      {
+        "accuracy": 0.7407407407407407,
+        "c": 0.1,
+        "class_weight": "balanced",
+        "invasive_ovr_auroc": 0.9801587301587301,
+        "log_loss": 0.6046515350384235,
+        "macro_ovr_auroc": 0.9305555555555555,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.9166666666666665,
+          "in_situ_carcinoma": 0.8948412698412699,
+          "invasive_carcinoma": 0.9801587301587301
+        },
+        "transform": "raw"
+      },
+      {
+        "accuracy": 0.7962962962962963,
+        "c": 1.0,
+        "class_weight": null,
+        "invasive_ovr_auroc": 0.9841269841269842,
+        "log_loss": 0.5434083994831401,
+        "macro_ovr_auroc": 0.9356481481481481,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.9180555555555556,
+          "in_situ_carcinoma": 0.9047619047619048,
+          "invasive_carcinoma": 0.9841269841269842
+        },
+        "transform": "raw"
+      },
+      {
+        "accuracy": 0.7222222222222222,
+        "c": 1.0,
+        "class_weight": "balanced",
+        "invasive_ovr_auroc": 0.9841269841269842,
+        "log_loss": 0.6033454954907321,
+        "macro_ovr_auroc": 0.9305555555555555,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.9166666666666666,
+          "in_situ_carcinoma": 0.8908730158730158,
+          "invasive_carcinoma": 0.9841269841269842
+        },
+        "transform": "raw"
+      },
+      {
+        "accuracy": 0.7777777777777778,
+        "c": 10.0,
+        "class_weight": null,
+        "invasive_ovr_auroc": 0.9880952380952381,
+        "log_loss": 0.6321450191732199,
+        "macro_ovr_auroc": 0.9386904761904762,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.9152777777777777,
+          "in_situ_carcinoma": 0.9126984126984128,
+          "invasive_carcinoma": 0.9880952380952381
+        },
+        "transform": "raw"
+      },
+      {
+        "accuracy": 0.7592592592592593,
+        "c": 10.0,
+        "class_weight": "balanced",
+        "invasive_ovr_auroc": 0.9880952380952381,
+        "log_loss": 0.6986099834250799,
+        "macro_ovr_auroc": 0.9324074074074075,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.9083333333333333,
+          "in_situ_carcinoma": 0.9007936507936508,
+          "invasive_carcinoma": 0.9880952380952381
+        },
+        "transform": "raw"
+      },
+      {
+        "accuracy": 0.7777777777777778,
+        "c": 100.0,
+        "class_weight": null,
+        "invasive_ovr_auroc": 0.992063492063492,
+        "log_loss": 0.8289476148689882,
+        "macro_ovr_auroc": 0.9386243386243386,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.9111111111111111,
+          "in_situ_carcinoma": 0.9126984126984127,
+          "invasive_carcinoma": 0.992063492063492
+        },
+        "transform": "raw"
+      },
+      {
+        "accuracy": 0.7592592592592593,
+        "c": 100.0,
+        "class_weight": "balanced",
+        "invasive_ovr_auroc": 0.9821428571428571,
+        "log_loss": 1.265541222197,
+        "macro_ovr_auroc": 0.9154761904761904,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.8694444444444445,
+          "in_situ_carcinoma": 0.8948412698412699,
+          "invasive_carcinoma": 0.9821428571428571
+        },
+        "transform": "raw"
+      },
+      {
+        "accuracy": 0.7037037037037037,
+        "c": 0.0001,
+        "class_weight": null,
+        "invasive_ovr_auroc": 0.9662698412698413,
+        "log_loss": 0.6767300920334736,
+        "macro_ovr_auroc": 0.9194444444444444,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.9111111111111112,
+          "in_situ_carcinoma": 0.8809523809523809,
+          "invasive_carcinoma": 0.9662698412698413
+        },
+        "transform": "standard"
+      },
+      {
+        "accuracy": 0.6851851851851852,
+        "c": 0.0001,
+        "class_weight": "balanced",
+        "invasive_ovr_auroc": 0.9801587301587301,
+        "log_loss": 0.74892925480808,
+        "macro_ovr_auroc": 0.9162698412698412,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.9055555555555554,
+          "in_situ_carcinoma": 0.8630952380952381,
+          "invasive_carcinoma": 0.9801587301587301
+        },
+        "transform": "standard"
+      },
+      {
+        "accuracy": 0.7592592592592593,
+        "c": 0.001,
+        "class_weight": null,
+        "invasive_ovr_auroc": 0.9781746031746031,
+        "log_loss": 0.5224827890747725,
+        "macro_ovr_auroc": 0.9317460317460319,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.9222222222222223,
+          "in_situ_carcinoma": 0.8948412698412699,
+          "invasive_carcinoma": 0.9781746031746031
+        },
+        "transform": "standard"
+      },
+      {
+        "accuracy": 0.7407407407407407,
+        "c": 0.001,
+        "class_weight": "balanced",
+        "invasive_ovr_auroc": 0.9801587301587301,
+        "log_loss": 0.5999857904805468,
+        "macro_ovr_auroc": 0.9279100529100529,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.9166666666666666,
+          "in_situ_carcinoma": 0.8869047619047619,
+          "invasive_carcinoma": 0.9801587301587301
+        },
+        "transform": "standard"
+      },
+      {
+        "accuracy": 0.7777777777777778,
+        "c": 0.01,
+        "class_weight": null,
+        "invasive_ovr_auroc": 0.9861111111111112,
+        "log_loss": 0.525063474293098,
+        "macro_ovr_auroc": 0.9408068783068783,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.923611111111111,
+          "in_situ_carcinoma": 0.9126984126984127,
+          "invasive_carcinoma": 0.9861111111111112
+        },
+        "transform": "standard"
+      },
+      {
+        "accuracy": 0.7222222222222222,
+        "c": 0.01,
+        "class_weight": "balanced",
+        "invasive_ovr_auroc": 0.9841269841269842,
+        "log_loss": 0.5920686836226766,
+        "macro_ovr_auroc": 0.9343915343915343,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.9222222222222222,
+          "in_situ_carcinoma": 0.8968253968253969,
+          "invasive_carcinoma": 0.9841269841269842
+        },
+        "transform": "standard"
+      },
+      {
+        "accuracy": 0.7592592592592593,
+        "c": 0.1,
+        "class_weight": null,
+        "invasive_ovr_auroc": 0.9880952380952381,
+        "log_loss": 0.5990472042793104,
+        "macro_ovr_auroc": 0.9409391534391535,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.9180555555555555,
+          "in_situ_carcinoma": 0.9166666666666666,
+          "invasive_carcinoma": 0.9880952380952381
+        },
+        "transform": "standard"
+      },
+      {
+        "accuracy": 0.7592592592592593,
+        "c": 0.1,
+        "class_weight": "balanced",
+        "invasive_ovr_auroc": 0.9861111111111112,
+        "log_loss": 0.659863999015077,
+        "macro_ovr_auroc": 0.9355820105820105,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.9138888888888889,
+          "in_situ_carcinoma": 0.9067460317460316,
+          "invasive_carcinoma": 0.9861111111111112
+        },
+        "transform": "standard"
+      },
+      {
+        "accuracy": 0.7777777777777778,
+        "c": 1.0,
+        "class_weight": null,
+        "invasive_ovr_auroc": 0.9880952380952381,
+        "log_loss": 0.744429545031021,
+        "macro_ovr_auroc": 0.9396164021164021,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.9180555555555555,
+          "in_situ_carcinoma": 0.9126984126984127,
+          "invasive_carcinoma": 0.9880952380952381
+        },
+        "transform": "standard"
+      },
+      {
+        "accuracy": 0.7777777777777778,
+        "c": 1.0,
+        "class_weight": "balanced",
+        "invasive_ovr_auroc": 0.9861111111111112,
+        "log_loss": 0.796721172206695,
+        "macro_ovr_auroc": 0.9351190476190476,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.9125,
+          "in_situ_carcinoma": 0.9067460317460319,
+          "invasive_carcinoma": 0.9861111111111112
+        },
+        "transform": "standard"
+      },
+      {
+        "accuracy": 0.7592592592592593,
+        "c": 10.0,
+        "class_weight": null,
+        "invasive_ovr_auroc": 0.9861111111111112,
+        "log_loss": 1.0624005648468982,
+        "macro_ovr_auroc": 0.9460317460317461,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.9472222222222222,
+          "in_situ_carcinoma": 0.9047619047619048,
+          "invasive_carcinoma": 0.9861111111111112
+        },
+        "transform": "standard"
+      },
+      {
+        "accuracy": 0.7592592592592593,
+        "c": 10.0,
+        "class_weight": "balanced",
+        "invasive_ovr_auroc": 0.9880952380952381,
+        "log_loss": 1.113146498401314,
+        "macro_ovr_auroc": 0.9437830687830688,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.9444444444444444,
+          "in_situ_carcinoma": 0.8988095238095237,
+          "invasive_carcinoma": 0.9880952380952381
+        },
+        "transform": "standard"
+      },
+      {
+        "accuracy": 0.7407407407407407,
+        "c": 100.0,
+        "class_weight": null,
+        "invasive_ovr_auroc": 0.9841269841269842,
+        "log_loss": 1.30357353429111,
+        "macro_ovr_auroc": 0.943584656084656,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.9458333333333333,
+          "in_situ_carcinoma": 0.9007936507936508,
+          "invasive_carcinoma": 0.9841269841269842
+        },
+        "transform": "standard"
+      },
+      {
+        "accuracy": 0.7592592592592593,
+        "c": 100.0,
+        "class_weight": "balanced",
+        "invasive_ovr_auroc": 0.9880952380952381,
+        "log_loss": 1.1254951996018567,
+        "macro_ovr_auroc": 0.9446428571428571,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.9430555555555555,
+          "in_situ_carcinoma": 0.9027777777777778,
+          "invasive_carcinoma": 0.9880952380952381
+        },
+        "transform": "standard"
+      },
+      {
+        "accuracy": 0.5555555555555556,
+        "c": 0.0001,
+        "class_weight": null,
+        "invasive_ovr_auroc": 0.9404761904761905,
+        "log_loss": 1.006235841751617,
+        "macro_ovr_auroc": 0.9114417989417989,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.8930555555555556,
+          "in_situ_carcinoma": 0.9007936507936507,
+          "invasive_carcinoma": 0.9404761904761905
+        },
+        "transform": "l2"
+      },
+      {
+        "accuracy": 0.6296296296296297,
+        "c": 0.0001,
+        "class_weight": "balanced",
+        "invasive_ovr_auroc": 0.9444444444444444,
+        "log_loss": 1.0980046412097997,
+        "macro_ovr_auroc": 0.8882275132275131,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.888888888888889,
+          "in_situ_carcinoma": 0.8313492063492063,
+          "invasive_carcinoma": 0.9444444444444444
+        },
+        "transform": "l2"
+      },
+      {
+        "accuracy": 0.5555555555555556,
+        "c": 0.001,
+        "class_weight": null,
+        "invasive_ovr_auroc": 0.9404761904761905,
+        "log_loss": 1.001429879599478,
+        "macro_ovr_auroc": 0.9101190476190476,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.8930555555555556,
+          "in_situ_carcinoma": 0.8968253968253967,
+          "invasive_carcinoma": 0.9404761904761905
+        },
+        "transform": "l2"
+      },
+      {
+        "accuracy": 0.6481481481481481,
+        "c": 0.001,
+        "class_weight": "balanced",
+        "invasive_ovr_auroc": 0.9444444444444444,
+        "log_loss": 1.0926115086090666,
+        "macro_ovr_auroc": 0.888888888888889,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.888888888888889,
+          "in_situ_carcinoma": 0.8333333333333333,
+          "invasive_carcinoma": 0.9444444444444444
+        },
+        "transform": "l2"
+      },
+      {
+        "accuracy": 0.5555555555555556,
+        "c": 0.01,
+        "class_weight": null,
+        "invasive_ovr_auroc": 0.9424603174603174,
+        "log_loss": 0.9584632332106587,
+        "macro_ovr_auroc": 0.9083333333333333,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.8916666666666667,
+          "in_situ_carcinoma": 0.8908730158730159,
+          "invasive_carcinoma": 0.9424603174603174
+        },
+        "transform": "l2"
+      },
+      {
+        "accuracy": 0.6481481481481481,
+        "c": 0.01,
+        "class_weight": "balanced",
+        "invasive_ovr_auroc": 0.9444444444444444,
+        "log_loss": 1.0446781299765349,
+        "macro_ovr_auroc": 0.8902116402116403,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.888888888888889,
+          "in_situ_carcinoma": 0.8373015873015872,
+          "invasive_carcinoma": 0.9444444444444444
+        },
+        "transform": "l2"
+      },
+      {
+        "accuracy": 0.7222222222222222,
+        "c": 0.1,
+        "class_weight": null,
+        "invasive_ovr_auroc": 0.9484126984126984,
+        "log_loss": 0.7649626174720403,
+        "macro_ovr_auroc": 0.9080026455026454,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.898611111111111,
+          "in_situ_carcinoma": 0.876984126984127,
+          "invasive_carcinoma": 0.9484126984126984
+        },
+        "transform": "l2"
+      },
+      {
+        "accuracy": 0.6666666666666666,
+        "c": 0.1,
+        "class_weight": "balanced",
+        "invasive_ovr_auroc": 0.9543650793650793,
+        "log_loss": 0.8384959452567045,
+        "macro_ovr_auroc": 0.9060846560846562,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.9027777777777777,
+          "in_situ_carcinoma": 0.8611111111111112,
+          "invasive_carcinoma": 0.9543650793650793
+        },
+        "transform": "l2"
+      },
+      {
+        "accuracy": 0.6851851851851852,
+        "c": 1.0,
+        "class_weight": null,
+        "invasive_ovr_auroc": 0.9682539682539683,
+        "log_loss": 0.5728799519718463,
+        "macro_ovr_auroc": 0.9283730158730159,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.9180555555555556,
+          "in_situ_carcinoma": 0.8988095238095238,
+          "invasive_carcinoma": 0.9682539682539683
+        },
+        "transform": "l2"
+      },
+      {
+        "accuracy": 0.7222222222222222,
+        "c": 1.0,
+        "class_weight": "balanced",
+        "invasive_ovr_auroc": 0.9781746031746031,
+        "log_loss": 0.6531610260469121,
+        "macro_ovr_auroc": 0.9256613756613756,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.9138888888888889,
+          "in_situ_carcinoma": 0.8849206349206349,
+          "invasive_carcinoma": 0.9781746031746031
+        },
+        "transform": "l2"
+      },
+      {
+        "accuracy": 0.7407407407407407,
+        "c": 10.0,
+        "class_weight": null,
+        "invasive_ovr_auroc": 0.9781746031746031,
+        "log_loss": 0.5348687385860839,
+        "macro_ovr_auroc": 0.9343253968253968,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.9180555555555556,
+          "in_situ_carcinoma": 0.9067460317460316,
+          "invasive_carcinoma": 0.9781746031746031
+        },
+        "transform": "l2"
+      },
+      {
+        "accuracy": 0.7037037037037037,
+        "c": 10.0,
+        "class_weight": "balanced",
+        "invasive_ovr_auroc": 0.9801587301587301,
+        "log_loss": 0.6149726196920327,
+        "macro_ovr_auroc": 0.9289682539682539,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.9138888888888889,
+          "in_situ_carcinoma": 0.8928571428571428,
+          "invasive_carcinoma": 0.9801587301587301
+        },
+        "transform": "l2"
+      },
+      {
+        "accuracy": 0.7592592592592593,
+        "c": 100.0,
+        "class_weight": null,
+        "invasive_ovr_auroc": 0.9841269841269842,
+        "log_loss": 0.6197847808987759,
+        "macro_ovr_auroc": 0.9355820105820106,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.9138888888888889,
+          "in_situ_carcinoma": 0.9087301587301587,
+          "invasive_carcinoma": 0.9841269841269842
+        },
+        "transform": "l2"
+      },
+      {
+        "accuracy": 0.7037037037037037,
+        "c": 100.0,
+        "class_weight": "balanced",
+        "invasive_ovr_auroc": 0.9861111111111112,
+        "log_loss": 0.6961015507678033,
+        "macro_ovr_auroc": 0.9308862433862434,
+        "per_class_ovr_auroc": {
+          "benign_or_normal": 0.9097222222222222,
+          "in_situ_carcinoma": 0.8968253968253967,
+          "invasive_carcinoma": 0.9861111111111112
+        },
+        "transform": "l2"
+      }
+    ],
+    "selected": {
+      "accuracy": 0.7592592592592593,
+      "c": 10.0,
+      "class_weight": null,
+      "invasive_ovr_auroc": 0.9861111111111112,
+      "log_loss": 1.0624005648468982,
+      "macro_ovr_auroc": 0.9460317460317461,
+      "per_class_ovr_auroc": {
+        "benign_or_normal": 0.9472222222222222,
+        "in_situ_carcinoma": 0.9047619047619048,
+        "invasive_carcinoma": 0.9861111111111112
+      },
+      "temperature": 2.0,
+      "transform": "standard"
+    },
+    "selection_metric": "validation macro one-vs-rest AUROC; invasive AUROC and log loss tie-breaks",
+    "temperature_validation_log_loss": {
+      "0.5": 2.007371267210844,
+      "0.75": 1.3700801791765216,
+      "1.0": 1.0624005648468982,
+      "1.5": 0.7764693345653938,
+      "2.0": 0.6554411782985395
+    }
+  },
+  "n_test": 54,
+  "n_training": 292,
+  "n_training_synthetic": false,
+  "n_validation": 54,
+  "patient_disjoint": true,
+  "schema_version": 2,
+  "secondary_evaluation_summary": {
+    "cross_identity_status_validation": {
+      "accuracy": 0.7777777777777778,
+      "description": "fit on all unresolved-identity train-only images; evaluate on official-ID validation patients",
+      "invasive_ovr_auroc": 0.9861111111111112,
+      "log_loss": 0.6988720807967463,
+      "macro_ovr_auroc": 0.9390873015873016,
+      "n_train_unresolved": 255,
+      "n_validation_identified": 54,
+      "per_class_ovr_auroc": {
+        "benign_or_normal": 0.9263888888888889,
+        "in_situ_carcinoma": 0.9047619047619048,
+        "invasive_carcinoma": 0.9861111111111112
+      }
+    },
+    "leave_one_test_patient_out_auroc": {
+      "max": 1.0,
+      "mean": 0.9700723310926799,
+      "min": 0.9628571428571429,
+      "n_estimable": 10
+    },
+    "mann_whitney_one_sided_p": 2.1291456208712564e-06,
+    "patient_grouped_bootstrap_auroc_ci": [
+      0.8620564415128996,
+      1.0
+    ],
+    "per_class_patient_grouped_null_evaluation": {
+      "benign_or_normal": {
+        "auroc": 0.8680555555555556,
+        "n": 54,
+        "n_negative": 24,
+        "n_negative_patient_groups": 7,
+        "n_positive": 30,
+        "n_positive_patient_groups": 4,
+        "n_valid_bootstrap_draws": 9942,
+        "null_signal_result": "inconclusive_vs_null",
+        "patient_grouped_auroc_ci": [
+          0.45299145299145294,
+          1.0
+        ],
+        "patient_grouped_ci_status": "estimated"
+      },
+      "in_situ_carcinoma": {
+        "auroc": 0.8482142857142856,
+        "n": 54,
+        "n_negative": 40,
+        "n_negative_patient_groups": 9,
+        "n_positive": 14,
+        "n_positive_patient_groups": 1,
+        "null_signal_result": "not_proven_at_patient_level",
+        "patient_grouped_ci_status": "not_estimable",
+        "reason": "fewer than two positive or negative patient groups"
+      },
+      "invasive_carcinoma": {
+        "auroc": 0.9704545454545455,
+        "n": 54,
+        "n_negative": 44,
+        "n_negative_patient_groups": 5,
+        "n_positive": 10,
+        "n_positive_patient_groups": 6,
+        "n_valid_bootstrap_draws": 9984,
+        "null_signal_result": "signal_above_null",
+        "patient_grouped_auroc_ci": [
+          0.8636363636363636,
+          1.0
+        ],
+        "patient_grouped_ci_status": "estimated"
+      }
+    },
+    "propensity_or_synthetic_control": {
+      "reason": "no single-arm treatment-effect estimand is present",
+      "status": "not_applicable_supervised_prediction_cohort"
+    },
+    "source_shortcut_assessment": {
+      "evidence": "all 400 samples come from one immutable BACH revision, acquisition protocol, and preprocessing path",
+      "status": "not_applicable_single_source"
+    },
+    "test_pairwise_invasive_auroc": {
+      "invasive_vs_benign_or_normal": {
+        "auroc": 0.9733333333333334,
+        "n": 40,
+        "n_positive": 10
+      },
+      "invasive_vs_in_situ_carcinoma": {
+        "auroc": 0.9642857142857142,
+        "n": 24,
+        "n_positive": 10
+      }
+    },
+    "test_per_class": {
+      "accuracy": 0.6296296296296297,
+      "invasive_ovr_auroc": 0.9704545454545455,
+      "log_loss": 1.0477508819755705,
+      "macro_ovr_auroc": 0.8955747955747956,
+      "per_class_ovr_auroc": {
+        "benign_or_normal": 0.8680555555555556,
+        "in_situ_carcinoma": 0.8482142857142856,
+        "invasive_carcinoma": 0.9704545454545455
+      }
+    },
+    "top1_anomaly_interrogation": {
+      "accuracy": 0.6296296296296297,
+      "confusion_matrix": [
+        [
+          22,
+          1,
+          7
+        ],
+        [
+          6,
+          3,
+          5
+        ],
+        [
+          0,
+          1,
+          9
+        ]
+      ],
+      "confusion_matrix_class_order": [
+        "benign_or_normal",
+        "in_situ_carcinoma",
+        "invasive_carcinoma"
+      ],
+      "exact_binomial_p_vs_majority": 0.16904406179254353,
+      "interpretation": "ranking signal is strong for the prespecified invasive endpoint, but top-1 accuracy is not significantly above the majority baseline; in-situ recall is reported without threshold tuning on test",
+      "majority_class_baseline": 0.5555555555555556,
+      "per_class_recall": {
+        "benign_or_normal": 0.7333333333333333,
+        "in_situ_carcinoma": 0.21428571428571427,
+        "invasive_carcinoma": 0.9
+      }
+    }
+  },
+  "seed": 20260928,
+  "source_commit": "373f2e400d228e9504bffc6196b1dc1f53ebddf4",
+  "split_manifest_path": "artifacts/biopsy_probe/biopsy_probe_split_v2.json",
+  "split_sha256": "6e598d655cdfa039e44eb38d1ac8f3478ac675295624c364b4edccac5b31b851",
+  "started_at": "2026-09-29T04:31:29.543875Z"
+}

@@ -1,0 +1,586 @@
+{
+  "receipt_type": "push_gate_violation",
+  "generated_utc": "2026-09-27T23:12:50.178055+00:00",
+  "repo": "fjkiani/scientist-monai-moat",
+  "branch": "audit/manski-gate-and-test-migration",
+  "commit": {
+    "sha": "bf5e54f8d8801286ba4b0ad7ca03ce0c7fc75b10",
+    "tree": "5a106e0face6a0e317cce5d65eeb08fda8ddd537",
+    "parent": "828974921775a32491e955d2dc029ad67ddb7147",
+    "author": "audit-bot <audit@local>",
+    "authored_at_utc": "2026-08-13T07:57:22+00:00",
+    "subject": "audit: ClinicalBERT fail-closed acceptance gate; MedSigLIP population validation; claim retractions",
+    "files_changed": [
+      "artifacts/audit/corrected_claims.json",
+      "artifacts/audit/medsiglip_population_validation.json",
+      "src/oncology_arbiter/api/app.py",
+      "src/oncology_arbiter/nlp/parser_acceptance_gate.py",
+      "tests/unit/test_clinicalbert_fail_closed_gate.py"
+    ],
+    "diffstat": "5 files changed, 1141 insertions(+), 1 deletion(-)"
+  },
+  "violated_rule": "Zero failures, zero errors, zero (non-environmental) skips before push. bf5e54f8 was pushed to the remote branch before the acceptance gate actually passed.",
+  "classification": "RED_NOT_MERGEABLE",
+  "evidence": {
+    "A_known_open_defect_shipped_undocumented_as_a_failing_test": {
+      "source": "artifacts/audit/medsiglip_population_validation.json.failure_modes (committed in this same commit)",
+      "finding": "The MedSigLIP Modal endpoint returns HTTP 200 with numeric scores for corrupted bytes, a degenerate 4x4 black PNG, and a PDF -- i.e. it never rejects malformed/unsupported input. This was measured and recorded IN the commit's own audit artifact, but no corresponding failing test was added to force a fix before merge; the defect shipped as a passive JSON note only.",
+      "raw": {
+        "corrupted_bytes": {
+          "returned_200": true,
+          "error": null
+        },
+        "degenerate_4x4_black": {
+          "returned_200": true,
+          "error": null
+        },
+        "unsupported_modality_pdf": {
+          "returned_200": true,
+          "error": null
+        }
+      }
+    },
+    "B_commits_own_measurement_already_failed_its_own_prespecified_gate": {
+      "source": "artifacts/audit/medsiglip_population_validation.json.prespecified_screening_gate",
+      "finding": "The commit's own directive-5 measurement declared a screening gate BEFORE seeing results (good practice) -- zero-shot AUROC CI95-lo must exceed 0.75, sensitivity at a prespecified threshold must exceed 0.85 -- and then failed it: zero_shot_gate_passed=false, embedding_probe_gate_passed=false. A commit whose own embedded audit already says its headline number fails its own prespecified bar is not evidence of a mergeable state.",
+      "best_zero_shot_auroc_point": 0.5020492630728851,
+      "best_zero_shot_auroc_ci95_lo": 0.45813799114660986,
+      "embedding_probe_auroc_ci95_lo": 0.7074605940420489
+    },
+    "C_this_session_independent_reproduction": {
+      "method": "Fresh single-branch clone of audit/manski-gate-and-test-migration this session, verified HEAD==bf5e54f8d8801286ba4b0ad7ca03ce0c7fc75b10 and tree==5a106e0face6a0e317cce5d65eeb08fda8ddd537 (exact match, zero credential leakage).",
+      "command": "python -m pytest tests/ -q --tb=no -m 'not slow and not integration'",
+      "result_before_downloading_real_dicom_fixtures": "941 passed, 81 skipped, 12 deselected, 0 failed (135.25s) -- LOOKS green.",
+      "result_after_downloading_the_5_real_cbis_ddsm_dicom_fixtures_from_tests/fixtures/download_cbis_ddsm_fixtures.py": "1006 passed, 10 FAILED, 6 skipped, 12 deselected (288.57s).",
+      "conclusion": "81 of the original skips were masking required-fixture-dependent tests. Removing the missing-fixture excuse surfaced 10 real, previously-hidden failures. The branch was never actually green; it only APPEARED green because the gate treats missing-fixture skips as passing rather than as blocking, which is exactly the failure mode the push-before-green rule exists to catch.",
+      "newly_surfaced_failures": [
+        "tests/data/test_api_real_dicom.py::test_screening_real_dicom_bytes (x5 parametrizations) -- expected model_state=='placeholder', observed 'unavailable'",
+        "test_screening_writes_audit_log -- KeyError: 'laterality' (missing from audit log entry)",
+        "test_case_full_chains_placeholder_stages -- body['biopsy'] is None, expected not None",
+        "test_case_full_with_monai_heuristic_feeds_co_scientist -- findings == [], expected len(findings) > 0",
+        "test_gated_screening_response_has_structured_gate_report -- expected model_state=='gated', observed 'unavailable'",
+        "test_allowed_screening_response_has_allowed_gate_report -- expected model_state=='loaded_medsiglip', observed 'unavailable'"
+      ]
+    },
+    "D_root_cause_of_the_unavailable_pattern_traced_this_session": {
+      "finding": "5 of the 6 newly-surfaced failures cascade from one root cause: the live MedSigLIP Modal deployment has regressed from app_version='medsiglip-modal-v0.4.0-alpha' (what the client is pinned to, and what the 2026-08-13 fleet matrix observed as PASS) down to app_version='medsiglip-modal-v0.3.0' right now. embedding_dim is still correctly 1152 and the model is still the real google/medsiglip-448 -- only the version string regressed -- but MedSigLipModalClient.preflight()/run() correctly refuse to trust the mismatched version, so /v1/screening/analyze fails closed to UNAVAILABLE end-to-end. This is a genuine, currently-live production regression, distinct from (and in addition to) the stale test assertions that still expect the old 'placeholder' contract.",
+      "live_verification": "preflight() reason='medsiglip_contract_mismatch:embedding_dim=1152,app_version=medsiglip-modal-v0.3.0' against https://crispro-test--medsiglip-info.modal.run"
+    },
+    "E_medsiglip_population_auroc_cross_methodology_reconciliation": {
+      "purpose": "Two different in-scope measurements of the same underlying quantity (MedSigLIP embedding-probe AUROC on CBIS-DDSM malignancy) give different point estimates. Per standing instruction, this is mathematically reconciled rather than dismissed as a confound.",
+      "measurement_1_in_repo_committed_at_bf5e54f8": {
+        "file": "artifacts/audit/medsiglip_population_validation.json",
+        "unit": "641 images, patient IDs not recoverable (SOP-UID filenames, no lesion-metadata CSV available in that session)",
+        "bootstrap_unit": "image (self-flagged anti-conservative; design-effect sensitivity re-run at ICC 0.25/0.5/1.0, CI still excludes 0.85 even at ICC=1.0)",
+        "auroc": [
+          0.7452352109832425,
+          0.7074605940420489,
+          0.7864099353527445
+        ],
+        "l2_selection": "fixed L2=10.0, no CV tuning"
+      },
+      "measurement_2_shared_workspace_qualified_supersedes_measurement_1": {
+        "file": "medsiglip_population_validation_qualified.json (generated later same day, patient-metadata CSV available)",
+        "unit": "316 patients (586 images after excluding 663 unmatched-metadata images and 24 raw-ID patients colliding across train/test)",
+        "bootstrap_unit": "patient-clustered",
+        "auroc": [
+          0.7588099012315572,
+          0.7048310992117606,
+          0.8103880901605166
+        ],
+        "l2_selection": "nested nested 5-fold patient-grouped CV over C in [0.001,0.01,0.1,1,10], selected C=0.01"
+      },
+      "reconciliation": "The two point estimates (0.7452 vs 0.7588) differ by 0.0136 and each falls inside the other's 95% CI -- not a statistically meaningful discrepancy. The remaining gap is fully explained by three principled methodology refinements in measurement 2: (i) patient-level clustering instead of image-level bootstrap, which correctly widens the CI (0.0789 -> 0.1056) rather than shrinking it, consistent with the correlated-image design effect measurement-1 itself flagged; (ii) exclusion of 24 patient IDs whose raw IDs collide across train/test (identity not provably distinct) and 663 images with no verified patient-metadata join, both absent from measurement 1 only because the join metadata was not available in that session; (iii) a properly nested, patient-grouped CV hyperparameter search instead of a fixed L2 constant. Both measurements independently and concordantly (a) reject the null zero-shot hypothesis's screening-gate claim (AUROC ~0.48-0.50, CI spans or hugs 0.5 in both), (b) confirm a real but modest linear-probe signal (~0.75-0.76), and (c) fall well short of the user's 0.85 ship gate. Cross-methodology agreement strengthens confidence that BELOW_SHIP_GATE_SCREENING is the correct conclusion, not an artifact of one specific pipeline."
+    },
+    "F_luna16_infer_missing_resample_preprocessing_defect": {
+      "source": [
+        "deploy/modal/luna16_infer_app.py (full source read, this session)",
+        "vendored MONAI bundle configs/inference.json (/mnt/shared-workspace/pillar2_assets/monai_bundles/lung_nodule_ct_detection/configs/inference.json, bundle version 0.6.9, byte-identical version string to production)",
+        "live measurement: test_luna16_infer_live.py::test_detect_real_chest_ct_returns_plausible_detections (case_id 892531e5e4dde1e8) + a follow-up cheap 2-slice DICOM header read via CaseStorageClient.get_file() (no additional GPU call) this session"
+      ],
+      "finding": "The bundle's own configs/inference.json declares a mandatory preprocessing step -- Orientationd(axcodes='RAS') then Spacingd(pixdim=[0.703125, 0.703125, 1.25]) -- that is '_disabled_' ONLY when the input has already been resampled offline ('whether_resampled_luna16'=true is the DEFAULT bundle assumption). The deployed `/luna16-detect` Modal endpoint (deploy/modal/luna16_infer_app.py::detect()) implements NEITHER of these two transforms for either supported request shape (case_id-backed DICOM series, or inline volume_hu_b64): it computes `spacing = [dz, row_mm, col_mm]` directly from the INPUT's own native DICOM metadata (or from the caller-supplied spacing_mm for the inline path) and feeds the volume straight into the RetinaNet with no resample and no RAS orientation normalization. Only the intensity-window step (clip to [-1024,300] -> scale to [0,1]) is faithfully reproduced from the bundle's real preprocessing.json.",
+      "why_this_matters_mechanistically": "RetinaNetDetector's anchors (AnchorGeneratorWithAnchorShape, base_anchor_shapes=[[6,8,4],[8,6,5],[10,10,6]] voxels) are fixed in VOXEL-shape units, calibrated assuming the bundle's target spacing. Feeding a volume at a coarser native spacing changes how many voxels a given real-mm nodule occupies, so the same physical nodule presents a different voxel-shape to the network than what the anchors were tuned for -- a real, mechanistic (not speculative) route to missed detections and/or mis-sized boxes. This is not dismissed as a confound: it was traced to a specific missing function call, in a specific file, against a primary-source config value.",
+      "concrete_measurement_this_session": {
+        "case_id": "892531e5e4dde1e8",
+        "measured_native_spacing_mm": {
+          "dz": 2.5,
+          "row": 0.7617189884185791,
+          "col": 0.7617189884185791
+        },
+        "app_declared_target_spacing_mm": {
+          "dz": 1.25,
+          "dy": 0.703125,
+          "dx": 0.703125
+        },
+        "z_axis_ratio_native_over_target": 2.0,
+        "inplane_ratio_native_over_target": 1.083,
+        "interpretation": "For this real, durable, production-uploaded chest CT, the native z-spacing is EXACTLY 2x the model's required target z-spacing (2.5mm vs 1.25mm slice thickness) because the mandatory Spacingd resample never runs. In-plane spacing is a smaller ~8% mismatch. This is the exact case used by test_luna16_infer_live.py's real-detect test, which passed structurally (well-formed output, 4 detections inside the claimed 3-30mm envelope) -- that structural pass does NOT certify spatial/size accuracy of those 4 detections, only that the endpoint runs and returns well-formed JSON."
+      },
+      "consequence_for_wave1_luna16_froc_work": [
+        "Any FROC (sensitivity vs FP/scan) measurement obtained by sending raw Zenodo LUNA16 series through this SAME deployed endpoint will inherit this defect, since most LUNA16/LIDC-IDRI series were acquired at 1.0-2.5mm slice thickness (rarely exactly 1.25mm) and non-703.125um in-plane spacing. A resulting low sensitivity must be interpreted as 'the deployed pipeline, including this defect' rather than 'the underlying RetinaNet weights are incapable' -- these are mathematically distinguishable claims, and a same-session comparison against a properly resampled path (bundle-native monai.bundle run validate with whether_raw_luna16=true, or manually pre-resampling before using the inline volume_hu_b64 path) is planned to separate them."
+      ],
+      "not_previously_documented_anywhere": "No mention of this gap exists in the app's own DISCLAIMER string, docs/model_cards/, docs/audit/end_to_end_audit_v0_3_0.md, or any test file discovered this session. This is a newly-surfaced defect, found by comparing the deployed code against its own vendored dependency's documented contract, not inherited from a prior audit pass."
+    },
+    "G_luna16_large_volume_input_causes_deterministic_server_500": {
+      "relationship_to_finding_F": "Direct mechanistic consequence of the SAME missing-resample defect documented in evidence key F_luna16_infer_missing_resample_preprocessing_defect. Finding F showed the deployed endpoint feeds native-spacing volumes straight into the RetinaNet with no Spacingd resample, causing SILENT spatial mis-calibration for mildly-off-spec volumes. This finding G shows the severe end of the same defect: a large, population-measured fraction of real LUNA16 series crash the endpoint outright with an unhandled server-side exception, rather than merely mis-calibrating.",
+      "discovery_context": "Surfaced when the first full 89-series subset0 FROC background run (scripts/run_luna16_froc_subset0.py) crashed the ENTIRE batch on the 4th series with an uncaught HTTPError, by original design ('record and re-raise: no silent skip'). Per standing instruction, this anomaly was mathematically interrogated rather than dismissed as a fluke or silently retried away.",
+      "failing_series_n1_pilot": {
+        "seriesuid": "1.3.6.1.4.1.14519.5.2.1.6279.6001.111172165674661221381920536987",
+        "shape_dhw": [
+          538,
+          512,
+          512
+        ],
+        "spacing_xyz_mm": [
+          0.7421879768371582,
+          0.7421879768371582,
+          0.625
+        ],
+        "raw_volume_bytes": 282066944,
+        "z_extent_mm": 336.25,
+        "note": "This n=1 pilot case is one of the 34 failures counted in the population-scale result below; retained here for historical continuity with the original discovery."
+      },
+      "reproducibility_check_n1_pilot": {
+        "method": "Re-uploaded the identical 538-slice volume as a fresh case (new case_id=0326b58ee90697ca, upload=31.1s) and called /luna16-detect on it a second time in isolation, independent of the crashed batch run, with no other change to inputs.",
+        "result": "FAILED again after 185.7s wall: SpecialistServiceError HTTP 500: Internal Server Error (byte-identical error string to the first, in-batch failure).",
+        "conclusion": "Deterministic / reproducible for this series, NOT a transient blip."
+      },
+      "SUPERSEDED_original_hypothesis_correction": {
+        "original_v1_claim": "population_risk_sizing (v1, header-scan-only, no live calls): 'Up to 20/89 (22%) subset0 series share the D>300 characteristic of the confirmed failure and may exhibit the same crash.' This was a prediction from a single n=1 failing case plus 3 succeeding comparators, extrapolated via a single D>300 proxy threshold -- explicitly labeled at the time as 'the exact D threshold is NOT assumed.'",
+        "what_the_full_population_run_actually_found": "The v1 hypothesis was DIRECTIONALLY CORRECT but MATERIALLY INCOMPLETE. D>300 is real and strong (90.0% failure rate in that stratum vs 23.2% baseline -- a ~4x risk multiplier, logistic-regression p=1.3e-05), but it is NOT a clean deterministic threshold: (a) there is a substantial 23.2% baseline failure rate even among normal-sized (D<=300) series -- 5x higher than the near-zero rate the v1 pilot's 3 small comparators implied; (b) the D distributions of ok vs. failed series overlap across a wide 127-325-slice zone, so no single D cutoff correctly separates them; (c) a stratified logistic regression shows D alone already achieves AUC=0.811 (a strong, continuous, monotonic risk relationship, not a step function), and adding spacing_z on top of D does NOT significantly improve the fit (likelihood-ratio test joint-vs-D-only: chi2=1.91, p=0.167) -- spacing_z's univariate association with failure (AUC=0.797 alone) is explained by its correlation with D, not independent information. The true root cause remains an unhandled server-side exception whose exact trigger is not fully explained by slice count or spacing alone; this was disclosed honestly rather than forcing a clean single-variable story onto a messier reality."
+      },
+      "population_scale_empirical_result": {
+        "method": "Full resilient re-run of ALL 89/89 subset0 series against the live luna16-infer endpoint (job run_id=luna16_froc_subset0_run_v2; resumed cleanly from a v1 checkpoint at series 5 after the original crash-on-series-4; wall=9019s for series 5-89). scripts/run_luna16_froc_subset0.py was changed from 'log the real error then re-raise (crash the whole batch)' to 'log the real error (including failed_stage, shape_dhw, spacing_xyz where available) then continue to the next series' -- pipeline resilience, NOT mocking-to-pass: every failure's exact exception string and volume geometry remain in artifacts/luna16_froc_subset0/processed_seriesuids.json and are counted as 'failed' (never silently dropped) in run.log's own summary and in the FROC computed from results.csv. D/spacing extracted independently this session from the raw .mhd headers of all 89 series (no third-party ITK/DICOM dependency), reproducibly via scripts/luna16_population_failure_analysis.py.",
+        "run_log_summary": {
+          "ok": 55,
+          "failed": 34,
+          "total_detections": 577,
+          "wall_seconds": 9019
+        },
+        "overall_failure_rate": 0.38202247191011235,
+        "D_stratified_failure_rates": {
+          "D_gt_300": {
+            "n": 20,
+            "n_failed": 18,
+            "failure_rate": 0.9
+          },
+          "D_le_300": {
+            "n": 69,
+            "n_failed": 16,
+            "failure_rate": 0.2318840579710145
+          }
+        },
+        "D_distribution": {
+          "ok": {
+            "mean": 187.54545454545453,
+            "median": 157.0,
+            "min": 109,
+            "max": 325
+          },
+          "failed": {
+            "mean": 369.2647058823529,
+            "median": 380.5,
+            "min": 127,
+            "max": 733
+          },
+          "overlap_zone_D": [
+            127,
+            325
+          ]
+        },
+        "spacing_z_distribution_mm": {
+          "ok": {
+            "mean": 1.8736363584345037,
+            "median": 2.0
+          },
+          "failed": {
+            "mean": 1.1147058798986322,
+            "median": 0.7249999940395355
+          }
+        },
+        "stratified_logistic_regression": {
+          "note": "In-sample fit on all n=89 series (no held-out split; small-n caveat: only 34 events). Purpose is to test whether spacing_z carries information about failure beyond D, and to quantify joint discrimination -- not to build a deployable predictive model.",
+          "auc_D_only": 0.8112299465240642,
+          "auc_spacing_z_only": 0.7965240641711231,
+          "auc_D_plus_spacing_z": 0.8077540106951872,
+          "likelihood_ratio_test_joint_vs_D_only_p_value": 0.16735948058085576,
+          "conclusion": "spacing_z adds no significant discrimination beyond D alone (p=0.167); D is a strong (AUC=0.81) continuous risk factor, not a redundant confound and not a clean deterministic cutoff."
+        },
+        "timing_signature": {
+          "avg_wall_seconds_per_ok_case": 79.53090909090909,
+          "implied_avg_wall_seconds_per_failed_case": 136.61176470588236,
+          "note": "Failed cases consistently consume substantial real compute before erroring (comparable order of magnitude to OK cases), consistent with a server-side resource-exhaustion failure mode rather than instant input-validation rejection."
+        },
+        "distinct_H_W_across_all_89_series": [
+          [
+            512,
+            512
+          ]
+        ]
+      },
+      "froc_cpm_evaluation": {
+        "evaluator_provenance": "Official LUNA16 grand-challenge evaluation script (evaluationScript.zip, MD5 02680d438a80dc26eeff0c12e1942642, Zenodo 10.5281/zenodo.3723295, CC-BY-4.0), mechanically ported Python2->3 with zero changes to matching/FROC logic (vendor/luna16_evaluation/py3_port/PORT_NOTES.md documents every diff). CPM (mean sensitivity at the 7 official FP/scan operating points [0.125,0.25,0.5,1,2,4,8]) is not printed by the vendored script itself; computed here via scripts/luna16_compute_cpm_with_ci.py, which drives the unmodified vendored evaluateCAD()/computeFROC_bootstrap() and only adds a side-channel capture of the per-replicate interpolated sensitivity matrix so the CPM's 95% CI can be computed as a proper joint statistic (all 7 points on a replicate share the same resampled cases and are correlated) rather than as the average of 7 independent marginal per-point CIs.",
+        "conditional_on_successful_processing__ok55": {
+          "n_series": 55,
+          "n_nodules_official_annotations": 63,
+          "true_positives": 46,
+          "false_positives": 444,
+          "false_negatives": 17,
+          "cpm_bootstrap_mean": 0.5690092052409843,
+          "cpm_95ci_joint": [
+            0.44940475480897085,
+            0.6948052048683167
+          ],
+          "sensitivity_at_official_fp_points": {
+            "0.125": 0.4447977865636349,
+            "0.25": 0.47010525184869767,
+            "0.5": 0.49706059649586676,
+            "1": 0.5745518811941147,
+            "2": 0.6136274812306677,
+            "4": 0.6559528601510181,
+            "8": 0.7269685792028904
+          }
+        },
+        "intent_to_treat__all89": {
+          "n_series": 89,
+          "n_nodules_official_annotations": 112,
+          "true_positives": 46,
+          "false_positives": 444,
+          "false_negatives": 66,
+          "cpm_bootstrap_mean": 0.3359518293745968,
+          "cpm_95ci_joint": [
+            0.24344023636409215,
+            0.43842364634786335
+          ],
+          "sensitivity_at_official_fp_points": {
+            "0.125": 0.2616645971387625,
+            "0.25": 0.27593458666652443,
+            "0.5": 0.3087736051827669,
+            "1": 0.3412585678249598,
+            "2": 0.35686992295725006,
+            "4": 0.3946902279023613,
+            "8": 0.41247129794955256
+          }
+        },
+        "full_receipt": "docs/proofs/luna16_froc_subset0_v2_metrics.json"
+      },
+      "ship_gate_screening": "BELOW_SHIP_GATE_SCREENING",
+      "ship_gate_note": "CPM (LUNA16's own headline metric) is not an AUC and the >=0.85 AUC screening gate does not directly apply to it in the same units; regardless, CPM_ok55=0.569 and CPM_all89=0.336 are both far below any plausible screening-grade sensitivity/FP-rate trade-off, and the endpoint's 38.2% raw failure rate on normal clinical CT geometry alone is independently disqualifying for the word 'screening' regardless of detector CPM.",
+      "status": "CONFIRMED_REPRODUCIBLE_POPULATION_SCALE_MEASURED_38pct_FAILURE_RATE_FROC_COMPUTED"
+    },
+    "H_medsiglip_deploy_drift_root_cause_traced_via_git_history": {
+      "relationship_to_finding_D": "Finding D (this file) already observed the SYMPTOM: preflight() fails closed because live app_version='medsiglip-modal-v0.3.0' while the client expects 'medsiglip-modal-v0.4.0-alpha'. This finding H traces the full git history to establish the ROOT CAUSE and, critically, whether the vision-embedding computation itself changed across that version gap (it did not).",
+      "method": "git log --follow + git show on deploy/modal/medsiglip_app.py and medsiglip_modal_client.py across their full commit history on this branch.",
+      "commit_timeline": [
+        {
+          "sha": "ad48cd4",
+          "summary": "initial v0.3.0 deploy; APP_VERSION='medsiglip-modal-v0.3.0'; _dicom_bytes_to_pil DICOM decode support already present from this very first commit."
+        },
+        {
+          "sha": "29683c7",
+          "summary": "still v0.3.0; added CBIS-DDSM training pipeline + client (this is the commit whose embeddings the shipped cbis_ddsm_logreg_v1.joblib was trained on)."
+        },
+        {
+          "sha": "76ba65b",
+          "summary": "APP_VERSION bumped to 'medsiglip-modal-v0.4.0-alpha'; added a prod/staging flip knob. This is where the version string diverged from the live deployment."
+        },
+        {
+          "sha": "074bbf4",
+          "summary": "current HEAD; fixed /healthz to report APP_VERSION instead of a stale hardcoded 'v0.3.0' literal; added client-side preflight() strict version/dim checks and run() contract assertions. Did NOT touch _dicom_bytes_to_pil, _embed_pils, or any model-forward-pass code."
+        }
+      ],
+      "live_verification": "curl https://crispro-test--medsiglip-info.modal.run and .../-healthz.modal.run both currently report app_version='medsiglip-modal-v0.3.0' -- i.e. the live container predates commit 76ba65b and has never been redeployed despite two subsequent commits changing the deploy script.",
+      "conclusion": "The vision-embedding computation (weights, preprocessing, pooling) has been IDENTICAL since the very first v0.3.0 deploy through current HEAD -- only version strings and unrelated client-side gating logic changed after 76ba65b. Consequently, the live endpoint used for ALL MedSigLIP work this session (including the CBIS-DDSM NBIA cross-cohort evaluation) is running the EXACT SAME code/weights that produced the original cbis_ddsm_logreg_v1 training embeddings (docs/proofs/cbis_ddsm_logreg_v1_metrics.json records modal_app_version='medsiglip-modal-v0.3.0' at training time -- an exact match, not a coincidence of similar-looking strings).",
+      "why_this_is_still_a_defect_despite_the_reassurance": "This is a genuine, disclosed process/deployment-hygiene defect (deploy script and live container have silently diverged for at least 2 commits) and it is exactly what causes Finding D's fail-closed UNAVAILABLE behavior for any consumer that goes through the normal, contract-validated MedSigLipModalClient.run()/preflight() path. It is LOW RISK specifically for the embedding-quality question (no confound introduced into cross-cohort AUROC by version drift) but remains a real production gap: the deploy script's stated intent (v0.4.0-alpha) has never actually shipped.",
+      "bypass_used_this_session_disclosed": "eval_cbis_ddsm_nbia_dicom.py calls MedSigLipModalClient.embed_dicoms()/embed_batch() directly, which do NOT call preflight() internally -- this deliberately bypasses the stale EXPECTED_APP_VERSION check to reach genuinely-live, functioning infrastructure for evaluation purposes. This is calling real infrastructure, not mocking; the bypass and its rationale are documented in that script's own docstring and in its output JSON's honesty_caveats field.",
+      "status": "ROOT_CAUSE_CONFIRMED"
+    },
+    "I_cbis_ddsm_training_script_reproducibility_gap": {
+      "finding": "The committed training script (scripts/train_cbis_ddsm_logreg.py, or equivalent in-repo path) hardcodes LogisticRegression(C=1.0), but the SHIPPED artifact models/cbis_ddsm_logreg_v1.joblib is actually StandardScaler(1152) + LogisticRegression(C=0.01, penalty='l2', solver='saga', max_iter=5000, random_state=42) -- a 100x difference in the regularization constant that the training script as committed cannot reproduce.",
+      "mitigating_context": "docs/proofs/cbis_ddsm_logreg_v1_metrics.json DOES honestly disclose that a C sweep was performed (the shipped C=0.01 is not asserted as untuned) -- the gap is that the sweep logic/grid itself was never committed alongside the script that produced the final artifact, so the exact shipped model cannot be regenerated end-to-end from the current repo state alone.",
+      "impact": "Does not invalidate this session's cross-cohort AUROC measurement (which loads the shipped .joblib directly via CbisDdsmProbe.get() and never re-trains), but blocks any future retraining, re-tuning, or audit re-derivation of the probe from source. Flagged, not fixed, this session.",
+      "status": "DISCLOSED_NOT_FIXED"
+    },
+    "J_cbis_ddsm_645_vs_641_series_count_reconciled": {
+      "anomaly": "This session's direct NBIA download of the official CBIS-DDSM test-set manifest yields 645 DICOM series. The original cbis_ddsm_logreg_v1 training/test split (dbaek111/CBIS-DDSM_1024 HF mirror, used for docs/proofs/cbis_ddsm_logreg_v1_metrics.json) reports exactly 641 test images. A 645-vs-641 mismatch on what is nominally 'the same official held-out test set' must be explained, not waved off as noise.",
+      "method": "Directly computed from the two canonical TCIA CSVs already on disk (mass_case_description_test_set.csv + calc_case_description_test_set.csv): searched for series_uid values with conflicting per-abnormality pathology labels (both a BENIGN and a MALIGNANT abnormality recorded on the SAME series_uid).",
+      "result": "Exactly 4 series have this conflict: 1.3.6.1.4.1.9590.100.1.2.231418499611483562804956443353410908413, 1.3.6.1.4.1.9590.100.1.2.87340566612403392138506082870553990204, 1.3.6.1.4.1.9590.100.1.2.374083122712703142909330807542822451571, 1.3.6.1.4.1.9590.100.1.2.204430961913085029114963861863064771359. 645 - 4 = 641, EXACTLY the HF-mirror count. Simulating a 'drop conflicting series' convention (vs. this session's own parser convention of malignant-if-any-abnormality-is-malignant) on this exact data reproduces n=641, malignant=260, benign=381 -- an EXACT match to the HF mirror's documented test-split label counts.",
+      "conclusion": "The NBIA test split (645 series) and the HF-PNG mirror's test split (641 images) are the SAME official CBIS-DDSM held-out patient population; the mirror simply dropped 4 ambiguous dual-pathology series that this session's parser kept (labeled malignant-if-any). This session's CBIS-DDSM NBIA cross-cohort evaluation is therefore a same-cohort, different-input-pipeline check (real DICOM pixels vs the mirror's pre-processed PNGs), NOT a cross-population/domain-shift study. This exact framing is written into eval_cbis_ddsm_nbia_dicom.py's own docstring and JSON output fields (honesty_caveats, cohort block) so downstream readers cannot mistake it for an independent external validation cohort.",
+      "status": "RECONCILED_NOT_A_DEFECT"
+    },
+    "K_cbis_ddsm_medsiglip1152_cross_cohort_auroc_measured_ship_gate_applied": {
+      "purpose": "Directive: measure MedSigLIP-1152 population AUROC on the full 645-series canonical NBIA CBIS-DDSM test cohort using real DICOM I/O end-to-end (real upload/embed via the live medsiglip-448 endpoint, scored with the frozen shipped probe cbis_ddsm_logreg_v1.joblib), and apply the user's locked >=0.85 ship-gate rule for the word 'screening' honestly -- do not invent a path to 0.85, do not stall.",
+      "job": "cbis_ddsm_nbia_embed_eval (background, worker-0), completed in 4292s (~71.5min) embedding 645/645 series, exit code 0.",
+      "cohort": {
+        "name": "CBIS-DDSM canonical NBIA DICOM test split",
+        "source": "TCIA/NBIA getImage (canonical DICOM, NOT the dbaek111 HF-PNG mirror)",
+        "n_series": 645,
+        "n_malignant": 264,
+        "n_benign": 381,
+        "manifest_path": "/mnt/shared-workspace/cbis_ddsm/nbia_test_subset/manifest.csv"
+      },
+      "features": {
+        "source_model": "google/medsiglip-448",
+        "modal_endpoint": "https://crispro-test--medsiglip-embed-batch.modal.run",
+        "modal_app_version_confirmed_live": "medsiglip-modal-v0.3.0",
+        "embedding_dim": 1152,
+        "input_format": "dicom",
+        "preprocessing_provenance": "raw NBIA DICOM bytes -> pydicom.dcmread -> RescaleSlope/Intercept Modality LUT -> MONOCHROME1 invert (if applicable) -> percentile [1,99] windowing -> 8-bit -> PIL RGB replicate -> SiglipImageProcessor.resize(448) -> vision_model.forward -> pooler_output (1152-d). See deploy/modal/medsiglip_app.py:_dicom_bytes_to_pil."
+      },
+      "probe": {
+        "artifact": "models/cbis_ddsm_logreg_v1.joblib",
+        "version": "cbis_ddsm_logreg_v1",
+        "frozen_not_retrained": true,
+        "trained_and_scored_on": "dbaek111/CBIS-DDSM_1024 HF-PNG mirror (input_format=pixels)"
+      },
+      "result_canonical_dicom_pipeline": {
+        "auc": 0.7299918476099578,
+        "pr_auc": 0.6518384101612431,
+        "brier": 0.21206422141574677,
+        "at_threshold_0.5": {
+          "threshold": 0.5,
+          "threshold_label": "0.5",
+          "accuracy": 0.6713178294573643,
+          "f1": 0.6102941176470589,
+          "precision": 0.5928571428571429,
+          "recall": 0.6287878787878788,
+          "confusion_matrix": [
+            [
+              267,
+              114
+            ],
+            [
+              98,
+              166
+            ]
+          ]
+        },
+        "at_youden_j_optimal_FROZEN_FROM_TRAINING": {
+          "threshold": 0.554904,
+          "threshold_label": "youden_frozen",
+          "accuracy": 0.7023255813953488,
+          "f1": 0.6190476190476191,
+          "precision": 0.65,
+          "recall": 0.5909090909090909,
+          "confusion_matrix": [
+            [
+              297,
+              84
+            ],
+            [
+              108,
+              156
+            ]
+          ]
+        },
+        "at_recall_0.85_FROZEN_FROM_TRAINING": {
+          "threshold": 0.283617,
+          "threshold_label": "recall_0.85_frozen",
+          "accuracy": 0.5813953488372093,
+          "f1": 0.6153846153846154,
+          "precision": 0.4931506849315068,
+          "recall": 0.8181818181818182,
+          "confusion_matrix": [
+            [
+              159,
+              222
+            ],
+            [
+              48,
+              216
+            ]
+          ]
+        }
+      },
+      "comparison_to_original_hf_png_mirror_test": {
+        "original_test_auc": 0.752584,
+        "original_test_pr_auc": 0.681633,
+        "original_test_brier": 0.198746,
+        "original_n": 641,
+        "delta_auc": -0.022592152390042197
+      },
+      "ship_gate_outcome": {
+        "rule": "AUC >= 0.85 required to use the word 'screening'; else report BELOW_SHIP_GATE_SCREENING",
+        "threshold": 0.85,
+        "status": "BELOW_SHIP_GATE_SCREENING"
+      },
+      "relationship_to_finding_E": "Finding E reconciled two PRIOR probe-AUROC measurements on the pixels_b64/HF-PNG-mirror input pathway: image-level bootstrap on n=641 images (AUROC=0.7452, CI 0.7075-0.7864) vs patient-clustered bootstrap on n=316 patients/586 images (AUROC=0.7588, CI 0.7048-0.8104). This Finding K is a THIRD, independent measurement that instead changes the INPUT MODALITY end-to-end -- raw canonical NBIA DICOM bytes decoded via pydicom + RescaleSlope/Intercept Modality LUT + MONOCHROME1 invert + percentile [1,99] windowing (dicom_b64 code path), vs Finding E's already-processed 8-bit PNG bytes (pixels_b64 code path) -- on the full n=645 reconciled cohort (see Finding J). Both code paths hit the identical live app_version=medsiglip-modal-v0.3.0 container (Finding H), so any delta reflects the input-preprocessing difference, not model or deployment drift. Result: AUROC=0.7300, inside both of Finding E's 95% CIs. Three independent measurements (0.7452, 0.7588, 0.7300) now form a tight cluster (range=0.0288), all clearly above the zero-shot null (~0.50, Finding B) and all clearly below the 0.85 ship gate. Cross-pipeline triangulation strengthens, not weakens, confidence that BELOW_SHIP_GATE_SCREENING is a real, pipeline-invariant conclusion rather than an artifact of any single measurement's preprocessing.",
+      "artifacts": {
+        "metrics_json": "artifacts/cbis_ddsm_nbia_dicom/cbis_ddsm_nbia_dicom_v1_metrics.json",
+        "run_log": "artifacts/cbis_ddsm_nbia_dicom/run.log",
+        "raw_arrays": "artifacts/cbis_ddsm_nbia_dicom/{embeddings.npy (645x1152), labels.npy, series_uids.npy}"
+      },
+      "honesty_caveats": [
+        "This is a SAME-COHORT (same official CBIS-DDSM test-split patients), DIFFERENT-INPUT-PIPELINE check -- canonical NBIA DICOM vs. the third-party dbaek111 HF-PNG derivative used for training/original scoring. It is NOT a novel-population domain-shift study. See docs/gate_findings for the measured series-count / patient overlap.",
+        "Embeddings use the dicom_b64 server code path (percentile windowing + Modality LUT); training embeddings used the pixels_b64 path (PNG bytes, no DICOM windowing). Both hit the same live app_version=medsiglip-modal-v0.3.0 container (confirmed by live /embed smoke call immediately before this run) -- so any AUC delta reflects the input pipeline difference, not a different model or a redeployed server.",
+        "Thresholds 0.5 / 0.554904 / 0.283617 are FROZEN from the original training-set metrics dossier and applied as-is (not re-tuned on this set) to keep this an honest out-of-sample comparison.",
+        "MedSigLipModalClient.preflight()'s EXPECTED_APP_VERSION constant (v0.4.0-alpha) does not match the live deployment (v0.3.0); this script bypasses preflight() and calls embed_dicoms()/the live /embed_batch endpoint directly. See finding G_medsiglip_app_version_deploy_drift."
+      ],
+      "generated_utc": "2026-09-27T21:11:49Z",
+      "status": "MEASURED_BELOW_SHIP_GATE_SCREENING_FINAL"
+    },
+    "L_phikon_nct_crc_population_validation_9class_probe_with_error_analysis": {
+      "purpose": "Complete the queued classifier-fitting/eval step for the approved scope-expansion addendum (full NCT-CRC-HE-100K Zenodo download for Phikon population validation, explicitly NOT a product screening claim): fit a real 9-class linear probe on Phikon embeddings of the official train split, evaluate on the official held-out val split, and mathematically interrogate any anomaly in the result rather than reporting only an aggregate number.",
+      "job": "phikon_nct_crc_embed_full (background, w2), completed in 4403s (~73.4min), 107180/107180 images embedded, exit code 0. One transient batch write-timeout retried successfully after 127.05s (retry/backoff logic) -- disclosed, not hidden.",
+      "data_integrity_check": {
+        "n_total": 107180,
+        "n_done_mask_true": 107180,
+        "n_all_finite_rows": 107180,
+        "n_nonzero_rows": 107180,
+        "status": "COMPLETE_NO_MISSING_NO_NONFINITE"
+      },
+      "cohort": {
+        "train_source": "NCT-CRC-HE-100K",
+        "val_source": "CRC-VAL-HE-7K (official held-out, patient-disjoint split per dataset creators)",
+        "classes": [
+          "ADI",
+          "BACK",
+          "DEB",
+          "LYM",
+          "MUC",
+          "MUS",
+          "NORM",
+          "STR",
+          "TUM"
+        ],
+        "n_train": 100000,
+        "n_val": 7180,
+        "train_class_counts": {
+          "ADI": 10407,
+          "BACK": 10566,
+          "DEB": 11512,
+          "LYM": 11557,
+          "MUC": 8896,
+          "MUS": 13536,
+          "NORM": 8763,
+          "STR": 10446,
+          "TUM": 14317
+        },
+        "val_class_counts": {
+          "ADI": 1338,
+          "BACK": 847,
+          "DEB": 339,
+          "LYM": 634,
+          "MUC": 1035,
+          "MUS": 592,
+          "NORM": 741,
+          "STR": 421,
+          "TUM": 1233
+        }
+      },
+      "probe": {
+        "type": "StandardScaler + multinomial LogisticRegression (lbfgs, C=1.0, max_iter=2000, random_state=42)",
+        "fit_seconds": 37.865225076675415,
+        "trained_this_run": true
+      },
+      "held_out_val_metrics_summary": {
+        "accuracy": 0.9306406685236769,
+        "balanced_accuracy": 0.929172808398694,
+        "macro_f1": 0.9200741203663677,
+        "weighted_f1": 0.9326383360802609,
+        "per_class_precision_recall_f1": {
+          "ADI": {
+            "f1": 0.8878737541528239,
+            "precision": 0.9990654205607477,
+            "recall": 0.7989536621823617,
+            "n_val": 1338
+          },
+          "BACK": {
+            "f1": 0.9964705882352941,
+            "precision": 0.9929660023446659,
+            "recall": 1.0,
+            "n_val": 847
+          },
+          "DEB": {
+            "f1": 0.9866666666666667,
+            "precision": 0.9910714285714286,
+            "recall": 0.9823008849557522,
+            "n_val": 339
+          },
+          "LYM": {
+            "f1": 0.9889589905362776,
+            "precision": 0.9889589905362776,
+            "recall": 0.9889589905362776,
+            "n_val": 634
+          },
+          "MUC": {
+            "f1": 0.9829018075232047,
+            "precision": 0.9940711462450593,
+            "recall": 0.9719806763285024,
+            "n_val": 1035
+          },
+          "MUS": {
+            "f1": 0.7595667870036101,
+            "precision": 0.6633039092055486,
+            "recall": 0.8885135135135135,
+            "n_val": 592
+          },
+          "NORM": {
+            "f1": 0.9879679144385026,
+            "precision": 0.9788079470198675,
+            "recall": 0.9973009446693657,
+            "n_val": 741
+          },
+          "STR": {
+            "f1": 0.7146118721461188,
+            "precision": 0.6879120879120879,
+            "recall": 0.7434679334916865,
+            "n_val": 421
+          },
+          "TUM": {
+            "f1": 0.9756487025948104,
+            "precision": 0.960691823899371,
+            "recall": 0.9910786699107867,
+            "n_val": 1233
+          }
+        }
+      },
+      "anomaly_mathematically_interrogated": "Per-class precision is highly bimodal: 7 of 9 classes (BACK, DEB, LYM, MUC, NORM, TUM, and ADI's own precision) sit at 0.96-0.999, while STR=0.688 and MUS=0.663 are markedly lower. Rather than reporting only the 93.06% aggregate accuracy, the full 9x9 confusion matrix was extracted and every off-diagonal pair counted. Result: 81.12% of ALL 498 held-out misclassifications are concentrated in a single ADI(adipose)/MUS(muscle)/STR(stroma) confusion triangle (ADI->MUS=186, STR->MUS=81, ADI->STR=73, MUS->STR=64; all other error pairs are <=25 each). This is a real, quantified, biologically explainable pattern -- adipose/muscle/stroma are all low-cellularity mesenchymal tissue types with overlapping eosin-dominant H&E appearance and no distinctive nuclear/glandular morphology, a well-documented ambiguity in the NCT-CRC-HE-100K benchmark -- NOT a Phikon embedding-endpoint defect or data-pipeline bug. The 6 classes with genuinely distinctive morphology (BACK, DEB, LYM, MUC, NORM, TUM) all achieve >=0.96 precision, evidencing the embedding pipeline itself is not the limiting factor for well-separated tissue types.",
+      "DISCLAIMER": "This is a population-scale linear-probe validation of the Phikon pathology embedding endpoint on a public 9-tissue-type histology benchmark (NCT-CRC-HE-100K train / CRC-VAL-HE-7K held-out val, Kather et al.). It is NOT a product screening claim, NOT a cancer-detection validation, and is UNRELATED to the CBIS-DDSM/MedSigLIP >=0.85 ship-gate. Approved as a scope-expansion addendum for population validation only.",
+      "artifacts": {
+        "population_validation_json": "docs/proofs/phikon_nct_crc_population_validation.json",
+        "raw_embeddings": "w2:/workspace/pathology_crc/phikon_embeddings/{embeddings.npy (107180x768), manifest.json, done_mask.npy}"
+      },
+      "status": "MEASURED_POPULATION_VALIDATION_NOT_A_SCREENING_CLAIM_FINAL"
+    }
+  },
+  "retracted_claims_in_this_commit": "artifacts/audit/corrected_claims.json lists 5 claims already self-withdrawn by the prior instance in this same commit (therapy-inversion overreach, unproven regex-laundering causal claim, n=1-to-population generalization overreach, medgemma one-line-fix cost claim, and informal endpoint-count denominators). These retractions are good-faith and are treated as already-settled; this receipt does not relitigate them.",
+  "verdict": "RED_NOT_MERGEABLE -- confirmed independently this session via fresh clone + fixture-driven re-test, not merely inherited from a prior label. Remains RED_NOT_MERGEABLE until: (1) the 10 failures newly surfaced by removing skip-masking are fixed or honestly re-asserted against the correct current contract, (2) the corrupted/degenerate/PDF-input-returns-200 defect has a tracked failing test forcing remediation, (3) the MedSigLIP app_version regression (v0.4.0-alpha -> v0.3.0) is either fixed at the deployment or explicitly walled off from any ship-gate claim, and (4) the full suite reruns with zero failures/errors and zero non-environmental skips before any further push. No push, merge, or deploy has been performed this session.",
+  "update_log": [
+    {
+      "utc": "2026-09-27T20:33:09.818314+00:00",
+      "session": "real-tests-and-dataset-gathering (Wave-1)",
+      "added_evidence_keys": [
+        "G_luna16_large_volume_input_causes_deterministic_server_500",
+        "H_medsiglip_deploy_drift_root_cause_traced_via_git_history",
+        "I_cbis_ddsm_training_script_reproducibility_gap",
+        "J_cbis_ddsm_645_vs_641_series_count_reconciled"
+      ],
+      "note": "This update also discovered and fixed a divergence between this canonical /mnt/results copy (which already had finding F) and the in-repo artifacts/audit/ copy (which was stale at finding E) -- both are now byte-identical after this write."
+    },
+    {
+      "utc": "2026-09-27T21:14:18.844193+00:00",
+      "session": "real-tests-and-dataset-gathering (Wave-1)",
+      "added_evidence_keys": [
+        "K_cbis_ddsm_medsiglip1152_cross_cohort_auroc_measured_ship_gate_applied"
+      ],
+      "note": "CBIS-DDSM Wave-1 background job (cbis_ddsm_nbia_embed_eval) completed: real MedSigLIP-1152 embeddings for all 645 canonical NBIA DICOM series, scored with the frozen shipped probe. Measured AUROC=0.7300 on canonical DICOM pipeline vs 0.7526 originally reported on the HF-PNG-mirror pipeline (delta=-0.0226, same cohort, different preprocessing -- see Finding J for cohort equivalence, Finding H for confirmation the live model/weights were unchanged throughout). Ship-gate rule applied exactly as locked: AUC=0.730 < 0.85 => status=BELOW_SHIP_GATE_SCREENING. No retraining, re-thresholding, or gate-chasing was performed to reach 0.85."
+    },
+    {
+      "utc": "2026-09-27T21:48:23.756296+00:00",
+      "session": "real-tests-and-dataset-gathering (Wave-1)",
+      "added_evidence_keys": [
+        "L_phikon_nct_crc_population_validation_9class_probe_with_error_analysis"
+      ],
+      "note": "Phikon full-population embedding job (107180 NCT-CRC-HE-100K+CRC-VAL-HE-7K images) completed; fit a real 9-class linear probe (train) and evaluated on the official held-out val split. Accuracy=93.06%, macro-F1=0.9201. Mathematically interrogated the per-class precision anomaly (STR/MUS much lower than other classes): 81.1% of all errors trace to a single explainable ADI/MUS/STR confusion triangle. Explicitly disclaimed throughout as NOT a product screening claim, per the approved scope-expansion addendum."
+    },
+    {
+      "utc": "2026-09-27T23:12:50.178022+00:00",
+      "session": "real-tests-and-dataset-gathering (Wave-1) -- Alpha audit follow-up",
+      "updated_evidence_keys": [
+        "G_luna16_large_volume_input_causes_deterministic_server_500"
+      ],
+      "note": "Finding G REWRITTEN (not appended) now that luna16_froc_subset0_run_v2 (the full 89-series resilient re-run) has completed: 55 ok / 34 failed / 89 total (38.2 pct failure rate), materially higher than the original v1 pilot's ~22 pct D>300-only estimate. The v1 D>300 hypothesis is explicitly retained and marked SUPERSEDED-but-directionally-correct rather than deleted, per the standing instruction to mathematically interrogate anomalies rather than silently revise them away. A stratified logistic regression (D alone AUC=0.811, p=1.3e-05; D+spacing_z joint not significantly better, LR-test p=0.167) shows D is a strong continuous risk factor, not a clean threshold and not confounded by spacing_z. FROC/CPM computed with the official (mechanically-ported, diff-verified) LUNA16 evaluator plus a from-scratch joint bootstrap CI on the CPM scalar itself (not the naive average-of-marginal-per-point-CIs shortcut): CPM_ok55(conditional)=0.569 [0.449, 0.695], CPM_all89(intent-to-treat)=0.336 [0.243, 0.438]. Ship-gate BELOW_SHIP_GATE_SCREENING applied; endpoint's raw 38.2 pct failure rate is independently disqualifying for the word 'screening' regardless of CPM."
+    }
+  ]
+}

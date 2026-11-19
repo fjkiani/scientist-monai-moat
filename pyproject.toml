@@ -48,6 +48,8 @@ dependencies = [
   # for the Gemma HTTP client. Was implicit before (worker image shipped
   # it) but the fresh CI runner does not, so make it explicit.
   "requests>=2.31",
+  # L5 agnostic swarm: Gemini Argon backend (google.genai Client / interactions)
+  "google-genai>=1.0",
   # v0.4.0-alpha Path C: parenchyma_mask.py uses scipy.ndimage for
   # morphological operations and connected-components. Existing modules
   # (lung/pipeline.py, models/monai_detector.py) also import scipy — this
@@ -71,6 +73,9 @@ dev = [
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+"oncology_arbiter.config" = ["*.json"]
+
 [tool.pytest.ini_options]
 minversion = "8.0"
 addopts = "-ra --strict-markers"
@@ -81,4 +86,5 @@ markers = [
     "data: requires real mammography data on disk (CBIS-DDSM / EMBED)",
     "slow: takes > 30 seconds",
     "regression: enforces v0.4.1 numerical / config invariants (F1 floor, prod wiring)",
+    "asyncio: async tests (pytest-asyncio)",
 ]

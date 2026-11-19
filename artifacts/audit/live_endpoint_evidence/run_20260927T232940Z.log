@@ -1,0 +1,220 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.13, pytest-8.4.1, pluggy-1.6.0 -- /workspace/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /workspace/smm
+configfile: pyproject.toml
+plugins: anyio-4.9.0, fast-array-utils-1.2.1, jaxtyping-0.3.2, langsmith-0.4.10, typeguard-4.4.4
+collecting ... collected 35 items / 1 deselected / 34 selected
+
+tests/integration/test_medsiglip_modal_client.py::test_preflight_reports_allowed_and_dim_1152 FAILED
+tests/integration/test_medsiglip_modal_client.py::test_embed_png_returns_1152_vector FAILED
+tests/integration/test_medsiglip_modal_client.py::test_embed_dicoms_batch_matches_singleton FAILED
+tests/integration/test_medsiglip_modal_client.py::test_run_returns_medsiglip_result_contract FAILED
+tests/integration/test_medsiglip_modal_client.py::test_factory_selects_modal_via_env FAILED
+tests/integration/test_clinicalbert_live.py::test_healthz_reports_ok FAILED
+tests/integration/test_clinicalbert_live.py::test_info_reports_real_v051_provenance_not_synthetic_default FAILED
+tests/integration/test_clinicalbert_live.py::test_info_app_version_and_sliding_window_contract_matches_client_expectation FAILED
+tests/integration/test_clinicalbert_live.py::test_parse_via_production_client_succeeds_on_real_reports[0] FAILED
+tests/integration/test_clinicalbert_live.py::test_parse_via_production_client_succeeds_on_real_reports[2] FAILED
+tests/integration/test_clinicalbert_live.py::test_parse_via_production_client_succeeds_on_real_reports[6] FAILED
+tests/integration/test_clinicalbert_live.py::test_parse_entity_type_recall_via_raw_endpoint_bypassing_strict_contract FAILED
+tests/integration/test_clinicalbert_live.py::test_parse_rejects_empty_report_text_client_side FAILED
+tests/integration/test_case_storage_live.py::test_upload_real_dicom_is_content_addressable FAILED
+tests/integration/test_case_storage_live.py::test_reupload_same_bytes_is_idempotent FAILED
+tests/integration/test_case_storage_live.py::test_manifest_matches_uploaded_case FAILED
+tests/integration/test_case_storage_live.py::test_get_file_returns_byte_identical_content FAILED
+tests/integration/test_case_storage_live.py::test_durable_prior_session_case_still_resolves FAILED
+tests/integration/test_case_storage_live.py::test_upload_with_no_payload_fields_raises_upstream_error_not_crash FAILED
+tests/integration/test_phikon_pathology_live.py::test_embed_real_tumor_tile_returns_768_dim FAILED
+tests/integration/test_phikon_pathology_live.py::test_embed_is_deterministic_across_repeated_calls FAILED
+tests/integration/test_phikon_pathology_live.py::test_embeddings_of_genuinely_different_tissue_are_not_degenerate FAILED
+tests/integration/test_phikon_pathology_live.py::test_receipt_carries_verifiable_link_to_exact_input_bytes FAILED
+tests/integration/test_gemma_fallback_live.py::test_healthz_reports_qwen_not_gemma PASSED
+tests/integration/test_gemma_fallback_live.py::test_chat_completion_infra_is_healthy PASSED
+tests/integration/test_gemma_fallback_live.py::test_chat_completion_model_identity_must_be_gemma_family FAILED
+tests/integration/test_luna16_infer_live.py::test_healthz_reports_ok_and_bundle_version FAILED
+tests/integration/test_luna16_infer_live.py::test_info_reports_loaded_model_state_and_preprocessing FAILED
+tests/integration/test_luna16_infer_live.py::test_detect_rejects_malformed_case_id_client_side FAILED
+tests/integration/test_luna16_infer_live.py::test_detect_valid_format_but_nonexistent_case_id_is_honest_upstream_error FAILED
+tests/integration/test_luna16_infer_live.py::test_detect_real_chest_ct_returns_plausible_detections FAILED
+tests/integration/test_luna16_infer_live.py::test_detect_preprocessing_does_not_resample_to_its_own_declared_target_spacing FAILED
+tests/integration/test_medgemma_27b_live.py::test_healthz_reports_current_app_version PASSED
+tests/integration/test_medgemma_27b_live.py::test_deployed_app_version_matches_repo_and_client_contract FAILED
+
+=================================== FAILURES ===================================
+_________________ test_preflight_reports_allowed_and_dim_1152 __________________
+tests/integration/test_medsiglip_modal_client.py:47: in test_preflight_reports_allowed_and_dim_1152
+    from oncology_arbiter.models.medsiglip_modal_client import MedSigLipModalClient
+E   ModuleNotFoundError: No module named 'oncology_arbiter'
+______________________ test_embed_png_returns_1152_vector ______________________
+tests/integration/test_medsiglip_modal_client.py:61: in test_embed_png_returns_1152_vector
+    from oncology_arbiter.models.medsiglip_modal_client import MedSigLipModalClient
+E   ModuleNotFoundError: No module named 'oncology_arbiter'
+__________________ test_embed_dicoms_batch_matches_singleton ___________________
+tests/integration/test_medsiglip_modal_client.py:75: in test_embed_dicoms_batch_matches_singleton
+    from oncology_arbiter.models.medsiglip_modal_client import MedSigLipModalClient
+E   ModuleNotFoundError: No module named 'oncology_arbiter'
+__________________ test_run_returns_medsiglip_result_contract __________________
+tests/integration/test_medsiglip_modal_client.py:90: in test_run_returns_medsiglip_result_contract
+    from oncology_arbiter.api.schemas import ModelState
+E   ModuleNotFoundError: No module named 'oncology_arbiter'
+______________________ test_factory_selects_modal_via_env ______________________
+tests/integration/test_medsiglip_modal_client.py:117: in test_factory_selects_modal_via_env
+    from oncology_arbiter.models.medsiglip_modal_client import (
+E   ModuleNotFoundError: No module named 'oncology_arbiter'
+___________________________ test_healthz_reports_ok ____________________________
+tests/integration/test_clinicalbert_live.py:88: in test_healthz_reports_ok
+    d = _client().healthz()
+        ^^^^^^^^^
+tests/integration/test_clinicalbert_live.py:72: in _client
+    from oncology_arbiter.nlp.clinicalbert_modal_client import (
+E   ModuleNotFoundError: No module named 'oncology_arbiter'
+_________ test_info_reports_real_v051_provenance_not_synthetic_default _________
+tests/integration/test_clinicalbert_live.py:105: in test_info_reports_real_v051_provenance_not_synthetic_default
+    d = _client().info()
+        ^^^^^^^^^
+tests/integration/test_clinicalbert_live.py:72: in _client
+    from oncology_arbiter.nlp.clinicalbert_modal_client import (
+E   ModuleNotFoundError: No module named 'oncology_arbiter'
+_ test_info_app_version_and_sliding_window_contract_matches_client_expectation _
+tests/integration/test_clinicalbert_live.py:131: in test_info_app_version_and_sliding_window_contract_matches_client_expectation
+    from oncology_arbiter.nlp.clinicalbert_modal_client import EXPECTED_APP_VERSION
+E   ModuleNotFoundError: No module named 'oncology_arbiter'
+_________ test_parse_via_production_client_succeeds_on_real_reports[0] _________
+tests/integration/test_clinicalbert_live.py:160: in test_parse_via_production_client_succeeds_on_real_reports
+    from oncology_arbiter.nlp.clinicalbert_modal_client import ClinicalBertModalError
+E   ModuleNotFoundError: No module named 'oncology_arbiter'
+_________ test_parse_via_production_client_succeeds_on_real_reports[2] _________
+tests/integration/test_clinicalbert_live.py:160: in test_parse_via_production_client_succeeds_on_real_reports
+    from oncology_arbiter.nlp.clinicalbert_modal_client import ClinicalBertModalError
+E   ModuleNotFoundError: No module named 'oncology_arbiter'
+_________ test_parse_via_production_client_succeeds_on_real_reports[6] _________
+tests/integration/test_clinicalbert_live.py:160: in test_parse_via_production_client_succeeds_on_real_reports
+    from oncology_arbiter.nlp.clinicalbert_modal_client import ClinicalBertModalError
+E   ModuleNotFoundError: No module named 'oncology_arbiter'
+___ test_parse_entity_type_recall_via_raw_endpoint_bypassing_strict_contract ___
+tests/integration/test_clinicalbert_live.py:190: in test_parse_entity_type_recall_via_raw_endpoint_bypassing_strict_contract
+    from oncology_arbiter.nlp.clinicalbert_modal_client import _post_json
+E   ModuleNotFoundError: No module named 'oncology_arbiter'
+_______________ test_parse_rejects_empty_report_text_client_side _______________
+tests/integration/test_clinicalbert_live.py:247: in test_parse_rejects_empty_report_text_client_side
+    from oncology_arbiter.nlp.clinicalbert_modal_client import ClinicalBertModalError
+E   ModuleNotFoundError: No module named 'oncology_arbiter'
+________________ test_upload_real_dicom_is_content_addressable _________________
+tests/integration/test_case_storage_live.py:80: in test_upload_real_dicom_is_content_addressable
+    resp = _upload_dicom_bytes(raw, note=f"pytest-content-address-{uuid.uuid4().hex[:8]}")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_case_storage_live.py:58: in _upload_dicom_bytes
+    from oncology_arbiter.models.specialist_clients import _http_json
+E   ModuleNotFoundError: No module named 'oncology_arbiter'
+____________________ test_reupload_same_bytes_is_idempotent ____________________
+tests/integration/test_case_storage_live.py:104: in test_reupload_same_bytes_is_idempotent
+    resp1 = _upload_dicom_bytes(raw, note="pytest-idempotency-1")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_case_storage_live.py:58: in _upload_dicom_bytes
+    from oncology_arbiter.models.specialist_clients import _http_json
+E   ModuleNotFoundError: No module named 'oncology_arbiter'
+_____________________ test_manifest_matches_uploaded_case ______________________
+tests/integration/test_case_storage_live.py:115: in test_manifest_matches_uploaded_case
+    from oncology_arbiter.models.specialist_clients import CaseStorageClient
+E   ModuleNotFoundError: No module named 'oncology_arbiter'
+_________________ test_get_file_returns_byte_identical_content _________________
+tests/integration/test_case_storage_live.py:139: in test_get_file_returns_byte_identical_content
+    from oncology_arbiter.models.specialist_clients import CaseStorageClient
+E   ModuleNotFoundError: No module named 'oncology_arbiter'
+________________ test_durable_prior_session_case_still_resolves ________________
+tests/integration/test_case_storage_live.py:165: in test_durable_prior_session_case_still_resolves
+    from oncology_arbiter.models.specialist_clients import CaseStorageClient
+E   ModuleNotFoundError: No module named 'oncology_arbiter'
+______ test_upload_with_no_payload_fields_raises_upstream_error_not_crash ______
+tests/integration/test_case_storage_live.py:187: in test_upload_with_no_payload_fields_raises_upstream_error_not_crash
+    from oncology_arbiter.models.specialist_clients import SpecialistServiceError, _http_json
+E   ModuleNotFoundError: No module named 'oncology_arbiter'
+__________________ test_embed_real_tumor_tile_returns_768_dim __________________
+tests/integration/test_phikon_pathology_live.py:46: in test_embed_real_tumor_tile_returns_768_dim
+    from oncology_arbiter.models.specialist_clients import PhikonClient
+E   ModuleNotFoundError: No module named 'oncology_arbiter'
+______________ test_embed_is_deterministic_across_repeated_calls _______________
+tests/integration/test_phikon_pathology_live.py:60: in test_embed_is_deterministic_across_repeated_calls
+    from oncology_arbiter.models.specialist_clients import PhikonClient
+E   ModuleNotFoundError: No module named 'oncology_arbiter'
+_______ test_embeddings_of_genuinely_different_tissue_are_not_degenerate _______
+tests/integration/test_phikon_pathology_live.py:93: in test_embeddings_of_genuinely_different_tissue_are_not_degenerate
+    from oncology_arbiter.models.specialist_clients import _http_json
+E   ModuleNotFoundError: No module named 'oncology_arbiter'
+__________ test_receipt_carries_verifiable_link_to_exact_input_bytes ___________
+tests/integration/test_phikon_pathology_live.py:142: in test_receipt_carries_verifiable_link_to_exact_input_bytes
+    from oncology_arbiter.models.specialist_clients import PhikonClient
+E   ModuleNotFoundError: No module named 'oncology_arbiter'
+___________ test_chat_completion_model_identity_must_be_gemma_family ___________
+tests/integration/test_gemma_fallback_live.py:116: in test_chat_completion_model_identity_must_be_gemma_family
+    assert "gemma" in reported_model.lower(), (
+E   AssertionError: gemma-fallback app reported model='qwen2.5-7b-instruct'; expected a Gemma-family model identity. KNOWN DEFECT: this app currently serves Qwen/Qwen2.5-7B-Instruct under the gemma-fallback label. Tracked separately from any deployment fix -- do not silence.
+E   assert 'gemma' in 'qwen2.5-7b-instruct'
+E    +  where 'qwen2.5-7b-instruct' = <built-in method lower of str object at 0x7eac52c68f30>()
+E    +    where <built-in method lower of str object at 0x7eac52c68f30> = 'qwen2.5-7b-instruct'.lower
+__________________ test_healthz_reports_ok_and_bundle_version __________________
+tests/integration/test_luna16_infer_live.py:63: in test_healthz_reports_ok_and_bundle_version
+    from oncology_arbiter.models.specialist_clients import _http_json
+E   ModuleNotFoundError: No module named 'oncology_arbiter'
+____________ test_info_reports_loaded_model_state_and_preprocessing ____________
+tests/integration/test_luna16_infer_live.py:74: in test_info_reports_loaded_model_state_and_preprocessing
+    from oncology_arbiter.models.specialist_clients import _http_json
+E   ModuleNotFoundError: No module named 'oncology_arbiter'
+______________ test_detect_rejects_malformed_case_id_client_side _______________
+tests/integration/test_luna16_infer_live.py:90: in test_detect_rejects_malformed_case_id_client_side
+    from oncology_arbiter.models.specialist_clients import (
+E   ModuleNotFoundError: No module named 'oncology_arbiter'
+__ test_detect_valid_format_but_nonexistent_case_id_is_honest_upstream_error ___
+tests/integration/test_luna16_infer_live.py:107: in test_detect_valid_format_but_nonexistent_case_id_is_honest_upstream_error
+    from oncology_arbiter.models.specialist_clients import (
+E   ModuleNotFoundError: No module named 'oncology_arbiter'
+____________ test_detect_real_chest_ct_returns_plausible_detections ____________
+tests/integration/test_luna16_infer_live.py:125: in test_detect_real_chest_ct_returns_plausible_detections
+    from oncology_arbiter.models.specialist_clients import Luna16Client
+E   ModuleNotFoundError: No module named 'oncology_arbiter'
+_ test_detect_preprocessing_does_not_resample_to_its_own_declared_target_spacing _
+tests/integration/test_luna16_infer_live.py:250: in test_detect_preprocessing_does_not_resample_to_its_own_declared_target_spacing
+    import pydicom
+E   ModuleNotFoundError: No module named 'pydicom'
+__________ test_deployed_app_version_matches_repo_and_client_contract __________
+tests/integration/test_medgemma_27b_live.py:85: in test_deployed_app_version_matches_repo_and_client_contract
+    assert observed == EXPECTED_APP_VERSION, (
+E   AssertionError: deployed app_version='medgemma-27b-modal-v0.4.0-alpha' != repo/client-expected 'medgemma-27b-modal-v0.5.0-production-ready'. The audited source code was never actually `modal deploy`-ed; this is deploy drift, not a code bug.
+E   assert 'medgemma-27b...-v0.4.0-alpha' == 'medgemma-27b...duction-ready'
+E     
+E     - medgemma-27b-modal-v0.5.0-production-ready
+E     + medgemma-27b-modal-v0.4.0-alpha
+=========================== short test summary info ============================
+FAILED tests/integration/test_medsiglip_modal_client.py::test_preflight_reports_allowed_and_dim_1152
+FAILED tests/integration/test_medsiglip_modal_client.py::test_embed_png_returns_1152_vector
+FAILED tests/integration/test_medsiglip_modal_client.py::test_embed_dicoms_batch_matches_singleton
+FAILED tests/integration/test_medsiglip_modal_client.py::test_run_returns_medsiglip_result_contract
+FAILED tests/integration/test_medsiglip_modal_client.py::test_factory_selects_modal_via_env
+FAILED tests/integration/test_clinicalbert_live.py::test_healthz_reports_ok
+FAILED tests/integration/test_clinicalbert_live.py::test_info_reports_real_v051_provenance_not_synthetic_default
+FAILED tests/integration/test_clinicalbert_live.py::test_info_app_version_and_sliding_window_contract_matches_client_expectation
+FAILED tests/integration/test_clinicalbert_live.py::test_parse_via_production_client_succeeds_on_real_reports[0]
+FAILED tests/integration/test_clinicalbert_live.py::test_parse_via_production_client_succeeds_on_real_reports[2]
+FAILED tests/integration/test_clinicalbert_live.py::test_parse_via_production_client_succeeds_on_real_reports[6]
+FAILED tests/integration/test_clinicalbert_live.py::test_parse_entity_type_recall_via_raw_endpoint_bypassing_strict_contract
+FAILED tests/integration/test_clinicalbert_live.py::test_parse_rejects_empty_report_text_client_side
+FAILED tests/integration/test_case_storage_live.py::test_upload_real_dicom_is_content_addressable
+FAILED tests/integration/test_case_storage_live.py::test_reupload_same_bytes_is_idempotent
+FAILED tests/integration/test_case_storage_live.py::test_manifest_matches_uploaded_case
+FAILED tests/integration/test_case_storage_live.py::test_get_file_returns_byte_identical_content
+FAILED tests/integration/test_case_storage_live.py::test_durable_prior_session_case_still_resolves
+FAILED tests/integration/test_case_storage_live.py::test_upload_with_no_payload_fields_raises_upstream_error_not_crash
+FAILED tests/integration/test_phikon_pathology_live.py::test_embed_real_tumor_tile_returns_768_dim
+FAILED tests/integration/test_phikon_pathology_live.py::test_embed_is_deterministic_across_repeated_calls
+FAILED tests/integration/test_phikon_pathology_live.py::test_embeddings_of_genuinely_different_tissue_are_not_degenerate
+FAILED tests/integration/test_phikon_pathology_live.py::test_receipt_carries_verifiable_link_to_exact_input_bytes
+FAILED tests/integration/test_gemma_fallback_live.py::test_chat_completion_model_identity_must_be_gemma_family
+FAILED tests/integration/test_luna16_infer_live.py::test_healthz_reports_ok_and_bundle_version
+FAILED tests/integration/test_luna16_infer_live.py::test_info_reports_loaded_model_state_and_preprocessing
+FAILED tests/integration/test_luna16_infer_live.py::test_detect_rejects_malformed_case_id_client_side
+FAILED tests/integration/test_luna16_infer_live.py::test_detect_valid_format_but_nonexistent_case_id_is_honest_upstream_error
+FAILED tests/integration/test_luna16_infer_live.py::test_detect_real_chest_ct_returns_plausible_detections
+FAILED tests/integration/test_luna16_infer_live.py::test_detect_preprocessing_does_not_resample_to_its_own_declared_target_spacing
+FAILED tests/integration/test_medgemma_27b_live.py::test_deployed_app_version_matches_repo_and_client_contract
+================= 31 failed, 3 passed, 1 deselected in 32.94s ==================

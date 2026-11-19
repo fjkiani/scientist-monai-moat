@@ -1,0 +1,27 @@
+{
+  "artifact_sha256": "429f804d7f348d7c4eeb27821f766cc2de65c4072f20db0c3b3afaefa9068e50",
+  "capability": "clinicalbert",
+  "cohort": "independent_external_validation",
+  "dataset_sha256": "13fd452d103da8c97634ba089ceabfa72e905a9365524699f7aefefac5ca62c2",
+  "n": 128,
+  "prediction_rows_sha256": "f3d0935f5b121c0fc1f61c437f694f020f5febd580100f378af00c3a968b8dc9",
+  "schema_version": 2,
+  "span_micro": {
+    "f1": 0.17371110078959592,
+    "fn": 104,
+    "fp": 1675,
+    "precision": 0.1004296455424275,
+    "recall": 0.6426116838487973,
+    "tp": 187
+  },
+  "split_sha256": "0d7f3f754adf9305dadbcc628786217a329b5050e802b7968bc4a5c2ccf5b888",
+  "strict_report_exact_match": {
+    "ci_95_exact": [
+      0.0,
+      0.028408053443543906
+    ],
+    "rate": 0.0,
+    "successes": 0,
+    "trials": 128
+  }
+}

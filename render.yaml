@@ -50,12 +50,12 @@ services:
       # 512 MB budget). Instead the parser is deployed to Modal and Render
       # calls it over HTTP via a stdlib-only urllib client. The Modal app
       # keeps 1 warm container (min_containers=1) for sub-second latency.
-      # Fine-tuned on SYNTHETIC-v0.3.1 across 5 seeds (42/123/456/789/1234);
-      # best seed = 42 (test micro-F1 = 0.9716, mean ± sd = 0.9716 ± 0.0001).
+      # Fine-tuned on 2,187 real TCGA pathology reports with patient-disjoint
+      # validation/test cohorts (held-out exact-span micro-F1 = 0.1916).
       - key: CLINICALBERT_BACKEND
         value: modal
       - key: CLINICALBERT_MODAL_URL
-        value: https://crispro-test--clinicalbert
+        value: https://crispro--clinicalbert
       # DELIBERATELY NOT SET (would OOM the free tier dyno):
       #   ONCOLOGY_ARBITER_ENABLE_MEDSIGLIP
       #   ONCOLOGY_ARBITER_ENABLE_MONAI_DETECTOR

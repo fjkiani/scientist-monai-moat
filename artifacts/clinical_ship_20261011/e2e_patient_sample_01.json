@@ -1,0 +1,136 @@
+{
+  "disclaimer": "RESEARCH USE ONLY \u2014 not FDA-cleared; not for clinical decision-making.",
+  "patient_id": "patient_sample_01",
+  "elapsed_seconds": 94.623,
+  "artifact_verification": {
+    "luna16": {
+      "path": "models/luna16/luna16_baseline_b5e79231466a.pt",
+      "sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01",
+      "metric_receipt": {
+        "name": "froc_at_2",
+        "value": 0.8267399271674979
+      },
+      "verified": true
+    },
+    "mammo-retinanet": {
+      "path": "models/mammo/mammo_retinanet_v1.safetensors",
+      "sha256": "691233bca51c4eb99fd6859301b8e1393ada6643b25e79622548ef80de951d32",
+      "metric_receipt": {
+        "name": "auroc",
+        "value": 0.785453260650111
+      },
+      "verified": true
+    },
+    "cbis-medsiglip": {
+      "path": "models/cbis_ddsm_logreg_v3.joblib",
+      "sha256": "f40f33c1cd3adfa48d1d10cc4d136795ad0642c3d1f94a543872ae1dc283aaf7",
+      "metric_receipt": {
+        "name": "auroc",
+        "value": 0.8614476075105997
+      },
+      "verified": true
+    },
+    "clinicalbert": {
+      "path": "artifacts/clinicalbert/clinicalbert_head_v2.safetensors",
+      "sha256": "429f804d7f348d7c4eeb27821f766cc2de65c4072f20db0c3b3afaefa9068e50",
+      "metric_receipt": {
+        "name": "span_f1",
+        "value": 0.1916
+      },
+      "verified": true
+    },
+    "medgemma": {
+      "path": "models/medgemma_1_5_4b_identity.json",
+      "sha256": "3369f0b6382e17d9e6665be1163d7ae840ce9c700ba300a63b75703d1b12031b",
+      "metric_receipt": {
+        "name": "chat_success_rate",
+        "value": 1.0
+      },
+      "verified": true
+    },
+    "stage-therapy": {
+      "path": "src/oncology_arbiter/arbiter/models/therapy_arbiter_v1.json",
+      "sha256": "a5f8ead83b3458b20b8e33203de6cfc13c2fa91dde360e0490722afd2f4ac889",
+      "metric_receipt": {
+        "name": "auroc",
+        "value": 0.9597117364447495
+      },
+      "verified": true
+    }
+  },
+  "modalities": {
+    "luna16": {
+      "capability": "luna16",
+      "artifact_sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01",
+      "froc_at_2_production": 0.8267399271674979,
+      "model_state": "loaded_luna16_baseline_b5e79231",
+      "status": "skipped_no_ct",
+      "error": "no luna16_case_id and no ct_path; LUNA baseline identity verified only",
+      "detections": []
+    },
+    "mammo_retinanet": {
+      "capability": "mammo-retinanet",
+      "artifact_path": "models/mammo/mammo_retinanet_v1.safetensors",
+      "artifact_sha256": "691233bca51c4eb99fd6859301b8e1393ada6643b25e79622548ef80de951d32",
+      "proba_cancer": 0.9826356172561646,
+      "test_auroc_receipt": 0.785453260650111,
+      "model_state": "loaded_mammo_retinanet_v1",
+      "input": "/Users/fahadkiani/Desktop/development/scientist-monai-moat/fixtures/patient_sample_01/mammogram.png",
+      "status": "ok",
+      "cbis_medsiglip_artifact": {
+        "path": "models/cbis_ddsm_logreg_v3.joblib",
+        "sha256": "f40f33c1cd3adfa48d1d10cc4d136795ad0642c3d1f94a543872ae1dc283aaf7",
+        "test_auroc_receipt": 0.8614476075105997,
+        "note": "Multimodal fusion probe verified by SHA; PNG scored by mammo-retinanet v1 in this runner."
+      }
+    },
+    "clinicalbert": {
+      "status": "ok",
+      "artifact_sha256": "3369f0b6382e17d9e6665be1163d7ae840ce9c700ba300a63b75703d1b12031b",
+      "entities": {
+        "er_status": "POSITIVE",
+        "er_percent": null,
+        "pr_status": "POSITIVE",
+        "her2_status": "POSITIVE",
+        "nottingham_grade": 3,
+        "tumor_size_mm": 45.0,
+        "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+      }
+    },
+    "medgemma": {
+      "status": "ok",
+      "model_id": "google/medgemma-1.5-4b-it",
+      "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8",
+      "reasoning": "As a research-use-only oncology co-scientist, based on the provided patient data (age 54, HER2=True, ER=True, mammo_proba_cancer=0.9826356172561646), the dominant driver is likely HER2 amplification, given the positive HER2 status. A research-use-only treatment hypothesis would be to investigate the efficacy of anti-HER2 targeted therapies, such as trastuzumab or pertuzumab, potentially in combination with chemotherapy or other endocrine therapies, to inhibit HER2-driven tumor growth and proliferation in"
+    },
+    "stage_therapy": {
+      "capability": "stage-therapy",
+      "status": "ok",
+      "artifact_sha256": "a5f8ead83b3458b20b8e33203de6cfc13c2fa91dde360e0490722afd2f4ac889",
+      "p_event": 0.773762,
+      "risk_bucket": "HIGH",
+      "logit": 1.229674,
+      "recommendation": "HIGH_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE",
+      "driving_feature": "er_status_positive",
+      "missing_features": [],
+      "caveat": "Real-patient retrospective grouped training and held-out evaluation; research use only. The score is not prospectively validated. The target is observed chemotherapy receipt in METABRIC, not treatment response, benefit, efficacy, or a causal recommendation."
+    }
+  },
+  "final_clinical_action_report": {
+    "observed_chemo_receipt_risk_pct": 77.4,
+    "risk_bucket": "HIGH",
+    "prescription_ruo": "Trastuzumab + chemo (RUO hypothesis)",
+    "primary_driver": "HER2 amplification / overexpression",
+    "mammo_proba_cancer": 0.9826356172561646,
+    "luna16_froc_at_2_production": 0.8267399271674979,
+    "therapy_target": "observed_chemotherapy_receipt",
+    "provenance": {
+      "mammo_sha256": "691233bca51c4eb99fd6859301b8e1393ada6643b25e79622548ef80de951d32",
+      "luna16_sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01",
+      "clinicalbert_sha256": "429f804d7f348d7c4eeb27821f766cc2de65c4072f20db0c3b3afaefa9068e50",
+      "cbis_medsiglip_sha256": "f40f33c1cd3adfa48d1d10cc4d136795ad0642c3d1f94a543872ae1dc283aaf7",
+      "medgemma_revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8",
+      "therapy_sha256": "a5f8ead83b3458b20b8e33203de6cfc13c2fa91dde360e0490722afd2f4ac889"
+    }
+  }
+}

@@ -1,7 +1,8 @@
 {
   "$schema_version": "1.0.0",
-  "generated_at": "2026-07-20T01:37:37+00:00",
-  "git_sha": "84f333ab4e70d39f3911b3facbdd168660fcb716",
+  "generated_at": "2026-10-21T00:28:00-04:00",
+  "git_sha": "3fa542e4b07122ef3d2a9171906b4b60dcdbbdc2",
+  "git_sha_scope": "HEAD at SL wire start. CBIS rows below were audited earlier on 416d84c. SL wire adds L4c-sl-agent-local without re-auditing older LIVE rows.",
   "project": {
     "name": "oncology-arbiter",
     "one_line_goal": "Open-architecture breast oncology reasoning platform spanning screening \u2192 biopsy \u2192 therapy, with calibrated per-stage arbiters, cited evidence, and honest performance disclosure.",
@@ -29,7 +30,7 @@
       "not_wired_reason": null,
       "evidence": [
         "src/oncology_arbiter/api/app.py",
-        "tests/unit/test_screening_medsiglip_wiring.py",
+        "tests/unit/test_screening_production_contract.py",
         "/mnt/results/screening_response_medsiglip_smoke_final.json"
       ]
     },
@@ -150,35 +151,9 @@
       ]
     },
     {
-      "id": "L2-report-parser",
-      "layer": "L2",
-      "role": "ClinicalBERT report parser fine-tuned to extract 21 breast + NSCLC pathology entities from free-text pathology reports; emits parsed_report + parsed_report_provenance onto the NSCLC branch of /v1/case/full.",
-      "status": "LIVE",
-      "not_wired_reason": null,
-      "current_backend": "emilyalsentzer/Bio_ClinicalBERT fine-tuned on SYNTHETIC-v0.3.1 (5 seeds, mean test micro-F1 = 0.9716 \u00b1 0.0001, best = 0.9717 @ seed 42, all 5 clear 0.85 floor). Modal-hosted in prod (crispro-test--clinicalbert, min_containers=1 warm), in-process torch fallback for local dev.",
-      "hai_def_gate_state": null,
-      "wired_files": [
-        "src/oncology_arbiter/api/app.py",
-        "src/oncology_arbiter/api/schemas.py",
-        "src/oncology_arbiter/nlp/clinicalbert_train.py",
-        "src/oncology_arbiter/nlp/corpus_synth.py",
-        "src/oncology_arbiter/nlp/clinicalbert_modal_client.py",
-        "src/oncology_arbiter/nlp/clinicalbert_local_client.py",
-        "deploy/modal/clinicalbert_app.py",
-        "render.yaml",
-        "docs/model_cards/report_parser_clinicalbert_v1.md"
-      ],
-      "evidence": [
-        "tests/regression/test_clinicalbert_f1_floor.py",
-        "tests/regression/test_clinicalbert_modal_wire.py",
-        "/mnt/shared-workspace/shared/clinicalbert_runs/AGGREGATE.json",
-        "/mnt/shared-workspace/shared/apex_case/local_v0.4.1_response.json"
-      ]
-    },
-    {
       "id": "L3-screening-arbiter",
       "layer": "L3",
-      "role": "L2-regularised logistic arbiter mapping BI-RADS-like features \u2192 p_positive \u2192 risk_bucket for screening triage.",
+      "role": "L2-regularised logistic arbiter mapping BI-RADS-like features to p_positive and a risk bucket for screening triage (illustrative template coefficients, n_training=0). Unobserved booleans encode to the reference level 0.0 and contribute exactly zero log-odds; the prior 0.5 midpoint injected +1.15 log-odds and inflated p from 0.11920292202211755 to 0.29943286 (+151.20%) from absent data alone.",
       "status": "LIVE",
       "not_wired_reason": null,
       "current_backend": "hand-drafted template coefficients (n_training=0)",
@@ -195,22 +170,24 @@
     {
       "id": "L3-biopsy-arbiter",
       "layer": "L3",
-      "role": "Logistic arbiter for biopsy stage classification.",
-      "status": "LIVE",
-      "not_wired_reason": null,
-      "current_backend": "hand-drafted template coefficients (n_training=0)",
+      "role": "RETIRED. Hand-drafted template logistic arbiter for the biopsy stage. The biopsy route now returns arbiter_score=None and emits breast_dss_prognosis only when the full explicit seven-feature vector is supplied (no parser imputation).",
+      "status": "RETIRED",
+      "not_wired_reason": "Superseded by breast_dss_arbiter_v3_metabric (n=1375, events=601, OOF AUROC 0.7074686031463495, incremental vs NPI+age delta 0.019632112929677783, p=0.006). The template carried n_training=0 and illustrative coefficients.",
+      "current_backend": null,
       "hai_def_gate_state": null,
       "wired_files": [
         "src/oncology_arbiter/arbiter/models/biopsy_arbiter_template_v0.json"
       ],
+      "superseded_by": "breast_dss_v3",
       "evidence": [
-        "tests/unit/test_api_arbiter_wiring.py::test_biopsy_endpoint_returns_arbiter_score"
+        "tests/unit/test_breast_dss_api.py",
+        "tests/unit/test_api_arbiter_wiring.py::test_biopsy_endpoint_emits_no_template_arbiter_score"
       ]
     },
     {
       "id": "L3-therapy-arbiter",
       "layer": "L3",
-      "role": "Logistic arbiter for therapy recommendation.",
+      "role": "Deterministic logistic TRIAGE over explicit patient inputs only (illustrative coefficients, n_training=0). node_status_positive = lymph_nodes_pos > 0; zero nodes contributes exactly 0.0; missing nodes suppress scoring entirely and are never encoded as 0.5. Not treatment-benefit evidence and not a therapy recommendation -- recommendations come only from the authenticated SL bridge.",
       "status": "LIVE",
       "not_wired_reason": null,
       "current_backend": "hand-drafted template coefficients (n_training=0)",
@@ -219,7 +196,8 @@
         "src/oncology_arbiter/arbiter/models/therapy_arbiter_template_v0.json"
       ],
       "evidence": [
-        "tests/unit/test_api_arbiter_wiring.py::test_therapy_endpoint_returns_arbiter_score"
+        "tests/unit/test_api_arbiter_wiring.py::test_therapy_arbiter_scores_only_from_explicit_inputs",
+        "tests/unit/test_api_arbiter_wiring.py::test_therapy_arbiter_suppressed_when_nodes_missing"
       ]
     },
     {
@@ -237,7 +215,7 @@
       ],
       "evidence": [
         "tests/unit/test_medsiglip_wiring.py",
-        "tests/unit/test_screening_medsiglip_wiring.py",
+        "tests/unit/test_screening_production_contract.py",
         "/mnt/results/screening_response_medsiglip_smoke_final.json"
       ],
       "live_smoke": {
@@ -250,21 +228,54 @@
       }
     },
     {
-      "id": "L4a-screening-siglip-proxy",
+      "id": "L4a-cbis-pure-vision-v2",
       "layer": "L4a",
-      "role": "Apache-2.0 ungated general-domain SigLIP used ONLY as a development proxy when HAI-DEF is denied. NEVER labeled as MedSigLIP.",
-      "status": "LIVE",
-      "not_wired_reason": null,
-      "current_backend": "google/siglip-base-patch16-224",
+      "role": "Supervised head on frozen 1152-d MedSigLIP embeddings. No radiologist assessment and no clinical metadata.",
+      "status": "GATE_PASS_FLOOR_0_74",
+      "not_wired_reason": "Probe, app.py, and artifacts/tonight_delivery.json name models/cbis_ddsm_logreg_v2.joblib. validate_tonight_delivery.py on the dirty worktree printed PASS because the floor is 0.74, under rescore 0.7475469412477287. Not a 0.75 pass and not a 0.85 pass. Uncommitted.",
+      "current_backend": "models/cbis_ddsm_logreg_v2.joblib",
       "hai_def_gate_state": null,
       "wired_files": [
-        "src/oncology_arbiter/models/siglip_baseline.py",
-        "src/oncology_arbiter/api/app.py"
+        "src/oncology_arbiter/models/cbis_ddsm_probe.py",
+        "src/oncology_arbiter/api/runtime.py",
+        "src/oncology_arbiter/api/routers/screening.py",
+        "tests/unit/test_cbis_medsiglip_v1_identity.py"
       ],
+      "meter": {
+        "joblib_sha256": "e5f5b67caf8ba18006e3d582e91becf95fbb20b8b34417366c7ef07b906a211b",
+        "joblib_bytes": 33597,
+        "n_features": 1152,
+        "held_out_n": 641,
+        "rescore_auroc": 0.7475469412477287,
+        "sidecar_test_metrics_auroc": 0.747551988693721,
+        "sweep_row_not_this_joblib": 0.7521199273167778,
+        "validator_floor": 0.74,
+        "delivery_artifact": "models/cbis_ddsm_logreg_v2.joblib",
+        "delivery_artifact_sha256": "e5f5b67caf8ba18006e3d582e91becf95fbb20b8b34417366c7ef07b906a211b",
+        "delivery_evaluation_sha256": "ef2e0b3a65eb718b6780fd68f34524a667d97345c8452dae48b5f37df531b331",
+        "delivery_test_auroc": 0.7475469412477287,
+        "label": "pure_vision_frozen_probe",
+        "gate": "PASS",
+        "committed": false
+      },
       "evidence": [
-        "tests/models/test_siglip_baseline.py",
-        "tests/unit/test_screening_medsiglip_wiring.py::test_medsiglip_disabled_proxy_still_works",
-        "/mnt/results/screening_response_medsiglip_gated_with_proxy_fallback.json"
+        "src/oncology_arbiter/models/cbis_ddsm_probe.py",
+        "docs/proofs/cbis_ddsm_logreg_v2_metrics.json",
+        "artifacts/tonight_delivery.json",
+        "artifacts/cbis_medsiglip/cbis_medsiglip_evaluation_v2.json"
+      ]
+    },
+    {
+      "id": "L4a-screening-siglip-proxy",
+      "layer": "L4a",
+      "role": "RETIRED. General-domain google/siglip-base-patch16-224 was used as a development proxy on mammograms when HAI-DEF was denied. The screening route is now strict MedSigLIP-448 only: a denied or failing required stage returns pipeline_status='failed_required_stage' with findings=[] and overall_score=None rather than degrading to a non-medical image encoder.",
+      "status": "RETIRED",
+      "not_wired_reason": "Retired by production-integrity policy. A general-domain image encoder is not an acceptable substitute for MedSigLIP-448 on mammography, and its zero-shot scores were never calibrated for malignancy.",
+      "current_backend": null,
+      "hai_def_gate_state": null,
+      "wired_files": [],
+      "evidence": [
+        "tests/unit/test_screening_production_contract.py"
       ]
     },
     {
@@ -301,17 +312,127 @@
       "evidence": []
     },
     {
+      "id": "L3-hgsoc-platinum-multivariate-v2",
+      "layer": "L3",
+      "role": "GSE63885 multivariate platinum-resistance (EMT+DDR+clinical+ratio). OOF CV across uni/L2/ElasticNet/HGB/RF. case/full?cancer=hgsoc unlocked.",
+      "status": "LIVE",
+      "not_wired_reason": "Multivariate LOOCV does not beat univariate MFAP4 on this n=75 cohort (honesty_note in proof). TCGA ovarian mortality arbiter remains retired.",
+      "current_backend": "ovarian_resistance_multivariate_v2.joblib sha256=82febea7003675941afeaffe268ec841281d17146188339900fba8f70f941e26",
+      "hai_def_gate_state": null,
+      "wired_files": [
+        "src/oncology_arbiter/arbiter/models/ovarian_resistance_multivariate_v2.joblib",
+        "src/oncology_arbiter/arbiter/stage_resistance_multivariate_wiring.py",
+        "src/oncology_arbiter/api/routers/tumor_board.py",
+        "docs/proofs/gse63885_multivariate_metrics.json",
+        "scripts/fit_ovarian_resistance_multivariate_v2.py",
+        "tests/unit/test_hgsoc_multivariate_wire.py"
+      ],
+      "meter": {
+        "geo": "GSE63885",
+        "honest_n": 75,
+        "univariate_mfap4_cv5_auroc": 0.6801,
+        "univariate_mfap4_loocv_auroc": 0.6528,
+        "winner_multivariate": "hist_gradient_boosting",
+        "winner_loocv_auroc": 0.5911,
+        "beats_univariate_loocv": false,
+        "routes": [
+          "POST /v1/case/full?cancer=hgsoc",
+          "POST /v1/tumor_board/dynamic"
+        ]
+      },
+      "evidence": [
+        "docs/proofs/gse63885_multivariate_metrics.json"
+      ]
+    },
+    {
+      "id": "L3-hgsoc-mfap4-platinum",
+      "layer": "L3",
+      "role": "GSE63885 MFAP4 (GPL570 212713_at) calibrated L2 logistic for platinum-resistance lean. Dedicated HGSOC score track retained beside multivariate v2.",
+      "status": "LIVE",
+      "not_wired_reason": "Univariate comparator. case/full now routes multivariate v2; /v1/hgsoc/mfap4/score remains expression-only RUO.",
+      "current_backend": "ovarian_mfap4_arbiter_v1.json sha256=1524d1638076a6b382104b823e22080294a0b4ace216e03b8420b5ce0fa7a605",
+      "hai_def_gate_state": null,
+      "wired_files": [
+        "src/oncology_arbiter/arbiter/models/ovarian_mfap4_arbiter_v1.json",
+        "src/oncology_arbiter/arbiter/stage_mfap4_wiring.py",
+        "src/oncology_arbiter/api/routers/hgsoc.py",
+        "docs/proofs/gse63885_mfap4_metrics.json",
+        "scripts/fit_ovarian_mfap4_arbiter_v1.py",
+        "tests/unit/test_hgsoc_mfap4_wire.py"
+      ],
+      "meter": {
+        "geo": "GSE63885",
+        "probe": "212713_at",
+        "gene": "MFAP4",
+        "n_training": 75,
+        "n_resistant": 34,
+        "n_sensitive": 41,
+        "auroc": 0.6836441893830704,
+        "production_auroc": 0.684,
+        "retracted_n101_auroc_forbidden": 0.7625,
+        "routes": [
+          "GET /v1/hgsoc/mfap4/health",
+          "GET /v1/hgsoc/mfap4/metrics",
+          "POST /v1/hgsoc/mfap4/score"
+        ]
+      },
+      "evidence": [
+        "docs/proofs/gse63885_mfap4_metrics.json",
+        "crispr-assistant-main/data/external/GSE63885/mfap4_auroc_recompute_proof.json"
+      ]
+    },
+    {
+      "id": "L4c-sl-agent-local",
+      "layer": "L4c",
+      "role": "Vendored Synthetic-Lethality sl_agent (Sprint 4S) for DDR panel, ATR manuscript receipt, and optional live DepMap analyze.",
+      "status": "LIVE_OFFLINE_PIN",
+      "not_wired_reason": "POST /v1/sl/analyze needs DepMap/PRISM/GDSC caches not vendored in this tree. Offline pin, DDR panel, and ATR receipt endpoints are live.",
+      "current_backend": "vendor/synthetic-lethality/sl_agent @ 488da52d8124c9ae1bfece2e9744414c787ff5b8",
+      "hai_def_gate_state": null,
+      "wired_files": [
+        "vendor/synthetic-lethality/SOURCE.json",
+        "src/oncology_arbiter/models/sl_agent_local.py",
+        "src/oncology_arbiter/api/routers/sl.py",
+        "src/oncology_arbiter/api/app.py",
+        "tests/unit/test_sl_agent_local_wire.py"
+      ],
+      "meter": {
+        "silo_sha": "488da52d8124c9ae1bfece2e9744414c787ff5b8",
+        "ceralasertib_ln_ic50_delta": -0.7324529879649893,
+        "ceralasertib_ln_ic50_p": 0.021484496737088882,
+        "n_lof": 14,
+        "n_wt": 914,
+        "routes": [
+          "GET /v1/sl/health",
+          "GET /v1/sl/source",
+          "GET /v1/sl/panel/ddr",
+          "GET /v1/sl/mbd4/atr_receipt",
+          "POST /v1/sl/analyze"
+        ]
+      },
+      "evidence": [
+        "tests/unit/test_sl_agent_local_wire.py",
+        "vendor/synthetic-lethality/00-mbd4-manuscript/mbd4_parp_response/artifacts/canonical_atr_wee1_rerun_20260405/canonical_atr_wee1_rerun.json"
+      ]
+    },
+    {
       "id": "L5-co-scientist-orchestrator",
       "layer": "L5",
       "role": "Multi-agent orchestrator (open-source re-implementation of Gottweis et al., Nature 2026).",
-      "status": "NOT_WIRED",
-      "not_wired_reason": "Agent scaffolding exists under src/oncology_arbiter/agents/ (supervisor.py etc.) but no orchestration loop calls them from any endpoint. No agent-to-agent turn taking is running.",
-      "current_backend": "none",
+      "status": "LIVE",
+      "not_wired_reason": null,
+      "current_backend": "medgemma_1_5_4b_modal + supervisor.execute_stage",
       "hai_def_gate_state": null,
       "wired_files": [
-        "src/oncology_arbiter/agents/supervisor.py"
+        "src/oncology_arbiter/agents/supervisor.py",
+        "src/oncology_arbiter/api/routers/co_scientist.py",
+        "src/oncology_arbiter/api/routers/nlp.py",
+        "src/oncology_arbiter/models/medgemma_1_5_4b_wiring.py",
+        "scripts/run_live_co_scientist_receipt.py"
       ],
-      "evidence": []
+      "evidence": [
+        "artifacts/medgemma_co_scientist/live_biopsy_20261020T032636Z.json"
+      ]
     },
     {
       "id": "hai-def-gate",
@@ -347,16 +468,16 @@
     {
       "id": "endpoint-screening-analyze",
       "layer": "API",
-      "role": "POST /v1/screening/analyze \u2014 DICOM in, screening arbiter + MedSigLIP score out.",
+      "role": "POST /v1/screening/analyze \u2014 de-identified DICOM in, MedSigLIP-448 zero-shot agreement scores out. arbiter_score is always None on this route. Scores are independent uncalibrated sigmoid values (they do not sum to 1) and are not diagnostic evidence.",
       "status": "LIVE",
       "not_wired_reason": null,
-      "current_backend": "MedSigLIP-448 (default) or SigLIP proxy (opt-in fallback)",
+      "current_backend": "MedSigLIP-448 via Modal (strict; no proxy fallback exists)",
       "hai_def_gate_state": "allowed",
       "wired_files": [
         "src/oncology_arbiter/api/app.py"
       ],
       "evidence": [
-        "tests/unit/test_screening_medsiglip_wiring.py",
+        "tests/unit/test_screening_production_contract.py",
         "tests/data/test_api_real_dicom.py"
       ]
     },
@@ -457,7 +578,7 @@
         "src/oncology_arbiter/api/app.py"
       ],
       "evidence": [
-        "tests/unit/test_screening_medsiglip_wiring.py"
+        "tests/unit/test_screening_production_contract.py"
       ]
     },
     {
@@ -586,7 +707,7 @@
       ],
       "goal": "Wire the ungated general-domain SigLIP as a development proxy so we can run end-to-end on real DICOM before HAI-DEF is granted.",
       "delivered": [
-        "src/oncology_arbiter/models/siglip_baseline.py \u2014 SigLIP proxy client with mammography honesty warning",
+        "src/oncology_arbiter/models/siglip_baseline.py \u2014 DELETED this pass (proxy client removed, not disabled)",
         "Real zero-shot smoke on Calc-Test_P_00038_LEFT_CC.dcm",
         "21 tests including a real-network CBIS-DDSM smoke"
       ],
@@ -667,6 +788,7 @@
         "Live smoke on Calc-Test_P_00038_LEFT_CC.dcm: overall_score=7.976839697221294e-06 (bit-exact to pre-hibernation)",
         "Live gated smoke: model_state=gated, no silent fallback",
         "Live proxy-fallback smoke: model_state=proxy_siglip with BOTH warnings",
+        "RETIRED LATER: the proxy fallback described in this sprint no longer exists. models/siglip_baseline.py was deleted, ModelState.PROXY_SIGLIP was removed, and tests/unit/test_screening_medsiglip_wiring.py was retired. The lines above are kept as the historical record of what this sprint shipped, not as a description of the current surface.",
         "Full regression 370 passed"
       ],
       "not_delivered": [
@@ -775,6 +897,31 @@
         "src/oncology_arbiter/api/rate_limit.py (docstring example)",
         "/mnt/results/proofs/v0.2-rate-limit/summary.json"
       ]
+    },
+    {
+      "id": "M-SL-AGENT-ARBITER-WIRE-20261021",
+      "date": "2026-10-21",
+      "commit_planned_sha": "uncommitted on 3fa542e4b07122ef3d2a9171906b4b60dcdbbdc2",
+      "summary": "Vendored github.com/fjkiani/Synthetic-Lethality@488da52 into vendor/synthetic-lethality/sl_agent (85 py files). Mounted GET /v1/sl/health|/source|/panel/ddr|/mbd4/atr_receipt and POST /v1/sl/analyze on oncology_arbiter. Offline pin intact; ATR LN_IC50 primary Δ=-0.7324529879649893 p=0.021484496737088882 n_lof=14 n_wt=914. models_loaded badges sl_agent=LOADED_SL_AGENT. Caspro was not the wire target. Live analyze still needs DepMap caches.",
+      "artifacts": [
+        "vendor/synthetic-lethality/SOURCE.json",
+        "src/oncology_arbiter/models/sl_agent_local.py",
+        "src/oncology_arbiter/api/routers/sl.py",
+        "tests/unit/test_sl_agent_local_wire.py"
+      ]
+    },
+    {
+      "id": "M-CBIS-V2-FLOOR-0-74-20261019",
+      "date": "2026-10-19",
+      "commit_planned_sha": "uncommitted on 416d84c4bfe10ed613667eef2801be06af9fb8b1",
+      "summary": "Supersedes the earlier split-brain note on this same date. Probe, app.py, and artifacts/tonight_delivery.json now name models/cbis_ddsm_logreg_v2.joblib sha e5f5b67caf8ba18006e3d582e91becf95fbb20b8b34417366c7ef07b906a211b. Evaluation value and delivery test_auroc are 0.7475469412477287. Sidecar test_metrics.auroc is 0.747551988693721. Sweep row 0.7521199273167778 is not this joblib. Validator floor is 0.74. This-turn validate_tonight_delivery.py printed PASS for 10 rows, including cbis-medsiglip and clinicalbert, with luna16 production_fallback. That PASS is the 0.74 floor under 0.7475469412477287. It does not clear 0.75 or 0.85. Uncommitted.",
+      "artifacts": [
+        "src/oncology_arbiter/models/cbis_ddsm_probe.py",
+        "src/oncology_arbiter/api/app.py",
+        "artifacts/tonight_delivery.json",
+        "docs/proofs/cbis_ddsm_logreg_v2_metrics.json",
+        ".cursor/skills/oncology-moat-platform/scripts/validate_tonight_delivery.py"
+      ]
     }
   ],
   "deferred_decisions": [
@@ -826,6 +973,11 @@
     "Ledger only marks LIVE when real code produces real output from real inputs, with an evidence path that exists.",
     "Hand-drafted math with caveat in a model card counts as LIVE (per user decision 2026-07-02) \u2014 the illustrative caveat lives in the model card and in `warnings`, not in the ledger tier.",
     "Stubs, placeholders, silent-failure fallbacks, and scaffolded-but-unconnected features are NOT_WIRED with an explicit `not_wired_reason`. They may still ship.",
-    "Live-smoke numbers cited in this ledger (e.g. overall_score=7.976839697221294e-06) are bit-verified against the transcript.jsonl record before landing."
+    "Live-smoke numbers cited in this ledger (e.g. overall_score=7.976839697221294e-06) are bit-verified against the transcript.jsonl record before landing.",
+    "2026-10-19: L4a-cbis-pure-vision-v2 is GATE_PASS_FLOOR_0_74. This-turn validator printed PASS on the dirty worktree. Rescore is 0.7475469412477287. Floor is 0.74. That PASS does not clear 0.75 or 0.85.",
+    "2026-10-19: git_sha 416d84c4bfe10ed613667eef2801be06af9fb8b1 covers the CBIS entry only. US-02, US-03, US-04, L2, L4b, and L4c were not re-checked in this edit.",
+    "2026-10-21: L4c-sl-agent-local is LIVE_OFFLINE_PIN in scientist-monai-moat (oncology_arbiter). Silo sha 488da52. Caspro is not the host. POST /v1/sl/analyze is cache-gated.",
+    "2026-10-22: L3-hgsoc-mfap4-platinum LIVE. GSE63885 probe 212713_at honest n=75 AUROC 0.683644 (production 0.684). Retracted n=101 0.7625 forbidden. case/full hgsoc remains 501.",
+    "2026-10-22b: L3-hgsoc-platinum-multivariate-v2 LIVE. OOF table: uni LOOCV 0.6528 still beats HGB 0.5911 / ElasticNet 0.4541. case/full?cancer=hgsoc → HTTP 200. Artifact sha 82febea7…"
   ]
 }

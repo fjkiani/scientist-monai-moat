@@ -1,0 +1,16 @@
+{
+  "status": "ok",
+  "image": "crispro-oncology-ruo:72h",
+  "healthz": 200,
+  "ts": "2026-10-05T23:52:19.237206+00:00",
+  "script": "deploy/docker/smoke_sovereign.sh",
+  "log": "/tmp/sovereign_smoke_48_72.txt",
+  "dockerfile": "deploy/docker/Dockerfile.sovereign",
+  "mounts_tonight_delivery": true,
+  "note": "Band 48-72 re-smoke; mounts artifacts/tonight_delivery.json (10-cap delivery manifest)",
+  "raw": {
+    "status": "ok",
+    "image": "crispro-oncology-ruo:72h",
+    "healthz": 200
+  }
+}

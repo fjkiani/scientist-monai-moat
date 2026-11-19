@@ -1,0 +1,2354 @@
+{
+  "capability": "clinicalbert",
+  "counts_by_reason": {
+    "duplicate_normalized_report_text": 7,
+    "no_deterministic_span_label": 251,
+    "no_schema_entity_could_be_surface_anchored": 18,
+    "reserved_tcga242_patient": 101
+  },
+  "created_at": "2026-09-30T00:20:00Z",
+  "rows": [
+    {
+      "kept_sample_id": "TCGA-AA-3697.271de291-30bb-435a-a113-5dccbf38f9ed",
+      "patient_id": "TCGA-AG-3742",
+      "payload_sha256": "60e526fb8d108c746757529998c849dce17b3baaf0bd9c29f2d927eab982926c",
+      "reason": "duplicate_normalized_report_text",
+      "report_id": "TCGA-AG-3742.c969bfbf-b11a-4144-9ca7-30dc8286673b"
+    },
+    {
+      "kept_sample_id": "TCGA-AN-A03Y.76734A82-9137-4DA4-871E-D4EC1BC33831",
+      "patient_id": "TCGA-AN-A049",
+      "payload_sha256": "54ac7645aeaea080da3fb3d119e9393f1cc249eb6de166d679f30ffa59cde514",
+      "reason": "duplicate_normalized_report_text",
+      "report_id": "TCGA-AN-A049.8C2B719A-D45A-4DF3-BA61-908A2E1F6D1D"
+    },
+    {
+      "kept_sample_id": "TCGA-AN-A0AR.0E27F140-3D60-4027-A370-68127564DE38",
+      "patient_id": "TCGA-AN-A0AT",
+      "payload_sha256": "ada73c56f3da1f82914c54d91913e6b5a99fe9dcca1498fb35c84b76a1292106",
+      "reason": "duplicate_normalized_report_text",
+      "report_id": "TCGA-AN-A0AT.3E8F2012-A457-4358-9C8B-23292374A743"
+    },
+    {
+      "kept_sample_id": "TCGA-AN-A0AK.12683FCC-4828-4D9A-9B35-E4B7295CC417",
+      "patient_id": "TCGA-AN-A0FL",
+      "payload_sha256": "b86521e94b062fe5df8b1d316f4547c8243305404d8d10b5387767acc017bac9",
+      "reason": "duplicate_normalized_report_text",
+      "report_id": "TCGA-AN-A0FL.049A2CA6-951A-452F-963A-F54FE87ECA31"
+    },
+    {
+      "kept_sample_id": "TCGA-AN-A0FN.6B53F577-5EB6-4AF5-9773-3654D3432BE4",
+      "patient_id": "TCGA-AN-A0FS",
+      "payload_sha256": "3803f02e9f6ecbdc4d5abb8dc05eeeaa6b2e377bf30aebd6f3e3bd4b39b40805",
+      "reason": "duplicate_normalized_report_text",
+      "report_id": "TCGA-AN-A0FS.3CD1D537-29E4-479B-99FA-26D27E192948"
+    },
+    {
+      "kept_sample_id": "TCGA-AN-A046.1304FB17-A20A-4EBC-9CC8-1554808AC1F6",
+      "patient_id": "TCGA-AN-A0FV",
+      "payload_sha256": "b2fba7fc018bea53017d859f9a9fd8a03419f02600e2bfb6c4734a20d10833fd",
+      "reason": "duplicate_normalized_report_text",
+      "report_id": "TCGA-AN-A0FV.5AEE90E0-A9A1-4944-AD6A-2675764D869D"
+    },
+    {
+      "kept_sample_id": "TCGA-AN-A0XO.3423E8AE-CE73-4212-BB72-2AF92FD0BC2D",
+      "patient_id": "TCGA-AN-A0XP",
+      "payload_sha256": "5c763fb94fef63a5092f3c38692780b0948487b971beed91731a4c1811dfccaa",
+      "reason": "duplicate_normalized_report_text",
+      "report_id": "TCGA-AN-A0XP.80E9B7CE-0D5D-4C01-A8E3-E6345BE145EC"
+    },
+    {
+      "patient_id": "TCGA-05-5425",
+      "payload_sha256": "6ed95c7dfb67d4d3734cd3d6eb3c41ca91e76c4e29a405c3defce1b24005455c",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-05-5425.6367B293-BF9C-4651-9B73-7B9D1764948D"
+    },
+    {
+      "patient_id": "TCGA-21-5782",
+      "payload_sha256": "dfff982e868a015187faace3b2997b692b465780b82574e3df4df2544a024eaf",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-21-5782.644e67c4-61cd-40f8-b2cb-287b8a868eb4"
+    },
+    {
+      "patient_id": "TCGA-22-1000",
+      "payload_sha256": "31cf1549d358a31d8de6fcb2e17c47a210a5144b1e531a95ed4e3092a01c9e1f",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-22-1000.B57BD00D-1719-4DB1-9CFE-14CD5E63D561"
+    },
+    {
+      "patient_id": "TCGA-22-1012",
+      "payload_sha256": "4de9d4d9443c5e5537ace95b184730ac744bfe03c30b56209c92a9d93d79b0c3",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-22-1012.442C89DF-A3F3-44DD-960E-F4B26281D9AE"
+    },
+    {
+      "patient_id": "TCGA-22-1016",
+      "payload_sha256": "0221657cde1e0508e555e026cb2f43920b37772ee91e2537ab37efe1e78eb01d",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-22-1016.DDA12CCE-0C66-4E29-9B36-BC4E24CFEC7B"
+    },
+    {
+      "patient_id": "TCGA-22-1017",
+      "payload_sha256": "31cf1549d358a31d8de6fcb2e17c47a210a5144b1e531a95ed4e3092a01c9e1f",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-22-1017.0C5101D2-339B-4B6B-B128-FAE9EF206C6B"
+    },
+    {
+      "patient_id": "TCGA-33-4533",
+      "payload_sha256": "752191ea973e94f4df1b377007ef71c09c5c4bf518e081d68684517f58d8977c",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-33-4533.1791e931-cced-44e6-b530-21bba650cc8c"
+    },
+    {
+      "patient_id": "TCGA-33-4582",
+      "payload_sha256": "6611aca03f1fe18acc42031b8eb372027fe1dd9b3d49095b1825634026aacf46",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-33-4582.3c5a7297-2aad-496b-a552-c570cbee49b0"
+    },
+    {
+      "patient_id": "TCGA-35-3615",
+      "payload_sha256": "3f7fc87fd79a1cffdd214c240a8bf8af91c1e4bf0a7527c597e25daaae27281a",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-35-3615.ffc829b9-9e11-41c9-9532-b6303ad48a9f"
+    },
+    {
+      "patient_id": "TCGA-35-4122",
+      "payload_sha256": "986378b3d62af299b3be1bf44c722659a570ae054d4e9361e240b767a19eff32",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-35-4122.a970d363-3ea8-4f28-a3a5-81c28dcb799f"
+    },
+    {
+      "patient_id": "TCGA-35-4123",
+      "payload_sha256": "b55a7bc130a65e37d8bbb233a0d9293f418092d3f5391d096965064de2f0e16d",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-35-4123.7f74ee3b-0ecf-468d-9280-d30686d67d3a"
+    },
+    {
+      "patient_id": "TCGA-35-5375",
+      "payload_sha256": "6ba09825a08266bed8776e80d4151d02c32b7e20c3e26bd38e817324f9ac4d1d",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-35-5375.a93477c8-5ebe-436b-978a-61b573f65471"
+    },
+    {
+      "patient_id": "TCGA-37-3783",
+      "payload_sha256": "d7f1c0530d14de6bbfea81c6e5361b63f269737a5a00d730f8bb29e890a34cae",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-37-3783.b3f279c3-f3a4-45a3-a711-b61873a3ca0a"
+    },
+    {
+      "patient_id": "TCGA-37-3789",
+      "payload_sha256": "436cc479fd5a2e6dc893b9d8731547362977efaaa06a50228b65a03c27c32a35",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-37-3789.9051358f-5b74-4f6c-b7f2-fc83e8f43306"
+    },
+    {
+      "patient_id": "TCGA-37-3792",
+      "payload_sha256": "0c9b227f5684c8871daa7f8df433bf5784564a520c49cd87d3821a8777da0b61",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-37-3792.d3661994-55f7-48d5-b27e-2bd64d13f4f6"
+    },
+    {
+      "patient_id": "TCGA-37-4129",
+      "payload_sha256": "6def305e53da3c10ada298d03e2ca87c01b2c471e0f2a086a28b77545fdcabba",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-37-4129.609db8ab-d13d-46ec-a247-a638da93e35b"
+    },
+    {
+      "patient_id": "TCGA-37-4130",
+      "payload_sha256": "8af0c39bd206105c015b370d74b620b82f29024d30537bf0ff2e274710749f0c",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-37-4130.ed6702d0-e9b6-4258-adde-a07b7ba681e6"
+    },
+    {
+      "patient_id": "TCGA-37-4132",
+      "payload_sha256": "3c18291a8f3976be1c5735e9b5be5ab37f6d40c002cde8393d4dcde7351ceb51",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-37-4132.1428fb74-8aab-487b-ace9-79bbe01de096"
+    },
+    {
+      "patient_id": "TCGA-37-4133",
+      "payload_sha256": "3bc40500d12f379843cc78497237587a28256b3ff34193fdba810405cd1f9dcb",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-37-4133.7f0f7712-3db1-4f55-aa5d-724e58d5fb90"
+    },
+    {
+      "patient_id": "TCGA-37-4135",
+      "payload_sha256": "75e08011eabbae70bf4d3e79d68b3bddef92991566820f868cbf44026ef73ac3",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-37-4135.27fd3de4-a7da-4dc1-a135-637bcb4b7316"
+    },
+    {
+      "patient_id": "TCGA-37-4141",
+      "payload_sha256": "ba41bee478032819bbd9d6dc6a56476ad3bcb7f8a7747b7e01ec2e29fe23b30d",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-37-4141.6cf75b07-d6a7-4b78-af73-e37c3a0581f8"
+    },
+    {
+      "patient_id": "TCGA-37-5819",
+      "payload_sha256": "a10b41b0c7247c06d68b144bec019702a608dd95ef202aa98424fb83474ffdd0",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-37-5819.8c9b5277-0cbf-4ba1-bda0-2c84bdadc9bd"
+    },
+    {
+      "patient_id": "TCGA-37-A5EL",
+      "payload_sha256": "343e5de0f4a6a1369de968112239361e658405cb1faf1e4df87a8909778d8c3a",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-37-A5EL.EAE31B82-48BE-4659-B32B-BC59A30D97DC"
+    },
+    {
+      "patient_id": "TCGA-37-A5EM",
+      "payload_sha256": "1650c38a10f9151324c57b595baec58516073b38871dc520287d85c08a90bac6",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-37-A5EM.5D9E8908-FE51-46B4-917C-4A0F6FAA3E38"
+    },
+    {
+      "patient_id": "TCGA-37-A5EN",
+      "payload_sha256": "3a38acebb308e0576075b4765b3b029bd6f1da4c439d3b6d180f2371272328ae",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-37-A5EN.CABD8B0D-315A-4134-BC68-E7ADD3A7CB39"
+    },
+    {
+      "patient_id": "TCGA-43-2576",
+      "payload_sha256": "b4831d097e14b83d06f6956574ef8de3b5555e6535dd0bc505bdfd5157541741",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-43-2576.15a1f3eb-1b46-45c4-85f8-0d52710986b3"
+    },
+    {
+      "patient_id": "TCGA-44-5645",
+      "payload_sha256": "b2364fabef1ce14c99372ae8266daa0d6d0c63c319bf4194daa0ddb838c528a9",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-44-5645.8904f1ec-527d-4f2e-a112-157d31ec9b3d"
+    },
+    {
+      "patient_id": "TCGA-49-4490",
+      "payload_sha256": "5ef079088462df06d02f06b2f6f2048e3bc8e64e94aff8343c97312faabe20ee",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-49-4490.d6ec6f67-0c16-4396-be41-aaa6868a6106"
+    },
+    {
+      "patient_id": "TCGA-49-4494",
+      "payload_sha256": "08f9b60d8c8009918619017358412d8720c96656ddbda15298da38b335adf14e",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-49-4494.178a8648-f3cd-46ae-b90a-a45d6715c889"
+    },
+    {
+      "patient_id": "TCGA-49-4501",
+      "payload_sha256": "716cc885bd8d7dfb912bb496cbde088e50d39fc810f2064a2d870c1fc15ec07e",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-49-4501.da1bf563-9ad3-49cf-a68a-44af8ed41684"
+    },
+    {
+      "patient_id": "TCGA-49-4506",
+      "payload_sha256": "996cc88968026549a91f5b3e2e82e24b13a25b80cb8449e1369741e6ab6fd702",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-49-4506.09fb40cf-afb5-4dd5-a1b6-6261ef27b65e"
+    },
+    {
+      "patient_id": "TCGA-49-4512",
+      "payload_sha256": "66b2103fa074eb70a57d877af777c8d4a6e0193f1b40d8df845a1476cc6fec0e",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-49-4512.dddbac81-a9e3-42a8-ab35-6d506c58413a"
+    },
+    {
+      "patient_id": "TCGA-49-4514",
+      "payload_sha256": "8437fd0371b8d122036dcd0536a31d8235e09206f71a3ad17a9031a4af529139",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-49-4514.1d1c3125-05a9-4939-a296-f98d8f977ab7"
+    },
+    {
+      "patient_id": "TCGA-55-6968",
+      "payload_sha256": "e5b9fd1bc34733076ed7170e87ee9c98797d691095121786e7005341da76aed3",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-55-6968.87f5cbe6-cce1-4a8c-8189-c6feabd3b4bb"
+    },
+    {
+      "patient_id": "TCGA-55-7816",
+      "payload_sha256": "d350a9a706dec894651092d7e970bdd36167445d3bd56384fc4ad25cb3450669",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-55-7816.ca0d6f7a-fee3-49c5-8239-8a2583cecdd1"
+    },
+    {
+      "patient_id": "TCGA-55-8091",
+      "payload_sha256": "34ece196a4d5e8813f5f037da9c9c879ca765901ed66d13ecac870bea490bc76",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-55-8091.33902b19-5be6-47ff-81a7-b945ae674a2f"
+    },
+    {
+      "patient_id": "TCGA-55-A4DF",
+      "payload_sha256": "7b597d4e6d9142d6324dafbfb6d3519fca38f006227dc8c5dad2a7406ff9bbf8",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-55-A4DF.25E84F93-E9AF-4A09-B3A9-86C5AC80BD4A"
+    },
+    {
+      "patient_id": "TCGA-56-7221",
+      "payload_sha256": "0af466177bf988be8ef6bbb98bcea4cc89d183b9256f17e1ca263e4c056db80a",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-56-7221.9c136f18-c53c-45f8-b20f-850086ee0f55"
+    },
+    {
+      "patient_id": "TCGA-56-A4BY",
+      "payload_sha256": "8ff34e2d8cc610b55053094afbb997570b53bc2f0dd315cf9a8ed3c4b76335a7",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-56-A4BY.62DC00DE-B06C-4A85-A1DB-3B6498D617C1"
+    },
+    {
+      "patient_id": "TCGA-64-5774",
+      "payload_sha256": "59edbe058419db879123964fe728936e3a479c4fb64254b0f00d452fedc03b2a",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-64-5774.d8d1fecd-1290-4d5a-a98b-3c29f789bde6"
+    },
+    {
+      "patient_id": "TCGA-74-6573",
+      "payload_sha256": "8bc33a687643061c6130ac3f365a7528b54d6bd7a044aa62a45fdd913a14fd72",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-74-6573.d33e2186-48d8-44da-84b6-e7f88daac1e2"
+    },
+    {
+      "patient_id": "TCGA-74-6575",
+      "payload_sha256": "4aa27c886ef23e09eefb46dd3c5f404bf324512e9a505d1cea67cc767772c60c",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-74-6575.5ecedd86-01d1-40c8-896f-1566e6d2dffd"
+    },
+    {
+      "patient_id": "TCGA-74-6578",
+      "payload_sha256": "a86bc33597087d22ac4ea5cc1ee6638235ac7e43fe7b92a07a8820e5c9bb6576",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-74-6578.35f9320c-f804-47e5-904f-4d1a87fddd35"
+    },
+    {
+      "patient_id": "TCGA-74-6581",
+      "payload_sha256": "e160a80b047dd5169ed8c580fb5eedf14f378d3d549b5202d14af8fcdfbf1603",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-74-6581.7ab73575-cd7d-434f-b21d-fcffb52c3a4d"
+    },
+    {
+      "patient_id": "TCGA-74-6584",
+      "payload_sha256": "a1d0cad9910e0c5f6514d8a4b03102252e286c086cda3196ac7f6c64e3ec19c3",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-74-6584.315ce84d-6870-4a44-bf59-e5b1ba0d94bb"
+    },
+    {
+      "patient_id": "TCGA-76-4926",
+      "payload_sha256": "93b125b2dc179b986fee87234fdc1c0b8ce7f41db4e13aa1e97390e82c3b6f55",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-76-4926.1dc2749e-bfe1-4f6f-ba92-c916f8aaedd8"
+    },
+    {
+      "patient_id": "TCGA-76-4927",
+      "payload_sha256": "903d109ce5e2f92b30f97f9c3ffaee2361785453264983e2351b7888f7834084",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-76-4927.5f1a707b-6acd-45b3-8540-0ff1ec834ab7"
+    },
+    {
+      "patient_id": "TCGA-76-4929",
+      "payload_sha256": "835aee8b0765724800e1b7923d0277c63201e3688356358d559285b485c4163e",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-76-4929.65054ac8-f9aa-4342-9f18-81c15efd6d81"
+    },
+    {
+      "patient_id": "TCGA-76-4932",
+      "payload_sha256": "0fd18d21bc202d4fa26f0b8e4f169507063b402c2d8c07267299548b4f06159f",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-76-4932.7dd69551-44d6-4b99-b0ef-6ea886b23394"
+    },
+    {
+      "patient_id": "TCGA-76-4934",
+      "payload_sha256": "4ab988676cc5f860b2153e3df027e0be7851edc31ad971b06ce97723a63e31ec",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-76-4934.31727bd3-2af9-4648-b5ae-60af7be49ea7"
+    },
+    {
+      "patient_id": "TCGA-76-4935",
+      "payload_sha256": "390539bdbe9855fec09a8562effa02605f99d3abf2546c4b575c68dfbb3300cc",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-76-4935.84580ae3-e984-4071-b9ce-1641f06963ad"
+    },
+    {
+      "patient_id": "TCGA-76-6191",
+      "payload_sha256": "622c091de94604c6334a660986ff92fa549b6e0af8b6b8d646075bb40d22ad3f",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-76-6191.d91aa8ca-fe4b-4f2e-89a7-c56d6fe176e1"
+    },
+    {
+      "patient_id": "TCGA-76-6192",
+      "payload_sha256": "f1a8d415d4db46809f921dc4921fc1006f1b32f4ddb386f919b0c9c9363abd93",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-76-6192.d2a94594-7f5a-40f2-87fa-beee3fa5be5b"
+    },
+    {
+      "patient_id": "TCGA-76-6193",
+      "payload_sha256": "fa4e2c8ee052d43c96a3274070547720632d005c802d900996e38d1fc759884c",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-76-6193.1ee55ecb-8de5-4a21-9fa0-babcb2d07212"
+    },
+    {
+      "patient_id": "TCGA-76-6280",
+      "payload_sha256": "c9a19969ab730802e647bbaf611a206bda868bb00ef77be5014ce821c8be298e",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-76-6280.6c77527e-b771-4544-bd9a-8468f2ff593e"
+    },
+    {
+      "patient_id": "TCGA-76-6282",
+      "payload_sha256": "8b8a125c63def4a6aa79db2cc4e233f883e45930049799549efdad71533af93f",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-76-6282.fe3b0aee-6477-48dd-af17-54f991fa47a5"
+    },
+    {
+      "patient_id": "TCGA-76-6656",
+      "payload_sha256": "2779311fb55bb354bc8eb7835acd892355a6da53a5538c2c499679dbe0dbb0c1",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-76-6656.916da87b-e1f7-43fc-91b6-8db07a5ba0b2"
+    },
+    {
+      "patient_id": "TCGA-76-6657",
+      "payload_sha256": "d412ba136ffd60e06e58b773a2ac88725999545749e16fdbb6603e23221cc665",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-76-6657.476eed15-94af-4c24-9a4f-17fbde281c66"
+    },
+    {
+      "patient_id": "TCGA-76-6660",
+      "payload_sha256": "188deafa01aae769e8158e860b603c92c71a15143320eb49cf459c3d10f1d1d5",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-76-6660.230f31a8-f9b9-46a9-b7d3-d09a4fad5ee1"
+    },
+    {
+      "patient_id": "TCGA-76-6661",
+      "payload_sha256": "76ebf6550c3099cf4fd3d16f5716c3de411d899ae002077489b5fb771012bdd6",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-76-6661.ebdc6747-57b5-4d88-a9cd-9222a7f71129"
+    },
+    {
+      "patient_id": "TCGA-76-6663",
+      "payload_sha256": "13f994b0e7e9b0b38805a97511975711fd7a6f8e97b683fdd6bf0017d1b0e91b",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-76-6663.e6733441-1472-4deb-9654-8f5059b0b72c"
+    },
+    {
+      "patient_id": "TCGA-78-7163",
+      "payload_sha256": "8e9ba1b076e4f736729db06d9ee68f1ed1c4f0089436bd230f9aae32da8dc949",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-78-7163.40948ca8-3075-47ef-a679-94ea5dc29a08"
+    },
+    {
+      "patient_id": "TCGA-86-6562",
+      "payload_sha256": "6b9b8ce2ace7b28d73dc48281447e83bbb1547102d3006a6956f5292654e5fd9",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-86-6562.b0e49ac9-6b9c-4e70-a4a9-10e0686e61aa"
+    },
+    {
+      "patient_id": "TCGA-86-7701",
+      "payload_sha256": "ff334bdf96808df432525bd43b092d826666313dfb7bed0e462cd39a1e39c809",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-86-7701.711a97e9-ac1d-4f62-b488-a3eb8370841e"
+    },
+    {
+      "patient_id": "TCGA-86-7953",
+      "payload_sha256": "be39b23c81e199f81d40b4e7270a02aaf37b728ebe74a4f596af1e21560187aa",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-86-7953.1af715d0-9b4b-444f-b93e-53478cde8e58"
+    },
+    {
+      "patient_id": "TCGA-86-7955",
+      "payload_sha256": "8b9f48e782046a53d9ef5fa39f395ee6995fd2b9caccc656737873b5fa770ead",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-86-7955.d6a25f15-9117-43b7-bbd4-132914a24d16"
+    },
+    {
+      "patient_id": "TCGA-86-8055",
+      "payload_sha256": "61826e4818d80becdc4091611512d45f29e336c76913585e10f2cad82781913a",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-86-8055.b0f478a2-7696-4fc2-bdc9-839142556b6f"
+    },
+    {
+      "patient_id": "TCGA-86-8074",
+      "payload_sha256": "be2ff8d751ce08fc16b4a4615e07decdf7b69addfb393b788803210a341feddc",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-86-8074.a1e9569b-0254-4be6-adb2-3a842e23613f"
+    },
+    {
+      "patient_id": "TCGA-86-8075",
+      "payload_sha256": "aadc56cfaf3a6c7a3806cd7a07467f02d961da952613db14bbecabc9177d8d4c",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-86-8075.7988f9a9-584e-4ce9-b12c-f3e289af1d6d"
+    },
+    {
+      "patient_id": "TCGA-86-8076",
+      "payload_sha256": "0cba5d458c588691903b2232ebd20e1ed706c684976f2a513d234043d3e3d819",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-86-8076.c282d817-b99a-4bda-8073-9de1cac074f9"
+    },
+    {
+      "patient_id": "TCGA-86-8280",
+      "payload_sha256": "2d8efb876e9641068c9cb661513fa9db7644e2ef445b54c928d878f1f48ee3b0",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-86-8280.49459cae-eee4-4e46-a8fc-efbeb6cb1f5d"
+    },
+    {
+      "patient_id": "TCGA-86-8358",
+      "payload_sha256": "64b2ac16ef84c555c31e21a5084912c85edf45d23a07dffde046ec2b7dc0e15d",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-86-8358.bdfc4ca3-ce4f-4206-b3ff-3733df596e9d"
+    },
+    {
+      "patient_id": "TCGA-86-8668",
+      "payload_sha256": "f501a5d5dcb160864b12fdee9c3fb1221b567e0bd77f4640a4dab0a8d05b1e98",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-86-8668.be6c4ce2-4c88-41a7-bff6-e5bb157ad3ad"
+    },
+    {
+      "patient_id": "TCGA-86-8669",
+      "payload_sha256": "3d65250a18c1af59768005114fa188b087039cca4e0515e5a0ebe15310052819",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-86-8669.6c8d6319-a235-4757-be34-79286a8da60f"
+    },
+    {
+      "patient_id": "TCGA-86-A456",
+      "payload_sha256": "806ffbf8910c6db4a892e5e7507b4e8d1080df5a65445fc35605ef45c101c4b8",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-86-A456.56606792-5083-4F1E-ABEF-711BACF546E6"
+    },
+    {
+      "patient_id": "TCGA-A8-A06N",
+      "payload_sha256": "015207af41087b3e73b7b4fd88c9138f34af8aaafcc4da5fc88248fcb2c45769",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A06N.2F0333BC-E9BB-4903-B3E2-8AE241DDDF84"
+    },
+    {
+      "patient_id": "TCGA-A8-A06R",
+      "payload_sha256": "908622ed946f721756b481608f4e4ca4a359a940ff25344b3b3ddde3e9051240",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A06R.B6B7939C-63AF-4B52-B494-AA09A9C03871"
+    },
+    {
+      "patient_id": "TCGA-A8-A06Z",
+      "payload_sha256": "abcee23897a7d223d2720733d63f95f7b74e6fced1c10fefb7250ca79fef5089",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A06Z.956F45E5-A8C6-4A4A-9D1F-D31912180584"
+    },
+    {
+      "patient_id": "TCGA-A8-A075",
+      "payload_sha256": "666fc22352cc580b4d5a780da4e9ca52f4c697c89534b9c6a7a39a18de9ea349",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A075.6643B290-5D7A-4649-B57D-47A5BA4E8D31"
+    },
+    {
+      "patient_id": "TCGA-A8-A076",
+      "payload_sha256": "f31522a6f9f1607fb3534d014a9c9ddd6fd2d0c7cdd0733e30765dd4a16eefd4",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A076.DD669244-34D8-4725-A52C-F3AAF59852F9"
+    },
+    {
+      "patient_id": "TCGA-A8-A07B",
+      "payload_sha256": "f6ff624304ba7582818c130dc17c307cb78c9dd7a4468bce2f8d1e551167fc03",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A07B.F24A752C-1AAE-4C70-B6D4-DD0E8C89D9AA"
+    },
+    {
+      "patient_id": "TCGA-A8-A07E",
+      "payload_sha256": "ab7fdc115b11eadcb85d6029e80398f02f162344c049d546e34cd6a81a2b4e13",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A07E.E20AC0FF-43C4-49EA-9E33-764E553933B7"
+    },
+    {
+      "patient_id": "TCGA-A8-A07F",
+      "payload_sha256": "85227744769ba7a54260148af2d9f5ddf6e2745e85a46d13680d866ab90d4ceb",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A07F.D1456192-83E7-4FC8-B783-90D615830156"
+    },
+    {
+      "patient_id": "TCGA-A8-A07G",
+      "payload_sha256": "1453eb82e32889827b12919dbe11e166c74ee9829e880d4d36ee07392635c4d9",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A07G.1ED901DF-BCDC-44C8-A7DF-AB895ECA0952"
+    },
+    {
+      "patient_id": "TCGA-A8-A081",
+      "payload_sha256": "71651c2fa576a0d2810f15d0da7db60e5022f1a996416dbf0dadc70e769123b0",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A081.DE25BF82-5F7A-489B-BFC1-9386C44E7D62"
+    },
+    {
+      "patient_id": "TCGA-A8-A083",
+      "payload_sha256": "aa58a4138451d9fa9769c1c970705735c2f7630436c18d41d7904e3519deef76",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A083.AF0A2220-DEEC-44C8-B15C-B6442D5B7517"
+    },
+    {
+      "patient_id": "TCGA-A8-A084",
+      "payload_sha256": "4801dd6ea92d90b11ff9a5b05dbebfd87ecef92f5b778d2773ed0e772ff681d4",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A084.6A49B3F9-6B43-4D74-A28B-C83BFE61EC7B"
+    },
+    {
+      "patient_id": "TCGA-A8-A085",
+      "payload_sha256": "787f076779903aaecc7edeac8e80830b7ba4c0604f8e7862d5b96ce10795add1",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A085.64F84FF4-A477-4E1E-B4BB-E5614517229E"
+    },
+    {
+      "patient_id": "TCGA-A8-A086",
+      "payload_sha256": "f5405621a7f6247524f5833ad742e4a94bb568b03110c29a24a8d501f6dcd3b9",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A086.D4E86E20-B75E-4CDA-83F2-22C481D4B9E8"
+    },
+    {
+      "patient_id": "TCGA-A8-A08A",
+      "payload_sha256": "a96332a3bd2acfcdc5af9b330e82495980b44ec4059d5c2b786cb5e58f058d38",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A08A.6D2212CE-C80F-4545-A895-3F1B6E4C6DB6"
+    },
+    {
+      "patient_id": "TCGA-A8-A08C",
+      "payload_sha256": "4dcb89c87306e1d782ddb728ab3735a2fc176db4e82018f1551c234ff0bd9055",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A08C.6E136F3D-A6E1-4541-AA4B-65BC5872DE06"
+    },
+    {
+      "patient_id": "TCGA-A8-A08J",
+      "payload_sha256": "cb517a73cceb0fe4b5c911f6d0d6b663fd0b417e4922a4f9068f8f01595d35e1",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A08J.C1D59BA7-FC3E-46EA-B095-3B6DF42892B0"
+    },
+    {
+      "patient_id": "TCGA-A8-A08R",
+      "payload_sha256": "470f5d12113aecdc928fa840556b44da7cf2f2655c1fdd4aedd71dd1473fc6be",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A08R.FC0C1BF3-74C3-4DFC-B9B5-2FD1728E287A"
+    },
+    {
+      "patient_id": "TCGA-A8-A08S",
+      "payload_sha256": "24026c1b980dd8e229528a3b81511d6351cf1f8a522a231b9d2069e414ef0db6",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A08S.0D293DF8-374D-4681-9B2A-ACC98601AA25"
+    },
+    {
+      "patient_id": "TCGA-A8-A08X",
+      "payload_sha256": "a6a2fd5f768d2fec668b71b2e270da0afd5d7cc5aae1c7f251766c61b5b7bb75",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A08X.CA911D90-5DDA-49F1-993F-68FCA77A8558"
+    },
+    {
+      "patient_id": "TCGA-A8-A08Z",
+      "payload_sha256": "9f7ac0e0f0eaedf2bb721ceeb00a9bf92022330bdab25feed7521738c8f45b5c",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A08Z.DA7BD84B-C00E-40A0-9AE2-33FCE7995696"
+    },
+    {
+      "patient_id": "TCGA-A8-A090",
+      "payload_sha256": "afabf6ad5e916545b062603a8fbda4c20d83e04b82d27d6c7b17772c4e1470f8",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A090.549E825B-F206-4FF9-835B-2FBE51C7B831"
+    },
+    {
+      "patient_id": "TCGA-A8-A091",
+      "payload_sha256": "a558b7e191a63e8fce0971f8dee46933bd3f5d78fa9a27b6d9b7e150db3c7946",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A091.FECA34F6-CEF7-4A6D-AA7E-F88542EAF6F7"
+    },
+    {
+      "patient_id": "TCGA-A8-A092",
+      "payload_sha256": "2fad5d3995fe9d94cf924cb9d3ef2d5be985ca16ab2a20e35f8393e2d7b2556b",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A092.93D66EAD-B7D3-4688-8EC9-75C4380619D9"
+    },
+    {
+      "patient_id": "TCGA-A8-A093",
+      "payload_sha256": "cc5900c8bfe6f1bba39a917cac8d9a2986754a80d9cac0966cd1067b90e8b068",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A093.9DCF000D-D996-49A6-950A-0CD1E90CC6C7"
+    },
+    {
+      "patient_id": "TCGA-A8-A094",
+      "payload_sha256": "af92edf74c73a257aafb64dfd1597ecfd638bffdcad3f5d1c4cf22b8cc277b1b",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A094.85288EC6-0BDC-4955-8B88-1DEECBF0E235"
+    },
+    {
+      "patient_id": "TCGA-A8-A096",
+      "payload_sha256": "9b89925acdc3e6a3792821f255d9a0fa05db7d8f537970fada23099ab918b534",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A096.91BFC77A-E56F-49F0-A294-A5EE9F266FB6"
+    },
+    {
+      "patient_id": "TCGA-A8-A09A",
+      "payload_sha256": "05d077794833843c2ea420e388745c95a031e94195d461a9a9d27a0ee999ec01",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A09A.5A6E0F10-758E-4DC1-A5C7-57D5DF9B25EF"
+    },
+    {
+      "patient_id": "TCGA-A8-A09D",
+      "payload_sha256": "805773c484a7e5090bc98927ffefe95e5ca3289dc157cb0de1d32706dc3dc04a",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A09D.C4A1A482-6AE5-4807-BA05-C73AC0898546"
+    },
+    {
+      "patient_id": "TCGA-A8-A09G",
+      "payload_sha256": "5dccca9715a6b35f2e3526ab6474523d00425467c14c85d4422d3e5c1bd7b12a",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A09G.2728DB14-66D5-4E67-B9B6-63D93DBF509C"
+    },
+    {
+      "patient_id": "TCGA-A8-A09W",
+      "payload_sha256": "47c2606e39780ec445eddbf06eeac9a2ff7c74b6aeadbf71018d92323ff92eee",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A09W.B73AF7B0-EED3-413C-B249-C97F27E4EA1C"
+    },
+    {
+      "patient_id": "TCGA-A8-A09X",
+      "payload_sha256": "b27d2b7383699511689279c5dab04c5b563f5880fd4b06c2cbd03cd08fcdea41",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A09X.F72703A2-2C57-459A-9015-94BD3D302491"
+    },
+    {
+      "patient_id": "TCGA-A8-A09Z",
+      "payload_sha256": "7acfd0825d7d22e20901367e71721a4ee7f99b87548796239500e9e0be4961bd",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A09Z.DF890966-D14E-4EDF-B6E3-E10E40BA5B5D"
+    },
+    {
+      "patient_id": "TCGA-A8-A0A6",
+      "payload_sha256": "0f6eaf1fbd5792c1d84d1ef41ff6d40ef91b8e8234dc9eb723822634303288c2",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-A8-A0A6.161A2735-C3CF-466D-AE21-C6A2C987BB1E"
+    },
+    {
+      "patient_id": "TCGA-AD-6963",
+      "payload_sha256": "d148fedf3474036220e9c333fc1f930f088f3ee9a26f8c4844872f5261adca99",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-AD-6963.cc2d253a-3e7a-4701-a5f3-12b70e3fa203"
+    },
+    {
+      "patient_id": "TCGA-AG-A025",
+      "payload_sha256": "6d46c2575f995ad06512714150f7615344b59c0e212f6766a80d29fcad52386f",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-AG-A025.390DADDE-F6CC-4072-B56C-C83EEE9AB337"
+    },
+    {
+      "patient_id": "TCGA-AM-5820",
+      "payload_sha256": "3342b65790aacb8677faebec3e89f3c4c4c21d973b890777941b6c27a8d748b9",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-AM-5820.727c0f04-0d64-43ec-a597-3a9e99bf78bb"
+    },
+    {
+      "patient_id": "TCGA-AM-5821",
+      "payload_sha256": "978d494710c0c6079adeb59e9535c1a09a6c428dbe506910f1dcafa58890781f",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-AM-5821.5ba47e48-c3f0-484b-aab5-23c75cf0cea4"
+    },
+    {
+      "patient_id": "TCGA-AZ-5403",
+      "payload_sha256": "a67144080811f134359ad780b477ee74c1169aca57a497eb5138ebb1441d43cf",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-AZ-5403.aade444b-f299-47cf-8837-e0de4f044637"
+    },
+    {
+      "patient_id": "TCGA-AZ-6607",
+      "payload_sha256": "77a4d4b2d17f72548566e6e4a52e1c5896c9256737d03988f4696aa70367062a",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-AZ-6607.2a744111-dfa5-4fa2-9eb4-20039a7c08f3"
+    },
+    {
+      "patient_id": "TCGA-B6-A0IE",
+      "payload_sha256": "39450e062c3fa699025b7a4ebe17496b742d19ac47d832b1de184b8231e5f531",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-B6-A0IE.DFCA9C6E-710E-4645-9CFC-A908AAD583F3"
+    },
+    {
+      "patient_id": "TCGA-B6-A0IQ",
+      "payload_sha256": "453cf6e3f5c6bb80425e35891103829ac7de88f4c419463e0c15d5619bff12df",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-B6-A0IQ.0ED7357E-662C-4D65-82ED-29739919068F"
+    },
+    {
+      "patient_id": "TCGA-BH-A18L",
+      "payload_sha256": "bd3827b22911115cd222a6ca1929fa76bd7b0477369cca2626cfaa8930fab773",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-BH-A18L.E4DF4771-074D-4870-A0BF-AF62724C5A86"
+    },
+    {
+      "patient_id": "TCGA-BH-A1EN",
+      "payload_sha256": "6532feaf3456ff5a103fc3bb17f90cce963026b53085cc018497c77b9673870f",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-BH-A1EN.809F294F-8C48-4719-866B-7169FB1CE24D"
+    },
+    {
+      "patient_id": "TCGA-BH-A1EV",
+      "payload_sha256": "e74382b2d56dd8b86a3db9d2e7cb6b7c22ff5ace5843b3602811ea45a1f66f55",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-BH-A1EV.16DEA43F-4A61-44E3-854F-6B6575B45628"
+    },
+    {
+      "patient_id": "TCGA-BH-A1F8",
+      "payload_sha256": "0db125e9fd11c274a0590a5b2e762c1d6a3bcc0185e68a0735128a0f8860be20",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-BH-A1F8.BAA6AA92-69C5-454B-A550-246E7DB1EBE3"
+    },
+    {
+      "patient_id": "TCGA-BH-A1FC",
+      "payload_sha256": "8d465007a9f3e1bfffe98f58a8f96c141a4b8a7011b4a494a754ea050a2745b4",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-BH-A1FC.7B1B31D2-0CC5-4EE6-8AF3-16DF726BE13F"
+    },
+    {
+      "patient_id": "TCGA-BH-A1FD",
+      "payload_sha256": "35a556142c4ea8bce9038a0d163226761c87d783b39a8b9060b310f7957bc257",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-BH-A1FD.9F838476-4DF1-44D6-989F-33A1D490424B"
+    },
+    {
+      "patient_id": "TCGA-BH-A1FL",
+      "payload_sha256": "cc8a8e1551565f274b4940c32baa67e95525204ac7267cd51725132902207fbc",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-BH-A1FL.032B81C5-F936-448E-A352-C186DF160B7C"
+    },
+    {
+      "patient_id": "TCGA-BH-A208",
+      "payload_sha256": "0971384e080593d81210358c43b5c5cef7735168872712fcf5bd9a5c05f3070c",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-BH-A208.4F943D12-E769-45F3-86BE-75193786DD4E"
+    },
+    {
+      "patient_id": "TCGA-BH-A209",
+      "payload_sha256": "d71b987fa1b80382db3108405d2efe99162cc766efde2261aa9bb72cddbeb460",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-BH-A209.E28150CE-E9B6-4C3F-B867-F9A75E2648DC"
+    },
+    {
+      "patient_id": "TCGA-CI-6619",
+      "payload_sha256": "fab5a6ad1a06418e48cc4f39335df1f201c640c200adda47467f4337aca8484f",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-CI-6619.9060bc33-42b3-4ee3-8137-9fe5913c480d"
+    },
+    {
+      "patient_id": "TCGA-CI-6620",
+      "payload_sha256": "7231007ece745e71d78432e9e3c3c73c9137e52eed25f5078016628ecfd05904",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-CI-6620.103605fa-bfbe-49b0-afea-3f8b60a3f2a2"
+    },
+    {
+      "patient_id": "TCGA-CI-6621",
+      "payload_sha256": "7535cccd8297ed19f818fc2d85d9985a6a1e27f78992a95e792b724362344fd5",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-CI-6621.75fbb034-4262-4263-a5d8-57d22b55a915"
+    },
+    {
+      "patient_id": "TCGA-CI-6622",
+      "payload_sha256": "4c890f33bb3810babac6dba0fbc04ba970ff1f994800ff2e316852dbecd12c38",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-CI-6622.61bd660b-aa14-41f6-a6a4-2fef072d3a10"
+    },
+    {
+      "patient_id": "TCGA-CI-6623",
+      "payload_sha256": "1738ee4ca58e4489bf01a45a333dc3a72de4ba5d72881ec87b8853c0a127c806",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-CI-6623.7bdb59ad-90f4-4fba-8053-1daf9945b869"
+    },
+    {
+      "patient_id": "TCGA-CI-6624",
+      "payload_sha256": "e8675650fdc4773880d08e560dee9500e845b71a29ccfe7194968be940308b26",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-CI-6624.7da84c10-2a8d-4876-97b7-d5bef4d3884f"
+    },
+    {
+      "patient_id": "TCGA-D8-A13Y",
+      "payload_sha256": "daa64d8eef920b83f30798e58bc857ab67a36a66e186a76dadfe718563f0cc91",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-D8-A13Y.0CF5DE3C-272C-4127-8047-4359D1278181"
+    },
+    {
+      "patient_id": "TCGA-D8-A1JA",
+      "payload_sha256": "bab758a5c7ae3522e1fb2383c16c458fc339b66fd4d95694a1714b32214bfa59",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-D8-A1JA.51A2B7B5-0CDD-427D-BC82-5498810B2641"
+    },
+    {
+      "patient_id": "TCGA-D8-A1XA",
+      "payload_sha256": "ab63c45ba4f0f7476c7f8fc40a37a388264f4c83d002a2e29af98f295af72fe3",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-D8-A1XA.9320030D-5E19-4BEE-99DA-366B6762DED1"
+    },
+    {
+      "patient_id": "TCGA-D8-A1XT",
+      "payload_sha256": "c4938939559aa4e24748a3949ee72b7b7b3ed49f4c0e0bf265b7a72a90701dbb",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-D8-A1XT.99050E48-8DFE-4405-B8D8-7649CE2C9CFF"
+    },
+    {
+      "patient_id": "TCGA-D8-A1XU",
+      "payload_sha256": "959f258ee28730a27ac2a738baeca9cee1cb71d8fe9111daf9999d80ef383d6b",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-D8-A1XU.845F8FCF-CF3C-4CEF-B673-A57DE626939C"
+    },
+    {
+      "patient_id": "TCGA-D8-A1XW",
+      "payload_sha256": "5ef518c62d85c979a27d36d313db57503b3fc4f3750461018264fcd95cbc7ef5",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-D8-A1XW.BD71F606-58BC-46B9-8A03-CB25D5BECA96"
+    },
+    {
+      "patient_id": "TCGA-D8-A27E",
+      "payload_sha256": "4bc47a06cd1a1b4683c62133241354e542437c6710e5a0cbb39fc38d8aacdb5e",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-D8-A27E.36F6CB19-17FE-47FA-BFCA-3846578C028B"
+    },
+    {
+      "patient_id": "TCGA-D8-A27M",
+      "payload_sha256": "2e5eea6845c545577c05417eaaef30de513391fd84ba047aa106a26fc63edd57",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-D8-A27M.85045216-10EC-473C-96A9-268E71D2B566"
+    },
+    {
+      "patient_id": "TCGA-D8-A27P",
+      "payload_sha256": "5239ae6766c0086a3f5fe16504a6a843723100900b5747d5008fc2998d591e5b",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-D8-A27P.ACC0A0E7-218F-4112-AC74-9F5D5A512DD3"
+    },
+    {
+      "patient_id": "TCGA-DM-A0X9",
+      "payload_sha256": "4e0687d7a82dd9ab287eb77f1cc1d5d4d50d9ecc843d6298f59baa3f83d73dd1",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-DM-A0X9.F323F54C-A86A-47DB-A26D-7541CB54A08E"
+    },
+    {
+      "patient_id": "TCGA-DM-A0XD",
+      "payload_sha256": "2813ebbc6dbbc7934234400b7025437518abb6bd54ff457f1d7d23233ffea18e",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-DM-A0XD.4D0D9EE2-7FEF-4E5F-922C-EE98200C4C61"
+    },
+    {
+      "patient_id": "TCGA-DM-A0XF",
+      "payload_sha256": "c9453f10ecf98a43a3a3110cbf8229d3c053db9c1e813dd42e0ffafe2d4b3aa4",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-DM-A0XF.2E442714-A485-48C1-80FD-9418ABD94D9C"
+    },
+    {
+      "patient_id": "TCGA-DY-A0XA",
+      "payload_sha256": "479da1acb59ca4fa99e3069acc21dcd0b81fd977538fbf6f32c1ae126266f4c1",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-DY-A0XA.47B69AE9-9AA3-4B40-A574-96DA72155DEE"
+    },
+    {
+      "patient_id": "TCGA-E9-A1N3",
+      "payload_sha256": "7631c7ae298e72a65538734d0b1fc9e0859e9ee6604d6532b65cee6d696c4200",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A1N3.4F50E811-0743-440B-9094-6BA0F40BD734"
+    },
+    {
+      "patient_id": "TCGA-E9-A1N4",
+      "payload_sha256": "6d947aa6cd02ccd2a79f2956ef888204c63081e8046278e1bc89ef0cb36bb680",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A1N4.64B91C7E-E6D8-4952-B49F-0F5D57332994"
+    },
+    {
+      "patient_id": "TCGA-E9-A1N5",
+      "payload_sha256": "0cf6889076f375406e34b7642732e233d5ca92591506f3597d0a58fd1cc6dc28",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A1N5.224A51C8-8EEB-424C-AD88-44C4321050EA"
+    },
+    {
+      "patient_id": "TCGA-E9-A1N6",
+      "payload_sha256": "581cddfd6e654da8f0cca766547649d1d2a987fc1b30d806b160d3df2aeac32a",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A1N6.910A4342-BBC1-47AE-9316-695B0CD0375D"
+    },
+    {
+      "patient_id": "TCGA-E9-A1N8",
+      "payload_sha256": "8aea19ed11086392060f5bc799039e4f4ea0c65f091ba480eb3129ec13d90031",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A1N8.4F15F8D6-9F34-4A61-A006-E5E7A2E68207"
+    },
+    {
+      "patient_id": "TCGA-E9-A1N9",
+      "payload_sha256": "5e82b497e41b42c0b1099126d8e94b879326d5666fa2979df11377be8c90f39a",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A1N9.39D6D1DE-2CAE-470F-836B-926242F46E67"
+    },
+    {
+      "patient_id": "TCGA-E9-A1NA",
+      "payload_sha256": "3e0ddcab77be1965adc09e09c931ab7248c3bf89ee245e27d90d04eebfe92390",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A1NA.595BB256-2F3D-493A-AA90-022BE0CC995F"
+    },
+    {
+      "patient_id": "TCGA-E9-A1NC",
+      "payload_sha256": "1ee937abeed8933c8b73cca15e13ad698e578562cf49f7a2387fc66ef711bc60",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A1NC.AA1B707B-4DE8-4E0D-87CA-601760F4A6CF"
+    },
+    {
+      "patient_id": "TCGA-E9-A1ND",
+      "payload_sha256": "f24416610ceb4b942fb9fd7baba78cdc0a2b0982c8077dfae34d9e8cc42fb0e2",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A1ND.AC26EE69-27D8-4523-917A-68573F5F614E"
+    },
+    {
+      "patient_id": "TCGA-E9-A1NE",
+      "payload_sha256": "835910e30a6ecb96d7093d2408e0045e731a2ea122d98df0cd7abd85f0e7f2c9",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A1NE.CF6E29A2-FAE6-45BB-B625-33877887A89E"
+    },
+    {
+      "patient_id": "TCGA-E9-A1NF",
+      "payload_sha256": "538362bc2a786207984f2a0e905211363c82f085f1b35cdee01834a0b8083866",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A1NF.740CF6E1-C742-47DC-8057-9D73AF4D6171"
+    },
+    {
+      "patient_id": "TCGA-E9-A1NG",
+      "payload_sha256": "ab03ab351aa1594ce0b7a071219a0c62ce3068cd6f8d7d5404ce30c931d2f813",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A1NG.73953A70-DAC0-443A-AC04-28BDA8D5F673"
+    },
+    {
+      "patient_id": "TCGA-E9-A1NH",
+      "payload_sha256": "dcd495279bb14163e60c05bbab935349c2849fb97da7fb99a8d92105ccf7b0ef",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A1NH.A6248687-C0C0-4DEF-9D92-196CBDB5CBDE"
+    },
+    {
+      "patient_id": "TCGA-E9-A1NI",
+      "payload_sha256": "43937ef4ed6bdbc6a90ba5a04a452e0d62ec075737400ebc7531f228021db817",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A1NI.3F4F5A98-F6EA-46D5-95E8-6797D419328A"
+    },
+    {
+      "patient_id": "TCGA-E9-A1QZ",
+      "payload_sha256": "53d4f027c4699e7cce6682a1a2b124fd4989e94f0f10e2c33ad8af13337775ff",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A1QZ.864BB34A-1008-480C-A3B5-A2C616E95C49"
+    },
+    {
+      "patient_id": "TCGA-E9-A1R0",
+      "payload_sha256": "5be555537baf093f2f8003c09bac223a6232c79a33b251f44bc18bdb4d3fac7c",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A1R0.DD0ADC20-2059-435E-9EB4-351C87D7CBEB"
+    },
+    {
+      "patient_id": "TCGA-E9-A226",
+      "payload_sha256": "2aee49aed199d3ebc095ebbc501002d02bf07c213f68e5c8bff9ca73ed60e5cb",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A226.7C8F01DC-9CD9-4D61-9032-BC9F28A687EE"
+    },
+    {
+      "patient_id": "TCGA-E9-A228",
+      "payload_sha256": "df4a18ce500f383a56ce7fb1814a9f95f80c0152e042cbdaf4969d0dd8de876d",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A228.B0E8F3C1-E996-4E70-9630-AC95AF6E4EDC"
+    },
+    {
+      "patient_id": "TCGA-E9-A229",
+      "payload_sha256": "68164ac11bd30727e582c11a4a29f6afe1e442c5ada95cebd815a708668427ed",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A229.15FA41AE-3A0F-4112-828B-EE8687A6F158"
+    },
+    {
+      "patient_id": "TCGA-E9-A22A",
+      "payload_sha256": "7a01c23304e44ade6aa9dc77741f12c7cacc9801d4a7dfdb83918898805a02a8",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A22A.BC3061B7-9C99-4270-84EE-B1306FA01AE2"
+    },
+    {
+      "patient_id": "TCGA-E9-A22B",
+      "payload_sha256": "27eb93de9e7d384a1c17b6a0b3c1dd5efe7a141374705b7c0699e98dffe71c8f",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A22B.FC896EB8-1CEC-46A0-82E1-E3FBFAAB69F1"
+    },
+    {
+      "patient_id": "TCGA-E9-A22D",
+      "payload_sha256": "6b1bff2afe86637c8c5c33b63384ec5cada049ab0de71c6ce33cc525ff66e752",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A22D.ED60F792-A71B-4BAE-A536-5FF6D8C3DEAA"
+    },
+    {
+      "patient_id": "TCGA-E9-A22E",
+      "payload_sha256": "d16e17bd992b35760b6e5f2906f34f1a3d9588bb0c01ba98c15774c2454ad231",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A22E.7788E7FD-B5A3-4B22-83CA-EA3FB5E826FC"
+    },
+    {
+      "patient_id": "TCGA-E9-A22G",
+      "payload_sha256": "ea8923a873ee45253e59bb0ff3b63cff1ca88c71ae4c41cdc2ca14f227c57b34",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A22G.E34F4BF0-A0C3-4C72-8E3A-F319D4CDDD5D"
+    },
+    {
+      "patient_id": "TCGA-E9-A22H",
+      "payload_sha256": "8031de9ee7496a35890ae3e0c55664721a07fb9aa87170c9d30c582567bbcf16",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A22H.672E4D81-DA47-495C-A58B-BD2B4FEA2380"
+    },
+    {
+      "patient_id": "TCGA-E9-A243",
+      "payload_sha256": "8a4a0439014b631f824a8caf542a643a5c9f511d82e77e7a3930591a9418ce62",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A243.742A4812-9EB1-4348-996E-3F1AD7FA3E5D"
+    },
+    {
+      "patient_id": "TCGA-E9-A247",
+      "payload_sha256": "f1c94bf3125022c364a7afa71233a6b95d745bc2a239e5e0bd72571274dcb009",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A247.61E73960-32B0-413E-AF1D-2EF4582293B3"
+    },
+    {
+      "patient_id": "TCGA-E9-A248",
+      "payload_sha256": "3ec141be919818e50d4fddc719662933a21ca81d7ed8b22762a85b1291ba46b1",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A248.8950E632-451D-4436-9AA2-740CB08237E8"
+    },
+    {
+      "patient_id": "TCGA-E9-A24A",
+      "payload_sha256": "0b7c56adc1dc8ab07d73af732fbd0af89957252ddf0aadc49f3d99992ebc2ba0",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A24A.392524F7-B570-4047-A439-71FC15642DC8"
+    },
+    {
+      "patient_id": "TCGA-E9-A295",
+      "payload_sha256": "3711d7618b0048ab2a91de49a4355da1b5410094c29e03564beb0b0aaad28426",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A295.A23D86FF-CCA9-42B2-B6AE-9E365AAC03C8"
+    },
+    {
+      "patient_id": "TCGA-E9-A2JS",
+      "payload_sha256": "ec46b7b949e9e9fb70a6d0599bf19a48aba147a19b4f351210f35b030ba4a3d0",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A2JS.1DFFCBD1-962D-4E9B-BEE1-726CABE3AA95"
+    },
+    {
+      "patient_id": "TCGA-E9-A3Q9",
+      "payload_sha256": "6d454b107d24aa804a19f9316c9f42f09d51ad93d8ba45228026d6ecb2a149df",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A3Q9.FE3E1376-1527-42C0-8F5F-8849D0F2743B"
+    },
+    {
+      "patient_id": "TCGA-E9-A3QA",
+      "payload_sha256": "03d6b6688dfa98ce5aeaed30a652aea9504a282eec7ca74625dd880ea71be2e1",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A3QA.1F02AA5F-67B1-4BAF-A3A9-CA20BCD7FBAF"
+    },
+    {
+      "patient_id": "TCGA-E9-A3X8",
+      "payload_sha256": "b9facfef2bf79853d87acdf650d9a96e80bc88da1693b06dd13c8390d1d13c1d",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-E9-A3X8.00058FFD-35E6-4891-8B01-DAB3AE9EBF78"
+    },
+    {
+      "patient_id": "TCGA-EF-5830",
+      "payload_sha256": "7c8b0b300b5d10d4d8fae06e9b129a6945c1375ece539c191f414fe0bffe70c2",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-EF-5830.75de77a3-0ebb-4f65-8421-598845866a35"
+    },
+    {
+      "patient_id": "TCGA-EF-5831",
+      "payload_sha256": "50648032652e6d2430c523938f3ba4dc04305e5b5b2239b6602bea36a1787b81",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-EF-5831.f1b9849a-61c5-491e-a103-c423119371f7"
+    },
+    {
+      "patient_id": "TCGA-EI-6881",
+      "payload_sha256": "2c0d0ac337f755e43b562a56b0aebbc22809d8fcb5b36178f9fc5ad1ad9f478c",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-EI-6881.30aa2e3c-207d-4a50-ba74-90a4ec99d085"
+    },
+    {
+      "patient_id": "TCGA-F4-6463",
+      "payload_sha256": "fcbc791f730e686928897da5afe920b8194c35d9d00432cc0ea038a0612a0bd9",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-F4-6463.a06e1c69-5737-4692-950c-4ef74ced2d03"
+    },
+    {
+      "patient_id": "TCGA-F4-6569",
+      "payload_sha256": "80291d6302f144dc43307684066a23896d303b37996ed8fff09389c518d6cb72",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-F4-6569.7ab8bd50-444e-48eb-bb37-3b64fecfefe8"
+    },
+    {
+      "patient_id": "TCGA-F4-6570",
+      "payload_sha256": "7f362f2951db773d1585f0e9a7de38a43b00d7752ae7120e962d29075dafb237",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-F4-6570.2db5fc84-1782-4c79-9179-11988dd8ba01"
+    },
+    {
+      "patient_id": "TCGA-F4-6704",
+      "payload_sha256": "7988b6c6bb795e9bcfe76a87691d69614f33f4d2bf595d3b99aa524937ec17ab",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-F4-6704.fde549ee-a203-4d65-8f24-9f450e6f3857"
+    },
+    {
+      "patient_id": "TCGA-F4-6808",
+      "payload_sha256": "a87b4587f9291bcbd37f5f45a5bbf218d048d313ff9df77007603dee4fa1dd0b",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-F4-6808.02919aa1-8f7b-499c-a799-c09984af58e0"
+    },
+    {
+      "patient_id": "TCGA-F4-6809",
+      "payload_sha256": "36685bb991075a52192a91cadfa9fcefc461da2be24dd4945f7ba0d951f5ce64",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-F4-6809.3eef31f7-8c59-4b40-b441-daae9cb87c92"
+    },
+    {
+      "patient_id": "TCGA-F4-6854",
+      "payload_sha256": "23b6a85d39e859f3d5b1101e057e76d682beef1ca46ce3222809cc12dc119e2a",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-F4-6854.7b65634e-37d9-4edd-9b0a-e3eb627999b0"
+    },
+    {
+      "patient_id": "TCGA-F4-6856",
+      "payload_sha256": "b7f2dcd8e285d4086f1452bb4ff9efa8bd5c2739cc0d65fdad0fe822b377fc4b",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-F4-6856.b45764e2-a7ca-47ec-8a4f-d39fd7f190c8"
+    },
+    {
+      "patient_id": "TCGA-F5-6464",
+      "payload_sha256": "e75cccfd2fe75a4ba79abbb666661b8391a11f8e8fa14becf49542d96ed7d6ed",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-F5-6464.3adc4714-aee3-4e56-8a24-073d70632f60"
+    },
+    {
+      "patient_id": "TCGA-F5-6465",
+      "payload_sha256": "28b807660d6f5997bcc5f154da47de94fccf7d39b3b3d3dda0217544e180055f",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-F5-6465.43e9a5d1-bf99-4768-985a-13c5e319882b"
+    },
+    {
+      "patient_id": "TCGA-F5-6811",
+      "payload_sha256": "b2f2664098f073c21e363ee14c52a6d336a092d529e2dd085f3d44ae98df8a68",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-F5-6811.b0ad0a6b-1d34-42a3-b5b6-6659831932bc"
+    },
+    {
+      "patient_id": "TCGA-F5-6812",
+      "payload_sha256": "f29e5667d550d248aa31254e5c51ae26ced20a85d7468ef0d48bd54108a07f66",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-F5-6812.59b4b08f-a953-4be2-bec8-fe9c63c4e8df"
+    },
+    {
+      "patient_id": "TCGA-F5-6814",
+      "payload_sha256": "677007beb0288e634b831325f3112b5a877bbab034a0b75aff8f1fe628ebab7d",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-F5-6814.51379639-fd60-4561-91c8-76941068c36c"
+    },
+    {
+      "patient_id": "TCGA-F5-6863",
+      "payload_sha256": "e91bd33f66f255f78458d6e83a3da4d859f3c7ab3156e8f789ed3c5f9d0d021f",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-F5-6863.d9e6e524-72f9-4eb7-8d10-0ea4501451f7"
+    },
+    {
+      "patient_id": "TCGA-GM-A2DA",
+      "payload_sha256": "8e1ae8b9f574b963944bbb58eacb5f5a2579cb879643c9984ef0e015557f2ef7",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-GM-A2DA.F3CD8E6E-B02F-4D5D-B895-6DF063F61603"
+    },
+    {
+      "patient_id": "TCGA-HC-A6AL",
+      "payload_sha256": "cdb5740c7110b942be95c75b58121a9d69ed28f7555643c106b6b5bd2ef9d47a",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-HC-A6AL.2A2BA0EA-C67A-4AA6-948C-019AA6475C06"
+    },
+    {
+      "patient_id": "TCGA-JL-A3YW",
+      "payload_sha256": "fd39243e24aaa130d8665cc22c96e96c1a2dff1625a9f271d811fd5bc2c3fc10",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-JL-A3YW.476488A9-3708-4B11-854A-C91B583C7804"
+    },
+    {
+      "patient_id": "TCGA-NP-A5H7",
+      "payload_sha256": "dad496f14464c447110575b2915782f7005bc7621a8bf1e85b46dde8884881e8",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-NP-A5H7.A2B8AEF3-3B3C-4094-A54B-C0F01BECA089"
+    },
+    {
+      "patient_id": "TCGA-P8-A5KC",
+      "payload_sha256": "4a637554250e5d822d335619980108aa55ccde86094ddc7148ab815ddf34ea50",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-P8-A5KC.A53180DC-CCD5-4457-87DC-23D92E051751"
+    },
+    {
+      "patient_id": "TCGA-P8-A5KD",
+      "payload_sha256": "9fcdaaafa51fe730f5180432c1385a3c83e76a103335efb5ac2817e24b31ee89",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-P8-A5KD.D4C6C0AC-0252-42FA-8531-3E42CD336C72"
+    },
+    {
+      "patient_id": "TCGA-P8-A6RX",
+      "payload_sha256": "96c437d19747d250d535d297193148f58b0b23c0574d8cc76194f1a5de279169",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-P8-A6RX.6225EA0C-D8BE-472D-BF48-CBD8876D3A48"
+    },
+    {
+      "patient_id": "TCGA-P8-A6RY",
+      "payload_sha256": "71fc1fde492f86a4a6755cdf837146123e270f7075fcef14253f2b752050d441",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-P8-A6RY.BC5DD88B-6A99-4AD9-90C2-07B2897FAD5E"
+    },
+    {
+      "patient_id": "TCGA-PL-A8LX",
+      "payload_sha256": "42c00eb450ef32cdc9b40da770f6542945aef5896f66bd82c236c34e468735a6",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-PL-A8LX.E6DD0840-4D71-4EEC-B559-F6BFC9E7E68B"
+    },
+    {
+      "patient_id": "TCGA-PL-A8LY",
+      "payload_sha256": "eab21b0fabb1e650242d215ee78cacd899c9df43f9877ee33f5502c0b7f784d2",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-PL-A8LY.8C97B391-96B4-468D-AAA3-24E196DE03CA"
+    },
+    {
+      "patient_id": "TCGA-PL-A8LZ",
+      "payload_sha256": "82d038543c65e9ec76ce2061c256626a974bd7f149c456dec5b52844cefac59c",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-PL-A8LZ.436F3280-98C7-4FA9-BD6F-1B02CAF1D262"
+    },
+    {
+      "patient_id": "TCGA-QM-A5NM",
+      "payload_sha256": "27e7f7aacc33bb6f5bb52b5a1546d288499c2a2747e4994f64b5a891ec998d22",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-QM-A5NM.9763DEDF-4A06-4063-B768-D21B666A783B"
+    },
+    {
+      "patient_id": "TCGA-QR-A6GU",
+      "payload_sha256": "fdb0dcbb327683f438abd62368d5a80a279144aa08e7dc12ed855f49e5849799",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-QR-A6GU.A1824EB7-6228-42BC-869C-AD3BD3B52129"
+    },
+    {
+      "patient_id": "TCGA-QR-A6GX",
+      "payload_sha256": "bd82638e9f39cc36a61f5cbeca3be125a5c87df439bf979d9e1abdd9b72c0c9d",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-QR-A6GX.4FEB8AC0-BA60-40FC-86D4-112FD99B11A8"
+    },
+    {
+      "patient_id": "TCGA-QR-A6GY",
+      "payload_sha256": "20c8634e7d656f7d68430740593004a830ca17bec6c94630db4e0638912a8504",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-QR-A6GY.EB45E32B-4108-4B47-B5AB-9646A68F0560"
+    },
+    {
+      "patient_id": "TCGA-QR-A6H4",
+      "payload_sha256": "0155a69c1c828a209e92fc44eacef2c71d61c393f52db9ff95e63a8500242856",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-QR-A6H4.E1AF06FB-D8F6-45CB-9042-98B4E9CF0F1B"
+    },
+    {
+      "patient_id": "TCGA-QR-A6H5",
+      "payload_sha256": "50f52d3187c2e24c8c45d914f50358906cd39b56ceda7e74d8e8de4ff0b704d9",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-QR-A6H5.9DE42B9C-FF8E-4DCE-8754-3F611B7FD610"
+    },
+    {
+      "patient_id": "TCGA-QR-A6ZZ",
+      "payload_sha256": "c5caa3a520f0fab413074cf0008414675ebbb5551b380defa5aca809587c7c33",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-QR-A6ZZ.01D46DC6-3444-49D7-BB42-450F3F072C06"
+    },
+    {
+      "patient_id": "TCGA-QR-A702",
+      "payload_sha256": "063407e2b4dc94befa28a1695ed50dca1fa24c36ad2dce1e220dc4abc8b4aae6",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-QR-A702.EA5D8EC1-2095-457E-9492-6BCE3E6A6E73"
+    },
+    {
+      "patient_id": "TCGA-QR-A705",
+      "payload_sha256": "061724b5dbcabf4c52826ba2d904c85c37a482987318d6c64e486b527bdbad7b",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-QR-A705.90AD858C-5A35-4CB4-8263-E3805322CB7B"
+    },
+    {
+      "patient_id": "TCGA-QR-A708",
+      "payload_sha256": "f4e304e6b5de5e8aa85f4201b59b39f093301daa428f1b5cd5e029fe240b1343",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-QR-A708.E8248729-742F-4355-A191-4B8754AEFDB1"
+    },
+    {
+      "patient_id": "TCGA-QR-A70A",
+      "payload_sha256": "0ada9c390a380957cab314a9dcb6b069377241cfdb886d03528701ee570133de",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-QR-A70A.88515273-97BE-44EF-A7BE-8942E1C44A7A"
+    },
+    {
+      "patient_id": "TCGA-QR-A70D",
+      "payload_sha256": "93b2f260710eb4fbaf7faa4c1755197bf8fa37a6de1b71159e596dedc6c47920",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-QR-A70D.AA5BFB7A-0449-4C53-BC29-B7C52616F4F3"
+    },
+    {
+      "patient_id": "TCGA-QR-A70E",
+      "payload_sha256": "8d279a0ce66c74bc535568f5892ae957e484b84173b977fa4ad801411c8201c2",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-QR-A70E.089504D5-ED7E-43B6-BD5B-0FFBA9171AF3"
+    },
+    {
+      "patient_id": "TCGA-QR-A70H",
+      "payload_sha256": "efa22475febbb8660b3d593fce382ebd50f9caee79cb9e9ffc6be758fb21cd90",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-QR-A70H.638243F5-83B3-4DD7-AA30-FC2217E8869F"
+    },
+    {
+      "patient_id": "TCGA-QR-A70I",
+      "payload_sha256": "27950f7a39570a9b077cfec94522aecf0b5377006f27d4edcdb2e8996cb82c93",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-QR-A70I.4243EF14-0AB3-4E1B-8544-1BF841DD0446"
+    },
+    {
+      "patient_id": "TCGA-QR-A70K",
+      "payload_sha256": "437d6ee0e888cafb5eb9c2024bbde1af231fafdc1f9c26b7ed4b6b899bdaeb61",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-QR-A70K.89446519-CC95-4244-9BCF-F37619D3618E"
+    },
+    {
+      "patient_id": "TCGA-QR-A70M",
+      "payload_sha256": "25af838597907fe08a78e7df8eca99f24c0f193990e5cd84b46e4b3be961ff03",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-QR-A70M.A5D2BBA1-2188-41DF-A32C-D916638267FA"
+    },
+    {
+      "patient_id": "TCGA-QR-A70O",
+      "payload_sha256": "7687e7e8081ed903d2e7da62810101d2eff6598c80bf48eae8fc7111d5280c30",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-QR-A70O.CCDF780F-2C65-431E-8DA0-A64651233D76"
+    },
+    {
+      "patient_id": "TCGA-QR-A70Q",
+      "payload_sha256": "f3dbd8277869890e31895cec34129dfd9919cb5d8d3466723d9912e35459b4f1",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-QR-A70Q.57D56938-4A86-41FB-B648-9D3C24E78363"
+    },
+    {
+      "patient_id": "TCGA-QR-A70R",
+      "payload_sha256": "d0d14ef5678da452513a3855f5b3d3bb9d55237b879e4c2e16f01f71161c95f7",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-QR-A70R.F1923FE5-5C71-492E-ADAD-7FB276360FE1"
+    },
+    {
+      "patient_id": "TCGA-QR-A70U",
+      "payload_sha256": "3adbdd79054627e7cab33a369ae4e12816d2f74b3ac6d9b400517f9d4cc12f86",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-QR-A70U.0EF224F3-DAFD-4312-828E-CE93AA6FE7DA"
+    },
+    {
+      "patient_id": "TCGA-QR-A70V",
+      "payload_sha256": "2c823519bef687d6255059fb445069e2923042de9a6344420b15b9055a0aa690",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-QR-A70V.BC0F8B7A-A87F-46C4-9816-A5B9E434B88A"
+    },
+    {
+      "patient_id": "TCGA-SP-A6QC",
+      "payload_sha256": "5bdd43a1c2d926cabd5deeb1960f765d14ead6120239669a182cace2eba67c60",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-SP-A6QC.E79EE6B9-75BB-463B-8379-C4E1564FC664"
+    },
+    {
+      "patient_id": "TCGA-TN-A7HJ",
+      "payload_sha256": "ece8268f60d310dff37531fccc5b70c6d6d66a58f6f7fd5ca2070dd45a3ab6de",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-TN-A7HJ.0A5551DE-647F-4E76-9C02-B20DF04618BA"
+    },
+    {
+      "patient_id": "TCGA-TT-A6YJ",
+      "payload_sha256": "237743e6ea379702607b555dcd19a2c815741599b756d5575957f35866a548ee",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-TT-A6YJ.1743037E-E653-489C-9EBF-C9343B63B375"
+    },
+    {
+      "patient_id": "TCGA-TT-A6YK",
+      "payload_sha256": "3d54c9f51d1034f0740c0d6657ebdf494c6ce72943aca19dba55278c5a786123",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-TT-A6YK.EDF00561-9C12-4FD7-B05F-8C71251025B0"
+    },
+    {
+      "patient_id": "TCGA-TT-A6YO",
+      "payload_sha256": "74fe8e3aef18fd8b6cc45abdfecff7ecc3ee4a9a0543c1f1280a4a9d901fc158",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-TT-A6YO.EBFBC36F-D75E-4E62-8DAB-BBE5890DEB34"
+    },
+    {
+      "patient_id": "TCGA-TT-A6YP",
+      "payload_sha256": "b855aaa79d850874304841999e81e72d9e1bc91ddab77b78afee00b083b6e118",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-TT-A6YP.386CEECB-27D2-470F-B17F-166CE36E8BF8"
+    },
+    {
+      "patient_id": "TCGA-V5-A7RB",
+      "payload_sha256": "65befcbf04fba0f7ec9c81d9c24f53c949afb1da2aa58ed2d4ccd23292dafa30",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-V5-A7RB.3F84FEC7-0389-4AF8-AAC1-F957B6282D67"
+    },
+    {
+      "patient_id": "TCGA-V5-A7RE",
+      "payload_sha256": "285113210ecf8ff829d08cd9e378a2e0631678126fdf250b18213e8ffb16acd0",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-V5-A7RE.CA85A8FF-1849-4D46-92F4-51C827E3A419"
+    },
+    {
+      "patient_id": "TCGA-V5-AASV",
+      "payload_sha256": "899a861e325a404b1b8b694dca1cce0e0a85ba5f6db92c290047f3506f5eb37c",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-V5-AASV.3E53EDF7-037C-4826-9825-32833B194566"
+    },
+    {
+      "patient_id": "TCGA-V5-AASW",
+      "payload_sha256": "2b93cc137c99c4224aee46b02bfbebd6457c8170046c8f46087092fd0d336a25",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-V5-AASW.19324D50-7E95-4270-99C1-D52532616DAD"
+    },
+    {
+      "patient_id": "TCGA-W2-A7H5",
+      "payload_sha256": "2b4d574e412929d113b75eed65d1ae6f653c701ad851603892736d23f258176f",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-W2-A7H5.C9BC48EB-1CD7-4FDB-A4F1-5334840D294B"
+    },
+    {
+      "patient_id": "TCGA-W2-A7HA",
+      "payload_sha256": "34ef3f1e60cf70db339dbc875f9cb825eedf9f83b885cbf862375d4d32ba4bea",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-W2-A7HA.FD947970-B76A-4AD0-9308-9F30BBEB78A3"
+    },
+    {
+      "patient_id": "TCGA-W2-A7HB",
+      "payload_sha256": "2aaa2e2da066d61d74c6b459b853c14eeb28210a01ca7b9c6d737e648dca5353",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-W2-A7HB.89F892DC-13B8-49BC-A06B-E4EC6179C068"
+    },
+    {
+      "patient_id": "TCGA-W2-A7HC",
+      "payload_sha256": "441019a69eb8135d671f272b081092fe1fefb1f30a1213b4a7283371355fbdb5",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-W2-A7HC.ADF63DF6-EA2C-4B38-B7D7-5CC12C6DEFF1"
+    },
+    {
+      "patient_id": "TCGA-W2-A7HD",
+      "payload_sha256": "ff0c949915752ecf46c89248318267dea3cb551e64e9305d0cd0b60a83cc91cb",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-W2-A7HD.A91DACE6-C322-45FD-A5CD-3DB6F42B18E9"
+    },
+    {
+      "patient_id": "TCGA-W2-A7HH",
+      "payload_sha256": "dbf46949a242228a418904670334ebdf860aab2ae6677f2a8697220804de9ced",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-W2-A7HH.1DFB5218-671E-4CB1-BE19-2E338EA7B057"
+    },
+    {
+      "patient_id": "TCGA-XE-AANV",
+      "payload_sha256": "b6a611961f1ea7377e503daad6c30dcb234f0600f49b31351720b59002332157",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-XE-AANV.C2F7D5BE-538F-4414-ABA2-84EE0C916BBD"
+    },
+    {
+      "patient_id": "TCGA-YT-A95D",
+      "payload_sha256": "58eccd6183668c2b1adf55ac33336b0726be437de93b21fb68c1fefd08fb8748",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-YT-A95D.AAEC6A80-48B3-4420-862C-9596A33922B9"
+    },
+    {
+      "patient_id": "TCGA-YT-A95E",
+      "payload_sha256": "422c817c78ac545fe39f487afedbf16eff9a9941f3561c79721b51453fba2bc6",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-YT-A95E.65F396D8-0059-420B-8F48-BA0294D5F8C0"
+    },
+    {
+      "patient_id": "TCGA-YT-A95F",
+      "payload_sha256": "de872b5212f038fefd565900020dc7885820bdb6b185d23037fbccea5072b86d",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-YT-A95F.BF066BA9-0185-4691-8DC9-A354E0331DC2"
+    },
+    {
+      "patient_id": "TCGA-YT-A95G",
+      "payload_sha256": "605c02f1eab3646d3a166b7eb4f4e96cbae6f4832164bd9d49dd375ff1d401cb",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-YT-A95G.60D44471-E8AB-47FF-BC45-0ECF59E87F81"
+    },
+    {
+      "patient_id": "TCGA-YT-A95H",
+      "payload_sha256": "180af78fbf6dc7ac696e9e70cfaaab8fa0a807bf4088688f8f68225b86301d5c",
+      "reason": "no_deterministic_span_label",
+      "report_id": "TCGA-YT-A95H.F394C6F3-0242-45D5-B5CD-8B74010A5A6B"
+    },
+    {
+      "annotation_sha256": "9ac89ea1b641e2787ef304c0964b54f143f7ff400ff9c96d0cef1a5173df8e20",
+      "category": 5,
+      "cohort": "external_validation",
+      "patient_id": "TCGA-2Y-A9GX",
+      "payload_sha256": "1011caf647fb53ece5d2052ae3b7d037875fea75a473a7745058c9bf7dce1e04",
+      "reason": "no_schema_entity_could_be_surface_anchored",
+      "report_id": "TCGA-2Y-A9GX.92541202-F81A-428F-8EF5-19A7C82CC31F",
+      "source_record": "tcga5_4.txt"
+    },
+    {
+      "annotation_sha256": "a26bc2d73d4d5e16ddcc14d234461ed25923dada70eed020387c81574e5711ca",
+      "category": 1,
+      "cohort": "primary_test",
+      "patient_id": "TCGA-A2-A04Y",
+      "payload_sha256": "8b59e0f4f22839c4f280e891c6a02c78b8fa1b99e989e792f58cfd47eafd5786",
+      "reason": "no_schema_entity_could_be_surface_anchored",
+      "report_id": "TCGA-A2-A04Y.E4F7064C-9D81-49B5-9992-898155B3F11E",
+      "source_record": "tcga1_10.txt"
+    },
+    {
+      "annotation_sha256": "6e30a17b8d3fc7bc312adc9cb9222c1499ecfd1306e6a83f1a610e8dccfd9382",
+      "category": 1,
+      "cohort": "primary_test",
+      "patient_id": "TCGA-A2-A0CV",
+      "payload_sha256": "f5dd7a9201976b308e301c4b9c2984bfa2592036b063e2a1a164d9ee68118eda",
+      "reason": "no_schema_entity_could_be_surface_anchored",
+      "report_id": "TCGA-A2-A0CV.FBDDD9EE-0A5C-4CAB-9EB3-48B6431A9A84",
+      "source_record": "tcga1_21.txt"
+    },
+    {
+      "annotation_sha256": "33d4e0970d0c3b3ecc9960aeb9a4a30d967df46470ed8b107f05e12b5f97156d",
+      "category": 1,
+      "cohort": "primary_test",
+      "patient_id": "TCGA-A2-A0YI",
+      "payload_sha256": "d9ad00056955273c35208e954b988b447124528a8dbc83ad0cd68c1313d04b9d",
+      "reason": "no_schema_entity_could_be_surface_anchored",
+      "report_id": "TCGA-A2-A0YI.CEFD12BB-1AF7-400D-8A84-49650DFDD8A5",
+      "source_record": "tcga1_64.txt"
+    },
+    {
+      "annotation_sha256": "27ee3a63c8494eb8c021be696a2c505d9c243917f783065e6cabc2f80267bfcb",
+      "category": 1,
+      "cohort": "primary_test",
+      "patient_id": "TCGA-A2-A25E",
+      "payload_sha256": "77afb69d5ec78202e0149a87677e1ba5e2ba70964e8825664cd2c6de3ff05b7f",
+      "reason": "no_schema_entity_could_be_surface_anchored",
+      "report_id": "TCGA-A2-A25E.B81555D4-78D9-4235-AABE-F852CA6F15B5",
+      "source_record": "tcga1_82.txt"
+    },
+    {
+      "annotation_sha256": "873723f9de08ed32d9fea3cb3e8b927e2bb9efcbc076ddd74992721513b37892",
+      "category": 5,
+      "cohort": "external_validation",
+      "patient_id": "TCGA-DD-A4NO",
+      "payload_sha256": "0aeb66c45c74e7968658e07963dfd8dbc4bcbe426fe5952bf6af86f6715cd177",
+      "reason": "no_schema_entity_could_be_surface_anchored",
+      "report_id": "TCGA-DD-A4NO.0B108361-E361-4A8B-9F5C-FC3ACB992DB9",
+      "source_record": "tcga5_97.txt"
+    },
+    {
+      "annotation_sha256": "d0f41634c3a55f861e9d4b3688378c4cf8b68ad16204c41af74c4e3822a49aa2",
+      "category": 5,
+      "cohort": "external_validation",
+      "patient_id": "TCGA-DD-AAC8",
+      "payload_sha256": "f8b72f9a95b265a7ee66006f8c4ccea43d328c9757cab1a3639e1665812b0ee4",
+      "reason": "no_schema_entity_could_be_surface_anchored",
+      "report_id": "TCGA-DD-AAC8.2751F570-A1CE-4F6A-98CD-56C8B31AB0FF",
+      "source_record": "tcga5_107.txt"
+    },
+    {
+      "annotation_sha256": "a73628a513673b40c57d5db9cbeb5a3d6a512dfe318a7170ba34df036c956bc7",
+      "category": 5,
+      "cohort": "external_validation",
+      "patient_id": "TCGA-DD-AAC9",
+      "payload_sha256": "503195f1af51275cd654b79bed4e98e80af8241d0d2a0e923ada126de5de28a3",
+      "reason": "no_schema_entity_could_be_surface_anchored",
+      "report_id": "TCGA-DD-AAC9.A993CEA3-6AA2-4CE7-A9EC-8318B1377E99",
+      "source_record": "tcga5_108.txt"
+    },
+    {
+      "annotation_sha256": "48134d4eaaeab7a8979aa16621869410cd8e5c485821895ee214b464bccde5ac",
+      "category": 5,
+      "cohort": "external_validation",
+      "patient_id": "TCGA-DD-AACI",
+      "payload_sha256": "fa6fa86ecd2d748268f000d96b30650b0fbedb6c40865622b728c27456b9ec40",
+      "reason": "no_schema_entity_could_be_surface_anchored",
+      "report_id": "TCGA-DD-AACI.54CDEB1D-8CF9-4723-9A7D-CD9DFEDFD659",
+      "source_record": "tcga5_117.txt"
+    },
+    {
+      "annotation_sha256": "1b175934b603885deffc3cae963e3842fc85c9fc27da08b8cf13d26f7fdfa2e5",
+      "category": 5,
+      "cohort": "external_validation",
+      "patient_id": "TCGA-DD-AACP",
+      "payload_sha256": "b45b4912fc509eb23ade51b264259b53b8361130f71e98beaea040b0bfd74990",
+      "reason": "no_schema_entity_could_be_surface_anchored",
+      "report_id": "TCGA-DD-AACP.7FDD120A-A5AD-4209-B167-34BA2289A784",
+      "source_record": "tcga5_124.txt"
+    },
+    {
+      "annotation_sha256": "1b2b2643b7f978114d73b8378f770500f347db920da35fbbe47ed9341d85aeb2",
+      "category": 5,
+      "cohort": "external_validation",
+      "patient_id": "TCGA-DD-AACQ",
+      "payload_sha256": "fdd2212d593aa04dfee0744735f3cb86d8d9196bacb806cb8f877bfe2650c8d1",
+      "reason": "no_schema_entity_could_be_surface_anchored",
+      "report_id": "TCGA-DD-AACQ.3BBE2BEA-D346-4EA8-82CB-9305EC49A331",
+      "source_record": "tcga5_125.txt"
+    },
+    {
+      "annotation_sha256": "bc23c5d134ccce73a34cd5311f84f4bf8bfa8167bc7287c45f042584e7d8484f",
+      "category": 5,
+      "cohort": "external_validation",
+      "patient_id": "TCGA-DD-AAD2",
+      "payload_sha256": "c9fa30766385aaa94fb11acfe6174a620fed0118d9a7e6ed6419764978830b5d",
+      "reason": "no_schema_entity_could_be_surface_anchored",
+      "report_id": "TCGA-DD-AAD2.3F50DE59-F830-4D51-90C6-7B275AF0876F",
+      "source_record": "tcga5_138.txt"
+    },
+    {
+      "annotation_sha256": "abf691b473124372ecf4d3e5c46580e202e834e3738d613d383c747e389b7585",
+      "category": 5,
+      "cohort": "external_validation",
+      "patient_id": "TCGA-ED-A459",
+      "payload_sha256": "20b69879c4bd159f61fcc32083bd39a1c0331c5489a0838036dc77bcb57eac8a",
+      "reason": "no_schema_entity_could_be_surface_anchored",
+      "report_id": "TCGA-ED-A459.289EC60C-0AAB-4E61-A8AB-A199D4663AE6",
+      "source_record": "tcga5_197.txt"
+    },
+    {
+      "annotation_sha256": "8d09d89cf8a15a037d3bad229a37edf6ae5e22a70bd370f0502ed81db46d4b79",
+      "category": 5,
+      "cohort": "external_validation",
+      "patient_id": "TCGA-ED-A66X",
+      "payload_sha256": "9a1ad917004ae4c11c8165d2296d164a708dcf3d13397466ecc5d287158007ab",
+      "reason": "no_schema_entity_could_be_surface_anchored",
+      "report_id": "TCGA-ED-A66X.F83A9A75-387A-4A66-9817-084A8E633E37",
+      "source_record": "tcga5_201.txt"
+    },
+    {
+      "annotation_sha256": "355b7cd733bda2bc13faf2ce44b0f687dead9865e6cd7dc5dc4bd7292873f781",
+      "category": 3,
+      "cohort": "external_validation",
+      "patient_id": "TCGA-EL-A3H5",
+      "payload_sha256": "0df9db857b5d6dbc94dceadfd885e093743dee1de8ff8f75d61d8c69d55cfb45",
+      "reason": "no_schema_entity_could_be_surface_anchored",
+      "report_id": "TCGA-EL-A3H5.9C354A78-E8E2-4A4C-8D7C-87A961A7AE40",
+      "source_record": "tcga3_2.txt"
+    },
+    {
+      "annotation_sha256": "5b158a6374d1bb429e6cbf8a2fa5d1b80fe55f0004e7f280cfe0540ba3d1e2c0",
+      "category": 5,
+      "cohort": "external_validation",
+      "patient_id": "TCGA-G3-A25W",
+      "payload_sha256": "461d62ed48c36f0aa4762364921156ca11013773dc93117bf80e8dc1289bcb2d",
+      "reason": "no_schema_entity_could_be_surface_anchored",
+      "report_id": "TCGA-G3-A25W.F92FE7A0-15D4-45FD-BB39-E3022E30EB77",
+      "source_record": "tcga5_238.txt"
+    },
+    {
+      "annotation_sha256": "50b410decc662373e30c4ebba8605fa930cdceb58e2c6d3c70346f1cb9524ffa",
+      "category": 5,
+      "cohort": "external_validation",
+      "patient_id": "TCGA-HP-A5N0",
+      "payload_sha256": "9e0b5146d9d5a759f4d5adcc1ca729c393ed11e0501b5c5b6f838dcb3069efdc",
+      "reason": "no_schema_entity_could_be_surface_anchored",
+      "report_id": "TCGA-HP-A5N0.0221A6F3-34F5-407E-8548-B62F27F66FCE",
+      "source_record": "tcga5_272.txt"
+    },
+    {
+      "annotation_sha256": "34e5f0a236f922646d0ff26afee0ec31101609b84840e2ecaaf35f30b1a53904",
+      "category": 5,
+      "cohort": "external_validation",
+      "patient_id": "TCGA-RC-A7S9",
+      "payload_sha256": "cb6ddf5ff4347f952d7e750f5ce675b0f66d7502bd04afb68174e8f7a77ce457",
+      "reason": "no_schema_entity_could_be_surface_anchored",
+      "report_id": "TCGA-RC-A7S9.A537996A-E747-4906-B488-43181F3C7E17",
+      "source_record": "tcga5_299.txt"
+    },
+    {
+      "patient_id": "TCGA-A2-A04N",
+      "payload_sha256": "52d3be05ade0a7c721c8630e0892876654d38b732512d9367ad035f957152f6f",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A04N.45B4B99C-80E6-4AF4-8692-F7EE19D0467A"
+    },
+    {
+      "patient_id": "TCGA-A2-A04R",
+      "payload_sha256": "707612cfc930fe5f35b2c63fcf77bd943c48beebab1817812194ad72ca8b8b78",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A04R.6A97C809-91BB-4E35-9E12-F5F2A58C9D35"
+    },
+    {
+      "patient_id": "TCGA-A2-A04U",
+      "payload_sha256": "f3fa05f0eaf522f642c460b831818d3d30caaede7a095b40014337121601a67a",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A04U.B14456B1-4992-492D-AFB5-4F975F20A277"
+    },
+    {
+      "patient_id": "TCGA-A2-A04W",
+      "payload_sha256": "9c26f3607a416d7d7726ad414bafe5e6717a0fe335506b4eebd548e002bc5f54",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A04W.84CA9DDD-36CA-466E-A74C-C7FB03E7C9E4"
+    },
+    {
+      "patient_id": "TCGA-A2-A04X",
+      "payload_sha256": "b0aef8a154be9b5873f8e1926fd6cfc673bb3ff33e3e2c7ace5548fb6e7a904b",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A04X.F114D078-5F03-47F8-82AE-B8A21C2F9D31"
+    },
+    {
+      "patient_id": "TCGA-A2-A04Y",
+      "payload_sha256": "8ba5a9ac72a51a047113cb91d720e9201795b15e659bb409ab3116b802920699",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A04Y.E4F7064C-9D81-49B5-9992-898155B3F11E"
+    },
+    {
+      "patient_id": "TCGA-A2-A0CM",
+      "payload_sha256": "bf4151e80af60944c5e1da9ead3d6b3523873c8110fc1ca8cb6a197bcb78fb4b",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A0CM.2972AB07-2C29-43B8-96DA-1386C5E248EB"
+    },
+    {
+      "patient_id": "TCGA-A2-A0CO",
+      "payload_sha256": "c336241581bb2d2eb0dd870ec205821d3541602ad4bc98f264e2aef0b8311220",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A0CO.8C440009-E05E-4046-96AB-BAB211CB7D02"
+    },
+    {
+      "patient_id": "TCGA-A2-A0CQ",
+      "payload_sha256": "5c6d30eb7350dd58d92ab2cc800c2891e3300496ef4b73449a5740705d0e1382",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A0CQ.964DFAC8-91EC-4C0E-B499-3ED5F2D70096"
+    },
+    {
+      "patient_id": "TCGA-A2-A0CS",
+      "payload_sha256": "b5a0ee2ca4fe0f1fd0ad240e86223cca405a1e9d3c2db5b8c0f893a8481103d9",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A0CS.A985FB5C-9E91-40E1-864E-CEA887B3866D"
+    },
+    {
+      "patient_id": "TCGA-A2-A0CV",
+      "payload_sha256": "c7e786d1debfc3c69fadaf2b9e42883b2c02bbc8bfc0e73e867f312a1889471e",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A0CV.FBDDD9EE-0A5C-4CAB-9EB3-48B6431A9A84"
+    },
+    {
+      "patient_id": "TCGA-A2-A0CY",
+      "payload_sha256": "d70cf411c5c6691f20dc023894bd07e48a4957dfe82c884cf56fe2e77d606a82",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A0CY.CB780DE7-E98C-4F7E-9487-8F25FE80DC21"
+    },
+    {
+      "patient_id": "TCGA-A2-A0D0",
+      "payload_sha256": "32e2cb915d3c8545f7f2626b35b6db9a14af68a1899d959e0b027ffc804ab706",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A0D0.D8B44020-EC34-4788-B7FB-790B9C12D886"
+    },
+    {
+      "patient_id": "TCGA-A2-A0D4",
+      "payload_sha256": "d348c4e95125e710bc5f53b341feb52767850a1c2398309fe491174dcf64a76d",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A0D4.990F5885-8EDD-42A2-AEFE-9DEE3E95A0B1"
+    },
+    {
+      "patient_id": "TCGA-A2-A0EO",
+      "payload_sha256": "39bfc2ef3d5aa9e3fb5fd502cbbf027f16f83b3b1a5d9a0d25b52434f72a7e3a",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A0EO.61BC91AE-CD06-432D-BCBA-6FAE2209C610"
+    },
+    {
+      "patient_id": "TCGA-A2-A0EP",
+      "payload_sha256": "b14f5c4366ac23a10bed76cb5c506e607e5ce492d03d023c8e05298acc4d82b9",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A0EP.F76120C1-B2B2-46EE-AAE1-57B05D258ED1"
+    },
+    {
+      "patient_id": "TCGA-A2-A0ER",
+      "payload_sha256": "42814dd505be4f78d747572c8d87135acf2fe46d7a379bd4ecc9724e6dbbb547",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A0ER.A5D94D02-5423-4055-96E3-B5AA5799DC02"
+    },
+    {
+      "patient_id": "TCGA-A2-A0ET",
+      "payload_sha256": "a6ecaf7371d495f8c4ac9c7e22bf4b9890889400ddcc04e2f68fb2e12b7a3bc5",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A0ET.E9D3FFF1-5FB2-4F17-9C1D-D9775E3CC5AC"
+    },
+    {
+      "patient_id": "TCGA-A2-A0EV",
+      "payload_sha256": "950d09cf690e28ccf5ef4912d92a25b9817ceefcaf898be31f7a6d087e0a311c",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A0EV.2A62DD22-EFE6-48CD-8BE6-59B08168F78A"
+    },
+    {
+      "patient_id": "TCGA-A2-A0ST",
+      "payload_sha256": "b3f3ab903953bb845e5b29f5c4914c103c5a225f9af59d2937c13b81d2229baa",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A0ST.1E8B978E-3D1B-46E8-80EE-3A11EE571CEC"
+    },
+    {
+      "patient_id": "TCGA-A2-A0SV",
+      "payload_sha256": "a1be4fe25d9be69684e5d3daff4bb1bd9556fa948ccad72cedb40d11717fde51",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A0SV.161E2817-7DB2-46F8-BFEB-256DBBEFE633"
+    },
+    {
+      "patient_id": "TCGA-A2-A0SX",
+      "payload_sha256": "2e624dc710e836996da82c7f411cef146d2836e5b49af2c3fb9277b0b2668e21",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A0SX.63F76DB5-8433-4EFE-9054-6C04F065DF2D"
+    },
+    {
+      "patient_id": "TCGA-A2-A0T0",
+      "payload_sha256": "8e798b1cde15f62567bbbdfb7df58a3e2a752294a8e61ad73be724724fe85a08",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A0T0.6F5EBE67-0A25-4B20-A1F6-9CE6C4FF4096"
+    },
+    {
+      "patient_id": "TCGA-A2-A0T2",
+      "payload_sha256": "acce9be2588becf210267b5b1684584fa325e061a4919523988695ad9821fc58",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A0T2.0DCD80E1-173E-4A1B-BDD8-74C7D12C1313"
+    },
+    {
+      "patient_id": "TCGA-A2-A0T3",
+      "payload_sha256": "14c00fad1052711886201c962da17f2302e9ba6db630e1da2a2a6cb9ce510441",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A0T3.E339A88E-3B39-465A-9545-FBA4F79727CC"
+    },
+    {
+      "patient_id": "TCGA-A2-A0T5",
+      "payload_sha256": "318c2d0737469bc4985eaa57b2fc5a8e8429048a797b83cd3c0f0018cba3c1a8",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A0T5.7B1E6EEB-3B61-4CE8-B695-ED11C2EF169F"
+    },
+    {
+      "patient_id": "TCGA-A2-A0T6",
+      "payload_sha256": "ce9f184fc82964dac29eab5e88e9674d662925a163499a57970ce83c551fc5ff",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A0T6.377F7050-F900-4345-A326-568F00050BC3"
+    },
+    {
+      "patient_id": "TCGA-A2-A0T7",
+      "payload_sha256": "02846715a2d5e31c82052759e2df76c086fe9602baefda3f5943472395df001b",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A0T7.383EC600-FBF3-4F91-8FAC-41E3DDE6589E"
+    },
+    {
+      "patient_id": "TCGA-A2-A0YE",
+      "payload_sha256": "c28192eb7b4f9a01889b3b3fbe432b74d4400fda84744b314a1b503708ec3afc",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A0YE.C58701EF-98C4-448E-978C-B39D125CC7E8"
+    },
+    {
+      "patient_id": "TCGA-A2-A0YF",
+      "payload_sha256": "3caf12db3e38516e80992d9d132454c74e530c3e8ed62f11938bbbaaa5574000",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A0YF.C4C7D190-F0EC-4A70-8136-534EA3419217"
+    },
+    {
+      "patient_id": "TCGA-A2-A0YI",
+      "payload_sha256": "cc5514a64ad5e3b88178357ca966322f907fe80ea1e7190f8dad9d52f2f68e5f",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A0YI.CEFD12BB-1AF7-400D-8A84-49650DFDD8A5"
+    },
+    {
+      "patient_id": "TCGA-A2-A0YK",
+      "payload_sha256": "5dcd25dba4bfe42dcc08aa38429113e8d9d533a57941a9981502650b00b017f1",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A0YK.C3B5F075-864A-4D8B-B0CB-1B1FA28ACF4F"
+    },
+    {
+      "patient_id": "TCGA-A2-A0YM",
+      "payload_sha256": "e011f09dbcc69932ff9ef87a758563d971f06ea1019d30c6846faaac0126f314",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A0YM.E1D8F2CB-25F1-49E0-92D3-132DCA8FD533"
+    },
+    {
+      "patient_id": "TCGA-A2-A1FW",
+      "payload_sha256": "837df3fae2200f5921d35f7e0cc694281d140451fa8103711e9d0425c87f522f",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A1FW.849E9FA7-3420-427B-A310-3346CFA9F0CC"
+    },
+    {
+      "patient_id": "TCGA-A2-A1FX",
+      "payload_sha256": "aba492c7ec7b5cb9f50bcd8c9a32fe57d93544d5ab003699f5e67e79b38792f5",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A1FX.EAFC71A1-D6FC-46EA-BC47-D054C497D705"
+    },
+    {
+      "patient_id": "TCGA-A2-A1FZ",
+      "payload_sha256": "f093d74a7312341df28abc9f9de4d8d15cb26a94db15bb2a00add4fb762213b6",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A1FZ.F93E326D-F4E0-4000-8A67-AA19C4D3637A"
+    },
+    {
+      "patient_id": "TCGA-A2-A259",
+      "payload_sha256": "622d956b49b69749bb1e44d23ef39941e4dd43003d876270d06aec10d12d6ed7",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A259.33569E07-D7BF-491B-A352-CEEA81556800"
+    },
+    {
+      "patient_id": "TCGA-A2-A25A",
+      "payload_sha256": "3fec3bee5673e7471366cbe1cccfd24f288c57921ab38e43b2b31150f609c317",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A25A.3971CA42-F1B0-4D85-9AD3-210B98E76A9C"
+    },
+    {
+      "patient_id": "TCGA-A2-A25B",
+      "payload_sha256": "a6639c948908269bc8f073e6e7fc30d1d738c793fbd17934ae25202fc0ee38ea",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A25B.FCE29F34-5D13-4A21-A950-A8577C957C10"
+    },
+    {
+      "patient_id": "TCGA-A2-A25C",
+      "payload_sha256": "7155ed4af089a30d2db73b4366bb9a36791211897a409ad468c320db4d9b4e32",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A25C.1D4CA1BA-B534-4CEA-ABA5-EF9B31694204"
+    },
+    {
+      "patient_id": "TCGA-A2-A25E",
+      "payload_sha256": "4c56b05028f19df541b26d1f487e35b9c44e25d5ea6f7e7c31320a45717e6b9e",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A25E.B81555D4-78D9-4235-AABE-F852CA6F15B5"
+    },
+    {
+      "patient_id": "TCGA-A2-A3KC",
+      "payload_sha256": "6fbec541ee24fa38ead25137d98324e6ea473a50e5c23531753e4531f24ef75d",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A3KC.593AF241-8F84-4BA0-8878-7C1CE72A460B"
+    },
+    {
+      "patient_id": "TCGA-A2-A3XS",
+      "payload_sha256": "07357e3a952fb92be4e2f027d76c9f118a39f78479a1c742b492dbfeec08d745",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A3XS.DD5295D4-3896-4AA5-AF75-30AEA45D1652"
+    },
+    {
+      "patient_id": "TCGA-A2-A3XU",
+      "payload_sha256": "ec9c4c52697334f7652d012b154f45610d5fb86cffc158c3ffbe3ae67092519c",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A3XU.5018EC57-96C6-4D63-B708-45559B4D8527"
+    },
+    {
+      "patient_id": "TCGA-A2-A3XV",
+      "payload_sha256": "b6fbc75a6386ebf1ceea82c568ac9539bc8a91e68a77b643bf05a8ff436e27c0",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A3XV.405B9D03-6200-4DFA-A7D1-C622D3A48AEA"
+    },
+    {
+      "patient_id": "TCGA-A2-A3XW",
+      "payload_sha256": "61f685f37cace2d57adfa6b8ca6be97743b727383c53b791543e47243ed8ed93",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A3XW.A4621FE7-E898-40BA-B45E-3DC9EF607F37"
+    },
+    {
+      "patient_id": "TCGA-A2-A3XZ",
+      "payload_sha256": "47d68bfa28ae8dd29dc7d4d4093bbd74619e701756567ec20c6dcd63bd1c2834",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A3XZ.A7B6FCF6-1B81-40B5-AD92-54681CBC8FE0"
+    },
+    {
+      "patient_id": "TCGA-A2-A4RW",
+      "payload_sha256": "3668cc9c0c645cb6f1f89cb497f15ddcef031e603a7452ca7c8b6cdd3852014d",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A4RW.C1D4D6BB-AF86-4208-A729-C61365941217"
+    },
+    {
+      "patient_id": "TCGA-A2-A4RX",
+      "payload_sha256": "927a061a3a7d8e8497f38f9ab372c7c18a68c5ab6bdde944e34baaa66c0baea4",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A4RX.CA88491F-5572-4B0D-8E3D-D536E3CE5069"
+    },
+    {
+      "patient_id": "TCGA-A2-A4S2",
+      "payload_sha256": "b9f7a46a8336381c72648c8a8d9db9245ba23d6bf493b0366631d17f86005506",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A2-A4S2.4A5630FF-0ADC-4E69-B22A-02F1F34F61F9"
+    },
+    {
+      "patient_id": "TCGA-A6-2670",
+      "payload_sha256": "98a352a936d94cd299e321a0ce57469d0a4461ff412c972ad2ae405f394b8ec0",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-2670.9a561bb9-e8b0-42cb-ade8-a7c785347ee4"
+    },
+    {
+      "patient_id": "TCGA-A6-2671",
+      "payload_sha256": "75789f4a8c862394919b6a11d253bf5b327fe5321a767ad7b093a867ef40e4fd",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-2671.d96c8372-9f4b-4e94-b93d-faea6a1445b1"
+    },
+    {
+      "patient_id": "TCGA-A6-2672",
+      "payload_sha256": "d3e14265fd4f8b8ccfca5e045e52adabb0a5784f2e183b86de319ce9c4274872",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-2672.8405a327-719d-4c6d-99f4-a58306c8fdc4"
+    },
+    {
+      "patient_id": "TCGA-A6-2674",
+      "payload_sha256": "6f94a91a834ba93f7a9f77846e9fb57edeb71b2cabfaef677765612baeec9338",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-2674.8d42a0be-1995-4889-94db-eef5528759c0"
+    },
+    {
+      "patient_id": "TCGA-A6-2675",
+      "payload_sha256": "831ca8ae1a431cee84e92ca493911244223d9fbf6f64af30e735a5ef47c3ff80",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-2675.c9a27850-8295-4e69-ab9e-a9765650fcea"
+    },
+    {
+      "patient_id": "TCGA-A6-2676",
+      "payload_sha256": "8ccad4e09ff123fa14a7f901df370d4c0a2e6001a41886b87fa710d8357772d9",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-2676.79622069-c0eb-4009-98aa-f757227501e5"
+    },
+    {
+      "patient_id": "TCGA-A6-2677",
+      "payload_sha256": "5fa789f7b629329177ed7f4c390207240c4fb7925fea7481a2f0b4500c39ef1f",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-2677.7a3d9432-c992-4410-9044-cbc04e0dbece"
+    },
+    {
+      "patient_id": "TCGA-A6-2678",
+      "payload_sha256": "378ea8a4aa9491ea5d5adf0358d61d45258c0d44a7e3574341b91332f30f407f",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-2678.4c0861d1-a3b9-45cf-b0ac-ee9adb748e55"
+    },
+    {
+      "patient_id": "TCGA-A6-2679",
+      "payload_sha256": "e831330ac1fdded14f81329ebcbb9dceb6f9e49dfb839410985cfff89cda1f19",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-2679.9a1a3daf-5e4d-4f24-8e73-2352bdefef40"
+    },
+    {
+      "patient_id": "TCGA-A6-2680",
+      "payload_sha256": "5e90ff9f2cfd5e12c5563aec248dd479b5177ecbdd21f70f32a0f59bea6e9edd",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-2680.f5ed27b7-f97a-40ec-9743-f5761f7ca1c6"
+    },
+    {
+      "patient_id": "TCGA-A6-2681",
+      "payload_sha256": "755b5f18965c0f1d17221c57a2108c385e25380898ec486c818bfa0a64c3d978",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-2681.ec4bb62b-edf5-4051-8240-4e9d89fd928f"
+    },
+    {
+      "patient_id": "TCGA-A6-2682",
+      "payload_sha256": "7336787fbeec357e63bf4633f46a95923f5556ca201839aeae8a215b283e1080",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-2682.b6280abb-7ccf-4fdb-ad83-65d8b98dfbba"
+    },
+    {
+      "patient_id": "TCGA-A6-2683",
+      "payload_sha256": "32e58febb83deb19e4034b28bf971da74867c9ceabfd73d26443e0da4fc722b3",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-2683.05891cb8-c672-4ea0-864d-6f5699bdd9e4"
+    },
+    {
+      "patient_id": "TCGA-A6-2684",
+      "payload_sha256": "6c095cb380c1dc996109ab302f28c4ae305bdfa6de563d6e6a191c20691f57a3",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-2684.9dabf713-dd0c-4388-b69e-f1bbb08e4d21"
+    },
+    {
+      "patient_id": "TCGA-A6-2685",
+      "payload_sha256": "f51da71e6a6cb4a399bb6f075993f10ad26e31e8b2ae290aa23473ce8f2d6a38",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-2685.4d01d457-e681-48c9-ac38-323c582105c3"
+    },
+    {
+      "patient_id": "TCGA-A6-2686",
+      "payload_sha256": "8df139297ef893c612ca68fb502aec2e9cc06b3b846a5e6081e168d2dd9a28cd",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-2686.cedebb2f-01b9-4bbd-9b4c-c9fa79f26e72"
+    },
+    {
+      "patient_id": "TCGA-A6-3807",
+      "payload_sha256": "db0b84165ab83db5e4e1591b26e06d2fa53c22a88b4b26d04e576a66851b3df5",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-3807.64b62c44-5f24-49db-bc69-f6fab36044a2"
+    },
+    {
+      "patient_id": "TCGA-A6-3808",
+      "payload_sha256": "f9fd5416740897cdc03dbf72c225c821cc00fbd0fceb2e7755c5ff0ebf6d8327",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-3808.e1505f65-72ef-438d-a5e1-93ed8bf6635d"
+    },
+    {
+      "patient_id": "TCGA-A6-3809",
+      "payload_sha256": "a8d0d65faf7c78f0a420644253e07f0c68818b03642a2bc138a0e8f0ef375449",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-3809.b4d15a05-bc09-4ddb-b35b-13798747fecc"
+    },
+    {
+      "patient_id": "TCGA-A6-3810",
+      "payload_sha256": "f2d197edd2750464765a22255768b2aa07971fb26a86085ea98101b2243b33c7",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-3810.d45c776b-26a5-406a-a4fe-f90896646611"
+    },
+    {
+      "patient_id": "TCGA-A6-4105",
+      "payload_sha256": "7cf25478e84e6dd1fd2c4130a352cba5567584971f5cd0ced4e63f2a5d6cc548",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-4105.d2ce055f-3de6-4b96-96ad-133091cd0a8f"
+    },
+    {
+      "patient_id": "TCGA-A6-4107",
+      "payload_sha256": "f4d148ffc2ac28dd0d3400213b1f54a41f9e45bddf94c0516db5b0560d6a5747",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-4107.ead64351-1c48-40cf-88d1-acea2f34a4ea"
+    },
+    {
+      "patient_id": "TCGA-A6-5656",
+      "payload_sha256": "4d193dd61c3cf628f2ed0f3e208a4475a116c234d1cf35045e29475425dce988",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-5656.9396cc9f-adf9-4e3e-9cb4-c0a5190299b9"
+    },
+    {
+      "patient_id": "TCGA-A6-5657",
+      "payload_sha256": "e302ab65e210a49c16466f5f1cc5082b64c3d6ca11449a7ffc7742eb19572c0b",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-5657.58264a19-4619-4e74-925b-4f3740a7a29f"
+    },
+    {
+      "patient_id": "TCGA-A6-5659",
+      "payload_sha256": "ac666b1bf345fc25e45dc7400fa335962e92f78c83c725146dbcf2a366875a99",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-5659.16172149-a834-4f41-a786-5d87a69fc65c"
+    },
+    {
+      "patient_id": "TCGA-A6-5660",
+      "payload_sha256": "082a13cd0a5071cf249528033da6d68db8df78577fa8d6da5666d3af6d2ea659",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-5660.865dc724-445f-45a7-a143-5318f6acb580"
+    },
+    {
+      "patient_id": "TCGA-A6-5661",
+      "payload_sha256": "5a9f1b617242a56c9123daed7e81ed30ecb580d3ef1d60583ede006ad6ba5504",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-5661.bfa2520c-b8f1-4475-b98c-6798ecbf6f16"
+    },
+    {
+      "patient_id": "TCGA-A6-5662",
+      "payload_sha256": "139dff43f74bc42dde1102da6119a2a5a03c23b14f47aa12893385bd8e1b63c6",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-5662.79935ec7-c03d-4dbf-97a6-c97da85af6d6"
+    },
+    {
+      "patient_id": "TCGA-A6-5664",
+      "payload_sha256": "735bd3e5bfa77cd2032efc268aea37e46cfaaac702f5ffe8e51eb45b1f228b44",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-5664.246d4906-c366-4317-97b3-cf159bb82689"
+    },
+    {
+      "patient_id": "TCGA-A6-5665",
+      "payload_sha256": "3a6ab580d6be224875d2588695d880b968aa4a1511a603a90ad8ac1800e72835",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-5665.814c8056-1298-4941-9fde-c660dae23c0e"
+    },
+    {
+      "patient_id": "TCGA-A6-5666",
+      "payload_sha256": "ae152f53a3309aaca90af8eea798b6ad7e5c44169d6719b1192930f76ef1af8b",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-5666.6496f931-2a98-43c3-8b80-7f658d4ea9ab"
+    },
+    {
+      "patient_id": "TCGA-A6-5667",
+      "payload_sha256": "4158be39789abb0276b0167a7193487c1ccee9437037be4714b4b1b6e751637f",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-5667.56e0d7dd-9466-430c-ac45-00450bf1d771"
+    },
+    {
+      "patient_id": "TCGA-A6-6138",
+      "payload_sha256": "8d3bbfd9773d888b8b4adb69c6d77eae59325b9b9fdd7e6f8b68e0971dc4e5be",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-6138.270ff9cd-8154-4fab-b2b5-01e9ace89200"
+    },
+    {
+      "patient_id": "TCGA-A6-6140",
+      "payload_sha256": "6391978e81ecb075168a78d5a21327f843b018c1571d38a179732829e6271b3e",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-6140.72f5199d-0b09-44b9-81fd-67a71f21f2af"
+    },
+    {
+      "patient_id": "TCGA-A6-6141",
+      "payload_sha256": "acd4132d35cfba2f83583e5b02bbc791c3fe1edf287a03dc24f0a648bedd7c80",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-6141.1878c2b7-98d8-4797-84f2-30d73d1db47d"
+    },
+    {
+      "patient_id": "TCGA-A6-6142",
+      "payload_sha256": "f6b4ee4e3dfc4c94d1ff7d925e56c0f0c1aa5fb50c326aa2388648092c908b71",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-6142.de239e8f-c789-4e05-ba13-1936905fb79c"
+    },
+    {
+      "patient_id": "TCGA-A6-6648",
+      "payload_sha256": "9bc65463f53e149837d9392287ee899b02d5eff56dc28dc460cf3580e68188ef",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-6648.432dec4f-b217-44bf-a559-1559fdceb7ba"
+    },
+    {
+      "patient_id": "TCGA-A6-6649",
+      "payload_sha256": "9b60a3156f6ce06076c1b3edb82c01f33a48e3b418f55892c1a7a771f4cc1643",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-6649.fee7ee02-806c-463a-9841-5758c737207a"
+    },
+    {
+      "patient_id": "TCGA-A6-6650",
+      "payload_sha256": "54636262970a5c1cb82a724407318ab8f7fa627187790c3e42f4812248111ff7",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-6650.a3bacc5b-1c12-44e2-99f6-80baa8668283"
+    },
+    {
+      "patient_id": "TCGA-A6-6651",
+      "payload_sha256": "b7a7dec8aece59767b92984c7c75116df79ec3f69da19476a01e27379f2df944",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-6651.c67ee589-8004-455c-8ccf-f02f086e4030"
+    },
+    {
+      "patient_id": "TCGA-A6-6652",
+      "payload_sha256": "0f687997af75efde8db9ffebf76f358d63a3fbb98f5849340a76453bea2a4ba2",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-6652.b5adcacd-ddc5-45a4-acc8-37842e1bda14"
+    },
+    {
+      "patient_id": "TCGA-A6-6653",
+      "payload_sha256": "1293716da3990d5d686301fbfe20614f805adc2a4a08fd2eebd3241ff78b10f0",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-6653.8360924d-ce15-4713-82d3-f8f8932b1dfb"
+    },
+    {
+      "patient_id": "TCGA-A6-6654",
+      "payload_sha256": "b6e1083b9cdc979b9d5585e0e96eec4c13dc6a0111cbce71bfdb7a8b864a7e83",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-6654.0f0a992e-3a5c-490f-aa3e-62d2b26d580b"
+    },
+    {
+      "patient_id": "TCGA-A6-6781",
+      "payload_sha256": "37d3bb43ff1f8fa70a7660b69e012d196058665aacfd953362da862438b9a781",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-6781.b3270a65-315c-422b-9441-00694a674d9d"
+    },
+    {
+      "patient_id": "TCGA-A6-6782",
+      "payload_sha256": "b01a909131161e641a3be2ad13f9a75c682c82f28051b542544ba967cf13fc2a",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-6782.415fc4f9-7e7d-4ad1-ad08-8fd462ebb39a"
+    },
+    {
+      "patient_id": "TCGA-A6-A565",
+      "payload_sha256": "6d0078e6f2f5f932e766dfb3c8d2f3ec2667236849f5861010e32390a459d335",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-A565.177EECE8-D2CB-4CA4-81C5-949F14F793FA"
+    },
+    {
+      "patient_id": "TCGA-A6-A566",
+      "payload_sha256": "d2a2874326805ce1ba4b5895093c243337fbd737f6889a6fafd126482aab4fed",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-A566.D2679879-72B7-4515-9496-B1FCE87C8571"
+    },
+    {
+      "patient_id": "TCGA-A6-A567",
+      "payload_sha256": "b603111889fa5d5004e2a9a1b2496f9507f9423689e79e341c5efa66fccb5ea2",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-A567.E166D77A-9C39-4B86-9320-8946DA9AA69D"
+    },
+    {
+      "patient_id": "TCGA-A6-A56B",
+      "payload_sha256": "336b60ba95ee963d7ea7ad8142ea2325d0be6e962857f564ad5532c209751038",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-A56B.FEE2A033-7EE5-4528-80AF-979BD2FDCBF9"
+    },
+    {
+      "patient_id": "TCGA-A6-A5ZU",
+      "payload_sha256": "0bb2a01632ce2c9389c9367d08b1f3f92b1ca87ad8c4f08b1c332d8c7f290204",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-A6-A5ZU.3E30630A-1BAB-480C-9C75-13E828907266"
+    },
+    {
+      "patient_id": "TCGA-ZP-A9CV",
+      "payload_sha256": "9ec94ece13d81b4cf691ab0800a6654efbf91033d939299bf723ad57bcf00618",
+      "reason": "reserved_tcga242_patient",
+      "report_id": "TCGA-ZP-A9CV.382219F6-24AD-49BD-96D1-FC7A9B2CDFDB"
+    }
+  ],
+  "schema_version": 2
+}

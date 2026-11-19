@@ -1,0 +1,13 @@
+{
+  "gate": "medgemma_chat_sla",
+  "status": "ok",
+  "model_id": "google/medgemma-1.5-4b-it",
+  "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8",
+  "latency_s": 35.237,
+  "sla_seconds": 120,
+  "sla_met": true,
+  "chat_url": "https://crispro-test--medgemma-1-5-4b-chat.modal.run",
+  "app_version": "medgemma-1-5-4b-modal-v1.1.0-causal-clone",
+  "ts": "2026-10-11T04:19:58Z",
+  "honesty": "RUO \u2014 generative suggestions not clinical decisions"
+}

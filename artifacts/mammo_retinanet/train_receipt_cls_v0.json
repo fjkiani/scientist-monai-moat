@@ -1,0 +1,102 @@
+{
+  "status": "ok",
+  "app_version": "mammo-retinanet-cls-v1.0.0",
+  "mode": "retinanet_backbone_cls",
+  "epochs": 20,
+  "lr": 0.0003,
+  "batch_size": 16,
+  "img_size": 384,
+  "n_train_fit": 2201,
+  "n_validation": 244,
+  "n_test": 641,
+  "val_auroc": 0.8390293225480283,
+  "test_auroc": 0.785453260650111,
+  "meets_floor_0.85": false,
+  "artifact": "/vol/out/mammo_retinanet_v1/mammo_retinanet_v1.safetensors",
+  "artifact_sha256": "691233bca51c4eb99fd6859301b8e1393ada6643b25e79622548ef80de951d32",
+  "history": [
+    {
+      "epoch": 1,
+      "loss_mean": 0.703742216894592
+    },
+    {
+      "epoch": 2,
+      "loss_mean": 0.6524477352698644
+    },
+    {
+      "epoch": 3,
+      "loss_mean": 0.6317393740882045
+    },
+    {
+      "epoch": 4,
+      "loss_mean": 0.6246507787618084
+    },
+    {
+      "epoch": 5,
+      "loss_mean": 0.6147092129441275
+    },
+    {
+      "epoch": 6,
+      "loss_mean": 0.5946454084005909
+    },
+    {
+      "epoch": 7,
+      "loss_mean": 0.5721131802900977
+    },
+    {
+      "epoch": 8,
+      "loss_mean": 0.5786304456600244
+    },
+    {
+      "epoch": 9,
+      "loss_mean": 0.5633041493702626
+    },
+    {
+      "epoch": 10,
+      "loss_mean": 0.555043744004291
+    },
+    {
+      "epoch": 11,
+      "loss_mean": 0.5352495787800222
+    },
+    {
+      "epoch": 12,
+      "loss_mean": 0.5151804022598958
+    },
+    {
+      "epoch": 13,
+      "loss_mean": 0.4911237575005794
+    },
+    {
+      "epoch": 14,
+      "loss_mean": 0.46173337269304454
+    },
+    {
+      "epoch": 15,
+      "loss_mean": 0.45379287868306256
+    },
+    {
+      "epoch": 16,
+      "loss_mean": 0.4250600041038748
+    },
+    {
+      "epoch": 17,
+      "loss_mean": 0.39839535033789236
+    },
+    {
+      "epoch": 18,
+      "loss_mean": 0.3757262475032737
+    },
+    {
+      "epoch": 19,
+      "loss_mean": 0.3595592394687127
+    },
+    {
+      "epoch": 20,
+      "loss_mean": 0.36253869004439615
+    }
+  ],
+  "elapsed_seconds": 930.695,
+  "gpu_name": "NVIDIA A10G",
+  "parent_det_test_auroc": 0.7401675752069452
+}

@@ -177,4 +177,8 @@ def test_health_endpoint_lists_new_endpoints(client: TestClient) -> None:
     assert any("v1/artifacts" in e for e in endpoints), (
         "health check must advertise /v1/artifacts"
     )
-    assert "l3_arbiter" in body["models_loaded"]
+    assert "breast_dss_v3" in body["models_loaded"], (
+        "models_loaded must advertise the fitted Breast DSS v3 arbiter that "
+        "superseded the n_training=0 l3_arbiter template"
+    )
+    assert "l3_arbiter" not in body["models_loaded"]

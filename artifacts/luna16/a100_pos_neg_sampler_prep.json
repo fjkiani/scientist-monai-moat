@@ -1,0 +1,24 @@
+{
+  "status": "staged",
+  "purpose": "A100 retrain prep — eliminate ~0.138 classification bias from positive-only crops",
+  "candidate_rejected": "90e733f34c6a",
+  "production_baseline": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01",
+  "sampler": {
+    "transform": "RandCropBoxByPosNegLabeld",
+    "pos": 1,
+    "neg": 1,
+    "num_samples": 2,
+    "effect": "50% pure empty-background lung/air crops per image",
+    "stock_train_json": {"pos": 1, "neg": 1, "num_samples": "@batch_size"},
+    "staged_change": "pin num_samples=2 (independent of batch_size)"
+  },
+  "optimizer": {
+    "learning_rate": 1e-5,
+    "warmup": "bundle GradualWarmupScheduler (linear) retained"
+  },
+  "wired_in": [
+    "deploy/modal/luna16_fullfit_app.py::_patch_pos_neg_sampler (called from _prepare_bundle)",
+    "deploy/modal/luna16_finetune_app.py::finetune (stages patched train.json before monai.bundle run)"
+  ],
+  "next_step": "MODAL_PROFILE=fjkiani modal run deploy/modal/luna16_fullfit_app.py with gpu=A100 after Gate C"
+}

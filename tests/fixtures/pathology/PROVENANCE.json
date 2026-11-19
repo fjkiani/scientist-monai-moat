@@ -1,0 +1,16 @@
+{
+  "dataset": "NCT-CRC-HE-100K",
+  "citation": "Kather, Jakob Nikolas, Halama, Niels, & Marx, Alexander. (2018). 100,000 histological images of human colorectal cancer and healthy tissue (v0.1) [Data set]. Zenodo. https://doi.org/10.5281/zenodo.1214456",
+  "source_doi": "10.5281/zenodo.1214456",
+  "source_mirror_used": "huggingface.co/datasets/1aurent/NCT-CRC-HE (split=NCT_CRC_HE_100K, streamed, not bulk-downloaded)",
+  "license": "CC-BY-4.0",
+  "description": "Real, non-synthetic H&E-stained histological image patches, 224x224px at 0.5 microns/pixel, Macenko color-normalized, manually extracted from N=86 real human FFPE cancer tissue slides (NCT Biobank, Heidelberg + UMM pathology archive, Mannheim). Retrieved via streaming (only 5 individual rows fetched, not the 11.7GB/800MB bulk archive) specifically to build a real-input fixture for the phikon-pathology Modal endpoint integration test, replacing an untracked/unrecoverable prior fixture (phikon_open_fixture.png, referenced only by hash in modal_fleet_matrix.json with no source file present in this session's environment).",
+  "files": {
+    "nct_crc_he100k_tum.png": {"tissue_class": "TUM", "tissue_class_meaning": "colorectal adenocarcinoma epithelium (tumor)", "sha256": "25da480fb5449dd10c0a107e821f4eb2f065b88caf5bca1de41112c4580ba700"},
+    "nct_crc_he100k_norm.png": {"tissue_class": "NORM", "tissue_class_meaning": "normal colon mucosa", "sha256": "2dd51c2d7820c8fda2c1c31f1772f2b4440f857f2ed24136bad599e6c51c6d7e"},
+    "nct_crc_he100k_str.png": {"tissue_class": "STR", "tissue_class_meaning": "cancer-associated stroma", "sha256": "6260faa2dc3158067d0b9e57ad1f7f9adcae44ef6b9d7ea4e91e623886549c9b"},
+    "nct_crc_he100k_lym.png": {"tissue_class": "LYM", "tissue_class_meaning": "lymphocytes", "sha256": "b2ce7ae570393fcca64038ca6e1af5b9accd4daff151da62081569397b8b658c"},
+    "nct_crc_he100k_back.png": {"tissue_class": "BACK", "tissue_class_meaning": "background (non-tissue)", "sha256": "371d8a01f75979c8fca38959e850947b21bf408b80c055035dcfb32dc6fa5118"}
+  },
+  "not_a_screening_claim": "These fixtures verify the phikon-pathology embedding endpoint's I/O contract (dimension, determinism, non-degeneracy) only. No classifier is fitted or evaluated here; no AUROC/F1 claim is made or implied for colorectal tissue typing."
+}

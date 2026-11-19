@@ -1,0 +1,9 @@
+{
+  "status": "ok",
+  "from": "crispro (spend limit / workspace disabled)",
+  "to": "testing-123",
+  "weights": "volume copy 8.1G offline cache + materialised snapshots",
+  "info_url": "https://testing-123--medgemma-1-5-4b-info.modal.run",
+  "chat_url": "https://testing-123--medgemma-1-5-4b-chat.modal.run",
+  "ts": "2026-10-05T06:57:14Z"
+}

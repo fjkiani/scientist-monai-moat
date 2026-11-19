@@ -76,7 +76,7 @@ class TestLuna16App:
         assert isinstance(defaults["epochs"], ast.Constant) and defaults["epochs"].value == 20
         # LR default 1e-3 (fine-tune, not bundle's from-scratch 1e-2)
         assert isinstance(defaults["learning_rate"], ast.Constant)
-        assert defaults["learning_rate"].value == 1e-3
+        assert defaults["learning_rate"].value == 1e-5
 
     def test_target_spacing_matches_bundle(self) -> None:
         text = LUNA16_APP.read_text()

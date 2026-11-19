@@ -1,0 +1,369 @@
+{
+  "capability": "hgsoc-platinum-resistance-multivariate-v2",
+  "geo": "GSE63885",
+  "honest_n": 75,
+  "resistant": 34,
+  "sensitive": 41,
+  "feature_names": [
+    "EMT_MFAP4",
+    "EMT_EFEMP1",
+    "EMT_VIM",
+    "EMT_CDH1",
+    "EMT_SNAI1",
+    "DDR_BRCA1",
+    "DDR_BRCA2",
+    "DDR_RAD51",
+    "DDR_PARP1",
+    "DDR_ATM",
+    "DDR_ATR",
+    "ratio_mes_epi",
+    "grade_ord",
+    "figo_ord",
+    "residual_ord",
+    "brca1_mut",
+    "hist_serous",
+    "hist_undiff"
+  ],
+  "clinical_source": "GSE63885_series_matrix.txt !Sample_characteristics_ch1 (sample_annotations.csv has only platinum_sensitivity + clinical_response)",
+  "ddr_probe_map": {
+    "BRCA1": [
+      "204531_s_at",
+      "211851_x_at"
+    ],
+    "BRCA2": [
+      "208368_s_at",
+      "214727_at"
+    ],
+    "RAD51": [
+      "205023_at",
+      "205024_s_at"
+    ],
+    "PARP1": [
+      "208644_at"
+    ],
+    "ATM": [
+      "1553387_at",
+      "1554631_at",
+      "1570352_at",
+      "208442_s_at",
+      "210858_x_at",
+      "212672_at"
+    ],
+    "ATR": [
+      "209902_at",
+      "209903_s_at",
+      "233288_at"
+    ]
+  },
+  "emt_probe_map": {
+    "MFAP4": [
+      "212713_at"
+    ],
+    "EFEMP1": [
+      "201842_s_at",
+      "201843_s_at",
+      "228421_s_at"
+    ],
+    "VIM": [
+      "1555938_x_at",
+      "201426_s_at"
+    ],
+    "CDH1": [
+      "201130_s_at",
+      "201131_s_at"
+    ],
+    "SNAI1": [
+      "219480_at"
+    ]
+  },
+  "comparison_oof": [
+    {
+      "model": "univariate_mfap4",
+      "n_features": 1,
+      "cv5": {
+        "auroc": 0.6800573888091822,
+        "prauc": 0.6391255863706908,
+        "brier": 0.23165745157982215,
+        "auroc_ci95": [
+          0.5451820090439277,
+          0.8057204111295679
+        ]
+      },
+      "loocv": {
+        "auroc": 0.6527977044476327,
+        "prauc": 0.6125507258515178,
+        "brier": 0.23774185025360312,
+        "auroc_ci95": [
+          0.515762187055683,
+          0.7792207792207793
+        ]
+      }
+    },
+    {
+      "model": "l2_emt_panel",
+      "n_features": 6,
+      "cv5": {
+        "auroc": 0.5860832137733142,
+        "prauc": 0.5442099000530921,
+        "brier": 0.24342617586321832,
+        "auroc_ci95": [
+          0.4514233449477353,
+          0.7174362244897959
+        ]
+      },
+      "loocv": {
+        "auroc": 0.4777618364418938,
+        "prauc": 0.46564487814180866,
+        "brier": 0.251370045473074,
+        "auroc_ci95": [
+          0.337142336550332,
+          0.6101838570693554
+        ]
+      }
+    },
+    {
+      "model": "elasticnet_emt_ddr_clinical",
+      "n_features": 18,
+      "cv5": {
+        "auroc": 0.5989956958393113,
+        "prauc": 0.5964887172800989,
+        "brier": 0.24195012074226882,
+        "auroc_ci95": [
+          0.4648002606712284,
+          0.7375552888562831
+        ]
+      },
+      "loocv": {
+        "auroc": 0.4540889526542324,
+        "prauc": 0.44488637589814206,
+        "brier": 0.2514519923449799,
+        "auroc_ci95": [
+          0.32147810404389354,
+          0.5909227204579528
+        ]
+      }
+    },
+    {
+      "model": "hist_gradient_boosting",
+      "n_features": 18,
+      "cv5": {
+        "auroc": 0.5007173601147776,
+        "prauc": 0.45251808104513247,
+        "brier": 0.378260959380372,
+        "auroc_ci95": [
+          0.3564261074984759,
+          0.6373829873829873
+        ]
+      },
+      "loocv": {
+        "auroc": 0.5911047345767575,
+        "prauc": 0.5330608005883697,
+        "brier": 0.3074987321930331,
+        "auroc_ci95": [
+          0.46142144951822367,
+          0.7179821428571427
+        ]
+      }
+    },
+    {
+      "model": "random_forest",
+      "n_features": 18,
+      "cv5": {
+        "auroc": 0.5294117647058824,
+        "prauc": 0.4645590873117907,
+        "brier": 0.2576473753161649,
+        "auroc_ci95": [
+          0.39498442249240123,
+          0.6650046296296296
+        ]
+      },
+      "loocv": {
+        "auroc": 0.5286944045911047,
+        "prauc": 0.46294619030726447,
+        "brier": 0.2590673724351775,
+        "auroc_ci95": [
+          0.39737614722493747,
+          0.6580214045214045
+        ]
+      }
+    }
+  ],
+  "winner": "hist_gradient_boosting",
+  "beats_univariate_loocv": false,
+  "univariate_proof_auroc": 0.6836,
+  "top_features": [
+    {
+      "feature": "EMT_MFAP4",
+      "weight": 0.13768531802965087,
+      "std": 0.02925500522018049,
+      "kind": "permutation_importance_auroc_delta"
+    },
+    {
+      "feature": "EMT_CDH1",
+      "weight": 0.013486370157819253,
+      "std": 0.004827856667201238,
+      "kind": "permutation_importance_auroc_delta"
+    },
+    {
+      "feature": "DDR_BRCA1",
+      "weight": 0.002008608321377329,
+      "std": 0.0018925259624494788,
+      "kind": "permutation_importance_auroc_delta"
+    },
+    {
+      "feature": "EMT_EFEMP1",
+      "weight": 0.00043041606886657556,
+      "std": 0.000860832137733142,
+      "kind": "permutation_importance_auroc_delta"
+    },
+    {
+      "feature": "DDR_ATR",
+      "weight": 0.00035868005738881603,
+      "std": 0.0006072895791104993,
+      "kind": "permutation_importance_auroc_delta"
+    },
+    {
+      "feature": "DDR_PARP1",
+      "weight": 9.564801530368428e-05,
+      "std": 0.00024385554823495373,
+      "kind": "permutation_importance_auroc_delta"
+    },
+    {
+      "feature": "EMT_VIM",
+      "weight": 0.0,
+      "std": 0.0,
+      "kind": "permutation_importance_auroc_delta"
+    },
+    {
+      "feature": "EMT_SNAI1",
+      "weight": 0.0,
+      "std": 0.0,
+      "kind": "permutation_importance_auroc_delta"
+    },
+    {
+      "feature": "DDR_BRCA2",
+      "weight": 0.0,
+      "std": 0.0,
+      "kind": "permutation_importance_auroc_delta"
+    },
+    {
+      "feature": "DDR_RAD51",
+      "weight": 0.0,
+      "std": 0.0,
+      "kind": "permutation_importance_auroc_delta"
+    },
+    {
+      "feature": "DDR_ATM",
+      "weight": 0.0,
+      "std": 0.0,
+      "kind": "permutation_importance_auroc_delta"
+    },
+    {
+      "feature": "ratio_mes_epi",
+      "weight": 0.0,
+      "std": 0.0,
+      "kind": "permutation_importance_auroc_delta"
+    },
+    {
+      "feature": "grade_ord",
+      "weight": 0.0,
+      "std": 0.0,
+      "kind": "permutation_importance_auroc_delta"
+    },
+    {
+      "feature": "figo_ord",
+      "weight": 0.0,
+      "std": 0.0,
+      "kind": "permutation_importance_auroc_delta"
+    },
+    {
+      "feature": "residual_ord",
+      "weight": 0.0,
+      "std": 0.0,
+      "kind": "permutation_importance_auroc_delta"
+    }
+  ],
+  "artifact_path": "src/oncology_arbiter/arbiter/models/ovarian_resistance_multivariate_v2.joblib",
+  "artifact_sha256": "82febea7003675941afeaffe268ec841281d17146188339900fba8f70f941e26",
+  "forbidden": "Do not use retracted n=101 AUROC 0.7625",
+  "status": "LOCKED",
+  "seed": 20261022,
+  "elasticnet_coefficients_full_fit": [
+    {
+      "feature": "EMT_MFAP4",
+      "weight": 0.10972962557833199,
+      "kind": "elasticnet_coef"
+    },
+    {
+      "feature": "grade_ord",
+      "weight": 0.01506088599790972,
+      "kind": "elasticnet_coef"
+    },
+    {
+      "feature": "figo_ord",
+      "weight": 0.014775774006778514,
+      "kind": "elasticnet_coef"
+    },
+    {
+      "feature": "ratio_mes_epi",
+      "weight": 0.012067291807132972,
+      "kind": "elasticnet_coef"
+    },
+    {
+      "feature": "EMT_EFEMP1",
+      "weight": 0.0,
+      "kind": "elasticnet_coef"
+    },
+    {
+      "feature": "EMT_VIM",
+      "weight": 0.0,
+      "kind": "elasticnet_coef"
+    },
+    {
+      "feature": "EMT_CDH1",
+      "weight": 0.0,
+      "kind": "elasticnet_coef"
+    },
+    {
+      "feature": "EMT_SNAI1",
+      "weight": 0.0,
+      "kind": "elasticnet_coef"
+    },
+    {
+      "feature": "DDR_BRCA1",
+      "weight": 0.0,
+      "kind": "elasticnet_coef"
+    },
+    {
+      "feature": "DDR_BRCA2",
+      "weight": 0.0,
+      "kind": "elasticnet_coef"
+    },
+    {
+      "feature": "DDR_RAD51",
+      "weight": 0.0,
+      "kind": "elasticnet_coef"
+    },
+    {
+      "feature": "DDR_PARP1",
+      "weight": 0.0,
+      "kind": "elasticnet_coef"
+    },
+    {
+      "feature": "DDR_ATM",
+      "weight": 0.0,
+      "kind": "elasticnet_coef"
+    },
+    {
+      "feature": "DDR_ATR",
+      "weight": 0.0,
+      "kind": "elasticnet_coef"
+    },
+    {
+      "feature": "residual_ord",
+      "weight": 0.0,
+      "kind": "elasticnet_coef"
+    }
+  ],
+  "honesty_note": "Univariate MFAP4 remains the strongest OOF discriminator on this n=75 cohort. Deployed multivariate winner is hist_gradient_boosting by LOOCV among multivariate candidates; it does NOT beat univariate LOOCV. ElasticNet coefficients attached for feature-interaction inspection only."
+}

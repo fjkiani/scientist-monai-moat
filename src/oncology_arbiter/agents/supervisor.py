@@ -30,9 +30,9 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
-import json
 import importlib
 import importlib.util
+import json
 import re
 import time
 import uuid
@@ -42,7 +42,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 
 from oncology_arbiter import AUROC_CAVEAT, RUO_DISCLAIMER
-from oncology_arbiter.models.llm_client import GemmaClient, LlmUnavailable, LlmResponse
+from oncology_arbiter.models.llm_client import GemmaClient, LlmResponse, LlmUnavailable
 
 SUPERVISOR_VERSION = "1.0.0"
 
@@ -78,6 +78,7 @@ class Hypothesis:
     elo: float = 1500.0
     tournament_wins: int = 0
     tournament_losses: int = 0
+    tournament_ties: int = 0
 
     def as_dict(self) -> Dict[str, Any]:
         return {
@@ -92,6 +93,7 @@ class Hypothesis:
             "elo": round(self.elo, 1),
             "tournament_wins": self.tournament_wins,
             "tournament_losses": self.tournament_losses,
+            "tournament_ties": self.tournament_ties,
         }
 
 
@@ -111,8 +113,14 @@ class StageResult:
 
     ``model_state`` values in v1.0.0:
 
-        - ``"executed"``           — real LLM loop ran end-to-end
+        - ``"executed"``           — real LLM loop ran end-to-end with fetched evidence
         - ``"llm_unavailable"``    — LLM ladder exhausted, degraded to placeholder
+        - ``"llm_evidence_empty"`` — GENERATE ran but PubMed/EuropePMC returned
+          no URLs; pairwise Elo is forbidden in this state
+        - ``"llm_reflection_incomplete"`` — at least one evidence-backed
+          hypothesis lacked a valid MedGemma reflection receipt
+        - ``"llm_tournament_incomplete"`` — at least one Elo pair lacked a
+          valid model judgment and request receipt
         - ``"placeholder"``        — legacy shim from :func:`run_placeholder`
     """
     stage: str
@@ -126,7 +134,24 @@ class StageResult:
     evidence_dropped: int = 0
     llm_calls: int = 0
     llm_total_tokens: int = 0
+    llm_prompt_tokens: int = 0
+    llm_completion_tokens: int = 0
     llm_cost_usd: float = 0.0
+    llm_provider: str | None = None
+    llm_model: str | None = None
+    llm_app_version: str | None = None
+    llm_revision_sha256: str | None = None
+    llm_request_ids: List[str] = field(default_factory=list)
+    llm_latency_s: float = 0.0
+    llm_honesty_warnings: List[str] = field(default_factory=list)
+    reflection_calls_expected: int = 0
+    reflection_calls_completed: int = 0
+    reflection_receipts: List[Mapping[str, Any]] = field(default_factory=list)
+    tournament_pairs_expected: int = 0
+    tournament_pairs_completed: int = 0
+    tournament_matches: List[Mapping[str, Any]] = field(default_factory=list)
+    meta_review_request_id: str | None = None
+    meta_review_response_sha256: str | None = None
     latency_s: float = 0.0
     notes: str = ""
     disclaimer: str = RUO_DISCLAIMER
@@ -140,12 +165,30 @@ class StageResult:
             "meta_review": self.meta_review,
             "evidence": list(self.evidence),
             "seen_urls_count": self.seen_urls_count,
+            "seen_urls": list(self.seen_urls),
             "seen_urls_sample": self.seen_urls[:10],
             "evidence_kept": self.evidence_kept,
             "evidence_dropped": self.evidence_dropped,
             "llm_calls": self.llm_calls,
             "llm_total_tokens": self.llm_total_tokens,
+            "llm_prompt_tokens": self.llm_prompt_tokens,
+            "llm_completion_tokens": self.llm_completion_tokens,
             "llm_cost_usd": round(self.llm_cost_usd, 6),
+            "llm_provider": self.llm_provider,
+            "llm_model": self.llm_model,
+            "llm_app_version": self.llm_app_version,
+            "llm_revision": self.llm_revision_sha256,
+            "llm_request_ids": list(self.llm_request_ids),
+            "llm_latency_s": round(self.llm_latency_s, 3),
+            "llm_honesty_warnings": list(self.llm_honesty_warnings),
+            "reflection_calls_expected": self.reflection_calls_expected,
+            "reflection_calls_completed": self.reflection_calls_completed,
+            "reflection_receipts": list(self.reflection_receipts),
+            "tournament_pairs_expected": self.tournament_pairs_expected,
+            "tournament_pairs_completed": self.tournament_pairs_completed,
+            "tournament_matches": list(self.tournament_matches),
+            "meta_review_request_id": self.meta_review_request_id,
+            "meta_review_response_sha256": self.meta_review_response_sha256,
             "latency_s": round(self.latency_s, 2),
             "notes": self.notes,
             "disclaimer": self.disclaimer,
@@ -177,8 +220,8 @@ _STAGE_PLANS: Dict[str, Dict[AgentPhase, List[str]]] = {
         AgentPhase.GENERATE: ["oncology_arbiter.tools.pubmed_search",
                               "oncology_arbiter.tools.arxiv_search"],
         AgentPhase.EVIDENCE: ["oncology_arbiter.tools.pubmed_search",
-                              "oncology_arbiter.tools.arxiv_search",
-                              "oncology_arbiter.tools.web_fetch"],
+                              "oncology_arbiter.tools.europe_pmc_search",
+                              "oncology_arbiter.tools.arxiv_search"],
         AgentPhase.REFLECT:  ["oncology_arbiter.tools.honesty"],
         AgentPhase.TOURNAMENT: ["oncology_arbiter.tools.honesty"],
         AgentPhase.META_REVIEW: ["oncology_arbiter.tools.web_fetch"],
@@ -318,18 +361,30 @@ def execute_stage(
     # We collect every URL the tool loop actually saw.
     seen_urls: set[str] = set(seed_urls or [])
     evidence: List[Mapping[str, Any]] = []
+    evidence_errors: List[str] = []
     result = StageResult(stage=stage, model_state="executed")
 
     try:
         # ── GENERATE ────────────────────────────────────────────────────
-        gen_prompt = _build_generate_prompt(stage, context, n_hypotheses)
-        gen_resp = llm.chat(
-            [{"role": "user", "content": gen_prompt}],
-            max_tokens=1500,
+        gen_user = _build_generate_prompt(stage, context, n_hypotheses)
+        gen_resp, gen_json = _chat_json(
+            llm,
+            result,
+            _SYSTEM_GENERATE.format(n=n_hypotheses),
+            gen_user,
+            max_tokens=1800,
             temperature=0.7,
         )
-        _record_llm(result, gen_resp)
-        hypotheses = _parse_hypotheses(gen_resp.text, expected_n=n_hypotheses)
+        if gen_resp is None:
+            result.notes = "GENERATE unavailable: MedGemma chat failed"
+            result.model_state = "llm_unavailable"
+            result.latency_s = time.time() - t0
+            return result
+        hypotheses = _parse_hypotheses(
+            gen_resp.text,
+            expected_n=n_hypotheses,
+            parsed=gen_json,
+        )
 
         if not hypotheses:
             result.notes = "GENERATE returned no parseable hypotheses"
@@ -338,39 +393,85 @@ def execute_stage(
             return result
 
         # ── EVIDENCE ────────────────────────────────────────────────────
-        # Rank by initial_confidence and fetch evidence for the top K.
+        # Every generated hypothesis must retrieve literature. Top-K is a
+        # per-hypothesis hit cap, not a license to Elo-rank unreflected claims.
         by_conf = sorted(hypotheses, key=lambda h: h.initial_confidence, reverse=True)
-        for h in by_conf[:n_evidence_top_k]:
-            ev = _retrieve_evidence(stage, h, seen_urls)
+        for h in by_conf:
+            ev = _retrieve_evidence(
+                stage, h, seen_urls, context=context, errors=evidence_errors,
+                max_hits=n_evidence_top_k,
+            )
             evidence.extend(ev)
+
+        if not evidence:
+            result.model_state = "llm_evidence_empty"
+            result.notes = (
+                "EVIDENCE retrieved 0 URLs; pairwise Elo is forbidden without "
+                "fetched literature."
+                + ((" Retrieval errors: " + "; ".join(evidence_errors[:8]))
+                   if evidence_errors else "")
+            )
+            result.hypotheses = hypotheses
+            result.evidence = []
+            result.seen_urls = sorted(seen_urls)
+            result.seen_urls_count = len(seen_urls)
+            result.latency_s = time.time() - t0
+            return result
 
         # ── REFLECT ────────────────────────────────────────────────────
         for h in hypotheses:
+            result.reflection_calls_expected += 1
             if not h.evidence_urls:
                 h.reflection = "No evidence retrieved for this hypothesis in EVIDENCE phase."
                 h.evidence_alignment = "unknown"
+                result.reflection_receipts.append({
+                    "hypothesis_id": h.hypothesis_id,
+                    "model_request_id": None,
+                    "model_response_sha256": None,
+                    "model_response_chars": 0,
+                    "evidence_alignment": "unknown",
+                    "completed": False,
+                })
                 continue
             ev_text = _summarize_evidence_for_hypothesis(evidence, h)
-            try:
-                ref_resp = llm.chat(
-                    [
-                        {"role": "system", "content": _SYSTEM_REFLECT},
-                        {"role": "user", "content": (
-                            f"Hypothesis:\n{h.claim}\n\nRationale:\n{h.rationale}\n\n"
-                            f"Retrieved evidence:\n{ev_text}"
-                        )},
-                    ],
-                    max_tokens=400,
-                    temperature=0.3,
-                )
-                _record_llm(result, ref_resp)
-                r_json = _extract_json(ref_resp.text)
-                if r_json:
-                    h.reflection = str(r_json.get("critique", ""))[:1200]
-                    h.evidence_alignment = str(r_json.get("evidence_alignment", "unknown"))
-            except LlmUnavailable:
-                h.reflection = "LLM unavailable during REFLECT"
+            ref_resp, r_json = _chat_json(
+                llm,
+                result,
+                _SYSTEM_REFLECT,
+                (
+                    f"Hypothesis:\n{h.claim}\n\nRationale:\n{h.rationale}\n\n"
+                    f"Retrieved evidence:\n{ev_text}"
+                ),
+                max_tokens=2048,
+                temperature=0.3,
+            )
+            critique = str((r_json or {}).get("critique", "")).strip()
+            alignment = str(
+                (r_json or {}).get("evidence_alignment", "unknown")
+            ).strip().lower()
+            completed = (
+                bool(critique)
+                and alignment in {"supports", "partial", "contradicts", "unrelated"}
+                and bool(ref_resp and ref_resp.request_id)
+            )
+            if completed:
+                h.reflection = critique[:1200]
+                h.evidence_alignment = alignment
+                result.reflection_calls_completed += 1
+            else:
+                h.reflection = "MedGemma REFLECT did not return a valid final judgment."
                 h.evidence_alignment = "unknown"
+            result.reflection_receipts.append({
+                "hypothesis_id": h.hypothesis_id,
+                "model_request_id": ref_resp.request_id if ref_resp else None,
+                "model_response_sha256": (
+                    hashlib.sha256(ref_resp.text.encode()).hexdigest()
+                    if ref_resp else None
+                ),
+                "model_response_chars": len(ref_resp.text) if ref_resp else 0,
+                "evidence_alignment": alignment,
+                "completed": completed,
+            })
 
         # Enforce honesty gate — drop hypothesis evidence urls not in seen_urls.
         from oncology_arbiter.tools.honesty import filter_evidence_by_seen_urls
@@ -386,25 +487,49 @@ def execute_stage(
         for h in hypotheses:
             h.evidence_urls = [u for u in h.evidence_urls if u in surviving_urls]
 
-        # ── TOURNAMENT ─────────────────────────────────────────────────
-        _run_tournament(hypotheses, llm, result)
-
-        # ── META_REVIEW ────────────────────────────────────────────────
-        try:
-            ranked = sorted(hypotheses, key=lambda h: h.elo, reverse=True)
-            meta_prompt = _build_meta_review_prompt(stage, ranked, evidence)
-            meta_resp = llm.chat(
-                [
-                    {"role": "system", "content": _SYSTEM_META_REVIEW},
-                    {"role": "user", "content": meta_prompt},
-                ],
-                max_tokens=600,
-                temperature=0.4,
+        if result.reflection_calls_completed != result.reflection_calls_expected:
+            result.model_state = "llm_reflection_incomplete"
+            result.notes = (
+                "MedGemma REFLECT incomplete: "
+                f"{result.reflection_calls_completed}/"
+                f"{result.reflection_calls_expected} judgments carried valid receipts"
             )
-            _record_llm(result, meta_resp)
-            result.meta_review = meta_resp.text.strip()
-        except LlmUnavailable:
-            result.meta_review = "LLM unavailable during META_REVIEW"
+        else:
+            # ── TOURNAMENT ─────────────────────────────────────────────
+            _run_tournament(hypotheses, llm, result)
+
+            # ── META_REVIEW ────────────────────────────────────────────
+            if result.tournament_pairs_completed != result.tournament_pairs_expected:
+                result.model_state = "llm_tournament_incomplete"
+                result.notes = (
+                    "Pairwise MedGemma tournament incomplete: "
+                    f"{result.tournament_pairs_completed}/"
+                    f"{result.tournament_pairs_expected} judgments carried valid receipts"
+                )
+            else:
+                try:
+                    ranked = sorted(hypotheses, key=lambda h: h.elo, reverse=True)
+                    meta_prompt = _build_meta_review_prompt(stage, ranked, evidence)
+                    meta_resp = llm.chat(
+                        [
+                            {"role": "system", "content": _SYSTEM_META_REVIEW},
+                            {"role": "user", "content": meta_prompt},
+                        ],
+                        max_tokens=1200,
+                        temperature=0.4,
+                    )
+                    _record_llm(result, meta_resp)
+                    result.meta_review_request_id = meta_resp.request_id
+                    result.meta_review_response_sha256 = hashlib.sha256(
+                        meta_resp.text.encode()
+                    ).hexdigest()
+                    result.meta_review = _final_model_text(meta_resp.text)
+                    if not result.meta_review or not result.meta_review_request_id:
+                        result.model_state = "llm_parse_failed"
+                        result.notes = "MedGemma META_REVIEW had no final text or receipt"
+                except LlmUnavailable:
+                    result.model_state = "llm_unavailable"
+                    result.notes = "MedGemma unavailable during META_REVIEW"
 
     except LlmUnavailable as e:
         result.model_state = "llm_unavailable"
@@ -423,6 +548,7 @@ def execute_stage(
 
 def _build_generate_prompt(stage: str, context: Mapping[str, Any], n: int) -> str:
     """Compose the GENERATE user prompt from patient context."""
+    del n  # count lives in the system prompt; user carries context only
     ctx_lines = [f"Stage: {stage}"]
     for k, v in context.items():
         if v is None or v == "":
@@ -434,8 +560,9 @@ def _build_generate_prompt(stage: str, context: Mapping[str, Any], n: int) -> st
         ctx_lines.append(f"- {k}: {v}")
     ctx_block = "\n".join(ctx_lines)
     return (
-        _SYSTEM_GENERATE.format(n=n)
-        + "\n\nPATIENT CONTEXT:\n" + ctx_block
+        "PATIENT CONTEXT:\n"
+        + ctx_block
+        + "\n\nReturn ONLY one JSON object with key 'hypotheses'."
     )
 
 
@@ -463,48 +590,136 @@ def _build_meta_review_prompt(
 
 # ─── Parsing helpers ───────────────────────────────────────────────────────
 
+def _final_model_text(text: str) -> str:
+    """Remove MedGemma reasoning wrappers and repeated turn terminators."""
+    final_marker = "<unused95>final"
+    thought_marker = "<unused94>thought"
+    if final_marker in text:
+        text = text.rsplit(final_marker, 1)[1]
+    elif thought_marker in text:
+        # A thought-only response exhausted its token budget before producing
+        # the required final answer and must not be treated as completion.
+        return ""
+    for marker in ("<end_of_turn>", "<eos>", "</s>"):
+        if marker in text:
+            text = text.split(marker, 1)[0]
+    return (
+        text.replace("<end_of_turn>", "")
+        .replace("<eos>", "")
+        .replace("</s>", "")
+        .strip()
+    )
+
+
 def _extract_json(text: str) -> Optional[Dict[str, Any]]:
-    """Strip code fences and try to parse JSON. Return None on failure."""
-    t = text.strip()
+    """Return the last valid JSON object from plain or reasoning-wrapped output."""
+    t = _final_model_text(text)
+    if not t and "<unused94>thought" in text:
+        t = text.split("<unused94>thought", 1)[1]
+        for marker in ("<unused95>final", "<end_of_turn>", "<eos>", "</s>"):
+            if marker in t:
+                t = t.split(marker, 1)[0]
+        t = t.strip()
+    if not t:
+        return None
     # Strip common code-fence patterns
     if t.startswith("```"):
         m = re.match(r"^```(?:json)?\s*(.*?)\s*```\s*$", t, re.DOTALL)
         if m:
             t = m.group(1)
-    # Grab from first { to last }
-    m = re.search(r"\{.*\}", t, re.DOTALL)
-    if not m:
-        return None
+    # MedGemma's causal chat template can emit a ``thought`` block containing
+    # pseudo-JSON before a valid ``final`` object. Prefer the valid object that
+    # ends latest, then its outermost start, so the final top-level object wins.
+    decoder = json.JSONDecoder()
+    candidates: list[tuple[int, int, Dict[str, Any]]] = []
+    for start in [match.start() for match in re.finditer(r"\{", t)]:
+        try:
+            value, consumed = decoder.raw_decode(t[start:])
+        except json.JSONDecodeError:
+            continue
+        if isinstance(value, dict):
+            candidates.append((start + consumed, -start, value))
+    return max(candidates, key=lambda item: (item[0], item[1]))[2] if candidates else None
+
+
+def _chat_json(
+    llm: GemmaClient,
+    result: StageResult,
+    system: str,
+    user: str,
+    *,
+    max_tokens: int,
+    temperature: float,
+) -> Tuple[LlmResponse | None, Dict[str, Any] | None]:
+    """Ask MedGemma for one JSON object. Retry once if the model only thought."""
+    resp: LlmResponse | None = None
     try:
-        return json.loads(m.group(0))
-    except json.JSONDecodeError:
-        return None
+        resp = llm.chat(
+            [{"role": "system", "content": system}, {"role": "user", "content": user}],
+            max_tokens=max_tokens,
+            temperature=temperature,
+        )
+        _record_llm(result, resp)
+        parsed = _extract_json(resp.text)
+        thought_only = parsed is None and (
+            "<unused94>thought" in resp.text or _final_model_text(resp.text) == ""
+        )
+        # Retry only thought-budget exhaustion — not arbitrary malformed JSON —
+        # so incomplete REFLECT/TOURNAMENT stay fail-closed on the first receipt.
+        if thought_only:
+            resp = llm.chat(
+                [
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": (
+                        user
+                        + "\n\nReturn ONLY one JSON object. No thought block. "
+                        "No markdown. No prose."
+                    )},
+                ],
+                max_tokens=max_tokens,
+                temperature=0.0,
+            )
+            _record_llm(result, resp)
+            parsed = _extract_json(resp.text)
+        return resp, parsed
+    except LlmUnavailable:
+        return resp, None
 
 
-def _parse_hypotheses(text: str, expected_n: int) -> List[Hypothesis]:
+def _parse_hypotheses(
+    text: str,
+    expected_n: int,
+    parsed: Optional[Dict[str, Any]] = None,
+) -> List[Hypothesis]:
     """Parse GENERATE output into hypotheses. Tolerates minor JSON drift."""
-    parsed = _extract_json(text)
-    if not parsed:
+    payload = parsed if isinstance(parsed, dict) else _extract_json(text)
+    if not payload:
         return []
-    raw_list = parsed.get("hypotheses", [])
+    raw_list = payload.get("hypotheses", [])
     if not isinstance(raw_list, list):
         return []
     result: List[Hypothesis] = []
     for raw in raw_list[: max(expected_n, 12)]:
         if not isinstance(raw, dict):
             continue
-        claim = str(raw.get("claim", "")).strip()
+        claim = str(
+            raw.get("claim")
+            or raw.get("statement")
+            or raw.get("hypothesis")
+            or ""
+        ).strip()
         if not claim:
             continue
+        conf_raw = raw.get("initial_confidence", raw.get("confidence", 0.5))
         try:
-            conf = float(raw.get("initial_confidence", 0.5))
+            conf = float(conf_raw)
         except (TypeError, ValueError):
             conf = 0.5
         conf = max(0.0, min(1.0, conf))
         result.append(Hypothesis(
             hypothesis_id=uuid.uuid4().hex,
             claim=claim[:400],
-            rationale=str(raw.get("rationale", ""))[:1200].strip(),
+            rationale=str(raw.get("rationale", raw.get("reason", "")))[:1200].strip(),
             source_scope=str(raw.get("source_scope", "clinical_history")),
             initial_confidence=conf,
         ))
@@ -513,66 +728,152 @@ def _parse_hypotheses(text: str, expected_n: int) -> List[Hypothesis]:
 
 # ─── Evidence retrieval ───────────────────────────────────────────────────
 
+_SEARCH_TOOL_NAMES = frozenset({
+    "pubmed_search",
+    "europe_pmc_search",
+    "arxiv_search",
+})
+
+
+def _run_coro(factory):
+    """Run an async tool from sync ``execute_stage`` even inside a live loop."""
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        return asyncio.run(factory())
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        return pool.submit(lambda: asyncio.run(factory())).result(timeout=60)
+
+
 def _retrieve_evidence(
     stage: str,
     hypothesis: Hypothesis,
     seen_urls: set[str],
+    *,
+    context: Mapping[str, Any] | None = None,
+    errors: List[str] | None = None,
+    max_hits: int = 3,
 ) -> List[Mapping[str, Any]]:
     """Fetch evidence for one hypothesis using the stage's EVIDENCE tools.
 
     Returns list of evidence dicts. Each has at minimum ``url``, ``title``,
     ``snippet``. Also mutates ``hypothesis.evidence_urls``. Never raises.
+    Search failures are recorded on ``errors`` instead of being swallowed.
     """
     tool_modules = _STAGE_PLANS[stage].get(AgentPhase.EVIDENCE, [])
-    query = _hypothesis_to_query(hypothesis)
+    primary = _hypothesis_to_query(hypothesis, context=context)
+    tokens = primary.split()
+    queries = [primary]
+    if len(tokens) > 4:
+        queries.append(" ".join(tokens[:4]))
     collected: List[Mapping[str, Any]] = []
+    error_sink = errors if errors is not None else []
+    hit_cap = max(1, min(int(max_hits or 3), 6))
 
-    for mod_path in tool_modules:
-        if len(collected) >= 3:  # cap per hypothesis
+    for query in queries:
+        if len(collected) >= hit_cap:
             break
-        try:
-            mod = importlib.import_module(mod_path)
-        except ImportError:
-            continue
-        tool_cls = _find_tool_class(mod)
-        if tool_cls is None:
-            continue
-        try:
-            tool = tool_cls()
-            ctx = _dummy_tool_ctx()
-            result = asyncio.run(tool.call({"query": query, "max_results": 3}, ctx))
-        except Exception:
-            continue
-        if result.is_error or not result.content:
-            continue
-        # Extract records
-        recs = result.content.get("results", []) if isinstance(result.content, dict) else []
-        for rec in recs:
-            url = rec.get("url") or rec.get("doi_url") or rec.get("pmid_url")
-            if not url:
+        for mod_path in tool_modules:
+            if len(collected) >= hit_cap:
+                break
+            try:
+                mod = importlib.import_module(mod_path)
+            except ImportError as exc:
+                error_sink.append(f"{mod_path}: ImportError {exc}")
                 continue
-            seen_urls.add(url)
-            hypothesis.evidence_urls.append(url)
-            collected.append({
-                "url": url,
-                "title": rec.get("title", ""),
-                "snippet": (rec.get("abstract") or rec.get("summary") or "")[:400],
-                "source": mod_path.split(".")[-1],
-                "hypothesis_id": hypothesis.hypothesis_id,
-            })
+            tool_cls = _find_tool_class(mod)
+            if tool_cls is None:
+                error_sink.append(f"{mod_path}: no tool class")
+                continue
+            tool_name = getattr(tool_cls, "name", "")
+            if tool_name not in _SEARCH_TOOL_NAMES:
+                continue
+            try:
+                tool = tool_cls()
+                ctx = _dummy_tool_ctx()
+                result = _run_coro(
+                    lambda t=tool, q=query, c=ctx: t.call(
+                        {"query": q, "max_results": 3}, c
+                    )
+                )
+            except Exception as exc:
+                error_sink.append(f"{mod_path}: {type(exc).__name__}: {exc}")
+                continue
+            if result.is_error or not result.content:
+                error_sink.append(
+                    f"{mod_path}: {result.error_message or 'empty content'} query={query!r}"
+                )
+                continue
+            recs = result.content.get("results", []) if isinstance(result.content, dict) else []
+            if not recs:
+                error_sink.append(f"{mod_path}: 0 hits query={query!r}")
+                continue
+            for rec in recs:
+                url = (
+                    rec.get("url")
+                    or rec.get("pubmed_url")
+                    or rec.get("doi_url")
+                    or rec.get("pmid_url")
+                )
+                if not url:
+                    continue
+                seen_urls.add(url)
+                hypothesis.evidence_urls.append(url)
+                collected.append({
+                    "url": url,
+                    "title": rec.get("title", ""),
+                    "snippet": (rec.get("abstract") or rec.get("summary") or "")[:400],
+                    "source": mod_path.split(".")[-1],
+                    "hypothesis_id": hypothesis.hypothesis_id,
+                    "query": query,
+                })
+            time.sleep(0.35)
     return collected
 
 
-def _hypothesis_to_query(h: Hypothesis) -> str:
-    """Convert a hypothesis claim into a search query.
+def _hypothesis_to_query(
+    h: Hypothesis,
+    *,
+    context: Mapping[str, Any] | None = None,
+) -> str:
+    """Convert a hypothesis and high-signal clinical context into a query.
 
-    Strips filler words, keeps top ~8 content tokens.
+    The context terms prevent generic markers such as ``Ki-67`` or
+    ``recurrence`` from retrieving evidence for an unrelated cancer.
     """
     stop = {"the","a","an","of","and","or","in","to","for","with","by","on",
             "is","are","was","were","be","been","being","this","that","these",
-            "those","which","from","as","at","it","its","has","have","had"}
-    tokens = re.findall(r"[A-Za-z][A-Za-z0-9\-]{2,}", h.claim)
-    keep = [t for t in tokens if t.lower() not in stop][:8]
+            "those","which","from","as","at","it","its","has","have","had",
+            "patient","patients","de-identified","woman","man","high","higher",
+            "despite","suggest","suggests","indicate","indicates","need",
+            "needs","necessitating","risk","reported"}
+    claim_tokens = re.findall(r"[A-Za-z][A-Za-z0-9+\-]{1,}", h.claim)
+    context_text = " ".join(
+        str(context[key])
+        for key in (
+            "cancer",
+            "tumor_type",
+            "diagnosis",
+            "pathology",
+            "receptor_panel",
+            "clinical_question",
+        )
+        if context and context.get(key)
+    )
+    context_tokens = re.findall(r"[A-Za-z][A-Za-z0-9+\-]{1,}", context_text)
+    keep: list[str] = []
+    seen: set[str] = set()
+    # Lead with three pathology/diagnosis anchors, then add the discriminating
+    # hypothesis terms. Long PubMed queries overconstrain to zero results.
+    for token in [*context_tokens[:3], *claim_tokens]:
+        lowered = token.lower()
+        if lowered in stop or lowered in seen:
+            continue
+        seen.add(lowered)
+        keep.append(token)
+        if len(keep) >= 6:
+            break
     return " ".join(keep) if keep else h.claim[:80]
 
 
@@ -644,34 +945,63 @@ def _run_tournament(
     MAX_PAIRS = 30
     if len(pairs) > MAX_PAIRS:
         pairs = pairs[:MAX_PAIRS]
+    result.tournament_pairs_expected = len(pairs)
 
     for a, b in pairs:
-        try:
-            resp = llm.chat(
-                [
-                    {"role": "system", "content": _SYSTEM_TOURNAMENT},
-                    {"role": "user", "content": (
-                        f"Hypothesis A:\n{a.claim}\n\nReflection A: {a.reflection[:300]}\n"
-                        f"Alignment A: {a.evidence_alignment}\n\n"
-                        f"Hypothesis B:\n{b.claim}\n\nReflection B: {b.reflection[:300]}\n"
-                        f"Alignment B: {b.evidence_alignment}"
-                    )},
-                ],
-                max_tokens=200,
-                temperature=0.2,
-            )
-            _record_llm(result, resp)
-            j = _extract_json(resp.text)
-        except LlmUnavailable:
-            j = None
-        if not j:
-            # No signal → tie
-            expected_a = 1.0 / (1.0 + 10.0 ** ((b.elo - a.elo) / 400.0))
-            a.elo += K * (0.5 - expected_a)
-            b.elo += K * (0.5 - (1.0 - expected_a))
+        pre_a = a.elo
+        pre_b = b.elo
+        pair_user = (
+            f"Hypothesis A:\n{a.claim}\n\nReflection A: {a.reflection[:300]}\n"
+            f"Alignment A: {a.evidence_alignment}\n\n"
+            f"Hypothesis B:\n{b.claim}\n\nReflection B: {b.reflection[:300]}\n"
+            f"Alignment B: {b.evidence_alignment}"
+        )
+        resp, j = _chat_json(
+            llm,
+            result,
+            _SYSTEM_TOURNAMENT,
+            pair_user,
+            max_tokens=1600,
+            temperature=0.2,
+        )
+        winner_raw = str((j or {}).get("winner", "tie")).strip().upper()
+        winner = {
+            "HYPOTHESIS A": "A",
+            "HYPOTHESIS B": "B",
+            "DRAW": "TIE",
+        }.get(winner_raw, winner_raw)
+        margin = str((j or {}).get("margin", "")).strip().lower()
+        reason = str((j or {}).get("reason", "")).strip()
+        response_sha256 = (
+            hashlib.sha256(resp.text.encode()).hexdigest() if resp else None
+        )
+        valid_judgment = (
+            bool(j)
+            and winner in {"A", "B", "TIE"}
+            and margin in {"clear", "moderate", "marginal", "tie"}
+            and bool(reason)
+            and bool(resp and resp.request_id)
+        )
+        if not valid_judgment:
+            result.tournament_matches.append({
+                "hypothesis_a_id": a.hypothesis_id,
+                "hypothesis_b_id": b.hypothesis_id,
+                "hypothesis_a_claim": a.claim,
+                "hypothesis_b_claim": b.claim,
+                "winner": "tie",
+                "margin": "unavailable",
+                "reason": "missing valid MedGemma pairwise judgment or request receipt",
+                "model_request_id": resp.request_id if resp else None,
+                "model_response_sha256": response_sha256,
+                "model_response_chars": len(resp.text) if resp else 0,
+                "completed": False,
+                "elo_a_before": round(pre_a, 3),
+                "elo_b_before": round(pre_b, 3),
+                "elo_a_after": round(a.elo, 3),
+                "elo_b_after": round(b.elo, 3),
+            })
             continue
 
-        winner = str(j.get("winner", "tie")).upper()
         if winner == "A":
             s_a, s_b = 1.0, 0.0
             a.tournament_wins += 1
@@ -682,14 +1012,55 @@ def _run_tournament(
             a.tournament_losses += 1
         else:
             s_a, s_b = 0.5, 0.5
+            a.tournament_ties += 1
+            b.tournament_ties += 1
 
         expected_a = 1.0 / (1.0 + 10.0 ** ((b.elo - a.elo) / 400.0))
         expected_b = 1.0 - expected_a
         a.elo += K * (s_a - expected_a)
         b.elo += K * (s_b - expected_b)
+        result.tournament_pairs_completed += 1
+        result.tournament_matches.append({
+            "hypothesis_a_id": a.hypothesis_id,
+            "hypothesis_b_id": b.hypothesis_id,
+            "hypothesis_a_claim": a.claim,
+            "hypothesis_b_claim": b.claim,
+            "winner": winner,
+            "margin": margin,
+            "reason": reason,
+            "model_request_id": resp.request_id,
+            "model_response_sha256": response_sha256,
+            "model_response_chars": len(resp.text),
+            "completed": True,
+            "elo_a_before": round(pre_a, 3),
+            "elo_b_before": round(pre_b, 3),
+            "elo_a_after": round(a.elo, 3),
+            "elo_b_after": round(b.elo, 3),
+        })
 
 
 def _record_llm(result: StageResult, resp: LlmResponse) -> None:
     result.llm_calls += 1
+    result.llm_prompt_tokens += resp.prompt_tokens
+    result.llm_completion_tokens += resp.completion_tokens
     result.llm_total_tokens += resp.prompt_tokens + resp.completion_tokens
     result.llm_cost_usd += resp.est_cost_usd
+    result.llm_latency_s += resp.latency_s
+    result.llm_provider = resp.route if result.llm_provider in {None, resp.route} else "mixed"
+    result.llm_model = resp.model if result.llm_model in {None, resp.model} else "mixed"
+    app_version = resp.app_version or None
+    result.llm_app_version = (
+        app_version
+        if result.llm_app_version in {None, app_version}
+        else "mixed"
+    )
+    revision = resp.revision_sha256 or None
+    result.llm_revision_sha256 = (
+        revision
+        if result.llm_revision_sha256 in {None, revision}
+        else "mixed"
+    )
+    if resp.request_id and resp.request_id not in result.llm_request_ids:
+        result.llm_request_ids.append(resp.request_id)
+    if resp.honesty_warning and resp.honesty_warning not in result.llm_honesty_warnings:
+        result.llm_honesty_warnings.append(resp.honesty_warning)

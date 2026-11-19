@@ -1,0 +1,61 @@
+{
+  "version": "cbis_ddsm_fusion_v3_push",
+  "fused_dim": 1309,
+  "join_coverage": 3086,
+  "candidates": [
+    {
+      "name": "VOTE_LR_HGB",
+      "auroc": 0.8623056733292954
+    },
+    {
+      "name": "HGB_deep",
+      "auroc": 0.8614375126186149
+    },
+    {
+      "name": "HGB",
+      "auroc": 0.8592772057338987
+    },
+    {
+      "name": "LR_C0.05",
+      "auroc": 0.8416313345447204
+    },
+    {
+      "name": "CalLR",
+      "auroc": 0.8380072683222289
+    },
+    {
+      "name": "ET",
+      "auroc": 0.836331516252776
+    },
+    {
+      "name": "LR_C0.1",
+      "auroc": 0.836129618413083
+    },
+    {
+      "name": "MLP",
+      "auroc": 0.8296587926509187
+    },
+    {
+      "name": "LR_C0.3",
+      "auroc": 0.8273167777104785
+    },
+    {
+      "name": "LR_no_assessment",
+      "auroc": 0.8197859882899253
+    },
+    {
+      "name": "LR_C1.0",
+      "auroc": 0.8184029880880275
+    },
+    {
+      "name": "LR_emb_dens_assess_sub",
+      "auroc": 0.8101756511205331
+    }
+  ],
+  "best": {
+    "name": "VOTE_LR_HGB",
+    "auroc": 0.8623056733292954,
+    "floor_pass": true
+  },
+  "artifact_sha256": "70775fed552347d75b058242e8bbbd608961dfd5f8f96a58a17bcb444664fce4"
+}

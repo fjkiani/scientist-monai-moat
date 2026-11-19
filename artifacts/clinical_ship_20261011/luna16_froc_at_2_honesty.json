@@ -1,0 +1,16 @@
+{
+  "gate": "luna16_clinical_meter",
+  "meter": "FROC@2",
+  "cohort": "held-out n=88",
+  "froc_at_2": 0.8267399271674979,
+  "ckpt_sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01",
+  "ckpt_path": "models/luna16/luna16_baseline_b5e79231466a.pt",
+  "claim_rejected": "0.904 defaultLung marketing \u2014 not this receipt",
+  "source_receipt": "models/luna16/luna16_baseline_b5e79231466a_froc_result.json",
+  "infer_app_version": "luna16-infer-v0.5.2-alpha-resample",
+  "resample_wired": true,
+  "deploy_urls": {
+    "fjkiani": "https://fjkiani--luna16-detect.modal.run",
+    "crispro-test": "https://crispro-test--luna16-detect.modal.run"
+  }
+}

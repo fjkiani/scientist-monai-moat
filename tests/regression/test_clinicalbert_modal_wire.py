@@ -1,6 +1,6 @@
-"""Regression: enforce v0.4.1 prod wiring for the ClinicalBERT report parser.
+"""Regression: enforce production wiring for the ClinicalBERT report parser.
 
-The v0.4.1 production plan requires:
+The production contract requires:
 
   1. ``render.yaml`` publishes the environment variables the app.py NSCLC
      branch needs to route to the Modal deployment.
@@ -19,14 +19,14 @@ which is deliberately kept out of the ``regression`` marker's scope.
 from __future__ import annotations
 
 import ast
-from pathlib import Path
 import re
+from pathlib import Path
 
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 RENDER_YAML = REPO_ROOT / "render.yaml"
-APP_PY = REPO_ROOT / "src" / "oncology_arbiter" / "api" / "app.py"
+APP_PY = REPO_ROOT / "src" / "oncology_arbiter" / "api" / "runtime.py"
 MODAL_CLIENT_PY = (
     REPO_ROOT / "src" / "oncology_arbiter" / "nlp" / "clinicalbert_modal_client.py"
 )
@@ -46,10 +46,10 @@ def test_render_yaml_declares_modal_env() -> None:
     ), "render.yaml does not set CLINICALBERT_BACKEND=modal"
     assert re.search(
         r"^\s*-\s*key:\s*CLINICALBERT_MODAL_URL\s*\n\s*value:\s*"
-        r"https://crispro-test--clinicalbert\s*$",
+        r"https://crispro--clinicalbert\s*$",
         text,
         re.MULTILINE,
-    ), "render.yaml does not set CLINICALBERT_MODAL_URL to the crispro-test URL"
+    ), "render.yaml does not set CLINICALBERT_MODAL_URL to the deployed real-data URL"
     # Co-Scientist MUST stay ON — otherwise elo_ranked_hypotheses is empty
     # even after the ClinicalBERT parse succeeds.
     assert re.search(
@@ -94,19 +94,18 @@ def test_modal_client_module_exists_and_is_stdlib_only() -> None:
 
 @pytest.mark.regression
 def test_app_py_imports_and_uses_modal_client() -> None:
-    """app.py NSCLC branch must import ClinicalBertModalClient and route on backend=modal."""
+    """The ClinicalBERT dispatcher must import ClinicalBertModalClient and route on backend=modal."""
     assert APP_PY.exists(), f"missing {APP_PY}"
     src = APP_PY.read_text()
 
-    # Must import the Modal client somewhere in app.py (top-level or inside
-    # the /v1/case/full handler).
+    # The dispatcher lives in api/runtime.py after the app factory split.
     assert "ClinicalBertModalClient" in src, (
-        "app.py does not reference ClinicalBertModalClient"
+        "runtime.py does not reference ClinicalBertModalClient"
     )
 
     # Must dispatch on CLINICALBERT_BACKEND env var and honor 'modal'.
     assert "CLINICALBERT_BACKEND" in src, (
-        "app.py does not read CLINICALBERT_BACKEND"
+        "runtime.py does not read CLINICALBERT_BACKEND"
     )
     # CLINICALBERT_MODAL_URL must be read either directly in app.py OR
     # inside the Modal client module app.py delegates to. Both count as
@@ -117,14 +116,14 @@ def test_app_py_imports_and_uses_modal_client() -> None:
         "CLINICALBERT_MODAL_URL" in src
         or "CLINICALBERT_MODAL_URL" in modal_client_src
     ), (
-        "Neither app.py nor clinicalbert_modal_client.py reads "
+        "Neither runtime.py nor clinicalbert_modal_client.py reads "
         "CLINICALBERT_MODAL_URL; render.yaml env var would be dead"
     )
-    # And a modal-branch string literal in app.py, so the routing is not
+    # And a modal-branch string literal, so the routing is not
     # just a shell of the env var check.
     assert (
         '"modal"' in src or "'modal'" in src
-    ), "app.py does not branch on the 'modal' backend value"
+    ), "runtime.py does not branch on the 'modal' backend value"
 
     # AST-level sanity: parse succeeds — no syntax errors were introduced
     # by the ClinicalBERT wiring block.
@@ -160,3 +159,34 @@ def test_nsclc_response_schema_carries_parsed_report() -> None:
         "NsclcResponse missing 'parsed_report_provenance' field; "
         f"found {sorted(field_names)}"
     )
+
+
+@pytest.mark.regression
+def test_modal_deployment_uses_release_locked_sliding_windows() -> None:
+    """Modal inference must package and call the shared 192/32 chunker."""
+    modal_app_py = REPO_ROOT / "deploy" / "modal" / "clinicalbert_app.py"
+    helper_py = (
+        REPO_ROOT
+        / "src"
+        / "oncology_arbiter"
+        / "nlp"
+        / "clinicalbert_sliding_window.py"
+    )
+    assert modal_app_py.exists(), f"missing {modal_app_py}"
+    assert helper_py.exists(), f"missing {helper_py}"
+
+    src = modal_app_py.read_text()
+    helper_src = helper_py.read_text()
+    ast.parse(src)
+    ast.parse(helper_src)
+
+    assert ".add_local_file(" in src
+    assert "ClinicalBertV2Runtime" in src
+    assert "max_length=512" not in src
+    assert "max_len=512" not in src
+
+    assert "WINDOW_TOKENS = 192" in helper_src
+    assert "OVERLAP_TOKENS = 32" in helper_src
+    assert "return_overflowing_tokens=True" in helper_src
+    assert 'padding="max_length"' in helper_src
+    assert "mean_logits = logit_sums / observations[:, None]" in helper_src

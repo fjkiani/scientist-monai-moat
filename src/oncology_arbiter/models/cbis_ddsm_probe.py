@@ -1,11 +1,12 @@
 """Trained LogReg probe on top of Modal-served MedSigLIP-448 embeddings.
 
-Loads ``models/cbis_ddsm_logreg_v1.joblib`` (a scikit-learn Pipeline of
+Loads ``models/cbis_ddsm_logreg_v2.joblib`` (sha256 ``e5f5b67caf8ba18006e3d582e91becf95fbb20b8b34417366c7ef07b906a211b``; a scikit-learn Pipeline of
 ``StandardScaler + LogisticRegression`` fit on 2445 CBIS-DDSM_1024 training
-images, held-out test AUC = 0.7526 on n=641). See
-``docs/proofs/cbis_ddsm_logreg_v1_metrics.json`` for the full metrics
-dossier including the CV per-fold breakdown, threshold sweep, and honesty
-caveats.
+images). Features are the 1152-d MedSigLIP embedding only. No clinical
+metadata and no radiologist ``assessment``. Held-out rescore on the cached
+test embeddings is AUROC 0.747552 (n=641). The C=0.01 sweep row 0.752120 in
+``docs/proofs/cbis_ddsm_logreg_v2_metrics.json`` is not this joblib's
+``test_metrics.auroc`` (0.747551988693721).
 
 **Off-label for mammography.** MedSigLIP-448 was not pretrained on
 mammography; this probe is a supervised head that recovers useful signal
@@ -24,9 +25,10 @@ from typing import Any, Sequence
 logger = logging.getLogger(__name__)
 
 
-DEFAULT_MODEL_PATH = Path(__file__).resolve().parents[3] / "models" / "cbis_ddsm_logreg_v1.joblib"
+EXPECTED_JOBLIB_SHA256 = "e5f5b67caf8ba18006e3d582e91becf95fbb20b8b34417366c7ef07b906a211b"
+DEFAULT_MODEL_PATH = Path(__file__).resolve().parents[3] / "models" / "cbis_ddsm_logreg_v2.joblib"
 DEFAULT_METRICS_PATH = (
-    Path(__file__).resolve().parents[3] / "docs" / "proofs" / "cbis_ddsm_logreg_v1_metrics.json"
+    Path(__file__).resolve().parents[3] / "docs" / "proofs" / "cbis_ddsm_logreg_v2_metrics.json"
 )
 
 # Threshold selected from the metrics dossier for the "high-sensitivity" op
@@ -37,7 +39,8 @@ DEFAULT_THRESHOLD_LABEL: str = "recall_0.85"
 # Honesty text surfaced to the API caller.
 CBIS_DDSM_PROBE_WARNING: str = (
     "This probe is a supervised classifier trained on 2445 CBIS-DDSM images "
-    "using MedSigLIP-448 embeddings (held-out test AUC = 0.7526 on n=641). "
+    "using 1152-d MedSigLIP embeddings only (held-out test AUROC = 0.747552 "
+    "on n=641). No clinical metadata and no radiologist assessment. "
     "MedSigLIP-448 was NOT pretrained on mammography — the backbone is used "
     "off-label. Fine-tuned mammography CNNs on CBIS-DDSM typically reach "
     "AUC 0.85-0.90, so this probe is a research prototype, not a clinical tool."
@@ -55,7 +58,7 @@ class CbisDdsmProbeResult:
     predicted_label: str                # "cancer" / "not_cancer"
     embedding_dim: int                  # 1152 (SigLIP-So400m/14)
     model_repo: str = "google/medsiglip-448"
-    probe_version: str = "cbis_ddsm_logreg_v1"
+    probe_version: str = "cbis_ddsm_logreg_v2"
     warnings: list[str] = field(default_factory=lambda: [CBIS_DDSM_PROBE_WARNING])
 
 
@@ -84,10 +87,29 @@ class CbisDdsmProbe:
                 f"trained probe not found at {self.model_path}. "
                 f"Run scripts/train_cbis_ddsm_logreg.py or check the deploy artifact."
             )
+        import hashlib
+
         from joblib import load as joblib_load
 
+        digest = hashlib.sha256(self.model_path.read_bytes()).hexdigest()
+        if digest != EXPECTED_JOBLIB_SHA256:
+            raise RuntimeError(
+                f"cbis joblib identity mismatch: expected {EXPECTED_JOBLIB_SHA256}, got {digest}"
+            )
+        if self.model_path.name != "cbis_ddsm_logreg_v2.joblib":
+            raise RuntimeError(
+                f"cbis_v2_path_refuse:{self.model_path.name}:1152-d MedSigLIP "
+                "must not enter a fusion head"
+            )
         self._pipe = joblib_load(self.model_path)
-        logger.info("Loaded CBIS-DDSM probe: %s", self.model_path)
+        scaler = getattr(self._pipe, "named_steps", {}).get("scaler")
+        n_in = getattr(scaler, "n_features_in_", None)
+        if n_in != 1152:
+            raise RuntimeError(
+                f"cbis_v2_shape_refuse:scaler_n_features={n_in}:expected_1152"
+            )
+        self.artifact_sha256 = digest
+        logger.info("Loaded CBIS-DDSM probe: %s n_features=%s", self.model_path, n_in)
 
     def predict_proba(self, embedding: Sequence[float]) -> float:
         """Return P(cancer) for a single 1152-d MedSigLIP embedding."""

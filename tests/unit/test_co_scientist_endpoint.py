@@ -1,4 +1,4 @@
-"""Unit tests for POST /v1/co_scientist/run (v0.4.0-alpha, PLAN §5 PR #5).
+"""Unit tests for POST /v1/offline_ranker/run (v0.4.0-alpha, PLAN §5 PR #5).
 
 Contract under test:
 
@@ -145,8 +145,8 @@ def test_co_scientist_endpoint_listed_in_health(client):
     r = client.get("/health")
     assert r.status_code == 200, r.text
     endpoints = r.json()["endpoints"]
-    assert "POST /v1/co_scientist/run" in endpoints, (
-        "/v1/co_scientist/run must be advertised in /health.endpoints, "
+    assert "POST /v1/offline_ranker/run" in endpoints, (
+        "/v1/offline_ranker/run must be advertised in /health.endpoints, "
         f"got: {endpoints}"
     )
 
@@ -157,7 +157,7 @@ def test_happy_path_envelope_shape(client):
         "screening": _screening_envelope([_ev(HONEST_URL, "honest citation")]),
         "seed_urls": [HONEST_URL],
     }
-    r = client.post("/v1/co_scientist/run", json=payload)
+    r = client.post("/v1/offline_ranker/run", json=payload)
     assert r.status_code == 200, r.text
     body = r.json()
 
@@ -195,8 +195,8 @@ def test_deterministic_same_input_same_output(client):
         "screening": _screening_envelope([_ev(HONEST_URL, "cite")]),
         "seed_urls": [HONEST_URL],
     }
-    r1 = client.post("/v1/co_scientist/run", json=payload)
-    r2 = client.post("/v1/co_scientist/run", json=payload)
+    r1 = client.post("/v1/offline_ranker/run", json=payload)
+    r2 = client.post("/v1/offline_ranker/run", json=payload)
     assert r1.status_code == 200 and r2.status_code == 200
     b1, b2 = r1.json(), r2.json()
 
@@ -234,7 +234,7 @@ def test_hostile_urls_all_dropped_by_reflect(client):
         "screening": _screening_envelope(hostile_ev),
         "seed_urls": [],  # empty — nothing was actually fetched
     }
-    r = client.post("/v1/co_scientist/run", json=payload)
+    r = client.post("/v1/offline_ranker/run", json=payload)
     assert r.status_code == 200, r.text
     body = r.json()
 
@@ -310,7 +310,7 @@ def test_hostile_urls_across_multiple_stages(client):
         "therapy": _therapy_envelope(hostile_b),
         "seed_urls": [],
     }
-    r = client.post("/v1/co_scientist/run", json=payload)
+    r = client.post("/v1/offline_ranker/run", json=payload)
     assert r.status_code == 200, r.text
     body = r.json()
 
@@ -340,7 +340,7 @@ def test_mixed_urls_only_hostile_dropped(client):
         "screening": _screening_envelope(mixed_ev),
         "seed_urls": [HONEST_URL],
     }
-    r = client.post("/v1/co_scientist/run", json=payload)
+    r = client.post("/v1/offline_ranker/run", json=payload)
     assert r.status_code == 200, r.text
     body = r.json()
 
@@ -367,7 +367,7 @@ def test_mixed_urls_only_hostile_dropped(client):
 def test_empty_envelopes_returns_empty_tournament(client):
     """No stage envelopes → empty tournament, no drops, no error."""
     payload = {"seed_urls": []}
-    r = client.post("/v1/co_scientist/run", json=payload)
+    r = client.post("/v1/offline_ranker/run", json=payload)
     assert r.status_code == 200, r.text
     body = r.json()
 
@@ -387,7 +387,7 @@ def test_pagination_return_top_respected(client):
         "seed_urls": [HONEST_URL],
         "return_top": 2,
     }
-    r = client.post("/v1/co_scientist/run", json=payload)
+    r = client.post("/v1/offline_ranker/run", json=payload)
     assert r.status_code == 200, r.text
     body = r.json()
     assert len(body["hypotheses"]) <= 2, (
@@ -405,14 +405,14 @@ def test_invalid_return_top_rejected(client):
         "seed_urls": [],
         "return_top": 0,  # < min
     }
-    r = client.post("/v1/co_scientist/run", json=payload)
+    r = client.post("/v1/offline_ranker/run", json=payload)
     assert r.status_code == 422, (
         f"return_top=0 should be rejected as < min, got {r.status_code}"
     )
 
 
 def test_route_is_public_no_auth_required(client, monkeypatch):
-    """POST /v1/co_scientist/run must remain callable with AUTH_MODE=on.
+    """POST /v1/offline_ranker/run must remain callable with AUTH_MODE=on.
 
     Matches /v1/elo/rank posture: standalone Co-Scientist has no PHI
     ingest, so it stays public for demo callers.
@@ -423,11 +423,11 @@ def test_route_is_public_no_auth_required(client, monkeypatch):
     from oncology_arbiter.api.app import create_app as _create
     _client = TestClient(_create())
     r = _client.post(
-        "/v1/co_scientist/run",
+        "/v1/offline_ranker/run",
         json={"seed_urls": []},  # no API key header
     )
     # Endpoint answers even without a key.
     assert r.status_code == 200, (
-        f"/v1/co_scientist/run must be public under AUTH_MODE=on, got "
+        f"/v1/offline_ranker/run must be public under AUTH_MODE=on, got "
         f"status {r.status_code}: {r.text[:400]}"
     )

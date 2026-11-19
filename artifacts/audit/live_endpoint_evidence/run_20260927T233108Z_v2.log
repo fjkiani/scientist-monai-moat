@@ -1,0 +1,191 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.13, pytest-8.4.1, pluggy-1.6.0 -- /workspace/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /workspace/smm
+configfile: pyproject.toml
+plugins: anyio-4.15.1, fast-array-utils-1.2.1, jaxtyping-0.3.2, langsmith-0.4.10, typeguard-4.4.4
+collecting ... collected 35 items / 1 deselected / 34 selected
+
+tests/integration/test_medsiglip_modal_client.py::test_preflight_reports_allowed_and_dim_1152 PASSED
+tests/integration/test_medsiglip_modal_client.py::test_embed_png_returns_1152_vector PASSED
+tests/integration/test_medsiglip_modal_client.py::test_embed_dicoms_batch_matches_singleton PASSED
+tests/integration/test_medsiglip_modal_client.py::test_run_returns_medsiglip_result_contract PASSED
+tests/integration/test_medsiglip_modal_client.py::test_factory_selects_modal_via_env PASSED
+tests/integration/test_clinicalbert_live.py::test_healthz_reports_ok PASSED
+tests/integration/test_clinicalbert_live.py::test_info_reports_real_v051_provenance_not_synthetic_default PASSED
+tests/integration/test_clinicalbert_live.py::test_info_app_version_and_sliding_window_contract_matches_client_expectation FAILED
+tests/integration/test_clinicalbert_live.py::test_parse_via_production_client_succeeds_on_real_reports[0] FAILED
+tests/integration/test_clinicalbert_live.py::test_parse_via_production_client_succeeds_on_real_reports[2] FAILED
+tests/integration/test_clinicalbert_live.py::test_parse_via_production_client_succeeds_on_real_reports[6] FAILED
+tests/integration/test_clinicalbert_live.py::test_parse_entity_type_recall_via_raw_endpoint_bypassing_strict_contract 
+[clinicalbert LIVE v0.5.1, raw endpoint, n=8 real reports] tp=24 fp=4 fn=21 precision=0.8571 recall=0.5333 entity_type_micro_f1=0.6575
+n_tokens per report (no sliding window -> hard truncation ceiling): [502, 826, 1014, 1083, 122, 783, 1073, 1714]
+per-entity-type breakdown: {
+  "MARGIN": {
+    "tp": 4,
+    "fp": 0,
+    "fn": 3
+  },
+  "TUMOR_SIZE_MM": {
+    "tp": 3,
+    "fp": 2,
+    "fn": 3
+  },
+  "N_STAGE": {
+    "tp": 1,
+    "fp": 0,
+    "fn": 4
+  },
+  "M_STAGE": {
+    "tp": 4,
+    "fp": 0,
+    "fn": 2
+  },
+  "T_STAGE": {
+    "tp": 4,
+    "fp": 1,
+    "fn": 2
+  },
+  "PR_VALUE": {
+    "tp": 2,
+    "fp": 0,
+    "fn": 0
+  },
+  "HER2_VALUE": {
+    "tp": 1,
+    "fp": 1,
+    "fn": 0
+  },
+  "ER_VALUE": {
+    "tp": 2,
+    "fp": 0,
+    "fn": 0
+  },
+  "GRADE": {
+    "tp": 1,
+    "fp": 0,
+    "fn": 4
+  },
+  "LVI": {
+    "tp": 0,
+    "fp": 0,
+    "fn": 3
+  },
+  "KRAS": {
+    "tp": 1,
+    "fp": 0,
+    "fn": 0
+  },
+  "EGFR": {
+    "tp": 1,
+    "fp": 0,
+    "fn": 0
+  }
+}
+Live /info self-reported combined test_micro_f1 = 0.08089260808926081 (BIO-span level, full 296-report held-out set) -- this test's entity-type-presence micro-F1 on 8 reports is a different methodology/sample, reported for direction only, not as a reproduction of that number.
+PASSED
+tests/integration/test_clinicalbert_live.py::test_parse_rejects_empty_report_text_client_side PASSED
+tests/integration/test_case_storage_live.py::test_upload_real_dicom_is_content_addressable PASSED
+tests/integration/test_case_storage_live.py::test_reupload_same_bytes_is_idempotent PASSED
+tests/integration/test_case_storage_live.py::test_manifest_matches_uploaded_case PASSED
+tests/integration/test_case_storage_live.py::test_get_file_returns_byte_identical_content PASSED
+tests/integration/test_case_storage_live.py::test_durable_prior_session_case_still_resolves PASSED
+tests/integration/test_case_storage_live.py::test_upload_with_no_payload_fields_raises_upstream_error_not_crash PASSED
+tests/integration/test_phikon_pathology_live.py::test_embed_real_tumor_tile_returns_768_dim PASSED
+tests/integration/test_phikon_pathology_live.py::test_embed_is_deterministic_across_repeated_calls PASSED
+tests/integration/test_phikon_pathology_live.py::test_embeddings_of_genuinely_different_tissue_are_not_degenerate PASSED
+tests/integration/test_phikon_pathology_live.py::test_receipt_carries_verifiable_link_to_exact_input_bytes PASSED
+tests/integration/test_gemma_fallback_live.py::test_healthz_reports_qwen_not_gemma PASSED
+tests/integration/test_gemma_fallback_live.py::test_chat_completion_infra_is_healthy PASSED
+tests/integration/test_gemma_fallback_live.py::test_chat_completion_model_identity_must_be_gemma_family FAILED
+tests/integration/test_luna16_infer_live.py::test_healthz_reports_ok_and_bundle_version PASSED
+tests/integration/test_luna16_infer_live.py::test_info_reports_loaded_model_state_and_preprocessing PASSED
+tests/integration/test_luna16_infer_live.py::test_detect_rejects_malformed_case_id_client_side PASSED
+tests/integration/test_luna16_infer_live.py::test_detect_valid_format_but_nonexistent_case_id_is_honest_upstream_error PASSED
+tests/integration/test_luna16_infer_live.py::test_detect_real_chest_ct_returns_plausible_detections 
+[luna16-infer live detect] case_id=892531e5e4dde1e8 n_detections_total=4 n_returned=4 top_score=0.7112138867378235 inference_seconds=2.9023 total_seconds=8.2557 device=cuda:0 input_shape=[121, 512, 512]
+PASSED
+tests/integration/test_luna16_infer_live.py::test_detect_preprocessing_does_not_resample_to_its_own_declared_target_spacing 
+[luna16-infer spacing probe] case_id=892531e5e4dde1e8 native=(dz=2.5, dy=0.7617189884185791, dx=0.7617189884185791) declared_target=[1.25, 0.703125, 0.703125] z_ratio=2.000x in_plane_ratio=1.083x
+FAILED
+tests/integration/test_medgemma_27b_live.py::test_healthz_reports_current_app_version PASSED
+tests/integration/test_medgemma_27b_live.py::test_deployed_app_version_matches_repo_and_client_contract FAILED
+
+=================================== FAILURES ===================================
+_ test_info_app_version_and_sliding_window_contract_matches_client_expectation _
+tests/integration/test_clinicalbert_live.py:135: in test_info_app_version_and_sliding_window_contract_matches_client_expectation
+    assert live_app_version == EXPECTED_APP_VERSION, (
+E   AssertionError: DEPLOY-DRIFT: live clinicalbert app_version='clinicalbert-modal-v0.5.1' but repo source + production client both expect 'clinicalbert-modal-v0.5.2-sliding-window'. The reviewed/committed v0.5.2-sliding-window code (with model_sha256/metrics_sha256 provenance pinning) was never `modal deploy`'d -- same class of gap already found for medgemma-27b. Live /info is missing these keys entirely: ['window_tokens', 'overlap_tokens', 'window_aggregation', 'model_sha256', 'metrics_sha256'].
+E   assert 'clinicalbert-modal-v0.5.1' == 'clinicalbert...liding-window'
+E     
+E     - clinicalbert-modal-v0.5.2-sliding-window
+E     + clinicalbert-modal-v0.5.1
+_________ test_parse_via_production_client_succeeds_on_real_reports[0] _________
+tests/integration/test_clinicalbert_live.py:165: in test_parse_via_production_client_succeeds_on_real_reports
+    client.parse(rec["text"])
+src/oncology_arbiter/nlp/clinicalbert_modal_client.py:199: in parse
+    validate_clinicalbert_contract(d)
+src/oncology_arbiter/nlp/clinicalbert_modal_client.py:95: in validate_clinicalbert_contract
+    raise ClinicalBertModalError(
+E   oncology_arbiter.nlp.clinicalbert_modal_client.ClinicalBertModalError: clinicalbert_contract_mismatch:{"app_version": {"expected": "clinicalbert-modal-v0.5.2-sliding-window", "observed": "clinicalbert-modal-v0.5.1"}, "metrics_sha256": {"expected": "06e2ac8433dfc4dc727150e44542cc5a07fb0b3666403eb9f04828fa65058def", "observed": null}, "model_sha256": {"expected": "7f83e9afebd249dbf8dc391bf20cf36e9127b75c698b1495906b3f69c37f1d03", "observed": null}, "overlap_tokens": {"expected": 32, "observed": null}, "window_aggregation": {"expected": "mean_logits_per_word_across_overlapping_windows", "observed": null}, "window_tokens": {"expected": 192, "observed": null}}
+
+During handling of the above exception, another exception occurred:
+tests/integration/test_clinicalbert_live.py:167: in test_parse_via_production_client_succeeds_on_real_reports
+    pytest.fail(
+E   Failed: parse() raised on real report #0 (breast_crc, 4 gold entities) -- expected root cause: deploy-drift (live=v0.5.1, client expects v0.5.2-sliding-window). Raw error: clinicalbert_contract_mismatch:{"app_version": {"expected": "clinicalbert-modal-v0.5.2-sliding-window", "observed": "clinicalbert-modal-v0.5.1"}, "metrics_sha256": {"expected": "06e2ac8433dfc4dc727150e44542cc5a07fb0b3666403eb9f04828fa65058def", "observed": null}, "model_sha256": {"expected": "7f83e9afebd249dbf8dc391bf20cf36e9127b75c698b1495906b3f69c37f1d03", "observed": null}, "overlap_tokens": {"expected": 32, "observed": null}, "window_aggregation": {"expected": "mean_logits_per_word_across_overlapping_windows", "observed": null}, "window_tokens": {"expected": 192, "observed": null}}
+_________ test_parse_via_production_client_succeeds_on_real_reports[2] _________
+tests/integration/test_clinicalbert_live.py:165: in test_parse_via_production_client_succeeds_on_real_reports
+    client.parse(rec["text"])
+src/oncology_arbiter/nlp/clinicalbert_modal_client.py:199: in parse
+    validate_clinicalbert_contract(d)
+src/oncology_arbiter/nlp/clinicalbert_modal_client.py:95: in validate_clinicalbert_contract
+    raise ClinicalBertModalError(
+E   oncology_arbiter.nlp.clinicalbert_modal_client.ClinicalBertModalError: clinicalbert_contract_mismatch:{"app_version": {"expected": "clinicalbert-modal-v0.5.2-sliding-window", "observed": "clinicalbert-modal-v0.5.1"}, "metrics_sha256": {"expected": "06e2ac8433dfc4dc727150e44542cc5a07fb0b3666403eb9f04828fa65058def", "observed": null}, "model_sha256": {"expected": "7f83e9afebd249dbf8dc391bf20cf36e9127b75c698b1495906b3f69c37f1d03", "observed": null}, "overlap_tokens": {"expected": 32, "observed": null}, "window_aggregation": {"expected": "mean_logits_per_word_across_overlapping_windows", "observed": null}, "window_tokens": {"expected": 192, "observed": null}}
+
+During handling of the above exception, another exception occurred:
+tests/integration/test_clinicalbert_live.py:167: in test_parse_via_production_client_succeeds_on_real_reports
+    pytest.fail(
+E   Failed: parse() raised on real report #2 (breast_crc, 8 gold entities) -- expected root cause: deploy-drift (live=v0.5.1, client expects v0.5.2-sliding-window). Raw error: clinicalbert_contract_mismatch:{"app_version": {"expected": "clinicalbert-modal-v0.5.2-sliding-window", "observed": "clinicalbert-modal-v0.5.1"}, "metrics_sha256": {"expected": "06e2ac8433dfc4dc727150e44542cc5a07fb0b3666403eb9f04828fa65058def", "observed": null}, "model_sha256": {"expected": "7f83e9afebd249dbf8dc391bf20cf36e9127b75c698b1495906b3f69c37f1d03", "observed": null}, "overlap_tokens": {"expected": 32, "observed": null}, "window_aggregation": {"expected": "mean_logits_per_word_across_overlapping_windows", "observed": null}, "window_tokens": {"expected": 192, "observed": null}}
+_________ test_parse_via_production_client_succeeds_on_real_reports[6] _________
+tests/integration/test_clinicalbert_live.py:165: in test_parse_via_production_client_succeeds_on_real_reports
+    client.parse(rec["text"])
+src/oncology_arbiter/nlp/clinicalbert_modal_client.py:199: in parse
+    validate_clinicalbert_contract(d)
+src/oncology_arbiter/nlp/clinicalbert_modal_client.py:95: in validate_clinicalbert_contract
+    raise ClinicalBertModalError(
+E   oncology_arbiter.nlp.clinicalbert_modal_client.ClinicalBertModalError: clinicalbert_contract_mismatch:{"app_version": {"expected": "clinicalbert-modal-v0.5.2-sliding-window", "observed": "clinicalbert-modal-v0.5.1"}, "metrics_sha256": {"expected": "06e2ac8433dfc4dc727150e44542cc5a07fb0b3666403eb9f04828fa65058def", "observed": null}, "model_sha256": {"expected": "7f83e9afebd249dbf8dc391bf20cf36e9127b75c698b1495906b3f69c37f1d03", "observed": null}, "overlap_tokens": {"expected": 32, "observed": null}, "window_aggregation": {"expected": "mean_logits_per_word_across_overlapping_windows", "observed": null}, "window_tokens": {"expected": 192, "observed": null}}
+
+During handling of the above exception, another exception occurred:
+tests/integration/test_clinicalbert_live.py:167: in test_parse_via_production_client_succeeds_on_real_reports
+    pytest.fail(
+E   Failed: parse() raised on real report #6 (nsclc, 26 gold entities) -- expected root cause: deploy-drift (live=v0.5.1, client expects v0.5.2-sliding-window). Raw error: clinicalbert_contract_mismatch:{"app_version": {"expected": "clinicalbert-modal-v0.5.2-sliding-window", "observed": "clinicalbert-modal-v0.5.1"}, "metrics_sha256": {"expected": "06e2ac8433dfc4dc727150e44542cc5a07fb0b3666403eb9f04828fa65058def", "observed": null}, "model_sha256": {"expected": "7f83e9afebd249dbf8dc391bf20cf36e9127b75c698b1495906b3f69c37f1d03", "observed": null}, "overlap_tokens": {"expected": 32, "observed": null}, "window_aggregation": {"expected": "mean_logits_per_word_across_overlapping_windows", "observed": null}, "window_tokens": {"expected": 192, "observed": null}}
+___________ test_chat_completion_model_identity_must_be_gemma_family ___________
+tests/integration/test_gemma_fallback_live.py:116: in test_chat_completion_model_identity_must_be_gemma_family
+    assert "gemma" in reported_model.lower(), (
+E   AssertionError: gemma-fallback app reported model='qwen2.5-7b-instruct'; expected a Gemma-family model identity. KNOWN DEFECT: this app currently serves Qwen/Qwen2.5-7B-Instruct under the gemma-fallback label. Tracked separately from any deployment fix -- do not silence.
+E   assert 'gemma' in 'qwen2.5-7b-instruct'
+E    +  where 'qwen2.5-7b-instruct' = <built-in method lower of str object at 0x7eb5aee9dbb0>()
+E    +    where <built-in method lower of str object at 0x7eb5aee9dbb0> = 'qwen2.5-7b-instruct'.lower
+_ test_detect_preprocessing_does_not_resample_to_its_own_declared_target_spacing _
+tests/integration/test_luna16_infer_live.py:279: in test_detect_preprocessing_does_not_resample_to_its_own_declared_target_spacing
+    assert abs(native_dz - target[0]) < tol, (
+E   AssertionError: z-spacing NOT resampled to declared target: native dz=2.5mm, target dz=1.25mm (ratio 2.00x). detect() has no Spacingd step for the case_id path -- this is the expected failure mode documented in evidence key F of gate_violation_bf5e54f8.json, not a test bug.
+E   assert 1.25 < 0.01
+E    +  where 1.25 = abs((2.5 - 1.25))
+__________ test_deployed_app_version_matches_repo_and_client_contract __________
+tests/integration/test_medgemma_27b_live.py:85: in test_deployed_app_version_matches_repo_and_client_contract
+    assert observed == EXPECTED_APP_VERSION, (
+E   AssertionError: deployed app_version='medgemma-27b-modal-v0.4.0-alpha' != repo/client-expected 'medgemma-27b-modal-v0.5.0-production-ready'. The audited source code was never actually `modal deploy`-ed; this is deploy drift, not a code bug.
+E   assert 'medgemma-27b...-v0.4.0-alpha' == 'medgemma-27b...duction-ready'
+E     
+E     - medgemma-27b-modal-v0.5.0-production-ready
+E     + medgemma-27b-modal-v0.4.0-alpha
+=========================== short test summary info ============================
+FAILED tests/integration/test_clinicalbert_live.py::test_info_app_version_and_sliding_window_contract_matches_client_expectation
+FAILED tests/integration/test_clinicalbert_live.py::test_parse_via_production_client_succeeds_on_real_reports[0]
+FAILED tests/integration/test_clinicalbert_live.py::test_parse_via_production_client_succeeds_on_real_reports[2]
+FAILED tests/integration/test_clinicalbert_live.py::test_parse_via_production_client_succeeds_on_real_reports[6]
+FAILED tests/integration/test_gemma_fallback_live.py::test_chat_completion_model_identity_must_be_gemma_family
+FAILED tests/integration/test_luna16_infer_live.py::test_detect_preprocessing_does_not_resample_to_its_own_declared_target_spacing
+FAILED tests/integration/test_medgemma_27b_live.py::test_deployed_app_version_matches_repo_and_client_contract
+============ 7 failed, 27 passed, 1 deselected in 157.84s (0:02:37) ============

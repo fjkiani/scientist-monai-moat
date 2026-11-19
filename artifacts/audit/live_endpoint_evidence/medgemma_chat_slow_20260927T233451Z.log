@@ -1,0 +1,173 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.13, pytest-8.4.1, pluggy-1.6.0 -- /workspace/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /workspace/smm
+configfile: pyproject.toml
+plugins: anyio-4.15.1, fast-array-utils-1.2.1, jaxtyping-0.3.2, langsmith-0.4.10, typeguard-4.4.4
+collecting ... collected 1 item
+
+tests/integration/test_medgemma_27b_live.py::test_chat_completion_real_call_via_production_client FAILED
+
+=================================== FAILURES ===================================
+_____________ test_chat_completion_real_call_via_production_client _____________
+
+self = <oncology_arbiter.models.llm_client.GemmaClient object at 0x7ed4733f7bd0>
+messages = [{'content': 'In one short sentence, what is non-small cell lung cancer?', 'role': 'user'}]
+max_tokens = 64, temperature = 0.0
+
+    def chat(
+        self,
+        messages: List[Dict[str, str]],
+        max_tokens: int = 1024,
+        temperature: float = 0.7,
+    ) -> LlmResponse:
+        """Send messages to the best available route.
+    
+        :raises LlmUnavailable: if every route fails or is exhausted.
+        """
+        errors: List[str] = []
+    
+        # Production route: the deployed MedGemma-27B specialist. When it is
+        # configured, failure is terminal: another provider or deterministic
+        # Elo must not be relabelled as MedGemma output.
+        if self.medgemma_url:
+            try:
+>               return self._call_medgemma_modal(messages, max_tokens, temperature)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+src/oncology_arbiter/models/llm_client.py:192: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <oncology_arbiter.models.llm_client.GemmaClient object at 0x7ed4733f7bd0>
+messages = [{'content': 'In one short sentence, what is non-small cell lung cancer?', 'role': 'user'}]
+max_tokens = 64, temperature = 0.0
+
+    def _call_medgemma_modal(
+        self,
+        messages: List[Dict[str, str]],
+        max_tokens: int,
+        temperature: float,
+    ) -> LlmResponse:
+        expected_model = "google/medgemma-27b-it"
+        expected_app = "medgemma-27b-modal-v0.5.0-production-ready"
+        url = self.medgemma_url
+        if not url.endswith(".modal.run"):
+            url = f"{url}-chat.modal.run"
+        started = time.time()
+        try:
+            response = self._session.post(
+                url,
+                json={
+                    "messages": messages,
+                    "max_tokens": max_tokens,
+                    "temperature": temperature,
+                },
+                headers={"Content-Type": "application/json"},
+                timeout=max(self.timeout_s, 900.0),
+            )
+        except requests.RequestException as exc:
+            raise _RouteFailure(f"network: {exc}") from exc
+        latency = time.time() - started
+        if response.status_code >= 400:
+>           raise _RouteFailure(f"HTTP {response.status_code}: {response.text[:200]}")
+E           oncology_arbiter.models.llm_client._RouteFailure: HTTP 500: modal-http: internal error: function execution timed out
+
+src/oncology_arbiter/models/llm_client.py:255: _RouteFailure
+
+The above exception was the direct cause of the following exception:
+
+    @LIVE
+    @pytest.mark.slow
+    def test_chat_completion_real_call_via_production_client() -> None:
+        """DESIRED CONTRACT, exercised through the REAL production code path
+        (GemmaClient.chat -> _call_medgemma_modal), not a raw HTTP probe.
+        Generous timeout (900s) chosen to exceed the historically observed
+        ~603s failure point so we can observe the actual current outcome
+        (success, a different failure, or the same timeout) rather than
+        truncating the measurement. Expected to fail honestly (LlmUnavailable)
+        given the confirmed stale deployment above; if it now succeeds, that
+        is a genuine, welcome, and reportable change from historical behavior.
+        """
+        from oncology_arbiter.models.llm_client import GemmaClient, LlmUnavailable
+    
+        os.environ["MEDGEMMA_MODAL_URL"] = _base_url()
+        client = GemmaClient(timeout_s=900.0)
+        t0 = time.time()
+        try:
+>           result = client.chat(
+                [{"role": "user", "content": "In one short sentence, what is non-small cell lung cancer?"}],
+                max_tokens=64,
+                temperature=0.0,
+            )
+
+tests/integration/test_medgemma_27b_live.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <oncology_arbiter.models.llm_client.GemmaClient object at 0x7ed4733f7bd0>
+messages = [{'content': 'In one short sentence, what is non-small cell lung cancer?', 'role': 'user'}]
+max_tokens = 64, temperature = 0.0
+
+    def chat(
+        self,
+        messages: List[Dict[str, str]],
+        max_tokens: int = 1024,
+        temperature: float = 0.7,
+    ) -> LlmResponse:
+        """Send messages to the best available route.
+    
+        :raises LlmUnavailable: if every route fails or is exhausted.
+        """
+        errors: List[str] = []
+    
+        # Production route: the deployed MedGemma-27B specialist. When it is
+        # configured, failure is terminal: another provider or deterministic
+        # Elo must not be relabelled as MedGemma output.
+        if self.medgemma_url:
+            try:
+                return self._call_medgemma_modal(messages, max_tokens, temperature)
+            except _RouteFailure as exc:
+                self.usage.record_failure("medgemma_modal")
+>               raise LlmUnavailable(f"MedGemma Modal unavailable: {exc}") from exc
+E               oncology_arbiter.models.llm_client.LlmUnavailable: MedGemma Modal unavailable: HTTP 500: modal-http: internal error: function execution timed out
+
+src/oncology_arbiter/models/llm_client.py:195: LlmUnavailable
+
+During handling of the above exception, another exception occurred:
+
+    @LIVE
+    @pytest.mark.slow
+    def test_chat_completion_real_call_via_production_client() -> None:
+        """DESIRED CONTRACT, exercised through the REAL production code path
+        (GemmaClient.chat -> _call_medgemma_modal), not a raw HTTP probe.
+        Generous timeout (900s) chosen to exceed the historically observed
+        ~603s failure point so we can observe the actual current outcome
+        (success, a different failure, or the same timeout) rather than
+        truncating the measurement. Expected to fail honestly (LlmUnavailable)
+        given the confirmed stale deployment above; if it now succeeds, that
+        is a genuine, welcome, and reportable change from historical behavior.
+        """
+        from oncology_arbiter.models.llm_client import GemmaClient, LlmUnavailable
+    
+        os.environ["MEDGEMMA_MODAL_URL"] = _base_url()
+        client = GemmaClient(timeout_s=900.0)
+        t0 = time.time()
+        try:
+            result = client.chat(
+                [{"role": "user", "content": "In one short sentence, what is non-small cell lung cancer?"}],
+                max_tokens=64,
+                temperature=0.0,
+            )
+        except LlmUnavailable as exc:
+            elapsed = time.time() - t0
+>           pytest.fail(
+                f"KNOWN DEFECT reproduced live (elapsed={elapsed:.1f}s): "
+                f"GemmaClient.chat() raised LlmUnavailable: {exc}. Tracked "
+                "separately from any deployment fix -- do not mock this to pass."
+            )
+E           Failed: KNOWN DEFECT reproduced live (elapsed=603.0s): GemmaClient.chat() raised LlmUnavailable: MedGemma Modal unavailable: HTTP 500: modal-http: internal error: function execution timed out
+E           . Tracked separately from any deployment fix -- do not mock this to pass.
+
+tests/integration/test_medgemma_27b_live.py:117: Failed
+=========================== short test summary info ============================
+FAILED tests/integration/test_medgemma_27b_live.py::test_chat_completion_real_call_via_production_client
+======================== 1 failed in 603.18s (0:10:03) =========================

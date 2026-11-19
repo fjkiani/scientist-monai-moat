@@ -1,0 +1,11 @@
+{
+  "status": "spawned",
+  "profile": "crispro",
+  "call_id": "fc-01M4590QH6TJF425QPQR9AH2WF",
+  "request_id": "gateD-crispro-posneg-lr1e6-20261005T013635Z-zo",
+  "learning_rate": 1e-06,
+  "epochs": 5,
+  "gate_c_request_id": "gateC-fjkiani-20261003T0435Z-zo",
+  "gate_c_copied_from": "fjkiani luna16-training-runs",
+  "clinical_meter": "FROC@2 held-out 88 after train"
+}

@@ -1,0 +1,1747 @@
+{
+  "bypass_attempts": [
+    {
+      "kind": "header",
+      "name": "X-Allow-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "true"
+    },
+    {
+      "kind": "header",
+      "name": "X-Allow-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "TRUE"
+    },
+    {
+      "kind": "header",
+      "name": "X-Allow-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "True"
+    },
+    {
+      "kind": "header",
+      "name": "X-Allow-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": " yes "
+    },
+    {
+      "kind": "header",
+      "name": "X-Allow-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "1"
+    },
+    {
+      "kind": "header",
+      "name": "X-Allow-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "on"
+    },
+    {
+      "kind": "header",
+      "name": "X-Allow-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "false"
+    },
+    {
+      "kind": "header",
+      "name": "X-Allow-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "0"
+    },
+    {
+      "kind": "header",
+      "name": "X-Allow-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": ""
+    },
+    {
+      "kind": "header",
+      "name": "X-Allow-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "maybe"
+    },
+    {
+      "kind": "header",
+      "name": "X-Allow-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "TrUe"
+    },
+    {
+      "kind": "header",
+      "name": "X-Allow-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "yes,true"
+    },
+    {
+      "kind": "header",
+      "name": "X-Allow-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "1 "
+    },
+    {
+      "kind": "header",
+      "name": "X-Allow-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "\ttrue"
+    },
+    {
+      "kind": "header",
+      "name": "x-allow-blind-inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "true"
+    },
+    {
+      "kind": "header",
+      "name": "x-allow-blind-inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "TRUE"
+    },
+    {
+      "kind": "header",
+      "name": "x-allow-blind-inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "True"
+    },
+    {
+      "kind": "header",
+      "name": "x-allow-blind-inference",
+      "status": 422,
+      "still_gated": true,
+      "value": " yes "
+    },
+    {
+      "kind": "header",
+      "name": "x-allow-blind-inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "1"
+    },
+    {
+      "kind": "header",
+      "name": "x-allow-blind-inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "on"
+    },
+    {
+      "kind": "header",
+      "name": "x-allow-blind-inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "false"
+    },
+    {
+      "kind": "header",
+      "name": "x-allow-blind-inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "0"
+    },
+    {
+      "kind": "header",
+      "name": "x-allow-blind-inference",
+      "status": 422,
+      "still_gated": true,
+      "value": ""
+    },
+    {
+      "kind": "header",
+      "name": "x-allow-blind-inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "maybe"
+    },
+    {
+      "kind": "header",
+      "name": "x-allow-blind-inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "TrUe"
+    },
+    {
+      "kind": "header",
+      "name": "x-allow-blind-inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "yes,true"
+    },
+    {
+      "kind": "header",
+      "name": "x-allow-blind-inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "1 "
+    },
+    {
+      "kind": "header",
+      "name": "x-allow-blind-inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "\ttrue"
+    },
+    {
+      "kind": "header",
+      "name": "X-ALLOW-BLIND-INFERENCE",
+      "status": 422,
+      "still_gated": true,
+      "value": "true"
+    },
+    {
+      "kind": "header",
+      "name": "X-ALLOW-BLIND-INFERENCE",
+      "status": 422,
+      "still_gated": true,
+      "value": "TRUE"
+    },
+    {
+      "kind": "header",
+      "name": "X-ALLOW-BLIND-INFERENCE",
+      "status": 422,
+      "still_gated": true,
+      "value": "True"
+    },
+    {
+      "kind": "header",
+      "name": "X-ALLOW-BLIND-INFERENCE",
+      "status": 422,
+      "still_gated": true,
+      "value": " yes "
+    },
+    {
+      "kind": "header",
+      "name": "X-ALLOW-BLIND-INFERENCE",
+      "status": 422,
+      "still_gated": true,
+      "value": "1"
+    },
+    {
+      "kind": "header",
+      "name": "X-ALLOW-BLIND-INFERENCE",
+      "status": 422,
+      "still_gated": true,
+      "value": "on"
+    },
+    {
+      "kind": "header",
+      "name": "X-ALLOW-BLIND-INFERENCE",
+      "status": 422,
+      "still_gated": true,
+      "value": "false"
+    },
+    {
+      "kind": "header",
+      "name": "X-ALLOW-BLIND-INFERENCE",
+      "status": 422,
+      "still_gated": true,
+      "value": "0"
+    },
+    {
+      "kind": "header",
+      "name": "X-ALLOW-BLIND-INFERENCE",
+      "status": 422,
+      "still_gated": true,
+      "value": ""
+    },
+    {
+      "kind": "header",
+      "name": "X-ALLOW-BLIND-INFERENCE",
+      "status": 422,
+      "still_gated": true,
+      "value": "maybe"
+    },
+    {
+      "kind": "header",
+      "name": "X-ALLOW-BLIND-INFERENCE",
+      "status": 422,
+      "still_gated": true,
+      "value": "TrUe"
+    },
+    {
+      "kind": "header",
+      "name": "X-ALLOW-BLIND-INFERENCE",
+      "status": 422,
+      "still_gated": true,
+      "value": "yes,true"
+    },
+    {
+      "kind": "header",
+      "name": "X-ALLOW-BLIND-INFERENCE",
+      "status": 422,
+      "still_gated": true,
+      "value": "1 "
+    },
+    {
+      "kind": "header",
+      "name": "X-ALLOW-BLIND-INFERENCE",
+      "status": 422,
+      "still_gated": true,
+      "value": "\ttrue"
+    },
+    {
+      "kind": "header",
+      "name": "X-Manski-Override",
+      "status": 422,
+      "still_gated": true,
+      "value": "true"
+    },
+    {
+      "kind": "header",
+      "name": "X-Manski-Override",
+      "status": 422,
+      "still_gated": true,
+      "value": "TRUE"
+    },
+    {
+      "kind": "header",
+      "name": "X-Manski-Override",
+      "status": 422,
+      "still_gated": true,
+      "value": "True"
+    },
+    {
+      "kind": "header",
+      "name": "X-Manski-Override",
+      "status": 422,
+      "still_gated": true,
+      "value": " yes "
+    },
+    {
+      "kind": "header",
+      "name": "X-Manski-Override",
+      "status": 422,
+      "still_gated": true,
+      "value": "1"
+    },
+    {
+      "kind": "header",
+      "name": "X-Manski-Override",
+      "status": 422,
+      "still_gated": true,
+      "value": "on"
+    },
+    {
+      "kind": "header",
+      "name": "X-Manski-Override",
+      "status": 422,
+      "still_gated": true,
+      "value": "false"
+    },
+    {
+      "kind": "header",
+      "name": "X-Manski-Override",
+      "status": 422,
+      "still_gated": true,
+      "value": "0"
+    },
+    {
+      "kind": "header",
+      "name": "X-Manski-Override",
+      "status": 422,
+      "still_gated": true,
+      "value": ""
+    },
+    {
+      "kind": "header",
+      "name": "X-Manski-Override",
+      "status": 422,
+      "still_gated": true,
+      "value": "maybe"
+    },
+    {
+      "kind": "header",
+      "name": "X-Manski-Override",
+      "status": 422,
+      "still_gated": true,
+      "value": "TrUe"
+    },
+    {
+      "kind": "header",
+      "name": "X-Manski-Override",
+      "status": 422,
+      "still_gated": true,
+      "value": "yes,true"
+    },
+    {
+      "kind": "header",
+      "name": "X-Manski-Override",
+      "status": 422,
+      "still_gated": true,
+      "value": "1 "
+    },
+    {
+      "kind": "header",
+      "name": "X-Manski-Override",
+      "status": 422,
+      "still_gated": true,
+      "value": "\ttrue"
+    },
+    {
+      "kind": "header",
+      "name": "X-Debug-Bypass",
+      "status": 422,
+      "still_gated": true,
+      "value": "true"
+    },
+    {
+      "kind": "header",
+      "name": "X-Debug-Bypass",
+      "status": 422,
+      "still_gated": true,
+      "value": "TRUE"
+    },
+    {
+      "kind": "header",
+      "name": "X-Debug-Bypass",
+      "status": 422,
+      "still_gated": true,
+      "value": "True"
+    },
+    {
+      "kind": "header",
+      "name": "X-Debug-Bypass",
+      "status": 422,
+      "still_gated": true,
+      "value": " yes "
+    },
+    {
+      "kind": "header",
+      "name": "X-Debug-Bypass",
+      "status": 422,
+      "still_gated": true,
+      "value": "1"
+    },
+    {
+      "kind": "header",
+      "name": "X-Debug-Bypass",
+      "status": 422,
+      "still_gated": true,
+      "value": "on"
+    },
+    {
+      "kind": "header",
+      "name": "X-Debug-Bypass",
+      "status": 422,
+      "still_gated": true,
+      "value": "false"
+    },
+    {
+      "kind": "header",
+      "name": "X-Debug-Bypass",
+      "status": 422,
+      "still_gated": true,
+      "value": "0"
+    },
+    {
+      "kind": "header",
+      "name": "X-Debug-Bypass",
+      "status": 422,
+      "still_gated": true,
+      "value": ""
+    },
+    {
+      "kind": "header",
+      "name": "X-Debug-Bypass",
+      "status": 422,
+      "still_gated": true,
+      "value": "maybe"
+    },
+    {
+      "kind": "header",
+      "name": "X-Debug-Bypass",
+      "status": 422,
+      "still_gated": true,
+      "value": "TrUe"
+    },
+    {
+      "kind": "header",
+      "name": "X-Debug-Bypass",
+      "status": 422,
+      "still_gated": true,
+      "value": "yes,true"
+    },
+    {
+      "kind": "header",
+      "name": "X-Debug-Bypass",
+      "status": 422,
+      "still_gated": true,
+      "value": "1 "
+    },
+    {
+      "kind": "header",
+      "name": "X-Debug-Bypass",
+      "status": 422,
+      "still_gated": true,
+      "value": "\ttrue"
+    },
+    {
+      "kind": "header",
+      "name": "X-Research-Mode",
+      "status": 422,
+      "still_gated": true,
+      "value": "true"
+    },
+    {
+      "kind": "header",
+      "name": "X-Research-Mode",
+      "status": 422,
+      "still_gated": true,
+      "value": "TRUE"
+    },
+    {
+      "kind": "header",
+      "name": "X-Research-Mode",
+      "status": 422,
+      "still_gated": true,
+      "value": "True"
+    },
+    {
+      "kind": "header",
+      "name": "X-Research-Mode",
+      "status": 422,
+      "still_gated": true,
+      "value": " yes "
+    },
+    {
+      "kind": "header",
+      "name": "X-Research-Mode",
+      "status": 422,
+      "still_gated": true,
+      "value": "1"
+    },
+    {
+      "kind": "header",
+      "name": "X-Research-Mode",
+      "status": 422,
+      "still_gated": true,
+      "value": "on"
+    },
+    {
+      "kind": "header",
+      "name": "X-Research-Mode",
+      "status": 422,
+      "still_gated": true,
+      "value": "false"
+    },
+    {
+      "kind": "header",
+      "name": "X-Research-Mode",
+      "status": 422,
+      "still_gated": true,
+      "value": "0"
+    },
+    {
+      "kind": "header",
+      "name": "X-Research-Mode",
+      "status": 422,
+      "still_gated": true,
+      "value": ""
+    },
+    {
+      "kind": "header",
+      "name": "X-Research-Mode",
+      "status": 422,
+      "still_gated": true,
+      "value": "maybe"
+    },
+    {
+      "kind": "header",
+      "name": "X-Research-Mode",
+      "status": 422,
+      "still_gated": true,
+      "value": "TrUe"
+    },
+    {
+      "kind": "header",
+      "name": "X-Research-Mode",
+      "status": 422,
+      "still_gated": true,
+      "value": "yes,true"
+    },
+    {
+      "kind": "header",
+      "name": "X-Research-Mode",
+      "status": 422,
+      "still_gated": true,
+      "value": "1 "
+    },
+    {
+      "kind": "header",
+      "name": "X-Research-Mode",
+      "status": 422,
+      "still_gated": true,
+      "value": "\ttrue"
+    },
+    {
+      "kind": "header",
+      "name": "Allow-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "true"
+    },
+    {
+      "kind": "header",
+      "name": "Allow-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "TRUE"
+    },
+    {
+      "kind": "header",
+      "name": "Allow-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "True"
+    },
+    {
+      "kind": "header",
+      "name": "Allow-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": " yes "
+    },
+    {
+      "kind": "header",
+      "name": "Allow-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "1"
+    },
+    {
+      "kind": "header",
+      "name": "Allow-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "on"
+    },
+    {
+      "kind": "header",
+      "name": "Allow-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "false"
+    },
+    {
+      "kind": "header",
+      "name": "Allow-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "0"
+    },
+    {
+      "kind": "header",
+      "name": "Allow-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": ""
+    },
+    {
+      "kind": "header",
+      "name": "Allow-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "maybe"
+    },
+    {
+      "kind": "header",
+      "name": "Allow-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "TrUe"
+    },
+    {
+      "kind": "header",
+      "name": "Allow-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "yes,true"
+    },
+    {
+      "kind": "header",
+      "name": "Allow-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "1 "
+    },
+    {
+      "kind": "header",
+      "name": "Allow-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "\ttrue"
+    },
+    {
+      "kind": "header",
+      "name": "X-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "true"
+    },
+    {
+      "kind": "header",
+      "name": "X-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "TRUE"
+    },
+    {
+      "kind": "header",
+      "name": "X-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "True"
+    },
+    {
+      "kind": "header",
+      "name": "X-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": " yes "
+    },
+    {
+      "kind": "header",
+      "name": "X-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "1"
+    },
+    {
+      "kind": "header",
+      "name": "X-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "on"
+    },
+    {
+      "kind": "header",
+      "name": "X-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "false"
+    },
+    {
+      "kind": "header",
+      "name": "X-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "0"
+    },
+    {
+      "kind": "header",
+      "name": "X-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": ""
+    },
+    {
+      "kind": "header",
+      "name": "X-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "maybe"
+    },
+    {
+      "kind": "header",
+      "name": "X-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "TrUe"
+    },
+    {
+      "kind": "header",
+      "name": "X-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "yes,true"
+    },
+    {
+      "kind": "header",
+      "name": "X-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "1 "
+    },
+    {
+      "kind": "header",
+      "name": "X-Blind-Inference",
+      "status": 422,
+      "still_gated": true,
+      "value": "\ttrue"
+    },
+    {
+      "kind": "header",
+      "name": "X-Manski-Max-Width",
+      "status": 422,
+      "still_gated": true,
+      "value": "true"
+    },
+    {
+      "kind": "header",
+      "name": "X-Manski-Max-Width",
+      "status": 422,
+      "still_gated": true,
+      "value": "TRUE"
+    },
+    {
+      "kind": "header",
+      "name": "X-Manski-Max-Width",
+      "status": 422,
+      "still_gated": true,
+      "value": "True"
+    },
+    {
+      "kind": "header",
+      "name": "X-Manski-Max-Width",
+      "status": 422,
+      "still_gated": true,
+      "value": " yes "
+    },
+    {
+      "kind": "header",
+      "name": "X-Manski-Max-Width",
+      "status": 422,
+      "still_gated": true,
+      "value": "1"
+    },
+    {
+      "kind": "header",
+      "name": "X-Manski-Max-Width",
+      "status": 422,
+      "still_gated": true,
+      "value": "on"
+    },
+    {
+      "kind": "header",
+      "name": "X-Manski-Max-Width",
+      "status": 422,
+      "still_gated": true,
+      "value": "false"
+    },
+    {
+      "kind": "header",
+      "name": "X-Manski-Max-Width",
+      "status": 422,
+      "still_gated": true,
+      "value": "0"
+    },
+    {
+      "kind": "header",
+      "name": "X-Manski-Max-Width",
+      "status": 422,
+      "still_gated": true,
+      "value": ""
+    },
+    {
+      "kind": "header",
+      "name": "X-Manski-Max-Width",
+      "status": 422,
+      "still_gated": true,
+      "value": "maybe"
+    },
+    {
+      "kind": "header",
+      "name": "X-Manski-Max-Width",
+      "status": 422,
+      "still_gated": true,
+      "value": "TrUe"
+    },
+    {
+      "kind": "header",
+      "name": "X-Manski-Max-Width",
+      "status": 422,
+      "still_gated": true,
+      "value": "yes,true"
+    },
+    {
+      "kind": "header",
+      "name": "X-Manski-Max-Width",
+      "status": 422,
+      "still_gated": true,
+      "value": "1 "
+    },
+    {
+      "kind": "header",
+      "name": "X-Manski-Max-Width",
+      "status": 422,
+      "still_gated": true,
+      "value": "\ttrue"
+    },
+    {
+      "kind": "header",
+      "name": "X-Override-Gate",
+      "status": 422,
+      "still_gated": true,
+      "value": "true"
+    },
+    {
+      "kind": "header",
+      "name": "X-Override-Gate",
+      "status": 422,
+      "still_gated": true,
+      "value": "TRUE"
+    },
+    {
+      "kind": "header",
+      "name": "X-Override-Gate",
+      "status": 422,
+      "still_gated": true,
+      "value": "True"
+    },
+    {
+      "kind": "header",
+      "name": "X-Override-Gate",
+      "status": 422,
+      "still_gated": true,
+      "value": " yes "
+    },
+    {
+      "kind": "header",
+      "name": "X-Override-Gate",
+      "status": 422,
+      "still_gated": true,
+      "value": "1"
+    },
+    {
+      "kind": "header",
+      "name": "X-Override-Gate",
+      "status": 422,
+      "still_gated": true,
+      "value": "on"
+    },
+    {
+      "kind": "header",
+      "name": "X-Override-Gate",
+      "status": 422,
+      "still_gated": true,
+      "value": "false"
+    },
+    {
+      "kind": "header",
+      "name": "X-Override-Gate",
+      "status": 422,
+      "still_gated": true,
+      "value": "0"
+    },
+    {
+      "kind": "header",
+      "name": "X-Override-Gate",
+      "status": 422,
+      "still_gated": true,
+      "value": ""
+    },
+    {
+      "kind": "header",
+      "name": "X-Override-Gate",
+      "status": 422,
+      "still_gated": true,
+      "value": "maybe"
+    },
+    {
+      "kind": "header",
+      "name": "X-Override-Gate",
+      "status": 422,
+      "still_gated": true,
+      "value": "TrUe"
+    },
+    {
+      "kind": "header",
+      "name": "X-Override-Gate",
+      "status": 422,
+      "still_gated": true,
+      "value": "yes,true"
+    },
+    {
+      "kind": "header",
+      "name": "X-Override-Gate",
+      "status": 422,
+      "still_gated": true,
+      "value": "1 "
+    },
+    {
+      "kind": "header",
+      "name": "X-Override-Gate",
+      "status": 422,
+      "still_gated": true,
+      "value": "\ttrue"
+    },
+    {
+      "kind": "query",
+      "status": 422,
+      "still_gated": true,
+      "value": "?allow_blind_inference=true"
+    },
+    {
+      "kind": "query",
+      "status": 422,
+      "still_gated": true,
+      "value": "?allow_blind_inference=1&manski_max_width=1.0"
+    },
+    {
+      "kind": "query",
+      "status": 422,
+      "still_gated": true,
+      "value": "?manski_max_width=0.99"
+    },
+    {
+      "kind": "query",
+      "status": 422,
+      "still_gated": true,
+      "value": "?bypass=true&debug=1"
+    },
+    {
+      "gate_error": "ManskiBoundsExceeded",
+      "kind": "body_field",
+      "status": 422,
+      "still_gated": true,
+      "value": [
+        "allow_blind_inference"
+      ]
+    },
+    {
+      "gate_error": "ManskiBoundsExceeded",
+      "kind": "body_field",
+      "status": 422,
+      "still_gated": true,
+      "value": [
+        "manski_max_width"
+      ]
+    },
+    {
+      "gate_error": "ManskiBoundsExceeded",
+      "kind": "body_field",
+      "status": 422,
+      "still_gated": true,
+      "value": [
+        "bypass_manski"
+      ]
+    }
+  ],
+  "findings": {
+    "continuous_encoding_unit_trap": {
+      "absolute_error": -0.054487999999999995,
+      "declared_encodings": {
+        "age_at_diagnosis_norm": "age_years / 100.0",
+        "ki67_norm": "ki67_pct / 100.0",
+        "tumor_size_norm": "size_mm / 50.0"
+      },
+      "errors_raised": 0,
+      "pre_normalised_panel_p": 0.100763,
+      "public_route_affected": false,
+      "public_route_reason": "app.py maps the wire field ki67_pct straight onto ki67_norm without pre-dividing, so the public path is correct",
+      "range_validation_present": false,
+      "raw_panel_p": 0.155251,
+      "relative_error_pct": -35.096714352886615,
+      "research_route_affected": true,
+      "research_route_reason": "the research route accepts a free-form feature dict, so a caller who reads the key name and pre-normalises gets a wrong-but-plausible probability",
+      "root_cause_shared_with_unbounded_gate": "the artefact declares a divisor but no admissible support; the same missing declaration is what forces IDENTIFIED_SET_UNBOUNDED and what makes the unit error undetectable",
+      "severity": "high",
+      "statement": "Continuous feature keys are named `*_norm` but the artefact declares the divisor and applies it, so the caller must pass the RAW value. Passing an already-normalised value is silently accepted.",
+      "warnings_raised": 0
+    }
+  },
+  "generated_at": 1786598466.6971283,
+  "max_width": 0.25,
+  "n_bypass_attempts": 147,
+  "public_routes": {
+    "/v1/case/full": {
+      "complete": {
+        "arbiter_score_present": true,
+        "dropped": [],
+        "expected": "identified",
+        "expected_width": 0.0,
+        "gate_error": null,
+        "identified": true,
+        "p_positive": 0.155251,
+        "status": 200,
+        "width": 0.0
+      },
+      "drop_all_bools": {
+        "bounds": [
+          null,
+          null
+        ],
+        "dropped": [
+          "er_positive",
+          "pr_positive",
+          "her2_positive",
+          "lymph_nodes_pos",
+          "brca_pathogenic"
+        ],
+        "expected": "ManskiBoundsExceeded",
+        "expected_width": 0.826868,
+        "gate_error": "ManskiBoundsExceeded",
+        "missing_features": [
+          "brca_status_known_pathogenic",
+          "er_status_positive",
+          "her2_status_positive",
+          "node_status_positive",
+          "pr_status_positive"
+        ],
+        "public_bypass_available": false,
+        "status": 422,
+        "unobserved_unbounded": [],
+        "width": 0.8268679999999999
+      },
+      "drop_continuous_age": {
+        "bounds": [
+          null,
+          null
+        ],
+        "dropped": [
+          "age_years"
+        ],
+        "expected": "IDENTIFIED_SET_UNBOUNDED",
+        "expected_width": 1.0,
+        "gate_error": "IDENTIFIED_SET_UNBOUNDED",
+        "missing_features": [
+          "age_at_diagnosis_norm"
+        ],
+        "public_bypass_available": false,
+        "status": 422,
+        "unobserved_unbounded": [
+          "age_at_diagnosis_norm"
+        ],
+        "width": 1.0
+      },
+      "drop_continuous_ki67": {
+        "bounds": [
+          null,
+          null
+        ],
+        "dropped": [
+          "ki67_pct"
+        ],
+        "expected": "IDENTIFIED_SET_UNBOUNDED",
+        "expected_width": 1.0,
+        "gate_error": "IDENTIFIED_SET_UNBOUNDED",
+        "missing_features": [
+          "ki67_norm"
+        ],
+        "public_bypass_available": false,
+        "status": 422,
+        "unobserved_unbounded": [
+          "ki67_norm"
+        ],
+        "width": 1.0
+      },
+      "drop_continuous_size": {
+        "bounds": [
+          null,
+          null
+        ],
+        "dropped": [
+          "tumor_size_mm"
+        ],
+        "expected": "IDENTIFIED_SET_UNBOUNDED",
+        "expected_width": 1.0,
+        "gate_error": "IDENTIFIED_SET_UNBOUNDED",
+        "missing_features": [
+          "tumor_size_norm"
+        ],
+        "public_bypass_available": false,
+        "status": 422,
+        "unobserved_unbounded": [
+          "tumor_size_norm"
+        ],
+        "width": 1.0
+      },
+      "drop_er_her2": {
+        "bounds": [
+          null,
+          null
+        ],
+        "dropped": [
+          "er_positive",
+          "her2_positive"
+        ],
+        "expected": "ManskiBoundsExceeded",
+        "expected_width": 0.468617,
+        "gate_error": "ManskiBoundsExceeded",
+        "missing_features": [
+          "er_status_positive",
+          "her2_status_positive"
+        ],
+        "public_bypass_available": false,
+        "status": 422,
+        "unobserved_unbounded": [],
+        "width": 0.46861699999999995
+      },
+      "drop_onehot_grade": {
+        "bounds": [
+          null,
+          null
+        ],
+        "dropped": [
+          "grade"
+        ],
+        "expected": "ManskiBoundsExceeded",
+        "expected_width": 0.33956,
+        "gate_error": "ManskiBoundsExceeded",
+        "missing_features": [
+          "grade"
+        ],
+        "public_bypass_available": false,
+        "status": 422,
+        "unobserved_unbounded": [],
+        "width": 0.33956000000000003
+      },
+      "drop_onehot_histology": {
+        "arbiter_score_present": true,
+        "dropped": [
+          "histology"
+        ],
+        "expected": "identified",
+        "expected_width": 0.147815,
+        "gate_error": null,
+        "identified": true,
+        "p_positive": 0.07628,
+        "status": 200,
+        "width": 0.147815
+      },
+      "drop_pr": {
+        "arbiter_score_present": true,
+        "dropped": [
+          "pr_positive"
+        ],
+        "expected": "identified",
+        "expected_width": 0.095615,
+        "gate_error": null,
+        "identified": true,
+        "p_positive": 0.250866,
+        "status": 200,
+        "width": 0.09561499999999998
+      }
+    },
+    "/v1/therapy/reason": {
+      "complete": {
+        "arbiter_score_present": true,
+        "dropped": [],
+        "expected": "identified",
+        "expected_width": 0.0,
+        "gate_error": null,
+        "identified": true,
+        "p_positive": 0.155251,
+        "status": 200,
+        "width": 0.0
+      },
+      "drop_all_bools": {
+        "bounds": [
+          null,
+          null
+        ],
+        "dropped": [
+          "er_positive",
+          "pr_positive",
+          "her2_positive",
+          "lymph_nodes_pos",
+          "brca_pathogenic"
+        ],
+        "expected": "ManskiBoundsExceeded",
+        "expected_width": 0.826868,
+        "gate_error": "ManskiBoundsExceeded",
+        "missing_features": [
+          "brca_status_known_pathogenic",
+          "er_status_positive",
+          "her2_status_positive",
+          "node_status_positive",
+          "pr_status_positive"
+        ],
+        "public_bypass_available": false,
+        "status": 422,
+        "unobserved_unbounded": [],
+        "width": 0.8268679999999999
+      },
+      "drop_continuous_age": {
+        "bounds": [
+          null,
+          null
+        ],
+        "dropped": [
+          "age_years"
+        ],
+        "expected": "IDENTIFIED_SET_UNBOUNDED",
+        "expected_width": 1.0,
+        "gate_error": "IDENTIFIED_SET_UNBOUNDED",
+        "missing_features": [
+          "age_at_diagnosis_norm"
+        ],
+        "public_bypass_available": false,
+        "status": 422,
+        "unobserved_unbounded": [
+          "age_at_diagnosis_norm"
+        ],
+        "width": 1.0
+      },
+      "drop_continuous_ki67": {
+        "bounds": [
+          null,
+          null
+        ],
+        "dropped": [
+          "ki67_pct"
+        ],
+        "expected": "IDENTIFIED_SET_UNBOUNDED",
+        "expected_width": 1.0,
+        "gate_error": "IDENTIFIED_SET_UNBOUNDED",
+        "missing_features": [
+          "ki67_norm"
+        ],
+        "public_bypass_available": false,
+        "status": 422,
+        "unobserved_unbounded": [
+          "ki67_norm"
+        ],
+        "width": 1.0
+      },
+      "drop_continuous_size": {
+        "bounds": [
+          null,
+          null
+        ],
+        "dropped": [
+          "tumor_size_mm"
+        ],
+        "expected": "IDENTIFIED_SET_UNBOUNDED",
+        "expected_width": 1.0,
+        "gate_error": "IDENTIFIED_SET_UNBOUNDED",
+        "missing_features": [
+          "tumor_size_norm"
+        ],
+        "public_bypass_available": false,
+        "status": 422,
+        "unobserved_unbounded": [
+          "tumor_size_norm"
+        ],
+        "width": 1.0
+      },
+      "drop_er_her2": {
+        "bounds": [
+          null,
+          null
+        ],
+        "dropped": [
+          "er_positive",
+          "her2_positive"
+        ],
+        "expected": "ManskiBoundsExceeded",
+        "expected_width": 0.468617,
+        "gate_error": "ManskiBoundsExceeded",
+        "missing_features": [
+          "er_status_positive",
+          "her2_status_positive"
+        ],
+        "public_bypass_available": false,
+        "status": 422,
+        "unobserved_unbounded": [],
+        "width": 0.46861699999999995
+      },
+      "drop_onehot_grade": {
+        "bounds": [
+          null,
+          null
+        ],
+        "dropped": [
+          "grade"
+        ],
+        "expected": "ManskiBoundsExceeded",
+        "expected_width": 0.33956,
+        "gate_error": "ManskiBoundsExceeded",
+        "missing_features": [
+          "grade"
+        ],
+        "public_bypass_available": false,
+        "status": 422,
+        "unobserved_unbounded": [],
+        "width": 0.33956000000000003
+      },
+      "drop_onehot_histology": {
+        "arbiter_score_present": true,
+        "dropped": [
+          "histology"
+        ],
+        "expected": "identified",
+        "expected_width": 0.147815,
+        "gate_error": null,
+        "identified": true,
+        "p_positive": 0.07628,
+        "status": 200,
+        "width": 0.147815
+      },
+      "drop_pr": {
+        "arbiter_score_present": true,
+        "dropped": [
+          "pr_positive"
+        ],
+        "expected": "identified",
+        "expected_width": 0.095615,
+        "gate_error": null,
+        "identified": true,
+        "p_positive": 0.250866,
+        "status": 200,
+        "width": 0.09561499999999998
+      }
+    },
+    "/v1/tumor_board/dynamic": {
+      "complete": {
+        "arbiter_score_present": true,
+        "dropped": [],
+        "expected": "identified",
+        "expected_width": 0.0,
+        "gate_error": null,
+        "identified": true,
+        "p_positive": 0.155251,
+        "status": 200,
+        "width": 0.0
+      },
+      "drop_all_bools": {
+        "bounds": [
+          null,
+          null
+        ],
+        "dropped": [
+          "er_positive",
+          "pr_positive",
+          "her2_positive",
+          "lymph_nodes_pos",
+          "brca_pathogenic"
+        ],
+        "expected": "ManskiBoundsExceeded",
+        "expected_width": 0.826868,
+        "gate_error": "ManskiBoundsExceeded",
+        "missing_features": [
+          "brca_status_known_pathogenic",
+          "er_status_positive",
+          "her2_status_positive",
+          "node_status_positive",
+          "pr_status_positive"
+        ],
+        "public_bypass_available": false,
+        "status": 422,
+        "unobserved_unbounded": [],
+        "width": 0.8268679999999999
+      },
+      "drop_continuous_age": {
+        "bounds": [
+          null,
+          null
+        ],
+        "dropped": [
+          "age_years"
+        ],
+        "expected": "IDENTIFIED_SET_UNBOUNDED",
+        "expected_width": 1.0,
+        "gate_error": "IDENTIFIED_SET_UNBOUNDED",
+        "missing_features": [
+          "age_at_diagnosis_norm"
+        ],
+        "public_bypass_available": false,
+        "status": 422,
+        "unobserved_unbounded": [
+          "age_at_diagnosis_norm"
+        ],
+        "width": 1.0
+      },
+      "drop_continuous_ki67": {
+        "bounds": [
+          null,
+          null
+        ],
+        "dropped": [
+          "ki67_pct"
+        ],
+        "expected": "IDENTIFIED_SET_UNBOUNDED",
+        "expected_width": 1.0,
+        "gate_error": "IDENTIFIED_SET_UNBOUNDED",
+        "missing_features": [
+          "ki67_norm"
+        ],
+        "public_bypass_available": false,
+        "status": 422,
+        "unobserved_unbounded": [
+          "ki67_norm"
+        ],
+        "width": 1.0
+      },
+      "drop_continuous_size": {
+        "bounds": [
+          null,
+          null
+        ],
+        "dropped": [
+          "tumor_size_mm"
+        ],
+        "expected": "IDENTIFIED_SET_UNBOUNDED",
+        "expected_width": 1.0,
+        "gate_error": "IDENTIFIED_SET_UNBOUNDED",
+        "missing_features": [
+          "tumor_size_norm"
+        ],
+        "public_bypass_available": false,
+        "status": 422,
+        "unobserved_unbounded": [
+          "tumor_size_norm"
+        ],
+        "width": 1.0
+      },
+      "drop_er_her2": {
+        "bounds": [
+          null,
+          null
+        ],
+        "dropped": [
+          "er_positive",
+          "her2_positive"
+        ],
+        "expected": "ManskiBoundsExceeded",
+        "expected_width": 0.468617,
+        "gate_error": "ManskiBoundsExceeded",
+        "missing_features": [
+          "er_status_positive",
+          "her2_status_positive"
+        ],
+        "public_bypass_available": false,
+        "status": 422,
+        "unobserved_unbounded": [],
+        "width": 0.46861699999999995
+      },
+      "drop_onehot_grade": {
+        "bounds": [
+          null,
+          null
+        ],
+        "dropped": [
+          "grade"
+        ],
+        "expected": "ManskiBoundsExceeded",
+        "expected_width": 0.33956,
+        "gate_error": "ManskiBoundsExceeded",
+        "missing_features": [
+          "grade"
+        ],
+        "public_bypass_available": false,
+        "status": 422,
+        "unobserved_unbounded": [],
+        "width": 0.33956000000000003
+      },
+      "drop_onehot_histology": {
+        "arbiter_score_present": true,
+        "dropped": [
+          "histology"
+        ],
+        "expected": "identified",
+        "expected_width": 0.147815,
+        "gate_error": null,
+        "identified": true,
+        "p_positive": 0.07628,
+        "status": 200,
+        "width": 0.147815
+      },
+      "drop_pr": {
+        "arbiter_score_present": true,
+        "dropped": [
+          "pr_positive"
+        ],
+        "expected": "identified",
+        "expected_width": 0.095615,
+        "gate_error": null,
+        "identified": true,
+        "p_positive": 0.250866,
+        "status": 200,
+        "width": 0.09561499999999998
+      }
+    }
+  },
+  "receipt_type": "manski_gate_no_public_bypass",
+  "research_route": {
+    "audit_ledger_entries": 4,
+    "audit_ledger_sample": [
+      {
+        "interval_semantics": "assumption-free (Manski) bounds obtained by ranging every unobserved feature over its entire admissible support; not a confidence interval, and carrying no sampling or distributional assumption",
+        "issued_at": 1786598467.4856775,
+        "key_prefix": "oa_live_44f9",
+        "missing_features": [],
+        "model_name": "therapy_arbiter_template_v0",
+        "not_for_clinical_use": true,
+        "point_estimate": 0.155251,
+        "public_route_would_have_returned": null,
+        "raw_bounds": [
+          0.155251,
+          0.155251
+        ],
+        "receipt_type": "blind_inference_release",
+        "request_features_sha256": "f4eaaa2fa99f6dcd925439ba503284b7ec889135905907fff6f4d795af7cc936",
+        "required_scope": "research:blind_inference",
+        "route": "/v1/research/arbiter/identified_set",
+        "stage": "research_therapy",
+        "tenant_id": "647129932bd13352",
+        "unobserved_unbounded": [],
+        "width": 0.0
+      }
+    ],
+    "auth_mode_for_scoped_tests": "on",
+    "bogus_key": {
+      "status": 401
+    },
+    "no_key_auth_mode_off": {
+      "body": {
+        "detail": {
+          "detail": "this route requires the 'research:blind_inference' scope. ONCOLOGY_ARBITER_AUTH_MODE=off does NOT grant it: the anonymous development principal holds no scopes, so a privileged route stays closed even with auth disabled.",
+          "error": "InsufficientScope",
+          "granted_scopes": [],
+          "required_scope": "research:blind_inference",
+          "tenant_id": "_anon"
+        }
+      },
+      "status": 403
+    },
+    "no_key_auth_mode_on": {
+      "status": 401
+    },
+    "scoped_key_no_acknowledgement": {
+      "status": 422
+    },
+    "scoped_releases": {
+      "complete": {
+        "bounds": [
+          0.155251,
+          0.155251
+        ],
+        "dropped": [],
+        "identified": true,
+        "missing_features": [],
+        "n_warnings": 0,
+        "not_for_clinical_use": true,
+        "point_estimate": 0.155251,
+        "public_route_error_code": null,
+        "receipt_sha_field": "f4eaaa2fa99f6dcd925439ba503284b7ec889135905907fff6f4d795af7cc936",
+        "receipt_tenant": "647129932bd13352",
+        "status": 200,
+        "unobserved_unbounded": [],
+        "warnings": [],
+        "width": 0.0,
+        "would_have_been_rejected": false
+      },
+      "drop_continuous_ki67": {
+        "bounds": [
+          0.0,
+          1.0
+        ],
+        "dropped": [
+          "ki67_norm"
+        ],
+        "identified": false,
+        "missing_features": [
+          "ki67_norm"
+        ],
+        "n_warnings": 5,
+        "not_for_clinical_use": true,
+        "point_estimate": 0.13308,
+        "public_route_error_code": "IDENTIFIED_SET_UNBOUNDED",
+        "receipt_sha_field": "baa3bef2bbf8158abca7dc043e4e5df536a8ff0960684be62d529d78a3af2da0",
+        "receipt_tenant": "647129932bd13352",
+        "status": 200,
+        "unobserved_unbounded": [
+          "ki67_norm"
+        ],
+        "warnings": [
+          "PROVISIONAL_UNOBSERVED_WARNING",
+          "IDENTIFIED_SET_UNBOUNDED:covariates_ki67_norm_have_no_declared_support_so_the_identified_set_is_[0,1]_and_this_point_estimate_carries_zero_information",
+          "identified_set:[0.000000,1.000000]:the_point_estimate_is_one_coordinate_inside_this_interval",
+          "unobserved_features:ki67_norm",
+          "released_via_authenticated_research_route:NOT_FOR_CLINICAL_USE:this_response_would_be_HTTP_422_on_any_public_route"
+        ],
+        "width": 1.0,
+        "would_have_been_rejected": true
+      },
+      "drop_er_her2": {
+        "bounds": [
+          0.155251,
+          0.623868
+        ],
+        "dropped": [
+          "er_status_positive",
+          "her2_status_positive"
+        ],
+        "identified": false,
+        "missing_features": [
+          "er_status_positive",
+          "her2_status_positive"
+        ],
+        "n_warnings": 5,
+        "not_for_clinical_use": true,
+        "point_estimate": 0.31131,
+        "public_route_error_code": "ManskiBoundsExceeded",
+        "receipt_sha_field": "1f6ca792b50ae174739695f387b3a2aff02465bdd3a653cdbbdc241814403be4",
+        "receipt_tenant": "647129932bd13352",
+        "status": 200,
+        "unobserved_unbounded": [],
+        "warnings": [
+          "PROVISIONAL_UNOBSERVED_WARNING",
+          "manski_width_0.468617_exceeds_max_0.25",
+          "identified_set:[0.155251,0.623868]:the_point_estimate_is_one_coordinate_inside_this_interval",
+          "unobserved_features:er_status_positive,her2_status_positive",
+          "released_via_authenticated_research_route:NOT_FOR_CLINICAL_USE:this_response_would_be_HTTP_422_on_any_public_route"
+        ],
+        "width": 0.46861699999999995,
+        "would_have_been_rejected": true
+      },
+      "drop_onehot_grade": {
+        "bounds": [
+          0.039392,
+          0.378952
+        ],
+        "dropped": [
+          "grade"
+        ],
+        "identified": false,
+        "missing_features": [
+          "grade"
+        ],
+        "n_warnings": 5,
+        "not_for_clinical_use": true,
+        "point_estimate": 0.119834,
+        "public_route_error_code": "ManskiBoundsExceeded",
+        "receipt_sha_field": "037a18ea89c06ee4df1b569ac825d31a7b2f672c6a518ba8d9f073e201d77d8d",
+        "receipt_tenant": "647129932bd13352",
+        "status": 200,
+        "unobserved_unbounded": [],
+        "warnings": [
+          "PROVISIONAL_UNOBSERVED_WARNING",
+          "manski_width_0.339560_exceeds_max_0.25",
+          "identified_set:[0.039392,0.378952]:the_point_estimate_is_one_coordinate_inside_this_interval",
+          "unobserved_features:grade",
+          "released_via_authenticated_research_route:NOT_FOR_CLINICAL_USE:this_response_would_be_HTTP_422_on_any_public_route"
+        ],
+        "width": 0.33956000000000003,
+        "would_have_been_rejected": true
+      }
+    },
+    "tenant_ids": {
+      "plain": "c98a2fdb16222fc0",
+      "scoped": "647129932bd13352"
+    },
+    "valid_key_no_scope": {
+      "error": "InsufficientScope",
+      "status": 403
+    }
+  },
+  "transport": "in-process ASGI TestClient (localhost) \u2014 NOT production evidence",
+  "verdict": "NO_PUBLIC_BYPASS",
+  "violations": []
+}

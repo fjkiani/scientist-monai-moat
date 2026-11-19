@@ -1,0 +1,327 @@
+{
+  "created_at": "2026-10-20T04:22:29.661509+00:00",
+  "live": true,
+  "route": "/v1/co_scientist/run",
+  "case_id": "892531e5e4dde1e8",
+  "endpoint": "https://testing1235--medgemma-1-5-4b-chat.modal.run",
+  "identity": {
+    "model_id": "google/medgemma-1.5-4b-it",
+    "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8",
+    "modal_workspace": "testing1235"
+  },
+  "gates": {
+    "engine_medgemma_pairwise": true,
+    "mode_live": true,
+    "transcript_nonempty": true,
+    "no_offline_scalar_rationale": true,
+    "no_0_5_loaded_hack_in_transcript": true,
+    "judgments_have_rationale": true,
+    "real_non_fallback_judgment": true,
+    "not_all_fallback_draws": true,
+    "at_least_one_model_request_id": true,
+    "pubmed_urls_in_seen": true,
+    "hypotheses_present": true,
+    "endpoint_pinned": true,
+    "identity_model": true,
+    "verdict_pass": true
+  },
+  "engine": "medgemma_pairwise_judge",
+  "mode": "live",
+  "phases": [
+    "generate",
+    "reflect",
+    "rank",
+    "evolve",
+    "rank"
+  ],
+  "patient_context": {
+    "case_id": "892531e5e4dde1e8",
+    "age": 54,
+    "receptors": {
+      "ER": "POSITIVE",
+      "PR": "POSITIVE",
+      "HER2": "POSITIVE"
+    },
+    "nottingham_grade": 3,
+    "tumor_size_mm": 45.0,
+    "luna16_n_detections": 4,
+    "luna16_top_score": 0.7112138867378235,
+    "mammo_proba_cancer": 0.9826356172561646,
+    "therapy_risk_bucket": "HIGH",
+    "prescription_ruo": "Trastuzumab + chemo (RUO hypothesis)",
+    "primary_driver": "HER2 amplification / overexpression"
+  },
+  "initial_count": 6,
+  "after_reflect": 6,
+  "after_evolve": 7,
+  "warnings": [],
+  "hypotheses": [
+    {
+      "hyp_id": "therapy:T-DM1 (ado-trastuzumab emtansine):line2",
+      "stage": "therapy",
+      "statement": "Therapy: T-DM1 (ado-trastuzumab emtansine) (line 2)",
+      "confidence": 0.5,
+      "evidence": [
+        {
+          "url": "https://pubmed.ncbi.nlm.nih.gov/23020162/",
+          "quoted_text": "T-DM1 for residual disease / progressive HER2+",
+          "source": "pubmed"
+        }
+      ],
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "derived_from": null,
+      "rating": 1508.0,
+      "wins": 1,
+      "losses": 0,
+      "draws": 0
+    },
+    {
+      "hyp_id": "therapy:trastuzumab + chemotherapy:line1",
+      "stage": "therapy",
+      "statement": "Therapy: trastuzumab + chemotherapy (line 1)",
+      "confidence": 0.5,
+      "evidence": [
+        {
+          "url": "https://pubmed.ncbi.nlm.nih.gov/27650830/",
+          "quoted_text": "adjuvant trastuzumab improves DFS/OS in HER2+",
+          "source": "pubmed"
+        }
+      ],
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "derived_from": null,
+      "rating": 1508.0,
+      "wins": 1,
+      "losses": 0,
+      "draws": 0
+    },
+    {
+      "hyp_id": "therapy:trastuzumab + pertuzumab + chemotherapy:line1",
+      "stage": "therapy",
+      "statement": "Therapy: trastuzumab + pertuzumab + chemotherapy (line 1)",
+      "confidence": 0.5,
+      "evidence": [
+        {
+          "url": "https://pubmed.ncbi.nlm.nih.gov/25176067/",
+          "quoted_text": "dual blockade adds pathologic CR / DFS signal",
+          "source": "pubmed"
+        }
+      ],
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "derived_from": null,
+      "rating": 1508.0,
+      "wins": 1,
+      "losses": 0,
+      "draws": 0
+    },
+    {
+      "hyp_id": "therapy:trastuzumab + pertuzumab + chemotherapy:line1:gen0:3215292",
+      "stage": "therapy",
+      "statement": "Add abemaciclib to the first-line regimen of trastuzumab, pertuzumab, and chemotherapy. \u2014 The patient has HER2-positive breast cancer with high therapy risk and HER2 amplification/overexpression. Adding a CDK4/6 inhibitor, such as abemaciclib, to the first-line trastuzumab/pertuzumab/chemotherapy regimen is a standard approach t",
+      "confidence": 0.85,
+      "evidence": [
+        {
+          "url": "https://pubmed.ncbi.nlm.nih.gov/25176067/",
+          "quoted_text": "dual blockade adds pathologic CR / DFS signal",
+          "source": "pubmed"
+        }
+      ],
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true,
+        "generative_evolve": true
+      },
+      "derived_from": "therapy:trastuzumab + pertuzumab + chemotherapy:line1",
+      "rating": 1500.0,
+      "wins": 0,
+      "losses": 0,
+      "draws": 0
+    },
+    {
+      "hyp_id": "biopsy:DCIS:alternate",
+      "stage": "biopsy",
+      "statement": "Alternate biopsy hypothesis: DCIS instead of IDC",
+      "confidence": 0.08999999999999997,
+      "evidence": [
+        {
+          "url": "https://pubmed.ncbi.nlm.nih.gov/25176067/",
+          "quoted_text": "pertuzumab CLEOPATRA / APHINITY class evidence",
+          "source": "pubmed"
+        }
+      ],
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "derived_from": null,
+      "rating": 1492.0,
+      "wins": 0,
+      "losses": 1,
+      "draws": 0
+    },
+    {
+      "hyp_id": "biopsy:IDC",
+      "stage": "biopsy",
+      "statement": "Biopsy subtype prediction: IDC at 0.91 confidence",
+      "confidence": 0.91,
+      "evidence": [
+        {
+          "url": "https://pubmed.ncbi.nlm.nih.gov/25176067/",
+          "quoted_text": "pertuzumab CLEOPATRA / APHINITY class evidence",
+          "source": "pubmed"
+        }
+      ],
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "derived_from": null,
+      "rating": 1492.0,
+      "wins": 0,
+      "losses": 1,
+      "draws": 0
+    },
+    {
+      "hyp_id": "screening:suspicious_mass",
+      "stage": "screening",
+      "statement": "Screening finding 'suspicious_mass' scored 0.9826",
+      "confidence": 0.9826356172561646,
+      "evidence": [
+        {
+          "url": "https://pubmed.ncbi.nlm.nih.gov/27650830/",
+          "quoted_text": "trastuzumab adjuvant breast cancer",
+          "source": "pubmed"
+        }
+      ],
+      "honesty_markers": {
+        "proxy": false,
+        "gated": false,
+        "loaded": true
+      },
+      "derived_from": null,
+      "rating": 1492.0,
+      "wins": 0,
+      "losses": 1,
+      "draws": 0
+    }
+  ],
+  "tournament_transcript": [
+    {
+      "hypothesis_a_id": "biopsy:DCIS:alternate",
+      "hypothesis_b_id": "therapy:trastuzumab + chemotherapy:line1",
+      "hypothesis_a_statement": "Alternate biopsy hypothesis: DCIS instead of IDC",
+      "hypothesis_b_statement": "Therapy: trastuzumab + chemotherapy (line 1)",
+      "elo_a_before": 1500.0,
+      "elo_b_before": 1500.0,
+      "mode": "live",
+      "winner": "B",
+      "clinical_rationale": "The patient is HER2-positive with a high risk bucket, making her eligible for adjuvant trastuzumab. The provided evidence supports the efficacy of trastuzumab in improving DFS/OS in HER2+ patients. Hypothesis B represents the standard of care and is directly supported by the evidence. Hypothesis A suggests a different diagnosis (DCIS) without specific evidence supporting this change or comparing its outcomes to standard HER2+ treatment. Therefore, Hypothesis B is preferred.",
+      "margin": "clear",
+      "model_request_id": "8bf6ec7d-8fb9-4484-b1a0-0e4d0ee63091",
+      "model": "google/medgemma-1.5-4b-it",
+      "route": "medgemma_modal",
+      "elo_a_after": 1492.0,
+      "elo_b_after": 1508.0
+    },
+    {
+      "hypothesis_a_id": "screening:suspicious_mass",
+      "hypothesis_b_id": "therapy:trastuzumab + chemotherapy:line1",
+      "hypothesis_a_statement": "Screening finding 'suspicious_mass' scored 0.9826",
+      "hypothesis_b_statement": "Therapy: trastuzumab + chemotherapy (line 1)",
+      "elo_a_before": 1500.0,
+      "elo_b_before": 1508.0,
+      "mode": "live",
+      "winner": "B",
+      "clinical_rationale": "The patient has HER2-positive breast cancer, a condition where trastuzumab significantly improves disease-free survival and overall survival compared to chemotherapy alone. Hypothesis B specifically addresses this indication and the patient's biomarker status.",
+      "margin": "clear",
+      "model_request_id": "7680b316-6aee-4d7a-bd63-8a213622a2a1",
+      "model": "google/medgemma-1.5-4b-it",
+      "route": "medgemma_modal",
+      "elo_a_after": 1492.184,
+      "elo_b_after": 1515.816
+    },
+    {
+      "hypothesis_a_id": "therapy:trastuzumab + chemotherapy:line1",
+      "hypothesis_b_id": "therapy:trastuzumab + pertuzumab + chemotherapy:line1",
+      "hypothesis_a_statement": "Therapy: trastuzumab + chemotherapy (line 1)",
+      "hypothesis_b_statement": "Therapy: trastuzumab + pertuzumab + chemotherapy (line 1)",
+      "elo_a_before": 1515.816,
+      "elo_b_before": 1500.0,
+      "mode": "live",
+      "winner": "B",
+      "clinical_rationale": "Patient has high-risk HER2+ breast cancer. Dual HER2 blockade (Trastuzumab + Pertuzumab) provides superior efficacy (pathologic CR, DFS) compared to trastuzumab monotherapy, making it the preferred first-line treatment.",
+      "margin": "moderate",
+      "model_request_id": "3d42c21f-25d9-4d5f-bd46-b95b1941b6bc",
+      "model": "google/medgemma-1.5-4b-it",
+      "route": "medgemma_modal",
+      "elo_a_after": 1507.452,
+      "elo_b_after": 1508.364
+    },
+    {
+      "hypothesis_a_id": "biopsy:DCIS:alternate",
+      "hypothesis_b_id": "therapy:trastuzumab + pertuzumab + chemotherapy:line1",
+      "hypothesis_a_statement": "Alternate biopsy hypothesis: DCIS instead of IDC",
+      "hypothesis_b_statement": "Therapy: trastuzumab + pertuzumab + chemotherapy (line 1)",
+      "elo_a_before": 1500.0,
+      "elo_b_before": 1500.0,
+      "mode": "live",
+      "winner": "B",
+      "clinical_rationale": "The patient has HER2-positive breast cancer with high-risk features (Triple Positive, High Grade, Large Tumor, High Luna16 score, HIGH therapy risk bucket). The evidence cited supports the efficacy of dual HER2 blockade (trastuzumab + pertuzumab) plus chemotherapy as the standard first-line treatment for HER2-positive breast cancer, which is appropriate given the patient's high therapy risk bucket. Hypothesis A is a diagnostic hypothesis about the type of cancer (DCIS vs IDC), not the treatment efficacy, toxicity, or resistance, making Hypothesis B the more relevant and decisive hypothesis for treatment planning.",
+      "margin": "clear",
+      "model_request_id": "68685716-b2ad-4b31-abf2-a78cf45f4fd7",
+      "model": "google/medgemma-1.5-4b-it",
+      "route": "medgemma_modal",
+      "elo_a_after": 1492.0,
+      "elo_b_after": 1508.0
+    },
+    {
+      "hypothesis_a_id": "biopsy:IDC",
+      "hypothesis_b_id": "therapy:T-DM1 (ado-trastuzumab emtansine):line2",
+      "hypothesis_a_statement": "Biopsy subtype prediction: IDC at 0.91 confidence",
+      "hypothesis_b_statement": "Therapy: T-DM1 (ado-trastuzumab emtansine) (line 2)",
+      "elo_a_before": 1500.0,
+      "elo_b_before": 1500.0,
+      "mode": "live",
+      "winner": "B",
+      "clinical_rationale": "The patient has high-risk, HER2-positive breast cancer. The evidence for T-DM1 (ado-trastuzumab emtansine) directly supports the use of a HER2-targeted therapy, consistent with the patient's HER2+ status and high risk. The evidence for IDC (Hypothesis A) is less specific to the HER2+ context.",
+      "margin": "moderate",
+      "model_request_id": "0c364cdb-28ca-4d7f-bd32-dd9d1ae804ad",
+      "model": "google/medgemma-1.5-4b-it",
+      "route": "medgemma_modal",
+      "elo_a_after": 1492.0,
+      "elo_b_after": 1508.0
+    },
+    {
+      "hypothesis_a_id": "screening:suspicious_mass",
+      "hypothesis_b_id": "therapy:trastuzumab + chemotherapy:line1",
+      "hypothesis_a_statement": "Screening finding 'suspicious_mass' scored 0.9826",
+      "hypothesis_b_statement": "Therapy: trastuzumab + chemotherapy (line 1)",
+      "elo_a_before": 1500.0,
+      "elo_b_before": 1500.0,
+      "mode": "live",
+      "winner": "B",
+      "clinical_rationale": "Patient is HER2 positive with high-risk features, making trastuzumab + chemotherapy the standard of care. Evidence supports trastuzumab's efficacy in HER2+ patients.",
+      "margin": "clear",
+      "model_request_id": "20022c60-8f03-4d92-86bd-d7026aa42d09",
+      "model": "google/medgemma-1.5-4b-it",
+      "route": "medgemma_modal",
+      "elo_a_after": 1492.0,
+      "elo_b_after": 1508.0
+    }
+  ],
+  "n_matches": 6
+}

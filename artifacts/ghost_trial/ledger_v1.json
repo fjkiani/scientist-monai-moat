@@ -1,0 +1,518 @@
+{
+  "disclaimer": "RESEARCH USE ONLY \u2014 Ghost Trial harness v1; not clinical validation.",
+  "n_requested": 20,
+  "n_cases": 20,
+  "n_ok": 20,
+  "elapsed_s": 391.424,
+  "modalities_exercised": [
+    "medgemma_pathology",
+    "stage_therapy"
+  ],
+  "modalities_absent": [
+    "luna16_ct",
+    "mammo_rsna",
+    "phikon_wsi"
+  ],
+  "rows": [
+    {
+      "sample_id": "TCGA242-C1-tcga1_1",
+      "patient_id": "TCGA-A2-A04N",
+      "disclaimer": "RUO ghost trial row",
+      "medgemma_pathology": {
+        "status": "ok",
+        "extraction": {
+          "er_status": "POSITIVE",
+          "er_percent": null,
+          "pr_status": "UNKNOWN",
+          "her2_status": "NON_AMPLIFIED",
+          "nottingham_grade": null,
+          "tumor_size_mm": 25.0,
+          "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+        },
+        "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
+      },
+      "stage_therapy": {
+        "status": "ok",
+        "p_event": 0.780492,
+        "risk_bucket": "HIGH",
+        "recommendation": "HIGH_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE"
+      },
+      "status": "ok"
+    },
+    {
+      "sample_id": "TCGA242-C1-tcga1_100",
+      "patient_id": "TCGA-A2-A4S2",
+      "disclaimer": "RUO ghost trial row",
+      "medgemma_pathology": {
+        "status": "ok",
+        "extraction": {
+          "er_status": "POSITIVE",
+          "er_percent": null,
+          "pr_status": "POSITIVE",
+          "her2_status": "POSITIVE",
+          "nottingham_grade": 3,
+          "tumor_size_mm": 58.0,
+          "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+        },
+        "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
+      },
+      "stage_therapy": {
+        "status": "ok",
+        "p_event": 0.776903,
+        "risk_bucket": "HIGH",
+        "recommendation": "HIGH_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE"
+      },
+      "status": "ok"
+    },
+    {
+      "sample_id": "TCGA242-C1-tcga1_13",
+      "patient_id": "TCGA-A2-A0CM",
+      "disclaimer": "RUO ghost trial row",
+      "medgemma_pathology": {
+        "status": "ok",
+        "extraction": {
+          "er_status": "NEGATIVE",
+          "er_percent": null,
+          "pr_status": "POSITIVE",
+          "her2_status": "NEGATIVE",
+          "nottingham_grade": 3,
+          "tumor_size_mm": 30.0,
+          "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+        },
+        "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
+      },
+      "stage_therapy": {
+        "status": "ok",
+        "p_event": 0.94826,
+        "risk_bucket": "HIGH",
+        "recommendation": "HIGH_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE"
+      },
+      "status": "ok"
+    },
+    {
+      "sample_id": "TCGA242-C1-tcga1_14",
+      "patient_id": "TCGA-A2-A0CO",
+      "disclaimer": "RUO ghost trial row",
+      "medgemma_pathology": {
+        "status": "ok",
+        "extraction": {
+          "er_status": "POSITIVE",
+          "er_percent": null,
+          "pr_status": "UNKNOWN",
+          "her2_status": "AMPLIFIED",
+          "nottingham_grade": null,
+          "tumor_size_mm": 52.0,
+          "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+        },
+        "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
+      },
+      "stage_therapy": {
+        "status": "ok",
+        "p_event": 0.812426,
+        "risk_bucket": "HIGH",
+        "recommendation": "HIGH_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE"
+      },
+      "status": "ok"
+    },
+    {
+      "sample_id": "TCGA242-C1-tcga1_16",
+      "patient_id": "TCGA-A2-A0CQ",
+      "disclaimer": "RUO ghost trial row",
+      "medgemma_pathology": {
+        "status": "ok",
+        "extraction": {
+          "er_status": "POSITIVE",
+          "er_percent": null,
+          "pr_status": "NEGATIVE",
+          "her2_status": "NEGATIVE",
+          "nottingham_grade": 3,
+          "tumor_size_mm": 18.0,
+          "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+        },
+        "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
+      },
+      "stage_therapy": {
+        "status": "ok",
+        "p_event": 0.77986,
+        "risk_bucket": "HIGH",
+        "recommendation": "HIGH_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE"
+      },
+      "status": "ok"
+    },
+    {
+      "sample_id": "TCGA242-C1-tcga1_18",
+      "patient_id": "TCGA-A2-A0CS",
+      "disclaimer": "RUO ghost trial row",
+      "medgemma_pathology": {
+        "status": "ok",
+        "extraction": {
+          "er_status": "UNKNOWN",
+          "er_percent": null,
+          "pr_status": "UNKNOWN",
+          "her2_status": "UNKNOWN",
+          "nottingham_grade": 3,
+          "tumor_size_mm": 70.0,
+          "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+        },
+        "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
+      },
+      "stage_therapy": {
+        "status": "ok",
+        "p_event": 0.958938,
+        "risk_bucket": "HIGH",
+        "recommendation": "HIGH_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE"
+      },
+      "status": "ok"
+    },
+    {
+      "sample_id": "TCGA242-C1-tcga1_24",
+      "patient_id": "TCGA-A2-A0CY",
+      "disclaimer": "RUO ghost trial row",
+      "medgemma_pathology": {
+        "status": "ok",
+        "extraction": {
+          "er_status": "POSITIVE",
+          "er_percent": null,
+          "pr_status": "NEGATIVE",
+          "her2_status": "NEGATIVE",
+          "nottingham_grade": 3,
+          "tumor_size_mm": 35.0,
+          "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+        },
+        "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
+      },
+      "stage_therapy": {
+        "status": "ok",
+        "p_event": 0.781392,
+        "risk_bucket": "HIGH",
+        "recommendation": "HIGH_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE"
+      },
+      "status": "ok"
+    },
+    {
+      "sample_id": "TCGA242-C1-tcga1_26",
+      "patient_id": "TCGA-A2-A0D0",
+      "disclaimer": "RUO ghost trial row",
+      "medgemma_pathology": {
+        "status": "ok",
+        "extraction": {
+          "er_status": "NEGATIVE",
+          "er_percent": null,
+          "pr_status": "NEGATIVE",
+          "her2_status": "NEGATIVE",
+          "nottingham_grade": 3,
+          "tumor_size_mm": 35.0,
+          "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+        },
+        "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
+      },
+      "stage_therapy": {
+        "status": "ok",
+        "p_event": 0.958207,
+        "risk_bucket": "HIGH",
+        "recommendation": "HIGH_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE"
+      },
+      "status": "ok"
+    },
+    {
+      "sample_id": "TCGA242-C1-tcga1_30",
+      "patient_id": "TCGA-A2-A0D4",
+      "disclaimer": "RUO ghost trial row",
+      "medgemma_pathology": {
+        "status": "ok",
+        "extraction": {
+          "er_status": "POSITIVE",
+          "er_percent": null,
+          "pr_status": "POSITIVE",
+          "her2_status": "2+",
+          "nottingham_grade": 2,
+          "tumor_size_mm": 30.0,
+          "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+        },
+        "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
+      },
+      "stage_therapy": {
+        "status": "ok",
+        "p_event": 0.603066,
+        "risk_bucket": "MID",
+        "recommendation": "INTERMEDIATE_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE"
+      },
+      "status": "ok"
+    },
+    {
+      "sample_id": "TCGA242-C1-tcga1_33",
+      "patient_id": "TCGA-A2-A0EO",
+      "disclaimer": "RUO ghost trial row",
+      "medgemma_pathology": {
+        "status": "ok",
+        "extraction": {
+          "er_status": "NEGATIVE",
+          "er_percent": null,
+          "pr_status": "NEGATIVE",
+          "her2_status": "NEGATIVE",
+          "nottingham_grade": 2,
+          "tumor_size_mm": 15.0,
+          "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+        },
+        "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
+      },
+      "stage_therapy": {
+        "status": "ok",
+        "p_event": 0.923451,
+        "risk_bucket": "HIGH",
+        "recommendation": "HIGH_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE"
+      },
+      "status": "ok"
+    },
+    {
+      "sample_id": "TCGA242-C1-tcga1_34",
+      "patient_id": "TCGA-A2-A0EP",
+      "disclaimer": "RUO ghost trial row",
+      "medgemma_pathology": {
+        "status": "ok",
+        "extraction": {
+          "er_status": "POSITIVE",
+          "er_percent": null,
+          "pr_status": "NEGATIVE",
+          "her2_status": "NON_AMPLIFIED",
+          "nottingham_grade": 3,
+          "tumor_size_mm": 20.0,
+          "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+        },
+        "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
+      },
+      "stage_therapy": {
+        "status": "ok",
+        "p_event": 0.780041,
+        "risk_bucket": "HIGH",
+        "recommendation": "HIGH_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE"
+      },
+      "status": "ok"
+    },
+    {
+      "sample_id": "TCGA242-C1-tcga1_36",
+      "patient_id": "TCGA-A2-A0ER",
+      "disclaimer": "RUO ghost trial row",
+      "medgemma_pathology": {
+        "status": "ok",
+        "extraction": {
+          "er_status": "UNKNOWN",
+          "er_percent": null,
+          "pr_status": "UNKNOWN",
+          "her2_status": "UNKNOWN",
+          "nottingham_grade": null,
+          "tumor_size_mm": null,
+          "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+        },
+        "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
+      },
+      "stage_therapy": {
+        "status": "ok",
+        "p_event": 0.957889,
+        "risk_bucket": "HIGH",
+        "recommendation": "HIGH_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE"
+      },
+      "status": "ok"
+    },
+    {
+      "sample_id": "TCGA242-C1-tcga1_38",
+      "patient_id": "TCGA-A2-A0ET",
+      "disclaimer": "RUO ghost trial row",
+      "medgemma_pathology": {
+        "status": "ok",
+        "extraction": {
+          "er_status": "POSITIVE",
+          "er_percent": null,
+          "pr_status": "NEGATIVE",
+          "her2_status": "NEGATIVE",
+          "nottingham_grade": 2,
+          "tumor_size_mm": 19.0,
+          "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+        },
+        "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
+      },
+      "stage_therapy": {
+        "status": "ok",
+        "p_event": 0.653344,
+        "risk_bucket": "MID",
+        "recommendation": "INTERMEDIATE_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE"
+      },
+      "status": "ok"
+    },
+    {
+      "sample_id": "TCGA242-C1-tcga1_4",
+      "patient_id": "TCGA-A2-A04R",
+      "disclaimer": "RUO ghost trial row",
+      "medgemma_pathology": {
+        "status": "ok",
+        "extraction": {
+          "er_status": "POSITIVE",
+          "er_percent": 80.0,
+          "pr_status": "POSITIVE",
+          "her2_status": "2+",
+          "nottingham_grade": 3,
+          "tumor_size_mm": 20.0,
+          "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+        },
+        "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
+      },
+      "stage_therapy": {
+        "status": "ok",
+        "p_event": 0.739738,
+        "risk_bucket": "HIGH",
+        "recommendation": "HIGH_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE"
+      },
+      "status": "ok"
+    },
+    {
+      "sample_id": "TCGA242-C1-tcga1_40",
+      "patient_id": "TCGA-A2-A0EV",
+      "disclaimer": "RUO ghost trial row",
+      "medgemma_pathology": {
+        "status": "ok",
+        "extraction": {
+          "er_status": "POSITIVE",
+          "er_percent": null,
+          "pr_status": "POSITIVE",
+          "her2_status": "NEGATIVE",
+          "nottingham_grade": 2,
+          "tumor_size_mm": 13.0,
+          "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+        },
+        "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
+      },
+      "stage_therapy": {
+        "status": "ok",
+        "p_event": 0.600923,
+        "risk_bucket": "MID",
+        "recommendation": "INTERMEDIATE_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE"
+      },
+      "status": "ok"
+    },
+    {
+      "sample_id": "TCGA242-C1-tcga1_44",
+      "patient_id": "TCGA-A2-A0ST",
+      "disclaimer": "RUO ghost trial row",
+      "medgemma_pathology": {
+        "status": "ok",
+        "extraction": {
+          "er_status": "NEGATIVE",
+          "er_percent": null,
+          "pr_status": "POSITIVE",
+          "her2_status": "NEGATIVE",
+          "nottingham_grade": 3,
+          "tumor_size_mm": 20.0,
+          "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+        },
+        "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
+      },
+      "stage_therapy": {
+        "status": "ok",
+        "p_event": 0.948001,
+        "risk_bucket": "HIGH",
+        "recommendation": "HIGH_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE"
+      },
+      "status": "ok"
+    },
+    {
+      "sample_id": "TCGA242-C1-tcga1_46",
+      "patient_id": "TCGA-A2-A0SV",
+      "disclaimer": "RUO ghost trial row",
+      "medgemma_pathology": {
+        "status": "ok",
+        "extraction": {
+          "er_status": "POSITIVE",
+          "er_percent": null,
+          "pr_status": "POSITIVE",
+          "her2_status": "POSITIVE",
+          "nottingham_grade": 3,
+          "tumor_size_mm": 45.0,
+          "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+        },
+        "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
+      },
+      "stage_therapy": {
+        "status": "ok",
+        "p_event": 0.775715,
+        "risk_bucket": "HIGH",
+        "recommendation": "HIGH_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE"
+      },
+      "status": "ok"
+    },
+    {
+      "sample_id": "TCGA242-C1-tcga1_48",
+      "patient_id": "TCGA-A2-A0SX",
+      "disclaimer": "RUO ghost trial row",
+      "medgemma_pathology": {
+        "status": "ok",
+        "extraction": {
+          "er_status": "UNKNOWN",
+          "er_percent": null,
+          "pr_status": "UNKNOWN",
+          "her2_status": "UNKNOWN",
+          "nottingham_grade": 3,
+          "tumor_size_mm": 13.0,
+          "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+        },
+        "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
+      },
+      "stage_therapy": {
+        "status": "ok",
+        "p_event": 0.957741,
+        "risk_bucket": "HIGH",
+        "recommendation": "HIGH_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE"
+      },
+      "status": "ok"
+    },
+    {
+      "sample_id": "TCGA242-C1-tcga1_50",
+      "patient_id": "TCGA-A2-A0T0",
+      "disclaimer": "RUO ghost trial row",
+      "medgemma_pathology": {
+        "status": "ok",
+        "extraction": {
+          "er_status": "NEGATIVE",
+          "er_percent": 0.0,
+          "pr_status": "NEGATIVE",
+          "her2_status": "NON_AMPLIFIED",
+          "nottingham_grade": 3,
+          "tumor_size_mm": 32.0,
+          "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+        },
+        "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
+      },
+      "stage_therapy": {
+        "status": "ok",
+        "p_event": 0.958143,
+        "risk_bucket": "HIGH",
+        "recommendation": "HIGH_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE"
+      },
+      "status": "ok"
+    },
+    {
+      "sample_id": "TCGA242-C1-tcga1_52",
+      "patient_id": "TCGA-A2-A0T2",
+      "disclaimer": "RUO ghost trial row",
+      "medgemma_pathology": {
+        "status": "ok",
+        "extraction": {
+          "er_status": "UNKNOWN",
+          "er_percent": null,
+          "pr_status": "UNKNOWN",
+          "her2_status": "UNKNOWN",
+          "nottingham_grade": 3,
+          "tumor_size_mm": 105.0,
+          "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+        },
+        "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8"
+      },
+      "stage_therapy": {
+        "status": "ok",
+        "p_event": 0.959657,
+        "risk_bucket": "HIGH",
+        "recommendation": "HIGH_OBSERVED_CHEMOTHERAPY_RECEIPT_PROFILE"
+      },
+      "status": "ok"
+    }
+  ]
+}

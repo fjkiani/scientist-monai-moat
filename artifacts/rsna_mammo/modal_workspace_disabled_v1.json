@@ -1,0 +1,9 @@
+{
+  "status": "MODAL_WORKSPACE_DISABLED",
+  "profile": "fjkiani",
+  "workspace_id": "ac-6Ygyi193JtRjFaNrSsoZEP",
+  "symptom": "HTTP 404 modal-http: workspace ... is disabled on MedSigLIP + LUNA PENDING forever",
+  "clear": "switch MODAL_PROFILE=crispro; redeploy/use crispro medsiglip-448 + luna16-fullfit",
+  "partial_vindr_embeds_done": 1008,
+  "ts": "2026-10-05T05:34:55Z"
+}

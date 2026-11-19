@@ -1,0 +1,39 @@
+{
+  "receipt_type": "luna16_collapse_forensic",
+  "candidate_sha12": "90e733f34c6a",
+  "baseline_sha12": "b5e79231",
+  "froc_request_id": "froc-fjkiani-20261004T0745Z-zo",
+  "froc_at_2_baseline": 0.8267399271674979,
+  "froc_at_2_candidate": 0.0,
+  "delta_froc_at_2": -0.8267399271674979,
+  "promotion": "DENIED",
+  "root_cause": {
+    "hypothesis": "classification_head_bias_collapse",
+    "observed_score_band_all_8800": {
+      "min": 0.133927,
+      "mean": 0.137053,
+      "max": 0.146239
+    },
+    "implied_logit_z": -1.839986,
+    "sigmoid_check": "sigma(-1.84)\u22480.13705 matches mean",
+    "lr_used": 0.001,
+    "axis_transpose": "REJECTED",
+    "logit_saturation_gt_0.99": "REJECTED",
+    "val_coco_epoch_curve": [
+      0.0165,
+      0.0119,
+      0.0351,
+      0.0,
+      0.0
+    ]
+  },
+  "production_default": "baseline model.pt b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01",
+  "artifacts": [
+    "models/luna16/luna16_candidate_90e733f34c6a_froc_result.json",
+    "models/luna16/luna16_candidate_90e733f34c6a_collapse_diag.json",
+    "models/luna16/luna16_candidate_90e733f34c6a_gateD_result.json",
+    "models/luna16/luna16_candidate_90e733f34c6a.meta.json",
+    "models/luna16/luna16_candidate_90e733f34c6a_training.log"
+  ],
+  "weights_note": "84MB .pt/.safetensors retained on Modal volume + local models/luna16/ but NOT committed to git (size)"
+}

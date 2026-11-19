@@ -1,0 +1,179 @@
+{
+  "capability": "stage-screening",
+  "command": "/workspace/.venv/bin/python scripts/train_stage_arbiters_v1.py --seed 20260928 --out-dir /workspace/stage-arbiters-full --repo-root /workspace/smm-ten-delivery --write-repo",
+  "completed_at": "2026-09-29T03:51:19.828191Z",
+  "dataset": "CBIS-DDSM official training case descriptions (screening malignancy-risk proxy)",
+  "dataset_manifest_path": "artifacts/stage_arbiters/stage_screening_dataset_v2.json",
+  "dataset_sha256": "4360985fdd110aff22293e4b79927ee7b4f55da974c7865875f580e3c971a155",
+  "n_test": 412,
+  "n_training": 2006,
+  "n_training_synthetic": false,
+  "n_validation": 446,
+  "nested_grouped_cv": [
+    {
+      "fold": 0,
+      "inner_mean_auroc_by_c": {
+        "0.01": 0.8362166423948117,
+        "0.1": 0.8385252606882513,
+        "1.0": 0.8383987424696278,
+        "10.0": 0.8382962508995595
+      },
+      "n_train": 1609,
+      "n_valid": 397,
+      "outer_auroc": 0.8493969640257849,
+      "selected_c": 0.1
+    },
+    {
+      "fold": 1,
+      "inner_mean_auroc_by_c": {
+        "0.01": 0.819652197789481,
+        "0.1": 0.8302016497530973,
+        "1.0": 0.836531875417056,
+        "10.0": 0.836531875417056
+      },
+      "n_train": 1629,
+      "n_valid": 377,
+      "outer_auroc": 0.8483889364128885,
+      "selected_c": 1.0
+    },
+    {
+      "fold": 2,
+      "inner_mean_auroc_by_c": {
+        "0.01": 0.8306400917929734,
+        "0.1": 0.8403170130623788,
+        "1.0": 0.8377116765806719,
+        "10.0": 0.8377116765806719
+      },
+      "n_train": 1571,
+      "n_valid": 435,
+      "outer_auroc": 0.8370806646660993,
+      "selected_c": 0.1
+    },
+    {
+      "fold": 3,
+      "inner_mean_auroc_by_c": {
+        "0.01": 0.8288447851036547,
+        "0.1": 0.8438693075953365,
+        "1.0": 0.8446271018859376,
+        "10.0": 0.8431388022110738
+      },
+      "n_train": 1604,
+      "n_valid": 402,
+      "outer_auroc": 0.8248587570621468,
+      "selected_c": 1.0
+    },
+    {
+      "fold": 4,
+      "inner_mean_auroc_by_c": {
+        "0.01": 0.8302303844245541,
+        "0.1": 0.8426059159717715,
+        "1.0": 0.84366411065843,
+        "10.0": 0.84366411065843
+      },
+      "n_train": 1611,
+      "n_valid": 395,
+      "outer_auroc": 0.8581764963343911,
+      "selected_c": 1.0
+    }
+  ],
+  "patient_disjoint": true,
+  "schema_version": 2,
+  "secondary_evaluation_summary": {
+    "purpose": "Mathematically interrogate weak/null signals using test-stratified AUROC, within-stratum regressions, and leave-stratum-out cross-cohort validation.",
+    "selected_c_fixed_before_test": 0.1,
+    "strata": {
+      "calc": {
+        "final_model_test": {
+          "auroc": 0.724721941354904,
+          "auroc_ci": [
+            0.5890809964855176,
+            0.829893041553971
+          ],
+          "n": 224,
+          "n_negative": 138,
+          "n_patients": 93,
+          "n_positive": 86,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        },
+        "leave_stratum_out_validation": {
+          "auroc": 0.6681833501853724,
+          "auroc_ci": [
+            0.5309568890669872,
+            0.7879776598915
+          ],
+          "n": 224,
+          "n_negative": 138,
+          "n_patients": 93,
+          "n_positive": 86,
+          "n_training": 908,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        },
+        "within_stratum_regression": {
+          "auroc": 0.7489888776541961,
+          "auroc_ci": [
+            0.606647701009007,
+            0.8476747039259694
+          ],
+          "n": 224,
+          "n_negative": 138,
+          "n_patients": 93,
+          "n_positive": 86,
+          "n_training": 1098,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        }
+      },
+      "mass": {
+        "final_model_test": {
+          "auroc": 0.8521541950113378,
+          "auroc_ci": [
+            0.7666301912790535,
+            0.9147710872285936
+          ],
+          "n": 188,
+          "n_negative": 90,
+          "n_patients": 98,
+          "n_positive": 98,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        },
+        "leave_stratum_out_validation": {
+          "auroc": 0.7591836734693879,
+          "auroc_ci": [
+            0.644527998710054,
+            0.8651122146436434
+          ],
+          "n": 188,
+          "n_negative": 90,
+          "n_patients": 98,
+          "n_positive": 98,
+          "n_training": 1098,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        },
+        "within_stratum_regression": {
+          "auroc": 0.8310657596371882,
+          "auroc_ci": [
+            0.7446346546354132,
+            0.90011921886263
+          ],
+          "n": 188,
+          "n_negative": 90,
+          "n_patients": 98,
+          "n_positive": 98,
+          "n_training": 908,
+          "null_signal_result": "signal_above_null",
+          "status": "estimated"
+        }
+      }
+    }
+  },
+  "seed": 20260928,
+  "selected_c": 0.1,
+  "source_commit": "55fc3a8fd4e5d8e7db87613b948e51974664790a",
+  "split_manifest_path": "artifacts/stage_arbiters/stage_screening_split_v2.json",
+  "split_sha256": "33bd7dcb3ebe1d363da8174b90b70500bc6e387b5dc36f47d21b9f1e87ff0e28",
+  "started_at": "2026-09-29T03:51:14.958237Z"
+}

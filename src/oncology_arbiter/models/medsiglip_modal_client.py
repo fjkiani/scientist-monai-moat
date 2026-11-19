@@ -33,6 +33,7 @@ from .medsiglip import (
     MEDSIGLIP_INPUT_RES,
     MEDSIGLIP_MAMMOGRAPHY_WARNING,
     MEDSIGLIP_REPO,
+    MEDSIGLIP_REVISION,
     MedSigLipResult,
 )
 from ..api.schemas import ModelState
@@ -44,17 +45,31 @@ DEFAULT_BATCH_CHUNK: int = 16
 DEFAULT_TIMEOUT_SECONDS: int = int(os.environ.get("MEDSIGLIP_MODAL_TIMEOUT", "300"))
 
 
+# Canon workspace pin (identity-locked). Env MODAL_MEDSIGLIP_URL overrides.
+DEFAULT_MEDSIGLIP_BASE = "https://testing1235--medsiglip"
+_IDENTITY_PATH = Path(__file__).resolve().parents[3] / "models" / "medsiglip_448_identity.json"
+
+
+def _identity_base_url() -> str | None:
+    try:
+        payload = json.loads(_IDENTITY_PATH.read_text())
+    except (OSError, json.JSONDecodeError):
+        return None
+    base = payload.get("base_url")
+    return str(base).rstrip("/") if base else None
+
+
 @dataclass(frozen=True)
 class ModalEndpointConfig:
     """URL layout for the deployed Modal app.
 
     Modal auto-generates URLs of the form
     ``https://<workspace>--<app>-<function>.modal.run``. We take a base
-    prefix (``https://crispro-test--medsiglip``) and derive the five
+    prefix (``https://testing1235--medsiglip``) and derive the five
     endpoints from it, so callers only need one env var.
     """
 
-    base: str  # e.g. "https://crispro-test--medsiglip"
+    base: str  # e.g. "https://testing1235--medsiglip"
 
     @property
     def healthz(self) -> str:
@@ -78,13 +93,24 @@ class ModalEndpointConfig:
 
     @classmethod
     def from_env(cls) -> "ModalEndpointConfig":
-        base = os.environ.get("MODAL_MEDSIGLIP_URL")
-        if not base:
-            raise RuntimeError(
-                "MODAL_MEDSIGLIP_URL is not set; expected the Modal base URL, "
-                "e.g. https://crispro-test--medsiglip"
-            )
+        base = (
+            os.environ.get("MODAL_MEDSIGLIP_URL")
+            or _identity_base_url()
+            or DEFAULT_MEDSIGLIP_BASE
+        )
         return cls(base=base.rstrip("/"))
+
+
+def _sdk_cls():
+    import modal
+
+    profile = (
+        os.environ.get("MODAL_PROFILE")
+        or os.environ.get("MEDSIGLIP_MODAL_PROFILE")
+        or "testing1235"
+    )
+    os.environ["MODAL_PROFILE"] = profile
+    return modal.Cls.from_name("medsiglip-448", "MedSigLipModal")
 
 
 def _post_json(url: str, payload: dict, *, timeout: int) -> dict:
@@ -98,22 +124,39 @@ def _post_json(url: str, payload: dict, *, timeout: int) -> dict:
     try:
         with urllib_request.urlopen(req, timeout=timeout) as resp:
             raw = resp.read()
-    except urllib_error.HTTPError as exc:  # pragma: no cover - live-network
-        raise RuntimeError(f"HTTP {exc.code} calling {url}: {exc.read()[:512]!r}") from exc
-    except urllib_error.URLError as exc:  # pragma: no cover
-        raise RuntimeError(f"Network error calling {url}: {exc}") from exc
-    try:
         return json.loads(raw)
-    except json.JSONDecodeError as exc:  # pragma: no cover
-        raise RuntimeError(f"Modal response was not JSON ({url}): {raw[:512]!r}") from exc
+    except Exception as http_exc:  # noqa: BLE001 — fall through to SDK
+        detail = str(http_exc).lower()
+        if "disabled" not in detail and "404" not in detail and not isinstance(
+            http_exc, (urllib_error.URLError, urllib_error.HTTPError, TimeoutError, json.JSONDecodeError)
+        ):
+            # Still attempt SDK for any transport failure when workspace HTTP is dead.
+            pass
+        try:
+            out = _sdk_cls()().embed_remote.remote(payload)
+            if not isinstance(out, dict):
+                raise RuntimeError(f"medsiglip sdk embed returned non-dict: {type(out)}")
+            return {**out, "transport": "modal_sdk_embed_remote"}
+        except Exception as sdk_exc:  # noqa: BLE001
+            raise RuntimeError(
+                f"MedSigLIP HTTP+SDK failed: http={http_exc!r}; sdk={type(sdk_exc).__name__}: {sdk_exc}"
+            ) from sdk_exc
 
 
 def _get_json(url: str, *, timeout: int) -> dict:
     try:
         with urllib_request.urlopen(url, timeout=timeout) as resp:
             return json.loads(resp.read())
-    except urllib_error.URLError as exc:  # pragma: no cover
-        raise RuntimeError(f"Network error calling {url}: {exc}") from exc
+    except Exception as http_exc:  # noqa: BLE001
+        try:
+            out = _sdk_cls()().info_remote.remote()
+            if not isinstance(out, dict):
+                raise RuntimeError(f"medsiglip sdk info returned non-dict: {type(out)}")
+            return {**out, "transport": "modal_sdk_info_remote"}
+        except Exception as sdk_exc:  # noqa: BLE001
+            raise RuntimeError(
+                f"Network error calling {url}: {http_exc}; sdk={type(sdk_exc).__name__}: {sdk_exc}"
+            ) from sdk_exc
 
 
 def _b64_of(path: os.PathLike[str] | str) -> str:
@@ -153,10 +196,15 @@ class MedSigLipModalClient:
         endpoints: ModalEndpointConfig | None = None,
         batch_chunk: int = DEFAULT_BATCH_CHUNK,
         timeout: int = DEFAULT_TIMEOUT_SECONDS,
+        expected_model_revision: str = MEDSIGLIP_REVISION,
     ) -> None:
         self.endpoints = endpoints or ModalEndpointConfig.from_env()
         self.batch_chunk = max(1, min(int(batch_chunk), 32))
         self.timeout = int(timeout)
+        self.expected_model_revision = expected_model_revision
+        # Production builders use this common identity attribute before
+        # accepting the client; preflight then proves /info serves it.
+        self.model_revision = expected_model_revision
         self._info_cache: dict | None = None
         self._gate_report: GateReport | None = None
         # Compat property so callers written against the local class don't crash.
@@ -213,23 +261,37 @@ class MedSigLipModalClient:
             return gr
 
         model_repo = str(info.get("model_repo", ""))
+        model_revision = str(info.get("model_revision", ""))
+        dim = int(info.get("embedding_dim", 0) or 0)
+        identity_errors: list[str] = []
         if model_repo != MEDSIGLIP_REPO:
+            identity_errors.append(f"model_repo={model_repo!r}")
+        if model_revision != self.expected_model_revision:
+            identity_errors.append(
+                f"model_revision={model_revision!r} "
+                f"(expected {self.expected_model_revision!r})"
+            )
+        if dim != 1152:
+            identity_errors.append(f"embedding_dim={dim} (expected 1152)")
+        if identity_errors:
             gr = GateReport(
                 repo_id=MEDSIGLIP_REPO,
                 access_level=AccessLevel.UNKNOWN,
                 status_code=200,
-                reason=f"unexpected model_repo={model_repo!r}",
+                reason="modal identity mismatch: " + "; ".join(identity_errors),
                 has_token=True,
             )
             self._gate_report = gr
             return gr
 
-        dim = int(info.get("embedding_dim", 0) or 0)
         gr = GateReport(
             repo_id=MEDSIGLIP_REPO,
             access_level=AccessLevel.ALLOWED,
             status_code=200,
-            reason=f"modal-remote model_repo={model_repo} dim={dim}",
+            reason=(
+                f"modal-remote model_repo={model_repo} "
+                f"revision={model_revision} dim={dim}"
+            ),
             has_token=True,
         )
         self._gate_report = gr
@@ -252,6 +314,74 @@ class MedSigLipModalClient:
         if not isinstance(emb, list):
             raise RuntimeError(f"malformed embed response: {resp!r}")
         return [float(x) for x in emb]
+
+    def embed_image(
+        self,
+        image_bytes: bytes | None = None,
+        image_url: str | None = None,
+        preprocessed_image=None,
+    ):
+        """Return the pinned 1,152-d pooled vision embedding for one image.
+
+        This mirrors :meth:`MedSigLip.embed_image` so the biopsy API can use
+        the backend factory instead of accidentally constructing an unpinned
+        local model.  The remote ``/embed`` implementation uses
+        ``vision_model(...).pooler_output``, exactly matching training.
+        """
+        import numpy as np
+
+        provided = sum(
+            value is not None
+            for value in (image_bytes, image_url, preprocessed_image)
+        )
+        if provided != 1:
+            raise ValueError(
+                "embed_image requires exactly one of image_bytes / image_url / "
+                f"preprocessed_image (got {provided})"
+            )
+
+        gate = self.preflight()
+        if gate.access_level is not AccessLevel.ALLOWED:
+            from .hai_def import GatedAccessError
+
+            raise GatedAccessError(
+                repo_id=MEDSIGLIP_REPO,
+                access_level=gate.access_level,
+                status_code=gate.status_code,
+                reason=gate.reason,
+            )
+
+        if image_bytes is not None:
+            raw = image_bytes
+        elif image_url is not None:
+            try:
+                with urllib_request.urlopen(image_url, timeout=self.timeout) as resp:
+                    raw = resp.read()
+            except (urllib_error.HTTPError, urllib_error.URLError) as exc:
+                raise RuntimeError(f"unable to retrieve biopsy image URL: {exc}") from exc
+        else:
+            from io import BytesIO
+            from PIL import Image
+
+            array = np.asarray(preprocessed_image)
+            if array.dtype != np.uint8:
+                array = np.clip(array * 255.0, 0, 255).astype(np.uint8)
+            image = Image.fromarray(array).convert("RGB")
+            buffer = BytesIO()
+            image.save(buffer, format="PNG")
+            raw = buffer.getvalue()
+
+        payload = {"pixels_b64": base64.b64encode(raw).decode("ascii")}
+        response = _post_json(self.endpoints.embed, payload, timeout=self.timeout)
+        embedding = response.get("embedding")
+        if not isinstance(embedding, list):
+            raise RuntimeError(f"malformed embed response: {response!r}")
+        vector = np.asarray(embedding, dtype=np.float32)
+        if vector.shape != (1152,) or not np.isfinite(vector).all():
+            raise RuntimeError(
+                f"Modal pooled embedding failed 1152-d finite contract: {vector.shape}"
+            )
+        return vector
 
     def embed_dicoms(
         self,
@@ -322,12 +452,26 @@ class MedSigLipModalClient:
                 reason=gate.reason,
             )
 
+        import hashlib
+
+        import numpy as np
+
         resp = self.zero_shot_raw(dicom_path, labels=labels_list)
         probs = resp.get("probs")
         if not isinstance(probs, list) or len(probs) != len(labels_list):
             raise RuntimeError(f"malformed zero_shot response: {resp!r}")
         probs_f = [float(x) for x in probs]
         top_idx = max(range(len(probs_f)), key=lambda i: probs_f[i])
+        # Production screening envelope requires a 1152-d embedding receipt.
+        embedding = self.embed_dicom(dicom_path)
+        if len(embedding) != 1152:
+            raise RuntimeError(
+                f"medsiglip embed dim mismatch: expected 1152 got {len(embedding)}"
+            )
+        emb_sha = hashlib.sha256(
+            np.asarray(embedding, dtype=np.float32).tobytes()
+        ).hexdigest()
+        info = self._info()
         return MedSigLipResult(
             source_path=str(dicom_path),
             labels=labels_list,
@@ -340,6 +484,13 @@ class MedSigLipModalClient:
             logits_shape=(1, len(labels_list)),
             warnings=[MEDSIGLIP_MAMMOGRAPHY_WARNING],
             gate_report=gate,
+            app_version=str(info.get("app_version") or resp.get("app_version") or "")
+            or None,
+            inference_seconds=float(resp.get("seconds") or 0.0) or None,
+            prompts=list(labels_list),
+            embedding_dim=1152,
+            embedding_sha256=emb_sha,
+            embedding=[float(x) for x in embedding],
         )
 
 

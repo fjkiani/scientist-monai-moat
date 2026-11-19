@@ -1,0 +1,18 @@
+{
+  "status": "ok",
+  "source": "medgemma_pathology",
+  "model_id": "google/medgemma-1.5-4b-it",
+  "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8",
+  "latency_s": 51.794,
+  "extraction": {
+    "er_status": "POSITIVE",
+    "er_percent": null,
+    "pr_status": "POSITIVE",
+    "her2_status": "POSITIVE",
+    "nottingham_grade": 3,
+    "tumor_size_mm": 45.0,
+    "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+  },
+  "raw_text": "```json\n{\n  \"er_status\": \"POSITIVE\",\n  \"er_percent\": null,\n  \"pr_status\": \"POSITIVE\",\n  \"her2_status\": \"POSITIVE\",\n  \"nottingham_grade\": 3,\n  \"tumor_size_mm\": 4.5\n}\n```",
+  "disclaimer": "RESEARCH USE ONLY \u2014 MedGemma structured extraction; not FDA-cleared; not for clinical decision-making."
+}

@@ -1,0 +1,20 @@
+{
+  "schema_version": 2,
+  "dataset_manifest_sha256": "bbb4ab20debcdc3407b72d05f46f1c87655b90441284ed20915053d30b19b375",
+  "train_sample_ids": [
+    "mg-train-000",
+    "mg-train-001",
+    "mg-train-002",
+    "mg-train-003"
+  ],
+  "validation_sample_ids": [
+    "mg-val-000",
+    "mg-val-001"
+  ],
+  "test_sample_ids": [
+    "mg-test-000",
+    "mg-test-001",
+    "mg-test-002",
+    "mg-test-003"
+  ]
+}

@@ -2,14 +2,14 @@
 
 Route order (first success wins):
 
-    1. **Google direct** (``generativelanguage.googleapis.com``) — Gemma-4-31b-it,
-       primary route, verified live 2026-07-06.
-    2. **OpenRouter V2** ``:free`` tier.
-    3. **OpenRouter V1** ``:free`` tier.
-    4. **OpenRouter legacy** key (also ``:free``).
+    1. **MedGemma 1.5 4B Modal** when ``MEDGEMMA_MODAL_URL`` is configured.
+       Its model, app version, and revision hash must match the pinned identity.
+    2. **Google direct** (``generativelanguage.googleapis.com``) for development.
+    3. **OpenRouter** development ladder.
 
-Every route target is Gemma-4-31b-it. The client is stateless and thread-safe;
-callers should reuse a single instance to keep the requests session pool hot.
+The Modal route is terminal: failure never falls through and gets relabelled
+as MedGemma output. The client is stateless and thread-safe; callers should
+reuse a single instance to keep the requests session pool hot.
 
 Environment variables (all optional; missing keys are skipped):
 
@@ -71,6 +71,10 @@ class LlmResponse:
     thinking_tokens: int  # Gemma "thinking" tokens (Google direct only)
     est_cost_usd: float
     latency_s: float
+    app_version: str | None = None
+    request_id: str | None = None
+    honesty_warning: str | None = None
+    revision_sha256: str | None = None
 
 
 @dataclass
@@ -151,6 +155,7 @@ class GemmaClient:
     ) -> None:
         self.model_bare = model or os.environ.get("GEMMA_MODEL", "gemma-4-31b-it")
         self.model = f"google/{self.model_bare}"
+        self.medgemma_url = (os.environ.get("MEDGEMMA_MODAL_URL") or "").rstrip("/")
         self.google_key = google_key or os.environ.get("GEMMA_GOOGLE_KEY")
         if openrouter_keys is None:
             openrouter_keys = [
@@ -180,6 +185,17 @@ class GemmaClient:
         """
         errors: List[str] = []
 
+        # Production route: the identity-locked MedGemma 1.5 4B specialist. When it is
+        # configured, failure is terminal: another provider or deterministic
+        # Elo must not be relabelled as MedGemma output.
+        if self.medgemma_url:
+            try:
+                return self._call_medgemma_modal(messages, max_tokens, temperature)
+            except _RouteFailure as exc:
+                self.usage.record_failure("medgemma_modal")
+                raise LlmUnavailable(f"MedGemma Modal unavailable: {exc}") from exc
+
+        # Development-only routing ladder when MedGemma is not configured.
         # ---- Route 1: Google direct ----
         if self.google_key:
             try:
@@ -209,6 +225,79 @@ class GemmaClient:
         )
 
     # --------------------------------------------------------------------
+
+    def _call_medgemma_modal(
+        self,
+        messages: List[Dict[str, str]],
+        max_tokens: int,
+        temperature: float,
+    ) -> LlmResponse:
+        from oncology_arbiter.models.medgemma_1_5_4b_wiring import (
+            assert_pinned_chat_url,
+            verify_artifact_identity,
+        )
+
+        identity = verify_artifact_identity()
+        expected_model = str(identity["model_id"])
+        expected_app = str(identity["app_version"])
+        expected_revision = str(identity["revision_sha256"])
+        url = assert_pinned_chat_url(self.medgemma_url)
+        started = time.time()
+        try:
+            response = self._session.post(
+                url,
+                json={
+                    "messages": messages,
+                    "max_tokens": max_tokens,
+                    "temperature": temperature,
+                },
+                headers={"Content-Type": "application/json"},
+                timeout=max(self.timeout_s, 900.0),
+            )
+        except requests.RequestException as exc:
+            raise _RouteFailure(f"network: {exc}") from exc
+        latency = time.time() - started
+        if response.status_code >= 400:
+            raise _RouteFailure(f"HTTP {response.status_code}: {response.text[:200]}")
+        try:
+            data = response.json()
+        except ValueError as exc:
+            raise _RouteFailure(f"non-JSON response ({response.text[:200]!r})") from exc
+        if data.get("error"):
+            raise _RouteFailure(str(data["error"]))
+        text = str(data.get("text") or "").strip()
+        if not text:
+            raise _RouteFailure("empty response")
+        response_model = data.get("model") or data.get("model_id")
+        if (
+            response_model != expected_model
+            or data.get("app_version") != expected_app
+            or data.get("revision_sha256") != expected_revision
+        ):
+            raise _RouteFailure(
+                "contract_mismatch:"
+                f"model={response_model!r},app_version={data.get('app_version')!r},"
+                f"revision_sha256={data.get('revision_sha256')!r}"
+            )
+        request_id = str(data.get("request_id") or "").strip()
+        if not request_id:
+            raise _RouteFailure("contract_mismatch:missing_request_id")
+        result = LlmResponse(
+            text=text,
+            route="medgemma_modal",
+            model=expected_model,
+            prompt_tokens=int(data.get("prompt_tokens") or 0),
+            completion_tokens=int(data.get("completion_tokens") or 0),
+            thinking_tokens=0,
+            est_cost_usd=0.0,
+            latency_s=float(data.get("latency_s") or latency),
+            app_version=expected_app,
+            request_id=request_id,
+            honesty_warning=str(data.get("honesty_warning") or "") or None,
+            revision_sha256=expected_revision,
+        )
+        self.usage.record(result)
+        return result
 
     def _call_google(
         self,
@@ -246,7 +335,7 @@ class GemmaClient:
         elapsed = time.time() - t0
 
         if r.status_code == 429:
-            raise _RouteFailure(f"rate_limited (HTTP 429)")
+            raise _RouteFailure("rate_limited (HTTP 429)")
         if r.status_code >= 400:
             raise _RouteFailure(f"HTTP {r.status_code}: {r.text[:200]}")
 
@@ -347,21 +436,21 @@ class GemmaClient:
             if r.status_code == 402:
                 # Insufficient credits — permanent for this key, don't retry
                 self._exhausted_openrouter[api_key] = time.time() + 24 * 3600
-                raise _RouteFailure(f"insufficient_credits (HTTP 402)")
+                raise _RouteFailure("insufficient_credits (HTTP 402)")
             if r.status_code >= 400:
                 raise _RouteFailure(f"HTTP {r.status_code}: {r.text[:200]}")
 
             try:
                 data = r.json()
             except ValueError:
-                raise _RouteFailure(f"non-JSON response")
+                raise _RouteFailure("non-JSON response")
 
             choices = data.get("choices", [])
             if not choices:
                 raise _RouteFailure(f"no choices: {json.dumps(data)[:300]}")
             text = choices[0].get("message", {}).get("content", "").strip()
             if not text:
-                raise _RouteFailure(f"empty response")
+                raise _RouteFailure("empty response")
 
             usage = data.get("usage", {})
             prompt_tokens = usage.get("prompt_tokens", 0)

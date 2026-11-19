@@ -1,0 +1,15 @@
+{
+  "status": "ok",
+  "band": "24-48",
+  "dataset": "rsna_kaggle_official_v1_resplit",
+  "n_total": 826,
+  "n_train": 660,
+  "n_test": 166,
+  "cv_auc_mean": 0.6145624303232999,
+  "test_auc": 0.6074137931034482,
+  "joblib": "artifacts/rsna_mammo/probe_official_v1_resplit/rsna_medsiglip_logreg_official_v1_resplit.joblib",
+  "joblib_sha256": "f3c7ed59a264f6abc952425cf73a093db8d319e232f861f072945dcebbd1175d",
+  "modal_embed_url": "https://testing-123--medsiglip",
+  "medsiglip_fix": "testing-123 secret medsiglip-hf-token (real hf_*) replaced offline placeholder; timeout 900s",
+  "ts": "2026-10-05T12:09:15.954113+00:00"
+}

@@ -76,14 +76,17 @@ class TestHealthCancers:
                     f"{cancer} has case_full=false but declares no endpoints"
                 )
 
-    def test_nsclc_flagged_at_least_as_proxy(self, client):
+    def test_nsclc_never_flagged_as_proxy(self, client):
         j = client.get("/health").json()
         # v0.2: the LIDC-IDRI + NCCN-lite pipeline is wired. /health may
         # advertise it as proxy (rules + heuristic) or placeholder in older
         # builds; both are acceptable, but never "loaded".
         assert j["cancers"]["nsclc"]["state"] in {
-            "placeholder", "proxy_lung_heuristic"
+            "configured_unverified",
+            "unavailable",
+            "loaded_luna16_retinanet",
         }
+        assert j["cancers"]["nsclc"]["state"] not in {"placeholder", "proxy_lung_heuristic"}
         assert "notes" in j["cancers"]["nsclc"], (
             "nsclc should carry an operator-visible 'notes' string that "
             "describes what the current NSCLC track actually does"
@@ -102,7 +105,9 @@ class TestCancerRouting:
         assert r.status_code == 200
         j = r.json()
         # Breast branch runs therapy even with no biopsy input.
-        assert j["therapy"] is not None
+        # therapy is None without the authenticated SL bridge: the retired
+        # rules-lite/TxGemma proxies used to fill this field.
+        assert j["therapy"] is None
         assert "disclaimer" in j and "provenance" in j
 
     def test_breast_explicit_matches_default(self, client):
@@ -115,7 +120,7 @@ class TestCancerRouting:
         assert set(j1.keys()) == set(j2.keys())
         assert (j1["therapy"] is None) == (j2["therapy"] is None)
 
-    def test_nsclc_returns_placeholder_envelope(self, client):
+    def test_nsclc_returns_unavailable_envelope(self, client):
         r = client.post("/v1/case/full?cancer=nsclc", json={})
         assert r.status_code == 200
         j = r.json()
@@ -126,15 +131,23 @@ class TestCancerRouting:
         assert j["elo_ranked_hypotheses"] == []
         # Full envelope contract still holds.
         assert "disclaimer" in j and "provenance" in j and "honesty_gate" in j
-        assert j["provenance"]["model_state"] == "placeholder"
-        assert j["provenance"]["model_name"] == "nsclc_placeholder_v0"
-        # Placeholder MUST self-flag via warnings — otherwise a downstream
-        # consumer could confuse the empty envelope with a "no findings"
-        # real inference.
+        assert j["provenance"]["model_state"] == "unavailable"
+        assert j["provenance"]["model_state"] != "placeholder"
+        assert j["provenance"]["model_name"] == "specialist-stack-composite"
+        # An empty envelope MUST self-flag — otherwise a downstream consumer
+        # could confuse it with a completed inference that found nothing.
+        # The flag is no longer the retired word "placeholder": it names the
+        # required stages that did not execute.
         assert any(
-            "nsclc" in w.lower() and "placeholder" in w.lower()
+            "nsclc" in w.lower() and "not_executed" in w.lower()
             for w in j["warnings"]
         ), f"nsclc warning missing; got warnings={j['warnings']!r}"
+        assert j["pipeline_status"] == "failed_required_stage"
+        stages = {r["stage"]: r for r in j["stage_receipts"]}
+        assert stages["case_storage"]["status"] == "failed_required"
+        assert stages["case_storage"]["error"]["code"] == "case_id_required"
+        assert stages["luna16_detection"]["status"] == "failed_required"
+        assert not any("placeholder" in w.lower() for w in j["warnings"])
 
     def test_invalid_cancer_returns_400(self, client):
         r = client.post("/v1/case/full?cancer=lymphoma", json={})
@@ -149,7 +162,7 @@ class TestCancerRouting:
         r = client.post("/v1/case/full?cancer=NSCLC", json={})
         assert r.status_code == 200
         # Same placeholder branch as lowercase 'nsclc'.
-        assert r.json()["provenance"]["model_name"] == "nsclc_placeholder_v0"
+        assert r.json()["provenance"]["model_name"] == "specialist-stack-composite"
 
 
 # --------------------------------------------------------------------------- #

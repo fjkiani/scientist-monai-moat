@@ -1,0 +1,29 @@
+{
+  "clinical_meter": "FROC@2 held-out n=88 official CAD",
+  "production": {
+    "froc_at_2": 0.8267399271674979,
+    "weight_sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01",
+    "app_version": "luna16-infer-v0.5.2-alpha-resample",
+    "resample_wired": true
+  },
+  "refine_f3cebb17": {
+    "trained": true,
+    "epochs": 5,
+    "n_training": 482,
+    "froc_at_2": null,
+    "n_candidates_cad": 8800,
+    "promotion": "REJECTED_COLLAPSE"
+  },
+  "medgemma": {
+    "model_id": "google/medgemma-1.5-4b-it",
+    "revision_sha256": "300c724c2c1fcdea39f1e21865cb1b14a605f1e3bb5ef50550faaa48da944fc8",
+    "chat_sla_met": true,
+    "latency_s": 35.237
+  },
+  "e2e": {
+    "p_event": 0.773762,
+    "leakage": "NONE"
+  },
+  "git_tip_branch": "feat/ten-capability-delivery-20260928",
+  "cad_request_id": "clinical-froc-cad-20261011T050956Z"
+}

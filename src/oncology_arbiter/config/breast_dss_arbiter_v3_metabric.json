@@ -1,0 +1,115 @@
+{
+  "artifact_name": "breast_dss_arbiter_v3_metabric",
+  "supersedes": "breast_mortality_arbiter_v2_metabric (all-cause; claim WITHDRAWN)",
+  "generated_utc": "2026-08-11T07:45:37Z",
+  "endpoint_label": "disease-specific mortality risk (METABRIC-derived, prognosis only)",
+  "label_definition": "event = VITAL_STATUS \"Died of Disease\"; non-event = \"Living\"; \"Died of Other Causes\" excluded",
+  "n": 1375,
+  "events": 601,
+  "prevalence": 0.4370909090909091,
+  "dropped": {
+    "other_cause": 497,
+    "no_vital": 529,
+    "incomplete": 108
+  },
+  "features": [
+    "age",
+    "tumor_size_mm",
+    "nodes_positive",
+    "grade",
+    "er_pos",
+    "pr_pos",
+    "her2_pos"
+  ],
+  "model": {
+    "type": "logistic_regression_l2",
+    "C": 1.0,
+    "solver": "lbfgs",
+    "max_iter": 5000,
+    "seed": 42,
+    "folds": 5,
+    "standardised": true,
+    "scaler_mean": [
+      58.175934545454524,
+      26.337556363636363,
+      2.2014545454545456,
+      2.4487272727272726,
+      0.7301818181818182,
+      0.5010909090909091,
+      0.144
+    ],
+    "scaler_scale": [
+      12.580983889089671,
+      16.106776538618956,
+      4.261386636544005,
+      0.6427980159087353,
+      0.4438652166801421,
+      0.49999880991593376,
+      0.3510897321198661
+    ],
+    "coef_standardised": {
+      "age": 0.3856299061446198,
+      "tumor_size_mm": 0.3483369300264921,
+      "nodes_positive": 0.5110165750880924,
+      "grade": 0.2813076679007716,
+      "er_pos": -0.009860156546417202,
+      "pr_pos": -0.03499901446392438,
+      "her2_pos": 0.16267763764550655
+    },
+    "intercept": -0.24702382790127209
+  },
+  "out_of_fold_discrimination": {
+    "arbiter": 0.7074686031463495,
+    "npi_native": 0.681211761620383,
+    "npi_plus_age": 0.6876545120750515,
+    "age_alone": 0.5927717370274348
+  },
+  "average_precision_arbiter": 0.648157173637555,
+  "brier_arbiter": 0.21449480814874922,
+  "incremental_rule": {
+    "rule": "A capability stays on the delivered list only if the 95% CI of its incremental discrimination over the cheapest available comparator excludes zero.",
+    "vs_npi": {
+      "delta": 0.026236965989468865,
+      "ci_lo": 0.005915425568152941,
+      "ci_hi": 0.04539407722088968,
+      "p_one_sided": 0.0065
+    },
+    "vs_npi_plus_age": {
+      "delta": 0.019632112929677783,
+      "ci_lo": 0.00422753355399465,
+      "ci_hi": 0.0343447829667733,
+      "p_one_sided": 0.006
+    },
+    "verdict": "PASSES vs both comparators"
+  },
+  "reproduction_against_audit_receipt": {
+    "expected_n": 1375,
+    "got_n": 1375,
+    "expected_events": 601,
+    "got_events": 601,
+    "expected_arbiter_auroc": 0.7090959511924569,
+    "got_arbiter_auroc": 0.7074686031463495,
+    "abs_auroc_diff": 0.0016273480461074241,
+    "fold_assignment_sensitivity": {
+      "probe": "OOF AUROC recomputed across 40 StratifiedKFold shuffle seeds, identical cohort/features/hyperparameters",
+      "mean": 0.712359,
+      "sd": 0.002267,
+      "min": 0.707724,
+      "max": 0.716796,
+      "receipt_value_inside_seed_range": true,
+      "seeds_at_or_above_receipt": "36/40",
+      "gap_in_sd_units": 0.72,
+      "resolution": "The 0.00163 gap is fold-assignment noise, not a specification difference. Cohort construction is confirmed exact: n, event count, NPI-alone AUROC and age-alone AUROC all reproduce bit-for-bit, and those are the two comparators that involve no cross-validated fitting.",
+      "consequence": "Quoting this AUROC to four decimals overstates precision. The defensible statement is OOF AUROC 0.71 +/- 0.002 (fold-assignment sd). The incremental verdict is unaffected: both CIs exclude zero under either fold draw."
+    },
+    "reproduces_receipt_cohort": true,
+    "reproduces_receipt_point_estimate": false
+  },
+  "deployment_caveats": [
+    "Point estimate is fold-sensitive at +/-0.002; report as 0.71, not 0.7091.",
+    "Prognosis under the treatment mix present in METABRIC. Not a treatment-benefit estimate and not identifiable as one from this design.",
+    "All-cause claim was withdrawn: increment over NPI+age crossed zero. Only the disease-specific endpoint is supported.",
+    "ER-negative subgroup is underpowered: delta +0.0236, 95% CI crosses zero, p=0.136.",
+    "METABRIC is a retrospective cohort accrued 1977-2005; calibration to a contemporary population is unverified."
+  ]
+}

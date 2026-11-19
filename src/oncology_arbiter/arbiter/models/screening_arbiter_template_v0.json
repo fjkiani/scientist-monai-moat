@@ -45,22 +45,41 @@
       ],
       "REFERENCE": "UNKNOWN"
     },
-    "prior_biopsy_history": {"true": 1.0, "false": 0.0, "unknown": 0.5},
-    "family_history_first_degree": {"true": 1.0, "false": 0.0, "unknown": 0.5},
-    "brca_status_known_pathogenic": {"true": 1.0, "false": 0.0, "unknown": 0.5},
+    "prior_biopsy_history": {
+      "true": 1.0,
+      "false": 0.0,
+      "unknown": null
+    },
+    "family_history_first_degree": {
+      "true": 1.0,
+      "false": 0.0,
+      "unknown": null
+    },
+    "brca_status_known_pathogenic": {
+      "true": 1.0,
+      "false": 0.0,
+      "unknown": null
+    },
     "age_norm": "raw_age_years / 100.0",
     "years_since_last_mammo_norm": "raw_years / 5.0"
   },
   "recommendations": {
-    "LOW":  "ROUTINE_1YR_FOLLOWUP",
-    "MID":  "SHORT_INTERVAL_6MO_FOLLOWUP",
+    "LOW": "ROUTINE_1YR_FOLLOWUP",
+    "MID": "SHORT_INTERVAL_6MO_FOLLOWUP",
     "HIGH": "RECALL_FOR_DIAGNOSTIC_WORKUP"
   },
   "performance": {
     "cv_auroc_mean": null,
     "cv_auroc_std": null,
     "brier_score": null,
-    "AUROC_CAVEAT": "TEMPLATE — coefficients illustrative, not fit on real mammography outcomes. n_training=0. Do not report AUROC; there is nothing to average over. Prospective AUROC will be established only after Phase 3 EMBED / CBIS-DDSM training runs land with an independent test split. This artefact locks the schema and honesty gates; it does not encode a validated model."
+    "AUROC_CAVEAT": "TEMPLATE \u2014 coefficients illustrative, not fit on real mammography outcomes. n_training=0. Do not report AUROC; there is nothing to average over. Prospective AUROC will be established only after Phase 3 EMBED / CBIS-DDSM training runs land with an independent test split. This artefact locks the schema and honesty gates; it does not encode a validated model."
   },
-  "disclaimer": "RESEARCH USE ONLY — not validated for clinical decision-making. Not FDA-cleared. Not CE-marked."
+  "disclaimer": "RESEARCH USE ONLY \u2014 not validated for clinical decision-making. Not FDA-cleared. Not CE-marked.",
+  "missingness": {
+    "policy": "reference_level_zero_logit_contribution",
+    "unobserved_boolean_encoding": 0.0,
+    "rationale": "The midpoint 0.5 injected +1.150000 log-odds on this artefact purely from absent data. Encoding at the reference level is the unique constant that leaves an all-unknown panel at the intercept-only base rate 0.11920292.",
+    "fitted_missingness_indicator_available": false,
+    "indicator_coefficient_convention": "<feature>__missing in coefficients (absent here: n_training=0)"
+  }
 }

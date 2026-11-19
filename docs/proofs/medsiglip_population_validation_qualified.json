@@ -1,0 +1,1880 @@
+{
+  "bootstrap": {
+    "replicates": 2000,
+    "seed": 20260813,
+    "unit": "patient"
+  },
+  "cohort": {
+    "archive": "CBIS-DDSM_full_1024.zip",
+    "archive_images_total": 3086,
+    "archive_sha256": "123239b7f68c3a309b33784aff0a7f91ff9200edc5a2f76c4507ce96cc7c0e53",
+    "image_class_counts": {
+      "test_0": 341,
+      "test_1": 245,
+      "train_0": 973,
+      "train_1": 779
+    },
+    "lesion_type_counts": {
+      "test_calcification_0": 159,
+      "test_calcification_1": 108,
+      "test_mass_0": 182,
+      "test_mass_1": 137,
+      "train_calcification_0": 701,
+      "train_calcification_1": 482,
+      "train_mass_0": 272,
+      "train_mass_1": 297
+    },
+    "locked_images_total": 2338,
+    "locked_unique_patients": {
+      "test": 316,
+      "train": 956
+    },
+    "matched_images_before_patient_lock": 2423,
+    "metadata": "cbis-ddsm-r-dataset.csv",
+    "metadata_rows": 2437,
+    "metadata_rows_without_archive_match": 14,
+    "metadata_sha256": "b58598c9181b6b9bd9e5f6efda601705a8e08bb76d1c14a402476428d1c8e863",
+    "patient_class_counts_any_malignant": {
+      "test_0": 177,
+      "test_1": 139,
+      "train_0": 484,
+      "train_1": 472
+    },
+    "patient_id_intersection": 0,
+    "patient_label_rule": "malignant if any locked image for that patient is malignant",
+    "patient_score_rule_primary": "maximum image score per patient (screening-oriented any-positive aggregation)",
+    "patient_score_sensitivity_analysis": "mean image score per patient",
+    "raw_split_anomaly": {
+      "affected_images": 85,
+      "interpretation": "All raw-ID collisions cross mass/calcification subdatasets. This may reflect ID reuse or cross-lesion partitioning; identity cannot be proven distinct, so all collided IDs are excluded from both splits.",
+      "patient_id_intersection": 24,
+      "policy": "exclude every raw patient_id observed in both train and test from both splits",
+      "same_lesion_type_present_in_both_splits": 0
+    },
+    "unmatched_archive_images_excluded_no_patient_metadata": 663,
+    "view_counts": {
+      "test_CC_0": 157,
+      "test_CC_1": 111,
+      "test_MLO_0": 184,
+      "test_MLO_1": 134,
+      "train_CC_0": 460,
+      "train_CC_1": 363,
+      "train_MLO_0": 513,
+      "train_MLO_1": 416
+    }
+  },
+  "directive": "7_qualified_medsiglip_population_analysis",
+  "elapsed_seconds": 173.106,
+  "embedding_probe": {
+    "candidate_C": [
+      0.001,
+      0.01,
+      0.1,
+      1.0,
+      10.0
+    ],
+    "estimand": "held-out linear decodability of malignancy from frozen MedSigLIP embeddings",
+    "final_C": 0.01,
+    "final_C_cv": {
+      "0.001": {
+        "fold_patient_auroc": [
+          0.7296842105263157,
+          0.706634963768116,
+          0.708513396715644,
+          0.6579293704759817,
+          0.7257331211639009
+        ],
+        "mean": 0.7056990125299917
+      },
+      "0.01": {
+        "fold_patient_auroc": [
+          0.7357894736842104,
+          0.7309782608695652,
+          0.7376836646499568,
+          0.7265847773634568,
+          0.7523300750170494
+        ],
+        "mean": 0.7366732503168476
+      },
+      "0.1": {
+        "fold_patient_auroc": [
+          0.7134736842105263,
+          0.7292798913043478,
+          0.7199654278305964,
+          0.7184689624917745,
+          0.7501704932939305
+        ],
+        "mean": 0.7262716918262351
+      },
+      "1.0": {
+        "fold_patient_auroc": [
+          0.6990526315789474,
+          0.6920289855072463,
+          0.6871218668971478,
+          0.683483220004387,
+          0.7216412821095703
+        ],
+        "mean": 0.6966655972194598
+      },
+      "10.0": {
+        "fold_patient_auroc": [
+          0.6881052631578948,
+          0.6631567028985508,
+          0.6784788245462403,
+          0.6671419170870806,
+          0.69686292339168
+        ],
+        "mean": 0.6787491262162892
+      }
+    },
+    "full_train_apparent_metrics_not_used_for_selection": {
+      "auprc": 0.8864787005502243,
+      "auroc": 0.9082057662140965,
+      "brier": 0.13049770730448954,
+      "n": 1752,
+      "positives": 779,
+      "prevalence": 0.444634703196347
+    },
+    "model": "StandardScaler plus L2-penalized logistic regression; no PCA",
+    "outer_folds": [
+      {
+        "inner_scores": {
+          "0.001": {
+            "fold_patient_auroc": [
+              0.7041092797471212,
+              0.6673901247965274,
+              0.7022351171287341,
+              0.6562835660580021
+            ],
+            "mean": 0.6825045219325961
+          },
+          "0.01": {
+            "fold_patient_auroc": [
+              0.7018514337322195,
+              0.6850786760716223,
+              0.7378035675908016,
+              0.6912996777658432
+            ],
+            "mean": 0.7040083387901217
+          },
+          "0.1": {
+            "fold_patient_auroc": [
+              0.6982388801083765,
+              0.6626153011394464,
+              0.7195357833655706,
+              0.6688506981740064
+            ],
+            "mean": 0.68731016569685
+          },
+          "1.0": {
+            "fold_patient_auroc": [
+              0.6623391284714383,
+              0.6435160065111231,
+              0.6968622394154309,
+              0.6408163265306122
+            ],
+            "mean": 0.6608834252321512
+          },
+          "10.0": {
+            "fold_patient_auroc": [
+              0.6459697448634003,
+              0.6272381985892566,
+              0.6912744465935955,
+              0.6269602577873254
+            ],
+            "mean": 0.6478606619583944
+          }
+        },
+        "n_train_images": 1400,
+        "n_validation_images": 352,
+        "n_validation_patients": 189,
+        "outer_fold": 0,
+        "selected_C": 0.01,
+        "validation_patient_auroc": 0.7687135813536531
+      },
+      {
+        "inner_scores": {
+          "0.001": {
+            "fold_patient_auroc": [
+              0.7231005709266579,
+              0.7128745115067303,
+              0.7057453416149069,
+              0.6669999999999999
+            ],
+            "mean": 0.7021801060120737
+          },
+          "0.01": {
+            "fold_patient_auroc": [
+              0.7661396574440053,
+              0.7154798089448545,
+              0.7250443655723158,
+              0.699888888888889
+            ],
+            "mean": 0.7266381802125161
+          },
+          "0.1": {
+            "fold_patient_auroc": [
+              0.761528326745718,
+              0.6996309161962657,
+              0.7142857142857143,
+              0.6911111111111111
+            ],
+            "mean": 0.7166390170847023
+          },
+          "1.0": {
+            "fold_patient_auroc": [
+              0.7482433025911287,
+              0.6732522796352584,
+              0.6968722271517303,
+              0.6718888888888889
+            ],
+            "mean": 0.6975641745667516
+          },
+          "10.0": {
+            "fold_patient_auroc": [
+              0.7389108476064998,
+              0.6566435084672166,
+              0.6845607808340727,
+              0.6613333333333333
+            ],
+            "mean": 0.6853621175602806
+          }
+        },
+        "n_train_images": 1407,
+        "n_validation_images": 345,
+        "n_validation_patients": 193,
+        "outer_fold": 1,
+        "selected_C": 0.01,
+        "validation_patient_auroc": 0.6831076724693746
+      },
+      {
+        "inner_scores": {
+          "0.001": {
+            "fold_patient_auroc": [
+              0.6731755208901494,
+              0.7343461747151383,
+              0.7715773809523808,
+              0.6380739081746921
+            ],
+            "mean": 0.7042932461830902
+          },
+          "0.01": {
+            "fold_patient_auroc": [
+              0.68190247627359,
+              0.7748236570808464,
+              0.7690263605442177,
+              0.6783874580067188
+            ],
+            "mean": 0.7260349879763432
+          },
+          "0.1": {
+            "fold_patient_auroc": [
+              0.680484346023781,
+              0.7564839934888767,
+              0.7426658163265306,
+              0.6940649496080628
+            ],
+            "mean": 0.7184247763618128
+          },
+          "1.0": {
+            "fold_patient_auroc": [
+              0.6645576524490018,
+              0.741942485078676,
+              0.7170493197278912,
+              0.6699888017917134
+            ],
+            "mean": 0.6983845647618206
+          },
+          "10.0": {
+            "fold_patient_auroc": [
+              0.6523399149121849,
+              0.7360824742268042,
+              0.7069515306122449,
+              0.6615901455767078
+            ],
+            "mean": 0.6892410163319854
+          }
+        },
+        "n_train_images": 1415,
+        "n_validation_images": 337,
+        "n_validation_patients": 189,
+        "outer_fold": 2,
+        "selected_C": 0.01,
+        "validation_patient_auroc": 0.6993281075027995
+      },
+      {
+        "inner_scores": {
+          "0.001": {
+            "fold_patient_auroc": [
+              0.7355723243702837,
+              0.6844671201814059,
+              0.5826395826395827,
+              0.7408493537525795
+            ],
+            "mean": 0.685882095235963
+          },
+          "0.01": {
+            "fold_patient_auroc": [
+              0.7519396322669785,
+              0.6799319727891157,
+              0.6510156510156511,
+              0.7387857065276421
+            ],
+            "mean": 0.7054182406498469
+          },
+          "0.1": {
+            "fold_patient_auroc": [
+              0.6994367095334254,
+              0.6519274376417233,
+              0.6749916749916751,
+              0.6994677962419898
+            ],
+            "mean": 0.6814559046022035
+          },
+          "1.0": {
+            "fold_patient_auroc": [
+              0.67244127962589,
+              0.6276643990929706,
+              0.6696636696636697,
+              0.6571087216248507
+            ],
+            "mean": 0.6567195175018452
+          },
+          "10.0": {
+            "fold_patient_auroc": [
+              0.6658518439791689,
+              0.6209750566893424,
+              0.6666666666666666,
+              0.6411426088845443
+            ],
+            "mean": 0.6486590440549306
+          }
+        },
+        "n_train_images": 1396,
+        "n_validation_images": 356,
+        "n_validation_patients": 192,
+        "outer_fold": 3,
+        "selected_C": 0.01,
+        "validation_patient_auroc": 0.7543136190992947
+      },
+      {
+        "inner_scores": {
+          "0.001": {
+            "fold_patient_auroc": [
+              0.6780151312861593,
+              0.6676417641764176,
+              0.7219785040579074,
+              0.6918086860912589
+            ],
+            "mean": 0.6898610214029358
+          },
+          "0.01": {
+            "fold_patient_auroc": [
+              0.6783489096573209,
+              0.7184968496849684,
+              0.72877824084229,
+              0.7444749862561847
+            ],
+            "mean": 0.717524746610191
+          },
+          "0.1": {
+            "fold_patient_auroc": [
+              0.6473075211392969,
+              0.7244599459945994,
+              0.7102434744461504,
+              0.7341396371632765
+            ],
+            "mean": 0.7040376446858307
+          },
+          "1.0": {
+            "fold_patient_auroc": [
+              0.6199376947040498,
+              0.6922817281728173,
+              0.6865540688747533,
+              0.7042330951072017
+            ],
+            "mean": 0.6757516467147056
+          },
+          "10.0": {
+            "fold_patient_auroc": [
+              0.6091455273698264,
+              0.6747299729972998,
+              0.6728449221320465,
+              0.6931280923584388
+            ],
+            "mean": 0.6624621287144028
+          }
+        },
+        "n_train_images": 1390,
+        "n_validation_images": 362,
+        "n_validation_patients": 193,
+        "outer_fold": 4,
+        "selected_C": 0.01,
+        "validation_patient_auroc": 0.7668599656357389
+      }
+    ],
+    "selection_target": "mean patient-level AUROC after max-score patient aggregation",
+    "test": {
+      "image_level": {
+        "auprc": 0.6677754786202162,
+        "auroc": 0.7378239272248489,
+        "brier": 0.20876048652006804,
+        "clustered_bootstrap": {
+          "auprc_ci95": [
+            0.5881324266248201,
+            0.7435988522283171
+          ],
+          "auroc_ci95": [
+            0.6868227316335522,
+            0.781693959780606
+          ],
+          "replicates_requested": 2000,
+          "replicates_valid": 2000,
+          "seed": 20265813,
+          "unit": "patient"
+        },
+        "n": 586,
+        "positives": 245,
+        "prevalence": 0.4180887372013652
+      },
+      "patient_level_primary_max_score": {
+        "auprc": 0.7015508086959368,
+        "auroc": 0.7588099012315572,
+        "bootstrap": {
+          "auprc_ci95": [
+            0.6183765472496631,
+            0.7855582805494452
+          ],
+          "auroc_ci95": [
+            0.7048310992117606,
+            0.8103880901605166
+          ],
+          "replicates_requested": 2000,
+          "replicates_valid": 2000,
+          "seed": 20265913,
+          "unit": "patient"
+        },
+        "brier": 0.21276115668048617,
+        "n": 316,
+        "positives": 139,
+        "prevalence": 0.439873417721519
+      },
+      "patient_level_sensitivity_mean_score": {
+        "auprc": 0.7036293526074343,
+        "auroc": 0.7527943746697557,
+        "brier": 0.20121086200463906,
+        "n": 316,
+        "positives": 139,
+        "prevalence": 0.439873417721519
+      }
+    },
+    "test_adjusted_regression": {
+      "covariates": [
+        "standardized malignant score",
+        "MLO indicator",
+        "mass indicator"
+      ],
+      "model": "binomial GLM; patient-cluster-robust covariance",
+      "score_ci95_log_odds": [
+        0.7145576133367137,
+        1.1562803840809737
+      ],
+      "score_log_odds_per_sd": 0.9354189987088437,
+      "score_odds_ratio_per_sd": 2.5482809605144743,
+      "score_p_value": 1.0317108156402415e-16
+    },
+    "test_calibration": {
+      "intercept": -0.2864906687625461,
+      "slope": 0.6850132466889993
+    },
+    "test_strata": {
+      "abnormality_type": {
+        "calcification": {
+          "image_level": {
+            "auprc": 0.6474484759228605,
+            "auroc": 0.7406825064057767,
+            "brier": 0.20494201649621097,
+            "clustered_bootstrap": {
+              "auprc_ci95": [
+                0.5294299306778698,
+                0.7651373565140387
+              ],
+              "auroc_ci95": [
+                0.6601469408063688,
+                0.8143240251893036
+              ],
+              "replicates_requested": 2000,
+              "replicates_valid": 2000,
+              "seed": 20261813,
+              "unit": "patient"
+            },
+            "n": 267,
+            "positives": 108,
+            "prevalence": 0.4044943820224719
+          },
+          "patient_level_primary_max_score": {
+            "auprc": 0.6676475491519142,
+            "auroc": 0.7579437360858126,
+            "bootstrap": {
+              "auprc_ci95": [
+                0.5591318285367384,
+                0.8018898324237678
+              ],
+              "auroc_ci95": [
+                0.6782577911622029,
+                0.8362572393822393
+              ],
+              "replicates_requested": 2000,
+              "replicates_valid": 2000,
+              "seed": 20261913,
+              "unit": "patient"
+            },
+            "brier": 0.21450783995984057,
+            "n": 142,
+            "positives": 61,
+            "prevalence": 0.4295774647887324
+          },
+          "patient_level_sensitivity_mean_score": {
+            "auprc": 0.6817332246486192,
+            "auroc": 0.7478243270592997,
+            "brier": 0.20443519375799724,
+            "n": 142,
+            "positives": 61,
+            "prevalence": 0.4295774647887324
+          }
+        },
+        "mass": {
+          "image_level": {
+            "auprc": 0.6830111095976964,
+            "auroc": 0.7360632068661266,
+            "brier": 0.21195651001966,
+            "clustered_bootstrap": {
+              "auprc_ci95": [
+                0.5897271592619845,
+                0.7781457481080873
+              ],
+              "auroc_ci95": [
+                0.6719656724083742,
+                0.7978315527679563
+              ],
+              "replicates_requested": 2000,
+              "replicates_valid": 2000,
+              "seed": 20261823,
+              "unit": "patient"
+            },
+            "n": 319,
+            "positives": 137,
+            "prevalence": 0.42946708463949845
+          },
+          "patient_level_primary_max_score": {
+            "auprc": 0.7347739363519348,
+            "auroc": 0.7679123711340206,
+            "bootstrap": {
+              "auprc_ci95": [
+                0.6269463182378039,
+                0.836386996828524
+              ],
+              "auroc_ci95": [
+                0.6957127329192547,
+                0.8391001256807707
+              ],
+              "replicates_requested": 2000,
+              "replicates_valid": 2000,
+              "seed": 20261923,
+              "unit": "patient"
+            },
+            "brier": 0.2081134710712553,
+            "n": 177,
+            "positives": 80,
+            "prevalence": 0.4519774011299435
+          },
+          "patient_level_sensitivity_mean_score": {
+            "auprc": 0.7308361345106849,
+            "auroc": 0.76159793814433,
+            "brier": 0.1959527886760729,
+            "n": 177,
+            "positives": 80,
+            "prevalence": 0.4519774011299435
+          }
+        }
+      },
+      "image_view": {
+        "CC": {
+          "image_level": {
+            "auprc": 0.6596114463149276,
+            "auroc": 0.7327996786595512,
+            "brier": 0.2126412148315504,
+            "clustered_bootstrap": {
+              "auprc_ci95": [
+                0.568858640995848,
+                0.755319781040599
+              ],
+              "auroc_ci95": [
+                0.6714817654070728,
+                0.7909300579112317
+              ],
+              "replicates_requested": 2000,
+              "replicates_valid": 2000,
+              "seed": 20261813,
+              "unit": "patient"
+            },
+            "n": 268,
+            "positives": 111,
+            "prevalence": 0.4141791044776119
+          },
+          "patient_level_primary_max_score": {
+            "auprc": 0.6756536851147231,
+            "auroc": 0.7207649567127536,
+            "bootstrap": {
+              "auprc_ci95": [
+                0.5819082442949979,
+                0.7724939497545467
+              ],
+              "auroc_ci95": [
+                0.6558940090363625,
+                0.7890168052591988
+              ],
+              "replicates_requested": 2000,
+              "replicates_valid": 2000,
+              "seed": 20261913,
+              "unit": "patient"
+            },
+            "brier": 0.21757265489156014,
+            "n": 251,
+            "positives": 109,
+            "prevalence": 0.4342629482071713
+          },
+          "patient_level_sensitivity_mean_score": {
+            "auprc": 0.6765896133955516,
+            "auroc": 0.7251582891846491,
+            "brier": 0.215702413556674,
+            "n": 251,
+            "positives": 109,
+            "prevalence": 0.4342629482071713
+          }
+        },
+        "MLO": {
+          "image_level": {
+            "auprc": 0.6794687034243192,
+            "auroc": 0.73904931862427,
+            "brier": 0.20548993561605142,
+            "clustered_bootstrap": {
+              "auprc_ci95": [
+                0.5907449500964256,
+                0.7630019778988189
+              ],
+              "auroc_ci95": [
+                0.678835118435016,
+                0.7936812971743572
+              ],
+              "replicates_requested": 2000,
+              "replicates_valid": 2000,
+              "seed": 20261823,
+              "unit": "patient"
+            },
+            "n": 318,
+            "positives": 134,
+            "prevalence": 0.42138364779874216
+          },
+          "patient_level_primary_max_score": {
+            "auprc": 0.6903615891963044,
+            "auroc": 0.7342330061795711,
+            "bootstrap": {
+              "auprc_ci95": [
+                0.6074085270758894,
+                0.7732294059145882
+              ],
+              "auroc_ci95": [
+                0.6770055757851616,
+                0.7902323832038464
+              ],
+              "replicates_requested": 2000,
+              "replicates_valid": 2000,
+              "seed": 20261923,
+              "unit": "patient"
+            },
+            "brier": 0.20806184871242736,
+            "n": 299,
+            "positives": 131,
+            "prevalence": 0.43812709030100333
+          },
+          "patient_level_sensitivity_mean_score": {
+            "auprc": 0.6901834582119977,
+            "auroc": 0.7358233369683751,
+            "brier": 0.20718755605759034,
+            "n": 299,
+            "positives": 131,
+            "prevalence": 0.43812709030100333
+          }
+        }
+      }
+    },
+    "test_threshold_results": {
+      "patient_level_sensitivity_0_85": {
+        "fn": 14,
+        "fp": 108,
+        "npv": 0.8313253012048193,
+        "ppv": 0.5364806866952789,
+        "sensitivity": 0.8992805755395683,
+        "specificity": 0.3898305084745763,
+        "threshold": 0.3840118235149403,
+        "tn": 69,
+        "tp": 125
+      },
+      "patient_level_youden_j": {
+        "fn": 52,
+        "fp": 43,
+        "npv": 0.7204301075268817,
+        "ppv": 0.6692307692307692,
+        "sensitivity": 0.6258992805755396,
+        "specificity": 0.7570621468926554,
+        "threshold": 0.621929783584574,
+        "tn": 134,
+        "tp": 87
+      }
+    },
+    "threshold_selection": {
+      "derivation": "nested group-CV out-of-fold predictions from training patients only",
+      "sensitivity_0_85": 0.3840118235149403,
+      "sensitivity_0_85_train_oof_sensitivity": 0.8516949152542372,
+      "sensitivity_0_85_train_oof_specificity": 0.4297520661157025,
+      "youden_j": 0.621929783584574,
+      "youden_j_train_oof_sensitivity": 0.625,
+      "youden_j_train_oof_specificity": 0.743801652892562
+    },
+    "train_oof": {
+      "image_level": {
+        "auprc": 0.6821938235615019,
+        "auroc": 0.7525367199363562,
+        "brier": 0.20309260814447289,
+        "clustered_bootstrap": {
+          "auprc_ci95": [
+            0.637729042389489,
+            0.7283363464921077
+          ],
+          "auroc_ci95": [
+            0.725897149529693,
+            0.7788984372486878
+          ],
+          "replicates_requested": 2000,
+          "replicates_valid": 2000,
+          "seed": 20264813,
+          "unit": "patient"
+        },
+        "n": 1752,
+        "positives": 779,
+        "prevalence": 0.444634703196347
+      },
+      "patient_level_primary_max_score": {
+        "auprc": 0.7127266319749685,
+        "auroc": 0.7330727342765093,
+        "bootstrap": {
+          "auprc_ci95": [
+            0.6677197045654779,
+            0.7576900643407983
+          ],
+          "auroc_ci95": [
+            0.7006588426378059,
+            0.7652846595151638
+          ],
+          "replicates_requested": 2000,
+          "replicates_valid": 2000,
+          "seed": 20264913,
+          "unit": "patient"
+        },
+        "brier": 0.21517940378374972,
+        "n": 956,
+        "positives": 472,
+        "prevalence": 0.49372384937238495
+      },
+      "patient_level_sensitivity_mean_score": {
+        "auprc": 0.7252772109922982,
+        "auroc": 0.7484547905869169,
+        "brier": 0.2039682935457232,
+        "n": 956,
+        "positives": 472,
+        "prevalence": 0.49372384937238495
+      }
+    },
+    "tuning": "five outer StratifiedGroupKFold splits by patient; within each outer training fold, four-fold patient-grouped C tuning; fold-local scaling and fitting; final C selected by separate five-fold patient-grouped CV on all training data"
+  },
+  "generated_utc": "2026-08-13T16:47:37.198580+00:00",
+  "limitations": [
+    "663 archive images lack a verified patient metadata join and are excluded rather than imputed.",
+    "24 raw patient IDs occur in both packaged splits; all are conservatively removed from both splits.",
+    "The metadata source contains lesion-bearing records; this locked analysis does not represent a general screening population.",
+    "The embedding probe is post hoc feature evidence, not a clinically validated screening model.",
+    "No independent external cohort was available for transport validation."
+  ],
+  "preprocessing_and_embeddings": {
+    "all_finite": true,
+    "duplicate_filenames": 0,
+    "embed_script_sha256": "e64934d0528d411133ccac590645353e616a3000e24c668feca250f8ad9ea155",
+    "embedding_dimension": 1152,
+    "embedding_rows": 3086,
+    "image_preprocessing": "PIL decode -> RGB; SiglipImageProcessor resize 448x448 bicubic; rescale 1/255; normalize mean/std 0.5; model.get_image_features; L2 normalize",
+    "model": "google/medsiglip-448",
+    "model_config_sha256": "a79c4b99ca743df7cdaf2e563ca0955ba63ec5390f591002c84b76865026b263",
+    "model_safetensors_sha256": "3e1722b8100cca8b87cfe16e42140737aa6d312854e9e6bc24dff6db70e21d72",
+    "preprocessor_config_sha256": "32adf33cc0bb18943c735d834c3892fc139a8fa969f4b6d1fc190200bf2392a3",
+    "score_semantics": "independent uncalibrated SigLIP sigmoid per prompt; scores need not sum to one",
+    "shard_sha256": {
+      "shard_0.npz": "e587d68e7806d84b04f3793c97648b28f49c2f5dfb294cf27ddd3d047bcf67f0",
+      "shard_1.npz": "b3c799d7a76ecb434e9ef4515d423342917b8aa96097c09180612de95105c579",
+      "shard_2.npz": "83534d67be4cd81eaafa5b5297fd0f394f2015807b42ab3965bfd076d74fcc7a",
+      "shard_3.npz": "6152e1dfb056e7900fb18df44936d610b1e101208cff6de71992b05c52254131",
+      "shard_4.npz": "28d21a6a4b147ccd7b9904f71981490726b8351675bb2803d51739fb3ffd04b9"
+    },
+    "zero_shot_score_file_sha256": "e1ccbf1c9e60b21d668c79533ab78bcf5b12b307a102812156b2eb5604221a36",
+    "zero_shot_score_metadata_sha256": "40c4f5487bacc7c6dbd646b89e34c79cfd816be45d5a221af399e25d7d78751b"
+  },
+  "secondary_evaluation": {
+    "independent_cross_cohort_validation": "not performed; no second patient-qualified external cohort was available, so train/test replication is reported without mislabeling it cross-cohort validation",
+    "methods": "patient-clustered bootstrap, train/test split replication, CC/MLO and mass/calcification strata, and patient-cluster-robust adjusted logistic regression",
+    "purpose": "interrogate apparent null zero-shot signal rather than dismissing it"
+  },
+  "status": "QUALIFIED_FEATURE_EVIDENCE_NOT_SCREENING_VALIDATION",
+  "zero_shot": {
+    "clinical_v1": {
+      "test": {
+        "image_level": {
+          "auprc": 0.4305125198145686,
+          "auroc": 0.49575079298581604,
+          "brier": 0.4174048443632104,
+          "clustered_bootstrap": {
+            "auprc_ci95": [
+              0.3639656959171387,
+              0.5107624309656812
+            ],
+            "auroc_ci95": [
+              0.4389266522475743,
+              0.5507920066762619
+            ],
+            "replicates_requested": 2000,
+            "replicates_valid": 2000,
+            "seed": 20262813,
+            "unit": "patient"
+          },
+          "n": 586,
+          "positives": 245,
+          "prevalence": 0.4180887372013652
+        },
+        "patient_level_primary_max_score": {
+          "auprc": 0.44798931976731404,
+          "auroc": 0.4830711701824981,
+          "bootstrap": {
+            "auprc_ci95": [
+              0.37493129600431657,
+              0.5325484118405097
+            ],
+            "auroc_ci95": [
+              0.4192901905072316,
+              0.5468760352842538
+            ],
+            "replicates_requested": 2000,
+            "replicates_valid": 2000,
+            "seed": 20262913,
+            "unit": "patient"
+          },
+          "brier": 0.43907119596936667,
+          "n": 316,
+          "positives": 139,
+          "prevalence": 0.439873417721519
+        },
+        "patient_level_sensitivity_mean_score": {
+          "auprc": 0.47764123928068025,
+          "auroc": 0.49278543267081254,
+          "brier": 0.43914385873903294,
+          "n": 316,
+          "positives": 139,
+          "prevalence": 0.439873417721519
+        }
+      },
+      "test_adjusted_regression": {
+        "covariates": [
+          "standardized malignant score",
+          "MLO indicator",
+          "mass indicator"
+        ],
+        "model": "binomial GLM; patient-cluster-robust covariance",
+        "score_ci95_log_odds": [
+          -0.19853402875552095,
+          0.22297790353733626
+        ],
+        "score_log_odds_per_sd": 0.012221937390907668,
+        "score_odds_ratio_per_sd": 1.012296930476543,
+        "score_p_value": 0.9095071944746286
+      },
+      "test_strata": {
+        "abnormality_type": {
+          "calcification": {
+            "image_level": {
+              "auprc": 0.4023319822295928,
+              "auroc": 0.4680875844397857,
+              "brier": 0.40384950061499947,
+              "clustered_bootstrap": {
+                "auprc_ci95": [
+                  0.30962916640170707,
+                  0.508180235588326
+                ],
+                "auroc_ci95": [
+                  0.3789235482356303,
+                  0.5537416171780254
+                ],
+                "replicates_requested": 2000,
+                "replicates_valid": 2000,
+                "seed": 20261813,
+                "unit": "patient"
+              },
+              "n": 267,
+              "positives": 108,
+              "prevalence": 0.4044943820224719
+            },
+            "patient_level_primary_max_score": {
+              "auprc": 0.4152600022834123,
+              "auroc": 0.42521756729407006,
+              "bootstrap": {
+                "auprc_ci95": [
+                  0.3233758612711829,
+                  0.5219642847117237
+                ],
+                "auroc_ci95": [
+                  0.3330578184664773,
+                  0.5191567432729488
+                ],
+                "replicates_requested": 2000,
+                "replicates_valid": 2000,
+                "seed": 20261913,
+                "unit": "patient"
+              },
+              "brier": 0.42881333659279575,
+              "n": 142,
+              "positives": 61,
+              "prevalence": 0.4295774647887324
+            },
+            "patient_level_sensitivity_mean_score": {
+              "auprc": 0.4393635682551244,
+              "auroc": 0.4401942926533091,
+              "brier": 0.4288865475426495,
+              "n": 142,
+              "positives": 61,
+              "prevalence": 0.4295774647887324
+            }
+          },
+          "mass": {
+            "image_level": {
+              "auprc": 0.46545644479227877,
+              "auroc": 0.5207347397128419,
+              "brier": 0.4287505396007412,
+              "clustered_bootstrap": {
+                "auprc_ci95": [
+                  0.37396771771136145,
+                  0.5785018781549052
+                ],
+                "auroc_ci95": [
+                  0.44422390214667107,
+                  0.6022476663673315
+                ],
+                "replicates_requested": 2000,
+                "replicates_valid": 2000,
+                "seed": 20261823,
+                "unit": "patient"
+              },
+              "n": 319,
+              "positives": 137,
+              "prevalence": 0.42946708463949845
+            },
+            "patient_level_primary_max_score": {
+              "auprc": 0.4969750181281426,
+              "auroc": 0.5283505154639175,
+              "bootstrap": {
+                "auprc_ci95": [
+                  0.4071243176724675,
+                  0.6251176325906778
+                ],
+                "auroc_ci95": [
+                  0.4464897054165347,
+                  0.6165414554220693
+                ],
+                "replicates_requested": 2000,
+                "replicates_valid": 2000,
+                "seed": 20261923,
+                "unit": "patient"
+              },
+              "brier": 0.4511415200245504,
+              "n": 177,
+              "positives": 80,
+              "prevalence": 0.4519774011299435
+            },
+            "patient_level_sensitivity_mean_score": {
+              "auprc": 0.5197327878483603,
+              "auroc": 0.5355670103092783,
+              "brier": 0.4512129297627526,
+              "n": 177,
+              "positives": 80,
+              "prevalence": 0.4519774011299435
+            }
+          }
+        },
+        "image_view": {
+          "CC": {
+            "image_level": {
+              "auprc": 0.44038182740781634,
+              "auroc": 0.4839329775635508,
+              "brier": 0.41356174756932496,
+              "clustered_bootstrap": {
+                "auprc_ci95": [
+                  0.36202742789641995,
+                  0.5329210261316814
+                ],
+                "auroc_ci95": [
+                  0.410058444533624,
+                  0.5566649210368132
+                ],
+                "replicates_requested": 2000,
+                "replicates_valid": 2000,
+                "seed": 20261813,
+                "unit": "patient"
+              },
+              "n": 268,
+              "positives": 111,
+              "prevalence": 0.4141791044776119
+            },
+            "patient_level_primary_max_score": {
+              "auprc": 0.4557564346325146,
+              "auroc": 0.47544902442175996,
+              "bootstrap": {
+                "auprc_ci95": [
+                  0.37013208654474145,
+                  0.5505992452426813
+                ],
+                "auroc_ci95": [
+                  0.39861124143143845,
+                  0.5479390102080371
+                ],
+                "replicates_requested": 2000,
+                "replicates_valid": 2000,
+                "seed": 20261913,
+                "unit": "patient"
+              },
+              "brier": 0.4336126339240409,
+              "n": 251,
+              "positives": 109,
+              "prevalence": 0.4342629482071713
+            },
+            "patient_level_sensitivity_mean_score": {
+              "auprc": 0.45781394951499543,
+              "auroc": 0.4796485334022484,
+              "brier": 0.43361408605790475,
+              "n": 251,
+              "positives": 109,
+              "prevalence": 0.4342629482071713
+            }
+          },
+          "MLO": {
+            "image_level": {
+              "auprc": 0.4372231980938618,
+              "auroc": 0.5025551589876703,
+              "brier": 0.4206436806549126,
+              "clustered_bootstrap": {
+                "auprc_ci95": [
+                  0.36319969469990426,
+                  0.5267180150021324
+                ],
+                "auroc_ci95": [
+                  0.4337662873778939,
+                  0.5720843576548063
+                ],
+                "replicates_requested": 2000,
+                "replicates_valid": 2000,
+                "seed": 20261823,
+                "unit": "patient"
+              },
+              "n": 318,
+              "positives": 134,
+              "prevalence": 0.42138364779874216
+            },
+            "patient_level_primary_max_score": {
+              "auprc": 0.44273648281281963,
+              "auroc": 0.48655034532897135,
+              "bootstrap": {
+                "auprc_ci95": [
+                  0.3721836604608356,
+                  0.5296319823622765
+                ],
+                "auroc_ci95": [
+                  0.41475921530074905,
+                  0.5539529440662031
+                ],
+                "replicates_requested": 2000,
+                "replicates_valid": 2000,
+                "seed": 20261923,
+                "unit": "patient"
+              },
+              "brier": 0.4373589074327609,
+              "n": 299,
+              "positives": 131,
+              "prevalence": 0.43812709030100333
+            },
+            "patient_level_sensitivity_mean_score": {
+              "auprc": 0.4490981908046251,
+              "auroc": 0.49059432933478736,
+              "brier": 0.43736087700465426,
+              "n": 299,
+              "positives": 131,
+              "prevalence": 0.43812709030100333
+            }
+          }
+        }
+      },
+      "train_split_replication": {
+        "image_level": {
+          "auprc": 0.46421997966243506,
+          "auroc": 0.5327698963147472,
+          "brier": 0.44389544374940476,
+          "clustered_bootstrap": {
+            "auprc_ci95": [
+              0.423996759133096,
+              0.5119628139617002
+            ],
+            "auroc_ci95": [
+              0.4993134435761265,
+              0.5658803847333026
+            ],
+            "replicates_requested": 2000,
+            "replicates_valid": 2000,
+            "seed": 20263813,
+            "unit": "patient"
+          },
+          "n": 1752,
+          "positives": 779,
+          "prevalence": 0.444634703196347
+        },
+        "patient_level_primary_max_score": {
+          "auprc": 0.49173554675991166,
+          "auroc": 0.5015145678666479,
+          "bootstrap": {
+            "auprc_ci95": [
+              0.45131647509029943,
+              0.5398381855564931
+            ],
+            "auroc_ci95": [
+              0.4648355714360668,
+              0.5381972046154924
+            ],
+            "replicates_requested": 2000,
+            "replicates_valid": 2000,
+            "seed": 20263913,
+            "unit": "patient"
+          },
+          "brier": 0.49282696532299314,
+          "n": 956,
+          "positives": 472,
+          "prevalence": 0.49372384937238495
+        },
+        "patient_level_sensitivity_mean_score": {
+          "auprc": 0.4997500835269491,
+          "auroc": 0.5133115632441518,
+          "brier": 0.4929069815740434,
+          "n": 956,
+          "positives": 472,
+          "prevalence": 0.49372384937238495
+        }
+      }
+    },
+    "radiology_v3": {
+      "test": {
+        "image_level": {
+          "auprc": 0.43521752977258793,
+          "auroc": 0.4922556705966844,
+          "brier": 0.41753859540866245,
+          "clustered_bootstrap": {
+            "auprc_ci95": [
+              0.36669153314146136,
+              0.5189982671851928
+            ],
+            "auroc_ci95": [
+              0.43272477096355355,
+              0.5529849967062029
+            ],
+            "replicates_requested": 2000,
+            "replicates_valid": 2000,
+            "seed": 20263213,
+            "unit": "patient"
+          },
+          "n": 586,
+          "positives": 245,
+          "prevalence": 0.4180887372013652
+        },
+        "patient_level_primary_max_score": {
+          "auprc": 0.4512726113004115,
+          "auroc": 0.4790879161077918,
+          "bootstrap": {
+            "auprc_ci95": [
+              0.38405031224208036,
+              0.5378891533560931
+            ],
+            "auroc_ci95": [
+              0.41845544203632373,
+              0.5454096520941766
+            ],
+            "replicates_requested": 2000,
+            "replicates_valid": 2000,
+            "seed": 20263313,
+            "unit": "patient"
+          },
+          "brier": 0.4392453180284097,
+          "n": 316,
+          "positives": 139,
+          "prevalence": 0.439873417721519
+        },
+        "patient_level_sensitivity_mean_score": {
+          "auprc": 0.46224017464041833,
+          "auroc": 0.4808356704466935,
+          "brier": 0.4392922306240202,
+          "n": 316,
+          "positives": 139,
+          "prevalence": 0.439873417721519
+        }
+      },
+      "test_adjusted_regression": {
+        "covariates": [
+          "standardized malignant score",
+          "MLO indicator",
+          "mass indicator"
+        ],
+        "model": "binomial GLM; patient-cluster-robust covariance",
+        "score_ci95_log_odds": [
+          -0.20391652408926675,
+          0.21264320344734777
+        ],
+        "score_log_odds_per_sd": 0.004363339679040498,
+        "score_odds_ratio_per_sd": 1.004372872906144,
+        "score_p_value": 0.9672479964041705
+      },
+      "test_strata": {
+        "abnormality_type": {
+          "calcification": {
+            "image_level": {
+              "auprc": 0.4108213109623309,
+              "auroc": 0.48683904029815983,
+              "brier": 0.4039642976272544,
+              "clustered_bootstrap": {
+                "auprc_ci95": [
+                  0.31463888610010876,
+                  0.5262744579176082
+                ],
+                "auroc_ci95": [
+                  0.395751114017243,
+                  0.5724135164894814
+                ],
+                "replicates_requested": 2000,
+                "replicates_valid": 2000,
+                "seed": 20261813,
+                "unit": "patient"
+              },
+              "n": 267,
+              "positives": 108,
+              "prevalence": 0.4044943820224719
+            },
+            "patient_level_primary_max_score": {
+              "auprc": 0.43165935671522726,
+              "auroc": 0.4658975915806517,
+              "bootstrap": {
+                "auprc_ci95": [
+                  0.33731780178769255,
+                  0.5522495136956077
+                ],
+                "auroc_ci95": [
+                  0.3710380798660928,
+                  0.5621128535468528
+                ],
+                "replicates_requested": 2000,
+                "replicates_valid": 2000,
+                "seed": 20261913,
+                "unit": "patient"
+              },
+              "brier": 0.42896402338229445,
+              "n": 142,
+              "positives": 61,
+              "prevalence": 0.4295774647887324
+            },
+            "patient_level_sensitivity_mean_score": {
+              "auprc": 0.42814387597304027,
+              "auroc": 0.4620522161505768,
+              "brier": 0.4290149010341153,
+              "n": 142,
+              "positives": 61,
+              "prevalence": 0.4295774647887324
+            }
+          },
+          "mass": {
+            "image_level": {
+              "auprc": 0.4619787510084373,
+              "auroc": 0.4961498355658939,
+              "brier": 0.42890015499372813,
+              "clustered_bootstrap": {
+                "auprc_ci95": [
+                  0.3687499973942293,
+                  0.578744309729443
+                ],
+                "auroc_ci95": [
+                  0.41924921358911765,
+                  0.578616971194056
+                ],
+                "replicates_requested": 2000,
+                "replicates_valid": 2000,
+                "seed": 20261823,
+                "unit": "patient"
+              },
+              "n": 319,
+              "positives": 137,
+              "prevalence": 0.42946708463949845
+            },
+            "patient_level_primary_max_score": {
+              "auprc": 0.4797868509545523,
+              "auroc": 0.4855670103092784,
+              "bootstrap": {
+                "auprc_ci95": [
+                  0.38928140742915,
+                  0.6009909197050556
+                ],
+                "auroc_ci95": [
+                  0.4031993606934505,
+                  0.5703469538663103
+                ],
+                "replicates_requested": 2000,
+                "replicates_valid": 2000,
+                "seed": 20261923,
+                "unit": "patient"
+              },
+              "brier": 0.45133468126602244,
+              "n": 177,
+              "positives": 80,
+              "prevalence": 0.4519774011299435
+            },
+            "patient_level_sensitivity_mean_score": {
+              "auprc": 0.49803394456114647,
+              "auroc": 0.49291237113402064,
+              "brier": 0.45137779126148914,
+              "n": 177,
+              "positives": 80,
+              "prevalence": 0.4519774011299435
+            }
+          }
+        },
+        "image_view": {
+          "CC": {
+            "image_level": {
+              "auprc": 0.44896267414409763,
+              "auroc": 0.49110575543696566,
+              "brier": 0.41364696992261224,
+              "clustered_bootstrap": {
+                "auprc_ci95": [
+                  0.37136222904973637,
+                  0.5361244816918768
+                ],
+                "auroc_ci95": [
+                  0.4176325861285253,
+                  0.5607195673478568
+                ],
+                "replicates_requested": 2000,
+                "replicates_valid": 2000,
+                "seed": 20261813,
+                "unit": "patient"
+              },
+              "n": 268,
+              "positives": 111,
+              "prevalence": 0.4141791044776119
+            },
+            "patient_level_primary_max_score": {
+              "auprc": 0.46294536432967964,
+              "auroc": 0.48462333634836535,
+              "bootstrap": {
+                "auprc_ci95": [
+                  0.3785501511718341,
+                  0.5564799591759939
+                ],
+                "auroc_ci95": [
+                  0.4095849411465578,
+                  0.555754291777019
+                ],
+                "replicates_requested": 2000,
+                "replicates_valid": 2000,
+                "seed": 20261913,
+                "unit": "patient"
+              },
+              "brier": 0.43370211667088965,
+              "n": 251,
+              "positives": 109,
+              "prevalence": 0.4342629482071713
+            },
+            "patient_level_sensitivity_mean_score": {
+              "auprc": 0.4661054574218411,
+              "auroc": 0.4883705905155705,
+              "brier": 0.43370352440883003,
+              "n": 251,
+              "positives": 109,
+              "prevalence": 0.4342629482071713
+            }
+          },
+          "MLO": {
+            "image_level": {
+              "auprc": 0.4365846008297737,
+              "auroc": 0.4933890330953926,
+              "brier": 0.4208183300950192,
+              "clustered_bootstrap": {
+                "auprc_ci95": [
+                  0.36458417562860784,
+                  0.5277459635349488
+                ],
+                "auroc_ci95": [
+                  0.42491266148204376,
+                  0.5604979289909501
+                ],
+                "replicates_requested": 2000,
+                "replicates_valid": 2000,
+                "seed": 20261823,
+                "unit": "patient"
+              },
+              "n": 318,
+              "positives": 134,
+              "prevalence": 0.42138364779874216
+            },
+            "patient_level_primary_max_score": {
+              "auprc": 0.4439052008711223,
+              "auroc": 0.4789167575427117,
+              "bootstrap": {
+                "auprc_ci95": [
+                  0.370718610905424,
+                  0.5300772512525087
+                ],
+                "auroc_ci95": [
+                  0.40691523915921884,
+                  0.5463811153087624
+                ],
+                "replicates_requested": 2000,
+                "replicates_valid": 2000,
+                "seed": 20261923,
+                "unit": "patient"
+              },
+              "brier": 0.437539190980888,
+              "n": 299,
+              "positives": 131,
+              "prevalence": 0.43812709030100333
+            },
+            "patient_level_sensitivity_mean_score": {
+              "auprc": 0.4504473864018542,
+              "auroc": 0.4830970556161396,
+              "brier": 0.43754075488478517,
+              "n": 299,
+              "positives": 131,
+              "prevalence": 0.43812709030100333
+            }
+          }
+        }
+      },
+      "train_split_replication": {
+        "image_level": {
+          "auprc": 0.4637626461331156,
+          "auroc": 0.5314129770821157,
+          "brier": 0.4440467565375225,
+          "clustered_bootstrap": {
+            "auprc_ci95": [
+              0.42557264677278944,
+              0.5091876404200053
+            ],
+            "auroc_ci95": [
+              0.4991914059100698,
+              0.56530523771054
+            ],
+            "replicates_requested": 2000,
+            "replicates_valid": 2000,
+            "seed": 20264213,
+            "unit": "patient"
+          },
+          "n": 1752,
+          "positives": 779,
+          "prevalence": 0.444634703196347
+        },
+        "patient_level_primary_max_score": {
+          "auprc": 0.4994606078566626,
+          "auroc": 0.5060823469673623,
+          "bootstrap": {
+            "auprc_ci95": [
+              0.45714598324162997,
+              0.5497309998691393
+            ],
+            "auroc_ci95": [
+              0.46899250304502527,
+              0.543886459018966
+            ],
+            "replicates_requested": 2000,
+            "replicates_valid": 2000,
+            "seed": 20264313,
+            "unit": "patient"
+          },
+          "brier": 0.4930248327826883,
+          "n": 956,
+          "positives": 472,
+          "prevalence": 0.49372384937238495
+        },
+        "patient_level_sensitivity_mean_score": {
+          "auprc": 0.5009887802540862,
+          "auroc": 0.5155571508614653,
+          "brier": 0.49307455737261363,
+          "n": 956,
+          "positives": 472,
+          "prevalence": 0.49372384937238495
+        }
+      }
+    },
+    "terse_v2": {
+      "test": {
+        "image_level": {
+          "auprc": 0.40980567304614507,
+          "auroc": 0.5128493626189479,
+          "brier": 0.4180121215478187,
+          "clustered_bootstrap": {
+            "auprc_ci95": [
+              0.34912903601232487,
+              0.48331550160625164
+            ],
+            "auroc_ci95": [
+              0.4598427712104682,
+              0.5633180135618221
+            ],
+            "replicates_requested": 2000,
+            "replicates_valid": 2000,
+            "seed": 20263013,
+            "unit": "patient"
+          },
+          "n": 586,
+          "positives": 245,
+          "prevalence": 0.4180887372013652
+        },
+        "patient_level_primary_max_score": {
+          "auprc": 0.4059816084931588,
+          "auroc": 0.4717310897045076,
+          "bootstrap": {
+            "auprc_ci95": [
+              0.3497205818127552,
+              0.4767734399265232
+            ],
+            "auroc_ci95": [
+              0.40645183042327926,
+              0.5356696089584418
+            ],
+            "replicates_requested": 2000,
+            "replicates_valid": 2000,
+            "seed": 20263113,
+            "unit": "patient"
+          },
+          "brier": 0.43978863622774145,
+          "n": 316,
+          "positives": 139,
+          "prevalence": 0.439873417721519
+        },
+        "patient_level_sensitivity_mean_score": {
+          "auprc": 0.4269947919112672,
+          "auroc": 0.4984757956346787,
+          "brier": 0.4397924127206476,
+          "n": 316,
+          "positives": 139,
+          "prevalence": 0.439873417721519
+        }
+      },
+      "test_adjusted_regression": {
+        "covariates": [
+          "standardized malignant score",
+          "MLO indicator",
+          "mass indicator"
+        ],
+        "model": "binomial GLM; patient-cluster-robust covariance",
+        "score_ci95_log_odds": [
+          -0.21270091635658914,
+          0.2158921592316332
+        ],
+        "score_log_odds_per_sd": 0.0015956214375220427,
+        "score_odds_ratio_per_sd": 1.0015968951187555,
+        "score_p_value": 0.9883563955038271
+      },
+      "test_strata": {
+        "abnormality_type": {
+          "calcification": {
+            "image_level": {
+              "auprc": 0.41542559963213094,
+              "auroc": 0.5345329606335896,
+              "brier": 0.4044205266098648,
+              "clustered_bootstrap": {
+                "auprc_ci95": [
+                  0.33233697996379274,
+                  0.5215715910212073
+                ],
+                "auroc_ci95": [
+                  0.4618217114037591,
+                  0.6091636226169597
+                ],
+                "replicates_requested": 2000,
+                "replicates_valid": 2000,
+                "seed": 20261813,
+                "unit": "patient"
+              },
+              "n": 267,
+              "positives": 108,
+              "prevalence": 0.4044943820224719
+            },
+            "patient_level_primary_max_score": {
+              "auprc": 0.3990004314177834,
+              "auroc": 0.45921878162315327,
+              "bootstrap": {
+                "auprc_ci95": [
+                  0.3199397679876201,
+                  0.5175451787636316
+                ],
+                "auroc_ci95": [
+                  0.36498397435897434,
+                  0.5558657296515093
+                ],
+                "replicates_requested": 2000,
+                "replicates_valid": 2000,
+                "seed": 20261913,
+                "unit": "patient"
+              },
+              "brier": 0.4294946737454798,
+              "n": 142,
+              "positives": 61,
+              "prevalence": 0.4295774647887324
+            },
+            "patient_level_sensitivity_mean_score": {
+              "auprc": 0.4316625350020592,
+              "auroc": 0.5057680631451124,
+              "brier": 0.42949859382704725,
+              "n": 142,
+              "positives": 61,
+              "prevalence": 0.4295774647887324
+            }
+          },
+          "mass": {
+            "image_level": {
+              "auprc": 0.41215899731400135,
+              "auroc": 0.4944252827464506,
+              "brier": 0.4293881586902442,
+              "clustered_bootstrap": {
+                "auprc_ci95": [
+                  0.33422793141493556,
+                  0.5117218802793057
+                ],
+                "auroc_ci95": [
+                  0.4223906384221771,
+                  0.5675305312849104
+                ],
+                "replicates_requested": 2000,
+                "replicates_valid": 2000,
+                "seed": 20261823,
+                "unit": "patient"
+              },
+              "n": 319,
+              "positives": 137,
+              "prevalence": 0.42946708463949845
+            },
+            "patient_level_primary_max_score": {
+              "auprc": 0.42470873825489264,
+              "auroc": 0.4818298969072165,
+              "bootstrap": {
+                "auprc_ci95": [
+                  0.3501759875573712,
+                  0.5346304200675907
+                ],
+                "auroc_ci95": [
+                  0.39835017777268444,
+                  0.5684758013739536
+                ],
+                "replicates_requested": 2000,
+                "replicates_valid": 2000,
+                "seed": 20261923,
+                "unit": "patient"
+              },
+              "brier": 0.45189034070928663,
+              "n": 177,
+              "positives": 80,
+              "prevalence": 0.4519774011299435
+            },
+            "patient_level_sensitivity_mean_score": {
+              "auprc": 0.4363977985341051,
+              "auroc": 0.49278350515463915,
+              "brier": 0.45189398438602413,
+              "n": 177,
+              "positives": 80,
+              "prevalence": 0.4519774011299435
+            }
+          }
+        },
+        "image_view": {
+          "CC": {
+            "image_level": {
+              "auprc": 0.441635693138698,
+              "auroc": 0.5321914270958856,
+              "brier": 0.4141074366350643,
+              "clustered_bootstrap": {
+                "auprc_ci95": [
+                  0.3662597612284761,
+                  0.5401438932447059
+                ],
+                "auroc_ci95": [
+                  0.4605817393161676,
+                  0.6014057014366196
+                ],
+                "replicates_requested": 2000,
+                "replicates_valid": 2000,
+                "seed": 20261813,
+                "unit": "patient"
+              },
+              "n": 268,
+              "positives": 111,
+              "prevalence": 0.4141791044776119
+            },
+            "patient_level_primary_max_score": {
+              "auprc": 0.44783491371555506,
+              "auroc": 0.5113709781625533,
+              "bootstrap": {
+                "auprc_ci95": [
+                  0.3660766701310082,
+                  0.5459002634251942
+                ],
+                "auroc_ci95": [
+                  0.43539023242554065,
+                  0.583790688523157
+                ],
+                "replicates_requested": 2000,
+                "replicates_valid": 2000,
+                "seed": 20261913,
+                "unit": "patient"
+              },
+              "brier": 0.4341877472444199,
+              "n": 251,
+              "positives": 109,
+              "prevalence": 0.4342629482071713
+            },
+            "patient_level_sensitivity_mean_score": {
+              "auprc": 0.44665472391387373,
+              "auroc": 0.5152474479906965,
+              "brier": 0.43418788062751085,
+              "n": 251,
+              "positives": 109,
+              "prevalence": 0.4342629482071713
+            }
+          },
+          "MLO": {
+            "image_level": {
+              "auprc": 0.39401369154240495,
+              "auroc": 0.4869605775470474,
+              "brier": 0.42130286229190106,
+              "clustered_bootstrap": {
+                "auprc_ci95": [
+                  0.3303703793352877,
+                  0.4682321673673779
+                ],
+                "auroc_ci95": [
+                  0.4214863259756994,
+                  0.5531436926315229
+                ],
+                "replicates_requested": 2000,
+                "replicates_valid": 2000,
+                "seed": 20261823,
+                "unit": "patient"
+              },
+              "n": 318,
+              "positives": 134,
+              "prevalence": 0.42138364779874216
+            },
+            "patient_level_primary_max_score": {
+              "auprc": 0.3975174599032917,
+              "auroc": 0.46451290439840065,
+              "bootstrap": {
+                "auprc_ci95": [
+                  0.33932922537172877,
+                  0.47042390690796865
+                ],
+                "auroc_ci95": [
+                  0.3993929555498283,
+                  0.5285852615384414
+                ],
+                "replicates_requested": 2000,
+                "replicates_valid": 2000,
+                "seed": 20261923,
+                "unit": "patient"
+              },
+              "brier": 0.43804317014222266,
+              "n": 299,
+              "positives": 131,
+              "prevalence": 0.43812709030100333
+            },
+            "patient_level_sensitivity_mean_score": {
+              "auprc": 0.4035557812314181,
+              "auroc": 0.47455470737913485,
+              "brier": 0.438043222956233,
+              "n": 299,
+              "positives": 131,
+              "prevalence": 0.43812709030100333
+            }
+          }
+        }
+      },
+      "train_split_replication": {
+        "image_level": {
+          "auprc": 0.48437310237672304,
+          "auroc": 0.5634849538304438,
+          "brier": 0.44455242059864825,
+          "clustered_bootstrap": {
+            "auprc_ci95": [
+              0.4438964721076111,
+              0.5262478417750037
+            ],
+            "auroc_ci95": [
+              0.5331920732523433,
+              0.5927656924958156
+            ],
+            "replicates_requested": 2000,
+            "replicates_valid": 2000,
+            "seed": 20264013,
+            "unit": "patient"
+          },
+          "n": 1752,
+          "positives": 779,
+          "prevalence": 0.444634703196347
+        },
+        "patient_level_primary_max_score": {
+          "auprc": 0.4967132852956428,
+          "auroc": 0.502330946210954,
+          "bootstrap": {
+            "auprc_ci95": [
+              0.45619346500238095,
+              0.5419531850481545
+            ],
+            "auroc_ci95": [
+              0.46678566631572416,
+              0.5380857109947381
+            ],
+            "replicates_requested": 2000,
+            "replicates_valid": 2000,
+            "seed": 20264113,
+            "unit": "patient"
+          },
+          "brier": 0.4936286738796949,
+          "n": 956,
+          "positives": 472,
+          "prevalence": 0.49372384937238495
+        },
+        "patient_level_sensitivity_mean_score": {
+          "auprc": 0.5093035705634315,
+          "auroc": 0.5351940047625718,
+          "brier": 0.4936326010187534,
+          "n": 956,
+          "positives": 472,
+          "prevalence": 0.49372384937238495
+        }
+      }
+    }
+  }
+}

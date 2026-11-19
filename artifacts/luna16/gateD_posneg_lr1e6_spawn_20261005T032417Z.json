@@ -1,0 +1,15 @@
+{
+  "status": "spawned",
+  "mode": "spawn-fullfit",
+  "request_id": "gateD-fjkiani-posneg-lr1e6-20261005T032417Z-zo",
+  "call_id": "fc-01M451EGQCSZZHQTPDNDDSCBEN",
+  "gate_c_request_id": "gateC-fjkiani-20261003T0435Z-zo",
+  "app_version": "luna16-fullfit-v0.1.3-posneg-1to1",
+  "learning_rate": 1e-06,
+  "epochs": 5,
+  "sampler": {"pos": 1, "neg": 1, "num_samples": 2},
+  "modal_run": "https://modal.com/apps/fjkiani/main/ap-PvEsNs87Th6KRjPBthI8yQ",
+  "clinical_meter": "FROC@2 held-out 88 — evaluate only after train completes",
+  "baseline_sha256": "b5e79231466adae93a6fe8e8594029e9add142914e223b879aa0343bb2402d01",
+  "prior_posneg_verdict": "PROVEN_BUT_REFINED_NAN at lr=1e-5; this strike lowers LR an order of magnitude"
+}

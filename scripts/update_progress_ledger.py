@@ -84,7 +84,7 @@ USER_STORIES = [
         "not_wired_reason": None,
         "evidence": [
             "src/oncology_arbiter/api/app.py",
-            "tests/unit/test_screening_medsiglip_wiring.py",
+            "tests/unit/test_screening_production_contract.py",
             "/mnt/results/screening_response_medsiglip_smoke_final.json",
         ],
     },
@@ -224,7 +224,15 @@ SUBSYSTEMS = [
     {
         "id": "L3-screening-arbiter",
         "layer": "L3",
-        "role": "L2-regularised logistic arbiter mapping BI-RADS-like features → p_positive → risk_bucket for screening triage.",
+        "role": (
+            "L2-regularised logistic arbiter mapping BI-RADS-like features to "
+            "p_positive and a risk bucket for screening triage (illustrative "
+            "template coefficients, n_training=0). Unobserved booleans encode "
+            "to the reference level 0.0 and contribute exactly zero log-odds; "
+            "the prior 0.5 midpoint injected +1.15 log-odds and inflated p "
+            "from 0.11920292202211755 to 0.29943286 (+151.20%) from absent "
+            "data alone."
+        ),
         "status": "LIVE",
         "not_wired_reason": None,
         "current_backend": "hand-drafted template coefficients (n_training=0)",
@@ -241,22 +249,44 @@ SUBSYSTEMS = [
     {
         "id": "L3-biopsy-arbiter",
         "layer": "L3",
-        "role": "Logistic arbiter for biopsy stage classification.",
-        "status": "LIVE",
-        "not_wired_reason": None,
-        "current_backend": "hand-drafted template coefficients (n_training=0)",
+        "role": (
+            "RETIRED. Hand-drafted template logistic arbiter for the biopsy "
+            "stage. The biopsy route now returns arbiter_score=None and emits "
+            "breast_dss_prognosis only when the full explicit seven-feature "
+            "vector is supplied (no parser imputation)."
+        ),
+        "status": "RETIRED",
+        "not_wired_reason": (
+            "Superseded by breast_dss_arbiter_v3_metabric (n=1375, events=601, "
+            "OOF AUROC 0.7074686031463495, incremental vs NPI+age delta "
+            "0.019632112929677783, p=0.006). The template carried n_training=0 "
+            "and illustrative coefficients."
+        ),
+        # RETIRED entries carry no backend: the biopsy route emits
+        # arbiter_score=None, so naming a backend here would imply the template
+        # still serves traffic (the L4a siglip proxy entry already uses None).
+        "current_backend": None,
         "hai_def_gate_state": None,
         "wired_files": [
             "src/oncology_arbiter/arbiter/models/biopsy_arbiter_template_v0.json",
         ],
+        "superseded_by": "breast_dss_v3",
         "evidence": [
-            "tests/unit/test_api_arbiter_wiring.py::test_biopsy_endpoint_returns_arbiter_score",
+            "tests/unit/test_breast_dss_api.py",
+            "tests/unit/test_api_arbiter_wiring.py::test_biopsy_endpoint_emits_no_template_arbiter_score",
         ],
     },
     {
         "id": "L3-therapy-arbiter",
         "layer": "L3",
-        "role": "Logistic arbiter for therapy recommendation.",
+        "role": (
+            "Deterministic logistic TRIAGE over explicit patient inputs only "
+            "(illustrative coefficients, n_training=0). node_status_positive = "
+            "lymph_nodes_pos > 0; zero nodes contributes exactly 0.0; missing "
+            "nodes suppress scoring entirely and are never encoded as 0.5. Not "
+            "treatment-benefit evidence and not a therapy recommendation -- "
+            "recommendations come only from the authenticated SL bridge."
+        ),
         "status": "LIVE",
         "not_wired_reason": None,
         "current_backend": "hand-drafted template coefficients (n_training=0)",
@@ -265,7 +295,8 @@ SUBSYSTEMS = [
             "src/oncology_arbiter/arbiter/models/therapy_arbiter_template_v0.json",
         ],
         "evidence": [
-            "tests/unit/test_api_arbiter_wiring.py::test_therapy_endpoint_returns_arbiter_score",
+            "tests/unit/test_api_arbiter_wiring.py::test_therapy_arbiter_scores_only_from_explicit_inputs",
+            "tests/unit/test_api_arbiter_wiring.py::test_therapy_arbiter_suppressed_when_nodes_missing",
         ],
     },
     # --- L4a: screening model ---
@@ -284,7 +315,7 @@ SUBSYSTEMS = [
         ],
         "evidence": [
             "tests/unit/test_medsiglip_wiring.py",
-            "tests/unit/test_screening_medsiglip_wiring.py",
+            "tests/unit/test_screening_production_contract.py",
             "/mnt/results/screening_response_medsiglip_smoke_final.json",
         ],
         "live_smoke": {
@@ -299,19 +330,26 @@ SUBSYSTEMS = [
     {
         "id": "L4a-screening-siglip-proxy",
         "layer": "L4a",
-        "role": "Apache-2.0 ungated general-domain SigLIP used ONLY as a development proxy when HAI-DEF is denied. NEVER labeled as MedSigLIP.",
-        "status": "LIVE",
-        "not_wired_reason": None,
-        "current_backend": "google/siglip-base-patch16-224",
+        "role": (
+            "RETIRED. General-domain google/siglip-base-patch16-224 was used as "
+            "a development proxy on mammograms when HAI-DEF was denied. The "
+            "screening route is now strict MedSigLIP-448 only: a denied or "
+            "failing required stage returns pipeline_status="
+            "'failed_required_stage' with findings=[] and overall_score=None "
+            "rather than degrading to a non-medical image encoder."
+        ),
+        "status": "RETIRED",
+        "not_wired_reason": (
+            "Retired by production-integrity policy. A general-domain image "
+            "encoder is not an acceptable substitute for MedSigLIP-448 on "
+            "mammography, and its zero-shot scores were never calibrated for "
+            "malignancy."
+        ),
+        "current_backend": None,
         "hai_def_gate_state": None,
-        "wired_files": [
-            "src/oncology_arbiter/models/siglip_baseline.py",
-            "src/oncology_arbiter/api/app.py",
-        ],
+        "wired_files": [],
         "evidence": [
-            "tests/models/test_siglip_baseline.py",
-            "tests/unit/test_screening_medsiglip_wiring.py::test_medsiglip_disabled_proxy_still_works",
-            "/mnt/results/screening_response_medsiglip_gated_with_proxy_fallback.json",
+            "tests/unit/test_screening_production_contract.py",
         ],
     },
     {
@@ -419,14 +457,19 @@ SUBSYSTEMS = [
     {
         "id": "endpoint-screening-analyze",
         "layer": "API",
-        "role": "POST /v1/screening/analyze — DICOM in, screening arbiter + MedSigLIP score out.",
+        "role": (
+            "POST /v1/screening/analyze — de-identified DICOM in, MedSigLIP-448 "
+            "zero-shot agreement scores out. arbiter_score is always None on "
+            "this route. Scores are independent uncalibrated sigmoid values "
+            "(they do not sum to 1) and are not diagnostic evidence."
+        ),
         "status": "LIVE",
         "not_wired_reason": None,
-        "current_backend": "MedSigLIP-448 (default) or SigLIP proxy (opt-in fallback)",
+        "current_backend": "MedSigLIP-448 via Modal (strict; no proxy fallback exists)",
         "hai_def_gate_state": "allowed",
         "wired_files": ["src/oncology_arbiter/api/app.py"],
         "evidence": [
-            "tests/unit/test_screening_medsiglip_wiring.py",
+            "tests/unit/test_screening_production_contract.py",
             "tests/data/test_api_real_dicom.py",
         ],
     },
@@ -505,7 +548,7 @@ SUBSYSTEMS = [
         "current_backend": "src/oncology_arbiter/api/schemas.py",
         "hai_def_gate_state": None,
         "wired_files": ["src/oncology_arbiter/api/schemas.py", "src/oncology_arbiter/api/app.py"],
-        "evidence": ["tests/unit/test_screening_medsiglip_wiring.py"],
+        "evidence": ["tests/unit/test_screening_production_contract.py"],
     },
     {
         "id": "response-gate-report-in-provenance",
@@ -619,7 +662,7 @@ SPRINTS = [
         "commits": ["c77370a"],
         "goal": "Wire the ungated general-domain SigLIP as a development proxy so we can run end-to-end on real DICOM before HAI-DEF is granted.",
         "delivered": [
-            "src/oncology_arbiter/models/siglip_baseline.py — SigLIP proxy client with mammography honesty warning",
+            "src/oncology_arbiter/models/siglip_baseline.py — DELETED this pass (proxy client removed, not disabled)",
             "Real zero-shot smoke on Calc-Test_P_00038_LEFT_CC.dcm",
             "21 tests including a real-network CBIS-DDSM smoke",
         ],
@@ -693,6 +736,11 @@ SPRINTS = [
             "Live smoke on Calc-Test_P_00038_LEFT_CC.dcm: overall_score=7.976839697221294e-06 (bit-exact to pre-hibernation)",
             "Live gated smoke: model_state=gated, no silent fallback",
             "Live proxy-fallback smoke: model_state=proxy_siglip with BOTH warnings",
+            "RETIRED LATER: the proxy fallback described in this sprint no longer "
+            "exists. models/siglip_baseline.py was deleted, ModelState.PROXY_SIGLIP "
+            "was removed, and tests/unit/test_screening_medsiglip_wiring.py was "
+            "retired. The lines above are kept as the historical record of what "
+            "this sprint shipped, not as a description of the current surface.",
             "Full regression 370 passed",
         ],
         "not_delivered": [
@@ -1082,7 +1130,35 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Validate + print diff summary without writing.",
     )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help=(
+            "Validate + compare the on-disk ledger against freshly generated "
+            "content, ignoring generated_at/git_sha. Exit 1 on drift. Never "
+            "writes, so CI and the test suite cannot dirty a tracked file."
+        ),
+    )
+    parser.add_argument(
+        "--ledger-path",
+        default=None,
+        help=(
+            "Compare against this ledger instead of the tracked one. Read-only: "
+            "only accepted together with --check or --dry-run, so it can never "
+            "be used to write somewhere unexpected."
+        ),
+    )
     args = parser.parse_args(argv)
+
+    ledger_path = LEDGER_PATH
+    if args.ledger_path is not None:
+        if not (args.check or args.dry_run):
+            print(
+                "--ledger-path is read-only: pass it with --check or --dry-run",
+                file=sys.stderr,
+            )
+            return 2
+        ledger_path = Path(args.ledger_path)
 
     ledger = build_ledger()
 
@@ -1101,12 +1177,25 @@ def main(argv: list[str] | None = None) -> int:
 
     new_text = _serialise(ledger)
 
-    old_text = LEDGER_PATH.read_text() if LEDGER_PATH.exists() else ""
+    old_text = ledger_path.read_text() if ledger_path.exists() else ""
     summary = _diff_summary(old_text, new_text)
+    is_current = _strip_volatile_fields(old_text) == _strip_volatile_fields(new_text)
+
+    if args.check:
+        print(f"check: {summary}")
+        print(f"    ledger: {ledger_path}")
+        if is_current:
+            return 0
+        print(
+            f"{ledger_path} is stale relative to scripts/update_progress_ledger.py "
+            "— regenerate it and commit the result",
+            file=sys.stderr,
+        )
+        return 1
 
     if args.dry_run:
         print(f"dry-run: {summary}")
-        print(f"    ledger: {LEDGER_PATH}")
+        print(f"    ledger: {ledger_path}")
         print(f"    mirror: {MIRROR_PATH}")
         return 0
 

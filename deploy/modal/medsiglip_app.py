@@ -30,6 +30,9 @@ from typing import Any, Dict, List, Optional
 import modal
 
 APP_VERSION = "medsiglip-modal-v0.4.0-alpha"
+MODEL_REPO = "google/medsiglip-448"
+# Immutable base revision used for every biopsy-probe training embedding.
+MODEL_REVISION = "9cea28a1a1195f665105faa6e8544c112fd960a4"
 
 # ── Prod flip knob ───────────────────────────────────────────────────
 # ``MEDSIGLIP_MODAL_MODE=prod`` deploys with min_containers=1 (keeps one
@@ -64,7 +67,9 @@ MEDSIGLIP_IMAGE = (
 )
 
 app = modal.App("medsiglip-448")
-HF_SECRET = modal.Secret.from_name("medsiglip-hf-token")
+import os as _os
+_HF_SECRET_NAME = _os.environ.get("MEDSIGLIP_HF_SECRET", "medsiglip-hf-token")
+HF_SECRET = modal.Secret.from_name(_HF_SECRET_NAME)
 
 
 # ── Standalone healthz (no GPU, no model) ─────────────────────────────
@@ -76,7 +81,7 @@ HEALTH_IMAGE = modal.Image.debian_slim(python_version="3.11").pip_install(
 @app.function(image=HEALTH_IMAGE)
 @modal.fastapi_endpoint(method="GET", label="medsiglip-healthz")
 def healthz() -> Dict[str, str]:
-    return {"status": "ok", "app": "medsiglip-448", "version": "v0.3.0"}
+    return {"status": "ok", "app": "medsiglip-448", "version": APP_VERSION}
 
 
 # ── GPU-backed class ─────────────────────────────────────────────────
@@ -85,7 +90,9 @@ def healthz() -> Dict[str, str]:
     gpu="A10G",
     secrets=[HF_SECRET],
     scaledown_window=_SCALEDOWN_S,
-    timeout=180,
+    # Cold start pulls ~3.3GB gated weights; 180s was killing enter() mid-download
+    # (healthz 200 + hung /info). Keep headroom for first-pull + inference.
+    timeout=900,
     min_containers=_MIN_CONTAINERS,
 )
 class MedSigLipModal:
@@ -101,17 +108,24 @@ class MedSigLipModal:
         token = os.environ.get("HF_TOKEN")
         assert token, "HF_TOKEN missing from Modal secret medsiglip-hf-token"
         api = HfApi(token=token)
-        info = api.model_info("google/medsiglip-448")
-        assert info is not None, "model_info returned None for google/medsiglip-448"
+        info = api.model_info(MODEL_REPO, revision=MODEL_REVISION)
+        assert info is not None, f"model_info returned None for {MODEL_REPO}"
+        resolved_revision = str(getattr(info, "sha", ""))
+        assert resolved_revision == MODEL_REVISION, (
+            f"resolved revision drift: expected {MODEL_REVISION}, "
+            f"got {resolved_revision}"
+        )
+        self.model_revision = resolved_revision
 
         # Load processor + model. AutoModel loads the full SigLIP two-tower
         # model; the text tower is only touched by /zero_shot.
         self.processor = AutoProcessor.from_pretrained(
-            "google/medsiglip-448", token=token
+            MODEL_REPO, token=token, revision=MODEL_REVISION
         )
         self.model = AutoModel.from_pretrained(
-            "google/medsiglip-448",
+            MODEL_REPO,
             token=token,
+            revision=MODEL_REVISION,
             torch_dtype=torch.float32,
         )
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -193,7 +207,8 @@ class MedSigLipModal:
     @modal.fastapi_endpoint(method="GET", label="medsiglip-info")
     def info(self) -> Dict[str, Any]:
         return {
-            "model_repo": "google/medsiglip-448",
+            "model_repo": MODEL_REPO,
+            "model_revision": self.model_revision,
             "input_resolution": self.input_resolution,
             "embedding_dim": self.embedding_dim,
             "device": self.device,
@@ -208,13 +223,8 @@ class MedSigLipModal:
     # @fastapi_endpoint doesn't reliably inject raw fastapi.Request on
     # class methods (it treats unknown types as query params). Base64
     # overhead (~33%) is negligible against total per-call latency.
-    @modal.fastapi_endpoint(method="POST", label="medsiglip-embed")
-    def embed(self, payload: Dict[str, Any]) -> Dict[str, Any]:
-        """POST JSON: `{"dicom_b64": "..."}` OR `{"pixels_b64": "..."}`.
-
-        ``dicom_b64`` decodes as a DICOM (Modality LUT + windowing).
-        ``pixels_b64`` decodes as a PNG/JPEG (RGB conversion only).
-        """
+    def _embed_payload(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        """Shared embed path for HTTP webhook + Modal SDK `.remote()`."""
         t0 = time.time()
         dicom_b64 = payload.get("dicom_b64")
         pixels_b64 = payload.get("pixels_b64")
@@ -240,7 +250,37 @@ class MedSigLipModal:
             "input_format": input_format,
             "seconds": round(time.time() - t0, 3),
             "app_version": APP_VERSION,
+            "model_repo": MODEL_REPO,
+            "model_revision": self.model_revision,
+            "embedding_dim": self.embedding_dim,
         }
+
+    @modal.method()
+    def embed_remote(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        """SDK-callable embed (survives Modal HTTP workspace-disabled gateways)."""
+        return self._embed_payload(payload)
+
+    @modal.method()
+    def info_remote(self) -> Dict[str, Any]:
+        return {
+            "model_repo": MODEL_REPO,
+            "model_revision": self.model_revision,
+            "input_resolution": self.input_resolution,
+            "embedding_dim": self.embedding_dim,
+            "device": self.device,
+            "load_seconds": self.load_seconds,
+            "warmed_at": self.warmed_at,
+            "app_version": APP_VERSION,
+        }
+
+    @modal.fastapi_endpoint(method="POST", label="medsiglip-embed")
+    def embed(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        """POST JSON: `{"dicom_b64": "..."}` OR `{"pixels_b64": "..."}`.
+
+        ``dicom_b64`` decodes as a DICOM (Modality LUT + windowing).
+        ``pixels_b64`` decodes as a PNG/JPEG (RGB conversion only).
+        """
+        return self._embed_payload(payload)
 
     # ─── /embed_batch  (JSON body: base64 list) ─────────────────────
     @modal.fastapi_endpoint(method="POST", label="medsiglip-embed-batch")

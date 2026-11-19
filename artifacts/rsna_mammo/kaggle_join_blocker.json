@@ -1,0 +1,5 @@
+{
+  "status": "cleared",
+  "train_csv_download": "ok",
+  "next": "modal ingest max_patients=2500"
+}
