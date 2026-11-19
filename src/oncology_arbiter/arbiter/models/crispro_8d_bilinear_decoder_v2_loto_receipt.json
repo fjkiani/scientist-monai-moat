@@ -359,7 +359,7 @@
         0.787498
       ],
       "bilinear_8d_score_mbd4_lof": 0.682613,
-      "bilinear_8d_score_mbd4_wt": -0.390163,
+      "bilinear_8d_score_mbd4_wt": -0.390162,
       "bilinear_8d_delta": 1.072775,
       "concordant_with_pharmacology": true
     },
@@ -418,7 +418,7 @@
         0.269915,
         0.546023
       ],
-      "bilinear_8d_score_mbd4_lof": -0.341156,
+      "bilinear_8d_score_mbd4_lof": -0.341157,
       "bilinear_8d_score_mbd4_wt": 0.288415,
       "bilinear_8d_delta": -0.629572,
       "concordant_with_pharmacology": true
@@ -525,7 +525,7 @@
       "loto_score_pos": 0.971777,
       "loto_score_neg": -0.765061,
       "loto_predicted_delta": 1.736838,
-      "full_predicted_delta": 0.391594,
+      "full_predicted_delta": 0.391595,
       "hr_sign_concordant": true,
       "resistant_arm_repelled_negative": true,
       "source_citation": "Besse et al. WCLC 2024: CARMEN-LC03 CEACAM5 >=80% subgroup OS HR=0.71 vs 50-79% subgroup HR=1.38 (ITT PFS HR=1.14)"
@@ -540,7 +540,7 @@
       "loto_score_pos": 0.690991,
       "loto_score_neg": -1.193819,
       "loto_predicted_delta": 1.88481,
-      "full_predicted_delta": 0.57341,
+      "full_predicted_delta": 0.573409,
       "hr_sign_concordant": true,
       "resistant_arm_repelled_negative": true,
       "source_citation": "Chen et al. JAMA Oncol 2020 / PMC10698621 & Bullock Nat Med 2024 (PMID 38871975): NLM PFS HR=0.54 (BOT/BAL ORR 17-23% in NLM) vs LM PFS HR=1.39 (ORR 0%)"
@@ -600,7 +600,7 @@
       "loto_score_pos": 1.465077,
       "loto_score_neg": -0.913094,
       "loto_predicted_delta": 2.37817,
-      "full_predicted_delta": 0.483552,
+      "full_predicted_delta": 0.483553,
       "hr_sign_concordant": true,
       "resistant_arm_repelled_negative": true,
       "source_citation": "Chafe et al. Sci Transl Med 2025 (GSE237446) & GSE223499 / GLASS syn17038081: BACE1 dual-compartment EGFR cleavage + CD163/LRP1 myeloid reprogramming"

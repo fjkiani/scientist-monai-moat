@@ -8,9 +8,9 @@ import numpy as np
 from scipy import optimize, stats
 from sklearn.metrics import roc_auc_score
 
-from .constants import MOA_CLASSES_15, MOA_CLASSES_9_EXT, SIGNED_AXES_8D
+from .constants import MOA_CLASSES_15, MOA_CLASSES_24, MOA_CLASSES_9_EXT, SIGNED_AXES_8D
 from .cohorts import ResponderCohortBlock, SubgroupContrastBlock, load_all_responder_cohorts, load_published_subgroup_contrasts
-from .moa import _moa_vec
+from .moa import _moa_vec, pad_moa_vec_15_to_24
 from .scoring import signed_fit_batch, signed_fit_score
 
 def build_biological_anchor_prior_w_moa() -> np.ndarray:
@@ -63,6 +63,17 @@ def build_biological_anchor_prior_w_moa() -> np.ndarray:
     return W0
 
 
+def _coerce_moa_vec(moa: np.ndarray, moa_width: int) -> np.ndarray:
+    m = np.asarray(moa, dtype=float).reshape(-1)
+    if m.shape[0] == moa_width:
+        return m
+    if moa_width == 24 and m.shape[0] == 15:
+        return pad_moa_vec_15_to_24(m)
+    if moa_width == 15 and m.shape[0] == 24:
+        return m[:15]
+    raise ValueError(f"moa_vec length {m.shape[0]} incompatible with moa_width={moa_width}")
+
+
 def fit_bilinear_w_moa(
     cohorts: Mapping[str, ResponderCohortBlock],
     contrasts: Sequence[SubgroupContrastBlock],
@@ -71,13 +82,25 @@ def fit_bilinear_w_moa(
     holdout_contrast_id: Optional[str] = None,
     l2_lambda: float = 6.0,
     temperature: float = 2.5,
+    moa_width: int = 15,
+    w0_override: Optional[np.ndarray] = None,
 ) -> np.ndarray:
-    """Fit W_MoA in R^(8 x 15) via L2-penalized cross-entropy + subgroup log-HR matching.
+    """Fit W_MoA in R^(8 x K) via L2-penalized cross-entropy + subgroup log-HR matching.
 
-    When holdout_cohort_id or holdout_contrast_id is provided (Leave-One-Trial-Out),
-    that cohort or contrast is completely excluded from the objective function.
+    K defaults to 15 (v1). Pass moa_width=24 to train the full v2 matrix (pads 15D
+    cohort/contrast MoA vectors). When holdout_* is set (LOTO), that block is excluded.
     """
-    W0 = build_biological_anchor_prior_w_moa()
+    if moa_width not in (15, 24):
+        raise ValueError(f"moa_width must be 15 or 24, got {moa_width}")
+    if w0_override is not None:
+        W0 = np.asarray(w0_override, dtype=float)
+        if W0.shape != (8, moa_width):
+            raise ValueError(f"w0_override shape {W0.shape} != (8, {moa_width})")
+    elif moa_width == 15:
+        W0 = build_biological_anchor_prior_w_moa()
+    else:
+        W0 = compose_w_moa_v2_from_v1_matrix(build_biological_anchor_prior_w_moa())
+
     active_cohorts = [
         c for cid, c in cohorts.items() if cid != holdout_cohort_id
     ]
@@ -85,22 +108,26 @@ def fit_bilinear_w_moa(
         c for c in contrasts if c.contrast_id != holdout_contrast_id and c.trial_id != holdout_contrast_id
     ]
 
-    # Precompute class-balanced sample weights for each cohort
+    # Precompute class-balanced sample weights + width-coerced MoA
     cohort_sample_weights: list[np.ndarray] = []
+    cohort_moa: list[np.ndarray] = []
     for c in active_cohorts:
         y = c.y
         n_pos = max(1, int(np.sum(y == 1)))
         n_neg = max(1, int(np.sum(y == 0)))
         w = np.where(y == 1, 0.5 / n_pos, 0.5 / n_neg)
         cohort_sample_weights.append(w)
+        cohort_moa.append(_coerce_moa_vec(c.moa_vec, moa_width))
+
+    contrast_moa = [_coerce_moa_vec(con.moa_vec, moa_width) for con in active_contrasts]
 
     def objective(flat_w: np.ndarray) -> float:
-        W = flat_w.reshape((8, 15))
+        W = flat_w.reshape((8, moa_width))
         loss = 0.0
 
         # 1. Patient/model-level class-balanced binary cross-entropy loss
-        for c, sw in zip(active_cohorts, cohort_sample_weights):
-            t = W @ c.moa_vec
+        for c, sw, mvec in zip(active_cohorts, cohort_sample_weights, cohort_moa):
+            t = W @ mvec
             norm_t = float(np.linalg.norm(t)) + 1e-8
             s = (c.P @ t) / norm_t
             logits = temperature * s
@@ -110,8 +137,8 @@ def fit_bilinear_w_moa(
             loss += c.weight * float(np.sum(sw * bce))
 
         # 2. Published trial subgroup log-HR contrast matching loss
-        for con in active_contrasts:
-            t = W @ con.moa_vec
+        for con, mvec in zip(active_contrasts, contrast_moa):
+            t = W @ mvec
             norm_t = float(np.linalg.norm(t)) + 1e-8
             s_pos = float(np.dot(con.p_pos, t) / norm_t)
             s_neg = float(np.dot(con.p_neg, t) / norm_t)
@@ -133,7 +160,7 @@ def fit_bilinear_w_moa(
         method="L-BFGS-B",
         options={"maxiter": 400, "ftol": 1e-9},
     )
-    W_learned = res.x.reshape((8, 15))
+    W_learned = res.x.reshape((8, moa_width))
     return W_learned
 
 
@@ -144,7 +171,7 @@ def build_biological_anchor_prior_w_moa_extension() -> np.ndarray:
 
     W_ext[:, col["VDR_Paricalcitol"]] = [0.05, 0.35, 0.00, 0.05, 0.10, -0.20, 0.05, 0.75]
     W_ext[:, col["FAK_ROCK_Inhibitor"]] = [-0.10, 0.25, 0.45, 0.05, 0.05, 0.85, 0.10, 0.15]
-    W_ext[:, col["mTORC2_Inhibitor"]] = [0.10, -0.55, 0.00, 0.10, 0.05, -0.15, 0.00, 0.45]
+    W_ext[:, col["mTORC2_Inhibitor"]] = [0.10, 0.55, 0.00, 0.10, 0.05, -0.15, 0.00, 0.45]
     W_ext[:, col["PRMT5_MAT2A_MTAP"]] = [0.55, -0.25, 0.00, 0.65, 0.05, -0.10, 0.05, 0.20]
     W_ext[:, col["EP300_CREBBP"]] = [0.35, -0.15, 0.10, 0.05, 0.75, -0.55, 0.05, 0.25]
     W_ext[:, col["CDK2_PKMYT1"]] = [0.75, 0.40, 0.00, 0.25, 0.05, -0.10, 0.05, 0.15]
